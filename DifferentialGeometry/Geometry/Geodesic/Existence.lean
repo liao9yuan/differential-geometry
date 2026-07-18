@@ -1,38 +1,7 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Local existence of geodesics via Picard-Lindelöf
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` (boundaryless,
-modelled on a complete inner-product space `E`) and any initial datum
-`(p : M, v : T_p M)`, there exists a curve `γ : ℝ → M` starting at `p`
-that is the projection of a local integral curve of the chart-fixed
-geodesic vector field `geodesicVectorFieldChart g p` on `T M`.
-
-The construction proceeds in two steps:
-
-1. **Picard-Lindelöf on the tangent bundle.** We feed
-   `geodesicVectorFieldChart g p` into Mathlib's existence theorem
-   `exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless`. The vector
-   field is `C^∞` at `⟨p, v⟩ : TangentBundle I M` by
-   `geodesicVectorFieldChart_contMDiffAt`; the tangent bundle is
-   boundaryless because `(I.prod 𝓘(ℝ, E)).Boundaryless` is automatic
-   from `[I.Boundaryless]`; `[CompleteSpace E]` is a hypothesis of the
-   theorem. The output is a curve `f : ℝ → TangentBundle I M` with
-   `f 0 = ⟨p, v⟩` and `IsMIntegralCurveAt f (gvfChart g p) 0`.
-
-2. **Projection to `M`.** Set `γ t := (f t).proj`. Then `γ 0 = p` and
-   `IsGeodesicAt g γ 0` packages the integral-curve property of `f` into
-   the integral-curve geodesic predicate (with chart basepoint `α := p`).
-
-The headline theorem `exists_geodesic_with_initial_velocity_at` returns `IsGeodesicAt g γ 0` —
-the local geodesic predicate at `t = 0`. The chart-`γ(t)` second-derivative
-form `HasGeodesicEquationAt g γ 0` is a separate downstream bridge once the
-chart-derivative properties of the projection are recorded.
--/
 
 noncomputable section
 
@@ -45,17 +14,12 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- **Picard-Lindelöf lift.** For a smooth Riemannian metric `g`, point
-`p : M`, and tangent vector `v : T_p M`, on a boundaryless smooth manifold
-modelled on a complete inner-product space, there exists a curve
-`f : ℝ → TangentBundle I M` with `f 0 = ⟨p, v⟩` that is a local integral
-curve of `geodesicVectorFieldChart g p` at `0`. -/
 theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
     (g : SmoothRiemannianMetric I M) [I.Boundaryless] [CompleteSpace E]
     (p : M) (v : TangentSpace I p) :
@@ -83,14 +47,13 @@ theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
       (v := geodesicVectorFieldChart (I := I) g p)
       (t₀ := (0 : ℝ)) (x₀ := (⟨p, v⟩ : TangentBundle I M)) hsmooth1
 
-/-- The base projection of a curve `f : ℝ → TangentBundle I M` to a curve
-`γ : ℝ → M`, namely `γ t := (f t).proj`. -/
 def projectCurve (f : ℝ → TangentBundle I M) : ℝ → M := fun t => (f t).proj
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma projectCurve_apply (f : ℝ → TangentBundle I M) (t : ℝ) :
     projectCurve (I := I) f t = (f t).proj := rfl
 
-/-- If the lifted curve starts at `⟨p, v⟩`, its projection starts at `p`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma projectCurve_zero_of_lift {f : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf0 : f 0 = (⟨p, v⟩ : TangentBundle I M)) :
     projectCurve (I := I) f 0 = p := by
@@ -100,23 +63,6 @@ section ChartedPicardLindelof
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Local existence of geodesics with prescribed initial velocity.** For
-a smooth Riemannian metric `g`, an initial point `p : M`, and an initial
-velocity `v : T_p M`, there exists a curve `γ : ℝ → M` through `p`, together
-with a lift `f : ℝ → TangentBundle I M`, such that
-
-* `f 0 = ⟨p, v⟩` (the lift carries the prescribed initial data);
-* `γ` is the base projection of `f`;
-* `γ 0 = p`;
-* `f` is a local integral curve of the chart-fixed geodesic vector field
-  `geodesicVectorFieldChart g p` at `t = 0`;
-* `IsGeodesicAt g γ 0` holds — `γ` is a local geodesic at the initial
-  time, with chart basepoint `p`.
-
-Here `IsGeodesicAt g γ 0` is the integral-curve form of the geodesic
-predicate at `t = 0`; promoting it to a geodesic `IsGeodesic g γ` for all
-times requires extending the integral curve to all of `ℝ`, which is a
-separate downstream step. -/
 theorem exists_geodesic_with_initial_velocity_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ∃ γ : ℝ → M, ∃ f : ℝ → TangentBundle I M,
@@ -133,7 +79,6 @@ theorem exists_geodesic_with_initial_velocity_at
   have h0 : (f 0).proj = p := projectCurve_zero_of_lift (I := I) hf0
   rw [h0]; exact mem_chart_source H p
 
-/-- The manifold derivative of the lifted curve at `0`. -/
 theorem hasMFDerivAt_lift_zero
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     (hf : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g

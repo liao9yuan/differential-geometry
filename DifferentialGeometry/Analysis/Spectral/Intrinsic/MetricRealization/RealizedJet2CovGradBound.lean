@@ -2,60 +2,60 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 
-/-!
-# The chart `2`-jet seminorm of two realized metrics, bounded by the iterated covariant
-gradient of the fixed realized tensor difference
 
-This file develops the **analytic core** of the geometric Ricci–DeTurck nonlinearity:
-the chart `2`-jet seminorm `chartMetricJet2DiffSup (realizeMetricAt u₁) (realizeMetricAt u₂)`
-of the difference of two realized metrics is controlled, pointwise on a compact piece of
-the chart-target interior, by the sum of the `g_bg`-fibre norms of the iterated covariant
-gradients `∇^j S` (`j = 0, 1, 2`) of the **fixed** `(0,2)`-tensor difference
 
-  `S := realizableRepr g_bg hu₁ − realizableRepr g_bg hu₂`,
 
-evaluated at the chart preimage `(extChartAt I α).symm y`.
 
-## The two layers
 
-The reduction proceeds in two genuinely distinct layers.
 
-* **The algebraic reduction (this file's headline).**  By
-  `chartGramOnE_realizeMetricAt_sub_eq_reprDiff`, the chart-Gram-on-`E` difference of the
-  two realized metrics, at chart point `y` and frame indices `(l, b)`, equals the
-  chart-frame component of the *single fixed tensor* `S`:
 
-    `chartGramOnE g₁ α l b y − chartGramOnE g₂ α l b y
-       = ccTensorBilinSymm g_bg S ((extChartAt I α).symm y)
-           (chartBasisVecFiber α l ((extChartAt I α).symm y))
-           (chartBasisVecFiber α b ((extChartAt I α).symm y))`.
 
-  Since this holds for **every** `y`, the two functions of `y` are equal, so all their
-  chart-coordinate partial derivatives `∂^j` agree on the interior.  Each
-  `chartMetricJet2DiffSup` summand is therefore a chart `∂^j` (`j = 0, 1, 2`) of a
-  chart-frame component of `S`.  This layer is purely algebraic and is proved here
-  unconditionally.
 
-* **The pointwise covariant-gradient jet bound (a genuine analytic input).**  The
-  chart `∂^j` of the chart-frame component of a fixed `(0,2)`-tensor `S` is bounded,
-  uniformly on a compact piece `K ⊆ interior (extChartAt I α).target`, by a constant times
-  `∑_{i ≤ j} ‖(iteratedCovGrad g_bg 0 2 i S).toSection (symm y)‖`.  This is the pointwise
-  inversion of the chart-coordinate covariant-derivative formula `∇T = ∂T + Γ·T`
-  (`nabla_equals_partial_plus_christoffel_on_tensors`), iterated twice:
-  `∂²S = ∇²S − Γ·∂S − (∂Γ + Γ·Γ)·S`, with the Christoffel carriers bounded uniformly on
-  `K` (`christoffel_Ck_bound_from_metric_Ck1` / `chartChristoffel_contDiffOn_interior`).
 
-  This is a *pointwise inequality bounding chart partials of a tensor component by the
-  covariant-gradient fibre norms of that tensor* — a statement structurally distinct from
-  the chart `2`-jet seminorm of the realized-metric difference (the headline conclusion).
-  We carry it as the named hypothesis `hcovgrad_jet_bound`; it is a genuine analytic input,
-  not a packaging of the conclusion.  The algebraic reduction then converts it into the
-  headline bound on `chartMetricJet2DiffSup`.
 
-## Sign convention
 
-Geometer `Δ_∇ = −∇*∇`; resolvent `(1 − Δ_∇)⁻¹`, weights `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -91,7 +91,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart Gram entry on `E` is differentiable at an interior point. -/
+
 private lemma chartGramOnE_diffAt_interior
     (g : SmoothRiemannianMetric I M) (α : M) (l b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -101,8 +101,8 @@ private lemma chartGramOnE_diffAt_interior
     (chartGramOnE_contDiffOn (I := I) g α l b).mono interior_subset
   exact (hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The first chart partial `∂_a f` of a function `C^∞` on the chart-target interior is
-again `C^∞` there. -/
+
+
 private lemma partialDeriv_contDiffOn_interior
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -117,8 +117,8 @@ private lemma partialDeriv_contDiffOn_interior
   rw [hrw]
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- The first chart partial `∂_a (chartGramOnE g α l b)` is differentiable at an interior
-point (needed to commute the second partial past the subtraction). -/
+
+
 private lemma partialDeriv_chartGramOnE_diffAt_interior
     (g : SmoothRiemannianMetric I M) (α : M) (a l b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -133,11 +133,11 @@ private lemma partialDeriv_chartGramOnE_diffAt_interior
     partialDeriv_contDiffOn_interior (I := I) α hcd_int a
   exact (hcd_partial.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The chart-`α` `(l, b)` frame component of the fixed realized tensor difference
-`S = realizableRepr hu₁ − realizableRepr hu₂`, as a function on the chart target `E`. -/
+
+
 def reprDiffChartCompOnE (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (l b : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>
     ccTensorBilinSymm (I := I) g_bg
@@ -146,14 +146,14 @@ def reprDiffChartCompOnE (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
       (chartBasisVecFiber (I := I) α l ((extChartAt I α).symm y))
       (chartBasisVecFiber (I := I) α b ((extChartAt I α).symm y))
 
-/-- **The chart-Gram-on-`E` difference of the two realized metrics, as a function on `E`,
-equals the chart-frame component of the fixed tensor difference.**  This is the
-function-level upgrade of `chartGramOnE_realizeMetricAt_sub_eq_reprDiff`: both sides are
-functions of the chart variable `y`, hence all their iterated chart partials agree. -/
+
+
+
+
 theorem chartGramOnE_realizeMetricAt_sub_funext
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (l b : Fin (Module.finrank ℝ E)) :
     (fun y : E => chartGramOnE (I := I) (realizeMetricAt (I := I) g_bg u₁) α l b y -
         chartGramOnE (I := I) (realizeMetricAt (I := I) g_bg u₂) α l b y) =
@@ -162,12 +162,12 @@ theorem chartGramOnE_realizeMetricAt_sub_funext
   rw [reprDiffChartCompOnE]
   exact chartGramOnE_realizeMetricAt_sub_eq_reprDiff (I := I) g_bg hu₁ hu₂ α l b y
 
-/-- The `0`-jet entry of the realized-metric difference equals the chart component of `S`
-at the chart point. -/
+
+
 theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiffComp
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (l b : Fin (Module.finrank ℝ E)) (y : E) :
     chartGramMatrix (I := I) (realizeMetricAt (I := I) g_bg u₁) α
           ((extChartAt I α).symm y) l b -
@@ -178,12 +178,12 @@ theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiffComp
   exact chartGramMatrix_realizeMetricAt_sub_eq_reprDiff (I := I) g_bg hu₁ hu₂
     α ((extChartAt I α).symm y) l b
 
-/-- On the chart-target interior, the first chart partial of the realized-metric
-Gram-on-`E` difference equals the first chart partial of the chart component of `S`. -/
+
+
 theorem partialDeriv_chartGramOnE_realizeMetricAt_sub_eq
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (a l b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     partialDeriv (E := E) a
@@ -199,12 +199,12 @@ theorem partialDeriv_chartGramOnE_realizeMetricAt_sub_eq
     (chartGramOnE_diffAt_interior (I := I) (realizeMetricAt (I := I) g_bg u₁) α l b hy)
     (chartGramOnE_diffAt_interior (I := I) (realizeMetricAt (I := I) g_bg u₂) α l b hy)).symm
 
-/-- On the chart-target interior, the second chart partial of the realized-metric
-Gram-on-`E` difference equals the second chart partial of the chart component of `S`. -/
+
+
 theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (c a l b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     partialDeriv (E := E) c
@@ -256,9 +256,9 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- The iterated covariant-gradient jet sum of a fixed `(0,2)`-tensor `S` at a manifold
-point `x`: `∑_{j ≤ 2} ‖(∇^j S)(x)‖_{g_bg}` (the `g_bg`-fibre norms of the `(0, 2 + j)`-tensors
-`∇^j S`).  This is exactly the left-hand side of the unconditional `C²` Sobolev embedding. -/
+
+
+
 def iteratedCovGradJetSum (g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g_bg 0 2) (x : M) : ℝ :=
   ∑ j ∈ Finset.range 3,
@@ -270,7 +270,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- `iteratedCovGradJetSum` is non-negative. -/
+
 lemma iteratedCovGradJetSum_nonneg (g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g_bg 0 2) (x : M) :
     0 ≤ iteratedCovGradJetSum (I := I) g_bg S x := by
@@ -284,53 +284,53 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **The iterated covariant-gradient jet sum is bounded by the intrinsic `H^{2k}` Sobolev
-norm of the fixed tensor (unconditional `C²` Sobolev embedding).**
 
-For `2k > dim M + 4`, there is a constant `C > 0` such that, for every smooth
-compactly-supported `(0,2)`-tensor `S` and every base point `x`,
 
-  `iteratedCovGradJetSum g_bg S x ≤ C · ‖S.toHs (2k)‖`.
 
-This is exactly `iteratedCovGrad_toSobolev_embedding_C2_unconditional`: the left-hand side
-of that embedding is, term by term, the `iteratedCovGradJetSum` of `S` at `x`. -/
+
+
+
+
+
+
+
 theorem iteratedCovGradJetSum_le_toHs (g_bg : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :
     ∃ C : ℝ, 0 < C ∧ ∀ (S : SmoothCcTensor g_bg 0 2) (x : M),
       iteratedCovGradJetSum (I := I) g_bg S x ≤
         C * ‖SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) S‖ := by
   obtain ⟨C, hC_pos, hC⟩ :=
-    iteratedCovGrad_toSobolev_embedding_C2_unconditional (I := I) (M := M) g_bg k h_super
+    iteratedCovGrad_toSobolev_embedding_C2_singleNorm (I := I) (M := M) g_bg k h_super
   refine ⟨C, hC_pos, fun S x => ?_⟩
   rw [iteratedCovGradJetSum]
   exact hC S x
 
 set_option linter.unusedSectionVars false in
-/-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
-iterated covariant-gradient jet sum of the fixed tensor difference, modulo the pointwise
-covariant-gradient input.**
 
-For two realizable order-`σ` elements `u₁, u₂` (smooth representatives `T₁, T₂`, fixed
-difference `S = T₁ − T₂`), a chart base point `α`, a compact piece `K ⊆ interior
-(extChartAt I α).target`, and a pointwise covariant-gradient jet bound `hcovgrad_jet_bound`
-controlling each chart `∂^j` (`j = 0, 1, 2`) of every chart-frame component of `S` by a
-single constant `C₀` times `iteratedCovGradJetSum g_bg S ((extChartAt I α).symm y)` uniformly
-on `K`, the chart `2`-jet seminorm of the realized-metric difference satisfies
 
-  `chartMetricJet2DiffSup (realizeMetricAt u₁) (realizeMetricAt u₂) α y
-     ≤ C · iteratedCovGradJetSum g_bg S ((extChartAt I α).symm y)`
 
-for all `y ∈ K`, with `C` uniform on `K`.  `C` is the per-summand constant times the total
-number of chart-jet index terms (`n² + n³ + n⁴`).
 
-The hypothesis `hcovgrad_jet_bound` is a genuine analytic input: a pointwise inequality
-bounding chart partials of the components of the *fixed* tensor `S` by the covariant-gradient
-fibre norms of `S`.  It is structurally distinct from the conclusion (the chart `2`-jet
-seminorm of the *realized-metric difference*), so it is not a packaging of the conclusion. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
     {C₀ : ℝ} (hC₀ : 0 ≤ C₀)
     (hcovgrad_jet_bound : ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
@@ -443,25 +443,25 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
     _ = C₀ * Ncard * R := by rw [hNcard_def]; ring
 
 set_option linter.unusedSectionVars false in
-/-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
-intrinsic `H^{2k}` norm of the fixed tensor difference, modulo the pointwise covariant-
-gradient input.**
 
-Combines `chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum` (the algebraic
-chart-jet reduction plus the pointwise covariant-gradient input `hcovgrad_jet_bound`) with
-the unconditional `C²` Sobolev embedding `iteratedCovGradJetSum_le_toHs` (`2k > dim M + 4`).
-The result is, for all `y ∈ K`,
 
-  `chartMetricJet2DiffSup (realizeMetricAt u₁) (realizeMetricAt u₂) α y
-     ≤ C · ‖(T₁ − T₂).toHs (2k)‖`,
 
-with `C` uniform on `K`.  This is the `2`-jet seminorm of the metric difference dominated by
-the intrinsic Sobolev norm of the single fixed tensor difference, the form the spectral
-norm-equivalence bridge then converts into the `H^{a+1}` spectral norm of `u₁ − u₂`. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
     (k : ℕ) (h_super : 2 * k > Module.finrank ℝ E + 4)
     {C₀ : ℝ} (hC₀ : 0 ≤ C₀)

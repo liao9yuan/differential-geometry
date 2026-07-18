@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
 
-/-!
-# Compactness of the L²-side tensor resolvent
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the L²-side
-compactness of the variational tensor resolvent
-`tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`
-factorises as
-`tensorResolventL2 g r s = TensorH1ComplToTensorL2 g r s ∘L
-  tensorResolvent g r s`,
-a composition of the H¹ → L² compactness with the bounded resolvent.
-
-The predicate-free (compactness-of-`M`-based) statements live in
-`Analysis/Spectral/Intrinsic/CompactSAResolventIntrinsic.lean`
-(`tensorResolventL2_isCompactOperator`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

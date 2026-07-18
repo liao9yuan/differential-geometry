@@ -13,14 +13,14 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Curvature-action contractions
 
-This file contains pointwise finite-index contractions of the slotwise
-curvature action on covariant tensors.  It is deliberately independent of the
-Ricci-flow evolution equations; Ricci-flow files should only specialize these
-basis-level identities to their time-dependent component fields.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,8 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-- A one-form is the inverse-metric contraction of its metric-flat basis
-components. -/
+
+
 theorem oneForm_eq_sum_inv_flat
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -71,8 +71,8 @@ theorem oneForm_eq_sum_inv_flat
   simpa [tangentFlatLinear_apply_gen, cotangentToDual_apply_gen, map_sum, Finset.sum_mul,
     smul_eq_mul] using hpair
 
-/-- Evaluate a `(1,3)` curvature tensor on an arbitrary one-form by expanding
-that one-form in the metric-flat basis. -/
+
+
 theorem rm13_oneForm_apply_eq_sum_inv_flat
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -107,10 +107,9 @@ theorem rm13_oneForm_apply_eq_sum_inv_flat
           rw [tensor0SSpace_sum_apply]
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [map_smul]
-          rw [ContinuousMultilinearMap.smul_apply]
-          simp [smul_eq_mul]
+          rfl
 
-/-- Components of a `(0,2)` tensor with both indices raised. -/
+
 def raised02CompAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -119,7 +118,7 @@ def raised02CompAt
   ∑ a : Idx, ∑ b : Idx,
     gInv i a * gInv j b * A (vec2 (basis a) (basis b))
 
-/-- Components of a `(0,2)` tensor with the second index raised. -/
+
 def oneUp02CompAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -127,7 +126,7 @@ def oneUp02CompAt
     (i k : Idx) : Real :=
   ∑ a : Idx, gInv k a * A (vec2 (basis i) (basis a))
 
-/-- The curvature-Ricci contraction `R_akbl A^{kl}` at one point. -/
+
 def rm04RicciContractionAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -138,7 +137,7 @@ def rm04RicciContractionAt
     Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
       raised02CompAt (I := I) basis gInv A k l
 
-/-- The quadratic contraction `A_a^k A_kb` at one point. -/
+
 def ricciQuadraticAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -148,7 +147,7 @@ def ricciQuadraticAt
     oneUp02CompAt (I := I) basis gInv A a k *
       A (vec2 (basis k) (basis b))
 
-/-- The raised components of a symmetric two-tensor are symmetric. -/
+
 private theorem raised02CompAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -176,8 +175,8 @@ private theorem raised02CompAt_symm
           rw [hInv a p, hInv b q, hA p q]
           ring
 
-/-- The quadratic contraction `A_a^k A_kb` is symmetric for symmetric `A` and
-inverse metric components. -/
+
+
 private theorem ricciQuadraticAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -218,8 +217,8 @@ private theorem ricciQuadraticAt_symm
           A (vec2 (basis p) (basis a)) := by
           simp [Finset.sum_mul, mul_assoc]
 
-/-- The curvature-Ricci contraction is symmetric in the two free indices for an
-algebraic curvature tensor and a symmetric raised two-tensor. -/
+
+
 private theorem rm04RicciContractionAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -259,8 +258,8 @@ private theorem rm04RicciContractionAt_symm
           refine Finset.sum_congr rfl fun l _ => ?_
           rw [raised02CompAt_symm (I := I) basis gInv A hA hInv l k]
 
-/-- The traced slot-1 curvature term is the negative Ricci component in the
-orientation produced by the intrinsic `Rm13` trace. -/
+
+
 private theorem rm04_slot1_trace_eq_neg_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -301,9 +300,9 @@ private theorem rm04_slot1_trace_eq_neg_ricci
     _ = -A (vec2 (basis p) (basis a)) := by
           rw [hTrace p a]
 
-/-- The first/third metric trace of `Rm04` is the negative Ricci component in
-the standard lowered slot convention.  This is the scalar-trace convention
-behind the curvature term in the scalar-curvature evolution equation. -/
+
+
+
 theorem rm04_trace_first_third_eq_neg_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -336,8 +335,8 @@ theorem rm04_trace_first_third_eq_neg_ricci
     _ = -A (vec2 (basis k) (basis l)) := by
         rw [hTrace k l]
 
-/-- The second slot contribution to the covariant two-tensor curvature action
-contracts to the Ricci quadratic term. -/
+
+
 private theorem contracted_slot1_eq_quadratic
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -459,8 +458,8 @@ private theorem contracted_slot1_eq_quadratic
                   A (vec2 (basis p) (basis b)) := by
                   simp [Finset.sum_mul, mul_assoc]
 
-/-- The first slot contribution to the covariant two-tensor curvature action
-contracts to the negative curvature-Ricci contraction. -/
+
+
 private theorem contracted_slot0_eq_neg_rm04RicciContraction
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -554,9 +553,9 @@ private theorem contracted_slot0_eq_neg_rm04RicciContraction
           dsimp [B]
           simp [rm04RicciContractionAt, mul_comm]
 
-/-- The metric trace of `R_akbl A^{kl}` is `- <A,A>` in the same inverse
-metric components.  This is the pointwise finite-index contraction used when
-tracing the Ricci evolution equation to scalar curvature. -/
+
+
+
 theorem metricTrace_rm04RicciContractionAt_eq_neg_inner
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -673,13 +672,13 @@ theorem metricTrace_rm04RicciContractionAt_eq_neg_inner
         refine Finset.sum_congr rfl fun l _ => ?_
         ring
 
-/-- Curvature-action contraction on a symmetric two-tensor, with the
-convention-correct lowered Ricci trace.
 
-The curvature-action sign is already built into `curvatureAction0SAt`.  With
-standard slots `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>` and
-`Ric_ab = g^{kl} Rm04(e_k,e_a,e_b,e_l)`, the contracted action contributes
-`R_akbl A^{kl} + A_a^k A_kb` in the local `rm04RicciContractionAt` notation. -/
+
+
+
+
+
+
 theorem contracted_curvatureAction0SAt_vec2_eq
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -830,7 +829,7 @@ theorem contracted_curvatureAction0SAt_vec2_eq
           rw [← hslot1_contracted, hslot0_contracted]
           ring
 
-/-- Symmetry of the combined curvature-Ricci RHS. -/
+
 theorem curvature_ricci_rhs_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)

@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ApplyInput
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ModelBridge
 
-/-!
-# Mixed tensor coordinate covariant derivative formula
 
-Generic coordinate-frame component formula for `nablaRSFun`.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -29,8 +29,8 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-- Coordinate-frame component formula for `nablaRSFun` in arbitrary mixed
-valence. -/
+
+
 theorem nablaRS_coordFrame_slots {r s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -184,8 +184,8 @@ theorem nablaRS_coordFrame_slots {r s : ℕ}
       upper (Function.update lower b k)]
   rw [hupperSum, hlowerSum]
 
-/-- Coordinate-frame component formula for `nablaRSFun`, with the model/scalar
-derivative bridge discharged by smoothness of the tensor field. -/
+
+
 theorem nablaRS_coordFrame_slots_of_smooth {r s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

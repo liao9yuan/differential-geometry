@@ -12,14 +12,14 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# One-form Ricci identity interfaces
 
-This file gives short, reusable names for Ricci-identity statements without
-depending on scalar Bochner.  The scalar Bochner file can specialize the
-one-form interface by taking `alpha = du`, `dLapAlpha = d(Delta u)`, and
-`curvatureVector = grad u`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,24 +35,24 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Smooth covariant tensor sections used by the section-level
-covariant-derivative API. -/
+
+
 abbrev Tensor0SSection (s : ℕ) :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) s
 
-/-- Smooth one-form sections used by the section-level covariant-derivative API. -/
+
 abbrev OneFormSection :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) 1
 
-/-- Smooth covariant two-tensor sections used by the section-level derivative API. -/
+
 abbrev TwoTensorSection :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) 2
 
-/-- A supplied `(0,2)` tensor field realizes the covariant derivative of a
-bundled one-form at one point. -/
+
+
 def NablaOneFormRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -67,11 +67,11 @@ def NablaOneFormRealizesAt
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         1 cov X alpha x (fun _ : Fin 1 => Y)
 
-/-- Section-level realization of `nablaAlpha = ∇ alpha`.
 
-This is stronger than a single pointwise realization and is the information
-needed to interpret a second derivative tensor as the true iterated derivative
-of the original one-form. -/
+
+
+
+
 def NablaOneFormSectionRealizes
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -80,9 +80,9 @@ def NablaOneFormSectionRealizes
     (nablaAlpha : TwoTensorSection (I := I) (M := M)) : Prop :=
   ∀ x : M, NablaOneFormRealizesAt (I := I) cov alpha (fun y => nablaAlpha y) x
 
-/-- A supplied `(0,3)` tensor realizes the true second covariant derivative of a
-bundled one-form at `x`: the bundled two-tensor section realizes `∇ alpha`,
-and the supplied three-tensor is `∇(∇ alpha)` at `x`. -/
+
+
+
 def Nabla2OneFormRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -130,8 +130,8 @@ theorem nabla2OneFormRealizesAt_apply
         2 cov X nablaAlpha x (vec2 Y Z) :=
   h.2 X Y Z
 
-/-- Build the existing pointwise second-one-form realization predicate from
-two total covariant derivative realization steps. -/
+
+
 theorem nabla2OneFormRealizesAt_of_totalNabla
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -171,20 +171,20 @@ theorem nabla2OneFormRealizesAt_of_totalNabla
     rw [hslots] at h
     exact h
 
-/-- Component-level trailing-slot symmetry for a third covariant derivative
-candidate `U`. -/
+
+
 def Nabla2DuTrailingSymmCoord {Idx : Type*}
     (U : Idx -> Idx -> Idx -> Real) : Prop :=
   ∀ i j k : Idx, U i j k = U i k j
 
-/-- Component-level one-form Ricci identity, with the sign convention already
-absorbed into `curvatureAction`. -/
+
+
 def OneFormRicciIdentityCoord {Idx : Type*}
     (U curvatureAction : Idx -> Idx -> Idx -> Real) : Prop :=
   ∀ i k j : Idx, U i k j - U k i j = curvatureAction i k j
 
-/-- Component-level trace of the one-form curvature action gives the
-Ricci-gradient component. -/
+
+
 def CurvatureActionTraceEqualsRicGradCoord {Idx : Type*} [Fintype Idx]
     (gInv : Idx -> Idx -> Real)
     (curvatureAction : Idx -> Idx -> Idx -> Real)
@@ -192,9 +192,9 @@ def CurvatureActionTraceEqualsRicGradCoord {Idx : Type*} [Fintype Idx]
   ∀ k : Idx,
     (∑ i : Idx, ∑ j : Idx, gInv i j * curvatureAction i k j) = ricGrad k
 
-/-- Pure finite-sum form of the Bochner one-form trace commutator.  The only
-inputs are trailing symmetry, the one-form Ricci identity, and the traced
-curvature-action identification. -/
+
+
+
 theorem oneFormRicciTraceCommCoord_of_identities {Idx : Type*} [Fintype Idx]
     (gInv : Idx -> Idx -> Real)
     (U curvatureAction : Idx -> Idx -> Idx -> Real)
@@ -230,11 +230,11 @@ theorem oneFormRicciTraceCommCoord_of_identities {Idx : Type*} [Fintype Idx]
           rw [h_trace k]
 
 
-/-- Pointwise Ricci identity for the third covariant derivative of a one-form.
 
-With the realized convention `Rm13 alpha X Y Z = alpha (R(X,Y)Z)`, the
-covector commutator carries the negative sign:
-`∇² alpha(X,Y,Z) - ∇² alpha(Y,X,Z) = -Rm13(alpha,X,Y,Z)`. -/
+
+
+
+
 def OneFormThirdCovDerivCommAt
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
@@ -260,7 +260,7 @@ theorem one_form_third_covDeriv_comm
       -Rm13 x alpha (vec3 X Y Z) :=
   h X Y Z
 
-/-- Swap the first two slots of a `(0,3)` tensor. -/
+
 def swapFirstTwo0S {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
@@ -276,8 +276,8 @@ def swapFirstTwo0S {x : M}
   funext q
   fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Integral.Connection.vec3]
 
-/-- Promote the coordinate form of the one-form Ricci identity to the tensor
-identity at a point. -/
+
+
 theorem one_form_third_comm_of_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -302,9 +302,13 @@ theorem one_form_third_comm_of_coord
     (fun A :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x =>
         A (vec3 X Y Z)) htensor
-  simpa using h_eval
+  change nabla2Alpha (vec3 X Y Z) -
+      swapFirstTwo0S (I := I) nabla2Alpha (vec3 X Y Z) =
+    -(Rm13 x alpha (vec3 X Y Z)) at h_eval
+  rw [swapFirstTwo0S_apply_vec3] at h_eval
+  exact h_eval
 
-/-- A component-indexed version of `one_form_third_comm_of_coord`. -/
+
 theorem one_form_third_comm_of_coord_ijk
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -333,9 +337,9 @@ theorem one_form_third_comm_of_coord_ijk
       fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Integral.Connection.vec3]
     simpa [hslots, hswap] using h
 
-/-- Pointwise trailing-slot symmetry of the second covariant derivative of a
-one-form. For `alpha = du`, this is the Hessian symmetry input preserved in the
-last two slots of `∇² alpha`. -/
+
+
+
 def OneFormLastTwoSymmAt {x : M}
     (nabla2Alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
@@ -351,9 +355,9 @@ theorem one_form_last_two_symm {x : M}
     nabla2Alpha (vec3 X Y Z) = nabla2Alpha (vec3 X Z Y) :=
   h X Y Z
 
-/-- The traced Hessian-derivative term for a one-form candidate.  In the
-scalar specialization `alpha = du`, this is the term that realizes
-`d (Delta u)`. -/
+
+
+
 def traceNablaOneFormAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -364,8 +368,8 @@ def traceNablaOneFormAt
   ∑ i : Idx, ∑ j : Idx,
     gInv i j * nabla2Alpha (vec3 Y (basis i) (basis j))
 
-/-- Pointwise one-form trace commutator with an explicit curvature vector:
-`tr_g ∇²α(.,.,Y) = tr_g ∇²α(Y,.,.) + Ric(Y,V)`. -/
+
+
 def OneFormRicciTraceCommWithVectorAt
     {Idx : Type*} [Fintype Idx]
     (Ric : Tensor02Section (I := I) (M := M))
@@ -380,8 +384,8 @@ def OneFormRicciTraceCommWithVectorAt
       traceNablaOneFormAt (I := I) basis gInv nabla2Alpha Y +
         Ric x (vec2 Y curvatureVector)
 
-/-- Coordinate components of a supplied second covariant derivative of a
-one-form in a pointwise tangent basis. -/
+
+
 def nabla2OneFormCoord
     {Idx : Type*}
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -390,9 +394,9 @@ def nabla2OneFormCoord
     (i j k : Idx) : Real :=
   nabla2Alpha (vec3 (basis i) (basis j) (basis k))
 
-/-- Signed curvature-action components for a one-form.  The minus sign is the
-covector curvature-action sign for the convention
-`Rm13 alpha X Y Z = alpha (R(X,Y)Z)`. -/
+
+
+
 def curvatureActionOnOneFormCoord
     {Idx : Type*}
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -403,7 +407,7 @@ def curvatureActionOnOneFormCoord
     (i k j : Idx) : Real :=
   -Rm13 x alpha (vec3 (basis i) (basis k) (basis j))
 
-/-- Ricci-vector components in a pointwise tangent basis. -/
+
 def ricciVectorCoord
     {Idx : Type*}
     (Ric : Tensor02Section (I := I) (M := M))
@@ -439,8 +443,8 @@ theorem oneFormRicciIdentityCoord_of_tensor
   intro i k j
   exact hcomm (basis i) (basis k) (basis j)
 
-/-- Coordinate-basis form of the trace commutator, obtained from the three
-component identities. -/
+
+
 theorem oneFormRicciTraceComm_basisCoord_of_identities
     {Idx : Type*} [Fintype Idx]
     (Ric : Tensor02Section (I := I) (M := M))
@@ -488,10 +492,10 @@ theorem metricTraceInput_one_eq_vec3 {x : M}
           (Fin.succ (Fin.succ 0)) = Z
     rw [Fin.cases_succ, Fin.cases_succ]
 
-/-- Trace-level Bochner commutator consumer from the untraced one-form Ricci
-identity. This is only finite-sum algebra: the actual geometric proof of the
-untraced commutator, trailing-slot symmetry, and curvature trace is supplied by
-the three pointwise hypotheses. -/
+
+
+
+
 theorem oneForm_ricci_trace_comm_of_third_comm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (Ric : Tensor02Section (I := I) (M := M))
@@ -559,8 +563,8 @@ theorem oneForm_ricci_trace_comm_of_third_comm
         Ric x (vec2 Y curvatureVector) := by
           rw [hcurv Y]
 
-/-- One-form Ricci identity interface at a point:
-`roughAlpha = dLapAlpha + Ric(., curvatureVector)`. -/
+
+
 def RicciIdentityOneFormAt
     (Ric : Tensor02Section (I := I) (M := M))
     {x : M}

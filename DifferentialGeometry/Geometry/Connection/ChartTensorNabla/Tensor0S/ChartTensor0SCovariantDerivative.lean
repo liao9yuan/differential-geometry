@@ -2,30 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 
-/-!
-# Chart-frame covariant derivative on `(0, s)`-tensor bundles
-
-Given a smooth Riemannian manifold `(M, g)` and a chart center `α : M`, this
-file constructs a *chart-frame* analog of the covariant derivative
-`(∇_X T)(b) ∈ Tensor0SSpace s I b` for a `(0, s)`-tensor section `T` and a
-tangent vector field `X`. The construction uses only chart-coordinate
-ingredients (Fréchet derivative of the trivialised representation +
-Christoffel correction), without invoking any abstract `CovariantDerivative`
-typeclass on the tensor bundle.
-
-For `s = 0`, the chart-frame covariant derivative acts as the directional
-derivative of the scalar value. For `s = s' + 1`, it is the standard Leibniz
-combination: the **intrinsic chart piece**
-`tensor0SIntrinsicChartCLM (s+1) α T b (X b)` (from
-`Tensor0SChartChristoffel.lean`) minus a **per-slot Christoffel correction**
-obtained by composing the tensor `T b` with a slot-by-slot CLM substitution.
-
-The slot CLM is the explicit linear formula
-`v ↦ trivFromE α b (christoffelCorrection g α b (trivToE α b v) (X b))`,
-which agrees with `chartLeviCivita g α (chartParallelExtend α b v) b (X b)`
-on the chart Levi-Civita good set; that agreement is deferred to a later
-file and is not required for the construction itself.
--/
 
 noncomputable section
 
@@ -46,19 +22,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-α-parallel extension of a tangent vector at `b` across `M`,
-defined via the chart-α trivialisation. -/
 def chartParallelExtend (α b : M) (v : TangentSpace I b) (b' : M) :
     TangentSpace I b' :=
   trivFromE (I := I) α b' (trivToE (I := I) α b v)
 
-/-- Pointwise unfolding of `chartParallelExtend`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_def (α b : M) (v : TangentSpace I b) (b' : M) :
     chartParallelExtend (I := I) α b v b' =
       trivFromE (I := I) α b' (trivToE (I := I) α b v) := rfl
 
-/-- The chart-trivialised representation of the parallel extension equals the
-constant `trivToE α b v` on the trivialisation base set. -/
 lemma chartE_section_repr_chartParallelExtend
     (α b : M) (v : TangentSpace I b) {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -71,9 +43,6 @@ lemma chartE_section_repr_chartParallelExtend
       = trivToE (I := I) α b v
   exact trivToE_trivFromE (I := I) α hb' _
 
-/-- The chart-α Levi-Civita-parallel CLM at `b`, applied along the vector
-field `X`. On the chart Levi-Civita good set, this evaluates to the chart
-Levi-Civita action on the parallel extension of its input. -/
 def chartLeviCivitaParallelCLM
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b') :
@@ -82,7 +51,7 @@ def chartLeviCivitaParallelCLM
     (christoffelCorrection (I := I) g α b
       (trivToE (I := I) α b (X b)))
 
-/-- Pointwise formula. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartLeviCivitaParallelCLM_apply
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b') (v : TangentSpace I b) :
@@ -94,21 +63,19 @@ lemma chartLeviCivitaParallelCLM_apply
   unfold chartLeviCivitaParallelCLM
   rfl
 
-/-- The slot-substitution function: identity on every coordinate except slot
-`k`, where it places the given CLM `Φ`. -/
 private def slotCLM (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin s) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
-/-- Slot-substitution value at slot `k`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slotCLM_self (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     slotCLM (I := I) s k Φ k = Φ := by
   unfold slotCLM
   simp
 
-/-- Slot-substitution value at slot `i ≠ k`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slotCLM_other (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin s} (h : i ≠ k) :
@@ -116,10 +83,6 @@ private lemma slotCLM_other (s : ℕ) {b : M}
   unfold slotCLM
   simp [h]
 
-/-- The slot-`k` Christoffel correction term, as a `Tensor0SSpace s I b`.
-
-This is the CMLM whose value at a tuple `(v₀, …, v_{s-1})` is
-`T b (Fin.update m k (chartLeviCivitaParallelCLM g α b X (m k)))`. -/
 def chartTensor0SSlotCorrection (s : ℕ) (g : SmoothRiemannianMetric I M)
     (α : M) (T : Π b' : M, Tensor0SSpace s I b')
     (X : Π b' : M, TangentSpace I b') (b : M) (k : Fin s) :
@@ -128,7 +91,7 @@ def chartTensor0SSlotCorrection (s : ℕ) (g : SmoothRiemannianMetric I M)
     (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I b) ℝ from T b)
     (slotCLM (I := I) s k (chartLeviCivitaParallelCLM (I := I) g α b X))
 
-/-- Pointwise formula for the slot-`k` Christoffel correction. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_apply (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -143,8 +106,6 @@ lemma chartTensor0SSlotCorrection_apply (s : ℕ)
   unfold chartTensor0SSlotCorrection
   rfl
 
-/-- The chart-frame covariant derivative of a `(0, s)`-tensor field along a
-tangent vector field, returning a section of the `(0, s)`-tensor bundle. -/
 def chartTensor0SCovariantDerivative :
     (s : ℕ) → SmoothRiemannianMetric I M → (α : M) →
       (T : Π b : M, Tensor0SSpace s I b) →
@@ -162,7 +123,7 @@ def chartTensor0SCovariantDerivative :
         - ∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k
 
-/-- Unfolding for `s = 0`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -175,7 +136,7 @@ lemma chartTensor0SCovariantDerivative_zero
                   (fun _ : Fin 0 => TangentSpace I b') ℝ from T b')
               (fun i => Fin.elim0 i)) b (X b))) := rfl
 
-/-- Unfolding for `s = s' + 1`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -185,7 +146,7 @@ lemma chartTensor0SCovariantDerivative_succ (s : ℕ)
         - ∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k := rfl
 
-/-- Evaluation at the unique empty tuple in the `s = 0` case. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -201,7 +162,7 @@ lemma chartTensor0SCovariantDerivative_zero_apply
   rw [chartTensor0SCovariantDerivative_zero]
   rfl
 
-/-- Evaluation at a non-empty tuple in the `s = s' + 1` case. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -241,7 +202,7 @@ lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
         ∑ k : Fin (s + 1), Y k) m = _
   rw [ContinuousMultilinearMap.sum_apply]
 
-/-- **Additivity in `T` (`s = 0` case).** -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace 0 I b)
@@ -302,7 +263,7 @@ lemma chartTensor0SCovariantDerivative_zero_add
   rw [mfderiv_add h₁ h₂]
   rfl
 
-/-- **Scalar homogeneity in `T` (`s = 0` case).** -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -346,7 +307,7 @@ lemma chartTensor0SCovariantDerivative_zero_smul
   rw [const_smul_mfderiv hT c]
   rfl
 
-/-- The slot-`k` correction is additive in `T`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_add (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, Tensor0SSpace s I b')
@@ -369,7 +330,7 @@ lemma chartTensor0SSlotCorrection_add (s : ℕ)
   intro m
   rfl
 
-/-- The slot-`k` correction is `ℝ`-linear in `T`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_smul (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -389,7 +350,7 @@ lemma chartTensor0SSlotCorrection_smul (s : ℕ)
   intro m
   rfl
 
-/-- **Additivity in `T` (`s = s' + 1` case).** -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -439,7 +400,7 @@ lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
   rw [hsplit_slot]
   abel
 
-/-- **Scalar homogeneity in `T` (`s = s' + 1` case).** -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)

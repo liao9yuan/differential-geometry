@@ -21,13 +21,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
 
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 

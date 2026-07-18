@@ -5,12 +5,12 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-norm heat assembly
 
-This module contains the scalar-evolution predicate, Ricci-norm heat component
-assembly, and smooth-solution package built on the core Ricci-flow API.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,11 +24,11 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- Scalar curvature evolution in Section 6.2:
-`∂_t R = Δ R + 2 |Ric|²`. -/
+
+
 def ScalarEvolutionEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq : Real -> M -> Real) : Prop :=
@@ -39,12 +39,12 @@ def ScalarEvolutionEquationOn
       D.carrier
       (t : Real)
 
-/-! ## Lemma 6.7: Ricci norm heat equation, component assembly -/
 
-/-- Time derivative component identity for `|Ric|²`.
 
-This is the point where differentiating inverse metrics and using Lemma 6.3 has
-already cancelled the cubic `Ric_i^k Ric_kj` terms. -/
+
+
+
+
 def RicciNormTimeDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (ricciNormSq roughLapInner reaction : Real -> M -> Real) : Prop :=
@@ -59,8 +59,8 @@ section RicciNormDerivative
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- The time-derivative identity for `|Ric|^2` once the component evolution
-equations and the remaining finite-sum simplification are supplied. -/
+
+
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -82,8 +82,8 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
       (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x (by simp)
   simpa [h_simplify t x] using hnorm
 
-/-- Canonical time-derivative identity for `|Ric|^2` from Lemma 6.3 and the
-inverse-metric evolution equation. -/
+
+
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -111,15 +111,15 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
 
 end RicciNormDerivative
 
-/-- Laplacian component identity for `|Ric|²`:
-`Δ |Ric|² = 2 <Δ Ric, Ric> + 2 |∇Ric|²`. -/
+
+
 def RicciNormLaplacianComponentsOn
     (ricciNormLap roughLapInner nablaRicNormSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
     ricciNormLap t x = 2 * roughLapInner t x + 2 * nablaRicNormSq t x
 
-/-- Bridge from the realized Bochner coordinate predicate to the interval
-Ricci-flow predicate. -/
+
+
 theorem ricciNormLaplacianComponentsOn_of_bochner
     (ricciNormLap roughLapInner nablaRicNormSq : Real -> M -> Real)
     (h_lap : DifferentialGeometry.Integral.Connection.RicciNormLaplacianComponentsInFrame
@@ -127,8 +127,8 @@ theorem ricciNormLaplacianComponentsOn_of_bochner
     RicciNormLaplacianComponentsOn ricciNormLap roughLapInner nablaRicNormSq :=
   h_lap
 
-/-- Canonical interval-level Ricci-norm Laplacian identity from the exact
-coordinate Bochner expansion for `|Ric|^2`. -/
+
+
 theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx]
@@ -152,8 +152,8 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
   intro t x
   simpa [roughLapRicciInnerInFrame, nablaRicciNormSqInFrame] using hrealized t x
 
-/-- Canonical inverse-metric coefficients in the coordinate frame centered at
-`x0`, for the metric at time `t`. -/
+
+
 noncomputable def coordInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -165,8 +165,8 @@ noncomputable def coordInv
     DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) (S.family.metric t) x0 i j (extChartAt I x0 x)
 
-/-- The canonical coordinate inverse really is the inverse metric in the
-centered coordinate basis at the center point. -/
+
+
 theorem coordInvReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -180,9 +180,9 @@ theorem coordInvReal
     DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) (S.family.metric t) x0
 
-/-- Canonical coordinate rough Laplacian components
-`g^{ab} (nabla_a nabla_b Ric)_ij` in the coordinate frame centered at `x0`,
-once the coordinate components of `nabla^2 Ric` have been produced. -/
+
+
+
 noncomputable def coordRoughRic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -201,8 +201,8 @@ noncomputable def coordRoughRic
       ∑ b : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         coordInv (I := I) S x0 t x a b * nabla2Ric t x a b i j
 
-/-- Canonical coordinate components of the second covariant derivative of the
-Ricci tensor, in the coordinate frame centered at `x0`. -/
+
+
 noncomputable def coordNab2Ric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -245,8 +245,8 @@ noncomputable def coordNab2Ric
           nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
             t x a i p)
 
-/-- Heat-equation form of Lemma 6.7:
-`∂_t |Ric|² = Δ |Ric|² - 2 |∇Ric|² + 4 R_ikjl Ric^{ij} Ric^{kl}`. -/
+
+
 def RicciNormHeatEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (ricciNormSq ricciNormLap nablaRicNormSq reaction : Real -> M -> Real) : Prop :=
@@ -258,8 +258,8 @@ def RicciNormHeatEquationOn
       D.carrier
       (t : Real)
 
-/-- Algebraic assembly of Lemma 6.7 from the time-derivative and Laplacian
-component identities. -/
+
+
 theorem ricciNormHeatEquationOn_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (ricciNormSq ricciNormLap roughLapInner nablaRicNormSq reaction : Real -> M -> Real)
@@ -279,13 +279,13 @@ theorem ricciNormHeatEquationOn_of_components
   rw [hvalue]
   exact h_dt t x
 
-/-- Strong Ricci-flow solution predicate used by global Hamilton packages.
 
-`IsSolutionOn` records the Ricci-flow equation and the interval-wise metric and
-connection smoothness currently used by the local evolution files.  The
-Hamilton/global layer also needs the canonical scalar and Ricci quantities
-supplied by a smooth Ricci flow to be regular on spacetime and to satisfy the
-coordinate-frame evolution and Bochner identities used by Section 6. -/
+
+
+
+
+
+
 structure IsSmoothSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
@@ -350,8 +350,8 @@ structure IsSmoothSolutionOn
 
 namespace IsSmoothSolutionOn
 
-/-- A smooth solution is in particular a Ricci-flow solution in the ordinary
-folder-level sense. -/
+
+
 theorem toIsSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -359,8 +359,8 @@ theorem toIsSolutionOn
     IsSolutionOn (I := I) S :=
   hS.isSolution
 
-/-- A smooth solution supplies the scalar spacetime-continuity package used by
-scalar maximum-principle packages. -/
+
+
 theorem scalarCont
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -368,8 +368,8 @@ theorem scalarCont
     ScalarSTContOn (I := I) (M := M) S :=
   hS.scalarSTCont
 
-/-- A smooth solution supplies the canonical scalar regularity package used by
-scalar maximum-principle producers. -/
+
+
 theorem scalarReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -383,9 +383,9 @@ section RicciNormAssembly
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- Section 6.2 Ricci-norm heat identity for a folder-level solution, reduced
-to inverse-metric evolution, Ricci evolution, symmetry, and the Bochner
-Laplacian component frontier. -/
+
+
+
 theorem ricciNormHeatEquationOn_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -421,8 +421,8 @@ theorem ricciNormHeatEquationOn_of_solution
         h_inv h_ricci hInvSym hRicSym)
       h_lap
 
-/-- Canonical Lemma 6.7 consumer using the exact Ricci-norm Bochner expansion
-instead of an already-packaged Laplacian component identity. -/
+
+
 theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -453,13 +453,12 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
       (ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
         (I := I) S gInv frame roughLapRic ricciNormLap nablaRic h_lap)
 
-/-- Canonical Lemma 6.7 consumer from the metric-compatible `(0,2)` tensor
-Bochner producer, without asking callers for a prepackaged Laplacian
-expansion predicate. -/
+
+
+
 theorem ricci_heat_mc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [DecidableEq Idx]
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (S : SolutionOn (I := I) (M := M) D)
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -487,9 +486,6 @@ theorem ricci_heat_mc
     (hRicSym : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (hmc : forall t : Real,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
-        (S.base.connection t) (S.base.metric t))
     (hframe : forall x i, basis x i = frame i x)
     (hinv : forall t x,
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) (S.base.metric t) x
@@ -531,7 +527,11 @@ theorem ricci_heat_mc
   let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
     { metric := S.base.metric
       connection := S.base.connection
-      metricCompatible := hmc }
+      metricCompatible := by
+        intro t
+        simpa [SolutionFamily.connection] using
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+            (I := I) (S.base.metric t)) }
   exact
     ricciNormHeatEquationOn_of_solution_canonical_laplacian
       (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic

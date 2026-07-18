@@ -1,13 +1,11 @@
-/-
-Copyright (c) 2024 Yury Kudryashov. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yury Kudryashov
-Coauthors: Jack McCarthy
--/
+
+
+
+
+
+
 import DifferentialGeometry.Tensor.Exterior.Defs
 import DifferentialGeometry.Tensor.Alternating.Flip
-
-/-! # Reindexing differential forms along an equivalence of index sets (`domDomCongr`) -/
 
 open ContinuousAlternatingMap
 
@@ -21,7 +19,6 @@ variable
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   {n m : ℕ}
 
-/-- Reorder the arguments of a smooth differential form using an equivalence of `Fin` indices. -/
 noncomputable def domDomCongr (σ : Fin n ≃ Fin m) (ω : Ω^n⟮E, F⟯) : Ω^m⟮E, F⟯ :=
   ⟨fun e => (ω e).domDomCongr σ, by
     let L : (E [⋀^Fin n]→L[ℝ] F) →L[ℝ] (E [⋀^Fin m]→L[ℝ] F) :=

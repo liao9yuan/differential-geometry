@@ -3,52 +3,12 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# The cutoff ↔ partition-of-unity iterated-Sobolev bridge for tensor `L²` chart
-components
-
-For a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)` and a chart base
-point `α`, this file propagates iterated Euclidean Sobolev regularity from the
-partition-of-unity-weighted chart components of an abstract `L²` tensor element
-`u : TensorL2 r s g` to the **cutoff-weighted** chart component centred at `α`.
-
-## The bridge
-
-The cutoff-weighted chart `P₀`-component of `u` equals, almost everywhere on the
-Euclidean chart target, the finite sum — over the transport chart centres `β`
-and the component multi-indices `Q` — of the chart-transition transports of the
-partition-of-unity `Q`-components of `u`
-(`tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum`). Iterated Sobolev
-membership `MemWkp k 2` is invariant under almost-everywhere equality and closed
-under finite sums, so the cutoff component is `W^{k,2}`-regular as soon as each
-transported summand is.
-
-Each transported summand is the chart-`α` pushforward of the smooth, bounded,
-compactly-supported transport coefficient times the chart-transition
-precomposition of a partition-of-unity component. The chart transition agrees,
-on a neighbourhood of the (compact) transport-coefficient support, with a
-bounded smooth diffeomorphism; the chain rule `MemWkp.comp_smoothDiffeoBounded
-AtOrder` carries `W^{k,2}`-regularity through that diffeomorphism, after the
-partition-of-unity component has been localised by a smooth chart-`β` cutoff so
-that it becomes compactly supported inside the diffeomorphism's codomain.
-Multiplying by the smooth bounded transport coefficient and extending the
-resulting compactly-supported function by zero off the diffeomorphism's domain
-completes the argument.
-
-## Main result
-
-* `tensorL2ChartComponentCutoff_memWkp_of_pou` — iterated Sobolev regularity of
-  the cutoff-weighted chart component, given iterated Sobolev regularity of all
-  partition-of-unity chart components at every chart centre.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -76,9 +36,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **`MemWkp` is closed under finite sums.** If every member of a family of
-functions indexed by a finite set is `W^{k,p}`-regular on an open set, then the
-pointwise finite sum is `W^{k,p}`-regular. -/
 private lemma memWkp_finsetSum
     {d : ℕ} [NeZero d] {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
@@ -106,9 +63,6 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
-/-- The topological support of the chart-`α` pushforward of a function `u` whose
-topological support is a compact subset of the chart-`α` source is contained in
-the chart-`α` Euclidean image of `tsupport u`. -/
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -134,14 +88,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
       (I := I) (M := M) (u := u) α hy_target hy_off')
   · exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target)
 
-/-- **Iterated Sobolev regularity of a transported chart component.** For chart
-base points `β`, `α`, component multi-indices `(P₀, Q)` and an `L²` class `f` on
-the chart-`β` Euclidean target that is `W^{k,2}`-regular there, the
-chart-transition transport `chartTransitionTransportCLM g r s β α P₀ Q f` is
-`W^{k,2}`-regular on the chart-`α` Euclidean target.
-
-The hypothesis is iterated Sobolev membership of `f` on the chart-`β` target;
-this is the genuine regularity input being propagated. -/
 private lemma chartTransitionTransportCLM_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (k : ℕ)
@@ -287,19 +233,6 @@ private lemma chartTransitionTransportCLM_memWkp
     rw [h_pointwise]
   exact (MemWkp_congr_ae (d := d) (by norm_num) hTα_open h_ae).mpr hw_memWkp_Tα
 
-/-- **The cutoff ↔ partition-of-unity iterated-Sobolev bridge.** For a closed
-Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, an abstract `L²` tensor
-element `u : TensorL2 r s g`, a chart base point `α` and a component multi-index
-`P₀`, if every partition-of-unity Euclidean chart component of `u` — taken at
-every chart centre `β` and for every component multi-index `Q` — is iterated
-Sobolev regular (`W^{k,2}`) on its chart target, then the cutoff-weighted
-Euclidean chart `P₀`-component of `u` centred at `α` is iterated Sobolev regular
-on the chart-`α` target.
-
-The cutoff component is, almost everywhere, a finite sum of chart-transition
-transports of the partition-of-unity components; iterated Sobolev membership is
-invariant under almost-everywhere equality, closed under finite sums, and — by
-the bounded chart-transition chain rule — preserved by each transport. -/
 theorem tensorL2ChartComponentCutoff_memWkp_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)

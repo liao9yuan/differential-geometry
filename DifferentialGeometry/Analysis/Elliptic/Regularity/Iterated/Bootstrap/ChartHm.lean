@@ -9,46 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Polymorphic-in-`m` chart-`H^{m+2}` bootstrap for the canonical chart-pushed
-representative
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h : H1Compl g`, the canonical chart-pushed POU-cut representative
-`chartPushed POU α (H1ComplToLp g u_h).coeFn` decomposes into chart-Sobolev
-regularity layers via the iterated chosen mixed weak partials. This module
-provides the polymorphic chart-`H^{m+2}` assembly:
-
-```
-chart-H^{m+2} of u_h.coeFn  ⇐  chart-H^{m+1} of u_h.coeFn AND
-                                ∀ (idx : Fin m → Fin n),
-                                chart-H² of (m-mixed partial in idx)
-```
-
-The assembly itself is purely structural: it iterates the elementary
-`MemWkp_succ` decomposition. Combined with the base case from
-`iteratedH2Regularity_one` (which gives chart-`H²` for
-`u_h ∈ laplacianDomainPow g 1`), it produces chart-`H^{m+2}` of the canonical
-function representative provided the chart-`H²` regularity of every `m`-mixed
-chosen partial is supplied.
-
-This module also provides a polymorphic cutoff-based support-aware extension
-of `MemWkp k 2` from a precompact open subdomain to the full chart target,
-generalising the bespoke `m = 2` version in `ChartPushedMemWkpFourSmooth`.
-
-## Main results
-
-* `MemWkp_extend_via_cutoff_poly` — the polymorphic support-aware extension
-  of `MemWkp k 2` from a precompact open subdomain to the full chart target.
-
-* `chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two` — the polymorphic
-  chart-`H^{m+2}` assembly: chart-`H^{m+2}` of the chart-pushed function from
-  chart-`H¹` of the chart-pushed function and chart-`H^{k+1}` of every
-  chosen `k`-mixed partial for every `k ≤ m`.
-
-* `chartPushed_memWkp_two_of_laplacianDomainPow_one` — base case chart-`H²`
-  for `u_h ∈ laplacianDomainPow g 1`.
--/
 
 noncomputable section
 
@@ -85,10 +45,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Polymorphic cutoff-based extension of `MemWkp k 2` from a precompact
-open subdomain.** A function in `MemWkp k 2` of an open precompact `Ω' ⊆ Ω`
-that vanishes a.e. on `Ω \ K` (for some compact `K ⊆ Ω'`) lies in
-`MemWkp k 2 Ω`. -/
 theorem MemWkp_extend_via_cutoff_poly
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -184,17 +140,7 @@ theorem MemWkp_extend_via_cutoff_poly
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
-/-- **Polymorphic chart-`H^{m+2}` assembly via iterated `MemWkp_succ`.**
-For any `m, k : ℕ` and any `m`-direction multi-index `dirs`, if every chosen
-`k`-mixed partial of the chart-pushed function (for arbitrary multi-index
-`Fin k → Fin n`) is in `MemWkp 2 2` of the chart target, and every chosen
-`j`-mixed partial for `j ≤ k` is in `MemW1p 2` of the chart target, then
-the chosen `m`-mixed partial in directions `dirs` lies in
-`MemWkp (k + 2 - m) 2` of the chart target — provided `m ≤ k`.
-
-This is the structural engine. The headline `chartPushed_memWkp_m_plus_two`
-specialises this at `m = 0`, where the chosen `0`-mixed partial is the
-chart-pushed parent itself. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -234,18 +180,6 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
   rw [h_succ_eq] at h_next
   exact h_next
 
-/-- **Polymorphic chart-`H^{m+2}` assembly from chart-`H²` of every `m`-mixed
-partial.**
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an element
-`u_h : H1Compl g`, an order `m : ℕ`, the chart-pushed POU-cut representative
-`chartPushed POU α u_h.coeFn` lies in `MemWkp (m + 2) 2` of the chart target,
-provided:
-
-* `MemW1p 2` of every chosen `j`-mixed partial for every `j ≤ m`,
-* `MemWkp 2 2` of every chosen `m`-mixed partial (the per-direction chart-`H²`
-  regularity that the Nirenberg pipeline delivers).
--/
 theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -308,9 +242,6 @@ theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
       have h_eq : s + 1 + 2 = s + 1 + 2 := rfl
       exact h_aux
 
-/-- **Base case chart-`H²` of the chart-pushed function.** For
-`u_h ∈ laplacianDomainPow g 1`, the canonical chart-pushed POU-cut
-representative lies in `MemWkp 2 2` of the chart target. -/
 theorem chartPushed_memWkp_two_of_laplacianDomainPow_one
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -326,19 +257,6 @@ theorem chartPushed_memWkp_two_of_laplacianDomainPow_one
   have h := (iteratedH2Regularity_one (I := I) (M := M) g hu_h).1
   exact h α
 
-/-- **Per-step chart-`H^{m+2}` boost.** For a closed Riemannian manifold
-`(M, g)`, a chart point `α : M`, an element `u_h : H1Compl g`, and an order
-`m : ℕ`, given:
-
-* chart-`H^{m+1}` of the chart-pushed parent — equivalently, by the polymorphic
-  regularity bridge, `MemW1p 2` of every chosen `j`-mixed partial for every
-  `j ≤ m`;
-* `MemWkp 2 2` of every chosen `m`-mixed partial of the chart-pushed parent
-  (the per-direction chart-`H²` regularity that the polymorphic Nirenberg
-  pipeline delivers on a precompact open subdomain, then extended to the
-  full chart target via the support-aware extension lemma),
-
-the chart-pushed parent lies in chart-`H^{m+2}`. -/
 theorem chartPushed_memWkp_m_plus_two_step
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -387,10 +305,7 @@ theorem chartPushed_memWkp_m_plus_two_step
   exact chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (I := I) (M := M) g α u_h m h_intermediate_w1p h_top_memWkp_two
 
-/-- **Chart-side bridge promotion at order `m + 2`.** If chart-`H^{m+2}` of
-the chart-pushed parent holds for every chart point `α`, then the manifold-
-level `MemWkpChart g (m + 2) 2` membership holds for the canonical function
-representative. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_m_plus_two_of_chartPushed_memWkp_m_plus_two
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

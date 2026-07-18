@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Connection evolution producers
 
-Book-facing producers for Christoffel evolution from metric variation, smoothness, inverse-metric data, Ricci flow, and Koszul inputs.
--/
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- General metric-variation Christoffel formula in raised component form. -/
+
 theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -64,14 +64,14 @@ theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt
       hpair hvarDiff hmetric hunique)
 
-/-- Lemma 6.2 from metric-frame regularity plus the fixed-base metric
-covariant-derivative frontier.
 
-This proof differentiates
-`Gamma(s) - Gamma(t) = gInv(s) * g_s((nabla^s - nabla^t)e_i e_j, e_l)`.
-The product-rule term containing `dt gInv` vanishes because the connection
-difference is zero at `s = t`; the remaining derivative is supplied by the
-finite-difference Koszul computation and the Ricci-flow metric variation. -/
+
+
+
+
+
+
+
 theorem christoffelEvolution_of_metricFrameTimeRegularity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -159,11 +159,11 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-/-- Lemma 6.2 from inverse-metric evolution and fixed-base metric variation.
 
-This theorem-level producer avoids the legacy metric-frame package: the inverse
-metric derivative is supplied by the actual inverse evolution equation, and the
-metric covariant-derivative variation is supplied separately. -/
+
+
+
+
 theorem gammaEvolOfInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -249,8 +249,8 @@ theorem gammaEvolOfInv
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-/-- Lemma 6.2 from local inverse-metric evolution and fixed-base metric
-variation. -/
+
+
 theorem gammaEvolLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -336,11 +336,11 @@ theorem gammaEvolLocal
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-/-- Lemma 6.2 from spacetime-smooth Ricci-flow metric components.
 
-This constructor eliminates the broad connection-regularity black box: the only
-time/spatial input is the fixed-base mixed derivative of the metric components,
-recorded in `MetricFrameSpacetimeRegularityInFrameOnLocal`. -/
+
+
+
+
 theorem christoffelEvolution_of_spacetimeSmoothMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -369,11 +369,11 @@ theorem christoffelEvolution_of_spacetimeSmoothMetric
     (metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
       (M := M) (Idx := Idx) nablaRic)
 
-/-- LaTeX Lemma 6.2, `lem:evol-christoffel`, in fixed-frame component form:
-along Ricci flow,
-`partial_t Gamma^k_ij =
-  -g^{kl} nabla_i Ric_jl - g^{kl} nabla_j Ric_il
-    + g^{kl} nabla_l Ric_ij`. -/
+
+
+
+
+
 theorem evol_christoffel_inFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -411,9 +411,9 @@ theorem evol_christoffel_inFrame
     (christoffelEvolutionRHSInFrame_eq_coordinates_rhs
       (M := M) gInv nablaRic (t : Real) x i j k)
 
-/-- Lemma 6.2 in raised Christoffel-component form, from the proved
-finite-difference Koszul computation plus the remaining time-regularity
-frontiers. -/
+
+
+
 theorem christoffelEvolution_of_ricciFlowMetricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -446,8 +446,8 @@ theorem christoffelEvolution_of_ricciFlowMetricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt nablaRic
       hpair hvarDiff hmetric hmetricRicci hunique)
 
-/-- Lemma 6.2 in raised Christoffel-component form, from the connection
-pairing derivative and the Ricci-flow Koszul variation identity. -/
+
+
 theorem christoffelEvolution_of_koszul
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

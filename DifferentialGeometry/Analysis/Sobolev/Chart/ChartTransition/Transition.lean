@@ -1,31 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Headline chart-transition diffeomorphism theorem
-
-This file delivers the headline statement
-`chartTransition_smoothDiffeoBoundedAtOrder`: for any two points `γ α` of a
-closed manifold `M` and a compact `K ⊆ chart-γ source ∩ chart-α source`, there
-is a `SmoothDiffeoBoundedAtOrder kmax` structure realising the chart-transition
-on a neighbourhood of the chart-γ Euclidean image of `K`.
-
-The argument assembles three ingredients delivered by the
-`Chart/ChartTransition/` pipeline and a smooth-cutoff layer from
-`Euclidean/Density.lean`:
-
-* a δ-neighbourhood of `K_E_γ := (toEuclidean ∘ extChartAt I γ) '' K` contained
-  in the chart-overlap (open) set;
-* the chart-transition map's bijection on the overlap, which transports openness
-  via the inverse map's continuity;
-* a positive lower bound for `|det fderiv T_γα|` on a compact superset of the
-  chosen open neighbourhood, obtained from the chain-rule identity
-  `T_αγ ∘ T_γα = id` on the overlap.
-
-These combine with the per-order derivative bound from
-`chartTransitionExtended_iter_deriv_bound` and the diffeomorphism constructor
-`mk_smoothDiffeoBoundedAtOrder_of_per_order_bounds` to produce the structure.
--/
 
 noncomputable section
 
@@ -44,9 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- On `chartOverlapEuclid γ α`, the iterated chart transition agrees with the
-identity. This is `chartTransitionEuclid_left_inv` packaged as a function-level
-identity. -/
+omit [IsManifold I ∞ M] in
 private lemma chartTransitionEuclid_comp_eq_id_on_overlap
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -55,9 +28,7 @@ private lemma chartTransitionEuclid_comp_eq_id_on_overlap
         (chartTransitionEuclid (I := I) (M := M) γ α z)) y = y :=
   chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy
 
-/-- On the open set `chartOverlapEuclid γ α`, the function
-`T_αγ ∘ T_γα` is eventually (in the neighbourhood filter) equal to the
-identity at every point. -/
+omit [IsManifold I ∞ M] in
 private lemma chartTransitionEuclid_comp_eventuallyEq_id
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -71,7 +42,6 @@ private lemma chartTransitionEuclid_comp_eventuallyEq_id
   intro z hz
   exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hz
 
-/-- On the open overlap, `T_γα` is differentiable. -/
 private lemma chartTransitionEuclid_differentiableAt_of_mem
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -93,9 +63,6 @@ private lemma chartTransitionEuclid_differentiableAt_of_mem
     h_diffOn y hy
   exact h_diffWithin.differentiableAt (h_open.mem_nhds hy)
 
-/-- On the chart overlap, the determinant of the differential of
-`chartTransitionEuclid γ α` is nonzero. The proof uses the chain rule applied
-to `T_αγ ∘ T_γα = id` on the open overlap. -/
 private lemma chartTransitionEuclid_det_fderiv_ne_zero
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -183,7 +150,6 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
   rw [h_zero, mul_zero] at h_det_comp
   exact zero_ne_one h_det_comp
 
-/-- The function `y ↦ |det (fderiv T_γα y)|` is continuous on the chart overlap. -/
 private lemma abs_det_fderiv_chartTransitionEuclid_continuousOn
     [I.Boundaryless]
     (γ α : M) :
@@ -205,7 +171,6 @@ private lemma abs_det_fderiv_chartTransitionEuclid_continuousOn
   have h_cont_abs : Continuous (fun r : ℝ => |r|) := continuous_abs
   exact (h_cont_abs.comp h_cont_det).continuousOn.comp h_cont_fderiv (Set.mapsTo_univ _ _)
 
-/-- The chart transition is continuous on the overlap. -/
 private lemma chartTransitionEuclid_continuousOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -213,10 +178,6 @@ private lemma chartTransitionEuclid_continuousOn_overlap
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
   (chartTransitionEuclid_contDiffOn_overlap (I := I) (M := M) γ α).continuousOn
 
-/-- For two charts on a closed manifold and a compact subset `K` contained in
-both chart sources, there exists a smooth bounded diffeomorphism with
-per-order derivative bounds realising the chart transition on a
-neighbourhood of the chart-γ Euclidean image of `K`. -/
 theorem chartTransition_smoothDiffeoBoundedAtOrder
     [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

@@ -15,15 +15,15 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci Evolution by Tracing Riemann Evolution
 
-This file contains the realized interval trace step for Lemma 6.3.  The
-Riemann evolution calculation itself is represented by the component predicate
-`RiemannEvolutionEquationInFrameOn`; once that is supplied, this file proves
-that tracing through the inverse metric gives the existing
-`RicciEvolutionEquationInFrame` predicate from `DifferentialGeometry.PDE.RicciFlow.Basic`.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,7 +38,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -46,8 +46,8 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- A time-indexed Ricci tensor realizes the lowered Riemann trace in a fixed
-frame at every time. -/
+
+
 def RicciTensorRealizesRm04TraceInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -58,9 +58,9 @@ def RicciTensorRealizesRm04TraceInFrameOn
     DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04TraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
 
-/-- A time-indexed Ricci tensor realizes the convention-correct lowered Riemann
-first trace in a fixed frame at every time:
-`Ric_ij = g^{kl} Rm04(e_k,e_l,e_i,e_j)`. -/
+
+
+
 def RicciTensorRealizesRm04FirstTraceInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -71,9 +71,9 @@ def RicciTensorRealizesRm04FirstTraceInFrameOn
     DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
 
-/-- Regular-time version of the convention-correct lowered Riemann first
-trace.  Lemma 6.3 only differentiates at regular times, so this is the natural
-producer target for Ricci evolution. -/
+
+
+
 def RicciTensorRealizesRm04FirstTraceInFrameOnRegular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -101,8 +101,8 @@ theorem ricciCompInFrame_eq_rm04_trace
     DifferentialGeometry.Integral.Connection.ricciComp_eq_trace (I := I)
       (S.ricci t) (Rm04 t) (gInv t) frame (htrace t) x i j
 
-/-- A local frame turns the Ricci-flow inverse-component predicate into the
-basis-level inverse predicate used by pointwise tensor contraction lemmas. -/
+
+
 private theorem metricInverseInBasis_of_solution_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -121,7 +121,7 @@ private theorem metricInverseInBasis_of_solution_frame
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
 
-/-- Local inverse components give the pointwise basis inverse predicate. -/
+
 theorem metricInverseInBasis_of_local
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -140,11 +140,11 @@ theorem metricInverseInBasis_of_local
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
 
-/-- Produce the convention-correct lowered Riemann first-trace realization of
-the bundled Ricci tensor from the intrinsic `(1,3)` Ricci trace and lowering.
 
-This is the separate trace-realization bridge used by the Ricci-evolution
-commutator proof. -/
+
+
+
+
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -187,8 +187,8 @@ theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
   simpa [DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame,
     IsLocalFrameOn.toBasisAt_coe] using hAt i j
 
-/-- Local smoothness of the time-slice connection at regular times, in the
-form needed by the curvature Bianchi/skew producers. -/
+
+
 def ConnectionLocallySmoothOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
@@ -196,8 +196,8 @@ def ConnectionLocallySmoothOn
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection (t : Real)) (1 : WithTop ℕ∞)
 
-/-- Static Levi-Civita smoothness gives the connection smoothness needed at
-flow times. -/
+
+
 theorem connSmoothOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -210,8 +210,8 @@ theorem connSmoothOfSol
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric s)
 
-/-- Coordinate curvature realization produced from the canonical smooth
-Levi-Civita connection. -/
+
+
 theorem connCurvOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -228,7 +228,7 @@ theorem connCurvOfSol
   exact DifferentialGeometry.Integral.Connection.connection_curvature_coord_of_christoffel
     (I := I) (S.family.connection s) htop x₀
 
-/-- Canonical `(1,3)` Riemann realization for the solution family. -/
+
 theorem rm13OfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -240,7 +240,7 @@ theorem rm13OfSol
     SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric s)).h_rm13
 
-/-- Canonical Ricci trace realization for the solution family. -/
+
 theorem ricciTraceOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -251,7 +251,7 @@ theorem ricciTraceOfSol
   simpa [SolutionOn.ricci_eq, SolutionFamily.ricci, SolutionFamily.rm13] using
     (metricCurvData (I := I) (M := M) (S.base.metric s)).h_ricci13
 
-/-- Ricci symmetry in a fixed frame, only at regular flow times. -/
+
 def RicciSymmetricInFrameOnRegular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -292,7 +292,7 @@ private theorem rm04Realizes_regular
     (S.family.connection (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
     (hRm13 t) (hLower t)
 
-/-- Output-skew producer for regular Ricci-flow time slices. -/
+
 theorem rm04OutputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -300,7 +300,6 @@ theorem rm04OutputSkew_regular
     (hS : IsSolutionOn (I := I) S)
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
@@ -312,12 +311,13 @@ theorem rm04OutputSkew_regular
   intro t x
   exact DifferentialGeometry.Integral.Connection.rm04OutputSkew_ofMC
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
-    (hcov t) (DifferentialGeometry.Integral.Connection.metricCompatible_of_isLeviCivita
+    (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
+    (DifferentialGeometry.Integral.Connection.metricCompatible_of_isLeviCivita
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-/-- First-Bianchi producer for regular Ricci-flow time slices. -/
+
 theorem rm04FirstBianchi_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -325,7 +325,6 @@ theorem rm04FirstBianchi_regular
     (hS : IsSolutionOn (I := I) S)
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
@@ -337,12 +336,13 @@ theorem rm04FirstBianchi_regular
   intro t x
   exact DifferentialGeometry.Integral.Connection.firstBianchi_ofTF
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
-    (hcov t) (DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+    (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
+    (DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-/-- Pair-symmetry producer for regular Ricci-flow time slices. -/
+
 theorem rm04PairSymm_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -350,7 +350,6 @@ theorem rm04PairSymm_regular
     (hS : IsSolutionOn (I := I) S)
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
@@ -364,10 +363,11 @@ theorem rm04PairSymm_regular
   intro t x
   exact DifferentialGeometry.Integral.Connection.rm04PairSymm_ofLC
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
-    (hcov t) (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
+    (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
+    (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-/-- First-two input-skew producer for regular Ricci-flow time slices. -/
+
 theorem rm04InputSkew_regular_first_two
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -390,10 +390,10 @@ theorem rm04InputSkew_regular_first_two
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-/-- Input-skew producer for regular Ricci-flow time slices.
 
-This is the canonical first-two curvature-input skew in the standard lowered
-`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>` slot order. -/
+
+
+
 theorem rm04InputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -413,8 +413,8 @@ theorem rm04InputSkew_regular
   rm04InputSkew_regular_first_two
     (I := I) S Rm13 Rm04 hRm13 hLower
 
-/-- Ricci symmetry in a fixed frame from the regular-time lowered Riemann
-trace and Levi-Civita curvature symmetries. -/
+
+
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciSymm_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -463,9 +463,9 @@ theorem ricciSymm_regular
   simpa [basis, ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
     DifferentialGeometry.Integral.Connection.ricciComp, IsLocalFrameOn.toBasisAt_coe] using hsym
 
-/-- Component form of a lowered Riemann evolution equation.  The future
-producer is the realized analogue of synthetic `RiemannVariation.lean` plus
-`RiemannEvolution.lean`. -/
+
+
+
 def RiemannEvolutionEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))

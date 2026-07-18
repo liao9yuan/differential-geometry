@@ -1,66 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartLowerOrderLimits
 
-/-!
-# The `n → ∞` `L²`-limit of the covariant-gradient Christoffel correction term
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`,
-a component multi-index `P₀`, and a chart-coordinate direction `k`, the raw
-chart-component formula for the section-level covariant gradient carries, on its
-right-hand side, the zeroth-order Christoffel correction term
-`covDerivLowerOrderTerm g r s Tₙ α k P₀.1 P₀.2`, evaluated at the
-partition-of-unity-weighted smooth approximant
-`Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor`.
-
-This file produces the `n → ∞` `L²`-limit of that term in
-`Lp ℝ 2 (chartL2Measure α)`.
-
-## The tracing identity
-
-The Christoffel correction `covDerivLowerOrderTerm` is, by
-`covDerivLowerOrderTerm_def`, a finite linear combination — over component
-multi-index pairs `p` — of the `C^∞` lower-order correction coefficient
-`covDerivLowerOrderCoeff` times the *undifferentiated raw* chart component of
-the section. For the partition-of-unity-weighted approximant `Tₙ`, the raw
-chart component is the partition-of-unity-weighted chart component
-(`tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou`), whose value at
-the chart preimage is, on the chart target, the canonical Euclidean chart
-component `tensorChartComponent g r s wₙ.toCcTensor α p`. Consequently the
-Christoffel correction at `Tₙ`, restricted to the chart target, is a finite
-`C^∞`-coefficient-weighted sum of the single `T`-dependent atom
-
-* `tensorChartComponent g r s wₙ.toCcTensor α p` (the bare chart component).
-
-The `L²`-limit of that atom is `componentLpLimit` (companion file
-`EigenvectorChartComponentL2.lean`), which is `μ` times the canonical chart
-component `tensorL2ChartComponent g r s φ α p` of the eigenvector
-`φ := tensorResolventEigenbasisVec h_atlas i`. The `μ⁻¹`-rescaling of the
-`n`-th term — matching the rescaling convention of every companion eigenvector
-chart-component limit object — therefore converges to the finite
-`C^∞`-coefficient-weighted sum of the genuine eigenvector chart components.
-
-## Main definitions
-
-* `covGradChristoffelLimit g r s h_atlas i α P₀ k` — the explicit `L²`-limit
-  function of the `μ⁻¹`-rescaled Christoffel correction term: a finite
-  `C^∞`-coefficient-weighted sum, over component multi-index pairs, of the
-  canonical eigenvector chart-component limit object `tensorL2ChartComponent`,
-  with each coefficient cut to the partition-of-unity kernel.
-
-## Main results
-
-* `covGradChristoffelLimit_memLp` — the limit function is `L²`.
-* `covGradChristoffel_tendsto` — the `n → ∞` `L²`-convergence headline.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -93,10 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- On the Euclidean chart target, the zeroth-order Christoffel correction of
-the partition-of-unity-weighted approximant is the finite linear combination,
-over component multi-index pairs, of the lower-order correction coefficient
-times the canonical Euclidean chart component. -/
 private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -119,7 +56,6 @@ private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentPou (I := I) (M := M) g r s S α p.1 p.2) hy]
 
-/-- Chart-locality-free twin of `covDerivLowerOrderTerm_pouSmul_memLp`. -/
 theorem covDerivLowerOrderTerm_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -148,9 +84,7 @@ theorem covDerivLowerOrderTerm_pouSmul_memLp
         g r s i n).toCcTensor k P₀.1 P₀.2 hy)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGradChristoffelLimit`. The canonical
-eigenvector chart-component limit object is re-keyed onto the chart-locality-free
-eigenbasis selector `tensorResolventEigenbasisVec`. -/
+
 noncomputable def covGradChristoffelLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -168,7 +102,7 @@ noncomputable def covGradChristoffelLimit
           EuclN → ℝ) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGradChristoffelLimit_memLp`. -/
+
 theorem covGradChristoffelLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -188,7 +122,6 @@ theorem covGradChristoffelLimit_memLp
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i) α p))
 
-/-- Chart-locality-free twin of `covGradChristoffelUnscaledLimit`. -/
 private noncomputable def covGradChristoffelUnscaledLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -202,7 +135,6 @@ private noncomputable def covGradChristoffelUnscaledLimit
         (componentLpLimit (I := I) (M := M) g r s i α p :
           EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `covGradChristoffelUnscaledLimit_memLp`. -/
 private theorem covGradChristoffelUnscaledLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -219,7 +151,6 @@ private theorem covGradChristoffelUnscaledLimit_memLp
         g r s α k P₀.1 p.1 P₀.2 p.2)
       (componentLpLimit (I := I) (M := M) g r s i α p))
 
-/-- Chart-locality-free twin of `covDerivLowerOrderTerm_pouSmul_tendsto`. -/
 private theorem covDerivLowerOrderTerm_pouSmul_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -300,7 +231,7 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
     hFn_eq hFlim_eq
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `smul_componentLpLimit_coeFn_ae`. -/
+
 private lemma smul_componentLpLimit_coeFn_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -332,7 +263,7 @@ private lemma smul_componentLpLimit_coeFn_ae
       (z : EuclN → ℝ)) h_lp_eq)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `smul_unscaledLimit_toLp_eq`. -/
+
 private lemma smul_unscaledLimit_toLp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -372,11 +303,6 @@ private lemma smul_unscaledLimit_toLp_eq
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [mul_left_comm, hy_all p]
 
-/-- **Chart-locality-free twin of `covGradChristoffel_tendsto`.** The
-`μ⁻¹`-rescaled `L²` classes of the zeroth-order Christoffel correction term at
-the partition-of-unity-weighted approximants converge, as `n → ∞` and in
-`Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit function
-`covGradChristoffelLimit g r s i α P₀ k`. -/
 theorem covGradChristoffel_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

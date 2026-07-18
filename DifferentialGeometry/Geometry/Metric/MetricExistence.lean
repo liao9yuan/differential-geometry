@@ -8,30 +8,6 @@ import Mathlib.Analysis.LocallyConvex.Bounded
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 
-/-!
-# Existence of a smooth Riemannian metric
-
-On a smooth, σ-compact, Hausdorff manifold modelled on a finite-dimensional inner-product
-space, the tangent bundle admits a smooth Riemannian metric (a smooth, fiberwise
-symmetric positive-definite bilinear form).
-
-The construction is the classical partition-of-unity argument:
-
-* On each chart domain the tangent bundle is trivialized; pulling the inner product on the
-  model fibre back through the trivialization's fibrewise linear equivalence gives a smooth,
-  fiberwise symmetric positive-definite `(0,2)`-tensor on that domain (`localFiber`).
-* These local metrics lie in the convex set of fiberwise symmetric positive-definite forms,
-  so Mathlib's `exists_contMDiffSection_forall_mem_convex_of_local` glues them — via a smooth
-  partition of unity subordinate to the chart cover — into a single global smooth section of
-  the bundle of `(0,2)`-tensors that is fiberwise symmetric positive-definite.
-* Positive-definiteness on a finite-dimensional inner-product space is coercive, which
-  discharges the von-Neumann boundedness field of `ContMDiffRiemannianMetric`.
-
-## Main result
-
-* `nonempty_contMDiffRiemannianMetric_of_sigmaCompact` : the tangent bundle of such a manifold carries a smooth
-  Riemannian metric.
--/
 
 noncomputable section
 
@@ -45,9 +21,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDim
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- A positive-definite continuous bilinear form on a finite-dimensional
-inner-product space is coercive, hence the sub-`1` ellipsoid `{v | g v v < 1}` is bounded
-(equivalently, von-Neumann bounded). -/
 theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
     (hpos : ∀ v : E, v ≠ 0 → 0 < g v v) :
     Bornology.IsVonNBounded ℝ {v : E | g v v < 1} := by
@@ -91,39 +64,36 @@ theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
   calc ‖v‖ = Real.sqrt (‖v‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
     _ ≤ Real.sqrt (1 / c) := Real.sqrt_le_sqrt h3.le
 
-/-- The inner product on the model fibre `E`, packaged as an `ℝ`-bilinear continuous form.
-This is `innerSL ℝ` viewed with its `ℝ`-linear type. -/
 def euclForm (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
     E →L[ℝ] E →L[ℝ] ℝ := innerSL ℝ
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma euclForm_apply (v w : E) : euclForm E v w = inner ℝ v w := rfl
 
-/-- The fibrewise linear coordinate map of the tangent trivialization at `x₀`, viewed (via the
-reducible defeq `TangentSpace I x = E`) as a continuous linear endomorphism of `E`. -/
-def trivCLM (x₀ x : M) : E →L[ℝ] E :=
+private def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ] E :=
   ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E)
 
-/-- The chart-local metric attached to `x₀`: the inner product on the model fibre pulled back
-through the trivialization's fibrewise linear coordinate map. It is a `(0,2)`-tensor on the
-tangent bundle, symmetric and positive-definite on the trivialization's base set. -/
-def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-  (((euclForm E).bilinearComp (trivCLM (I := I) x₀ x) (trivCLM (I := I) x₀ x)) :
+private def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
     E →L[ℝ] E →L[ℝ] ℝ)
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_apply (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w =
-      inner ℝ (trivCLM (I := I) x₀ x v) (trivCLM (I := I) x₀ x w) := rfl
+      inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x w) := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_symm (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w = localFiber (I := I) x₀ x w v := by
   rw [localFiber_apply, localFiber_apply, real_inner_comm]
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_pos (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < localFiber (I := I) x₀ x v v := by
   rw [localFiber_apply, real_inner_self_eq_norm_sq]
-  have hAv : trivCLM (I := I) x₀ x v ≠ 0 := by
+  have hAv : tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v ≠ 0 := by
     change ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E) v ≠ 0
     rw [show ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E) v
           = (trivializationAt E (TangentSpace I) x₀).continuousLinearEquivAt ℝ x hx v from
@@ -133,9 +103,7 @@ lemma localFiber_pos (x₀ : M) {x : M}
       ℝ x hx).map_ne_zero_iff.mpr hv
   positivity
 
-/-- The fibrewise coordinate map of the trivialization of the `1`-form bundle
-`x ↦ TangentSpace I x →L ℝ` acts by post-composition with the inverse coordinate map of the
-tangent bundle, on the base set. -/
+omit [FiniteDimensional ℝ E] in
 lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (φ : TangentSpace I x →L[ℝ] ℝ) :
@@ -157,8 +125,7 @@ lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
       Bundle.Trivialization.coe_linearMapAt_of_mem _ hxR]
   rfl
 
-/-- On the base set, the coordinate representation (`inCoordinates`, same base point) of the
-chart-local metric is the constant model-fibre form `euclForm E`. -/
+omit [FiniteDimensional ℝ E] in
 lemma inCoordinates_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ) (fun y => TangentSpace I y →L[ℝ] ℝ)
@@ -169,14 +136,13 @@ lemma inCoordinates_localFiber (x₀ : M) {x : M}
   simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
   rw [oneForm_continuousLinearMapAt x₀ hx]
   simp only [ContinuousLinearMap.comp_apply]
-  change inner ℝ (trivCLM (I := I) x₀ x (e₁.symmL ℝ x v))
-      (trivCLM (I := I) x₀ x (e₁.symmL ℝ x w)) = inner ℝ v w
-  rw [show trivCLM (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
-      show trivCLM (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
+  change inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v))
+      (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w)) = inner ℝ v w
+  rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
+      show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
 
-/-- The value of the chart-local metric in the trivialization of the `(0,2)`-tensor bundle at
-`x₀` is the constant `euclForm E` on the base set. -/
-lemma coord_localFiber (x₀ : M) {x : M}
+omit [FiniteDimensional ℝ E] in
+private lemma coord_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
         (fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀
@@ -189,8 +155,8 @@ lemma coord_localFiber (x₀ : M) {x : M}
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-/-- The chart-local metric `localFiber x₀`, as a section of the `(0,2)`-tensor bundle, is
-smooth on the base set of the trivialization at `x₀`. -/
+
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_contMDiffOn (x₀ : M) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (⊤ : ℕ∞)
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x (localFiber (I := I) x₀ x))
@@ -211,11 +177,10 @@ lemma localFiber_contMDiffOn (x₀ : M) :
   intro x hx
   exact coord_localFiber x₀ hx
 
-/-- The set of symmetric positive-definite continuous bilinear forms on the fibre
-`TangentSpace I x`. -/
-def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+private def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
   {φ | (∀ v w, φ v w = φ w v) ∧ (∀ v, v ≠ 0 → 0 < φ v v)}
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma convex_posDefForms (x : M) : Convex ℝ (posDefForms (I := I) x) := by
   intro φ hφ ψ hψ a b ha hb hab
   refine ⟨?_, ?_⟩
@@ -233,14 +198,6 @@ lemma convex_posDefForms (x : M) : Convex ℝ (posDefForms (I := I) x) := by
     · rw [← ha'] at hab ⊢; simp only [zero_add] at hab ⊢
       rw [hab]; simpa using h2
 
-/-- **Existence of a smooth Riemannian metric.** The tangent bundle of a smooth, σ-compact,
-Hausdorff manifold modelled on a finite-dimensional inner-product space admits a smooth
-Riemannian metric: a smooth, fiberwise symmetric positive-definite `(0,2)`-tensor field.
-
-The metric is built by gluing chart-local pullbacks of the model-fibre inner product with a
-smooth partition of unity subordinate to the chart cover. Positive-definiteness survives the
-convex partition-of-unity average, and finite-dimensional coercivity discharges the
-von-Neumann boundedness of the assembled metric. -/
 theorem nonempty_contMDiffRiemannianMetric_of_sigmaCompact
     [SigmaCompactSpace M] [T2Space M] :
     Nonempty (Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)) := by
@@ -266,8 +223,6 @@ theorem nonempty_contMDiffRiemannianMetric_of_sigmaCompact
   exact posDef_isVonNBounded (E := E) ((s x : E →L[ℝ] E →L[ℝ] ℝ))
     (fun v hv => (hs x).2 v hv)
 
-/-- Specialisation: the project alias `SmoothRiemannianMetric` (a `ContMDiffRiemannianMetric`
-at smoothness `∞`) is inhabited on such a manifold. -/
 theorem nonempty_smoothRiemannianMetric
     [SigmaCompactSpace M] [T2Space M] :
     Nonempty (Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)) :=

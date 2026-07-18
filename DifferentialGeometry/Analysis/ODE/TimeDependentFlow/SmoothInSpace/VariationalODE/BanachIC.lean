@@ -5,11 +5,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 
-/-! # Jointly `C^∞` local flow from a jointly `C^∞` field (Banach initial condition)
-
-For a jointly `C^∞` time-dependent vector field on a finite-dimensional Banach
-space, the local Picard flow is jointly `C^∞`; specialised to the chart-coordinate
-Picard data of the time-dependent flow. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -27,19 +22,6 @@ section SmoothLocalFlow
 open Set Metric Function DifferentialGeometry.Analysis.ODE DifferentialGeometry.Analysis.ODE.Flow
 open scoped NNReal
 
-/-- **Smooth local flow from a jointly `C^∞` vector field.**
-
-For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional
-complete Banach space, jointly `C^∞` in `(t, x)`, and any base point
-`(t₀, x₀)`, there exist a Picard--Lindelöf local flow `Φ` and a strictly
-interior open neighbourhood on which `Φ` is jointly `C^∞`.
-
-The proof combines the Picard--Lindelöf existence theorem
-(`exists_isLocalFlow_of_contDiffOn_univ`) with the Hartman smooth-dependence
-induction (`IsLocalFlow.contDiffOn_top`). The only
-substantial new content is the uniform operator-norm bound on the
-linearization `(x, t) ↦ fderiv ℝ (f t) (Φ(x, t))`, which follows from
-continuity of the composition on a compact product. -/
 theorem exists_isLocalFlow_contDiffOn_top
     [CompleteSpace E]
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E}
@@ -156,18 +138,7 @@ open scoped NNReal Topology
 
 variable [CompleteSpace E]
 
-/-- Transfer C^∞ regularity from the Hartman smooth local flow to the Picard flow
-`ChartLocalPicardData.flow` via ODE uniqueness.
-
-Given a chart-local Picard flow `hper.flow` and a jointly `C^∞` chart-coordinate
-vector field `f_chart`, we show there exist `ρ > 0` and `T₀ > 0` with `ρ ≤ hper.r`
-and `T₀ ≤ hper.T` such that `uncurry hper.flow` is `C^∞` on
-`ball(center, ρ) ×ˢ Ioo(0, T₀)`.
-
-The proof applies the Hartman smooth-dependence theorem to obtain a smooth local
-flow `Φ_pl` solving the same ODE, then shows `Φ_pl(y, t) = hper.flow y t` for every
-`(y, t) ∈ closedBall(center, ρ) × Icc(0, T₀)` by Groenwall ODE uniqueness, and
-finally transfers the `C^∞` regularity via `ContDiffOn.congr`. -/
+omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ChartLocalPicardData.contDiffOn_top
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hper : ChartLocalPicardData X α)

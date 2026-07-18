@@ -1,52 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
 
-/-!
-# The second-order part of the linearized chart Ricci tensor
-
-The chart Ricci tensor of a Riemannian metric is, in chart coordinates, the algebraic
-expression
-$$\operatorname{Rc}_{ik}(\alpha)(y) = \sum_j \bigl(\partial_j \Gamma^j{}_{ik}
-    - \partial_k \Gamma^j{}_{ij}\bigr)(y) + (\Gamma\cdot\Gamma\text{ terms})(y),$$
-a function of the chart Christoffel symbols, their chart partial derivatives, and the
-chart inverse Gram matrix.
-
-Linearizing in a metric-perturbation direction `h` and collecting the terms that carry
-**two** chart derivatives of `h` is the first step toward the principal symbol of the
-linearized Ricci operator.  The `Γ·Γ` terms and the `D(G⁻¹)` part of the Christoffel
-linearization each carry **at most one** chart derivative of `h`, so the second-order
-part comes only from `∂` applied to the *principal* part
-`chartLinearizedChristoffelPrincipal` of the linearized Christoffel symbol.  Thus the
-second-order part of `D\operatorname{Rc}_{ik}[h]` is
-$$\sum_j \bigl(\partial_j [D\Gamma_{\mathrm{principal}}]^j{}_{ik}
-    - \partial_k [D\Gamma_{\mathrm{principal}}]^j{}_{ij}\bigr)(y).$$
-
-## Contents
-
-* `chartRicciSecondOrderPart` — the second-order-in-`h` part of `D\operatorname{Rc}_{ik}[h]`,
-  defined as the chart-derivative combination `∑_j(∂_j[DΓ_principal]^j{}_{ik}
-  − ∂_k[DΓ_principal]^j{}_{ij})` of the principal linearized Christoffel part, together
-  with its unfolding lemma `chartRicciSecondOrderPart_def`.
-* `chartRicciSecondOrderPrincipalSymbol` — the explicit four-term `∂²h` expression
-  $$\tfrac12 \sum_{j,l} G^{jl}\bigl(\partial_j\partial_i h_{lk}
-      + \partial_k\partial_l h_{ij} - \partial_j\partial_l h_{ik}
-      - \partial_k\partial_i h_{lj}\bigr),$$
-  obtained from `chartRicciSecondOrderPart` after a Leibniz expansion of the outer
-  derivative and the Schwarz cancellation of the two `∂\partial h_{li}` terms.
-* `chartRicciFirstOrderRemainder` — the complementary `(∂G⁻¹)\cdot(∂h)` terms, each
-  carrying **exactly one** chart derivative of a component field of `h`.
-* `chartRicciSecondOrderPart_eq_principalSymbol_add_remainder` — the rigorous split
-  `chartRicciSecondOrderPart = chartRicciSecondOrderPrincipalSymbol
-  + chartRicciFirstOrderRemainder`, valid at chart-interior points.
-* `chartRicciFirstOrderRemainder_eq_first_order_sum` — the explicit exhibition of the
-  remainder as a finite sum of terms of the syntactic shape
-  `(coefficient)·partialDeriv _ (h _ _) _`, making precise that it carries at most one
-  chart derivative of `h`.
-* `h`-linearity (`_add`, `_smul`, `_zero`) of all three objects.
-
-The `∂_a∂_b ↦ ξ_a\xi_b` substitution applied to `chartRicciSecondOrderPrincipalSymbol`
-recovers the principal symbol of the linearized Ricci operator; the remainder, carrying
-only first derivatives of `h`, is invisible to that second-order symbol.
--/
 
 noncomputable section
 
@@ -69,8 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Differentiability
 
-/-- The chart inverse Gram entry `G^{jl}` is differentiable at every point in the
-interior of the chart target. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -85,8 +37,7 @@ lemma chartInvGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- Each `partialDeriv` of a globally `C^∞` real function on the model space is itself
-globally `C^∞`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_contDiff_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i u) := by
@@ -95,21 +46,19 @@ lemma partialDeriv_contDiff_of_contDiff
   unfold partialDeriv
   exact hfderiv.clm_apply contDiff_const
 
-/-- Each `partialDeriv` of a perturbation component field is globally `C^∞`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_perturbation_contDiff
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
-/-- Each `partialDeriv` of a perturbation component field is differentiable at every
-point of the model space. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_perturbation_differentiableAt
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) (y : E) :
     DifferentiableAt ℝ (partialDeriv (E := E) i (h a b)) y :=
   ((partialDeriv_perturbation_contDiff h i a b).differentiable (by simp)).differentiableAt
 
-/-- The principal linearized Christoffel part is differentiable at every point in the
-interior of the chart target (as a function of the chart-coordinate point). -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartLinearizedChristoffelPrincipal_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -126,11 +75,7 @@ lemma chartLinearizedChristoffelPrincipal_differentiableAt
     hcd.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- **Schwarz symmetry for a perturbation component field.**  The iterated chart partial
-derivative of a perturbation component field `h_{ab}` is symmetric in the two
-differentiation directions: `∂_p∂_q h_{ab} = ∂_q∂_p h_{ab}`.  This is Schwarz's theorem
-applied to the globally `C^∞` component field `h a b`; no chart-interior hypothesis is
-needed because `h a b` is smooth on all of the model space. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_partialDeriv_perturbation_swap
     (h : ChartMetricPerturbation E) (a b p q : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q (h a b)) y =
@@ -164,16 +109,6 @@ lemma partialDeriv_partialDeriv_perturbation_swap
 
 end Differentiability
 
-/-- The **second-order-in-`h` part of the linearized chart Ricci tensor** in the chart
-at `α`, in the perturbation direction `h`, evaluated at the chart-coordinate point
-`y ∈ E`:
-$$[D\operatorname{Rc}]^{(2)}_{ik}[h](y) = \sum_j \bigl(\partial_j
-    [D\Gamma_{\mathrm{principal}}]^j{}_{ik} - \partial_k
-    [D\Gamma_{\mathrm{principal}}]^j{}_{ij}\bigr)(y),$$
-where `[DΓ_principal]^j{}_{ab} = chartLinearizedChristoffelPrincipal g α h a b j` is the
-principal part of the linearized Christoffel symbol.  This is the term of the linearized
-Ricci tensor carrying two chart derivatives of `h`; the `Γ·Γ` and `D(G⁻¹)` contributions
-are lower order and do not appear here. -/
 def chartRicciSecondOrderPart (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ j : Fin (Module.finrank ℝ E),
@@ -182,6 +117,7 @@ def chartRicciSecondOrderPart (g : SmoothRiemannianMetric I M) (α : M)
       partialDeriv (E := E) k
         (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h i j j y') y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -193,18 +129,6 @@ def chartRicciSecondOrderPart (g : SmoothRiemannianMetric I M) (α : M)
             (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h i j j y') y) :=
   rfl
 
-/-- The **explicit second-order symbol expression** of the linearized chart Ricci
-tensor: the four-term `∂²h` combination
-$$[D\operatorname{Rc}]^{\sigma}_{ik}[h](y) = \tfrac12 \sum_{j,l} G^{jl}(y)\,
-    \bigl(\partial_j\partial_i h_{lk} + \partial_k\partial_l h_{ij}
-        - \partial_j\partial_l h_{ik} - \partial_k\partial_i h_{lj}\bigr)(y),$$
-where `∂_a∂_b h_{cd}` denotes the iterated chart partial derivative
-`partialDeriv a (partialDeriv b (h c d))`.
-
-This is the pure `∂²h` content of `chartRicciSecondOrderPart`: every term carries
-exactly two chart derivatives of a component field of `h`, with the chart inverse Gram
-matrix `G^{jl}` as a frozen coefficient.  Substituting `∂_a∂_b ↦ ξ_aξ_b` here gives the
-principal symbol of the linearized Ricci operator. -/
 def chartRicciSecondOrderPrincipalSymbol (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
@@ -215,6 +139,7 @@ def chartRicciSecondOrderPrincipalSymbol (g : SmoothRiemannianMetric I M) (α : 
          partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) y -
          partialDeriv (E := E) k (partialDeriv (E := E) i (h l j)) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPrincipalSymbol_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -228,23 +153,6 @@ def chartRicciSecondOrderPrincipalSymbol (g : SmoothRiemannianMetric I M) (α : 
              partialDeriv (E := E) k (partialDeriv (E := E) i (h l j)) y) :=
   rfl
 
-/-- The **first-order remainder** of the linearized chart Ricci tensor second-order
-part: the `(∂G⁻¹)·(∂h)` terms left over once the pure `∂²h` symbol is extracted.
-
-Writing the principal linearized Christoffel part as
-`[DΓ_principal]^j{}_{ab}(y) = ½∑_l G^{jl}(y)·(∂_a h_{lb} + ∂_b h_{la} − ∂_l h_{ab})(y)`
-and applying the outer chart derivative `∂` by the Leibniz rule, the branch where `∂`
-lands on the inverse-Gram factor `G^{jl}` produces
-$$[D\operatorname{Rc}]^{\rho}_{ik}[h](y) = \tfrac12 \sum_{j,l}
-    \bigl(\partial_j G^{jl}\bigr)(y)\,
-      \bigl(\partial_i h_{lk} + \partial_k h_{li} - \partial_l h_{ik}\bigr)(y)
-  - \tfrac12 \sum_{j,l} \bigl(\partial_k G^{jl}\bigr)(y)\,
-      \bigl(\partial_i h_{lj} + \partial_j h_{li} - \partial_l h_{ij}\bigr)(y).$$
-
-Each term carries **exactly one** chart derivative of a component field of `h`, with the
-chart-derivative-of-inverse-Gram factor `∂G^{jl}` not involving `h` at all.  This is the
-content of `chartRicciFirstOrderRemainder_eq_first_order_sum`, which justifies the
-remainder being invisible to the second-order principal symbol. -/
 def chartRicciFirstOrderRemainder (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
@@ -260,6 +168,7 @@ def chartRicciFirstOrderRemainder (g : SmoothRiemannianMetric I M) (α : M)
          partialDeriv (E := E) j (h l i) y -
          partialDeriv (E := E) l (h i j) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciFirstOrderRemainder_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -278,12 +187,7 @@ def chartRicciFirstOrderRemainder (g : SmoothRiemannianMetric I M) (α : M)
              partialDeriv (E := E) l (h i j) y) :=
   rfl
 
-/-- **Leibniz expansion of the outer chart derivative of the principal linearized
-Christoffel part.**  Differentiating
-`[DΓ_principal]^j{}_{ab}(y') = ½∑_l G^{jl}(y')·(∂_a h_{lb} + ∂_b h_{la} − ∂_l h_{ab})(y')`
-in the direction `e_d` by the product rule splits each summand into the
-`(∂_d G^{jl})·(∂h)` branch and the `G^{jl}·(∂_d∂h)` branch.  Valid at chart-interior
-points, where `G^{jl}` is differentiable. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartLinearizedChristoffelPrincipal
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (a b j d : Fin (Module.finrank ℝ E)) {y : E}
@@ -356,17 +260,7 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipal
           (partialDeriv (E := E) a (h l b)) (partialDeriv (E := E) b (h l a)) h1 h2]
   rw [hSderiv, hS]
 
-/-- **The expanded `∂²h` formula for the second-order part of the linearized chart Ricci
-tensor.**  At chart-interior points, the literal chart-derivative combination
-`chartRicciSecondOrderPart` splits as the explicit four-term `∂²h` symbol
-`chartRicciSecondOrderPrincipalSymbol` plus the genuinely-first-order remainder
-`chartRicciFirstOrderRemainder`.
-
-The four-term symbol arises from the six raw `∂²h` terms after Schwarz cancellation of
-the two `∂\partial h_{li}` terms; the remainder collects the inverse-Gram branches of
-the Leibniz expansion.  Under `[I.Boundaryless]` the chart-interior hypothesis is
-automatic for `y = extChartAt I α x` with `x` in the chart source — see
-`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -500,10 +394,7 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
     rw [Finset.sum_congr rfl (fun j _ => hcombine j), ← Finset.mul_sum]
   rw [hrem, hsymbol, add_comm]
 
-/-- **The expanded `∂²h` formula on the chart source under `[I.Boundaryless]`.**  At
-chart-image points `y = extChartAt I α x` with `x` in the chart source, the
-chart-interior hypothesis of
-`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder` is automatic. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -520,14 +411,7 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciSecondOrderPart_eq_principalSymbol_add_remainder (I := I) g α h i k hx_int
 
-/-- **The first-order remainder, exhibited as a sum of first-order terms.**  The
-remainder `chartRicciFirstOrderRemainder` is a finite double sum (over `j, l`) of terms,
-each a product of a coefficient not involving `h` — namely `±(1/2)·∂G^{jl}` — with a
-single `partialDeriv` of a component field of `h`.
-
-Concretely, each `(j, l)` summand expands into six terms, each of the syntactic shape
-`coeff · partialDeriv _ (h _ _) _`.  No term carries a second derivative of `h`; this is
-the formal content of "the remainder carries at most one chart derivative of `h`". -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciFirstOrderRemainder_eq_first_order_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -561,8 +445,7 @@ theorem chartRicciFirstOrderRemainder_eq_first_order_sum
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-/-- The second-order part of the linearized Ricci tensor vanishes on the zero
-perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPart_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -587,8 +470,6 @@ perturbation. -/
     rw [hik, hij, partialDeriv_const, partialDeriv_const, sub_zero]
   rw [Finset.sum_congr rfl (fun j _ => hzero j), Finset.sum_const_zero]
 
-/-- **Additivity** of the second-order part of the linearized Ricci tensor in the
-perturbation direction. -/
 theorem chartRicciSecondOrderPart_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -637,8 +518,6 @@ theorem chartRicciSecondOrderPart_add
   rw [hadd_ik, hadd_ij]
   ring
 
-/-- **Scalar homogeneity** of the second-order part of the linearized Ricci tensor in
-the perturbation direction. -/
 theorem chartRicciSecondOrderPart_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -678,7 +557,7 @@ theorem chartRicciSecondOrderPart_smul
   rw [hsmul_ik, hsmul_ij]
   ring
 
-/-- The explicit second-order symbol vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPrincipalSymbol_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -713,8 +592,7 @@ theorem chartRicciSecondOrderPart_smul
     Finset.sum_congr rfl (fun l _ => hzero j l))]
   rw [Finset.sum_const_zero, Finset.sum_const_zero, mul_zero]
 
-/-- A perturbation component field of a pointwise sum splits the iterated partial
-derivative additively. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((h₁ + h₂) a b)) y =
@@ -732,8 +610,7 @@ private lemma partialDeriv_partialDeriv_add_apply
         (partialDeriv_perturbation_differentiableAt h₁ q a b y)
         (partialDeriv_perturbation_differentiableAt h₂ q a b y)]
 
-/-- A perturbation component field of a scalar multiple scales the iterated partial
-derivative. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((c • h) a b)) y =
@@ -747,7 +624,6 @@ private lemma partialDeriv_partialDeriv_smul_apply
         (partialDeriv (E := E) q (h a b))
         (partialDeriv_perturbation_differentiableAt h q a b y), smul_eq_mul]
 
-/-- **Additivity** of the explicit second-order symbol in the perturbation direction. -/
 theorem chartRicciSecondOrderPrincipalSymbol_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -767,8 +643,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ k i l j y]
   ring
 
-/-- **Scalar homogeneity** of the explicit second-order symbol in the perturbation
-direction. -/
 theorem chartRicciSecondOrderPrincipalSymbol_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -813,7 +687,7 @@ theorem chartRicciSecondOrderPrincipalSymbol_smul
   rw [Finset.sum_congr rfl (fun j _ => hinner j), ← Finset.mul_sum]
   ring
 
-/-- The first-order remainder vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciFirstOrderRemainder_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -851,7 +725,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_smul
     Finset.sum_congr rfl (fun l _ => hzero2 j l))]
   simp
 
-/-- **Additivity** of the first-order remainder in the perturbation direction. -/
 theorem chartRicciFirstOrderRemainder_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -932,8 +805,6 @@ theorem chartRicciFirstOrderRemainder_add
     Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
   ring
 
-/-- **Scalar homogeneity** of the first-order remainder in the perturbation
-direction. -/
 theorem chartRicciFirstOrderRemainder_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -1004,11 +875,7 @@ theorem chartRicciFirstOrderRemainder_smul
     ← Finset.mul_sum, ← Finset.mul_sum]
   ring
 
-/-- **Symmetry of the explicit second-order symbol** in the index pair `(i, k)`.  The
-four-term `∂²h` formula is invariant under `i ↔ k`: each of the four terms of the
-`(k, i)`-symbol matches a term of the `(i, k)`-symbol after the dummy-index swap
-`j ↔ l` (with `G^{jl} = G^{lj}`), the perturbation symmetry `h_{ab} = h_{ba}`, and
-Schwarz symmetry `∂_a∂_b h = ∂_b∂_a h` of the smooth mixed partials. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPrincipalSymbol_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :

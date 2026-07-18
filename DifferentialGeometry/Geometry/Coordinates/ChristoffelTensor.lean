@@ -7,13 +7,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Christoffel Components of the Connection-Difference Tensor
 
-This file is the coordinate projection of the invariant connection-difference
-tensor.  It identifies the `(1,2)` tensor introduced in the tensor layer with
-the existing local-frame Christoffel-difference components.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -30,9 +30,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- Local-frame `(1,2)` components of the invariant
-`connectionDifferenceTensorAt` are the existing Christoffel-symbol difference
-components. -/
+
+
+
 theorem tensor12Comp_connectionDifferenceTensorAt
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -56,9 +56,9 @@ theorem tensor12Comp_connectionDifferenceTensorAt
   rw [componentRS_connectionDifferenceTensorAt]
   simp [IsLocalFrameOn.coeff, hx, IsLocalFrameOn.toBasisAt_coe]
 
-/-- In a local frame whose inverse-metric components are the identity, the
-invariant squared norm of the connection-difference tensor is the sum of
-squares of the Christoffel-symbol difference components. -/
+
+
+
 theorem normSqRS_connectionDifferenceTensorAt_eq_christoffel_sum
     [IsManifold I ∞ M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

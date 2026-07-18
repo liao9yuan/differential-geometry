@@ -7,14 +7,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Levi-Civita Uniqueness on Smooth Inputs
 
-The bundled `CovariantDerivative` type is total on raw sections, including
-non-smooth sections.  The geometric uniqueness theorem therefore identifies
-Levi-Civita connections on differentiable vector-field inputs and tangent
-directions, not as literal total functions on all raw section inputs.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -31,11 +31,11 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Smooth-input uniqueness of the Levi-Civita connection for a fixed metric.
 
-This is the geometrically meaningful uniqueness statement for mathlib's
-`CovariantDerivative`: two smooth Levi-Civita connections agree on every
-differentiable vector-field input and every tangent direction. -/
+
+
+
+
 def LeviCivitaConnectionUniqueOnSmooth
     (g : SmoothRiemannianMetric I M) : Prop :=
   forall cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _),
@@ -48,7 +48,7 @@ def LeviCivitaConnectionUniqueOnSmooth
                 forall v : TangentSpace I x,
                   cov Y x v = cov' Y x v
 
-/-- Koszul identity for any connection satisfying the Levi-Civita predicates. -/
+
 theorem leviCivita_inner_eq_half_koszul
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -66,15 +66,15 @@ theorem leviCivita_inner_eq_half_koszul
   have htYZ := torsion_free_apply (I := I) htf (X := Y) (Y := Z) hY hZ
   have htZX := torsion_free_apply (I := I) htf (X := Z) (Y := X) hZ hX
   have htXY := torsion_free_apply (I := I) htf (X := X) (Y := Y) hX hY
-  change directionalDeriv (I := I) X
+  change directionalDerivAlong (I := I) X
       (fun y : M => g.inner y (Y y) (Z y)) x =
     g.inner x (cov Y x (X x)) (Z x) +
       g.inner x (Y x) (cov Z x (X x)) at hXYZ
-  change directionalDeriv (I := I) Y
+  change directionalDerivAlong (I := I) Y
       (fun y : M => g.inner y (Z y) (X y)) x =
     g.inner x (cov Z x (Y x)) (X x) +
       g.inner x (Z x) (cov X x (Y x)) at hYZX
-  change directionalDeriv (I := I) Z
+  change directionalDerivAlong (I := I) Z
       (fun y : M => g.inner y (X y) (Y y)) x =
     g.inner x (cov X x (Z x)) (Y x) +
       g.inner x (X x) (cov Y x (Z x)) at hZXY
@@ -89,12 +89,12 @@ theorem leviCivita_inner_eq_half_koszul
   rw [← g.symm x (cov Y x (X x)) (Z x)]
   ring
 
-/-- Fixed-coordinate-frame Christoffel formula for any connection satisfying
-the Levi-Civita predicates.
 
-The chart center `x₀` is fixed while the evaluation point `x` ranges over the
-coordinate-frame domain. This is the pointwise local formula needed before
-passing to model-coordinate eventual equalities. -/
+
+
+
+
+
 theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -110,15 +110,15 @@ theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
       (1 / 2 : Real) *
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           gInv k l *
-            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+            (directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 j y)
                     (coordinateFrameAt (I := I) x0 l y)) x +
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 l y)) x -
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 j y)) x) := by
@@ -181,15 +181,15 @@ theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
     _ = (1 / 2 : Real) *
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           gInv k l *
-            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+            (directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 j y)
                     (coordinateFrameAt (I := I) x0 l y)) x +
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 l y)) x -
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 j y)) x) := by
@@ -198,9 +198,9 @@ theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
           rw [koszulScalar_coordinateFrame_eq_metric_derivs_of_mem
             (I := I) g x0 hx i j l]
 
-/-- Two smooth Levi-Civita connections agree on differentiable vector-field
-inputs.  The smoothness hypotheses are part of the geometric uniqueness API;
-the proof only uses the Levi-Civita calculus identities at the point. -/
+
+
+
 theorem leviCivita_apply_eq_of_smooth
     {cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -229,7 +229,7 @@ theorem leviCivita_apply_eq_of_smooth
   rw [hZx] at hleft hright
   exact hleft.trans hright.symm
 
-/-- Descended tangent-direction form of smooth Levi-Civita uniqueness. -/
+
 theorem leviCivita_apply_eq_of_smooth_direction
     {cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -252,7 +252,7 @@ theorem leviCivita_apply_eq_of_smooth_direction
   rw [hXx] at h
   exact h
 
-/-- The smooth-input uniqueness package is realized by the Koszul formula. -/
+
 theorem leviCivitaConnectionUniqueOnSmooth
     (g : SmoothRiemannianMetric I M) :
     LeviCivitaConnectionUniqueOnSmooth (I := I) g := by

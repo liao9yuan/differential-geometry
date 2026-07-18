@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevCauchy
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
-/-!
-# Sequential completeness of the iterated Euclidean Sobolev space `W^{k,p}`
-
-We package together the structural lemmas of `EuclideanIteratedSobolevCauchy`
-(`L^p` limits of iterated weak partials of a `wkpNorm`-Cauchy sequence exist) and
-`WeakPartialLimit` (those `L^p` limits are themselves the iterated weak partials
-of the order-`0` limit) into a single statement: every Cauchy sequence in
-`wkpNorm`, with members in `MemWkp k p`, has a limit in `MemWkp k p`, and the
-convergence is in `wkpNorm`.
-
-The result holds for `1 ≤ p < ∞`. We pass through a subsequence extraction step
-to convert the εδ Cauchy criterion into the summable bound form required by
-Mathlib's `cauchy_complete_eLpNorm`, then transfer convergence from the
-subsequence back to the full sequence.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -31,25 +15,23 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Extract a strictly-monotone subsequence index `φ` such that consecutive
-`wkpNorm` differences along the subsequence are bounded by `1/2^(i+1)`. -/
 private theorem exists_subseq_geom_bound
     {k : ℕ} {p : ℝ≥0∞} {Ω : Set E} {u : ℕ → E → ℝ}
     (hu_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε) :
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧
-      ∀ i, wkpNorm (d := d) k p (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
+      ∀ i, iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) := by
   classical
   have h_choose : ∀ i : ℕ, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) := by
     intro i
     have hpos : (0 : ℝ) < (1 : ℝ) / 2 ^ (i + 1) := by positivity
     exact hu_cauchy ((1 : ℝ) / 2 ^ (i + 1)) hpos
   let N_seq : ℕ → ℕ := fun i => (h_choose i).choose
   have hN_spec : ∀ i m n, N_seq i ≤ m → N_seq i ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) :=
     fun i => (h_choose i).choose_spec
   let φ : ℕ → ℕ := fun i => Nat.rec (N_seq 0)
@@ -74,7 +56,6 @@ private theorem exists_subseq_geom_bound
     exact le_trans h_φi (le_trans (Nat.le_succ _) (le_max_right _ _))
   exact hN_spec i (φ (i + 1)) (φ i) h_φi1 h_φi
 
-/-- The series `(1/2)^i` is summable in `ℝ`. -/
 private lemma summable_geom_pow_two : Summable (fun i : ℕ => (1 : ℝ) / 2 ^ i) := by
   have hgeom : Summable (fun i : ℕ => ((1 : ℝ) / 2) ^ i) := by
     have h2 : ‖((1 : ℝ) / 2)‖ < 1 := by
@@ -86,12 +67,10 @@ private lemma summable_geom_pow_two : Summable (fun i : ℕ => (1 : ℝ) / 2 ^ i
     funext i; rw [div_pow, one_pow]
   rwa [heq] at hgeom
 
-/-- `2 * (1/2)^N` is summable. -/
 private lemma summable_2_div_pow : Summable (fun N : ℕ => 2 * (1 : ℝ) / 2 ^ N) := by
   have h := summable_geom_pow_two.const_smul (2 : ℝ)
   simpa [smul_eq_mul] using h
 
-/-- `∑' i, ENNReal.ofReal (2 * (1/2)^i) ≠ ∞`. -/
 private lemma tsum_ofReal_2_div_pow_ne_top :
     ∑' i : ℕ, ENNReal.ofReal (2 * (1 : ℝ) / 2 ^ i) ≠ ∞ := by
   have h_nn : ∀ i : ℕ, 0 ≤ 2 * (1 : ℝ) / 2 ^ i := fun _ => by positivity
@@ -101,17 +80,15 @@ private lemma tsum_ofReal_2_div_pow_ne_top :
   rw [h_eq]
   exact ENNReal.ofReal_ne_top
 
-/-- Telescoping triangle inequality for `wkpNorm`: bound the distance between
-two elements of a sequence by the sum of consecutive differences. -/
 private theorem wkpNorm_telescope_sum
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
     {v : ℕ → E → ℝ}
     (hv_mem : ∀ n, MemWkp (d := d) k p (v n) Ω)
     (n ℓ : ℕ) :
-    wkpNorm (d := d) k p (fun x => v (n + ℓ) x - v n x) Ω ≤
+    iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + ℓ) x - v n x) Ω ≤
       ∑ i ∈ Finset.range ℓ,
-        wkpNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := by
+        iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := by
   induction ℓ with
   | zero =>
       simp only [Finset.range_zero, Finset.sum_empty, add_zero]
@@ -134,55 +111,54 @@ private theorem wkpNorm_telescope_sum
       have hC_mem : MemWkp (d := d) k p C Ω :=
         MemWkp.sub (d := d) hp hΩ (hv_mem (n + ℓ + 1)) (hv_mem (n + ℓ))
       have h_le_triangle :
-          wkpNorm (d := d) k p (fun x => A x + C x) Ω ≤
-            wkpNorm (d := d) k p A Ω + wkpNorm (d := d) k p C Ω :=
+          iteratedWeakSobolevNorm (d := d) k p (fun x => A x + C x) Ω ≤
+            iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω :=
         wkpNorm_add_le (d := d) hp hΩ hA_mem hC_mem
       have hL_norm_eq :
-          wkpNorm (d := d) k p L Ω = wkpNorm (d := d) k p (fun x => A x + C x) Ω := by
+          iteratedWeakSobolevNorm (d := d) k p L Ω = iteratedWeakSobolevNorm (d := d) k p (fun x => A x + C x) Ω := by
         rw [hL_eq]
       have hL_le :
-          wkpNorm (d := d) k p L Ω ≤
-            wkpNorm (d := d) k p A Ω + wkpNorm (d := d) k p C Ω := by
+          iteratedWeakSobolevNorm (d := d) k p L Ω ≤
+            iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω := by
         rw [hL_norm_eq]
         exact h_le_triangle
       have h_ih_le_sum :
-          wkpNorm (d := d) k p A Ω ≤
+          iteratedWeakSobolevNorm (d := d) k p A Ω ≤
             ∑ i ∈ Finset.range ℓ,
-              wkpNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := ih
+              iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := ih
       have h_step :
-          wkpNorm (d := d) k p A Ω + wkpNorm (d := d) k p C Ω ≤
+          iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω ≤
             (∑ i ∈ Finset.range ℓ,
-              wkpNorm (d := d) k p
+              iteratedWeakSobolevNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω) +
-              wkpNorm (d := d) k p C Ω := by
+              iteratedWeakSobolevNorm (d := d) k p C Ω := by
         exact add_le_add h_ih_le_sum (le_refl _)
       have h_succ_eq :
           (∑ i ∈ Finset.range ℓ,
-            wkpNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω) +
-            wkpNorm (d := d) k p C Ω =
+            iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω) +
+            iteratedWeakSobolevNorm (d := d) k p C Ω =
           ∑ i ∈ Finset.range (ℓ + 1),
-            wkpNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := by
+            iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + i + 1) x - v (n + i) x) Ω := by
         rw [Finset.sum_range_succ]
       calc
-        wkpNorm (d := d) k p (fun x => v (n + (ℓ + 1)) x - v n x) Ω
-            = wkpNorm (d := d) k p L Ω := rfl
-        _ ≤ wkpNorm (d := d) k p A Ω + wkpNorm (d := d) k p C Ω := hL_le
+        iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + (ℓ + 1)) x - v n x) Ω
+            = iteratedWeakSobolevNorm (d := d) k p L Ω := rfl
+        _ ≤ iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω := hL_le
         _ ≤ (∑ i ∈ Finset.range ℓ,
-              wkpNorm (d := d) k p
+              iteratedWeakSobolevNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω) +
-              wkpNorm (d := d) k p C Ω := h_step
+              iteratedWeakSobolevNorm (d := d) k p C Ω := h_step
         _ = ∑ i ∈ Finset.range (ℓ + 1),
-              wkpNorm (d := d) k p
+              iteratedWeakSobolevNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω := h_succ_eq
 
-/-- `wkpNorm k p (a - b) = wkpNorm k p (b - a)`. -/
 private theorem wkpNorm_sub_comm
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
     {a b : E → ℝ}
     (ha : MemWkp (d := d) k p a Ω) (hb : MemWkp (d := d) k p b Ω) :
-    wkpNorm (d := d) k p (fun x => a x - b x) Ω =
-      wkpNorm (d := d) k p (fun x => b x - a x) Ω := by
+    iteratedWeakSobolevNorm (d := d) k p (fun x => a x - b x) Ω =
+      iteratedWeakSobolevNorm (d := d) k p (fun x => b x - a x) Ω := by
   have h_eq : (fun x : E => a x - b x) =
       (fun x => (-1 : ℝ) * (b x - a x)) := by
     funext x; ring
@@ -194,7 +170,6 @@ private theorem wkpNorm_sub_comm
     simp
   rw [h_norm_neg_one, one_mul]
 
-/-- The partial geometric sum closed form: `∑_{i=0}^{ℓ-1} (1/2)^i = 2 - 2 * (1/2)^ℓ`. -/
 private lemma partial_geom_sum_eq (ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i = 2 - 2 * ((1 : ℝ) / 2) ^ ℓ := by
   induction ℓ with
@@ -207,14 +182,12 @@ private lemma partial_geom_sum_eq (ℓ : ℕ) :
       rw [hpow]
       ring
 
-/-- The partial geometric sum `∑_{i=0}^{ℓ-1} (1/2)^i < 2`. -/
 private lemma partial_geom_sum_lt_two (ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i < 2 := by
   rw [partial_geom_sum_eq]
   have hpow_pos : (0 : ℝ) < ((1 : ℝ) / 2) ^ ℓ := by positivity
   linarith
 
-/-- The partial geometric sum scaled by `1 / 2^(n+1)`: bounded strictly by `1/2^n`. -/
 private lemma scaled_partial_geom_sum_lt
     (n ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, (1 : ℝ) / 2 ^ (n + i + 1) < (1 : ℝ) / 2 ^ n := by
@@ -242,33 +215,31 @@ private lemma scaled_partial_geom_sum_lt
           rw [pow_succ]
           field_simp
 
-/-- The Cauchy bound for the subsequence: for `n, m ≥ N`, the `wkpNorm`
-difference of `u ∘ φ` is strictly less than `2 / 2 ^ N`. -/
 private theorem wkpNorm_subseq_lt
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
     {u : ℕ → E → ℝ}
     (hu_mem : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {φ : ℕ → ℕ} (_hφ : StrictMono φ)
-    (h_geom : ∀ i, wkpNorm (d := d) k p (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
+    (h_geom : ∀ i, iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
       ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1))) :
     ∀ N n m : ℕ, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p (fun x => u (φ n) x - u (φ m) x) Ω <
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ n) x - u (φ m) x) Ω <
         ENNReal.ofReal (2 * (1 : ℝ) / 2 ^ N) := by
   have h_aux : ∀ a b : ℕ, a ≤ b →
-      wkpNorm (d := d) k p (fun x => u (φ b) x - u (φ a) x) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ b) x - u (φ a) x) Ω ≤
       ENNReal.ofReal ((1 : ℝ) / 2 ^ a) := by
     intro a b hab
     obtain ⟨ℓ, rfl⟩ := Nat.le.dest hab
     have h_telescope := wkpNorm_telescope_sum (d := d) hp hΩ
       (v := fun n => u (φ n)) (fun n => hu_mem (φ n)) a ℓ
     have h_each : ∀ i,
-        wkpNorm (d := d) k p
+        iteratedWeakSobolevNorm (d := d) k p
           (fun x => u (φ (a + i + 1)) x - u (φ (a + i)) x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (a + i + 1)) := fun i => h_geom (a + i)
     have h_sum_bound :
         (∑ i ∈ Finset.range ℓ,
-          wkpNorm (d := d) k p
+          iteratedWeakSobolevNorm (d := d) k p
             (fun x => u (φ (a + i + 1)) x - u (φ (a + i)) x) Ω) ≤
         ∑ i ∈ Finset.range ℓ, ENNReal.ofReal ((1 : ℝ) / 2 ^ (a + i + 1)) :=
       Finset.sum_le_sum (fun i _ => h_each i)
@@ -313,15 +284,13 @@ private theorem wkpNorm_subseq_lt
       exact h_strict_real m hm
     exact lt_of_le_of_lt h_le h_strict
 
-/-- For each `(j, β)` with `j ≤ k`, the iterated weak partial of order `j`
-along `β` of the subsequence has an `L^p` limit `v j β`. -/
 private theorem exists_iter_limits_subseq
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
     {u : ℕ → E → ℝ}
     (hu_mem : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {φ : ℕ → ℕ} (hφ_strict : StrictMono φ)
-    (h_geom : ∀ i, wkpNorm (d := d) k p
+    (h_geom : ∀ i, iteratedWeakSobolevNorm (d := d) k p
         (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
       ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1))) :
     ∃ v : ∀ j : ℕ, (Fin j → Fin d) → E → ℝ,
@@ -337,7 +306,7 @@ private theorem exists_iter_limits_subseq
   let B : ℕ → ℝ≥0∞ := fun N => ENNReal.ofReal (2 * (1 : ℝ) / 2 ^ N)
   have hB_summable : ∑' i, B i ≠ ∞ := tsum_ofReal_2_div_pow_ne_top
   have h_cau : ∀ N n m : ℕ, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p
+      iteratedWeakSobolevNorm (d := d) k p
         (fun x => u (φ n) x - u (φ m) x) Ω < B N :=
     wkpNorm_subseq_lt (d := d) hp_one hΩ hu_mem hφ_strict h_geom
   have hu_φ : ∀ i, MemWkp (d := d) k p (u (φ i)) Ω := fun i => hu_mem (φ i)
@@ -367,8 +336,6 @@ private theorem exists_iter_limits_subseq
     rw [dif_pos hj]
     exact (h_each j β hj).choose_spec.2
 
-/-- The order-0 limit `v 0 ![]` of the subsequence is in `MemWkp k p`, and the
-subsequence converges to it in `wkpNorm`. -/
 private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
@@ -376,12 +343,12 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     {u : ℕ → E → ℝ}
     (hu_mem : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {φ : ℕ → ℕ} (hφ_strict : StrictMono φ)
-    (h_geom : ∀ i, wkpNorm (d := d) k p
+    (h_geom : ∀ i, iteratedWeakSobolevNorm (d := d) k p
         (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
       ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1))) :
     ∃ u_lim : E → ℝ, MemWkp (d := d) k p u_lim Ω ∧
       Tendsto
-        (fun i => wkpNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
+        (fun i => iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
         atTop (𝓝 0) := by
   classical
   obtain ⟨v, hv_lp, h_v_tendsto⟩ :=
@@ -390,7 +357,7 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     MemWkp_of_iter_tendsto_eLpNorm (d := d) hp_one hp_top hΩ k
       (u_n := fun i => u (φ i)) (fun i => hu_mem (φ i)) v hv_lp h_v_tendsto
   refine ⟨v 0 ![], h_lim_mem, ?_⟩
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   have h_per_pair : ∀ (j : ℕ) (_hj : j ∈ Finset.range (k + 1)) (β : Fin j → Fin d),
       Tendsto
         (fun i => eLpNorm
@@ -476,8 +443,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
   have hfinal := tendsto_finset_sum (Finset.range (k + 1)) h_inner_tendsto
   simpa using hfinal
 
-/-- If `(a_n)` is `wkpNorm`-Cauchy and a subsequence `(a_{φ(n)})` converges to
-`a_lim` in `wkpNorm`, then `(a_n)` itself converges to `a_lim` in `wkpNorm`. -/
 private theorem wkpNorm_tendsto_of_cauchy_of_subseq
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -485,13 +450,13 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
     (hu_mem : ∀ n, MemWkp (d := d) k p (u n) Ω)
     (hu_lim_mem : MemWkp (d := d) k p u_lim Ω)
     (hu_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε)
     {φ : ℕ → ℕ} (hφ_strict : StrictMono φ)
     (h_subseq_tendsto : Tendsto
-      (fun i => wkpNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
+      (fun i => iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
       atTop (𝓝 0)) :
     Tendsto
-      (fun n => wkpNorm (d := d) k p (fun x => u n x - u_lim x) Ω)
+      (fun n => iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u_lim x) Ω)
       atTop (𝓝 0) := by
   classical
   rw [ENNReal.tendsto_atTop_zero]
@@ -515,15 +480,15 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
   have hn_N₂ : N₂ ≤ n := le_trans (le_max_right _ _) hn
   have h_φn_ge_n : n ≤ φ n := hφ_strict.id_le n
   have h_φn_ge_N₁ : N₁ ≤ φ n := le_trans hn_N₁ h_φn_ge_n
-  have h_cauchy_bound : wkpNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω ≤
+  have h_cauchy_bound : iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω ≤
       ENNReal.ofReal δ :=
     hN₁ n (φ n) hn_N₁ h_φn_ge_N₁
-  have h_subseq_bound : wkpNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω ≤
+  have h_subseq_bound : iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω ≤
       ENNReal.ofReal δ := hN₂ n hn_N₂
   have h_triangle :
-      wkpNorm (d := d) k p (fun x => u n x - u_lim x) Ω ≤
-        wkpNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω +
-          wkpNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω := by
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u_lim x) Ω ≤
+        iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω +
+          iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω := by
     have h_split : (fun x : E => u n x - u_lim x) =
         (fun x => (u n x - u (φ n) x) + (u (φ n) x - u_lim x)) := by
       funext x; ring
@@ -532,9 +497,9 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
     · exact MemWkp.sub (d := d) hp hΩ (hu_mem n) (hu_mem (φ n))
     · exact MemWkp.sub (d := d) hp hΩ (hu_mem (φ n)) hu_lim_mem
   calc
-    wkpNorm (d := d) k p (fun x => u n x - u_lim x) Ω
-        ≤ wkpNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω +
-            wkpNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω := h_triangle
+    iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u_lim x) Ω
+        ≤ iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u (φ n) x) Ω +
+            iteratedWeakSobolevNorm (d := d) k p (fun x => u (φ n) x - u_lim x) Ω := h_triangle
     _ ≤ ENNReal.ofReal δ + ENNReal.ofReal δ := by
         exact add_le_add h_cauchy_bound h_subseq_bound
     _ = ENNReal.ofReal (δ + δ) := (ENNReal.ofReal_add hδ_pos.le hδ_pos.le).symm
@@ -545,9 +510,6 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
         ring
     _ = ε := ENNReal.ofReal_toReal hε_ne
 
-/-- **Cauchy completeness** of the iterated Euclidean Sobolev space `W^{k,p}(Ω)`:
-every Cauchy sequence with respect to the `wkpNorm` semi-distance has a limit in
-`MemWkp k p Ω`, with `wkpNorm`-convergence. -/
 theorem MemWkp.exists_limit_of_wkpNorm_cauchy
     [NeZero d]
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -555,11 +517,11 @@ theorem MemWkp.exists_limit_of_wkpNorm_cauchy
     {u : ℕ → E → ℝ}
     (hu_mem : ∀ n, MemWkp (d := d) k p (u n) Ω)
     (hu_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε) :
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x) Ω ≤ ENNReal.ofReal ε) :
     ∃ u_lim : E → ℝ,
       MemWkp (d := d) k p u_lim Ω ∧
       Filter.Tendsto
-        (fun n => wkpNorm (d := d) k p (fun x => u n x - u_lim x) Ω)
+        (fun n => iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u_lim x) Ω)
         Filter.atTop (𝓝 0) := by
   classical
   obtain ⟨φ, hφ_strict, h_geom⟩ :=

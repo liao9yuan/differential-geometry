@@ -17,12 +17,12 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F Geometry
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
--/
+
+
+
+
+
 
 section Geometry
 
@@ -35,9 +35,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Perelman-facing weighted identity
-`∫ (Delta f - |grad f|^2) e^{-f} dmu_g = 0`, obtained from the closed
-Green identity and the pointwise chain rule for `grad(exp(-f))`. -/
+
+
+
 theorem weightedIBP
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -95,9 +95,9 @@ theorem weightedIBP
       DifferentialGeometry.Integral.DivergenceTheorem.expNegIBP
         (I := I) g hpotential hlap hgrad
 
-/-- Scalar consequence of weighted integration by parts:
-if `∫(Delta f - |grad f|^2)e^{-f}dmu = 0`, then the two bracket forms of
-Perelman's `F` have the same weighted integral. -/
+
+
+
 theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
     (mu : Measure M)
     (scalarCurvature lapPotential gradPotentialNormSq potential : M -> Real)
@@ -148,8 +148,8 @@ theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
       ∫ x, fFunctionalClosedBracket scalarCurvature lapPotential x ∂μw := by
         rfl
 
-/-- Arbitrary-test weighted Green identity transported to the weighted measure
-`e^{-f} dmu_g`. -/
+
+
 theorem weightedGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -223,9 +223,9 @@ theorem weightedGreen
       intro x
       ring
 
-/-- Closed weighted-divergence cancellation.  If a scalar term becomes the
-ordinary divergence after multiplying by `e^{-f}`, then its weighted integral
-vanishes. -/
+
+
+
 theorem weightedDivZero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -259,7 +259,7 @@ theorem weightedDivZero
         DifferentialGeometry.Integral.DivergenceTheorem.integral_divergence_eq_zero_of_compact
           (I := I) g X
 
-/-- Smoothness of Perelman's density `e^{-f}`. -/
+
 theorem expNegPotentialDensity_contMDiff
     {potential : M -> Real}
     (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential) :
@@ -267,7 +267,7 @@ theorem expNegPotentialDensity_contMDiff
   simpa [expNegPotentialDensity] using
     Real.contDiff_exp.contMDiff.comp hpotential.neg
 
-/-- Tangent-action chain rule for `e^{-f}`. -/
+
 theorem tangentSectionAction_expNeg
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
     {potential : M -> Real}
@@ -292,10 +292,10 @@ theorem tangentSectionAction_expNeg
   have happly := congrArg (fun L => L (X x)) hmf
   simpa [smul_eq_mul] using happly
 
-/-- The global divergence field used to cancel the connection-variation term in
-formula 5.10, once the metric trace of the connection variation has already
-been constructed as a smooth tangent section.  If `traceVec = tr_g A`, then
-this is the book's vector field `X = e^{-f} tr_g A`. -/
+
+
+
+
 def connTraceVec
     {potential : M -> Real}
     (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
@@ -305,8 +305,8 @@ def connTraceVec
     (I := I) (expNegPotentialDensity potential)
     (expNegPotentialDensity_contMDiff (I := I) hpotential) traceVec
 
-/-- Divergence of `connTraceVec`.  This is the global smooth-section version of
-`div(e^{-f} tr_g A) = e^{-f}(div(tr_g A) - tr_g A(f))`. -/
+
+
 theorem connTraceDivEq
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -341,8 +341,8 @@ theorem connTraceDivEq
   rw [hactionTrace x, hweighted x]
   ring
 
-/-- Closed weighted-divergence cancellation when the divergence field is the
-actual section `connTraceVec = e^{-f} tr_g A`. -/
+
+
 theorem weightedDivZero_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -374,8 +374,44 @@ theorem weightedDivZero_of_connTrace
     (connTraceDivEq (I := I) g hpotential traceVec hdivTrace
       hactionTrace hweighted)
 
-/-- Weighted Green in the exact scalar form used by formula 5.10 for the
-shifted Hessian trace `Delta(h - V/2)`. -/
+
+
+theorem weighted_grad_zero
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q) :
+    ∫ x,
+        (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+            (I := I) g hq x -
+          g.inner x
+            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+              (I := I) g hq) x)
+            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+              (I := I) g hpotential) x))
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) = 0 := by
+  have hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    (ENNReal.continuous_ofReal.comp
+      (expNegPotentialDensity_contMDiff (I := I) hpotential).continuous).aemeasurable
+  exact weightedDivZero_of_connTrace (I := I) g hpotential
+    (DifferentialGeometry.Integral.DivergenceTheorem.grad_g (I := I) g hq)
+    hmeas
+    (fun x =>
+      (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def
+        (I := I) g hq x).symm)
+    (fun x =>
+      DifferentialGeometry.Integral.DivergenceTheorem.tangentSectionAction_eq_inner_grad_g
+        (I := I) g hpotential
+        (DifferentialGeometry.Integral.DivergenceTheorem.grad_g (I := I) g hq) x)
+    (fun _ => rfl)
+
+
+
 theorem shiftIntEq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -458,7 +494,7 @@ theorem shiftIntEq
       unfold expWeightedMeasureVariationFactor
       ring
 
-/-- Moving-volume derivative for integrals against `e^{-f_s} dmu_s`. -/
+
 theorem expWeightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -535,7 +571,7 @@ theorem expWeightedMeasureIntegral_hasDerivAt_at
     expWeightedMeasureVariationFactor
   ring
 
-/-- Scalar derivative of the bracket `R + |grad f|^2`. -/
+
 def fFunctionalBracketVariation
     (scalarCurvatureVariation gradPotentialNormSqVariation : M -> Real) :
     M -> Real :=
@@ -564,7 +600,7 @@ theorem fFunctionalBracket_hasDerivAt
   have h := (hscalar_deriv x).add (hgrad_deriv x)
   simpa [fFunctionalBracket, fFunctionalBracketVariation] using h
 
-/-- Scalar derivative of the closed bracket `R + Delta f`. -/
+
 theorem closedBracket_deriv
     {scalarCurvaturePath lapPotentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -588,9 +624,9 @@ theorem closedBracket_deriv
   have h := (hscalar_deriv x).add (hlap_deriv x)
   simpa [fFunctionalClosedBracket, fFunctionalClosedBracketVariation] using h
 
-/-- Formula specialized to Perelman's `F` bracket.  The derivatives of scalar
-curvature and `|grad f|^2` are scalar inputs; formula 5.10 later identifies
-their integrated geometric expression. -/
+
+
+
 theorem fFunctionalBaseIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -662,9 +698,9 @@ theorem fFunctionalBaseIntegral_hasDerivAt_at
       hscalar_deriv hgrad_deriv)
     htrace hmetric_reg hintegrand_reg
 
-/-- Moving-volume first derivative for the closed bracket `R + Delta f`.
-This is the derivative producer used before comparing the closed bracket with
-the original `R + |grad f|^2` form by weighted integration by parts. -/
+
+
+
 theorem closedBase_deriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -735,8 +771,8 @@ theorem closedBase_deriv
       hscalar_deriv hlap_deriv)
     htrace hmetric_reg hintegrand_reg
 
-/-- Convert a base-integral derivative into the path-level first-variation
-predicate for `F`. -/
+
+
 theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
     {muPath : Real -> Measure M}
@@ -768,7 +804,7 @@ theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
   unfold FFunctionalHasFirstVariationAt fFunctionalAlong
   exact hbase.congr_of_eventuallyEq hbase_eq
 
-/-- First-variation producer for `F` from moving-volume differentiation. -/
+
 theorem FFunctionalHasFirstVariationAt_of_volumeVariation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

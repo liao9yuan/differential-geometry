@@ -7,12 +7,12 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Torsion-Free Calculus
 
-Concrete consequences of mathlib's torsion tensor for
-Levi-Civita packages.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -29,8 +29,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Pointwise torsion-free equation:
-`nabla_X Y - nabla_Y X = [X,Y]`. -/
+
+
 theorem torsion_free_at_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {x : M}
@@ -48,7 +48,7 @@ theorem torsion_free_at_apply
   rw [cov.torsion_apply hX hY] at hzero
   exact sub_eq_zero.mp hzero
 
-/-- Global torsion-free equation at a point. -/
+
 theorem torsion_free_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (htf : IsTorsionFree (I := I) cov)
@@ -57,7 +57,7 @@ theorem torsion_free_apply
     cov Y x (X x) - cov X x (Y x) = VectorField.mlieBracket I X Y x :=
   torsion_free_at_apply (I := I) (htf x) hX hY
 
-/-- Family torsion-free equation at a flow time. -/
+
 theorem torsion_free_family_apply
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
@@ -69,7 +69,7 @@ theorem torsion_free_family_apply
       VectorField.mlieBracket I X Y x :=
   torsion_free_apply (I := I) (htf t) hX hY
 
-/-! ## Coordinate proof for the Koszul connection -/
+
 
 theorem coordinate_basis_coord_eq_sum_inv_metric_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -115,15 +115,15 @@ theorem koszulScalar_coordinateFrame_eq_metric_derivs_of_mem
         (coordinateFrameAt (I := I) x0 i)
         (coordinateFrameAt (I := I) x0 j)
         (coordinateFrameAt (I := I) x0 l) x =
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 j y)
             (coordinateFrameAt (I := I) x0 l y)) x +
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 i y)
             (coordinateFrameAt (I := I) x0 l y)) x -
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 i y)
             (coordinateFrameAt (I := I) x0 j y)) x := by
@@ -149,23 +149,23 @@ private theorem koszulScalar_coordinateFrame_eq_metric_derivs
         (coordinateFrameAt (I := I) x0 i)
         (coordinateFrameAt (I := I) x0 j)
         (coordinateFrameAt (I := I) x0 l) x0 =
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 j y)
             (coordinateFrameAt (I := I) x0 l y)) x0 +
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 i y)
             (coordinateFrameAt (I := I) x0 l y)) x0 -
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x0 i y)
             (coordinateFrameAt (I := I) x0 j y)) x0 :=
   koszulScalar_coordinateFrame_eq_metric_derivs_of_mem
     (I := I) g x0 (coordinateFrameAt_mem (I := I) x0) i j l
 
-/-- The Koszul scalar is symmetric in coordinate-frame directions at the
-coordinate base point. -/
+
+
 theorem koszulScalar_coordinateFrame_symm
     (g : SmoothRiemannianMetric I M)
     (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E)
@@ -181,9 +181,9 @@ theorem koszulScalar_coordinateFrame_symm
       koszulScalar_swap_sub (I := I) g (coordinateFrameAt (I := I) x0 i)
         (coordinateFrameAt (I := I) x0 j) Z x0)
 
-/-- In the coordinate frame, the torsion coefficients are exactly the skew
-Christoffel coefficients, because coordinate frame brackets vanish at the
-base point. -/
+
+
+
 theorem coordinate_torsion_coeff_eq_christoffel_skew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -203,8 +203,8 @@ theorem coordinate_torsion_coeff_eq_christoffel_skew
   rw [coordinateFrameAt_bracket_zero (I := I) x0 i j] at h
   simpa [hframe] using h
 
-/-- A torsion-free connection has symmetric coordinate Christoffel coefficients
-in the lower two coordinate indices. -/
+
+
 theorem coordinate_christoffel_symm_of_torsionFree
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (htf : IsTorsionFree (I := I) cov)
@@ -225,7 +225,7 @@ theorem coordinate_christoffel_symm_of_torsionFree
   rw [hzero] at hskew
   exact sub_eq_zero.mp hskew.symm
 
-/-- The Koszul connection is symmetric on coordinate-frame basis vectors. -/
+
 theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g
@@ -250,8 +250,8 @@ theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
     (tangentConstAt (I := I) x0 v)
   simpa [metricFlatLinear_apply] using hleft.trans (hK.trans hright.symm)
 
-/-- Coordinate-frame Christoffel symbols of the Koszul connection are symmetric
-in the lower two coordinate indices. -/
+
+
 theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
     christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) g)
@@ -263,11 +263,11 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
   unfold christoffelSymbolInFrame
   rw [leviCivitaConnectionOfMetric_coordinateFrame_apply_symm (I := I) g x0 i j]
 
-/-- Coordinate Christoffel formula for the Koszul Levi-Civita connection.
 
-In the coordinate frame at `x0`, this is
-`Γᵏᵢⱼ = 1/2 * g^{kℓ} (∂ᵢ gⱼℓ + ∂ⱼ gᵢℓ - ∂ℓ gᵢⱼ)`, with the inverse metric
-components supplied by `gInv`. -/
+
+
+
+
 theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
     (g : SmoothRiemannianMetric I M) (x0 : M)
     (gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
@@ -280,15 +280,15 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
       (1 / 2 : Real) *
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           gInv k l *
-            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+            (directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 j y)
                     (coordinateFrameAt (I := I) x0 l y)) x0 +
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 l y)) x0 -
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 j y)) x0) := by
@@ -342,15 +342,15 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
     _ = (1 / 2 : Real) *
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           gInv k l *
-            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+            (directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 i)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 j y)
                     (coordinateFrameAt (I := I) x0 l y)) x0 +
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 j)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 l y)) x0 -
-              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+              directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x0 l)
                 (fun y : M =>
                   g.inner y (coordinateFrameAt (I := I) x0 i y)
                     (coordinateFrameAt (I := I) x0 j y)) x0) := by
@@ -358,7 +358,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
           refine Finset.sum_congr rfl fun l _ => ?_
           rw [koszulScalar_coordinateFrame_eq_metric_derivs (I := I) g x0 i j l]
 
-/-- The Koszul connection has zero torsion on coordinate-frame basis vectors. -/
+
 theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g).torsion x0
@@ -380,7 +380,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero
     ring
   simpa [hframe, hx, IsLocalFrameOn.coeff] using hcoeff
 
-/-- The Koszul-constructed connection is torsion-free. -/
+
 theorem leviCivitaConnectionOfMetric_isTorsionFree
     (g : SmoothRiemannianMetric I M) :
     IsTorsionFree (I := I) (leviCivitaConnectionOfMetric (I := I) g) := by
@@ -399,8 +399,8 @@ theorem leviCivitaConnectionOfMetric_isTorsionFree
   simp [B, coordinateFrameAt_toBasis_apply,
     leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero]
 
-/-- The Koszul-constructed connection satisfies the Levi-Civita
-predicate. -/
+
+
 theorem leviCivitaConnectionOfMetric_isLeviCivita
     (g : SmoothRiemannianMetric I M) :
     IsLeviCivita (I := I) (leviCivitaConnectionOfMetric (I := I) g) g :=

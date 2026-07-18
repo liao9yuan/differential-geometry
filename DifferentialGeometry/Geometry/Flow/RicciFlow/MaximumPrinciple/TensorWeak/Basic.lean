@@ -37,43 +37,43 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Basic
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 abbrev TwoTensorFamily : Type _ :=
   Real -> RawTwoTensorField (I := I) (M := M)
 
-/-- A time-dependent vector field used for drift terms. -/
+
 abbrev TimeDependentVectorField : Type _ :=
   Real -> (x : M) -> TangentSpace I x
 
-/-- A time-dependent quadratic-form evaluation on tangent vectors. -/
+
 abbrev TensorQuadraticFormFamily : Type _ :=
   Real -> (x : M) -> TangentSpace I x -> Real
 
-/-- Supplied first covariant derivative tensors for a time-dependent two-tensor. -/
+
 abbrev TensorNabla1Family : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x
 
-/-- Supplied second covariant derivative tensors for a time-dependent two-tensor. -/
+
 abbrev TensorNabla2Family : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x
 
-/-- A fiberwise algebraic reaction term for the tensor maximum principle. -/
+
 abbrev TwoTensorReaction : Type _ :=
   Real -> SmoothRiemannianMetric I M -> RawTwoTensorField (I := I) (M := M) ->
     RawTwoTensorField (I := I) (M := M)
 
-/-- Pointwise symmetry of a covariant two-tensor. -/
+
 def TwoTensorSymmetricAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ X Y : TangentSpace I x, A x X Y = A x Y X
 
-/-- Pointwise bilinearity of a raw covariant two-tensor evaluator. -/
+
 structure TwoTensorBilinearAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) :
     Prop where
   add_left : ∀ X Y Z : TangentSpace I x,
@@ -85,33 +85,33 @@ structure TwoTensorBilinearAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) 
   smul_right : ∀ (c : Real) (X Z : TangentSpace I x),
     A x X (c • Z) = c * A x X Z
 
-/-- Pointwise nonnegativity of a covariant two-tensor as a quadratic form. -/
+
 def TwoTensorNonnegativeAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, 0 ≤ A x v v
 
-/-- Pointwise positive definiteness of a covariant two-tensor as a quadratic form. -/
+
 def TwoTensorPositiveDefiniteAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, v ≠ 0 -> 0 < A x v v
 
-/-- Symmetry of a tensor family on a set of times. -/
+
 def TwoTensorFamilySymmetricOn (S : TwoTensorFamily (I := I) (M := M))
     (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ x, TwoTensorSymmetricAt (I := I) (M := M) (S t) x
 
-/-- Nonnegativity of a tensor family on a set of times. -/
+
 def TwoTensorFamilyNonnegativeOn (S : TwoTensorFamily (I := I) (M := M))
     (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
 
-/-- Nonnegativity of a tensor family at one time. -/
+
 def TwoTensorFamilyNonnegativeAtTime (S : TwoTensorFamily (I := I) (M := M))
     (t : Real) : Prop :=
   ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
 
-/--
-Hamilton's positive barrier
-`S_epsilon = S + epsilon * (delta + t - t0) * g`.
--/
+
+
+
+
 def tensorBarrierFamily
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -126,23 +126,23 @@ def tensorBarrierFamily
       S t x v w + epsilon * (delta + t - t0) * (G t).inner x v w := by
   rfl
 
-/-- A time-dependent smooth covariant two-tensor section. -/
+
 abbrev TwoTensorSecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 2
 
-/-- A time-dependent smooth covariant three-tensor section used as `∇S`. -/
+
 abbrev TensorNabla1SecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 3
 
-/-- A time-dependent smooth covariant four-tensor section used as `∇²S`. -/
+
 abbrev TensorNabla2SecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 4
 
-/-- Convert a section-backed two-tensor family to the pointwise quadratic-form
-style used by the tensor WMP statement. -/
+
+
 def twoTensorSecToFamily
     (S : TwoTensorSecFamily (I := I) (M := M)) :
     TwoTensorFamily (I := I) (M := M) :=
@@ -156,8 +156,8 @@ theorem twoTensorSecToFamily_apply
       S t x (vec2 (I := I) v w) := by
   rfl
 
-/-- A genuine two-tensor section gives a bilinear raw evaluator at every
-point. -/
+
+
 theorem twoTensorSecToFamily_bilin
     (S : TwoTensorSecFamily (I := I) (M := M))
     (t : Real) (x : M) :
@@ -219,9 +219,9 @@ theorem twoTensorSecToFamily_bilin
       fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hZ, smul_eq_mul] using hmap
 
-/-- Section-backed positive barrier.  This is the smooth-section version of
-`tensorBarrierFamily`; it is used only as a producer bridge for spatial
-covariant derivative data. -/
+
+
+
 noncomputable def tensorBarrierSecFamily
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -279,7 +279,7 @@ theorem quad02_sec_eq
     _ = twoTensorSecToFamily (I := I) (M := M) S t x v v :=
           eval02_sec_eq (I := I) (M := M) S t x v v
 
-/-- The positive metric barrier preserves pointwise symmetry. -/
+
 theorem barrierSymmAt
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -290,7 +290,7 @@ theorem barrierSymmAt
   intro v w
   simp [tensorBarrierFamily, hS v w, (G t).symm x v w]
 
-/-- The metric inner product is bilinear as a raw two-tensor evaluator. -/
+
 theorem metricInner_bilinAt
     (G : Real -> SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
@@ -298,7 +298,7 @@ theorem metricInner_bilinAt
       (fun y v w => (G t).inner y v w) x := by
   constructor <;> intros <;> simp
 
-/-- The positive metric barrier preserves pointwise bilinearity. -/
+
 theorem barrierBilinearAt
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -325,7 +325,7 @@ theorem vec2_self_eq_const {x : M} (v : TangentSpace I x) :
   funext i
   fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Section-backed barriers are quadratic in the repeated tangent vector. -/
+
 theorem barrierSec_smul2
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -343,7 +343,7 @@ theorem barrierSec_smul2
     a v
   simpa [quad02, twoTensorSecToFamily, vec2_self_eq_const] using hscale
 
-/-- A section-backed raw barrier keeps the same quadratic scaling. -/
+
 theorem barrierFamily_smul2
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -361,8 +361,8 @@ theorem barrierFamily_smul2
     ← tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0 t x v v]
   exact barrierSec_smul2 (I := I) (M := M) G S epsilon delta t0 t x a v
 
-/-- A negative section-backed barrier value can be normalized to a metric-unit
-tangent vector at the same time and base point. -/
+
+
 theorem negBarrier_unit
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -425,7 +425,7 @@ theorem negBarrier_unit
     simpa [B] using hneg
   exact mul_neg_of_pos_of_neg hcoeff_pos hnegB
 
-/-- The scalar barrier quadratic form on a metric unit-tangent time slab. -/
+
 def barrierUnitQuad
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -451,8 +451,8 @@ theorem barrierUnitQuad_mk
       tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
   rfl
 
-/-- A negative section-backed barrier value gives a negative point on the
-metric unit-tangent slab at the same time. -/
+
+
 theorem negBarrier_unitSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -474,8 +474,8 @@ theorem negBarrier_unitSlab
         MetricUnitTangent (I := I) (M := M) (G t))⟩, rfl, ?_⟩
   simpa using hneg_u
 
-/-- Failure of nonnegativity for a section-backed barrier produces a negative
-point on the metric unit-tangent time slab. -/
+
+
 theorem failure_unitSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -518,21 +518,21 @@ theorem metricUnitSlab_timeVal_cont
   continuous_subtype_val.comp
     (metricUnitSlab_time_cont (I := I) (M := M) G tA tB)
 
-/-- Metric quadratic evaluation on an ambient time/tangent-bundle product. -/
+
 def metricBundleQuad
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   metricTimeBundleQuad (I := I) (M := M) G K q
 
-/-- Section-backed two-tensor quadratic evaluation on an ambient
-time/tangent-bundle product. -/
+
+
 def tensorSecBundleQuad
     (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   S q.1.1 q.2.proj (fun _ : Fin 2 => q.2.2)
 
-/-- Metric-family quadratic continuity from continuity of the corresponding
-metric `(0,2)` tensor section over the time/tangent-bundle product. -/
+
+
 theorem metricFamQuadCont
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (hG :
@@ -567,8 +567,8 @@ theorem metricFamQuadCont
     Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply,
     metricTensorField_apply, vec2_self_eq_const] using hEval
 
-/-- Section-backed two-tensor quadratic continuity from continuity of the
-two-tensor section over the time/tangent-bundle product. -/
+
+
 theorem tensorQuadCont
     (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
     (hS :
@@ -602,7 +602,7 @@ theorem tensorQuadCont
   simpa [tensorSecBundleQuad, T, b, v, vec2_self_eq_const,
     Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
-/-- Raw barrier quadratic evaluation on an ambient time/tangent-bundle product. -/
+
 def barrierBundleQuad
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -611,8 +611,8 @@ def barrierBundleQuad
   tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
     q.1.1 q.2.proj q.2.2 q.2.2
 
-/-- The section-backed ambient barrier quadratic form is continuous if the
-metric and two-tensor quadratic evaluations are continuous. -/
+
+
 theorem barrierBundleCont
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -641,8 +641,8 @@ theorem barrierBundleCont
     metricTimeBundleQuad, tensorBarrierFamily, twoTensorSecToFamily,
     vec2_self_eq_const, mul_assoc]
 
-/-- The scalar barrier quadratic form on the geometric metric unit-tangent
-time slab. -/
+
+
 def barrierTimeSlabQuad
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -680,8 +680,8 @@ theorem barrierTimeSlabQuad_mk
       tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
   rfl
 
-/-- The geometric time-slab barrier quadratic form is continuous if the
-ambient metric and section-backed tensor quadratic evaluations are continuous. -/
+
+
 theorem barrierTimeCont
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -702,8 +702,8 @@ theorem barrierTimeCont
     MetricUnitTangentTimeSlab.vec, MetricUnitTangentTimeSlab.bundlePoint]
     using hbundle.comp hsub
 
-/-- A negative section-backed barrier value gives a negative point on the
-geometric metric unit-tangent time slab at the same time. -/
+
+
 theorem negBarrier_timeSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -723,8 +723,8 @@ theorem negBarrier_timeSlab
   refine ⟨⟨(⟨t, ht⟩, (⟨x, u⟩ : TangentBundle I M)), hunit⟩, rfl, ?_⟩
   simpa using hneg_u
 
-/-- Failure of nonnegativity for a section-backed barrier produces a negative
-point on the geometric metric unit-tangent time slab. -/
+
+
 theorem failure_timeSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))

@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
-/-!
-# IBP-expanded chart-bilinear variational identity
-
-Building on the smooth approximating sequence supplied by
-`SubstitutionDischargeSmoothApprox`, this module performs the discrete
-integration-by-parts and discrete product-rule expansions that turn the
-variational identity at `v_h := standardNirenbergTest k h η D.u_chart`
-into the symbolic-piece form
-
-  `principal + cross_1 + cross_2 + cross_3 + f_term = c_term`,
-
-matching the names in `SubstitutionNonSmoothChartBilinear`.
-
-The chain proceeds in five steps, each transforming the previous identity
-by a single algebraic operation:
-
-1. `chart_bilinear_identity_h1_0_smooth_seq` — the variational identity
-   applied to each smooth approximant `v_h_n := standardNirenbergTest k h η
-   (u_seq n)` via `chart_bilinear_identity_h1_0`.
-2. `variational_identity_at_v_h` — pass to the L² limit using the
-   smooth-CS approximating sequence from `exists_smooth_uChart_approx` and
-   `standardNirenbergTest_seq_tendsto_eLpNorm`.
-3. `variational_identity_v_h_expanded` — substitute the explicit weak
-   `j`-partial of `v_h` from `hasWeakPartialDeriv_standardNirenbergTest`.
-4. `variational_identity_after_ibp` — apply
-   `integral_diffQuot_mul_eq_neg_integral_mul_diffQuot` to move the outer
-   `D_{-h}^k` onto the principal coefficient.
-5. `variational_identity_after_product_rule` — apply the discrete product
-   rule `D_h^k(a · u) = (D_h^k a) · τ_h u + a · D_h^k u` to expand into
-   the principal term plus the four cross terms, ready to be matched
-   against the symbolic pieces.
--/
 
 noncomputable section
 
@@ -68,12 +36,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For each smooth compactly-supported `u_seq n`, the variational identity
-holds with the smooth Nirenberg test function `v_h_n :=
-standardNirenbergTest k h η (u_seq n)` as the test function. This is a
-direct application of `chart_bilinear_identity_h1_0` (with `K_0 :=
-cthickening |h| K_0`, treating the constant sequence `n ↦ v_h_n` as the
-smooth-CS approximating sequence to itself). -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1_0_smooth_seq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -188,20 +151,8 @@ theorem chart_bilinear_identity_h1_0_smooth_seq
     h_thick_compact h_thick ψ weak_partial_ψ hψ_lp hψ_grad_lp ψ_seq
     hψ_seq_smooth hψ_seq_cs hψ_seq_supp hψ_seq_l2 hψ_seq_grad_l2
 
-set_option linter.unusedVariables false in
-/-- The variational identity holds at `v_h := standardNirenbergTest k h η
-D.u_chart`, integrated over `cthickening |h| K_0` (the support of `v_h`).
-The principal integrand uses the explicit weak `j`-partial of `v_h` as
-provided in the input.
 
-The hypothesis bundle encodes:
-
-* the smooth-CS approximating sequence `v_h_n` (from `u_seq n`),
-* L² and L²-gradient convergence on `cthickening |h| K_0`,
-* the explicit weak partial `weak_partial_v_h j` of `v_h`.
-
-This packages the result of applying `chart_bilinear_identity_h1_0` with
-these data. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_at_v_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -209,7 +160,7 @@ theorem variational_identity_at_v_h
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
     (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
     {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
     (h_thick : Metric.cthickening |h| K_0 ⊆
@@ -275,28 +226,16 @@ theorem variational_identity_at_v_h
     v_h_seq h_v_seq_smooth h_v_seq_cs h_v_seq_supp h_v_seq_l2
     h_v_seq_grad_l2
 
-set_option linter.unusedVariables false in
-/-- After substituting the explicit weak `j`-partial of `v_h` (the symmetric
-difference quotient `D_{-h}^k` of the discrete product rule), the
-variational identity reads in terms of `D_{-h}^k`-shaped integrands.
-The hypothesis bundle provides:
 
-* the variational identity at `v_h` (the conclusion of
-  `variational_identity_at_v_h`),
-* the pointwise-a.e. equality between `weak_partial_v_h j` and the
-  explicit difference-quotient formula. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_v_h_expanded
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN}
+    {η : EuclN → ℝ}
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
-      chartTargetEuclid (I := I) (M := M) α)
+    {_R₀ : ℝ} {h : ℝ}
     (weak_partial_v_h : Fin (Module.finrank ℝ E) → EuclN → ℝ)
     (h_var_id_at_v_h :
       (∫ y in Metric.cthickening |h| K_0,
@@ -326,26 +265,7 @@ theorem variational_identity_v_h_expanded
               (d := Module.finrank ℝ E) k h (D.weak_partial j) z +
             2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
               DifferentialGeometry.Analysis.Sobolev.diffQuot
-                (d := Module.finrank ℝ E) k h D.u_chart z) y)
-    (h_principal_integrable : ∀ i j : Fin (Module.finrank ℝ E),
-      Integrable (fun y =>
-        weightedInvGramOnEuclid (I := I) g α i j y *
-          D.weak_partial i y *
-          weak_partial_v_h j y)
-        ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)))
-    (h_principal_integrable_subst : ∀ i j : Fin (Module.finrank ℝ E),
-      Integrable (fun y =>
-        weightedInvGramOnEuclid (I := I) g α i j y *
-          D.weak_partial i y *
-          DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k (-h)
-            (fun z => (η z) ^ 2 *
-              DifferentialGeometry.Analysis.Sobolev.diffQuot
-                (d := Module.finrank ℝ E) k h (D.weak_partial j) z +
-              2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
-                DifferentialGeometry.Analysis.Sobolev.diffQuot
-                  (d := Module.finrank ℝ E) k h D.u_chart z) y)
-        ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0))) :
+                (d := Module.finrank ℝ E) k h D.u_chart z) y) :
     (∫ y in Metric.cthickening |h| K_0,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -424,26 +344,19 @@ theorem variational_identity_v_h_expanded
   rw [← h_principal_eq]
   exact h_var_id_at_v_h
 
-set_option linter.unusedVariables false in
-/-- After moving the outer `D_{-h}^k` from `G` onto `F` via discrete IBP,
-the principal integrand has the shape
 
-  `- D_h^k(F) · G = - D_h^k(weightedInvGramOnEuclid · D.weak_partial i) ·
-    (η² · D_h^k (D.weak_partial j) + 2η · ∂_j η · D_h^k u_chart)`,
-
-and the variational identity rearranges accordingly. The hypothesis bundle
-provides the IBP equality. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_ibp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN} (_hK_0_compact : IsCompact K_0)
+    (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {η : EuclN → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η) (_hη_supp : HasCompactSupport η)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
+    {R₀ : ℝ} {h : ℝ} (_hh : h ≠ 0) (_hh_le : |h| ≤ R₀)
+    (_h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α)
     (h_expanded :
       (∫ y in Metric.cthickening |h| K_0,
@@ -653,28 +566,19 @@ theorem variational_identity_after_ibp
   rw [h_int_swap_before, h_per_ij_eq, ← h_int_swap_after] at h_expanded
   exact h_expanded
 
-set_option linter.unusedVariables false in
-/-- After applying the discrete product rule on the principal IBP'd term,
-the four cross terms emerge and the variational identity rearranges into
 
-  `principal + cross_1 + cross_2 + cross_3 + f_term = c_term`,
-
-matching the symbolic pieces `principalTerm_chartBilinear`,
-`cross_1_term_chartBilinear`, `cross_2_term_chartBilinear`,
-`cross_3_term_chartBilinear`, `f_term_chartBilinear`,
-`c_term_chartBilinear`. The hypothesis bundle provides the algebraic
-expansion as a per-`(i, j)` integral identity. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_product_rule
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN} (_hK_0_compact : IsCompact K_0)
+    (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {η : EuclN → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η) (_hη_supp : HasCompactSupport η)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
+    {R₀ : ℝ} {h : ℝ} (_hh : h ≠ 0) (_hh_le : |h| ≤ R₀)
+    (_h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α)
     (h_after_ibp :
       -(∫ y in Metric.cthickening |h| K_0,

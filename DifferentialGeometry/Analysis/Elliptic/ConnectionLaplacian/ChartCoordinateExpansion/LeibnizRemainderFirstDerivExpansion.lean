@@ -2,58 +2,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentFormula
 
-/-!
-# T₀-linear expansion of the chart-α Leibniz remainder
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file expands
-the chart-α Leibniz remainder
-`chartLeibnizRemainder g r s α T₀ Idx Jdx b` further, by chaining the
-predecessor pure-first-derivative form
-`chartLeibnizRemainder_eq_firstDerivOnly` with the chart-coordinate
-covariant-derivative component formula
-(`covDerivComponent_eq_euclidPartial_add_lowerOrder`).
-
-The chart-α `(Idx, Jdx)` projection
-`π_(Idx, Jdx)((triv α).clmAt b (covApply cov_RS ∂_k T₀.toSection b))`
-expands, on the chart-α Levi-Civita good set, into
-
-```
-euclidPartial k (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α Idx Jdx))
-    (toEuclidean ((extChartAt I α) b))
-+ Σ_p covDerivLowerOrderCoeff g r s α k Idx p.1 Jdx p.2
-        (toEuclidean ((extChartAt I α) b)) ·
-    chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α p.1 p.2)
-        (toEuclidean ((extChartAt I α) b)),
-```
-
-a finite linear combination of *T₀-data* — the Euclidean partial derivative of
-the chart-pushed raw `(Idx, Jdx)` component of `T₀`, plus undifferentiated raw
-chart components of `T₀` weighted by `C^∞` coefficients
-(`covDerivLowerOrderCoeff`) which are independent of `T₀`.
-
-Plugged into the cross sum
-`Σ_{i, l, k} C^l_i(b) · (∂_l-dir of C^k_i)(b) · [chart-α (Idx, Jdx) projection]`
-this packages the chart-α Leibniz remainder as a T₀-linear expression in raw
-chart-pushed components of `T₀` and their first chart-Euclidean partial
-derivatives, with T₀-independent smooth coefficients.
-
-## Main result
-
-* `chartLeibnizRemainder_eq_T₀_linear` — the chart-α Leibniz remainder
-  written explicitly as a finite linear combination, with `T₀`-independent
-  coefficients built from the chart-frame coordinate matrix and the
-  `covDerivLowerOrderCoeff` family, of the chart-Euclidean partial derivative
-  `euclidPartial k (chartPushedRaw raw_α^{IJ})` and the undifferentiated
-  chart-pushed raw components `chartPushedRaw raw_α^p`. The identity is
-  unconditional in the chart atlas — no chart-locality predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -82,11 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Pointwise bridge.** At a chart-α good-set point `b`, the chart-α
-`(Idx, Jdx)` projection through the canonical trivialisation of
-`covApply cov_RS ∂_k T₀.toSection b` equals
-`covDerivComponentEuclid g r s α T₀ k Idx Jdx (toEuclidean ((extChartAt I α)
-b))`. -/
 private lemma tensorChartComponentProjection_covApply_eq_covDerivComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -131,10 +77,6 @@ private lemma tensorChartComponentProjection_covApply_eq_covDerivComponentEuclid
   exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (I := I) (M := M) g r s T₀ α k (b := b) hb_good
 
-/-- **Pointwise expansion of the chart-α (Idx, Jdx) projection of `(triv
-α).clmAt b (covApply ∂_k T₀.toSection b)` at a chart-α good-set point as the
-chart-Euclidean partial of the chart-pushed raw component plus the lower-order
-correction term, all evaluated at `toEuclidean ((extChartAt I α) b)`.** -/
 private lemma tensorChartComponentProjection_covApply_eq_T₀_expansion
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -182,31 +124,6 @@ private lemma tensorChartComponentProjection_covApply_eq_T₀_expansion
     (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α p.1 p.2)
     hy_target).symm
 
-/-- **T₀-linear expansion of the chart-α Leibniz remainder.**
-
-At a base point `b` lying in the chart-α partition-of-unity tsupport
-intersected with the chart-α Levi-Civita good set, the chart-α Leibniz remainder
-expands into the triple sum
-
-```
-Σ_{i, l, k} C^l_i(b) · (∂_l-dir C^k_i)(b) · [
-    euclidPartial k (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α
-        Idx Jdx)) (toEuclidean ((extChartAt I α) b))
-  + Σ_p covDerivLowerOrderCoeff g r s α k Idx p.1 Jdx p.2
-        (toEuclidean ((extChartAt I α) b)) ·
-      chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α p.1 p.2)
-        (toEuclidean ((extChartAt I α) b))
-]
-```
-
-where `C^l_i := chartFrameNormGlobalSmoothCoordMatrix g α i l` and
-`(∂_l-dir C^k_i)(b) := extDerivFun (C^k_i) b (chartBasisVecFiber α l b)`.
-
-The chart-α Leibniz remainder is *T₀-linear*: the bracketed factor in each
-summand is a finite linear combination of `T₀`-data (the chart-Euclidean
-partial derivative of the chart-pushed raw `(Idx, Jdx)` component of `T₀`, plus
-undifferentiated raw chart components of `T₀`) with `T₀`-independent smooth
-coefficients (`covDerivLowerOrderCoeff`). -/
 theorem chartLeibnizRemainder_eq_T₀_linear
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

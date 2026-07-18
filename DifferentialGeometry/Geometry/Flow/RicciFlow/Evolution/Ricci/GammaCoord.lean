@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution GammaCoord
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +25,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -54,8 +54,8 @@ def christoffelVariationCovDerivCoordAt
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x₀ dir j a *
         gammaDt t x₀ i a k)
 
-/-- Torsion-freeness of a Ricci-flow solution makes coordinate Christoffel
-symbols symmetric in the two lower slots at regular times. -/
+
+
 private theorem christoffelCoordAt_symm_of_isSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -80,8 +80,8 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
   rw [hzero] at hskew
   exact sub_eq_zero.mp hskew.symm
 
-/-- Time derivative of a spatial coordinate derivative of a Christoffel
-component, supplied by the mixed derivative regularity predicate. -/
+
+
 private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -109,8 +109,8 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
       (t := (t : Real)) t.2 (x := x₀) hx₀
       (coordinateFrameAt (I := I) x₀ dir x₀)
 
-/-- Time derivative of a coordinate Christoffel coefficient from a supplied
-Christoffel variation formula. -/
+
+
 private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -133,11 +133,11 @@ private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     coordinateFrameAt_mem (I := I) x₀
   simpa [DifferentialGeometry.Integral.Connection.christoffelCoordAt] using hvar t x₀ hx₀ i j k
 
-/-- Differentiate the coordinate Christoffel curvature coefficient in time.
 
-This is the full-coordinate version of the usual calculation
-`∂ₜ R = ∇(∂ₜ Γ) - ∇(∂ₜ Γ)`: the `Γ A` product terms are kept and then
-regrouped into the covariant derivative of the Christoffel variation tensor. -/
+
+
+
+
 theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -273,7 +273,7 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     covDChristoffelVariation] using
     (christoffel_curv_variation_algebra Γ A dA hΓsymm i k j m)
 
-/-- Differentiate the coordinate Christoffel trace formula for Ricci in time. -/
+
 theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -321,8 +321,8 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
   refine hsum.congr_deriv ?_
   simp [ricciVariationFromConnectionRHSInFrame, Finset.sum_sub_distrib]
 
-/-- Coordinate-frame Ricci variation formula from differentiating the
-Christoffel Ricci trace formula. -/
+
+
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -337,9 +337,6 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
@@ -372,18 +369,18 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
         DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j
     rw [hRicTrace s hs x₀]
     exact DifferentialGeometry.Integral.Connection.ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
-      (I := I) (S.family.connection s) (hcov s hs) (Rm13 s) x₀
+      (I := I) (S.family.connection s) (connSmoothOfSol (I := I) S hS s hs) (Rm13 s) x₀
       (hRm s hs) (hcurv s hs) i j
   exact hderiv.congr
     (fun s hs => hricci s hs)
     (hricci (t : Real) (D.regular_subset t.2))
 
-/-- Covariantly differentiating the Ricci-flow Christoffel variation and using
-`nabla g^{-1} = 0` turns the actual Christoffel-variation tensor into the
-book expression with second Ricci derivatives.
 
-This is the precise component product-rule calculation for
-`nabla_d (g^{kl} B_ijl) = g^{kl} nabla_d B_ijl`. -/
+
+
+
+
+
 theorem gammaCovNab2Core
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -441,16 +438,16 @@ theorem gammaCovNab2Core
                 (I := I) S frame hframe nablaRic (t : Real) x₀ d j i l +
               ricciSecondCovDerivCompInFrame
                 (I := I) S frame hframe nablaRic (t : Real) x₀ d l i j) := by
-    /-
-    This is the only remaining local calculus step in this theorem.  It is the
-    finite-sum/product rule for
-    `gammaDt^k_ij = ∑ l, gInv^{kl} B_ijl`, followed by the already-proved
-    metric-layer identity
-    `inverseMetricCovDerivCompInFrame_eq_zero` to cancel the `∂_d gInv`
-    terms.  The theorem receives only the exact pointwise differentiability,
-    inverse-covariant-derivative, and second-Ricci realization inputs needed for
-    the finite-sum algebraic normalization.
-    -/
+
+
+
+
+
+
+
+
+
+
     let Γ : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
       fun up low => DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
         (S.family.connection (t : Real)) x₀ d low up
@@ -593,9 +590,9 @@ theorem gammaCovNab2Core
   refine Finset.sum_congr rfl fun l _hl => ?_
   rw [hnabla2_at d i j l, hnabla2_at d j i l, hnabla2_at d l i j]
 
-/-- Legacy-package wrapper for `gammaCovNab2Core`.  It keeps the old consumer
-available while the canonical coordinate route supplies the core inputs
-theorem-by-theorem. -/
+
+
+
 theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -681,11 +678,11 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     (I := I) S gInv nablaRic nabla2Ric x₀ t d k i j
     hginv_mdiff hN_mdiff hginv_zero hnabla2_at
 
-/-- Ricci-flow specialization of the coordinate-frame Ricci variation formula:
-differentiate the Christoffel Ricci trace formula, use the Ricci-flow
-Christoffel evolution, then substitute `nabla A = nabla^2 Ric`.  The only
-regularity input left explicit is the honest mixed derivative
-`partial_t partial_x Gamma = partial_x partial_t Gamma`. -/
+
+
+
+
+
 theorem ricciVarCore
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -734,9 +731,6 @@ theorem ricciVarCore
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -758,7 +752,7 @@ theorem ricciVarCore
   have hlocal :=
     ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
       (I := I) S hS (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic)
-      Rm13 x₀ hRicTrace hRm hcov hcurv hvar hmix
+      Rm13 x₀ hRicTrace hRm hcurv hvar hmix
   intro t x hx i j
   have hx_eq : x = x₀ := by
     simpa using hx
@@ -824,9 +818,9 @@ theorem ricciVarCore
     rw [hsum₁, hsum₂]
   exact hbase.congr_deriv hEq
 
-/-- Compatibility wrapper for the legacy metric-frame regularity route.  The
-new core theorem `ricciVarCore` takes Christoffel evolution and the pointwise
-covariant-derivative inputs directly. -/
+
+
+
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -857,9 +851,6 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -938,7 +929,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
   exact ricciVarCore
     (I := I) S hS gInv nablaRic nabla2Ric Rm13 x₀ hGamma
     hginv_mdiff hN_mdiff hginv_zero hnabla2_at
-    hRicTrace hRm hcov hcurv hmix
+    hRicTrace hRm hcurv hmix
 
 end CoordinateConnectionVariation
 

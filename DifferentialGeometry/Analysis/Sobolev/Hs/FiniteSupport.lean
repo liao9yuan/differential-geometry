@@ -1,42 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
 import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
 
-/-!
-# Finitely-supported elements of the spectral `Hˢ` Sobolev scale (scalar fields)
-
-For a closed Riemannian manifold `(M, g)` and any exponent `σ : ℝ`, the
-scalar spectral Sobolev space `scalarHs g σ` contains the spectral basis
-vectors `basisVec g σ i`, defined by the coordinate family
-`j ↦ if j = i then 1 else 0`. Their finite linear combinations form the
-submodule `finiteSupportSubmodule g σ` of all elements with
-finitely-supported eigenbasis coordinate family, which is shown here to
-be **dense** in `Hˢ`.
-
-The density proof transports the canonical finitely-supported `ℓ²`
-approximation `lp.hasSum_single` of `rescaleEquivL2 T` back along the
-diagonal rescaling isometric equivalence `rescaleEquivL2`.
-
-## Main definitions
-
-* `basisVec g σ i` — the `i`-th spectral basis vector of `scalarHs g σ`.
-* `finiteSupportSubmodule g σ` — the submodule of `scalarHs g σ` of
-  elements with finitely-supported coordinate family.
-
-## Main results
-
-* `mem_finiteSupportSubmodule` — membership criterion in terms of the
-  support of the coordinate family.
-* `hasSum_smul_basisVec_of_finite` — a finitely-supported element is the
-  finite `ℝ`-linear combination of basis vectors over its support.
-* `hasSum_smul_basisVec` — every `T ∈ scalarHs g σ` is the unconditional
-  sum of its spectral basis components `(coeff i T) • basisVec g σ i`.
-* `mem_closure_finiteSupportSubmodule` — every element of `scalarHs g σ`
-  lies in the closure of `finiteSupportSubmodule`.
-* `finiteSupportSubmodule_topologicalClosure_eq_top` — the
-  topological closure of `finiteSupportSubmodule` is the whole space.
-* `finiteSupportSubmodule_dense` — the finitely-supported elements are
-  dense in `scalarHs g σ`.
--/
 
 noncomputable section
 
@@ -68,8 +32,6 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M} {σ : ℝ}
 
-/-- A finitely-supported coordinate family `f` defines an element of
-`scalarHs g σ` for every exponent `σ`. -/
 def ofFiniteSupport (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (f : EigenIdx (I := I) (M := M) g → ℝ)
     (hf : (Function.support f).Finite) :
@@ -85,15 +47,14 @@ def ofFiniteSupport (g : SmoothRiemannianMetric I M) (σ : ℝ)
     rw [hfi]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ofFiniteSupport_coeff (g : SmoothRiemannianMetric I M)
     (σ : ℝ) (f : EigenIdx (I := I) (M := M) g → ℝ)
     (hf : (Function.support f).Finite) :
     (ofFiniteSupport (I := I) (M := M) g σ f hf).coeff = f := rfl
 
 open scoped Classical in
-/-- The standard basis coordinate family `j ↦ if j = i then 1 else 0`
-defines an element of every `scalarHs g σ` — the spectral representation
-of the `i`-th eigenvector. -/
+
 def basisVec (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i : EigenIdx (I := I) (M := M) g) :
     scalarHs (I := I) (M := M) g σ :=
@@ -107,14 +68,12 @@ def basisVec (g : SmoothRiemannianMetric I M) (σ : ℝ)
       simpa using hj)
 
 open scoped Classical in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma basisVec_coeff (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i j : EigenIdx (I := I) (M := M) g) :
     (basisVec (I := I) (M := M) g σ i).coeff j =
       (if j = i then (1 : ℝ) else 0) := rfl
 
-/-- The submodule of `scalarHs g σ` consisting of elements whose
-eigenbasis coordinate family has finite support. Equivalently, the span
-of the spectral basis vectors `basisVec g σ`. -/
 def finiteSupportSubmodule (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     Submodule ℝ (scalarHs (I := I) (M := M) g σ) where
   carrier := {T | (Function.support T.coeff).Finite}
@@ -141,15 +100,13 @@ def finiteSupportSubmodule (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     intro hcon
     exact hi (by rw [hcon, mul_zero])
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma mem_finiteSupportSubmodule
     (T : scalarHs (I := I) (M := M) g σ) :
     T ∈ finiteSupportSubmodule (I := I) (M := M) g σ ↔
       (Function.support T.coeff).Finite := Iff.rfl
 
-/-- A finitely-supported `scalarHs g σ` element equals the finite
-`ℝ`-linear combination of basis vectors over its support: if
-`T ∈ finiteSupportSubmodule g σ`, then
-`T = ∑_{i ∈ hT.toFinset} (coeff i T) • basisVec g σ i`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasSum_smul_basisVec_of_finite
     (T : scalarHs (I := I) (M := M) g σ)
     (hT : T ∈ finiteSupportSubmodule (I := I) (M := M) g σ) :
@@ -182,9 +139,8 @@ theorem hasSum_smul_basisVec_of_finite
     simp [hzero]
 
 open scoped Classical in
-/-- The rescaling isometry carries the spectral basis component
-`(coeff i T) • basisVec g σ i` to the canonical `ℓ²` unit family
-`lp.single 2 i (√(1+λᵢ)^σ · coeff i T)`. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleEquivL2_smul_basisVec
     (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -202,11 +158,7 @@ lemma rescaleEquivL2_smul_basisVec
   · subst h; simp
   · simp [h]
 
-/-- Every `T ∈ scalarHs g σ` is the unconditional sum of its spectral
-basis components: `T = ∑ᵢ (coeff i T) • basisVec g σ i`. The proof
-transports the canonical finitely-supported `ℓ²` approximation
-`lp.hasSum_single` of `rescaleEquivL2 T` back along the diagonal
-rescaling isometry. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasSum_smul_basisVec
     (T : scalarHs (I := I) (M := M) g σ) :
     HasSum (fun i : EigenIdx (I := I) (M := M) g =>
@@ -232,10 +184,7 @@ theorem hasSum_smul_basisVec
   rw [LinearIsometryEquiv.coe_toContinuousLinearEquiv,
     rescaleEquivL2_smul_basisVec]
 
-/-- Every `T ∈ scalarHs g σ` is the limit of the finite partial sums of
-its spectral basis expansion: the finitely-supported elements (the span
-of `basisVec g σ`) are dense in `scalarHs g σ`. Stated as `T` lying in
-the topological closure of the finitely-supported submodule. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_closure_finiteSupportSubmodule
     (T : scalarHs (I := I) (M := M) g σ) :
     T ∈ closure
@@ -256,11 +205,7 @@ theorem mem_closure_finiteSupportSubmodule
 
 end scalarHs
 
-/-- The finitely-supported elements form a dense submodule of
-`scalarHs g σ`: their topological closure is the whole space.
-Equivalently, the span of the spectral basis vectors `basisVec g σ` is
-dense — this is what lets bounded operators be extended from finite
-linear combinations of eigenvectors to all of `scalarHs g σ`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarHs.finiteSupportSubmodule_topologicalClosure_eq_top
     {g : SmoothRiemannianMetric I M} {σ : ℝ} :
     (scalarHs.finiteSupportSubmodule (I := I) (M := M)
@@ -270,7 +215,7 @@ theorem scalarHs.finiteSupportSubmodule_topologicalClosure_eq_top
   rw [← SetLike.mem_coe, Submodule.topologicalClosure_coe]
   exact scalarHs.mem_closure_finiteSupportSubmodule (I := I) (M := M) T
 
-/-- The set of finitely-supported elements of `scalarHs g σ` is dense. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarHs.finiteSupportSubmodule_dense
     {g : SmoothRiemannianMetric I M} {σ : ℝ} :
     Dense (scalarHs.finiteSupportSubmodule (I := I) (M := M) g σ :

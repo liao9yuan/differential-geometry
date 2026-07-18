@@ -1,37 +1,12 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-/-!
-# Manifold-side Sobolev embedding `W^{1,p}_chart(M) ↪ L^q(M, μ_g)` for `q ≤ p`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
-on a finite-dimensional real inner-product space `E`, this file lifts the
-chart-pushed `q ≤ p` Hölder embedding (already provided in `Embedding.lean` and
-quantified by `eLpNorm_chartPushed_q_le_wkpNorm_one_subexp`) to a manifold-side
-`L^q` bound under the Riemannian volume measure `riemannianMeasure g`.
-
-The argument is a partition-of-unity decomposition: writing
-`u = ∑_{α ∈ S} ρ_α · u` over the (finite, compactness) finite-support index set
-`S` of the canonical chart-atlas partition of unity, applying Minkowski for the
-`L^q`-norm of the manifold sum, and translating each per-chart `L^q` norm via
-the volume bridge `eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset`
-combined with the chart-pushed Hölder bound.
-
-## Main results
-
-* `MemWkpChart.memLp_riemannianMeasure_of_le_exponent` —
-  `MemWkpChart g 1 p u` together with `1 ≤ q ≤ p < ∞` implies `u ∈ L^q(M, μ_g)`.
-
-* `eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent` —
-  the quantitative bound, with a constant depending only on `g`, `p`, `q`, and
-  the canonical partition of unity.
--/
 
 noncomputable section
 
@@ -53,8 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- On the chart-target image of `α`, the partition-of-unity-weighted
-chart-push agrees pointwise with the raw chart-push of `(ρ α) · u`. -/
+omit [IsManifold I ∞ M] in
 private lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -67,8 +41,7 @@ private lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) hy]
 
-/-- The `chartPushed` and `chartPushedRaw (ρ α · u)` are equal a.e. on the
-restriction to `chartTargetEuclid α`. -/
+omit [IsManifold I ∞ M] in
 private lemma chartPushed_eq_chartPushedRaw_pou_ae'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α u
@@ -82,9 +55,8 @@ private lemma chartPushed_eq_chartPushedRaw_pou_ae'
     (I := I) (M := M) ρ α u hy
 
 omit [IsManifold I ∞ M] in
-/-- The (closed) support of `ρ_α · u` is contained in the (closed) support of
-`ρ_α`. This is a `tsupport`-level packaging of `tsupport_smul_subset_left`
-specialised to scalar multiplication. -/
+
+omit [FiniteDimensional ℝ E] in
 private lemma tsupport_pou_mul_subset_tsupport_pou'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
@@ -97,7 +69,8 @@ private lemma tsupport_pou_mul_subset_tsupport_pou'
     (f := fun x : M => ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
 
 omit [IsManifold I ∞ M] in
-/-- Measurability of `(ρ α) · u` on `M` for measurable `u`. -/
+
+omit [FiniteDimensional ℝ E] in
 private lemma measurable_pou_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {u : M → ℝ} (hu : Measurable u) :
@@ -106,8 +79,6 @@ private lemma measurable_pou_mul
     (ρ α).contMDiff.continuous
   exact hcont.measurable.mul hu
 
-/-- On a compact manifold, the canonical chart-atlas POU finite-support sum
-expression: `u(x) = ∑_{α ∈ chartAtlasPOU_finset} ρ_α(x) · u(x)` for every `x : M`. -/
 private theorem chartAtlasPOU_pou_decomp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (u : M → ℝ) (x : M) :
@@ -122,11 +93,6 @@ private theorem chartAtlasPOU_pou_decomp
       (I := I) (M := M) x
   rw [← Finset.sum_mul, hsum, one_mul]
 
-/-- Per-chart bound combining the chart-target Hölder embedding and the
-manifold-to-chart-target measure bridge: for `q ≤ p` with `1 ≤ q ≤ p < ∞`, the
-manifold `L^q` norm of `ρ_α · u` is bounded by a constant times the chart
-Sobolev `W^{1,p}` norm of `u`. The constant depends only on `α`, `g`, `p`, `q`,
-and the canonical partition of unity. -/
 private theorem perChart_eLpNorm_le
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -241,9 +207,6 @@ private theorem perChart_eLpNorm_le
         rw [hK_α_def, hH_α_def]
         ring
 
-/-- Per-chart total constant produced by `perChart_eLpNorm_le`, packaged as a
-function `M → ℝ≥0∞`. We retain only the existence; the value is selected via
-`Classical.choose`. -/
 private noncomputable def perChartConst
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -281,8 +244,6 @@ private lemma perChartConst_bound
   (Classical.choose_spec (perChart_eLpNorm_le (I := I) (M := M) g
     hp_one hp_top hq_one hq_top hqp α)).2 hu_meas hu
 
-/-- For each chart `α`, `ρ_α · u` is in `L^q(M, μ_g)` whenever `u ∈ W^{1,p}_chart(M)`,
-`1 ≤ q ≤ p < ∞`. -/
 private theorem perChart_memLp_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -320,8 +281,6 @@ private theorem perChart_memLp_riemannianMeasure
       · exact lt_top_iff_ne_top.mpr hN
     exact lt_of_le_of_lt h_bound hRHS_lt_top
 
-/-- Continuous embedding `W^{1,p}_chart(M) ↪ L^q(M, μ_g)` for `q ≤ p` on a closed
-manifold, via Hölder + chart-density-volume bridge. -/
 theorem MemWkpChart.memLp_riemannianMeasure_of_le_exponent
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -355,10 +314,6 @@ theorem MemWkpChart.memLp_riemannianMeasure_of_le_exponent
   exact perChart_memLp_riemannianMeasure (I := I) (M := M) g hp_one hp_top
     hq_one hq_top hqp hu_meas hu α
 
-/-- Quantitative `q ≤ p` Sobolev-Hölder embedding: there exists a constant `C`
-(depending on `g`, `p`, `q`, the canonical chart-atlas POU) such that for every
-`u ∈ W^{1,p}_chart(M)` measurable on `M`,
-`eLpNorm u q μ_g ≤ ENNReal.ofReal C · wkpNormChart g 1 p u`. -/
 theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

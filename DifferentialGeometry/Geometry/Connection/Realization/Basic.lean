@@ -9,21 +9,11 @@ import Mathlib.Analysis.InnerProductSpace.Dual
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-/-!
-# Scalar-tower scaffolding for the realization layer
-
-Imports, instance verification, and `IsScalarTower` for the concrete instantiation
-`k = ℝ`, `R = C^∞(M, ℝ)`, `V = Γ(TM)`.
--/
 
 noncomputable section
 
 open scoped Manifold ContDiff
 open Bundle
-
--- ============================================================
--- Standard variable context
--- ============================================================
 
 section SmoothRicciFlowContext
 
@@ -33,10 +23,6 @@ variable
   (I : ModelWithCorners ℝ E H)
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
-
--- ============================================================
--- Instance verification
--- ============================================================
 
 section InstanceVerification
 
@@ -50,24 +36,11 @@ example : ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I := infer
 
 end InstanceVerification
 
--- ============================================================
--- IsScalarTower: ℝ-action compatible with C^∞(M,ℝ)-action
--- ============================================================
-
-/-- Pointwise: `(r * f(x)) • s(x) = r • (f(x) • s(x))` by `mul_smul`. -/
 instance smoothSectionScalarTower :
     IsScalarTower ℝ C^∞⟮I, M; ℝ⟯ Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ where
   smul_assoc r f s := by ext x; exact mul_smul (r : ℝ) (f x : ℝ) (s x)
 
--- ============================================================
--- Invertible (2 : C^∞(M, ℝ))
--- ============================================================
-
-/-! The constant function `1/2` provides the two-sided inverse of `2` in `C^∞(M, ℝ)`.
-We lift `Invertible (2 : ℝ)` through `algebraMap`. -/
-
-/-- `2 : C^∞(M, ℝ)` is invertible (with inverse the constant function `1/2`).
-Constructed by mapping `Invertible (2 : ℝ)` through `algebraMap ℝ C^∞(M, ℝ)`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem two_smooth_eval (x : M) : (2 : C^∞⟮I, M; ℝ⟯) x = (2 : ℝ) := by
   have h2a : (2 : C^∞⟮I, M; ℝ⟯) * (1 : C^∞⟮I, M; ℝ⟯) = (2 : C^∞⟮I, M; ℝ⟯) := mul_one _
   have h_two_eq : (2 : C^∞⟮I, M; ℝ⟯) = (1 : C^∞⟮I, M; ℝ⟯) + (1 : C^∞⟮I, M; ℝ⟯) := by norm_num

@@ -7,21 +7,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Manifold derivative of the projection of an integral curve
-
-For an integral curve `f : ℝ → TangentBundle I M` of the chart-fixed
-geodesic vector field `geodesicVectorFieldChart g α` at a base time `t₀`,
-the projection curve `γ t := (f t).proj` carries a manifold derivative at
-`t₀` equal to the fibre vector `(f t₀).snd : TangentSpace I (f t₀).proj`.
-
-This is the manifold-level "horizontal lift" identity: a curve in `T M`
-whose tangent vector (in the secondary tangent bundle `T(T M)`) is the
-canonical geodesic vector field projects to a base curve whose
-manifold derivative is the fibre component of the lift.
--/
 
 noncomputable section
 
@@ -34,17 +20,14 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-/-- **`chartFiberCoord` as a `tangentCoordChange`.** When `p.proj` lies
-in the chart-source at `α`, the chart-`α` fibre coordinate of `p : T M`
-equals the tangent coordinate change of `p.snd` from the chart at
-`p.proj` to the chart at `α`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartFiberCoord_eq_tangentCoordChange
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -77,11 +60,6 @@ lemma chartFiberCoord_eq_tangentCoordChange
     E → E) p.snd = _
   rw [happ]
 
-/-- The first component of the secondary trivialisation's `continuousLinearMapAt`
-at a `T M` point `p` with `p.proj ∈ chartAt H α source` equals
-`tangentCoordChange I p.proj α p.proj ∘ Prod.fst`. This expresses the
-block-triangular structure of the chart-transition fderiv on `T M`:
-the base-chart change only sees the H-component. -/
 lemma fst_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -283,13 +261,6 @@ lemma fst_continuousLinearMapAt_secondaryTriv
     rfl
   exact hgoal
 
-/-- **Fibre component of the chart-of-`TM` chart at a base point `q`, in
-`tangentCoordChange` form.** For `p : TangentBundle I M` whose projection
-lies in the chart-source of `q.proj`, the second component of
-`extChartAt I.tangent q p` equals
-`tangentCoordChange I p.proj q.proj p.proj p.snd`. This rewrites
-`extChartAt_tangent_apply_snd` (stated via the trivialisation's
-`continuousLinearMapAt`) into the core coordinate-change form. -/
 lemma extChartAt_tangent_apply_snd_tangentCoordChange
     (q : TangentBundle I M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -311,39 +282,16 @@ lemma extChartAt_tangent_apply_snd_tangentCoordChange
   rw [hsnd, hCLM_eq_fiber]
   exact chartFiberCoord_eq_tangentCoordChange (I := I) (α := q.proj) (p := p) hp
 
-/-- **Closed form of the second component of the iterated-tangent
-transition map.** For a base `T M`-point `p` and a chart basepoint `α`,
-the map
-
-`z ↦ tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2`
-
-is the second component of
-`Ψ := extChartAt I.tangent ⟨α, 0⟩ ∘ (extChartAt I.tangent p).symm`. We
-package it here so the fibre-block derivative lemma below has a named
-target. -/
-def secondaryTrivSndForm (α : M) (p : TangentBundle I M) (z : E × E) : E :=
+def secondaryTrivFiberComponentMap (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2
 
-/-- **Second (fibre) block of the secondary trivialisation — derivative
-form.** Companion of `fst_continuousLinearMapAt_secondaryTriv`. For a
-`T M`-point `p` whose projection lies in the chart-source at `α`, the
-*second* component of the secondary trivialisation's `continuousLinearMapAt`
-at `p`, applied to `w : E × E`, equals the Fréchet derivative within
-`range I.tangent` (at the chart-base point `extChartAt I.tangent p p`) of
-the closed-form map `secondaryTrivSndForm I α p`, applied to `w`.
-
-Unlike the first block (which is purely the first-order base coordinate
-change, with no second derivative), the second block genuinely encodes the
-*second derivative* of the base chart transition, through the dependence of
-the leading `tangentCoordChange` on its base point
-`(extChartAt I p.proj).symm z.1`. -/
 lemma snd_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
     (w : E × E) :
     ((trivializationAt (E × E) (TangentSpace I.tangent)
         (⟨α, (0 : E)⟩ : TangentBundle I M)).continuousLinearMapAt ℝ p w).2 =
-      (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent)
+      (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent)
         ((extChartAt I.tangent p) p)) w := by
   classical
   set e := trivializationAt (E × E) (TangentSpace I.tangent)
@@ -396,7 +344,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
     exact Filter.image_mem_map hU_nhds
   have hpoint : ∀ {q : TangentBundle I M}, q ∈ U →
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)) q).2 =
-        secondaryTrivSndForm (I := I) α p ((extChartAt I.tangent p) q) := by
+        secondaryTrivFiberComponentMap (I := I) α p ((extChartAt I.tangent p) q) := by
     intro q hqU
     have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
     have hq_proj_src_α : q.proj ∈ (chartAt H α).source := hqU.2
@@ -422,7 +370,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
       rw [hz1]; exact (extChartAt I p.proj).left_inv hq_proj_ext_src
     have hq_proj_ext_src_α : q.proj ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact hq_proj_src_α
-    unfold secondaryTrivSndForm
+    unfold secondaryTrivFiberComponentMap
     rw [hsymm_z1, hz2]
     have hq_proj_ext_src_self : q.proj ∈ (extChartAt I q.proj).source :=
       mem_extChartAt_source (I := I) q.proj
@@ -431,7 +379,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
       ⟨⟨hq_proj_ext_src_self, hq_proj_ext_src⟩, hq_proj_ext_src_α⟩]
     exact hLHS.symm
   have hsnd_Ψ_eq :
-      (secondaryTrivSndForm (I := I) α p) =ᶠ[𝓝[range I.tangent] basepoint]
+      (secondaryTrivFiberComponentMap (I := I) α p) =ᶠ[𝓝[range I.tangent] basepoint]
         (fun z : E × E => (Ψ z).2) := by
     rw [Filter.eventuallyEq_iff_exists_mem]
     refine ⟨(extChartAt I.tangent p) '' U, hVnhds, ?_⟩
@@ -439,31 +387,31 @@ lemma snd_continuousLinearMapAt_secondaryTriv
     have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
     have hsymm : (extChartAt I.tangent p).symm z = q := by
       rw [← hqEq]; exact (extChartAt I.tangent p).left_inv hq_src
-    change secondaryTrivSndForm (I := I) α p z =
+    change secondaryTrivFiberComponentMap (I := I) α p z =
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
         ((extChartAt I.tangent p).symm z)).2
     rw [hsymm, ← hqEq]
     exact (hpoint hqU).symm
   have hsnd_basepoint :
-      (secondaryTrivSndForm (I := I) α p) basepoint =
+      (secondaryTrivFiberComponentMap (I := I) α p) basepoint =
         (fun z : E × E => (Ψ z).2) basepoint := by
     have hsymmp : (extChartAt I.tangent p).symm basepoint = p := by
       rw [hbase_def]
       exact (extChartAt I.tangent p).left_inv
         (mem_extChartAt_source (I := I.tangent) p)
-    change secondaryTrivSndForm (I := I) α p basepoint =
+    change secondaryTrivFiberComponentMap (I := I) α p basepoint =
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
         ((extChartAt I.tangent p).symm basepoint)).2
     rw [hsymmp, hbase_def]
     exact (hpoint hU_mem).symm
   have hform_hasD :
-      HasFDerivWithinAt (secondaryTrivSndForm (I := I) α p)
+      HasFDerivWithinAt (secondaryTrivFiberComponentMap (I := I) α p)
         ((ContinuousLinearMap.snd ℝ E E).comp
           (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p))
         (range I.tangent) basepoint :=
     hΨ_snd.congr_of_eventuallyEq hsnd_Ψ_eq hsnd_basepoint
   have hfderivWithin_eq :
-      fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) basepoint =
+      fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) basepoint =
         (ContinuousLinearMap.snd ℝ E E).comp
           (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p) :=
     hform_hasD.fderivWithin (ModelWithCorners.uniqueDiffWithinAt_image I.tangent)
@@ -471,11 +419,6 @@ lemma snd_continuousLinearMapAt_secondaryTriv
   rw [hfderivWithin_eq]
   rfl
 
-/-- **First fibre component of the chart-fixed geodesic vector field.**
-For a chart basepoint `α : M` and a tangent-bundle point `p : T M`
-whose projection lies in the chart-source at `α`, the first component
-(in the canonical `E × E` representation of `TangentSpace I.tangent p`)
-of `geodesicVectorFieldChart g α p` equals the fibre vector `p.snd`. -/
 theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M}
@@ -557,13 +500,6 @@ theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     exact hself_snd
   exact this
 
-/-- **Manifold derivative of the projection of an integral curve.** For a
-local integral curve `f : ℝ → TangentBundle I M` of the chart-fixed
-geodesic vector field `geodesicVectorFieldChart g α` at base time `t₀`,
-whose projection `(f t₀).proj` lies in the chart-source at `α`, the
-manifold derivative of the projection curve `t ↦ (f t).proj`, evaluated
-at `t₀ : ℝ` against the unit tangent vector `1 : ℝ`, equals the fibre
-vector `(f t₀).snd : TangentSpace I (f t₀).proj`. -/
 theorem IsMIntegralCurveAt.mfderiv_proj_one [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     {α : M} {t₀ : ℝ}

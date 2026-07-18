@@ -4,54 +4,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 
-/-!
-# Metric compatibility of the chart-local Levi-Civita covariant derivative
-
-The chart-local Levi-Civita covariant derivative
-`chartLeviCivita g α : (Π x : M, TangentSpace I x) →
-  (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x)`,
-defined chart-by-chart at the basepoint `α : M` (see
-`LeviCivitaChartLocal.lean`), satisfies the metric-compatibility identity on
-its open *good set*:
-$$
-  \mathrm{d}\bigl(b \mapsto g_b(Y_b, Z_b)\bigr)(x)\,v
-    = g_x((\nabla_v Y)_x, Z_x) + g_x(Y_x, (\nabla_v Z)_x).
-$$
-
-In Mathlib's notation, with `cov := chartLeviCivita g α`, this reads
-$$
-  (\mathrm{mfderiv}\,I\,\mathbb{R}\,(b \mapsto g_b(Y_b, Z_b))\,x)\,v
-    = g_x(\mathrm{cov}\,Y\,x\,v,\,Z_x) + g_x(Y_x,\,\mathrm{cov}\,Z\,x\,v).
-$$
-
-## Proof outline
-
-1. **LHS**: Express `g_b(Y_b, Z_b)` for `b` in a neighborhood of the good-set
-   point `x` using `g_inner_eq_chart_sum`. Then use
-   `mfderiv_scalar_eq_chart_fderiv` to convert the manifold derivative into a
-   Fréchet derivative on the chart target. The resulting object is the Fréchet
-   derivative of a sum-of-products of three scalar functions on `E`, evaluated
-   on `trivToE α x v`.
-
-2. **RHS**: Expand `cov Y x v` and `cov Z x v` via `chartLeviCivita_apply`.
-   Pair each through `g.inner x` against the other section using
-   `g_inner_eq_chart_sum`. The result is a sum of two pieces, each involving
-   chart Gram entries `G^E_{ij}`, Fréchet derivatives of the chart-pulled-back
-   sections, and Christoffel-correction sums.
-
-3. **Match**: Apply `partialDeriv_chartGramOnE_eq_chartChristoffel_sum` to
-   substitute `∂_k G_{ij} = ∑_l Γ^l_{ki} G_{lj} + ∑_l Γ^l_{kj} G_{li}` in the
-   expanded LHS. After the substitution, the LHS and RHS agree by direct
-   algebraic comparison via `Finset.sum_congr`, `Finset.sum_comm`, the chart
-   Gram symmetry, and `ring`.
-
-The metric-compatibility property is the second of the two characterising
-axioms of the Levi-Civita connection (the first being torsion-freeness, treated
-in the sibling file `LeviCivitaChartTorsion.lean`). Together with the
-additivity and Leibniz rule axioms verified in `LeviCivitaChartLocal.lean`,
-the chart-local construction is shown to be the Levi-Civita connection on the
-open good set at `α`.
--/
 
 noncomputable section
 
@@ -71,8 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-side scalar function `F_{Y,Z}` whose Fréchet derivative encodes
-the metric-compatibility identity. -/
 def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) (y : E) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
@@ -83,7 +33,7 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
           (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
         chartGramOnE (I := I) g α i j y
 
-/-- Pointwise unfolding of `chartInnerOnE`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartInnerOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) (y : E) :
@@ -96,9 +46,6 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
               (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
             chartGramOnE (I := I) g α i j y := rfl
 
-/-- On the chart target, `chartInnerOnE g α Y Z (φ b)` recovers the inner
-product `g.inner b (Y b) (Z b)` whenever `b` lies in the chart source and the
-trivialization base set. -/
 lemma chartInnerOnE_eq_g_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) {b : M}
@@ -129,8 +76,7 @@ lemma chartInnerOnE_eq_g_inner
   rw [hG i j]
   rfl
 
-/-- The component-extraction map: composing a differentiable function with the
-linear functional `b.coord i` preserves differentiability. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_repr_comp
     {f : E → E} {y : E} (hf : DifferentiableAt ℝ f y)
     (i : Fin (Module.finrank ℝ E)) :
@@ -140,8 +86,6 @@ private lemma differentiableAt_repr_comp
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
 
-/-- `chartGramOnE g α i j` is differentiable at any interior point of the
-chart target. -/
 lemma chartGramOnE_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -157,9 +101,6 @@ lemma chartGramOnE_differentiableAt_int
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- `b ↦ g.inner b (Y b) (Z b)` is `EventuallyEq` to
-`chartInnerOnE g α Y Z ∘ extChartAt I α` on a neighborhood of any good-set
-point. -/
 private lemma chartInnerOnE_eventuallyEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) {x : M}
@@ -177,13 +118,13 @@ private lemma chartInnerOnE_eventuallyEq
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   exact (chartInnerOnE_eq_g_inner (I := I) g α Y Z hb_src hb_base).symm
 
-/-- The `i`-th component of the chart-pulled-back section. -/
 private def chartReprComp
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ((chartModelBasis E).repr
       (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartReprComp_apply
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -191,8 +132,6 @@ private def chartReprComp
       ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i := rfl
 
-/-- The component function `chartReprComp α Y i` is differentiable at `φ x`
-when the section `Y` is differentiable at `x` and `x` is in the good set. -/
 private lemma chartReprComp_differentiableAt
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -206,9 +145,6 @@ private lemma chartReprComp_differentiableAt
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hY
   exact differentiableAt_repr_comp hY_pull i
 
-/-- Fréchet derivative formula for `chartReprComp α Y i`: it is the `i`-th
-component (under `b.repr`) of the Fréchet derivative of the chart-pullback,
-WHEN the chart-pullback is differentiable at `extChartAt I α x`. -/
 private lemma chartReprComp_fderiv_apply
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -233,8 +169,6 @@ private lemma chartReprComp_fderiv_apply
   rw [hfun, hcomp, hci_fderiv]
   rfl
 
-/-- Each three-fold product `chartReprComp α Y i · chartReprComp α Z j · G^E_{ij}`
-is differentiable at `φ x`. -/
 private lemma chartInnerOnE_summand_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -257,7 +191,6 @@ private lemma chartInnerOnE_summand_differentiableAt
       (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx)
   exact (hYi.mul hZj).mul hG
 
-/-- The full `chartInnerOnE g α Y Z` function is differentiable at `φ x`. -/
 private lemma chartInnerOnE_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -272,7 +205,6 @@ private lemma chartInnerOnE_differentiableAt
   intro j _
   exact chartInnerOnE_summand_differentiableAt (I := I) g α hx hY hZ i j
 
-/-- Fréchet derivative formula for the three-fold-product summand. -/
 private lemma chartInnerOnE_summand_fderiv_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -331,7 +263,6 @@ private lemma chartInnerOnE_summand_fderiv_apply
   simp only [smul_eq_mul]
   ring
 
-/-- Fréchet derivative formula for the full `chartInnerOnE`. -/
 private lemma chartInnerOnE_fderiv_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -372,9 +303,6 @@ private lemma chartInnerOnE_fderiv_apply
   refine Finset.sum_congr rfl (fun j _ => ?_)
   exact chartInnerOnE_summand_fderiv_apply (I := I) g α hx hY hZ i j w
 
-/-- The manifold derivative of `b ↦ g.inner b (Y b) (Z b)` at a good-set point
-`x`, applied to a tangent vector `v`, equals the Fréchet derivative of
-`chartInnerOnE g α Y Z` at `φ x` applied to `trivToE α x v`. -/
 private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -426,8 +354,7 @@ private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     rw [(extChartAt I α).right_inv hy_tgt]
   rw [Filter.EventuallyEq.fderiv_eq hev_pull]
 
-/-- The directional derivative of `chartGramOnE g α i j` along `w` equals the
-basis expansion of `w` weighted by the partial derivatives. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -451,8 +378,6 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
   rw [map_smul, smul_eq_mul]
   rfl
 
-/-- The `i`-th component of `christoffelCorrection α x Y v` under
-`(chartModelBasis E).repr`. -/
 private lemma christoffelCorrection_repr_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :
@@ -488,9 +413,6 @@ private lemma christoffelCorrection_repr_apply
   · intro habs
     exact absurd (Finset.mem_univ i) habs
 
-/-- The fully expanded LHS as a sum involving Fréchet derivatives, chart Gram
-entries, and the `chartChristoffel` symbols (the latter via the chart metric
-identity `partialDeriv_chartGramOnE_eq_chartChristoffel_sum`). -/
 private lemma mfderiv_g_inner_chart_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -581,9 +503,6 @@ private lemma mfderiv_g_inner_chart_expand
     rw [partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k
       hx_int]]
 
-/-- Expansion of `g.inner x (chartLeviCivita g α Y x v) (Z x)` in chart
-coordinates: a Fréchet-derivative piece plus a Christoffel-correction piece,
-then weighted by `(b.repr Z x)_j · G^E_{ij}(φ x)` and summed over `i, j`. -/
 private lemma g_inner_chartLeviCivita_Y_Z_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -657,8 +576,6 @@ private lemma g_inner_chartLeviCivita_Y_Z_expand
   rw [christoffelCorrection_repr_apply (I := I) g α x
     (chartE_section_repr (I := I) α Y x) v i]
 
-/-- Expansion of `g.inner x (Y x) (chartLeviCivita g α Z x v)` in chart
-coordinates. -/
 private lemma g_inner_Y_chartLeviCivita_Z_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -732,12 +649,6 @@ private lemma g_inner_Y_chartLeviCivita_Z_expand
   rw [christoffelCorrection_repr_apply (I := I) g α x
     (chartE_section_repr (I := I) α Z x) v j]
 
-/-- **Algebraic core of the metric-compatibility match.** The arithmetic
-identity needed to close the metric-compatibility theorem after both sides are
-expanded in chart coordinates. The variables `B i, D j, w k` are the
-basis-extracted components of the relevant chart-trivialised vectors,
-`G i j` are the chart Gram entries (symmetric under `i ↔ j`), and `Γ k l i` is
-the chart Christoffel symbol. -/
 private lemma christoffel_match
     {n : ℕ}
     (B D w : Fin n → ℝ) (G : Fin n → Fin n → ℝ)
@@ -928,14 +839,6 @@ private lemma christoffel_match
     ring
   rw [hMatch_Y, hMatch_Z]
 
-/-- **Metric compatibility of the chart-local Levi-Civita.** On the open good
-set at `α`, the chart-local Levi-Civita covariant derivative `chartLeviCivita
-g α` is metric-compatible with the smooth Riemannian metric `g`.
-
-The proof unfolds both sides of the metric-compatibility identity in
-chart-α coordinates and matches them via the chart metric identity
-`partialDeriv_chartGramOnE_eq_chartChristoffel_sum` together with the
-algebraic match `christoffel_match`. -/
 theorem chartLeviCivita_isMetricCompatibleOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     IsMetricCompatibleOn (chartLeviCivita (I := I) g α) g

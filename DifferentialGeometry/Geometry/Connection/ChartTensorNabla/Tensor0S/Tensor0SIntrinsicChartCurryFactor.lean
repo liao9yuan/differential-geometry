@@ -3,37 +3,12 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
-/-!
-# Curry factorisation of the intrinsic chart Fréchet derivative
-
-Given a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model `I`, a
-chart-centre `α : M`, a base point `b : M` on the chart-Levi-Civita good set, a
-tangent vector `v : TangentSpace I b`, and a smooth `(0, s + 1)`-tensor section `T`,
-the chart intrinsic Fréchet derivative
-`tensor0SIntrinsicChartCLM (s + 1) α T b : TangentSpace I b →L[ℝ] Tensor0SSpace (s+1) I b`
-applied to a vector `X b` and then evaluated at a tuple of the form
-`Fin.cons (chartParallelExtend α b v b) m` admits a clean factorisation:
-
-* it equals
-  `tensor0SIntrinsicChartCLM s α (tensor0SPartialEval T (chartParallelExtend α b v)) b (X b)`
-  evaluated at `m`.
-
-Mechanism: when the first slot is the chart-parallel extension of `v`, the trivialised
-representation has constant-in-`b'` Y-slot input, so the cross b-dependence vanishes;
-what remains is the fderiv of the partially-evaluated trivialised section.
-
-## Main result
-
-* `tensor0SIntrinsicChartCLM_factor_via_partialEval` — the headline factorisation.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open scoped Manifold ContDiff Topology
 open Bundle Set Tensor0SBundle
@@ -50,14 +25,13 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- The "curry-left then evaluate at `w`" CLM, sending a `(0, s + 1)`-model tensor to
-a `(0, s)`-model tensor by currying the first slot at `w`. -/
 noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
     Tensor0SModel (s + 1) ℝ E →L[ℝ] Tensor0SModel s ℝ E :=
   (ContinuousLinearMap.apply ℝ (Tensor0SModel s ℝ E) w).comp
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E)
         ℝ).toContinuousLinearEquiv.toContinuousLinearMap
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] in
 @[simp] lemma curryLeftEvalCLM_apply (s : ℕ) (w : E)
     (F : Tensor0SModel (s + 1) ℝ E) (m : Fin s → E) :
     (curryLeftEvalCLM (E := E) s w F) m = F (Fin.cons w m) := by
@@ -66,9 +40,7 @@ noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
   simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
     continuousMultilinearCurryLeftEquiv_apply]
 
-/-- On the chart-α trivialisation base set, the chart-α trivialised representation of
-a `(0, n)`-tensor fibre applied to a model tuple `v : Fin n → E` equals the original
-fibre applied to the `trivFromE`-pulled-back tuple. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_apply_tuple {n : ℕ} (α : M)
     (T : Π b : M, Tensor0SSpace n I b) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -94,9 +66,7 @@ theorem tensor0SChartE_section_repr_apply_tuple {n : ℕ} (α : M)
       congrFun hcoe (T b)]
   rfl
 
-/-- On the chart-α trivialisation base set, the `symmL` action of the chart-α
-`(0, n)`-tensor trivialisation on a model fibre value equals the multilinear
-precomposition with `trivToE α b`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SBundle_symmL_apply_eq_compContinuousLinearMap {n : ℕ}
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -125,9 +95,7 @@ theorem tensor0SBundle_symmL_apply_eq_compContinuousLinearMap {n : ℕ}
             (trivializationAt E (TangentSpace I) α)).symm b D) from rfl]
   exact h
 
-/-- On the chart-α trivialisation base set, the `(s + 1)`-trivialised section
-applied to `Fin.cons (trivToE α b v) m` equals the `s`-trivialised partial
-evaluation applied to `m`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_cons_eq_partialEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M} (v : TangentSpace I b)
     {b' : M} (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -169,8 +137,7 @@ theorem tensor0SChartE_section_repr_cons_eq_partialEval (s : ℕ) (α : M)
   · simp only [Fin.cons_zero]; rfl
   · intro k; simp only [Fin.cons_succ]
 
-/-- On the chart-α trivialisation base set, the `s`-trivialised partial-eval section
-equals the curry-left-eval CLM applied to the `(s + 1)`-trivialised section. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_partialEval_eq_curryLeftEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M} (v : TangentSpace I b)
     {b' : M} (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -186,9 +153,7 @@ theorem tensor0SChartE_section_repr_partialEval_eq_curryLeftEval (s : ℕ) (α :
   exact (tensor0SChartE_section_repr_cons_eq_partialEval (I := I) (M := M) s α T
     (b := b) v (b' := b') hb' m).symm
 
-/-- The chart pullback of the `s`-trivialised partial-eval representation agrees,
-in a neighbourhood of `extChartAt I α b`, with the curry-left-eval CLM applied to
-the chart pullback of the `(s + 1)`-trivialised representation. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem partialEval_chartPullback_eventually_eq_curryLeftEval_chartPullback
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (v : TangentSpace I b)
@@ -221,8 +186,7 @@ theorem partialEval_chartPullback_eventually_eq_curryLeftEval_chartPullback
   exact tensor0SChartE_section_repr_partialEval_eq_curryLeftEval
     (I := I) (M := M) s α T (b := b) v (b' := φ.symm y) hyBase
 
-/-- The Fréchet derivative of the chart pullback of the `s`-trivialised
-partial-eval section at `φ b` factors through the curry-left-eval CLM. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (v : TangentSpace I b)
@@ -252,13 +216,7 @@ theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
 
-/-- **Curry factorisation of the intrinsic chart Fréchet derivative.** On the
-chart Levi-Civita good set, applying the intrinsic chart Fréchet derivative CLM
-of a `(0, s + 1)`-tensor `T` to a vector `X b` and evaluating the resulting
-tensor at a tuple `Fin.cons (chartParallelExtend α b v b) m` agrees with the
-intrinsic chart Fréchet derivative CLM of the partial evaluation
-`tensor0SPartialEval T (chartParallelExtend α b v)` applied to `X b` and
-evaluated at `m`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SIntrinsicChartCLM_factor_via_partialEval
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

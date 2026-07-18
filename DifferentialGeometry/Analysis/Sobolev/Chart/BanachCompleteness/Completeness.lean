@@ -3,17 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobo
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-/-!
-# Banach completeness of the chart-based Sobolev space `W^{k,p}_chart(M)`
-
-We prove `CompleteSpace (WkpChartQuot g k p hp)` for `1 ≤ p < ∞`. The proof
-uses the chart-by-chart Cauchy property to extract a chart-target limit on each
-chart, then assembles a global limit on `M` via pointwise a.e. convergence
-along a diagonally-extracted subsequence.
-
-The instance `SeparationQuotient.instCompleteSpace` transfers completeness from
-the seminormed `WkpChart` to its `SeparationQuotient`.
--/
 
 noncomputable section
 
@@ -34,8 +23,7 @@ section
 
 variable [NeZero (Module.finrank ℝ E)]
 
-/-- The chart-based seminorm satisfies: a `CauchySeq` of `WkpChart` elements
-yields the εδ-Cauchy condition in `wkpNormChart` (ENNReal-valued). -/
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem wkpNormChart_cauchy_of_seminormCauchySeq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -71,8 +59,7 @@ private theorem wkpNormChart_cauchy_of_seminormCauchySeq
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
 
-/-- For each chart `α`, the chart-pushed sequence is `wkpNorm`-Cauchy on
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -84,7 +71,7 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
         ENNReal.ofReal ε)
     (α : M) :
     ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -113,14 +100,14 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
   rw [h_chartPushed_eq]
   unfold wkpNormChart at h_le
   have h_summand_le_tsum :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
           (fun x => wkpChartFun (f m) x - wkpChartFun (f n) x))
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ∑' α' : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α'
@@ -129,8 +116,6 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-- For each chart `α`, the chart-pushed sequence has a `wkpNorm`-limit which
-is itself in `MemWkp k p` of `chartTargetEuclid α`. -/
 private theorem exists_chart_limit
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -148,7 +133,7 @@ private theorem exists_chart_limit
         (chartTargetEuclid (I := I) (M := M) α) ∧
       Tendsto
         (fun n =>
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (fun y => chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -169,7 +154,7 @@ private theorem exists_chart_limit
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
 
-/-- The chart-pushed sequence converges in measure on each chart target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chartPushed_tendstoInMeasure
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -183,7 +168,7 @@ private theorem chartPushed_tendstoInMeasure
       (chartTargetEuclid (I := I) (M := M) α))
     (h_v : Tendsto
       (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -234,9 +219,7 @@ private theorem chartPushed_tendstoInMeasure
   exact tendstoInMeasure_of_tendsto_eLpNorm_of_ne_top hp_zero hp_top
     h_aesm_seq h_aesm_lim h_eLp
 
-/-- For each chart `α`, there is a strict subsequence along which the
-chart-pushed `wkpChartFun (f n)` converges pointwise a.e. on the chart
-target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_subseq_chartPushed_ae_tendsto
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -250,7 +233,7 @@ private theorem exists_subseq_chartPushed_ae_tendsto
       (chartTargetEuclid (I := I) (M := M) α))
     (h_v : Tendsto
       (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α

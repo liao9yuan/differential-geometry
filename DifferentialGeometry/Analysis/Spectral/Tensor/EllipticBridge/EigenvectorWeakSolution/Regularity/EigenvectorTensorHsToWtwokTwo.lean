@@ -1,71 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorManifoldSobolevAggregate
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 
-/-!
-# From a finitely-supported spectral Sobolev element to a smooth `W^{2k,2}` section
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order `k : ℕ` and
-a real Sobolev exponent `σ`, this file constructs, from each element
-`T : tensorHs g r s σ` whose eigenbasis coordinates have **finite support**, a
-smooth, compactly-supported representative
-
-  `tensorHsSmoothRepr T hT_fs : SmoothCcTensor g r s`,
-
-namely the finite linear combination
-`∑ i ∈ support, T.coeff i • eigenvectorSmooth g r s i`. The
-representative is a true `W^{2k, 2}` element (`MemWtwokTwo g k`) and its
-`L²`-image agrees, for `σ ≥ 0`, with the canonical inclusion
-`tensorHsToL2 … hσ T`.
-
-The headline aggregates the manifold-aggregated per-eigenvector Sobolev bound
-`eigenvectorSmooth_wtwokTwoNorm_le_uniform` (with the uniform
-constant `C`) into a *single* `W^{2k, 2}` bound for every finitely-supported
-coordinate family, with the same uniform geometric constant `C`:
-
-  `wtwokTwoNorm g k (tensorHsSmoothRepr T hT_fs) ≤
-    ENNReal.ofReal C *
-      ENNReal.ofReal (∑ i ∈ support, |T.coeff i| · (i.fst.val)⁻¹ ^ (2k + 1))`.
-
-The right-hand side is, by Cauchy–Schwarz on the finite support, controllable
-by the spectral Sobolev norm of `T` at any exponent `σ` sufficiently large to
-make the dual eigenvalue tail summable; downstream consumers pick `σ`.
-
-The eigenbasis used throughout is the intrinsic compact-operator eigenbasis
-`tensorResolventEigenbasisVec (… intrinsic g r s)`, so no
-chart-selection hypothesis is required.
-
-## Main definitions
-
-* `tensorHsSmoothRepr T hT_fs` — the smooth compactly-supported
-  representative of a finitely-supported `Hˢ` element, as a finite linear
-  combination of the smooth eigenvector representatives.
-
-## Main results
-
-* `tensorHsSmoothRepr_memWtwokTwo` — the smooth representative lies
-  in `MemWtwokTwo g k` for every `k : ℕ`.
-* `tensorHsSmoothRepr_toL2` — for `σ ≥ 0`, the `L²`-image of the
-  smooth representative coincides with the canonical inclusion
-  `tensorHsToL2 … hσ T`.
-* `tensorHsSmoothRepr_wtwokTwoNorm_le_uniform` — the
-  manifold-aggregated `W^{2k, 2}` bound: a single geometric constant `C ≥ 0`,
-  uniform over *every* exponent `σ` and *every* finitely-supported `Hˢ`
-  element, controls the Sobolev norm of the smooth representative by the
-  explicit finite sum of `|coeff i| · (i.fst.val)⁻¹^(2k + 1)` over the support.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`). The resolvent eigenvalue at
-sigma-index `i` is `μ = i.fst.val ∈ (0, 1]` and `μ⁻¹ = 1 + λ_i ≥ 1`.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -98,9 +38,8 @@ namespace TensorHsSmoothReprAux
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open scoped Classical in
-/-- Reading the coordinate of a finite linear combination of the
-`tensorHsBasisVec` family at index `j`: it is `T.coeff j` whenever `j` lies in
-the chosen finite subset, else zero. -/
+
+omit [CompleteSpace E] in
 private lemma sum_basisVec_coeff_apply
     (σ : ℝ) (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
     (T : tensorHs (I := I) (M := M) g r s σ)
@@ -120,10 +59,6 @@ private lemma sum_basisVec_coeff_apply
 
 end TensorHsSmoothReprAux
 
-/-- A finitely-supported `Hˢ` element equals the *finite* sum, over its
-support, of its spectral basis components. The `Hˢ`-norm convergence of the
-spectral expansion (`tensorHs.hasSum_smul_basisVec`) collapses to this finite
-identity when the coordinate family has finite support. -/
 theorem tensorHs_eq_finset_sum_of_finite_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
@@ -165,17 +100,12 @@ namespace TensorHsSmoothReprAux
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
-/-- The finite linear combination `∑ i ∈ S, c i • eigenvectorSmooth g r s i`
-of the smooth eigenvector representatives, viewed as a `SmoothCcTensor g r s`,
-over a finite set `S` of eigen-indices with real coefficients `c`. -/
 private def partialSum_unconditional
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ) :
     SmoothCcTensor g r s :=
   ∑ i ∈ S, c i • eigenvectorSmooth (I := I) (M := M) g r s i
 
-/-- The empty partial sum `partialSum_unconditional g r s ∅ c` is the zero
-section of `SmoothCcTensor g r s`. -/
 private lemma partialSum_empty_unconditional
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ) :
     partialSum_unconditional (I := I) (M := M) g r s (∅ :
@@ -184,10 +114,7 @@ private lemma partialSum_empty_unconditional
   unfold partialSum_unconditional; simp
 
 open scoped Classical in
-/-- Inserting a fresh index `j ∉ S` adds the summand
-`c j • eigenvectorSmooth g r s j` to the partial sum:
-`partialSum_unconditional g r s (insert j S) c =
-  c j • eigenvectorSmooth g r s j + partialSum_unconditional g r s S c`. -/
+
 private lemma partialSum_insert_unconditional
     {S : Finset (TensorEigenIdx (I := I) (M := M) g r s)}
     {j : TensorEigenIdx (I := I) (M := M) g r s} (hj : j ∉ S)
@@ -197,10 +124,6 @@ private lemma partialSum_insert_unconditional
         partialSum_unconditional (I := I) (M := M) g r s S c := by
   unfold partialSum_unconditional; rw [Finset.sum_insert hj]
 
-/-- Every finite partial sum `partialSum_unconditional g r s S c` lies in
-`MemWtwokTwo g k`, by induction on `S` using that each smooth eigenvector
-representative is `W^{2k,2}` and that `MemWtwokTwo` is closed under scalar
-multiplication and addition. -/
 private lemma partialSum_memWtwokTwo_unconditional
     (k : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
@@ -220,10 +143,6 @@ private lemma partialSum_memWtwokTwo_unconditional
 
 end TensorHsSmoothReprAux
 
-/-- The smooth, compactly-supported representative of a finitely-supported
-`Hˢ` element `T`: the finite linear combination
-`∑ i ∈ support, T.coeff i • eigenvectorSmooth g r s i` over the (finite)
-support of `T`'s eigenbasis coordinates. -/
 noncomputable def tensorHsSmoothRepr
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
@@ -232,9 +151,6 @@ noncomputable def tensorHsSmoothRepr
   TensorHsSmoothReprAux.partialSum_unconditional (I := I) (M := M) g r s
     hT_fs.toFinset T.coeff
 
-/-- Unfolds the smooth representative `tensorHsSmoothRepr T hT_fs` to its
-defining finite sum `∑ i ∈ hT_fs.toFinset, T.coeff i • eigenvectorSmooth g r s i`
-(definitional equality). -/
 theorem tensorHsSmoothRepr_eq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
@@ -244,8 +160,6 @@ theorem tensorHsSmoothRepr_eq
         T.coeff i •
           eigenvectorSmooth (I := I) (M := M) g r s i := rfl
 
-/-- The smooth representative `tensorHsSmoothRepr T hT_fs` lies in
-`MemWtwokTwo g k` for every `k : ℕ`. -/
 theorem tensorHsSmoothRepr_memWtwokTwo
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
@@ -255,9 +169,6 @@ theorem tensorHsSmoothRepr_memWtwokTwo
   TensorHsSmoothReprAux.partialSum_memWtwokTwo_unconditional
     (I := I) (M := M) g r s k hT_fs.toFinset T.coeff
 
-/-- For `σ ≥ 0`, the `L²`-image (`TensorL2`-coercion) of the smooth
-representative `tensorHsSmoothRepr T hT_fs` coincides with the canonical
-inclusion `tensorHsToL2 … hσ T` of `T` into `L²`. -/
 theorem tensorHsSmoothRepr_toL2
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ)
@@ -338,11 +249,6 @@ namespace TensorHsSmoothReprAux
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
 
-/-- Per-summand `W^{2k,2}` bound: assuming each smooth eigenvector
-representative satisfies the uniform bound `hC_bound`, the scaled summand
-`c i • eigenvectorSmooth g r s i` has `wtwokTwoNorm` at most
-`|c i| · C · (i.fst.val)⁻¹^(2k+1)` (in `ENNReal`). Uses scalar homogeneity of
-the norm and that the eigenbasis vectors are unit-normalized. -/
 private lemma summand_wtwokTwoNorm_le_unconditional
     {C : ℝ} (_hC_nn : 0 ≤ C)
     (hC_bound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -382,11 +288,6 @@ private lemma summand_wtwokTwoNorm_le_unconditional
     exact h
   exact mul_le_mul_of_nonneg_left h_bd (zero_le _)
 
-/-- Finite-sum `W^{2k,2}` bound: under the uniform per-eigenvector bound
-`hC_bound`, the `wtwokTwoNorm` of the partial sum
-`partialSum_unconditional g r s S c` is at most
-`∑ i ∈ S, |c i| · C · (i.fst.val)⁻¹^(2k+1)` (in `ENNReal`). Proved by
-induction on `S` via the triangle inequality and the per-summand bound. -/
 private lemma partialSum_wtwokTwoNorm_le_sum_unconditional
     {C : ℝ} (hC_nn : 0 ≤ C)
     (hC_bound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -430,12 +331,6 @@ private lemma partialSum_wtwokTwoNorm_le_sum_unconditional
 
 end TensorHsSmoothReprAux
 
-/-- The manifold-aggregated `W^{2k, 2}` bound: there is a single geometric
-constant `C ≥ 0`, uniform over every exponent `σ` and every finitely-supported
-`Hˢ` element `T`, with `wtwokTwoNorm g k (tensorHsSmoothRepr T hT_fs)` bounded by
-`ENNReal.ofReal C · ENNReal.ofReal (∑ i ∈ support, |T.coeff i| · (i.fst.val)⁻¹^(2k+1))`.
-The constant comes from the per-eigenvector uniform bound
-`eigenvectorSmooth_wtwokTwoNorm_le_uniform`, aggregated over the finite support. -/
 theorem tensorHsSmoothRepr_wtwokTwoNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) :

@@ -5,14 +5,14 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-Flow Metric Evolution in a Fixed Frame
 
-This file translates the first Section 6.2 metric calculation into the realized
-interval API.  The core geometric input is the Ricci-flow equation
-`partial_t g = -2 Ric`; the inverse-metric result is obtained by differentiating
-the frame identity `g^{-1} g = I`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,12 +35,12 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-- Inverse-metric evolution from the differentiated identity `g^{-1}g = I`.
 
-The proof uses the Ricci-flow metric derivative, the product rule on the
-left-inverse identity, uniqueness of the interval derivative, and the two-sided
-inverse identity to solve for the component derivative.  Inverse-metric
-symmetry is derived from the two-sided inverse identities. -/
+
+
+
+
+
 theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -85,11 +85,11 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       j
   exact (hdt t x i j).congr_deriv hsolve
 
-/-- Metric-frame regularity produces the inverse-metric evolution equation.
 
-The computation is the existing inverse-identity differentiation theorem; this
-wrapper keeps the future matrix-inverse smoothness work attached to the metric
-regularity package rather than to the Christoffel evolution layer. -/
+
+
+
+
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -109,8 +109,8 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.nondegenerateGram
     hreg.uniqueTimeDerivatives
 
-/-- The canonical coordinate inverse is locally the inverse of the coordinate
-frame Gram matrix on the coordinate-frame domain. -/
+
+
 theorem coordInvLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -127,11 +127,11 @@ theorem coordInvLocal
   · simpa [coordInv, metricCompInFrame,
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).2
 
-/-- Canonical coordinate inverse-metric evolution for a Ricci-flow solution.
 
-This differentiates the actual coordinate inverse of the frame Gram operator,
-so it does not require a supplied `gInvDt` field or interval derivative
-uniqueness.  The theorem is local on the coordinate-frame set. -/
+
+
+
+
 theorem coordInvEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -263,8 +263,8 @@ theorem coordInvEvol
           (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
       hEq |>.symm
 
-/-- LaTeX Lemma 6.1 in fixed-frame component form:
-`partial_t g^{ij} = 2 Ric^{ij}`. -/
+
+
 theorem evol_inverse_metric_inFrame
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

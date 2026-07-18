@@ -2,62 +2,10 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Tensor.Auxiliary.DetOpNormBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 
-/-!
-# Pointwise raw-component swap and chart-`α` representation bound on the
-# POU tsupport
-
-For a smooth closed Riemannian manifold `(M, g)` and fixed tensor ranks
-`(r, s)`, this file ships the pointwise bound
-
-```
-POU(α b) · ‖tensorRSChartE_section_repr r s α T.toSection b‖² ≤
-  K_pt · Σ_β ∈ chartAtlasPOU_finset, Σ_(Idx, Jdx)
-    (tensorChartComponentPou g r s T β Idx Jdx b)²
-```
-
-with `K_pt ≥ 0` depending only on the manifold, the metric, and the ranks
-— independent of the chart base point `α`, the chart base point `β`, the
-component multi-index `(Idx, Jdx)`, and the tensor section `T`. The
-bound holds for all `b : M` and is the central pointwise input to the
-order-`0` chart-α POU-weighted L² bound by the order-`0` tensor Sobolev
-norm-squared on the chart overlap.
-
-## Strategy
-
-The bound follows from a three-step pointwise chain at `b ∈ tsupport (POU α)`:
-
-1. **Cauchy–Schwarz with `Σ POU = 1`.**
-   `1 = (Σ_β POU(β b))² ≤ |finset| · Σ_β POU(β b)²`, hence after multiplying
-   by `‖repr α b‖²` and using `POU(α b) ≤ 1` to drop the `POU(α b)` factor,
-   `POU(α b) · ‖repr α b‖² ≤ |finset| · Σ_β POU(β b)² · ‖repr α b‖²`.
-
-2. **`reprNormSq_le_sum_components_sq`.**
-   `‖repr α b‖² ≤ N · Bnorm² · Σ_(Idx, Jdx) (raw α IJ b)²` where `N` is
-   the cardinality of the component multi-index pair set and `Bnorm` is
-   the chart-frame basis-norm constant.
-
-3. **Chart-transition raw-component swap.** For `b ∈ tsupport (POU α) ∩
-   tsupport (POU β)`, the uniform op-norm bound
-   `transitionCoeff_le_uniform_on_pouTsupport` (Phase 4c.1) and a
-   Cauchy–Schwarz on the pair-finset yield
-   `Σ_(Idx, Jdx) (raw α IJ b)² ≤ N · K_trans² · Σ_(Idx, Jdx) (raw β IJ b)²`.
-
-The identity `POU(β b)² · (raw β IJ b)² = (POU(β b) · raw β IJ b)² =
-(tensorChartComponentPou β IJ b)²` packages the result.
-
-At `b ∉ tsupport (POU α)`, the left-hand side vanishes because
-`POU(α b) = 0` (support of POU is contained in its tsupport, and POU
-vanishes off its support), so the bound is trivial.
-
-The downstream lemma assembling this pointwise bound with a per-`β` chart
-change of variables and the order-`0` chart-`β` POU-weighted L² bound is
-deferred to a follow-up dispatch.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -88,7 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 private local instance : MeasurableSpace E := borel E
@@ -96,11 +43,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Chart-transition raw-component swap.** For `b ∈ tsupport (POU α) ∩
-tsupport (POU β)`, the finite double sum of squared chart-α raw components
-is bounded by a uniform constant times the finite double sum of squared
-chart-β raw components. The constant `K_swap = N · (N · K_trans²)`
-depends only on the manifold, the metric, and the ranks. -/
 theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K_swap : ℝ, 0 ≤ K_swap ∧
@@ -279,15 +221,7 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
           ∑ Q ∈ V,
             (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by ring
 
-/-- **Pointwise chart-α representation bound.** For every smooth
-compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`,
-every chart base point `α : M`, and every `b : M`, the chart-α
-representation norm-squared weighted by `POU(α b)` is bounded by a
-uniform non-negative constant times the finite double sum, over the
-chart-atlas POU support set `chartAtlasPOU_finset` and the component
-multi-index pair set, of squared `tensorChartComponentPou β Idx Jdx` at
-`b`. The constant depends only on the manifold, the metric, and the
-ranks — independent of `α`, `β`, and `T`. -/
+omit [BoundarylessManifold I M] in
 theorem pointwise_α_repr_le_sum_β_componentPou_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K_pt : ℝ, 0 ≤ K_pt ∧

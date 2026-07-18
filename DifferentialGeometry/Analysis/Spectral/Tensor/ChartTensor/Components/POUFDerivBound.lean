@@ -2,47 +2,10 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 
-/-!
-# Leibniz decomposition and uniform sup bound for the chart-pushed POU weight
-
-For a closed Riemannian manifold `(M, g)` and a chart `α : M`, the
-chart-pushed POU weight
-
-  `chartPushed (chartAtlasPOU I M) α (chartAtlasPOU I M α) y =
-     (POU_α (symm y)) * (POU_α (symm y))`,
-
-viewed as a function on the Euclidean chart target, decomposes as the
-product of two smoother pieces:
-
-* the globally `C^∞` extension `chartSmoothExt α (POU_α : M → ℝ)`,
-* the globally `C^∞` extension `chartSmoothExt α (POU_α * POU_α : M → ℝ)`.
-
-The first form is enough to derive a Leibniz formula for the derivative of
-`chartPushed (chartAtlasPOU I M) α u` against any smooth scalar `u : M → ℝ`,
-pointwise on the open chart target. The second form, specialised to
-`u = POU_α`, exhibits the chart-pushed POU weight as a globally `C^∞`
-compactly supported function on the Euclidean ambient space, hence its
-Fréchet derivative is continuous with compact support, and therefore
-uniformly bounded.
-
-## Main results
-
-* `fderiv_chartPushed_pou_eq_leibniz_on_target`: pointwise Leibniz
-  decomposition of `fderiv (chartPushed ρ_α u)` on the open chart target,
-  for smooth `u : M → ℝ`.
-* `exists_fderiv_chartPushed_pou_uniform_bound`: a uniform sup bound on
-  the operator norm of `fderiv (chartPushed ρ_α (POU_α : M → ℝ))` over the
-  chart target.
-
-All public theorems consume only the smoothness of `u` (where applicable)
-and the closed-Riemannian-manifold hypotheses. No new axioms are
-introduced.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -71,16 +34,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Pointwise rewrite `POU_α · 1 = POU_α`, used to specialise the
-multiplicative-version smoothness lemma. -/
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartAtlasPOU_mul_one_eq (α : M) :
     (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
         (1 : ℝ)) =
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := by
   funext x; ring
 
-/-- Smoothness of the globally extended POU weight `chartSmoothExt α (POU_α)`
-on the whole Euclidean ambient space. -/
 theorem contDiff_chartSmoothExt_chartAtlasPOU (α : M) :
     ContDiff ℝ ∞
       (chartSmoothExt (I := I) (M := M) α
@@ -92,7 +52,7 @@ theorem contDiff_chartSmoothExt_chartAtlasPOU (α : M) :
   rw [chartAtlasPOU_mul_one_eq (I := I) (M := M)] at hsmooth
   exact hsmooth
 
-/-- Compact support of the globally extended POU weight. -/
+omit [I.Boundaryless] in
 theorem hasCompactSupport_chartSmoothExt_chartAtlasPOU (α : M) :
     HasCompactSupport
       (chartSmoothExt (I := I) (M := M) α
@@ -103,8 +63,7 @@ theorem hasCompactSupport_chartSmoothExt_chartAtlasPOU (α : M) :
   rw [chartAtlasPOU_mul_one_eq (I := I) (M := M)] at hsupp
   exact hsupp
 
-/-- On the chart target, `chartPushed ρ_α u` factors as the pointwise product
-of the two chart-pushed pieces `chartSmoothExt α POU_α` and `chartSmoothExt α u`. -/
+omit [CompactSpace M] [I.Boundaryless] in
 theorem chartPushed_pou_eq_smoothExt_mul_smoothExt_on_target
     (α : M) (u : M → ℝ) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -140,8 +99,7 @@ theorem chartPushed_pou_eq_smoothExt_mul_smoothExt_on_target
     rw [if_pos h_symm_target]
   rw [hPOU, hU]
 
-/-- `chartPushed ρ_α u =ᶠ[nhds y] chartSmoothExt α POU_α · chartSmoothExt α u`
-at every chart-target point. -/
+omit [CompactSpace M] in
 theorem chartPushed_eventuallyEq_smoothExt_mul (α : M) (u : M → ℝ)
     {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -156,8 +114,7 @@ theorem chartPushed_eventuallyEq_smoothExt_mul (α : M) (u : M → ℝ)
   exact chartPushed_pou_eq_smoothExt_mul_smoothExt_on_target
     (I := I) (M := M) α u hz
 
-/-- `chartSmoothExt α u` is `C^∞` in a neighbourhood of every chart-target
-point, for any smooth `u : M → ℝ`. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem contDiffAt_chartSmoothExt_of_chartTarget
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -194,7 +151,7 @@ theorem contDiffAt_chartSmoothExt_of_chartTarget
     else (0 : ℝ)) = _
   rw [if_pos h_symm_target]
 
-/-- Fréchet differentiability of `chartSmoothExt α u` at any chart-target point. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem differentiableAt_chartSmoothExt_of_chartTarget
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -202,7 +159,6 @@ theorem differentiableAt_chartSmoothExt_of_chartTarget
   have h := contDiffAt_chartSmoothExt_of_chartTarget (I := I) (M := M) α hu hy
   exact h.differentiableAt (by decide)
 
-/-- Fréchet differentiability of `chartSmoothExt α (POU_α)`. -/
 theorem differentiable_chartSmoothExt_chartAtlasPOU (α : M) :
     Differentiable ℝ
       (chartSmoothExt (I := I) (M := M) α
@@ -210,16 +166,6 @@ theorem differentiable_chartSmoothExt_chartAtlasPOU (α : M) :
   have h := contDiff_chartSmoothExt_chartAtlasPOU (I := I) (M := M) α
   exact h.differentiable (by decide)
 
-/-- **Leibniz decomposition for `fderiv (chartPushed ρ_α u)` on the chart
-target.** For smooth `u : M → ℝ` and any point `y` of the open chart target,
-
-  `fderiv (chartPushed ρ_α u) y =
-     chartSmoothExt α POU_α y • fderiv (chartSmoothExt α u) y +
-     chartSmoothExt α u y • fderiv (chartSmoothExt α POU_α) y`,
-
-with `ρ_α := chartAtlasPOU I M`. Proof: on the chart target, `chartPushed ρ_α u`
-is locally a product of the two smooth extensions; Mathlib's product rule
-finishes. -/
 theorem fderiv_chartPushed_pou_eq_leibniz_on_target
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -239,9 +185,6 @@ theorem fderiv_chartPushed_pou_eq_leibniz_on_target
     (differentiableAt_chartSmoothExt_of_chartTarget
       (I := I) (M := M) α hu hy)
 
-/-- Smoothness of the globally extended `POU_α · POU_α`. Specialises the
-multiplicative version of `contDiff_chartSmoothExt_pou_mul` with
-`u := POU_α`. -/
 theorem contDiff_chartSmoothExt_chartAtlasPOU_sq (α : M) :
     ContDiff ℝ ∞
       (chartSmoothExt (I := I) (M := M) α
@@ -254,7 +197,7 @@ theorem contDiff_chartSmoothExt_chartAtlasPOU_sq (α : M) :
   exact contDiff_chartSmoothExt_pou_mul (I := I) (M := M) α
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M) hPOU_smooth
 
-/-- Compact support of the globally extended `POU_α · POU_α`. -/
+omit [I.Boundaryless] in
 theorem hasCompactSupport_chartSmoothExt_chartAtlasPOU_sq (α : M) :
     HasCompactSupport
       (chartSmoothExt (I := I) (M := M) α
@@ -264,9 +207,7 @@ theorem hasCompactSupport_chartSmoothExt_chartAtlasPOU_sq (α : M) :
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
-/-- Pointwise equality of the Fréchet derivatives of `chartPushed ρ_α POU_α`
-and the globally smooth `chartSmoothExt α (POU_α · POU_α)` at any
-chart-target point. -/
+omit [CompactSpace M] in
 theorem fderiv_chartPushed_pou_self_eq_fderiv_chartSmoothExt_sq
     (α : M) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -285,14 +226,6 @@ theorem fderiv_chartPushed_pou_self_eq_fderiv_chartSmoothExt_sq
     (I := I) (M := M) α
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) hz).symm
 
-/-- **Uniform sup bound for the Fréchet derivative of the chart-pushed POU
-weight on the chart target.** The chart-pushed POU weight
-`chartPushed ρ_α POU_α` agrees on the open chart target with the globally
-`C^∞` and compactly-supported function `chartSmoothExt α (POU_α · POU_α)`,
-whose Fréchet derivative is therefore continuous with compact support, and
-hence uniformly bounded on the whole Euclidean ambient space. The bound
-transfers to the original chart-pushed function via the pointwise
-`fderiv`-agreement on the chart target. -/
 theorem exists_fderiv_chartPushed_pou_uniform_bound (α : M) :
     ∃ M_pou : ℝ, 0 ≤ M_pou ∧
       ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,

@@ -2,68 +2,7 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChristoffel
 import Mathlib.Analysis.ODE.Gronwall
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Sections along a curve, covariant derivative `D/dt`, and parallel transport
-
-Given a smooth Riemannian metric `g` on a smooth manifold `M` and a curve
-`γ : ℝ → M`, a **section along `γ` on `s ⊆ ℝ`** is a map
-`t ↦ X(t) ∈ T_{γ(t)} M`. Because the project's `TangentSpace I (γ t)` is
-definitionally `E`, such a section is type-theoretically the same as a
-function `ℝ → E`; the geometric content lives in how chart transitions
-act on it.
-
-This file packages the chart-local theory of sections along curves:
-
-1. **G.5.1 — `SectionAlongCurve`**: the bundled data of a section, kept
-   simple as a wrapper around `ℝ → E`. The geometric content is in the
-   companion smoothness and tangentiality predicates below.
-
-2. **G.5.2 — Smoothness API**: smoothness of a section along `γ` is the
-   chart-local notion. The section `X` is smooth at `t₀` in the chart at
-   `α : M` (whose source contains `γ(t₀)`) iff `X : ℝ → E` is `C^n` at
-   `t₀` *as a function with values in the model fibre at `α`*. Because
-   `TangentSpace I (γ t) = E` definitionally for every `t`, no
-   trivialization-rewrite is needed for the `E`-valued representation
-   itself; the chart-α dependence enters only through the Christoffel
-   symbols that appear in `D/dt`.
-
-3. **G.5.3 — `chartCovDerivAlong`**: the chart-local covariant derivative
-   `D X / dt` written in a fixed chart at `α : M`,
-   $$\bigl(\tfrac{D X}{dt}\bigr)(t) := X'(t) +
-       \Gamma_\alpha\bigl(u'(t), X(t)\bigr)(u(t)),$$
-   where `u(t) := φ_α(γ(t))`. The predicate
-   `IsCovDerivAlongChart g α γ Y W s` records that `W` is the covariant
-   derivative of `Y` along `γ` on `s ⊆ ℝ` in the chart at `α`. The
-   companion lemmas establish linearity in the section argument and the
-   scalar-Leibniz rule.
-
-4. **G.5.4 — `IsParallelTransportChart`**: a section `Y` is *parallel
-   along `γ` in chart `α`* if its chart-local representation satisfies
-   the parallel-transport ODE
-   $$Y'(t) + \Gamma_\alpha\bigl(u'(t), Y(t)\bigr)(u(t)) = 0.$$
-   We prove the **uniqueness** of parallel transport with prescribed
-   initial value using Mathlib's Gronwall machinery
-   (`ODE_solution_unique_of_mem_Ioo`). Existence of parallel transport
-   along a curve segment staying inside a single chart is recorded as
-   the chart-local Picard–Lindelöf statement; the global extension and
-   the chart-independence of the parallel-transport ODE require a
-   separate chart-gluing development and are not addressed here.
-
-## Strategic notes
-
-We follow the **chart-fixed** strategy: every definition takes an
-explicit basepoint `α : M`, and statements about `X(t) ∈ T_{γ(t)} M` are
-interpreted in the chart at `α`, valid whenever `γ(t) ∈ (chartAt α).source`.
-This avoids the chart-transition complications that arise when `γ`
-crosses multiple chart domains and is the natural foundation on which a
-Picard–Lindelöf construction (followed by chart-gluing) would be built.
-
-The intrinsic, chart-independent versions of `D/dt` and parallel
-transport are downstream developments built on top of this chart-local
-infrastructure.
--/
 
 noncomputable section
 
@@ -76,125 +15,110 @@ namespace Riemannian
 namespace AlongCurve
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- A section along a curve `γ : ℝ → M`. The underlying data is the
-function `toFun : ℝ → E`; semantically, `X.toFun t` is interpreted as
-a vector in `T_{γ(t)} M = E`. -/
 @[ext] structure SectionAlongCurve (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     (_γ : ℝ → M) where
-  /-- The underlying real-to-model-fibre function. -/
+
   toFun : ℝ → E
 
 namespace SectionAlongCurve
 
 variable {γ : ℝ → M}
 
-/-- `X : ℝ → E` is interpreted as a vector in `T_{γ(t)} M = E` at each
-parameter value `t`. -/
-@[simp] lemma toFun_def (X : SectionAlongCurve I M γ) (t : ℝ) :
-    X.toFun t = X.toFun t := rfl
-
-/-- The zero section: identically zero. -/
 def zero : SectionAlongCurve I M γ := ⟨fun _ => 0⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma zero_toFun (t : ℝ) : (zero : SectionAlongCurve I M γ).toFun t = 0 := rfl
 
-/-- Pointwise addition of two sections along the same curve. -/
 def add (X Y : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => X.toFun t + Y.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma add_toFun (X Y : SectionAlongCurve I M γ) (t : ℝ) :
     (add X Y).toFun t = X.toFun t + Y.toFun t := rfl
 
-/-- Pointwise negation of a section. -/
 def neg (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => - X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma neg_toFun (X : SectionAlongCurve I M γ) (t : ℝ) :
     (neg X).toFun t = - X.toFun t := rfl
 
-/-- Pointwise subtraction of two sections. -/
 def sub (X Y : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => X.toFun t - Y.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma sub_toFun (X Y : SectionAlongCurve I M γ) (t : ℝ) :
     (sub X Y).toFun t = X.toFun t - Y.toFun t := rfl
 
-/-- Pointwise scalar multiplication of a section by a real number. -/
 def smul (a : ℝ) (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => a • X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smul_toFun (a : ℝ) (X : SectionAlongCurve I M γ) (t : ℝ) :
     (smul a X).toFun t = a • X.toFun t := rfl
 
-/-- Pointwise scalar multiplication of a section by a real-valued
-function of the parameter `t`. This is the operation by which `D/dt`
-acts as a derivation. -/
+omit [Module.Finite ℝ E] in
 def smulFun (f : ℝ → ℝ) (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => f t • X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smulFun_toFun (f : ℝ → ℝ) (X : SectionAlongCurve I M γ) (t : ℝ) :
     (smulFun f X).toFun t = f t • X.toFun t := rfl
 
-/-- The underlying function of a section, exposed as `(↑·)`. -/
 instance : CoeFun (SectionAlongCurve I M γ) (fun _ => ℝ → E) := ⟨toFun⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_zero : ((zero : SectionAlongCurve I M γ) : ℝ → E) = fun _ => 0 := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_add (X Y : SectionAlongCurve I M γ) :
     ((add X Y : SectionAlongCurve I M γ) : ℝ → E) = fun t => X.toFun t + Y.toFun t := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_smul (a : ℝ) (X : SectionAlongCurve I M γ) :
     ((smul a X : SectionAlongCurve I M γ) : ℝ → E) = fun t => a • X.toFun t := rfl
 
-/-- Smoothness predicate for a section along a curve, *in the chart at
-`α`*: `X.toFun` is `C^n` (in the sense of `ContDiffOn ℝ n`) on `s`. The
-geometric interpretation (e.g. transformation under chart changes)
-requires that `γ(s)` lies in the chart's source; we keep this as a
-separate hypothesis in downstream theorems rather than baking it in. -/
 def ContMDiffOnInChart (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (s : Set ℝ) : Prop :=
   ContDiffOn ℝ n X.toFun s
 
-/-- Smoothness predicate for a section along a curve at a single point.
-This is the localised version of `ContMDiffOnInChart`. -/
 def ContMDiffAtInChart (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (t : ℝ) : Prop :=
   ContDiffAt ℝ n X.toFun t
 
-/-- Differentiability predicate for a section along a curve, as a special
-case of `ContMDiffOnInChart` with `n = 1`. -/
 def DifferentiableOnAlong (X : SectionAlongCurve I M γ) (s : Set ℝ) : Prop :=
   DifferentiableOn ℝ X.toFun s
 
-/-- Differentiability at a point. -/
 def DifferentiableAtAlong (X : SectionAlongCurve I M γ) (t : ℝ) : Prop :=
   DifferentiableAt ℝ X.toFun t
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma contMDiffOnInChart_def (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (s : Set ℝ) :
     ContMDiffOnInChart (I := I) (M := M) n X s = ContDiffOn ℝ n X.toFun s := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma contMDiffAtInChart_def (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (t : ℝ) :
     ContMDiffAtInChart (I := I) (M := M) n X t = ContDiffAt ℝ n X.toFun t := rfl
 
-/-- The zero section is smooth. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma zero_contMDiffOnInChart (n : WithTop ℕ∞) (s : Set ℝ) :
     ContMDiffOnInChart (I := I) (M := M) (γ := γ) n zero s := by
   unfold ContMDiffOnInChart
   exact contDiffOn_const
 
-/-- The zero section is smooth at every point. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma zero_contMDiffAtInChart (n : WithTop ℕ∞) (t : ℝ) :
     ContMDiffAtInChart (I := I) (M := M) (γ := γ) n zero t := by
   unfold ContMDiffAtInChart
   exact contDiffAt_const
 
-/-- The sum of two smooth sections is smooth. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s)
     (hY : ContMDiffOnInChart (I := I) (M := M) n Y s) :
@@ -202,7 +126,7 @@ lemma add_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffOnInChart at *
   exact hX.add hY
 
-/-- Smoothness of the sum at a point. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_contMDiffAtInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {t : ℝ}
     (hX : ContMDiffAtInChart (I := I) (M := M) n X t)
     (hY : ContMDiffAtInChart (I := I) (M := M) n Y t) :
@@ -210,14 +134,14 @@ lemma add_contMDiffAtInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffAtInChart at *
   exact hX.add hY
 
-/-- The negation of a smooth section is smooth. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma neg_contMDiffOnInChart {n : WithTop ℕ∞} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s) :
     ContMDiffOnInChart (I := I) (M := M) n (neg X) s := by
   unfold ContMDiffOnInChart at *
   exact hX.neg
 
-/-- Smoothness of the difference. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma sub_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s)
     (hY : ContMDiffOnInChart (I := I) (M := M) n Y s) :
@@ -225,15 +149,14 @@ lemma sub_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffOnInChart at *
   exact hX.sub hY
 
-/-- A real-scalar multiple of a smooth section is smooth. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smul_contMDiffOnInChart {n : WithTop ℕ∞} {a : ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s) :
     ContMDiffOnInChart (I := I) (M := M) n (smul a X) s := by
   unfold ContMDiffOnInChart at *
   exact hX.const_smul a
 
-/-- A scalar-function multiple of a smooth section is smooth, provided
-the scalar function is itself smooth on `s`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smulFun_contMDiffOnInChart {n : WithTop ℕ∞} {f : ℝ → ℝ}
     {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hf : ContDiffOn ℝ n f s)
@@ -242,7 +165,7 @@ lemma smulFun_contMDiffOnInChart {n : WithTop ℕ∞} {f : ℝ → ℝ}
   unfold ContMDiffOnInChart at *
   exact hf.smul hX
 
-/-- Differentiability of the sum. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_differentiableOnAlong {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : DifferentiableOnAlong (I := I) (M := M) X s)
     (hY : DifferentiableOnAlong (I := I) (M := M) Y s) :
@@ -250,14 +173,14 @@ lemma add_differentiableOnAlong {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
   unfold DifferentiableOnAlong at *
   exact hX.add hY
 
-/-- Differentiability of a real-scalar multiple. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smul_differentiableOnAlong {a : ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : DifferentiableOnAlong (I := I) (M := M) X s) :
     DifferentiableOnAlong (I := I) (M := M) (smul a X) s := by
   unfold DifferentiableOnAlong at *
   exact hX.const_smul a
 
-/-- Differentiability of a scalar-function multiple. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smulFun_differentiableOnAlong {f : ℝ → ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hf : DifferentiableOn ℝ f s)
     (hX : DifferentiableOnAlong (I := I) (M := M) X s) :
@@ -267,20 +190,13 @@ lemma smulFun_differentiableOnAlong {f : ℝ → ℝ} {X : SectionAlongCurve I M
 
 end SectionAlongCurve
 
-/-- Helper: the chart-coordinate curve `u(t) := φ_α(γ(t))`. -/
 def chartCurve (α : M) (γ : ℝ → M) : ℝ → E :=
   fun t => extChartAt I α (γ t)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartCurve_def (α : M) (γ : ℝ → M) (t : ℝ) :
     chartCurve (I := I) α γ t = extChartAt I α (γ t) := rfl
 
-/-- The chart-local covariant derivative of a section `X` along `γ` at
-time `t`, written in the chart at the basepoint `α : M`:
-$$\Bigl(\frac{D X}{dt}\Bigr)(t)
-  = X'(t) + \Gamma_\alpha(u'(t), X(t))(u(t)),$$
-where `u(t) = φ_α(γ(t))`. The formula uses `deriv` for the
-representation of the time-derivatives; it is the right expression
-*only when* `X` and `u` are differentiable at `t`. -/
 def chartCovDerivAlong (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (X : ℝ → E) (t : ℝ) : E :=
   deriv X t +
@@ -288,6 +204,7 @@ def chartCovDerivAlong (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M
       (deriv (chartCurve (I := I) α γ) t) (X t)
       (chartCurve (I := I) α γ t)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartCovDerivAlong_def
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (X : ℝ → E) (t : ℝ) :
@@ -301,8 +218,7 @@ namespace ChartChristoffel
 
 variable {g : SmoothRiemannianMetric I M} {α : M} {y : E}
 
-/-- The Christoffel contraction is right-additive in its second vector
-slot. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma contraction_add_right (v w₁ w₂ : E) :
     chartChristoffelContraction (I := I) g α v (w₁ + w₂) y =
       chartChristoffelContraction (I := I) g α v w₁ y +
@@ -322,10 +238,6 @@ lemma contraction_add_right (v w₁ w₂ : E) :
     unfold chartCoord; simp]
   ring
 
-/-- The Christoffel contraction is left-additive in its first vector
-slot. By the symmetry of the contraction in its arguments
-(`chartChristoffelContraction_symm`), this is equivalent to right
-additivity. -/
 lemma contraction_add_left (v₁ v₂ w : E) :
     chartChristoffelContraction (I := I) g α (v₁ + v₂) w y =
       chartChristoffelContraction (I := I) g α v₁ w y +
@@ -334,8 +246,7 @@ lemma contraction_add_left (v₁ v₂ w : E) :
     chartChristoffelContraction_symm (v := v₁) (w := w),
     chartChristoffelContraction_symm (v := v₂) (w := w)]
 
-/-- The Christoffel contraction commutes with scalar multiplication in
-the second vector slot. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma contraction_smul_right (a : ℝ) (v w : E) :
     chartChristoffelContraction (I := I) g α v (a • w) y =
       a • chartChristoffelContraction (I := I) g α v w y := by
@@ -352,26 +263,18 @@ lemma contraction_smul_right (a : ℝ) (v w : E) :
   rw [chartCoord_smul]
   ring
 
-/-- The Christoffel contraction commutes with scalar multiplication in
-the first vector slot. -/
 lemma contraction_smul_left (a : ℝ) (v w : E) :
     chartChristoffelContraction (I := I) g α (a • v) w y =
       a • chartChristoffelContraction (I := I) g α v w y := by
   rw [chartChristoffelContraction_symm, contraction_smul_right,
     chartChristoffelContraction_symm (v := v) (w := w)]
 
-/-- Zero on the right side: the Christoffel contraction is zero if the
-second slot is zero. -/
 lemma contraction_zero_right (v : E) :
     chartChristoffelContraction (I := I) g α v (0 : E) y = 0 := by
   rw [chartChristoffelContraction_symm, chartChristoffelContraction_zero_left]
 
 end ChartChristoffel
 
-/-- The continuous linear map `E → E` given by
-`w ↦ chartChristoffelContraction g α v w y`. Linearity in `w` is by
-`contraction_add_right` and `contraction_smul_right`. Boundedness on a
-finite-dimensional vector space is automatic. -/
 def chartChristoffelContractionRightCLM
     (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) : E →L[ℝ] E :=
   LinearMap.toContinuousLinearMap
@@ -379,16 +282,13 @@ def chartChristoffelContractionRightCLM
       map_add' := fun w₁ w₂ => ChartChristoffel.contraction_add_right v w₁ w₂
       map_smul' := fun a w => ChartChristoffel.contraction_smul_right a v w }
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartChristoffelContractionRightCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) (w : E) :
     chartChristoffelContractionRightCLM (I := I) g α v y w =
       chartChristoffelContraction (I := I) g α v w y := rfl
 
-/-- The covariant-derivative formula expressed via a continuous linear
-map: `D X / dt = X'(t) + A_t (X(t))`, where `A_t := chartChristoffelContractionRightCLM g α (u'(t)) (u(t))`
-is the linear endomorphism of the model fibre that depends on the
-chart-trajectory `u`. This is the formulation that feeds Picard–Lindelöf
-for parallel transport (which corresponds to `D X / dt = 0`). -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCovDerivAlong_eq_add_clm
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (X : ℝ → E) (t : ℝ) :
@@ -398,12 +298,6 @@ lemma chartCovDerivAlong_eq_add_clm
           (deriv (chartCurve (I := I) α γ) t)
           (chartCurve (I := I) α γ t) (X t) := rfl
 
-/-- Predicate "`W` is the covariant derivative of `Y` along `γ` on `s`,
-written in the chart at `α`". The predicate uses `HasDerivAt` so the
-section need only be differentiable at points of `s` (not necessarily
-on a larger set). The chart-curve `u = chartCurve α γ` must have a
-specified derivative `uPrime t` at `t`; we package this as a hypothesis
-in the predicate body. -/
 def IsCovDerivAlongChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y W : ℝ → E) (s : Set ℝ) : Prop :=
   (∀ t ∈ s, HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t) ∧
@@ -411,8 +305,7 @@ def IsCovDerivAlongChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ →
       (W t - chartChristoffelContraction (I := I) g α (uPrime t) (Y t)
           (chartCurve (I := I) α γ t)) t
 
-/-- If `W = D Y / dt` in the predicate sense, then for every `t ∈ s`,
-`Y'(t) + Γ_α(u'(t), Y(t))(u(t)) = W(t)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsCovDerivAlongChart.hasDerivAt_eq
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y W : ℝ → E} {s : Set ℝ}
     (h : IsCovDerivAlongChart (I := I) g α γ uPrime Y W s) {t : ℝ} (ht : t ∈ s) :
@@ -421,8 +314,7 @@ lemma IsCovDerivAlongChart.hasDerivAt_eq
           (chartCurve (I := I) α γ t)) t :=
   h.2 t ht
 
-/-- Linearity in `Y`: if `W_i = D Y_i / dt` for `i ∈ {1, 2}`, then
-`W₁ + W₂ = D (Y₁ + Y₂) / dt`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsCovDerivAlongChart.add
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y₁ Y₂ W₁ W₂ : ℝ → E} {s : Set ℝ}
@@ -446,7 +338,7 @@ theorem IsCovDerivAlongChart.add
   convert hadd using 1
   rw [hΓadd]; module
 
-/-- Real-scalar linearity in `Y`: if `W = D Y / dt`, then `c • W = D (c • Y) / dt`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsCovDerivAlongChart.smul
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -466,10 +358,7 @@ theorem IsCovDerivAlongChart.smul
   convert hcY using 1
   rw [hΓsmul, smul_sub]
 
-/-- Negation closure: if `W = D Y / dt`, then `-W = D (-Y) / dt`. This
-specialises `IsCovDerivAlongChart.smul` to the scalar `c = -1` and
-rewrites the resulting `(-1) •`-expressions as negations on both the
-section and its covariant derivative. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsCovDerivAlongChart.neg
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -484,7 +373,6 @@ theorem IsCovDerivAlongChart.neg
   rw [hYeq, hWeq] at hsmul
   exact hsmul
 
-/-- The zero section has zero covariant derivative. -/
 theorem IsCovDerivAlongChart.zero
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (uPrime : ℝ → E) (s : Set ℝ)
     (hu : ∀ t ∈ s, HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t) :
@@ -496,9 +384,7 @@ theorem IsCovDerivAlongChart.zero
     ChartChristoffel.contraction_zero_right (uPrime t)
   rw [hΓ0]; simpa using (hasDerivAt_const t (0 : E))
 
-/-- Leibniz rule for scalar-function multiples: if `W = D Y / dt`
-(chart-α form) and `f : ℝ → ℝ` has derivative `fPrime t` at `t ∈ s`,
-then `D (f · Y) / dt = f'(t) • Y(t) + f(t) • W(t)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsCovDerivAlongChart.smulFun
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -522,15 +408,11 @@ theorem IsCovDerivAlongChart.smulFun
   convert hfY using 1
   rw [hΓsmul, smul_sub]; module
 
-/-- A section `Y` is parallel along `γ` on `s ⊆ ℝ` in the chart at `α`
-iff `Y` satisfies the parallel-transport ODE
-`Y'(t) = - Γ_α(u'(t), Y(t))(u(t))`. -/
 def IsParallelChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y : ℝ → E) (s : Set ℝ) : Prop :=
   IsCovDerivAlongChart (I := I) g α γ uPrime Y (fun _ => (0 : E)) s
 
-/-- Unfolding: `Y` is parallel iff the chart-curve has the prescribed
-derivative and `Y'(t) = - Γ_α(u'(t), Y(t))(u(t))` for `t ∈ s`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsParallelChart.hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) {t : ℝ} (ht : t ∈ s) :
@@ -540,15 +422,14 @@ lemma IsParallelChart.hasDerivAt
   have := h.2 t ht
   simpa using this
 
-/-- The chart-curve hypothesis embedded in `IsParallelChart`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsParallelChart.chartCurve_hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) {t : ℝ} (ht : t ∈ s) :
     HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t :=
   h.1 t ht
 
-/-- Linearity of parallel transport: a real-scalar multiple of a
-parallel section is parallel. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsParallelChart.smul
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) (c : ℝ) :
@@ -560,7 +441,7 @@ theorem IsParallelChart.smul
   convert hsmul using 1
   exact hzero.symm
 
-/-- Additivity of parallel transport. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsParallelChart.add
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E} {s : Set ℝ}
     (h₁ : IsParallelChart (I := I) g α γ uPrime Y₁ s)
@@ -573,22 +454,13 @@ theorem IsParallelChart.add
   convert hadd using 1
   exact hzero.symm
 
-/-- The Lipschitz constant for the parallel-transport vector field on a
-real interval: the supremum of the operator norm of
-`Y ↦ Γ_α(u'(t), Y)(u(t))` over `t ∈ s`. We expose it as a hypothesis
-rather than constructing it explicitly; the existence on a compact
-chart-interval follows from continuity of `t ↦ chartChristoffelContractionRightCLM g α (u'(t)) (u(t))`
-in `t`, which is itself a downstream-of-`Picard-Lindelöf` development. -/
 def ParallelTransportLipschitzBound (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (K : NNReal) (s : Set ℝ) : Prop :=
   ∀ t ∈ s,
     ‖chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t)‖₊ ≤ K
 
-/-- **Uniqueness of parallel transport (Gronwall).** On an open
-interval `Ioo a b` with `t₀ ∈ Ioo a b`, two parallel sections sharing
-an initial value at `t₀` agree on `Ioo a b`, given a uniform Lipschitz
-bound on the right-hand side. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsParallelChart.unique_of_initial
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {a b t₀ : ℝ} {K : NNReal}
@@ -634,9 +506,7 @@ theorem IsParallelChart.unique_of_initial
     exact h₂.hasDerivAt ht
   exact ODE_solution_unique_of_mem_Ioo hLip ht₀ hY₁ hY₂ hinit
 
-/-- **Uniqueness of parallel transport (local form).** Two parallel
-sections sharing an initial value at `t₀` agree in some neighborhood of
-`t₀`, provided the right-hand side is eventually-Lipschitz. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem IsParallelChart.unique_eventually
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {t₀ : ℝ} {K : NNReal}
@@ -667,16 +537,11 @@ theorem IsParallelChart.unique_eventually
     simpa using ht
   exact ODE_solution_unique_of_eventually hLip hYY₁ hYY₂ hinit
 
-/-- `HasParallelTransportChart g α γ uPrime t₀ v₀ Y s` says that `Y` is
-a parallel section along `γ` in the chart at `α` on `s ⊆ ℝ`, with
-initial value `Y(t₀) = v₀`. This packages "Y is the parallel transport
-of v₀ along γ at t₀ (in chart α)" into a Prop. -/
 def HasParallelTransportChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (t₀ : ℝ) (v₀ : E) (Y : ℝ → E) (s : Set ℝ) : Prop :=
   IsParallelChart (I := I) g α γ uPrime Y s ∧ Y t₀ = v₀
 
-/-- Parallel transport, when it exists, is uniquely determined by its
-initial value on any open interval (with the standard Lipschitz hypothesis). -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasParallelTransportChart.unique_of_lipschitz
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {a b t₀ : ℝ} {v₀ : E} {K : NNReal}
@@ -688,9 +553,6 @@ theorem HasParallelTransportChart.unique_of_lipschitz
   IsParallelChart.unique_of_initial h₁.1 h₂.1 hK ht₀
     (h₁.2.trans h₂.2.symm)
 
-/-- The zero parallel transport: `Y ≡ 0` is the parallel transport of
-the zero vector at any base time `t₀`, on any `s` where the
-chart-curve has the prescribed derivative. -/
 theorem HasParallelTransportChart.zero
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (uPrime : ℝ → E)
     (t₀ : ℝ) (s : Set ℝ)
@@ -699,9 +561,7 @@ theorem HasParallelTransportChart.zero
   refine ⟨?_, rfl⟩
   exact IsCovDerivAlongChart.zero g α γ uPrime s hu
 
-/-- Linear superposition: if `Y₁` and `Y₂` are parallel transports of
-`v₁` and `v₂` (with the same chart-curve derivative `uPrime`), then
-`a • Y₁ + b • Y₂` is the parallel transport of `a • v₁ + b • v₂`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasParallelTransportChart.linear_combination
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {t₀ : ℝ} {v₁ v₂ : E} (a c : ℝ) {s : Set ℝ}
@@ -721,23 +581,20 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
 
-/-- The chart-frame coordinate of a section along the curve: the `i`-th
-coordinate of `X(t)` in the canonical model basis `chartModelBasis E`. -/
 def chartSectionCoord (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) : ℝ → ℝ :=
   fun t => chartCoord (E := E) i (X t)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartSectionCoord_def (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) (t : ℝ) :
     chartSectionCoord (E := E) X i t = chartCoord (E := E) i (X t) := rfl
 
-/-- The Gram quadratic form of two sections `V, W` along `γ`, written in
-the chart at `α`:
-`∑_{i,j} G_{ij}(u(t)) · Vᶜ_i(t) · Wᶜ_j(t)`, with `u := chartCurve α γ`. -/
 def chartGramAlongCurve (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (V W : ℝ → E) (t : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
     chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
       chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartGramAlongCurve_def
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E) (t : ℝ) :
     chartGramAlongCurve (I := I) g α γ V W t =
@@ -745,8 +602,7 @@ def chartGramAlongCurve (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → 
         chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
           chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t) := rfl
 
-/-- A model-fibre vector `v : E` expands in the chart frame at `x` as
-`triv.symmL ℝ x v = ∑_i (chartCoord i v) • e_i(x)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma symmL_eq_sum_chartBasisVecFiber
     (α : M) {x : M}
     (v : E) :
@@ -764,10 +620,7 @@ lemma symmL_eq_sum_chartBasisVecFiber
   rw [map_smul]
   rfl
 
-/-- For any `x : M`, the `g`-inner product of the chart-frame
-sections `triv.symmL ℝ x V` and `triv.symmL ℝ x W` (the trivialization at
-`α`) equals the Gram quadratic form `∑_{i,j} G_{ij}(x) · Vᶜ_i · Wᶜ_j`,
-where `G_{ij}(x) = chartGramMatrix g α x i j`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem inner_eq_chartGramOnE_bilinear_on_baseSet
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (V W : E) :
@@ -796,9 +649,7 @@ theorem inner_eq_chartGramOnE_bilinear_on_baseSet
   rw [map_smul, smul_eq_mul, hvfib, chartGramMatrix_apply]
   ring
 
-/-- The chart-frame coordinate `chartCoord i ∘ X` has derivative
-`chartCoord i (X'(t))` whenever `X` is differentiable at `t`; this is the
-chain rule through the continuous-linear coordinate functional. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartSectionCoord_hasDerivAt
     {X : ℝ → E} {Xprime : ℝ → E} {t : ℝ} (i : Fin (Module.finrank ℝ E))
     (hX : HasDerivAt X (Xprime t) t) :
@@ -818,10 +669,7 @@ lemma chartSectionCoord_hasDerivAt
   rw [hfun, hLapply] at hcomp
   exact hcomp
 
-/-- The directional derivative of `chartGramOnE g α i j` at a point `y`
-along a vector `v` expands in the model basis as the `chartCoord`-weighted
-sum of the `partialDeriv`s:
-`fderiv ℝ G_{ij} y v = ∑_k (chartCoord k v) · partialDeriv k G_{ij} y`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_chartGramOnE_eq_sum_partialDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y v : E) :
@@ -840,10 +688,6 @@ lemma fderiv_chartGramOnE_eq_sum_partialDeriv
   rw [map_smul, smul_eq_mul]
   rfl
 
-/-- The Gram coefficient along the curve `t ↦ G_{ij}(u(t))` has derivative
-`∑_k (chartCoord k (u'(t))) · ∂_k G_{ij}(u(t))` at `t`, provided the
-chart-curve `u = chartCurve α γ` has derivative `uPrime t` at `t` and lies
-in the interior of the chart target there (so `G_{ij}` is differentiable). -/
 lemma chartGramOnE_comp_chartCurve_hasDerivAt
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (i j : Fin (Module.finrank ℝ E)) {uPrime : ℝ → E} {t : ℝ}
@@ -872,15 +716,6 @@ lemma chartGramOnE_comp_chartCurve_hasDerivAt
   rw [fderiv_chartGramOnE_eq_sum_partialDeriv (I := I) g α i j] at hchain
   exact hchain
 
-/-- **Leibniz derivative of the chart Gram form along a curve.** For
-sections `V, W` along `γ` (in chart-frame coordinates) and a chart-curve
-`u = chartCurve α γ` differentiable at `t` with `u(t)` in the interior of
-the chart target, the Gram quadratic form
-`t ↦ ∑_{i,j} G_{ij}(u(t)) Vᶜ_i(t) Wᶜ_j(t)` has derivative
-`∑_{i,j} [ (∑_k Vᵘ_k · ∂_k G_{ij}) Vᶜ_i Wᶜ_j
-          + G_{ij} (Vᶜ_i)' Wᶜ_j
-          + G_{ij} Vᶜ_i (Wᶜ_j)' ]`,
-where `Vᵘ_k := chartCoord k (u'(t))`, `Vᶜ_i := chartCoord i (V t)`, etc. -/
 theorem chartGramAlongCurve_hasDerivAt
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
     {uPrime Vprime Wprime : ℝ → E} {t : ℝ}
@@ -954,8 +789,7 @@ theorem chartGramAlongCurve_hasDerivAt
   rw [hfun] at hsum
   exact hsum
 
-/-- The `l`-th chart-coordinate of the Christoffel contraction:
-`chartCoord l (Γ_α(v, w)(y)) = ∑_{i,j} Γ^l_{ij}(y) · vⁱ · wʲ`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
     (l : Fin (Module.finrank ℝ E)) :
@@ -991,9 +825,6 @@ lemma chartCoord_chartChristoffelContraction
         · intro k _ hkl; rw [hbasis k, if_neg hkl]; ring
         · intro hl; exact absurd (Finset.mem_univ l) hl
 
-/-- Reorder a four-fold finite sum, swapping the outermost and innermost
-index.  Used to match the two index orderings of the chart-Christoffel
-contraction in the metric-compatibility product rule. -/
 private lemma sum4_swap_outer_inner {ι : Type*} [Fintype ι]
     (f : ι → ι → ι → ι → ℝ) :
     (∑ a, ∑ b, ∑ c, ∑ d, f a b c d)
@@ -1016,8 +847,6 @@ private lemma sum4_swap_outer_inner {ι : Type*} [Fintype ι]
     exact g1.trans g2
   exact e1.trans (e2.trans (e3.trans e4))
 
-/-- Reorder a three-fold finite sum, swapping the outermost and innermost
-index (the middle one is fixed). -/
 private lemma sum3_swap_outer_inner {ι : Type*} [Fintype ι]
     (f : ι → ι → ι → ℝ) :
     (∑ a, ∑ b, ∑ c, f a b c) = ∑ c, ∑ b, ∑ a, f a b c := by
@@ -1029,12 +858,6 @@ private lemma sum3_swap_outer_inner {ι : Type*} [Fintype ι]
     Finset.sum_congr rfl (fun c _ => Finset.sum_comm)
   exact e1.trans (e2.trans e3)
 
-/-- **Covariant-derivative product rule for the chart Gram form.** With
-`u(t)` in the interior of the chart target, the derivative of the Gram
-form `t ↦ ⟨V, W⟩_G(t)` equals the sum of the Gram forms of the
-chart-covariant derivatives `D V/dt = V' + Γ_α(u', V)` against `W` and of
-`V` against `D W/dt = W' + Γ_α(u', W)`:
-`d/dt ⟨V, W⟩_G = ⟨DV/dt, W⟩_G + ⟨V, DW/dt⟩_G`. -/
 theorem chartGramAlongCurve_hasDerivAt_covariant
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
     {uPrime Vprime Wprime : ℝ → E} {t : ℝ}

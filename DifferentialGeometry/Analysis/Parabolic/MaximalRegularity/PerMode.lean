@@ -3,109 +3,28 @@ import Mathlib.Algebra.QuadraticDiscriminant
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.MeasureTheory.Integral.Prod
 
-/-!
-# The per-eigenvalue scalar maximal-regularity estimate
-
-This file isolates the one-dimensional, real-analytic core of `L²` maximal
-regularity for a parabolic evolution equation.  Once a self-adjoint generator
-with discrete spectrum is diagonalised, the inhomogeneous Duhamel formula
-`φ(t) = ∫₀ᵗ e^{(t−s)A} f(s) ds` decouples into independent scalar problems, one
-for each eigenvalue `λ`.  On the eigen-coordinate belonging to `λ` the heat
-operator `e^{(t−s)A}` acts as multiplication by `e^{−λ(t−s)}`, and the Duhamel
-integral becomes the **per-mode convolution**
-
-  `φ_λ(t) = ∫₀ᵗ e^{−λ(t−s)} f(s) ds`,
-
-the solution of the scalar ODE `φ' + λφ = f`, `φ(0) = 0`.  Everything here is
-pure analysis on the interval `[0,T]`: there is no manifold and no
-Hilbert-space-valued object, only real functions of time.
-
-## Main definitions
-
-* `perModeConv lam f t` — the per-mode convolution `∫₀ᵗ e^{−lam(t−s)} f(s) ds`.
-
-## Main results
-
-* `perModeConv_zero_left` — `φ_λ(0) = 0`.
-* `kernelIntegral_space` / `kernelIntegral_time` — the two kernel mass
-  identities `∫₀ᵗ lam·e^{−lam(t−s)} ds = 1 − e^{−lam·t}` and
-  `∫ₛᵀ lam·e^{−lam(t−s)} dt = 1 − e^{−lam(T−s)}`, with their `≤ 1` corollaries.
-* `perModeConv_sq_integral_le` — **the maximal-regularity estimate**:
-  for `0 ≤ lam` and a forcing term `f` continuous on `[0,T]`,
-
-    `∫₀ᵀ (lam·φ_λ(t))² dt ≤ ∫₀ᵀ f(t)² dt`,
-
-  i.e. `‖lam·φ_λ‖_{L²(0,T)} ≤ ‖f‖_{L²(0,T)}` with constant `1`, **uniform in
-  `lam`**.  This is the scalar Schur-test estimate underlying de Simon's
-  `L²`-maximal-regularity theorem.
-* `perModeConv_hasDerivAt` — the fundamental theorem of calculus / ODE:
-  `φ_λ` has time derivative `f(t) − lam·φ_λ(t)`.
-* `perModeConv_deriv_sq_integral_le` — the resulting `L²` bound on the time
-  derivative, `∫₀ᵀ (φ_λ')² ≤ 4·∫₀ᵀ f²`.
-* `continuous_perModeConv` — `φ_λ` is continuous (an indefinite integral).
-
-## Proof of the maximal-regularity estimate
-
-The argument is the classical **Schur test** (a weighted Cauchy–Schwarz applied
-twice).  Write the convolution kernel `k_λ(t,s) = lam·e^{−lam(t−s)}` for
-`0 ≤ s ≤ t`.  It has unit-bounded mass in each variable:
-
-* `∫₀ᵗ k_λ(t,s) ds = 1 − e^{−lam·t} ≤ 1`;
-* `∫ₛᵀ k_λ(t,s) dt = 1 − e^{−lam(T−s)} ≤ 1`.
-
-Since `lam·φ_λ(t) = ∫₀ᵗ k_λ(t,s) f(s) ds`, the weighted Cauchy–Schwarz
-inequality with weight `k_λ(t,·)` gives, for each `t`,
-
-  `(lam·φ_λ(t))² ≤ (∫₀ᵗ k_λ(t,s) ds)·(∫₀ᵗ k_λ(t,s) f(s)² ds)
-              ≤ ∫₀ᵗ k_λ(t,s) f(s)² ds`.
-
-Integrating in `t` and exchanging the order of integration over the triangle
-`{0 ≤ s ≤ t ≤ T}` (Fubini for the bounded, hence integrable, kernel) yields
-
-  `∫₀ᵀ (lam·φ_λ)² dt ≤ ∫₀ᵀ ∫₀ᵗ k_λ(t,s) f(s)² ds dt
-                    = ∫₀ᵀ f(s)² (∫ₛᵀ k_λ(t,s) dt) ds
-                    ≤ ∫₀ᵀ f(s)² ds`. ∎
-
-For `lam = 0` the left-hand side is identically zero and the estimate is
-trivial.
--/
-
 noncomputable section
 
 open Set MeasureTheory Filter intervalIntegral
-open scoped Topology
+open scoped Topology ContDiff
 
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
 namespace MaximalRegularity
 
-/-- **The per-mode Duhamel convolution.**  For a decay rate `lam`, a forcing
-term `f : ℝ → ℝ` and a time `t`,
-
-  `perModeConv lam f t = ∫₀ᵗ e^{−lam(t−s)} f(s) ds`.
-
-This is the eigen-coordinate, belonging to the eigenvalue `lam`, of the Duhamel
-integral `∫₀ᵗ e^{(t−s)A} f(s) ds`: the heat operator `e^{(t−s)A}` acts on that
-mode as multiplication by `e^{−lam(t−s)}`.  Equivalently `perModeConv lam f` is
-the solution of the scalar ODE `φ' + lam·φ = f` with `φ(0) = 0`. -/
 def perModeConv (lam : ℝ) (f : ℝ → ℝ) (t : ℝ) : ℝ :=
   ∫ s in (0 : ℝ)..t, Real.exp (-(lam * (t - s))) * f s
 
-/-- Unfolding lemma for `perModeConv`. -/
 theorem perModeConv_def (lam : ℝ) (f : ℝ → ℝ) (t : ℝ) :
     perModeConv lam f t = ∫ s in (0 : ℝ)..t, Real.exp (-(lam * (t - s))) * f s :=
   rfl
 
-/-- At the initial time the per-mode convolution vanishes: `φ_λ(0) = 0`.  This
-is the initial condition `φ(0) = 0` of the scalar ODE. -/
 @[simp]
 theorem perModeConv_zero_left (lam : ℝ) (f : ℝ → ℝ) :
     perModeConv lam f 0 = 0 := by
   simp [perModeConv]
 
-/-- The convolution kernel `e^{−lam(t−s)}` factors as `e^{−lam·t} · e^{lam·s}`:
-this separates the time variable out of the integral. -/
 private theorem kernel_factor (lam t s : ℝ) :
     Real.exp (-(lam * (t - s))) = Real.exp (-(lam * t)) * Real.exp (lam * s) := by
   rw [← Real.exp_add]
@@ -115,21 +34,14 @@ section Continuity
 
 variable {f : ℝ → ℝ}
 
-/-- For a continuous forcing term `f` and a fixed time `t`, the convolution
-integrand `s ↦ e^{−lam(t−s)} · f(s)` is continuous. -/
 theorem continuous_kernel_mul (lam t : ℝ) (hf : Continuous f) :
     Continuous (fun s => Real.exp (-(lam * (t - s))) * f s) := by
   fun_prop
 
-/-- The convolution integrand `s ↦ e^{−lam(t−s)} · f(s)` is interval integrable
-on every interval, for a continuous forcing term `f`. -/
 theorem intervalIntegrable_kernel_mul (lam t : ℝ) (hf : Continuous f) (a b : ℝ) :
     IntervalIntegrable (fun s => Real.exp (-(lam * (t - s))) * f s) volume a b :=
   (continuous_kernel_mul lam t hf).intervalIntegrable a b
 
-/-- **Continuity of the per-mode convolution.**  For a continuous forcing term
-`f`, the function `t ↦ perModeConv lam f t` is continuous: it is the indefinite
-integral of a continuous (hence locally integrable) integrand. -/
 theorem continuous_perModeConv (lam : ℝ) (hf : Continuous f) :
     Continuous (perModeConv lam f) := by
   have hsplit : perModeConv lam f
@@ -145,20 +57,12 @@ theorem continuous_perModeConv (lam : ℝ) (hf : Continuous f) :
     continuous_primitive (fun a b => (hg.intervalIntegrable a b)) 0
   fun_prop
 
-/-- The per-mode convolution is continuous on `[0,T]` (a restriction of the
-global continuity, recorded for the `L²` embedding). -/
 theorem continuousOn_perModeConv (lam T : ℝ) (hf : Continuous f) :
     ContinuousOn (perModeConv lam f) (Set.Icc (0 : ℝ) T) :=
   (continuous_perModeConv lam hf).continuousOn
 
 end Continuity
 
-/-- **Kernel mass in the space variable.**  For every `lam` and `t`,
-
-  `∫₀ᵗ lam·e^{−lam(t−s)} ds = 1 − e^{−lam·t}`.
-
-The integrand `s ↦ lam·e^{−lam(t−s)}` is the `s`-derivative of
-`s ↦ e^{−lam(t−s)}`, so the integral telescopes. -/
 theorem kernelIntegral_space (lam t : ℝ) :
     ∫ s in (0 : ℝ)..t, lam * Real.exp (-(lam * (t - s)))
       = 1 - Real.exp (-(lam * t)) := by
@@ -181,12 +85,6 @@ theorem kernelIntegral_space (lam t : ℝ) :
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
   simp
 
-/-- **Kernel mass in the time variable.**  For every `lam`, `s` and `T`,
-
-  `∫ₛᵀ lam·e^{−lam(t−s)} dt = 1 − e^{−lam(T−s)}`.
-
-The integrand `t ↦ lam·e^{−lam(t−s)}` is the `t`-derivative of
-`t ↦ −e^{−lam(t−s)}`, so the integral telescopes. -/
 theorem kernelIntegral_time (lam s T : ℝ) :
     ∫ t in s..T, lam * Real.exp (-(lam * (t - s)))
       = 1 - Real.exp (-(lam * (T - s))) := by
@@ -213,16 +111,12 @@ theorem kernelIntegral_time (lam s T : ℝ) :
   simp only [sub_self, mul_zero, neg_zero, Real.exp_zero]
   ring
 
-/-- The space-variable kernel mass is at most `1`:
-
-  `∫₀ᵗ lam·e^{−lam(t−s)} ds = 1 − e^{−lam·t} ≤ 1`. -/
 theorem kernelIntegral_space_le_one (lam t : ℝ) :
     ∫ s in (0 : ℝ)..t, lam * Real.exp (-(lam * (t - s))) ≤ 1 := by
   rw [kernelIntegral_space]
   have : (0 : ℝ) ≤ Real.exp (-(lam * t)) := (Real.exp_pos _).le
   linarith
 
-/-- The space-variable kernel mass is nonnegative, for `0 ≤ lam` and `0 ≤ t`. -/
 theorem kernelIntegral_space_nonneg {lam t : ℝ} (hlam : 0 ≤ lam) (ht : 0 ≤ t) :
     0 ≤ ∫ s in (0 : ℝ)..t, lam * Real.exp (-(lam * (t - s))) := by
   rw [kernelIntegral_space]
@@ -230,22 +124,12 @@ theorem kernelIntegral_space_nonneg {lam t : ℝ} (hlam : 0 ≤ lam) (ht : 0 ≤
     Real.exp_le_one_iff.mpr (by nlinarith)
   linarith
 
-/-- The time-variable kernel mass is at most `1`:
-
-  `∫ₛᵀ lam·e^{−lam(t−s)} dt = 1 − e^{−lam(T−s)} ≤ 1`. -/
 theorem kernelIntegral_time_le_one (lam s T : ℝ) :
     ∫ t in s..T, lam * Real.exp (-(lam * (t - s))) ≤ 1 := by
   rw [kernelIntegral_time]
   have : (0 : ℝ) ≤ Real.exp (-(lam * (T - s))) := (Real.exp_pos _).le
   linarith
 
-/-- **Weighted Cauchy–Schwarz inequality for the interval integral.**  If `w`
-and `g` are continuous and `w` is nonnegative on `[a,b]`, then
-
-  `(∫ₐᵇ w·g)² ≤ (∫ₐᵇ w)·(∫ₐᵇ w·g²)`.
-
-This is obtained from the discriminant of the nonnegative quadratic
-`c ↦ ∫ₐᵇ w·(g − c)²`. -/
 theorem weighted_cauchy_schwarz {w g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hw : Continuous w) (hg : Continuous g) (hwpos : ∀ x ∈ Set.Icc a b, 0 ≤ w x) :
     (∫ x in a..b, w x * g x) ^ 2
@@ -281,13 +165,6 @@ section Estimate
 
 variable {f : ℝ → ℝ}
 
-/-- The pointwise step of the Schur test.  For `0 ≤ lam`, a continuous forcing
-term `f` and `0 ≤ t`,
-
-  `(lam·perModeConv lam f t)² ≤ ∫₀ᵗ lam·e^{−lam(t−s)} · f(s)² ds`.
-
-It is the weighted Cauchy–Schwarz inequality with weight `s ↦ lam·e^{−lam(t−s)}`
-together with the unit bound on that weight's mass. -/
 theorem perModeConv_sq_le_kernel_integral (lam : ℝ) (hlam : 0 ≤ lam)
     (hf : Continuous f) {t : ℝ} (ht : 0 ≤ t) :
     (lam * perModeConv lam f t) ^ 2
@@ -323,32 +200,23 @@ theorem perModeConv_sq_le_kernel_integral (lam : ℝ) (hlam : 0 ≤ lam)
     _ = ∫ s in (0 : ℝ)..t, lam * Real.exp (-(lam * (t - s))) * f s ^ 2 := by
         simp only [hw_def]
 
-/-- The integrand of the Schur-test double integral, packaged for Fubini: the
-kernel times `f²`, cut off to the triangle `{s ≤ t}` by an indicator over the
-square `[0,T]²`. -/
 private def schurIntegrand (lam : ℝ) (f : ℝ → ℝ) (t s : ℝ) : ℝ :=
   Set.indicator (Set.Iic t) (fun s => lam * Real.exp (-(lam * (t - s))) * f s ^ 2) s
 
-/-- On the triangle `s ≤ t` the Schur integrand is the kernel times `f²`. -/
 private theorem schurIntegrand_of_le (lam : ℝ) (f : ℝ → ℝ) {t s : ℝ} (hst : s ≤ t) :
     schurIntegrand lam f t s = lam * Real.exp (-(lam * (t - s))) * f s ^ 2 := by
   rw [schurIntegrand, Set.indicator_of_mem (Set.mem_Iic.mpr hst)]
 
-/-- Off the triangle `s ≤ t` the Schur integrand vanishes. -/
 private theorem schurIntegrand_of_not_le (lam : ℝ) (f : ℝ → ℝ) {t s : ℝ}
     (hst : ¬ s ≤ t) : schurIntegrand lam f t s = 0 := by
   rw [schurIntegrand, Set.indicator_of_notMem (by simpa using hst)]
 
-/-- The Schur integrand is nonnegative for `0 ≤ lam`. -/
 private theorem schurIntegrand_nonneg {lam : ℝ} (hlam : 0 ≤ lam) (f : ℝ → ℝ)
     (t s : ℝ) : 0 ≤ schurIntegrand lam f t s := by
   rw [schurIntegrand]
   refine Set.indicator_nonneg (fun s _ => ?_) s
   exact mul_nonneg (mul_nonneg hlam (Real.exp_pos _).le) (sq_nonneg _)
 
-/-- The inner integral of the Schur integrand over `[0,T]` recovers the
-triangular kernel integral `∫₀ᵗ lam·e^{−lam(t−s)} · f(s)² ds`, for `t ∈ [0,T]`.
--/
 private theorem setIntegral_schurIntegrand_space (lam : ℝ) (f : ℝ → ℝ)
     {T t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
     ∫ s in Set.Icc (0 : ℝ) T, schurIntegrand lam f t s
@@ -374,9 +242,6 @@ private theorem setIntegral_schurIntegrand_space (lam : ℝ) (f : ℝ → ℝ)
   rw [hset, intervalIntegral.integral_of_le ht0,
     ← MeasureTheory.integral_Icc_eq_integral_Ioc]
 
-/-- The outer integral of the Schur integrand over `[0,T]` recovers the
-triangular kernel integral in the time variable, `f(s)² · ∫ₛᵀ lam·e^{−lam(t−s)}
-dt`, for `s ∈ [0,T]`. -/
 private theorem setIntegral_schurIntegrand_time (lam : ℝ) (f : ℝ → ℝ)
     {T s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     ∫ t in Set.Icc (0 : ℝ) T, schurIntegrand lam f t s
@@ -406,9 +271,6 @@ private theorem setIntegral_schurIntegrand_time (lam : ℝ) (f : ℝ → ℝ)
   refine MeasureTheory.setIntegral_congr_fun measurableSet_Icc (fun t _ => ?_)
   ring
 
-/-- The Schur integrand is integrable for the product time measure on the
-square `[0,T]²`: it is bounded (the kernel is `≤ lam` on the triangle and `f²`
-is bounded on the compact interval) and measurable. -/
 private theorem integrable_uncurry_schurIntegrand (lam : ℝ) (hlam : 0 ≤ lam)
     (f : ℝ → ℝ) (hf : Continuous f) (T : ℝ) :
     Integrable (Function.uncurry (schurIntegrand lam f))
@@ -476,17 +338,6 @@ private theorem integrable_uncurry_schurIntegrand (lam : ℝ) (hlam : 0 ≤ lam)
   · rw [Function.uncurry_apply_pair, schurIntegrand_of_not_le lam f hp]
     exact hCbound_nonneg
 
-/-- **The per-mode maximal-regularity estimate.**  Fix a decay rate `0 ≤ lam`
-and a time horizon `0 ≤ T`.  For a forcing term `f` continuous on `[0,T]`,
-
-  `∫₀ᵀ (lam·perModeConv lam f t)² dt ≤ ∫₀ᵀ f(t)² dt`,
-
-equivalently `‖lam·φ_λ‖_{L²(0,T)} ≤ ‖f‖_{L²(0,T)}` — the per-mode `L²`-maximal
-regularity bound with constant `1`, **uniform in `lam`**.
-
-The continuity hypothesis `Continuous f` is the cleanest sufficient assumption
-making every interval / product integral appearing in the Schur test
-automatically integrable; the estimate is, of course, of pure `L²` nature. -/
 theorem perModeConv_sq_integral_le (lam : ℝ) (hlam : 0 ≤ lam)
     (hf : Continuous f) {T : ℝ} (hT : 0 ≤ T) :
     ∫ t in (0 : ℝ)..T, (lam * perModeConv lam f t) ^ 2
@@ -573,13 +424,6 @@ section Derivative
 
 variable {f : ℝ → ℝ}
 
-/-- **The scalar ODE.**  For a continuous forcing term `f`, the per-mode
-convolution `perModeConv lam f` has time derivative
-
-  `(perModeConv lam f)'(t) = f(t) − lam·perModeConv lam f t`
-
-at every `t`.  Together with `perModeConv lam f 0 = 0` this says that
-`perModeConv lam f` solves `φ' + lam·φ = f`, `φ(0) = 0`. -/
 theorem perModeConv_hasDerivAt (lam : ℝ) (hf : Continuous f) (t : ℝ) :
     HasDerivAt (perModeConv lam f)
       (f t - lam * perModeConv lam f t) t := by
@@ -619,29 +463,15 @@ theorem perModeConv_hasDerivAt (lam : ℝ) (hf : Continuous f) (t : ℝ) :
   rw [hderiv_eq] at hprod
   exact hprod
 
-/-- The per-mode convolution has derivative `f(t) − lam·perModeConv lam f t`
-within `[0,T]` at every point (the within-set form of `perModeConv_hasDerivAt`).
--/
 theorem perModeConv_hasDerivWithinAt (lam : ℝ) (hf : Continuous f) (T t : ℝ) :
     HasDerivWithinAt (perModeConv lam f)
       (f t - lam * perModeConv lam f t) (Set.Icc (0 : ℝ) T) t :=
   (perModeConv_hasDerivAt lam hf t).hasDerivWithinAt
 
-/-- The time derivative of the per-mode convolution, as a function of time:
-`t ↦ f(t) − lam·perModeConv lam f t`.  It is continuous for a continuous
-forcing term `f`. -/
 theorem continuous_perModeConv_deriv (lam : ℝ) (hf : Continuous f) :
     Continuous (fun t => f t - lam * perModeConv lam f t) :=
   hf.sub (continuous_const.mul (continuous_perModeConv lam hf))
 
-/-- **The `L²` bound on the time derivative.**  For `0 ≤ lam`, `0 ≤ T` and a
-forcing term `f` continuous on `[0,T]`,
-
-  `∫₀ᵀ ((perModeConv lam f)'(t))² dt ≤ 4·∫₀ᵀ f(t)² dt`,
-
-i.e. `‖φ_λ'‖_{L²(0,T)} ≤ 2·‖f‖_{L²(0,T)}`.  The factor `2` is the triangle
-inequality `φ_λ' = f − lam·φ_λ` together with the maximal-regularity estimate
-`‖lam·φ_λ‖ ≤ ‖f‖`. -/
 theorem perModeConv_deriv_sq_integral_le (lam : ℝ) (hlam : 0 ≤ lam)
     (hf : Continuous f) {T : ℝ} (hT : 0 ≤ T) :
     ∫ t in (0 : ℝ)..T, (f t - lam * perModeConv lam f t) ^ 2
@@ -685,6 +515,48 @@ theorem perModeConv_deriv_sq_integral_le (lam : ℝ) (hlam : 0 ≤ lam)
     _ = 4 * ∫ t in (0 : ℝ)..T, f t ^ 2 := by ring
 
 end Derivative
+
+section Smoothness
+
+private theorem perModeConv_contDiff_natCast (lam : ℝ) :
+    ∀ (k : ℕ) (f : ℝ → ℝ), ContDiff ℝ ((k : ℕ) : WithTop ℕ∞) f →
+      ContDiff ℝ ((k : ℕ) : WithTop ℕ∞) (perModeConv lam f) := by
+  intro k
+  induction k with
+  | zero =>
+      intro f hf
+      rw [Nat.cast_zero, contDiff_zero] at hf ⊢
+      exact continuous_perModeConv lam hf
+  | succ k ih =>
+      intro f hf
+      have hfcont : Continuous f := hf.continuous
+      have hf_low : ContDiff ℝ ((k : ℕ) : WithTop ℕ∞) f :=
+        hf.of_le (by rw [Nat.cast_succ]; exact le_self_add)
+      have hphi_low : ContDiff ℝ ((k : ℕ) : WithTop ℕ∞) (perModeConv lam f) :=
+        ih f hf_low
+      have hderiv_eq : deriv (perModeConv lam f)
+          = fun t => f t - lam * perModeConv lam f t :=
+        deriv_eq (fun t => perModeConv_hasDerivAt lam hfcont t)
+      have hdiff : Differentiable ℝ (perModeConv lam f) :=
+        fun t => (perModeConv_hasDerivAt lam hfcont t).differentiableAt
+      rw [Nat.cast_succ, contDiff_succ_iff_deriv]
+      refine ⟨hdiff, fun hω => absurd hω (by simp), ?_⟩
+      rw [hderiv_eq]
+      exact hf_low.sub (contDiff_const.mul hphi_low)
+
+theorem perModeConv_contDiff_of_contDiff (n : ℕ∞) (lam : ℝ) (f : ℝ → ℝ)
+    (hf : ContDiff ℝ n f) : ContDiff ℝ n (perModeConv lam f) := by
+  induction n using ENat.recTopCoe with
+  | top =>
+      rw [show ((⊤ : ℕ∞) : WithTop ℕ∞) = ∞ from rfl, contDiff_infty] at hf ⊢
+      exact fun k => perModeConv_contDiff_natCast lam k f (hf k)
+  | coe k => exact perModeConv_contDiff_natCast lam k f hf
+
+theorem perModeConv_contDiff_top (lam : ℝ) (f : ℝ → ℝ)
+    (hf : ContDiff ℝ ∞ f) : ContDiff ℝ ∞ (perModeConv lam f) :=
+  perModeConv_contDiff_of_contDiff ⊤ lam f hf
+
+end Smoothness
 
 end MaximalRegularity
 end Parabolic

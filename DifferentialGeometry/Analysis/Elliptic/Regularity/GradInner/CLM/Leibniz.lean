@@ -5,61 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclu
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 
-/-!
-# Leibniz identity for `gradInnerCLM` on `H1Compl`
-
-For a closed Riemannian manifold `(M, g)` and a bundled smooth function
-`ρα : C^∞⟮I, M; ℝ⟯`, the **pointwise gradient Leibniz rule**
-`∇(ρα · v) = ρα · ∇v + v · ∇ρα` for smooth `ρα, v` yields, after taking the
-metric inner product with `∇ρα`,
-
-```
-g(∇ρα, ∇(ρα · v)) = ρα · g(∇ρα, ∇v) + |∇ρα|²_g · v.
-```
-
-Rearranging,
-
-```
-ρα · g(∇ρα, ∇v) = g(∇ρα, ∇(ρα · v)) − |∇ρα|²_g · v.
-```
-
-Both sides are bilinear in `(ρα, v)`. We package this identity at the
-`Lp ℝ 2 μ_g` class level, first for smooth `v ∈ SmoothScalar g`, and then
-extend by `H1Compl`-density to all `u_h ∈ H1Compl g`:
-
-```
-smoothMulLp g ρα (gradInnerCLM g ρα u_h)
-  = gradInnerCLM g ρα (smoothMulH1Compl g ρα u_h)
-    − smoothMulLp g (gradRhoSqSmooth g ρα) (H1ComplToLp u_h).
-```
-
-Both sides of this identity are continuous linear maps `H1Compl g →L[ℝ]
-Lp ℝ 2 μ_g`. The first ingredient `smoothMulLp g ρα ∘ gradInnerCLM g ρα`
-multiplies the gradient inner product by `ρα`. The second ingredient
-`gradInnerCLM g ρα ∘ smoothMulH1Compl g ρα` first multiplies `u_h` by `ρα`
-inside the H¹-completion (using `smoothMulH1Compl`, which preserves H¹ regularity)
-and then takes the gradient inner product with `∇ρα`. The third ingredient
-`smoothMulLp g (gradRhoSqSmooth g ρα) ∘ H1ComplToLp` multiplies `u_h.coeFn`
-by the smooth bounded scalar `|∇ρα|²_g`.
-
-## Main results
-
-* `gradRhoSqSmooth` : the smooth scalar function `x ↦ g(∇ρα(x), ∇ρα(x))`
-  packaged as a `C^∞⟮I, M; ℝ⟯` bundle.
-* `gradInner_leibniz_pointwise` : the pointwise smooth Leibniz identity
-  `ρα · g(∇ρα, ∇v) = g(∇ρα, ∇(ρα · v)) − |∇ρα|²_g · v`.
-* `gradInner_leibniz_smooth_Lp` : the Lp-class smooth-case Leibniz identity.
-* `gradInner_leibniz_H1Compl` : the Lp-class identity at `H1Compl g`,
-  obtained by H¹Compl-density extension of the smooth-case identity.
-
-## Strategy
-
-The H¹Compl extension proceeds via the standard density-extension pattern:
-both sides of the desired identity are continuous linear maps from
-`H1Compl g` into `Lp ℝ 2 μ_g`. Agreement on the dense range of
-`smoothToH1Compl` (the smooth-case identity) extends to agreement on all of
-`H1Compl g` by continuity.
--/
 
 noncomputable section
 
@@ -93,20 +38,19 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The pointwise squared metric norm of `∇ρα`, packaged as a bundled smooth
-map `M → ℝ`. -/
 noncomputable def gradRhoSqSmooth
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     C^∞⟮I, M; ℝ⟯ :=
   ⟨normGradSqFun (I := I) g (ρα : M → ℝ),
     normGradSqFun_contMDiff (I := I) g ρα.contMDiff⟩
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma gradRhoSqSmooth_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
     (gradRhoSqSmooth (I := I) (M := M) g ρα : M → ℝ) x =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g ρα x) := rfl
 
-/-- **Pointwise smooth Leibniz identity** for the gradient inner product. -/
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInner_leibniz_pointwise
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -125,12 +69,6 @@ lemma gradInner_leibniz_pointwise
   simp only [smul_eq_mul, gradRhoSqSmooth_apply]
   ring
 
-/-- **Smooth Leibniz identity at the Lp class level**: for smooth `v`,
-```
-smoothMulLp g ρα (gradInnerSmooth g ρα v)
-  = gradInnerSmooth g ρα (smoothScalarMulFun g ρα v)
-    − smoothMulLp g (gradRhoSqSmooth g ρα) (smoothToLp g v).
-``` -/
 theorem gradInner_leibniz_smooth_Lp
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulLp (I := I) (M := M) g ρα
@@ -195,7 +133,6 @@ theorem gradInner_leibniz_smooth_Lp
   rw [hx_diff, Pi.sub_apply, hx_rhs1, hx_rhs2]
   exact (gradInner_leibniz_pointwise (I := I) (M := M) g ρα v x).symm
 
-/-- The LHS CLM: `u_h ↦ smoothMulLp g ρα (gradInnerCLM g ρα u_h)`. -/
 noncomputable def leibnizLhsCLM
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -208,8 +145,6 @@ noncomputable def leibnizLhsCLM
       smoothMulLp (I := I) (M := M) g ρα
         (gradInnerCLM (I := I) (M := M) g ρα u_h) := rfl
 
-/-- The RHS CLM: `u_h ↦ gradInnerCLM g ρα (smoothMulH1Compl g ρα u_h)
-      - smoothMulLp g (|∇ρα|²_g) (H1ComplToLp u_h)`. -/
 noncomputable def leibnizRhsCLM
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -230,8 +165,6 @@ noncomputable def leibnizRhsCLM
   unfold leibnizRhsCLM
   rfl
 
-/-- **Smooth-case agreement**: `leibnizLhsCLM` and `leibnizRhsCLM` agree on
-`smoothToH1Compl g v` for every `v : SmoothScalar g`. -/
 private lemma leibnizCLM_agree_on_smooth
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     leibnizLhsCLM (I := I) (M := M) g ρα
@@ -245,7 +178,7 @@ private lemma leibnizCLM_agree_on_smooth
     H1ComplToLp_smoothToH1Compl]
   exact gradInner_leibniz_smooth_Lp (I := I) (M := M) g ρα v
 
-/-- `smoothToH1Compl` has dense range. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_smoothToH1Compl_aux
     (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
@@ -255,8 +188,6 @@ private lemma denseRange_smoothToH1Compl_aux
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- **H¹Compl Leibniz identity at the CLM level**: the two CLMs `leibnizLhsCLM`
-and `leibnizRhsCLM` are equal. -/
 theorem leibnizLhsCLM_eq_leibnizRhsCLM
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     leibnizLhsCLM (I := I) (M := M) g ρα =
@@ -284,15 +215,6 @@ theorem leibnizLhsCLM_eq_leibnizRhsCLM
     exact h_eq_on_range v
   exact congr_fun h_eq_funs u_h
 
-/-- **Headline Leibniz identity at `H1Compl g`**: for every `u_h ∈ H1Compl g`,
-```
-smoothMulLp g ρα (gradInnerCLM g ρα u_h)
-  = gradInnerCLM g ρα (smoothMulH1Compl g ρα u_h)
-    − smoothMulLp g (gradRhoSqSmooth g ρα) (H1ComplToLp u_h).
-```
-This generalises the smooth pointwise identity `ρα · g(∇ρα, ∇v) =
-g(∇ρα, ∇(ρα · v)) − |∇ρα|²_g · v` to non-smooth `H1Compl`-completion
-elements. -/
 theorem gradInner_leibniz_H1Compl
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     smoothMulLp (I := I) (M := M) g ρα
@@ -309,7 +231,6 @@ theorem gradInner_leibniz_H1Compl
 
 variable [NeZero (Module.finrank ℝ E)]
 
-/-- Chart-pulled-raw distribution over subtraction of Lp classes. -/
 lemma chartPushedRawLpFromLp_coeFn_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -370,8 +291,6 @@ lemma chartPushedRawLpFromLp_coeFn_sub
   rw [hy_FG, hy_chart, h_chartPushedRaw_diff_pointwise y]
   rw [← hy_F, ← hy_G]
 
-/-- The chart-pull of `smoothMulLp g φ F` equals `(φ ∘ symm) · chartPushedRawLpFromLp F` ae
-on the chart-pulled weighted measure restricted to chartTarget. -/
 private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -437,13 +356,6 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
   rw [hy_smoothMul, hy_chart, h_pointwise y]
   rw [← hy_F]
 
-/-- **Chart-pulled Leibniz identity**: chart-pulling the M-side identity
-`smoothMulLp ρα (gradInnerCLM ρα u_h) = gradInnerCLM ρα (smoothMulH1Compl ρα u_h)
-− smoothMulLp (|∇ρα|²_g) (H1ComplToLp u_h)` via `chartPushedRawLpFromLp g α`
-produces an ae-identity on the chart-pulled weighted measure restricted to
-`chartTargetEuclid α`. The chart-pulled LHS is the chart-pull of
-`ρα · g(∇ρα, ∇u_h)`, the chart-pulled RHS is expressed by chart-pulling each
-summand of the M-side identity. -/
 theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
@@ -483,7 +395,6 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     with y hy_sub hy_smooth
   rw [hy_sub, hy_smooth]
 
-/-- The chart-pulled Leibniz identity, restated for smooth `v`. -/
 theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

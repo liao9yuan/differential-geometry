@@ -13,56 +13,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-/-!
-# Pointwise order-2 squared norm bound on the chart-pulled representation of
-the raw tensor connection Laplacian by orders 0..4 of the chart-pulled
-representation of `T`
-
-This file is part of the chain of squared-norm bounds connecting the bundled
-raw tensor connection Laplacian to a manifold Sobolev norm of the underlying
-smooth compactly supported tensor section.
-
-## Smoothness regularity prerequisite
-
-The downstream order-2 iterated-Fréchet-derivative bound rests on the
-`ContDiffOn ℝ ∞` regularity of the chart-pulled representation
-`(tensorRSChartE_section_repr r s α (raw T)) ∘ (extChartAt I α).symm` on
-the chart-target image of the chart-`α` Levi-Civita good set. This regularity
-is the analog of `reprT_contDiffOn_goodSet` (already present in
-`RawTensorConnLapNormSqChartPulledReprBound.lean`) but for the raw tensor
-connection Laplacian section instead of an arbitrary smooth compactly
-supported tensor section. It follows immediately from the bundled smoothness
-of `rawTensorConnLapSmooth g r s T : SmoothCcTensor g r s` by applying the
-existing template.
-
-This file ships the regularity lemma.
-
-The order-2 squared norm bound proper — namely
-
-```
-‖iteratedFDeriv ℝ 2 ((repr (raw T)) ∘ symm) (extChartAt I α b)‖ ^ 2 ≤
-  K * ∑ j : Fin 5,
-    ‖iteratedFDeriv ℝ j.val ((repr T) ∘ symm) (extChartAt I α b)‖ ^ 2
-```
-
-— requires combining (a) the chart-pulled covApply explicit-formula
-expansion of `(repr (raw T)) ∘ symm` into Fréchet-derivative pieces in
-`(repr T) ∘ symm` together with smooth bounded chart coefficients, (b)
-applying the higher-order Leibniz rule and chain rule to differentiate twice
-in chart coordinates, and (c) per-summand bounds in terms of orders 0..4 of
-`(repr T) ∘ symm` with uniform coefficient bounds drawn from the chart frame
-normalisation, the chart Christoffel data, and the chart-pulled covApply
-Fréchet-derivative kernel. That step is the next sub-task in the dependency
-graph for the chart-pulled order-2 raw tensor representation bound; it is
-out of scope for this file and is left to a follow-on file. -/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -86,6 +42,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] in
 private lemma raw_reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -184,12 +141,7 @@ private lemma raw_reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- **Public smoothness regularity statement.** For any smooth compactly
-supported `(r, s)`-tensor section `T`, the chart-pulled representation of
-`rawTensorConnLapSmooth g r s T` is `ContDiffOn ℝ ∞` on the chart-target
-image of the chart-`α` Levi-Civita good set. This regularity statement is the
-foundational ingredient for any pointwise order-`N` Fréchet-derivative bound
-on `(repr (raw T)) ∘ symm`. -/
+omit [CompactSpace M] in
 theorem rawTensorRepr_chart_pulled_contDiffOn_goodSet_image
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -201,7 +153,7 @@ theorem rawTensorRepr_chart_pulled_contDiffOn_goodSet_image
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   raw_reprT_contDiffOn_goodSet (I := I) (M := M) g r s α T
 
-/-- `ContDiffAt ℝ N` at a good-set chart-coord point for any `N : ℕ`. -/
+omit [CompactSpace M] in
 theorem rawTensorRepr_chart_pulled_contDiffAt_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) (N : ℕ) {b : M}

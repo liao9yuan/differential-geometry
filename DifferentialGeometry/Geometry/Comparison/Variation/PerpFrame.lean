@@ -1,31 +1,10 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransportSmooth
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransportSmooth
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 
-/-!
-# Parallel orthonormal perpendicular frame along a geodesic
-
-For a `C^∞` unit-speed geodesic `γ : ℝ → M` on `Icc 0 L` with `L > 0`, this
-file isolates the construction and supporting bridges for a parallel
-orthonormal frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` of the
-`g`-orthogonal complement of the velocity `t ↦ dγ_t(1)`:
-
-* `exists_parallel_orthonormal_perp_frame_along_geodesic` — existence of the frame: each
-  `e i` is differentiable, parallel along `γ` (moving-foot
-  `chartCovDerivAlong g (γ t) γ (e i) t = 0`), the frame is `g`-orthonormal
-  pointwise, and each `e i` is `g`-orthogonal to the velocity.
-* `perp_to_velocity_preserved_of_parallel` — a parallel section that is `g`-orthogonal to
-  the velocity at `t = 0` stays `g`-orthogonal to the velocity for all `t`.
-* `chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered` — the
-  foot bridge from `IsParallelChart` to the moving-foot `chartCovDerivAlong`.
-
-The foot identity relating a section's value to the inverse-trivialisation of
-its chart representation is already available as `symmL_chartRepAt_self`
-(`CovariantDerivativeAlong`), so it is consumed directly rather than restated here.
--/
 
 noncomputable section
 
@@ -35,7 +14,7 @@ open scoped Topology Manifold ContDiff ENNReal
 namespace DifferentialGeometry.Geometry.Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -49,8 +28,6 @@ namespace PerpFrameAux
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- The normalised Gram–Schmidt vector at index `i` for the `B`-bilinear form
-applied to the family `v`. Defined by well-founded recursion on `i.val`. -/
 private noncomputable def bGramSchmidt
     (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F) (i : Fin m) : F :=
   let raw : F :=
@@ -61,8 +38,6 @@ private noncomputable def bGramSchmidt
 termination_by i.val
 decreasing_by exact j.isLt
 
-/-- The unnormalised Gram–Schmidt vector at index `i`:
-`raw_i = v i - ∑_{j < i} B(v i, e_j) • e_j`. -/
 private noncomputable def bGramSchmidtRaw
     (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F) (i : Fin m) : F :=
   v i - ∑ j : Fin i.val,
@@ -77,7 +52,6 @@ private lemma bGramSchmidt_eq
   unfold bGramSchmidt bGramSchmidtRaw
   rfl
 
-/-- Bilinear distribution in the right slot. -/
 private lemma B_sum_right
     (B : F →L[ℝ] F →L[ℝ] ℝ) (x : F)
     {ι : Type*} (s : Finset ι) (w : ι → F) (c : ι → ℝ) :
@@ -90,8 +64,6 @@ private lemma B_sum_right
       show (B x) (c a • w a) = c a * B x (w a) from by
         rw [map_smul, smul_eq_mul], ih]
 
-/-- The self `B`-norm of the `i`-th Gram–Schmidt vector is `1`, provided the
-raw vector is nonzero (and `B` is positive-definite). -/
 private lemma bGramSchmidt_self_norm
     (B : F →L[ℝ] F →L[ℝ] ℝ)
     (Bpos : ∀ x : F, x ≠ 0 → 0 < B x x)
@@ -122,9 +94,7 @@ private lemma bGramSchmidt_self_norm
   rw [hs_sq]; exact inv_mul_cancel₀ (ne_of_gt hpos)
 
 set_option maxHeartbeats 4000000 in
-/-- Strong-induction package: for a `B`-linearly-independent family `v`,
-the Gram–Schmidt recursion is well-defined (raw vectors nonzero) and
-`B`-orthonormal. `B` is assumed symmetric and positive-definite. -/
+
 private theorem bGramSchmidt_orth_strong_aux
     (B : F →L[ℝ] F →L[ℝ] ℝ)
     (Bsymm : ∀ x y : F, B x y = B y x)
@@ -281,9 +251,6 @@ private theorem bGramSchmidt_orth_strong_aux
         rw [horth_raw j hj_lt, mul_zero]
       · exact bGramSchmidt_self_norm B Bpos v i hraw_ne
 
-/-- **`B`-orthonormality of the abstract Gram–Schmidt family.** For a symmetric
-positive-definite bilinear form `B` and a `B`-linearly-independent family `v`,
-`bGramSchmidt B v` is `B`-orthonormal: `B (e i) (e j) = δ_{ij}`. -/
 private theorem bGramSchmidt_orthonormal
     (B : F →L[ℝ] F →L[ℝ] ℝ)
     (Bsymm : ∀ x y : F, B x y = B y x)
@@ -302,9 +269,6 @@ private theorem bGramSchmidt_orthonormal
     have hne : i ≠ j := fun h_eq => by rw [h_eq] at hgt; omega
     rw [if_neg hne, Bsymm]; exact h.2.1 j hgt
 
-/-- Each Gram–Schmidt output lies in the submodule spanned by the input family
-(in fact in the span of `v`); hence if every `v k` lies in a submodule `W`, so
-does every `bGramSchmidt B v i`. -/
 private theorem bGramSchmidt_mem
     (B : F →L[ℝ] F →L[ℝ] ℝ) {m : ℕ} (v : Fin m → F)
     (W : Submodule ℝ F) (hv : ∀ k, v k ∈ W) (i : Fin m) :
@@ -326,33 +290,11 @@ section PerpFrame
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-set_option linter.unusedVariables false in
-/-- A parallel section along a geodesic that starts `g`-orthogonal to the
-velocity stays `g`-orthogonal to the velocity. Concretely: if `V` is a section
-along a `C^∞` geodesic `γ` that is parallel on `Icc 0 L` (the intrinsic
-covariant derivative `covDerivAlong g γ V` vanishes there) and `V 0` is
-`g`-orthogonal to the velocity `dγ_0(1)` at the basepoint, then `V t` is
-`g`-orthogonal to the velocity `dγ_t(1)` for every `t ∈ Icc 0 L`.
 
-The mechanism is constancy of the Riemannian inner product
-`t ↦ g(γ t)(V t, dγ_t(1))`: at every point its derivative is computed in the
-chart pinned at the foot `γ t` by the covariant-derivative product rule
-(`chartGramAlongCurve_hasDerivAt_covariant`), and both correction terms vanish —
-the `V`-term because `V` is parallel (its foot-chart covariant derivative is the
-chart coordinate of `covDerivAlong g γ V`, which is `0`), the velocity-term
-because `γ` is a geodesic so its velocity field is parallel
-(`covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`).
-
-The regularity hypothesis `hVdiff` — the chart-coordinate representation
-`chartRepAt γ V t` is differentiable at the foot `t` — is the standard
-"`V` varies differentiably along `γ`" assumption shared with `covDerivAlong_add`
-/ `covDerivAlong_smulFun`; without it the chart-Gram form is not differentiable
-and `covDerivAlong g γ V = 0` (which reads `deriv` of a possibly
-non-differentiable representation) carries no propagation content. -/
 theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
-    {L : ℝ} (hL : 0 < L) (V : ∀ t, TangentSpace I (γ t))
+    {L : ℝ} (_hL : 0 < L) (V : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
     (hVpar : ∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0)
@@ -517,27 +459,6 @@ theorem perp_to_velocity_preserved_of_parallel
   rw [hft]
   exact hPerp0
 
-/-- Along a `C^∞` unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`) there exists a
-parallel `g`-orthonormal frame of the velocity's orthogonal complement. Concretely:
-there is a frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` such that each
-`e i` is differentiable on `Icc 0 L`, is parallel along `γ` (the intrinsic covariant
-derivative `covDerivAlong g γ (e i) t` vanishes), the frame is pointwise
-`g`-orthonormal (`g(γ t)(e i, e j) = if i = j then 1 else 0`), and each frame vector
-is `g`-orthogonal to the velocity `dγ_t(1)`. Unit speed enters only through the
-hypothesis `hUnit`; it is used to make the velocity functional nonzero so its kernel
-has dimension `finrank E - 1`.
-
-The construction is Gram–Schmidt of an orthonormal basis of `(γ'(0))^⊥` followed by
-parallel transport: seed an orthonormal basis of the `g`-orthogonal complement of
-`dγ_0(1)` at the basepoint `γ 0` and parallel transport each seed along `γ`
-(`parallelTransport`). The transported sections are parallel by construction
-(`parallelTransport_isParallel`, bridged to the intrinsic `covDerivAlong` via
-`covDerivAlong_eq_zero_iff` /
-`chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered`),
-`g`-orthonormality is preserved by parallel transport
-(`parallelTransport_preserves_inner_product`), and perpendicularity to the velocity
-is preserved because a geodesic's velocity field is itself parallel
-(`perp_to_velocity_preserved_of_parallel`). -/
 theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -605,7 +526,7 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
       (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
     intro i
     exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
-      (I := I) g γ hγ hL (seed i)
+      (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL (seed i)
   choose Vfun hV0 hVdiff hVpar using htransport
   refine ⟨fun i => ⟨fun t => Vfun i t⟩, ?_, ?_, ?_, ?_⟩
   · intro i t ht; exact hVdiff i t ht
@@ -613,7 +534,8 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
   · intro t ht i j
     have hconst :=
       DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-        (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
+        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
         from rfl,
@@ -633,19 +555,37 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
         from rfl]
     exact hperp
 
-/-- **Parallel orthonormal frame perpendicular to the geodesic velocity field.**
-For a unit-speed geodesic `γ` on `[0, L]` with velocity `uPrime t = γ'(t)`
-(`huPrimeEq` pins `uPrime t = mfderiv γ t (1)` and `hUnit` records unit speed),
-there is a frame `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` whose every
-member is differentiable (in its chart representation), parallel along `γ` (the
-intrinsic `covDerivAlong g γ (e i) t = 0`), pointwise `g`-orthonormal, and
-`g`-orthogonal to the velocity `uPrime t`.
+theorem exists_parallel_frame
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ) {L : ℝ} (hL : 0 < L)
+    {ι : Type*} [DecidableEq ι] (v : ι → TangentSpace I (γ 0))
+    (hON0 : ∀ i j, g.inner (γ 0) (v i) (v j) = if i = j then (1 : ℝ) else 0) :
+    ∃ e : ι → ∀ t : ℝ, TangentSpace I (γ t),
+      (∀ i, e i 0 = v i) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i) t) t) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        covDerivAlong (I := I) g γ (e i) t = 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+        g.inner (γ t) (e i t) (e j t) = if i = j then 1 else 0) := by
+  classical
+  have htransport : ∀ i, ∃ V : ∀ t, TangentSpace I (γ t),
+      V 0 = v i ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) :=
+    fun i =>
+      DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
+        (I := I) g γ hN hγ hL (v i)
+  choose Vfun hV0 hVdiff hVpar using htransport
+  refine ⟨Vfun, hV0, hVdiff, hVpar, ?_⟩
+  intro t ht i j
+  have hconst :=
+    DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
+      (I := I) g γ hN hγ hL.le (Vfun i) (Vfun j)
+      (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
+  rw [hconst, hV0 i, hV0 j]
+  exact hON0 i j
 
-This is the velocity-field-indexed restatement of
-`exists_parallel_orthonormal_perp_frame_along_geodesic`: the only difference is that the
-perpendicularity clause is phrased against the supplied `uPrime` rather than
-the bare `mfderiv γ t (1)`; the two coincide by `huPrimeEq`, so the result is a
-direct reduction to the underlying frame. -/
 theorem parallel_on_frame_perp_to_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
@@ -676,11 +616,6 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
-/-- **Foot bridge: chart parallelism implies moving-foot covariant vanishing.**
-If a section's `E`-valued representation `X` is parallel along `γ` in the chart
-centred at the foot `γ t` (the predicate `IsParallelChart` for the foot-centred
-chart curve velocity, on a neighbourhood `s` of `t`), then the moving-foot
-chart-local covariant derivative `chartCovDerivAlong g (γ t) γ X t` vanishes. -/
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
     (hX : IsParallelChart (I := I) g (γ t) γ
@@ -698,12 +633,7 @@ section SmoothPerpFrame
 
 variable [I.Boundaryless]
 
-/-- **Scalar cut-off of a bundle-smooth field is bundle-smooth.**  If
-`t ↦ ⟨γ t, V t⟩` is a `C^n` section of `TM` along `γ` and `χ : ℝ → ℝ` is `C^n`,
-then `t ↦ ⟨γ t, χ t • V t⟩` is `C^n`.  The fibre coordinate of the cut-off
-section, read in the trivialisation at `γ t₀`, is `χ t` times the fibre
-coordinate of the original (fibrewise linearity), hence smooth as a product of
-smooth scalar functions. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem contMDiff_smul_bundleField_perp
     {γ : ℝ → M} {V : ℝ → E} {χ : ℝ → ℝ} {n : WithTop ℕ∞}
     (hγ : ContMDiff (𝓘(ℝ, ℝ)) I n γ) (hχ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n χ)
@@ -732,14 +662,6 @@ theorem contMDiff_smul_bundleField_perp
         (γ t) ht]
   exact map_smul _ _ _
 
-/-- A smooth compactly-supported cut-off `χ : ℝ → ℝ` equal to `1` on `Icc 0 L`,
-whose topological support is *compactly contained* in the open neighbourhood
-`Ioo (-δ) (L + δ)`, and valued in `[0, 1]`.  This is the `δ`-parametrised
-refinement of the unit cut-off: the support closure is forced strictly inside the
-prescribed open window (by building the cut-off vanishing already outside the
-half-window `Ioo (-δ/2) (L + δ/2)`), so a product with a field that is only
-smooth on `Ioo (-δ) (L + δ)` remains globally smooth — vanishing on the open
-complement of the support. -/
 theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 (Set.Icc 0 L) ∧
       tsupport χ ⊆ Set.Ioo (-δ : ℝ) (L + δ) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
@@ -769,18 +691,89 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     intro x hx
     exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
 
+
+theorem exists_time_window_clip {a b lam : ℝ}
+    (hlam_pos : 0 < lam) (ha : -lam < a) (hb : b < lam) :
+    ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
+      Set.EqOn tau id (Set.Icc a b) ∧ ∀ t, |tau t| ≤ lam := by
+  have hclosed_t : IsClosed (Set.Icc a b) := isClosed_Icc
+  have hclosed_s : IsClosed ((Set.Ioo (-lam : ℝ) lam)ᶜ) := isOpen_Ioo.isClosed_compl
+  have hdisj : Disjoint ((Set.Ioo (-lam : ℝ) lam)ᶜ) (Set.Icc a b) := by
+    rw [Set.disjoint_compl_left_iff_subset]
+    intro x hx
+    exact ⟨lt_of_lt_of_le ha hx.1, lt_of_le_of_lt hx.2 hb⟩
+  obtain ⟨χ, hχ0, hχ1, hχIcc⟩ :=
+    exists_contMDiffMap_zero_one_of_isClosed 𝓘(ℝ, ℝ) (n := (⊤ : ℕ∞))
+      hclosed_s hclosed_t hdisj
+  refine ⟨fun t => χ t * t, ?_, ?_, ?_⟩
+  · have hcd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (χ : ℝ → ℝ) := by
+      rw [← contMDiff_iff_contDiff]
+      exact χ.contMDiff
+    exact hcd.mul contDiff_id
+  · intro t ht
+    change χ t * t = t
+    rw [hχ1 ht]
+    simp
+  · intro t
+    change |χ t * t| ≤ lam
+    by_cases htΩ : t ∈ Set.Ioo (-lam : ℝ) lam
+    · have hχ_abs : |χ t| ≤ 1 := by
+        rw [abs_of_nonneg (hχIcc t).1]
+        exact (hχIcc t).2
+      have ht_abs : |t| ≤ lam := by
+        rw [abs_le]
+        exact ⟨le_of_lt htΩ.1, le_of_lt htΩ.2⟩
+      calc
+        |χ t * t| = |χ t| * |t| := abs_mul _ _
+        _ ≤ 1 * lam :=
+          mul_le_mul hχ_abs ht_abs (abs_nonneg _) (by norm_num)
+        _ = lam := one_mul _
+    · have hχ_zero : χ t = 0 := hχ0 htΩ
+      simpa [hχ_zero] using hlam_pos.le
+
+
+theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
+    ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
+      Set.EqOn tau id (Set.Icc 0 L) ∧ ∀ t, |tau t| ≤ lam := by
+  set delta : ℝ := (lam - L) / 2 with hdelta_def
+  have hdelta_pos : 0 < delta := by rw [hdelta_def]; linarith
+  have hlam_pos : 0 < lam := lt_of_le_of_lt hL hlam
+  obtain ⟨chi, hchi_cd, hchi_one, hchi_supp, hchi_range⟩ :=
+    exists_cutoff_one_on_Icc_supported_Ioo (L := L) hdelta_pos
+  refine ⟨fun t => chi t * t, hchi_cd.mul contDiff_id, ?_, ?_⟩
+  · intro t ht
+    change chi t * t = t
+    rw [hchi_one ht]
+    simp
+  · intro t
+    change |chi t * t| ≤ lam
+    by_cases htΩ : t ∈ Set.Ioo (-delta : ℝ) (L + delta)
+    · have hchi_abs : |chi t| ≤ 1 := by
+        rw [abs_of_nonneg (hchi_range t).1]
+        exact (hchi_range t).2
+      have hdelta_le : delta ≤ L + delta := by linarith
+      have ht_abs : |t| < L + delta := by
+        rw [abs_lt]
+        exact ⟨lt_of_le_of_lt (neg_le_neg hdelta_le) htΩ.1, htΩ.2⟩
+      exact le_of_lt (by
+      calc
+        |chi t * t| = |chi t| * |t| := abs_mul _ _
+        _ ≤ 1 * (L + delta) :=
+          mul_le_mul hchi_abs (le_of_lt ht_abs) (abs_nonneg _) (by norm_num)
+        _ = L + delta := one_mul _
+        _ < lam := by rw [hdelta_def]; linarith)
+    · have hnot_tsupport : t ∉ tsupport chi := fun h => htΩ (hchi_supp h)
+      have hchi_zero : chi t = 0 := by
+        have hnot_support : t ∉ Function.support chi := fun h =>
+          hnot_tsupport (subset_closure h)
+        simpa [Function.support] using hnot_support
+      simpa [hchi_zero] using hlam_pos.le
+
 set_option linter.unusedVariables false in
-/-- **Perpendicularity to the velocity is preserved (geodesic-on-a-set form).**
-The set-relativised analogue of `perp_to_velocity_preserved_of_parallel`: it only requires
-`γ` to be a geodesic *on* `Icc 0 L` (not globally), which is exactly the
-hypothesis available in the Bonnet–Myers length bound, and it carries no
-`T2Space (TangentBundle I M)` assumption.  The proof is the same constancy
-argument for `t ↦ g(γ t)(V t, dγ_t(1))`: its derivative vanishes at every foot
-because both covariant corrections vanish (the `V`-term by parallelism, the
-velocity-term because the geodesic velocity field is parallel on `Icc 0 L`). -/
+
 theorem perp_to_velocity_preserved_on
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (_hL : 0 < L)
     (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
     (V : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) L,
@@ -945,12 +938,6 @@ theorem perp_to_velocity_preserved_on
   rw [hft]
   exact hPerp0
 
-/-- The velocity field's chart representation is differentiable at every time.
-For a `C^∞` curve `γ`, the chart-`(γ t)`-coordinate representation of the
-velocity field `s ↦ dγ_s(1)` agrees, near `t`, with `deriv (chartCurve (γ t) γ)`
-(chain rule), which is `C^∞` near `t` (the chart trajectory is `C^∞` on the chart
-source and the derivative of a `C^∞` function on an open set is `C^∞`); hence the
-representation is differentiable at `t`. -/
 theorem velocity_chartRepAt_differentiableAt
     (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     DifferentiableAt ℝ
@@ -993,25 +980,7 @@ theorem velocity_chartRepAt_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Globally-smooth parallel orthonormal perpendicular frame along a geodesic.**
-For a `C^∞` unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`, unit-speed pinned at
-`t = 0` by `hUnit0`), there is a frame
-`e : Fin (finrank E - 1) → SectionAlongCurve I M γ` of the `g`-orthogonal
-complement of the velocity such that each `e i` is:
 
-* chart-differentiable on `Icc 0 L`;
-* parallel along `γ` (the intrinsic `covDerivAlong g γ (e i) t = 0`) on `Icc 0 L`;
-* part of a pointwise `g`-orthonormal frame on `Icc 0 L`;
-* `g`-orthogonal to the velocity `dγ_t(1)` on `Icc 0 L`; and
-* a **globally bundle-`C^∞`** section `t ↦ ⟨γ t, (e i) t⟩` on all of `ℝ`.
-
-This is the complete frame package consumed by the Bonnet–Myers length-bound
-contradiction (the fifth, global-smoothness clause is what makes the sinusoidal
-test field globally smooth).  Construction: an orthonormal seed basis of the
-`g`-orthogonal complement of `dγ_0(1)` at `γ 0`, smoothly parallel-transported
-along `γ` on an open neighbourhood of `Icc 0 L`
-(`parallelTransport_section_contMDiffOn_Ioo`), then cut off by a smooth bump
-equal to `1` on `Icc 0 L` and supported in that neighbourhood. -/
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -1133,7 +1102,8 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
     intro t ht
     have hconst :=
-      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
+        (hγ.of_le (by exact_mod_cast le_top)) hL.le
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
@@ -1155,7 +1125,8 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     have hχj : χ j t = 1 := by have := hχ_one j ht; simpa using this
     rw [hχi, hχj, one_smul, one_smul]
     have hconst :=
-      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
+        (hγ.of_le (by exact_mod_cast le_top)) hL.le
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j

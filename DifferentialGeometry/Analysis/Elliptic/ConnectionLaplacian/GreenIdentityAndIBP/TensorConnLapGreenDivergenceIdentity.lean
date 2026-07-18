@@ -6,70 +6,16 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
+import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# The intrinsic `(0, 2)` connection-Laplacian Green identity via the Dirichlet current
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file proves the integrated Green identity for the
-rough (connection) Laplacian on `(0, 2)`-tensor fields,
-
-```
-tensorL2Inner g 0 3 (covGrad g 0 2 T).toFun (covGrad g 0 2 v).toFun
-  = − tensorL2Inner g 0 2 (rawTensorConnLapSmooth g 0 2 T).toFun v.toFun,
-```
-
-through a single **Dirichlet current** vector field and a single application of
-the divergence theorem on the closed manifold — with no partition-of-unity
-fixed-frame Leibniz weight residual.
-
-## The Dirichlet current
-
-The Dirichlet current is the metric-musical raise `♯` of the `1`-form
-`ω_b : X ↦ ⟨∇_X T, v⟩_g`, i.e. the smooth tangent vector field `Z` characterised
-by `g(Z b, X) = ω_b(X)` for every tangent vector `X`.  Its intrinsic divergence
-satisfies the pointwise Bochner identity
-
-```
-div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b,
-```
-
-whose integral against the Riemannian volume vanishes on the closed manifold.
-Combined with the gradient-side bridge for the left-hand `L²` inner product, this
-gives the headline.
-
-The divergence is evaluated, at every base point `b`, against the **smooth
-orthonormal frame** `Bᵢ := smoothOrthoFrame g b i`, which is `g_b`-orthonormal at
-its centre `b`.  The intrinsic divergence `divergence_g` is frame-independent, so
-its chart-basis metric trace at `b` (which holds because every `b` lies in its
-own chart source) equals the orthonormal-frame trace against `Bᵢ`.  The
-per-direction Bochner expansion then absorbs the frame-acceleration term
-`∇_{Bᵢ}Bᵢ` cleanly into the second covariant derivative `∇²_{Bᵢ, Bᵢ}`.
-
-## Main definitions
-
-* `dirichletForm g T v b` — the `1`-form `X ↦ ⟨∇_X T, v⟩_g` at `b`.
-* `dirichletVF g T v b` — its metric-musical sharp, a tangent vector at `b`.
-* `dirichletVFSection g T v` — `dirichletVF` packaged as a smooth tangent-bundle
-  section.
-
-## Main results
-
-* `divergence_dirichletVF_eq` — the pointwise Bochner divergence identity
-  `div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b`.
-* `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` — the headline Green
-  identity.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -88,7 +34,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open Tensor0SNabla TensorRSNabla TensorMetricLowering
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -102,8 +48,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The Dirichlet `1`-form.** At a base point `b`, the linear functional
-`X ↦ ⟨∇_X T, v⟩_g` on `T_b M`. -/
 def dirichletForm
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     TangentSpace I b →ₗ[ℝ] ℝ where
@@ -129,6 +73,7 @@ def dirichletForm
     rw [hcov, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
     rfl
 
+omit [CompactSpace M] in
 @[simp] lemma dirichletForm_apply
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (X : TangentSpace I b) :
@@ -137,15 +82,12 @@ def dirichletForm
         (TensorRSSpace.toModel (tensorCovDerivAt (I := I) (M := M) g 0 2 T b X))
         (TensorRSSpace.toModel (v.toSection b)) := rfl
 
-/-- **The Dirichlet current vector field, pointwise.** The metric-musical sharp
-of the Dirichlet `1`-form: the unique tangent vector `Z b` with
-`g(Z b, X) = ⟨∇_X T, v⟩_g` for all `X`. -/
 def dirichletVF
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletForm (I := I) (M := M) g T v b)
 
-/-- **The defining Riesz identity for the Dirichlet current.** -/
+omit [CompactSpace M] in
 lemma inner_dirichletVF
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (X : TangentSpace I b) :
@@ -154,9 +96,7 @@ lemma inner_dirichletVF
   rw [dirichletVF]
   exact inner_metricSharp (I := I) g b (dirichletForm (I := I) (M := M) g T v b) X
 
-/-- **Chart-local smoothness of the Dirichlet-form chart-basis component.** For
-each chart base point `α` and chart-basis index `j`, the scalar
-`b ↦ ω_b(∂ⱼ) = ⟨∇_{∂ⱼ}T, v⟩_g` is `C^∞` on the chart-`α` source. -/
+omit [CompactSpace M] in
 private lemma dirichletForm_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -208,7 +148,7 @@ private lemma dirichletForm_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletForm_apply]
 
-/-- **Smoothness of the Dirichlet current as a tangent-bundle section.** -/
+omit [CompactSpace M] in
 lemma dirichletVF_contMDiff
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -218,7 +158,6 @@ lemma dirichletVF_contMDiff
     (fun α j => dirichletForm_chartBasis_component_contMDiffOn
       (I := I) (M := M) g T v α j)
 
-/-- **The Dirichlet current packaged as a smooth tangent-bundle section.** -/
 def dirichletVFSection
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -226,15 +165,13 @@ def dirichletVFSection
     (fun b : M => dirichletVF (I := I) (M := M) g T v b)
     (dirichletVF_contMDiff (I := I) (M := M) g T v)
 
+omit [CompactSpace M] in
 @[simp] lemma dirichletVFSection_apply
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     dirichletVFSection (I := I) (M := M) g T v b =
       dirichletVF (I := I) (M := M) g T v b := rfl
 
-/-- **Divergence equals the chart-basis metric covariant trace (at every point).**
-For a smooth tangent vector field `Z` and any base point `b`,
-`divergence_g g Z b = ∑_{m,n} G⁻¹_{mn}(b) · g(∇_{∂_m}Z, ∂_n)`, with the chart
-centred at `b`. -/
+omit [CompactSpace M] in
 lemma divergence_g_chartBasis_metricTrace_self
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -271,13 +208,7 @@ lemma divergence_g_chartBasis_metricTrace_self
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartChristoffel_symm (I := I) g b k i i]
 
-/-- **Divergence equals the smooth-orthonormal-frame trace (at every point).**
-For a smooth tangent vector field `Z` and any base point `b`,
-
-```
-divergence_g g Z b = ∑ᵢ g(∇_{Bᵢ}Z, Bᵢ),   Bᵢ = smoothOrthoFrame g b i b.
-```
--/
+omit [CompactSpace M] in
 lemma divergence_g_eq_smoothOrthoFrame_trace
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -317,7 +248,6 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
     rw [hHb_apply, chartBasisVecFiber_self (I := I) b m,
       chartBasisVecFiber_self (I := I) b n]
 
-/-- **Per-direction Bochner expansion of the divergence summand.** -/
 private lemma divergence_dirichletVF_summand_eq
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -433,9 +363,7 @@ private lemma divergence_dirichletVF_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
-/-- **Dirichlet integrand = smooth-orthonormal-frame diagonal sum.** For every
-`b`, with `Bᵢ = smoothOrthoFrame g b i b`,
-`tensorCovDerivPointwiseInner g 0 2 T v b = ∑ᵢ ⟨∇_{Bᵢ}T, ∇_{Bᵢ}v⟩_b`. -/
+omit [CompactSpace M] [BoundarylessManifold I M] in
 private lemma tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b =
@@ -501,14 +429,6 @@ private lemma tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
-/-- **The pointwise Bochner divergence identity.** For the Dirichlet current `Z`,
-
-```
-div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b,
-```
-
-with `⟨∇T, ∇v⟩_b = tensorCovDerivPointwiseInner g 0 2 T v b` and
-`⟨Δ_∇ T, v⟩_b = tensorInnerPointwise g 0 2 b (rawConnLap T b) (v b)`. -/
 lemma divergence_dirichletVF_eq
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     divergence_g (I := I) g (dirichletVFSection (I := I) (M := M) g T v) b =
@@ -557,17 +477,6 @@ lemma divergence_dirichletVF_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
-/-- **Green / `L²`-adjoint identity for the rough connection Laplacian on a closed
-manifold.** For smooth compactly-supported `(0, 2)`-tensors `T, v`,
-`⟨∇T, ∇v⟩_{L²} = -⟨Δ_∇ T, v⟩_{L²}`, where `∇` is the covariant gradient `covGrad`,
-`Δ_∇` is the rough (connection) Laplacian `rawTensorConnLapSmooth`, and the inner
-products are the tensor `L²` inner products `tensorL2Inner` against the Riemannian
-volume measure. Equivalently, the rough Laplacian is the negative `L²`-adjoint of the
-covariant gradient. The manifold is assumed closed (compact and boundaryless, from the
-ambient `[CompactSpace M] [BoundarylessManifold I M]` instances), which makes the
-boundary term of the integration by parts vanish: the proof integrates the divergence
-of the Dirichlet vector field (which vanishes by compact support) and expands it via the
-pointwise Bochner divergence identity. -/
 theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)

@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.JointFrechetDerivative
 
-/-!
-# `ContDiffOn ℝ 1` upgrade for the local flow
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, jointly `C^1` in
-`(t, x)`, and a local Picard–Lindelöf flow `Φ : E × ℝ → E` (packaged by `IsLocalFlow`),
-the pointwise joint Fréchet differentiability of `(x, t) ↦ Φ ⟨x, t⟩` proved in the previous
-file is upgraded here to `ContDiffOn ℝ 1` on an open neighbourhood of `(x₀, t₀)`.
-
-The argument has three pieces:
-
-* **Re-centering of the flow.**  If `IsLocalFlow f t₀ x₀ r tmin tmax Φ` and `x₁` is close
-  to `x₀`, then a *shrunk* `IsLocalFlow f t₀ x₁ r' tmin tmax Φ` exists.  This lets us
-  apply the pointwise V.2.c.1 result at every nearby base point `x₁`.
-
-* **Pointwise joint Fréchet derivative on the neighbourhood.**  By V.2.c.1 applied at every
-  `(x, t)` in an open neighbourhood, the joint Fréchet derivative exists.  Its value is the
-  coproduct of (the spatial variational CLM along the orbit `Φ ⟨x, ·⟩`) and (the time CLM
-  `s ↦ s • f t (Φ ⟨x, t⟩)`).
-
-* **Continuity of the Fréchet derivative.**  Two ingredients:
-  - Time piece `(x, t) ↦ s • f t (Φ ⟨x, t⟩)` is continuous by joint continuity of `f`
-    and `Φ`.
-  - Spatial piece (variational CLM) is jointly continuous in `(x, t)` by a Grönwall
-    comparison argument: two variational solutions starting at the same `δ`, with central
-    orbits differing by `‖x₁ - x₂‖`, differ in operator norm by `O(‖x₁ - x₂‖)`; and the
-    map `t ↦ variationalLinearMapAt(t)` is Lipschitz at fixed central orbit.
-
-Combined with `contDiffOn_succ_iff_fderiv_of_isOpen`, the result is `ContDiffOn ℝ 1`.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is
-not used.  No manifold or tensor file is imported.
--/
 
 noncomputable section
 
@@ -49,8 +17,7 @@ namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- Re-center the local flow at any nearby point `x₁`.  If `closedBall x₁ r' ⊆ closedBall x₀ r`
-then `Φ` is a local flow centered at `x₁` with radius `r'`. -/
+omit [CompleteSpace E] in
 lemma restrict_center
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x₁ : E} {r' : ℝ≥0}
@@ -65,8 +32,7 @@ lemma restrict_center
     obtain ⟨L, hL⟩ := hΦ.exists_lipschitz
     exact ⟨L, fun t ht => (hL t ht).mono hsub⟩
 
-/-- A version with explicit radii: if `‖x₁ - x₀‖ + r' ≤ r` then a flow centered at `x₁` with
-radius `r'` exists. -/
+omit [CompleteSpace E] in
 lemma restrict_center_of_norm_le
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x₁ : E} {r' : ℝ≥0}
@@ -84,8 +50,6 @@ section JointPointwise
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The joint Fréchet derivative at any nearby `(x, t)`.  This is V.2.c.1 applied after
-re-centering the flow at `x`. -/
 theorem hasFDerivAt_flow_jointly_at
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -121,9 +85,7 @@ section GronwallCompare
 
 variable {f : ℝ → E → E} {t₀ : ℝ}
 
-/-- Compare two variational solutions with the same initial condition along nearby central
-orbits.  The difference at time `t` is bounded by `ε · ‖δ‖ · T · exp(2 M T)`, where `ε` is
-the uniform operator-norm difference of the linearizations. -/
+omit [CompleteSpace E] in
 theorem variationalSolution_compare_norm
     {α₁ α₂ : ℝ → E} {T M ε : ℝ}
     (hT : 0 < T) (hM : 0 ≤ M) (hε : 0 ≤ ε)
@@ -306,14 +268,43 @@ theorem variationalSolution_compare_norm
     have hx_le_T : τ' - t₀ ≤ T := by change 2 * t₀ - t - t₀ ≤ T; linarith [ht.1]
     exact le_trans hgr_τ' (hreduce_full hx_nn hx_le_T)
 
+
+
+
+
+theorem opNorm_sub_le_of_var
+    {α₁ α₂ : ℝ → E} {T M ε : ℝ}
+    (hT : 0 < T) (hM : 0 ≤ M) (hε : 0 ≤ ε)
+    (hA₂_bd : ∀ τ ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f τ) (α₂ τ)‖ ≤ M)
+    (hA₁_bd : ∀ τ ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f τ) (α₁ τ)‖ ≤ M)
+    (hA_diff : ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
+      ‖fderiv ℝ (f τ) (α₁ τ) - fderiv ℝ (f τ) (α₂ τ)‖ ≤ ε)
+    {Y₁ Y₂ : ℝ → E →L[ℝ] E}
+    (h₁ : ∀ δ, IsVariationalSolutionOn f α₁ δ t₀ (fun s => Y₁ s δ)
+      (Icc (t₀ - T) (t₀ + T)))
+    (h₂ : ∀ δ, IsVariationalSolutionOn f α₂ δ t₀ (fun s => Y₂ s δ)
+      (Icc (t₀ - T) (t₀ + T))) :
+    ∀ t ∈ Icc (t₀ - T) (t₀ + T),
+      ‖Y₁ t - Y₂ t‖ ≤ ε * exp (M * T) * T * exp (M * T) := by
+  intro t ht
+  apply ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (mul_nonneg (mul_nonneg hε (le_of_lt (exp_pos _))) hT.le)
+      (le_of_lt (exp_pos _)))
+  intro δ
+  rw [ContinuousLinearMap.sub_apply]
+  have hcompare := variationalSolution_compare_norm hT hM hε
+    hA₂_bd hA₁_bd hA_diff (h₁ δ) (h₂ δ) t ht
+  calc
+    ‖Y₁ t δ - Y₂ t δ‖ ≤
+        ε * ‖δ‖ * exp (M * T) * T * exp (M * T) := hcompare
+    _ = (ε * exp (M * T) * T * exp (M * T)) * ‖δ‖ := by ring
+
 end GronwallCompare
 
 section VariationalCLMContinuity
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- Operator-norm bound on the difference of two variational linear maps at the *same*
-time `t`, central orbits at two different base points. -/
 lemma variationalLinearMapAt_opNorm_sub_bound
     {α₁ α₂ : ℝ → E} {T M ε : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1) (hε : 0 ≤ ε)
     (hA₁_cont : ContinuousOn (fun τ => fderiv ℝ (f τ) (α₁ τ)) (Icc (t₀ - T) (t₀ + T)))
@@ -350,8 +341,6 @@ lemma variationalLinearMapAt_opNorm_sub_bound
         = ε * exp (M * T) * T * exp (M * T) * ‖δ‖ := by ring
   linarith [hcompare, hgoal]
 
-/-- Lipschitz continuity in `t` (same central orbit): the variational CLM is `M·exp(M·T)`-
-Lipschitz in `t` on `Icc (t₀-T) (t₀+T)`. -/
 lemma variationalLinearMapAt_opNorm_time_lipschitz
     {α : ℝ → E} {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun τ => fderiv ℝ (f τ) (α τ)) (Icc (t₀ - T) (t₀ + T)))
@@ -432,7 +421,7 @@ section JointContinuity
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- Joint continuity of the partial Fréchet derivative on a closed-ball × interval. -/
+omit [CompleteSpace E] in
 lemma continuousOn_fderiv_jointly
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -466,7 +455,6 @@ section ContDiffOnUpgrade
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The flow is differentiable on the open neighbourhood `ball x₀ ρ ×ˢ Ioo (t₀-T) (t₀+T)`. -/
 lemma differentiableOn_flow_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -485,8 +473,7 @@ lemma differentiableOn_flow_of_isLocalFlow
   have h := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT hM hMT hsub hr' hρρ' hA_bd hx_cb hp_t
   exact h.differentiableAt.differentiableWithinAt
 
-/-- Continuity of the time-piece of the Fréchet derivative: `(x, t) ↦ f t (Φ ⟨x, t⟩)` is
-continuous on the closed-ball × interval slab. -/
+omit [CompleteSpace E] in
 lemma continuousOn_timePiece
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -507,14 +494,7 @@ lemma continuousOn_timePiece
       (Set.univ : Set (ℝ × E)) := fun _ _ => mem_univ _
   exact hf_cont.continuousOn.comp hmap hmt
 
-/-- **Per-x uniform-in-τ continuity of the linearization at an interior point.**
-For each `x` in the *open* ball `ball x₀ ρ` and each `ε > 0`, there is `δ > 0` such that
-any `xq` with `‖xq - x‖ < δ` and any `τ ∈ Icc (t₀-T') (t₀+T')` (with `T' < T` strict
-sub-interval) satisfy
-`‖fderiv ℝ (f τ) (Φ⟨x, τ⟩) - fderiv ℝ (f τ) (Φ⟨xq, τ⟩)‖ < ε`.
-
-The proof uses Heine-Cantor at the compact line `{x} × Icc(t₀-T', t₀+T')` lying inside
-the open slab `ball × Ioo`. -/
+omit [CompleteSpace E] in
 lemma uniformly_close_fderiv_in_x
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -576,7 +556,6 @@ lemma uniformly_close_fderiv_in_x
   change ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩) - fderiv ℝ (f τ) (Φ ⟨xq, τ⟩)‖ < ε
   linarith
 
-/-- Operator norm of a coprod is bounded by the sum of operator norms. -/
 private lemma opNorm_coprod_le {F G H : Type*}
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -597,13 +576,7 @@ private lemma opNorm_coprod_le {F G H : Type*}
     _ = (‖L₁‖ + ‖L₂‖) * ‖p‖ := by ring
 
 set_option maxHeartbeats 2400000 in
-/-- **Continuity of the Fréchet derivative of the flow** on a strictly-interior open
-neighbourhood.  We require a three-layer nested structure: the outer interval/radius
-`(T_out, ρ_out)` on which the linearization is uniformly bounded by `M` and jointly
-continuous; the middle `(T_mid, ρ_mid)` strictly inside, on which variational solutions
-exist with `M · T_mid < 1`; and the inner `(T, ρ)` strictly inside the middle, on which
-the flow is `C¹`.  This nesting ensures all compactness and uniformity arguments work
-without requiring closed balls in a Banach space to be compact. -/
+
 theorem continuousOn_fderiv_flow_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -798,12 +771,6 @@ theorem continuousOn_fderiv_flow_of_isLocalFlow
     linarith
   linarith [hcoprod_norm, hgoal]
 
-/-- **The flow is `C¹` on a strictly-interior open neighbourhood.**
-
-Three-layer nested setup: outer `(T_out, ρ_out)` for ambient continuity, middle
-`(T_mid, ρ_mid)` for variational ODE setup, inner `(T, ρ)` for `ContDiffOn`.
-The strict containments `T < T_mid < T_out` and `ρ < ρ_mid < ρ_out` ensure all
-compactness / interior-point arguments work in arbitrary Banach spaces. -/
 theorem contDiffOn_flow_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

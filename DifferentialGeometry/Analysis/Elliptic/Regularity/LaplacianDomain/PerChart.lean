@@ -2,57 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Per-chart unconditional `MemWkp 2 2` witness for `laplacianDomain g`
-
-This module assembles the per-chart non-smooth `H²` witness from an element
-`u_h ∈ laplacianDomain g`, with **no additional hypotheses**. The radius
-`R₀ > 0` of the difference-quotient regime, the precompact subdomain
-`Ω''` of the chart target, the smooth Nirenberg cutoff `η`, and the
-parameters needed to invoke the unconditional uniform difference-quotient
-bound are all chosen internally per chart.
-
-The headline `chartH2NonSmoothPOUWitness_of_laplacianDomain` builds the
-per-chart `ChartH2NonSmoothPOUWitness g (H1ComplToLp u_h).coeFn α` for every
-chart point `α : M`, consuming only `u_h ∈ laplacianDomain g`. Combining this
-with `memWkpChart_two_of_chartPOUWitnesses` immediately yields the manifold-
-level `MemWkpChart g 2 2` statement without any consumer-supplied per-chart
-data.
-
-## Strategy
-
-For each `α : M`:
-
-1. Let `K_α := chartImagePOUTsupport α`. It is compact and contained in
-   `chartTargetEuclid α`.
-2. By `IsCompact.exists_cthickening_subset_open`, pick `R_α > 0` with
-   `Metric.cthickening R_α K_α ⊆ chartTargetEuclid α`.
-3. Set `ε := R_α / 16` and `R₀ := ε`.
-4. Define the nested thickenings:
-   * `Ω'' := Metric.thickening (2 ε) K_α` (open neighbourhood of `K_α`);
-   * `Ω' := Metric.thickening (8 ε) K_α` (larger open neighbourhood);
-5. Build a smooth Nirenberg cutoff `η` that is `≡ 1` on `Ω''` and has
-   `tsupport η ⊆ Metric.cthickening (4 ε) K_α ⊆ Ω'`. Specifically
-   the cutoff is `1` on `cthickening (3 ε) K_α ⊇ closure Ω''`, with
-   `tsupport η ⊆ cthickening (4 ε) K_α`. Hence
-   `Metric.cthickening R₀ (tsupport η) ⊆ Metric.cthickening (5 ε) K_α
-     ⊆ Metric.thickening (8 ε) K_α = Ω'`.
-6. Apply the unconditional uniform difference-quotient bound
-   (`chartBilinearH1Compl_uniform_diffQuot_bound_of_data`) with `R₀`,
-   `Ω'`, `Ω''`, `η` to obtain a uniform-in-`h` bound on the difference
-   quotients of `D.weak_partial i`.
-7. Apply `chart_loc_of_uniform_bound` with `h₀ = R₀` (and the room
-   hypothesis `cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`)
-   to extract weak second partials `g_ik` of `D.weak_partial i` on
-   `Ω''`.
-8. Combine `MemWkp.extend_zero` with the ae-bridges between `D.u_chart`,
-   `D.weak_partial i`, and the chart-pushed Lp class to obtain
-   `MemWkp 2 2 (chartPushed POU α u_h.coeFn) (chartTargetEuclid α)`.
-
-The final headline `laplacianDomain_memWkpChart_two_unconditional` consumes
-only `g` and `hu_h : u_h ∈ laplacianDomain g` and produces the
-`MemWkpChart g 2 2` membership and finite-norm conclusion.
--/
 
 noncomputable section
 
@@ -94,9 +43,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- A `r`-thickening of a non-empty set is contained in the strict
-`r'`-thickening for any `r' > r`. Sometimes we need this when we want
-`Metric.thickening r K ⊆ Metric.thickening r' K` for `r < r'`. -/
 private lemma thickening_mono_of_lt
     {α : Type*} [PseudoEMetricSpace α]
     {r r' : ℝ} (hr_lt : r < r') (K : Set α) :
@@ -107,16 +53,13 @@ private lemma thickening_mono_of_lt
   exact lt_of_lt_of_le h
     (ENNReal.ofReal_le_ofReal hr_lt.le)
 
-/-- For `r > 0`, a set `K` is contained in its open `r`-thickening. -/
 private lemma self_subset_thickening_of_pos
     {α : Type*} [PseudoEMetricSpace α]
     {r : ℝ} (hr_pos : 0 < r) (K : Set α) :
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-/-- The chart-pushed POU function vanishes on `chartTargetEuclid α` outside
-`chartImagePOUTsupport α`. This is a re-statement of
-`chartPushed_eq_zero_off_chartImagePOUTsupport` in our notation. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_pou_zero_off_KApha
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) :
@@ -127,18 +70,7 @@ private lemma chartPushed_pou_zero_off_KApha
   intro y hy hy_off
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α u hy hy_off
 
-set_option linter.unusedVariables false in
-/-- **Per-chart unconditional `MemWkp 2 2` witness for `laplacianDomain g`.**
 
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`,
-any chart point `α : M`, and any element `u_h ∈ laplacianDomain g`, the
-POU-cut chart-pushed function `chartPushed (chartAtlasPOU I M) α
-((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkp 2 2` of `chartTargetEuclid α`.
-
-No analytical hypotheses beyond `hu_h` are consumed: the radius `R₀ > 0`, the
-precompact subdomain `Ω''`, the Nirenberg cutoff `η`, and all auxiliary
-parameters are chosen internally from the compact set
-`K_α := chartImagePOUTsupport α` and the open set `chartTargetEuclid α`. -/
 theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -290,7 +222,7 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd
@@ -458,13 +390,6 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
     h_v_eq_f_ae).mp hv_memWkp_two_chart
 
-/-- **Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
-unconditional form.**
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and
-any element `u_h ∈ laplacianDomain g`, the canonical function representative
-`((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkpChart g 2 2`, with a finite
-chart-based norm. **No additional hypotheses are required.** -/
 theorem laplacianDomain_memWkpChart_two_unconditional
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

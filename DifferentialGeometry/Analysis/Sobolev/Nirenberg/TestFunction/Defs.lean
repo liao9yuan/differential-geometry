@@ -1,41 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Defs
 
-/-!
-# The interior-regularity test function `D_{-h}^k(η² · D_h^k u)`
-
-This module isolates the algebraic primitives associated with the interior
-test function
-
-  `v_test(x) := D_{-h}^k(η² · D_h^k u)(x)`
-
-used to extract second-order regularity for weak solutions of uniformly
-elliptic divergence-form equations. The L²-norm bounds and the substitution
-into the bilinear form are not addressed here: they are downstream of these
-primitives.
-
-## Main definitions
-
-* `nirenbergTestFunction k h η u`: the test function
-  `D_{-h}^k(η² · D_h^k u)`.
-
-## Main results
-
-* `contDiff_diffQuot_of_contDiff`, `contDiff_nirenbergTestFunction`: smoothness
-  of the difference quotient and of the test function for `h ≠ 0`.
-* `hasCompactSupport_translate_of_hasCompactSupport`,
-  `hasCompactSupport_diffQuot_of_hasCompactSupport`,
-  `hasCompactSupport_nirenbergTestFunction`: compact support is preserved.
-* `tsupport_nirenbergTestFunction_subset`: the support of `v_test` lies in
-  the closed `|h|`-thickening of `tsupport η`.
-* `fderiv_diffQuot_apply_eq_diffQuot_partial`: the directional derivative
-  of `D_h^k g` factors as the difference quotient of the directional
-  derivative of `g`, when `g` is smooth.
-* `fderiv_eta_sq_times_diffQuot_apply`: pointwise product-rule expansion
-  of the directional derivative of `η² · D_h^k u`.
-* `fderiv_nirenbergTestFunction_apply`: pointwise expansion of the
-  directional derivative of `v_test`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -48,9 +12,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- For `h ≠ 0` the forward difference quotient `D_h^k v` of a smooth
-function `v` is itself smooth: it equals
-`h⁻¹ • ((v ∘ τ_h) - v)` for the smooth translation `τ_h x := x + h • e_k`. -/
+
 theorem contDiff_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -86,8 +48,7 @@ theorem contDiff_diffQuot_of_contDiff
   exact h_div
 
 omit [NeZero d] in
-/-- The interior-regularity test function `v_test = D_{-h}^k(η² · D_h^k u)`
-is smooth whenever `η, u ∈ C^∞(E)` and `h ≠ 0`. -/
+
 theorem contDiff_nirenbergTestFunction_aux
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -109,8 +70,7 @@ theorem contDiff_nirenbergTestFunction_aux
   exact contDiff_diffQuot_of_contDiff (d := d) h_prod k hnh
 
 omit [NeZero d] in
-/-- If `v : E → ℝ` has compact support, then so does the translated function
-`τ_h v(x) = v(x + h • e_k)`. -/
+
 theorem hasCompactSupport_translate_of_hasCompactSupport
     {v : E → ℝ} (hv : HasCompactSupport v) (k : Fin d) (h : ℝ) :
     HasCompactSupport
@@ -124,8 +84,7 @@ theorem hasCompactSupport_translate_of_hasCompactSupport
   exact hv.comp_homeomorph φ
 
 omit [NeZero d] in
-/-- The forward difference quotient inherits compact support from the
-underlying function. -/
+
 theorem hasCompactSupport_diffQuot_of_hasCompactSupport
     {v : E → ℝ} (hv : HasCompactSupport v) (k : Fin d) (h : ℝ) :
     HasCompactSupport
@@ -155,8 +114,6 @@ theorem hasCompactSupport_diffQuot_of_hasCompactSupport
       h_translate.sub hv
     exact h_diff.smul_left
 
-/-- The Nirenberg interior-regularity test function:
-`v_test(x) := D_{-h}^k(η² · D_h^k u)(x)`. -/
 noncomputable def nirenbergTestFunction
     (k : Fin d) (h : ℝ) (η u : E → ℝ) : E → ℝ :=
   DifferentialGeometry.Analysis.Sobolev.diffQuot k (-h)
@@ -164,7 +121,7 @@ noncomputable def nirenbergTestFunction
       DifferentialGeometry.Analysis.Sobolev.diffQuot k h u y)
 
 omit [NeZero d] in
-/-- Smoothness of the test function for `h ≠ 0`. -/
+
 theorem contDiff_nirenbergTestFunction
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -173,7 +130,7 @@ theorem contDiff_nirenbergTestFunction
   exact contDiff_nirenbergTestFunction_aux (d := d) hη hu k hh
 
 omit [NeZero d] in
-/-- The test function inherits compact support from `η`. -/
+
 theorem hasCompactSupport_nirenbergTestFunction
     {η u : E → ℝ} (hη_supp : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :
@@ -194,8 +151,7 @@ theorem hasCompactSupport_nirenbergTestFunction
     (d := d) h_prod_supp k (-h)
 
 omit [NeZero d] in
-/-- Auxiliary: support of the squared cutoff is contained in the support of
-the cutoff itself. -/
+
 private lemma support_eta_sq_subset
     (η : E → ℝ) :
     Function.support (fun y : E => η y ^ 2) ⊆ Function.support η := by
@@ -208,7 +164,7 @@ private lemma support_eta_sq_subset
   simp
 
 omit [NeZero d] in
-/-- Auxiliary: support of `η² · D_h^k u` is contained in `support η`. -/
+
 private lemma support_eta_sq_diffQuot_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     Function.support
@@ -228,7 +184,7 @@ private lemma support_eta_sq_diffQuot_subset
   simp
 
 omit [NeZero d] in
-/-- Auxiliary: `tsupport (η² · D_h^k u) ⊆ tsupport η`. -/
+
 private lemma tsupport_eta_sq_diffQuot_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     tsupport
@@ -238,8 +194,7 @@ private lemma tsupport_eta_sq_diffQuot_subset
   exact closure_mono (support_eta_sq_diffQuot_subset (d := d) η u k h)
 
 omit [NeZero d] in
-/-- The test function `v_test = D_{-h}^k(η² · D_h^k u)` has support contained
-in the closed `|h|`-thickening of `tsupport η`. -/
+
 theorem tsupport_nirenbergTestFunction_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     tsupport (nirenbergTestFunction k h η u) ⊆
@@ -331,8 +286,7 @@ theorem tsupport_nirenbergTestFunction_subset
   exact (closure_minimal h_supp_subset h_thick_closed)
 
 omit [NeZero d] in
-/-- Translation `y ↦ y + h • e_k` has Fréchet derivative the identity at every
-point. -/
+
 private lemma hasFDerivAt_translate (k : Fin d) (h : ℝ) (x : E) :
     HasFDerivAt
       (fun y : E => y + h • EuclideanSpace.single k 1)
@@ -340,8 +294,7 @@ private lemma hasFDerivAt_translate (k : Fin d) (h : ℝ) (x : E) :
   exact (hasFDerivAt_id x).add_const _
 
 omit [NeZero d] in
-/-- For smooth `g`, the directional derivative of `D_h^k g` is the difference
-quotient of the directional derivative of `g`, when `h ≠ 0`. -/
+
 theorem fderiv_diffQuot_apply_eq_diffQuot_partial
     {g : E → ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -422,9 +375,7 @@ theorem fderiv_diffQuot_apply_eq_diffQuot_partial
   rw [div_eq_inv_mul, smul_eq_mul]
 
 omit [NeZero d] in
-/-- Pointwise expansion of the directional derivative of
-`y ↦ η(y)² · D_h^k u(y)`:
-`∂_j (η² · D_h^k u) = 2η · ∂_j η · D_h^k u + η² · D_h^k(∂_j u)`. -/
+
 theorem fderiv_eta_sq_times_diffQuot_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -497,7 +448,7 @@ theorem fderiv_eta_sq_times_diffQuot_apply
   ring
 
 omit [NeZero d] in
-/-- Pointwise directional-derivative expansion of the test function. -/
+
 theorem fderiv_nirenbergTestFunction_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :

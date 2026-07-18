@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouSobolevIso.PouNormChartComp
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
-/-! # Assembling the `H^1`-level two-sided comparison between the operator-norm and Hilbert-Schmidt chart-Sobolev tensor norms -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle
@@ -23,41 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Two-sided norm equivalence between the operator-norm chart-Sobolev
-norm `(tensorPouSobolevNorm g 1 T).toReal` and the Hilbert-Schmidt
-chart-Sobolev norm `(tensorPouSobolevHsNorm g 1 T).toReal` at order
-`k = 1`, packaged at the level of `(r, s)`-tensor sections on a closed
-manifold.
-
-# Blueprint intent
-
-The intrinsic `H^1` Hilbert-space norm on `TensorPouSobolevHilbert g r s 1`
-is induced by the **Hilbert-Schmidt** chart-Sobolev norm
-`(tensorPouSobolevHsNorm g 1 T).toReal`, which aggregates the chart-frame
-component squared moduli of `T` and of its first iterated covariant
-derivative `∇ T` against the partition-of-unity. Its operator-norm
-counterpart `(tensorPouSobolevNorm g 1 T).toReal` is the analogous
-chart-aggregated norm built from operator norms of the iterated Fréchet
-derivatives rather than from pointwise Hilbert-Schmidt sums of squares.
-
-Assembling the order-`k = 0` two-sided comparison
-`pou_weighted_norm_equals_chart_component_norm_up_to_constant` with the
-order-`k = 1` two-sided comparison
-`iterated_nabla_vs_iterated_partial_equivalence_H1` (specialised at
-`k = 1`) and uniformising every chart-dependent constant through
-`uniform_chart_bounds_from_compactness` yields the global `H^1`-level
-two-sided comparison
-```
-c · (tensorPouSobolevNorm g 1 T).toReal ≤
-    (tensorPouSobolevHsNorm g 1 T).toReal ≤
-  C · (tensorPouSobolevNorm g 1 T).toReal,
-```
-valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
-with `0 < c ≤ C` depending only on `g`, `r`, `s`, and the dimension of
-the model fibre. This packages the chart-aggregated operator-norm
-`H^1`-Sobolev formalism used downstream with the chart-aggregated
-Hilbert-Schmidt `H^1`-Sobolev formalism that underlies the inner-product
-structure on `TensorPouSobolevHilbert g r s 1`. -/
 theorem assemble_pou_h1_iso_intrinsic_h1
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

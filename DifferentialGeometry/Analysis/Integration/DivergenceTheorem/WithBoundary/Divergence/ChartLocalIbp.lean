@@ -12,39 +12,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Chart-local integration-by-parts identity for the chart Voss–Weyl divergence
-(with-boundary variant)
-
-For a smooth tangent section `X` and a smooth function `φ : M → ℝ` with compact
-support contained in `(chartAt H α).source` **and** in the manifold interior
-`I.interior M`, the chart-local Voss–Weyl with-boundary divergence at `α`
-satisfies:
-$$
-\int_M (\text{localDivergenceWithin}_g\, \alpha\, X)(x) \cdot \phi(x)
-    \,\mathrm{d}(\text{chartLocalMeasure}_g\,\alpha)(x)
-  = -\int_M (\text{tangentSectionAction}\, X\, \phi)(x)
-    \,\mathrm{d}(\text{chartLocalMeasure}_g\,\alpha)(x).
-$$
-
-The proof proceeds by pulling both integrals back to the chart target via the
-extended chart, applying Mathlib's Euclidean integration by parts on each
-summand of the chart formula, and pushing the result back to the manifold via
-the chart-local representation of `tangentSectionAction`.
-
-The structural adjustments compared to the boundaryless `chart_local_ibp`
-proof in `DifferentialGeometry/Analysis/Integration/DivergenceTheorem/IntegrationByParts.lean` are:
-
-* The Fréchet partial derivatives `partialDeriv` are replaced everywhere on the
-  chart-target side by `partialDerivWithin (extChartAt I α).target`. On the
-  open neighbourhood `interior (extChartAt I α).target` (which contains the
-  chart image of `tsupport φ` thanks to the manifold-interior support
-  hypothesis), the two notions coincide
-  (`partialDerivWithin_extChartAt_target_eq_partialDeriv`).
-* The smoothness arguments, which require an open neighbourhood of the chart
-  image of the support, use `interior (extChartAt I α).target` (open by
-  Mathlib's `isOpen_interior`) instead of the chart target itself.
--/
 
 noncomputable section
 
@@ -57,7 +24,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -68,10 +35,10 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The image of `tsupport φ` under the chart map. -/
 private def chartImageOfTsupport (α : M) (φ : M → ℝ) : Set E :=
   (extChartAt I α) '' tsupport φ
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isCompact
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -85,6 +52,7 @@ private lemma chartImageOfTsupport_isCompact
     exact hφ_supp hx
   exact (hφ_compactSupp : IsCompact (tsupport φ)).image_of_continuousOn hcontOn
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_subset_target
     (α : M) {φ : M → ℝ}
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
@@ -98,6 +66,7 @@ private lemma chartImageOfTsupport_subset_target
     (extChartAt I α).map_source hxsrc
   rwa [hxy] at this
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isClosed
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -105,9 +74,7 @@ private lemma chartImageOfTsupport_isClosed
     IsClosed (chartImageOfTsupport (I := I) α φ) :=
   (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp).isClosed
 
-/-- Under the manifold-interior support hypothesis, the chart image of
-`tsupport φ` lies in the **interior** of the chart target — an open subset
-of `E`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma chartImageOfTsupport_subset_interior_target
     (α : M) {φ : M → ℝ}
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source)
@@ -121,8 +88,6 @@ private lemma chartImageOfTsupport_subset_interior_target
     (I := I) (M := M) α hx_src hx_int
   rwa [hxy] at h
 
-/-- The chart-pulled-back integrand `X^i_α · ρ_α`, extended by zero outside the
-chart target, viewed as a function `E → ℝ`. -/
 private def vwIntegrandOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -130,6 +95,7 @@ private def vwIntegrandOnE
   fun y => (extChartAt I α).target.indicator
     (fun z => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -139,6 +105,7 @@ private lemma vwIntegrandOnE_apply_of_mem
       chartCoeffOnE (I := I) α X i y * chartDensityOnE (I := I) g α y :=
   Set.indicator_of_mem hy _
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -147,9 +114,6 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-- On the **interior** of the chart target (an open neighbourhood of every
-point in the chart image of `tsupport φ`), `vwIntegrandOnE` agrees with the
-smooth function `chartCoeffOnE * chartDensityOnE`. -/
 private lemma vwIntegrandOnE_contDiffOn_interior_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -164,23 +128,23 @@ private lemma vwIntegrandOnE_contDiffOn_interior_target
   intro y hy
   rw [vwIntegrandOnE_apply_of_mem (I := I) g α X i (interior_subset hy)]
 
-/-- The chart-pullback of `φ : M → ℝ`, extended by zero outside the chart
-target. -/
 private def phiOnE (α : M) (φ : M → ℝ) : E → ℝ :=
   fun y => (extChartAt I α).target.indicator
     (fun z => φ ((extChartAt I α).symm z)) y
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_mem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = φ ((extChartAt I α).symm y) :=
   Set.indicator_of_mem hy _
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_notMem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-- On the chart target, `phiOnE α φ` agrees with `scalarOnE α φ`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_eq_scalarOnE_on_target
     (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -188,7 +152,7 @@ private lemma phiOnE_eq_scalarOnE_on_target
   rw [phiOnE_apply_of_mem (I := I) α φ hy]
   rfl
 
-/-- `phiOnE α φ` is `C^∞` on the **interior** of the chart target. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma phiOnE_contDiffOn_interior_target
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ) :
     ContDiffOn ℝ ∞ (phiOnE (I := I) α φ)
@@ -200,8 +164,7 @@ private lemma phiOnE_contDiffOn_interior_target
   intro y hy
   exact phiOnE_eq_scalarOnE_on_target (I := I) α φ (interior_subset hy)
 
-/-- If the function `f : E → ℝ` is `C^∞` on the open set `U` and identically
-zero outside a closed set `K ⊆ U`, then `f` is `C^∞` on all of `E`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma contDiff_of_smooth_on_open_zero_outside
     {U : Set E} (hU : IsOpen U) {K : Set E} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : E → ℝ}
@@ -221,7 +184,7 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-/-- Support of `phiOnE α φ` is contained in the chart image of the tsupport of φ. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_support_subset_chartImage
     (α : M) (φ : M → ℝ) :
     Function.support (phiOnE (I := I) α φ) ⊆ chartImageOfTsupport (I := I) α φ := by
@@ -235,7 +198,7 @@ private lemma phiOnE_support_subset_chartImage
   · rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
     exact (hy rfl).elim
 
-/-- `tsupport (phiOnE α φ)` ⊆ `chartImageOfTsupport α φ`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_tsupport_subset_chartImage
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -244,8 +207,7 @@ private lemma phiOnE_tsupport_subset_chartImage
   refine closure_minimal (phiOnE_support_subset_chartImage (I := I) α φ) ?_
   exact chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp
 
-/-- Under the manifold-interior support hypothesis, `phiOnE α φ` has compact
-tsupport in `E`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_hasCompactSupport
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -263,7 +225,7 @@ private lemma phiOnE_hasCompactSupport
     exact hy this
   · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
-/-- `phiOnE α φ` is `C^∞` on all of `E`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma phiOnE_contDiff
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (hφ_compactSupp : HasCompactSupport φ)
@@ -300,8 +262,7 @@ private lemma vwIntegrandOnE_differentiableOn_interior_target
     vwIntegrandOnE_contDiffOn_interior_target (I := I) g α X i y hy
   exact ((h_at.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp))
 
-/-- The pointwise `fderiv` of `phiOnE α φ` agrees with the pointwise `fderiv`
-of `scalarOnE α φ` on the interior of the chart target. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma fderiv_phiOnE_eq_fderiv_scalarOnE
     (α : M) (φ : M → ℝ)
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -312,8 +273,6 @@ private lemma fderiv_phiOnE_eq_fderiv_scalarOnE
     exact phiOnE_eq_scalarOnE_on_target (I := I) α φ (interior_subset hz)
   exact Filter.EventuallyEq.fderiv_eq h_eq
 
-/-- The chart-local IBP per index, expressed via extension by zero outside the
-chart target. -/
 private theorem ibp_per_index
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -587,9 +546,7 @@ private lemma tangentSectionAction_measurable
   rw [h_eq]
   exact hpiecewise_meas
 
-/-- The integrand `localDivergenceWithin g α X · φ` pulled back via the chart
-inverse — and viewed as a function on the chart target — vanishes outside the
-chart image of `tsupport φ`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_mul_phi_pullback_zero_off_chartImage
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -609,8 +566,6 @@ private lemma localDivergenceWithin_mul_phi_pullback_zero_off_chartImage
     exact hsymm_notin (subset_tsupport _ hne)
   rw [hφ_zero, mul_zero, mul_zero]
 
-/-- Helper: pointwise identity of the LHS pullback at points in
-`chartImageOfTsupport α φ` (which lie in the interior of the chart target). -/
 private lemma localDivergenceWithin_mul_phi_pullback_eq_on_chartImage
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -664,9 +619,6 @@ private lemma localDivergenceWithin_mul_phi_pullback_eq_on_chartImage
   rw [Finset.sum_congr rfl (fun i _ => h_partial_eq i)]
   field_simp
 
-/-- The LHS of the chart-local IBP equals an `E`-integral over **all of `E`**:
-the manifold integral pulls back through the chart, and outside the chart
-target (where the integrand was extended by zero anyway) both sides agree. -/
 private lemma lhs_chart_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -736,7 +688,6 @@ private lemma lhs_chart_target
     intro y hy
     rw [phiOnE_apply_of_notMem (I := I) α φ hy, mul_zero]
 
-/-- The RHS of the chart-local IBP equals an `E`-integral on the chart target. -/
 private lemma rhs_chart_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -985,11 +936,6 @@ private lemma summand_int_rhs
     rw [hfderiv_zero]; simp
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
-/-- **Chart-local integration by parts (with-boundary variant).** For smooth
-`φ` with compact support contained in the chart base set at `α` and in the
-manifold interior, the chart-local Voss–Weyl with-boundary divergence
-`localDivergenceWithin g α X` integrates by parts against `φ` to yield the
-intrinsic action `tangentSectionAction X φ`. -/
 theorem chart_local_ibp_within
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

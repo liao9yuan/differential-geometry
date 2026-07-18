@@ -6,13 +6,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Constant scaling of the Levi-Civita connection
 
-This file proves the connection-side scaling fact needed for parabolic
-rescaling: multiplying a smooth Riemannian metric by a positive constant leaves
-the Koszul-constructed bundled Levi-Civita connection unchanged.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -52,11 +52,11 @@ private theorem mfderiv_const_smul_ne
 private theorem directionalDeriv_const_mul_ne
     (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M)
     {c : Real} (hc : c ≠ 0) :
-    directionalDeriv (I := I) X (fun y : M => c * f y) x =
-      c * directionalDeriv (I := I) X f x := by
-  change directionalDeriv (I := I) X (c • f) x =
-    c * directionalDeriv (I := I) X f x
-  unfold directionalDeriv
+    directionalDerivAlong (I := I) X (fun y : M => c * f y) x =
+      c * directionalDerivAlong (I := I) X f x := by
+  change directionalDerivAlong (I := I) X (c • f) x =
+    c * directionalDerivAlong (I := I) X f x
+  unfold directionalDerivAlong
   rw [DifferentialGeometry.extDerivFun_real_eq_mfderiv I (c • f) x (X x),
     DifferentialGeometry.extDerivFun_real_eq_mfderiv I f x (X x)]
   rw [mfderiv_const_smul_ne (I := I) (f := f) (x := x) hc]
@@ -69,23 +69,23 @@ private theorem koszulScalar_scaleMetric
       c * koszulScalar (I := I) g X Y Z x := by
   have hcne : c ≠ 0 := ne_of_gt hc
   have hYZ :
-      directionalDeriv (I := I) X
+      directionalDerivAlong (I := I) X
           (fun y : M => c * g.inner y (Y y) (Z y)) x =
-        c * directionalDeriv (I := I) X
+        c * directionalDerivAlong (I := I) X
           (fun y : M => g.inner y (Y y) (Z y)) x :=
     directionalDeriv_const_mul_ne (I := I) X
       (fun y : M => g.inner y (Y y) (Z y)) x hcne
   have hZX :
-      directionalDeriv (I := I) Y
+      directionalDerivAlong (I := I) Y
           (fun y : M => c * g.inner y (Z y) (X y)) x =
-        c * directionalDeriv (I := I) Y
+        c * directionalDerivAlong (I := I) Y
           (fun y : M => g.inner y (Z y) (X y)) x :=
     directionalDeriv_const_mul_ne (I := I) Y
       (fun y : M => g.inner y (Z y) (X y)) x hcne
   have hXY :
-      directionalDeriv (I := I) Z
+      directionalDerivAlong (I := I) Z
           (fun y : M => c * g.inner y (X y) (Y y)) x =
-        c * directionalDeriv (I := I) Z
+        c * directionalDerivAlong (I := I) Z
           (fun y : M => g.inner y (X y) (Y y)) x :=
     directionalDeriv_const_mul_ne (I := I) Z
       (fun y : M => g.inner y (X y) (Y y)) x hcne
@@ -179,8 +179,8 @@ private theorem leviCivitaConnectionCandidateAt_scaleMetric
   intro i
   simp [koszulNablaField_scaleMetric (I := I) c hc g]
 
-/-- Positive constant scaling leaves the bundled Koszul Levi-Civita connection
-unchanged. -/
+
+
 theorem lcConn_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) :
     leviCivitaConnectionOfMetric (I := I) (scaleMetric (I := I) c hc g) =

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
@@ -11,31 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-/-!
-# Fixed-chart variation identities
-
-For a smooth two-parameter map `f : ℝ → ℝ → M`, with the basepoint of the
-chart-local covariant derivative held at `f s t`, we record two identities
-written entirely in the **pinned chart** `φ := extChartAt I (f s t)`.
-
-The velocity of a parameter slice is read off as a *chart-coordinate*
-`E`-valued section: the Fréchet derivative `fderiv ℝ (fun v => φ (f u v)) t 1`
-of the chart-pulled-back slice. Because `φ` is fixed (it does not follow the
-moving foot of the slice), the map `F (u, v) := φ (f u v)` is jointly smooth on
-`ℝ × ℝ`, and the chart-coordinate sections fed to `chartCovDerivAlong` are
-honest jointly-smooth `E`-valued functions of `(u, v)`.
-
-With this pinned-chart representation:
-
-* `commute_ds_dt_fixed_chart`: the mixed chart-covariant derivatives commute.
-  The deriv-of-section terms agree by Schwarz symmetry of the second Fréchet
-  derivative of `F`; the Christoffel-contraction terms agree by symmetry of the
-  chart-Christoffel contraction. No moving-foot transition correction appears.
-
-* `chartCovDerivAlong_commutator_eq_riemannOp_on_variation`: the `∇_s, ∇_t` commutator on a
-  chart-coordinate section `Y` equals the Riemann operator of the Levi-Civita
-  connection applied to the two chart-coordinate velocities and `Y`.
--/
 
 noncomputable section
 
@@ -59,26 +34,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- A "smooth" two-parameter variation `f : ℝ → ℝ → M` is one whose uncurried
-map `ℝ × ℝ → M` is jointly `C^N` for the FIXED finite order `N := 8`. Since
-neither factor is a manifold of positive geometric dimension carrying the
-project's geometric structures, joint regularity on `ℝ × ℝ` is admissible here.
-
-The order is fixed and finite (rather than `∞`) so that the per-order
-exponential geodesic variation — which is only `C^n` for each finite `n`, never
-globally `C^∞` (the `C^∞` geodesic flow is a Mathlib gap) — can satisfy this
-predicate. `N = 8` comfortably exceeds the regularity the second-variation
-machinery consumes: the arc length is differentiated twice in `s` and once in
-`t`, with covariant derivatives (curvature) and chart-rep velocity-field
-manipulations adding a few more, all extracted at order `≤ 2` (or a small
-constant) via `.of_le` from `N`. -/
 def IsSmoothVariation
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     (f : ℝ → ℝ → M) : Prop :=
   ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => f p.1 p.2)
 
-/-- Partial Fréchet derivative in the second variable expressed via the joint
-Fréchet derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
     (h : DifferentiableAt ℝ G (u, t)) :
     fderiv ℝ (fun v : ℝ => G (u, v)) t (1 : ℝ) = fderiv ℝ G (u, t) (0, 1) := by
@@ -90,8 +51,7 @@ private lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
   rw [hcomp, hch.fderiv]
   simp [ContinuousLinearMap.inr]
 
-/-- Partial Fréchet derivative in the first variable expressed via the joint
-Fréchet derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_fst_apply_one (G : ℝ × ℝ → E) (s v : ℝ)
     (h : DifferentiableAt ℝ G (s, v)) :
     fderiv ℝ (fun u : ℝ => G (u, v)) s (1 : ℝ) = fderiv ℝ G (s, v) (1, 0) := by
@@ -103,8 +63,7 @@ private lemma partial_fst_apply_one (G : ℝ × ℝ → E) (s v : ℝ)
   rw [hcomp, hch.fderiv]
   simp [ContinuousLinearMap.inl]
 
-/-- The `u`-derivative of `u ↦ fderiv G (u, t) (0, 1)` as an iterated Fréchet
-derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_jointFderiv_snd (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ G (u, t) (0, 1)) s
@@ -129,8 +88,7 @@ private lemma deriv_jointFderiv_snd (G : ℝ × ℝ → E) (s t : ℝ)
   rw [hderiv.deriv]
   simp [hL, ContinuousLinearMap.inl]
 
-/-- The `v`-derivative of `v ↦ fderiv G (s, v) (1, 0)` as an iterated Fréchet
-derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_jointFderiv_fst (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     deriv (fun v : ℝ => fderiv ℝ G (s, v) (1, 0)) t
@@ -155,8 +113,7 @@ private lemma deriv_jointFderiv_fst (G : ℝ × ℝ → E) (s t : ℝ)
   rw [hderiv.deriv]
   simp [hL, ContinuousLinearMap.inr]
 
-/-- `C¹` on a neighborhood of `(s, t)` gives differentiability of `G` pulled
-back along the first inclusion `u ↦ (u, t)` near `s`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eventually_diff_along_fst (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     ∀ᶠ u in nhds s, DifferentiableAt ℝ G (u, t) := by
@@ -168,8 +125,7 @@ private lemma eventually_diff_along_fst (G : ℝ × ℝ → E) (s t : ℝ)
     simpa using hcont.continuousAt (x := s)
   exact h2.eventually hdiffG
 
-/-- `C¹` on a neighborhood of `(s, t)` gives differentiability of `G` pulled
-back along the second inclusion `v ↦ (s, v)` near `t`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eventually_diff_along_snd (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     ∀ᶠ v in nhds t, DifferentiableAt ℝ G (s, v) := by
@@ -181,8 +137,7 @@ private lemma eventually_diff_along_snd (G : ℝ × ℝ → E) (s t : ℝ)
     simpa using hcont.continuousAt (x := t)
   exact h2.eventually hdiffG
 
-/-- Mixed partial Fréchet derivative (∂_u of the ∂_v partial fderiv) of a
-`C²` two-parameter `E`-valued map, as an iterated Fréchet derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_partialFderiv_snd (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ (fun v : ℝ => F u v) t (1 : ℝ)) s
@@ -196,8 +151,7 @@ private lemma deriv_partialFderiv_snd (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hev.deriv_eq]
   exact deriv_jointFderiv_snd G s t hF
 
-/-- Mixed partial Fréchet derivative (∂_v of the ∂_u partial fderiv) of a
-`C²` two-parameter `E`-valued map, as an iterated Fréchet derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_partialFderiv_fst (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun v : ℝ => fderiv ℝ (fun u : ℝ => F u v) s (1 : ℝ)) t
@@ -211,9 +165,7 @@ private lemma deriv_partialFderiv_fst (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hev.deriv_eq]
   exact deriv_jointFderiv_fst G s t hF
 
-/-- **Mixed-partial commutation** for a `C²` two-parameter `E`-valued map: the
-`u`-derivative of the `v`-partial Fréchet derivative equals the `v`-derivative
-of the `u`-partial Fréchet derivative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma mixed_partialFderiv_comm (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ (fun v : ℝ => F u v) t (1 : ℝ)) s
@@ -224,8 +176,7 @@ private lemma mixed_partialFderiv_comm (F : ℝ → ℝ → E) (s t : ℝ)
     rw [minSmoothness_of_isRCLikeNormedField]
   exact hsymm (1, 0) (0, 1)
 
-/-- The chart-pulled-back variation `F (u, v) := extChartAt I (f s t) (f u v)` is
-`C²` at the basepoint `(s, t)`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulled_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
     ContDiffAt ℝ 2
@@ -242,20 +193,8 @@ private lemma chartPulled_contDiffAt
   exact key.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))
 
 omit [T2Space M] [SigmaCompactSpace M] in
-/-- **Fixed-chart commutation of mixed covariant derivatives.** For a smooth
-two-parameter variation `f`, with chart basepoint pinned at `f s t` and the
-parameter velocities read off as chart-coordinate sections
-`fderiv ℝ (fun v => extChartAt I (f s t) (f u v)) t 1` (resp. with the roles of
-`u, v` swapped), the chart-local covariant derivatives along the two parameter
-directions commute.
 
-Unfolding `chartCovDerivAlong`, each side is a deriv-of-section term plus a
-Christoffel-contraction term. The deriv-of-section terms agree by Schwarz
-symmetry of the second Fréchet derivative of the chart-pulled-back map
-`F (u, v) := extChartAt I (f s t) (f u v)` (`mixed_partialFderiv_comm`); the
-Christoffel-contraction terms agree by `chartChristoffelContraction_symm`.
-Because the chart `extChartAt I (f s t)` is held fixed, there is no
-moving-foot transition correction. -/
+omit [I.Boundaryless] in
 theorem commute_ds_dt_fixed_chart_C2
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (s t : ℝ)
@@ -300,24 +239,7 @@ theorem commute_ds_dt_fixed_chart_C2
       (fderiv ℝ (fun v : ℝ => F s v) t (1 : ℝ)) (F s t)
   rw [hsec, hChristoffel]
 
-/-- **Fixed-chart commutation of mixed covariant derivatives.** For a smooth
-two-parameter variation `f`, with chart basepoint pinned at `f s t` and the
-parameter velocities read off as chart-coordinate sections
-`fderiv ℝ (fun v => extChartAt I (f s t) (f u v)) t 1` (resp. with the roles of
-`u, v` swapped), the chart-local covariant derivatives along the two parameter
-directions commute.
-
-Unfolding `chartCovDerivAlong`, each side is a deriv-of-section term plus a
-Christoffel-contraction term. The deriv-of-section terms agree by Schwarz
-symmetry of the second Fréchet derivative of the chart-pulled-back map
-`F (u, v) := extChartAt I (f s t) (f u v)` (`mixed_partialFderiv_comm`); the
-Christoffel-contraction terms agree by `chartChristoffelContraction_symm`.
-Because the chart `extChartAt I (f s t)` is held fixed, there is no
-moving-foot transition correction.
-
-This is the smooth-variation wrapper of `commute_ds_dt_fixed_chart_C2`: the only
-regularity it uses is the `C²` chart-pullback fact, which `IsSmoothVariation`
-supplies via `chartPulled_contDiffAt`. -/
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem commute_ds_dt_fixed_chart
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -331,23 +253,22 @@ theorem commute_ds_dt_fixed_chart
 
 section FixedChartCurvatureHelpers
 open DifferentialGeometry.Integral.DivergenceTheorem
-set_option linter.unusedSectionVars false
 
-/-- `chartCoord i` as a continuous linear functional. -/
 def chartCoordCLM (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (chartModelBasis E).coord i |>.toContinuousLinearMap
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartCoordCLM_apply (i : Fin (Module.finrank ℝ E)) (v : E) :
     chartCoordCLM (E := E) i v = chartCoord (E := E) i v := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma hasDerivAt_chartCoord {P : ℝ → E} {P' : E} {s : ℝ} (hP : HasDerivAt P P' s)
     (i : Fin (Module.finrank ℝ E)) :
     HasDerivAt (fun u => chartCoord (E := E) i (P u)) (chartCoord (E := E) i P') s := by
   have := (chartCoordCLM (E := E) i).hasFDerivAt.comp_hasDerivAt s hP
   simpa using this
 
-/-- The Leibniz derivative of the chart-Christoffel contraction along three
-differentiable curves `P, Q, R`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma hasDerivAt_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α : M)
     {P Q R : ℝ → E} {P' Q' R' : E} {s : ℝ}
@@ -410,7 +331,6 @@ end FixedChartCurvatureHelpers
 
 namespace Aux2
 open DifferentialGeometry.Geometry.Riemannian.Variation
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
@@ -433,7 +353,6 @@ lemma partial_fst_apply_one (G : ℝ × ℝ → E) (s v : ℝ)
   have hch := hG.comp s hincl
   rw [hcomp, hch.fderiv]; simp [ContinuousLinearMap.inl]
 
-/-- HasDerivAt for the second-partial-fderiv section. -/
 lemma hasDerivAt_partial_snd (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     HasDerivAt (fun u : ℝ => fderiv ℝ (fun v : ℝ => F u v) t (1 : ℝ))
@@ -467,7 +386,6 @@ lemma hasDerivAt_partial_snd (F : ℝ → ℝ → E) (s t : ℝ)
     rw [hFv]; exact partial_snd_apply_one G u t hu
   exact hbase.congr_of_eventuallyEq hev
 
-/-- HasDerivAt for the slice `u ↦ F u t` from joint C¹. -/
 lemma hasDerivAt_slice_fst (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : DifferentiableAt ℝ (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     HasDerivAt (fun u : ℝ => F u t)
@@ -484,7 +402,6 @@ lemma hasDerivAt_slice_fst (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hFeq]
   simpa [ContinuousLinearMap.inl] using this
 
-/-- HasDerivAt for the slice `v ↦ F s v` from joint C¹. -/
 lemma hasDerivAt_slice_snd (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : DifferentiableAt ℝ (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     HasDerivAt (fun v : ℝ => F s v)
@@ -501,7 +418,6 @@ lemma hasDerivAt_slice_snd (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hFeq]
   simpa [ContinuousLinearMap.inr] using this
 
-/-- HasDerivAt for the first-partial-fderiv section. -/
 lemma hasDerivAt_partial_fst (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     HasDerivAt (fun v : ℝ => fderiv ℝ (fun u : ℝ => F u v) s (1 : ℝ))
@@ -550,7 +466,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -558,8 +473,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- `chartChristoffel g α i j k` is differentiable at the chart-self image
-`extChartAt I α α`, under `[I.Boundaryless]`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma chartChristoffel_differentiableAt_self
     (g : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) :
     DifferentiableAt ℝ (chartChristoffel (I := I) g α i j k) (extChartAt I α α) := by
@@ -584,7 +498,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open Aux2
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -592,8 +505,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Rewrite the inner covariant derivative as a function of `u` into the
-partial-fderiv form (no `deriv`, no `chartCurve`), valid pointwise. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma innerW_eq (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (t : ℝ) :
     (fun u => chartCovDerivAlong (I := I) g α (fun v : ℝ => f u v) (fun v : ℝ => Y u v) t)
       = fun u => fderiv ℝ (fun v : ℝ => Y u v) t (1 : ℝ)
@@ -605,8 +517,7 @@ lemma innerW_eq (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M
   rw [chartCovDerivAlong_def]
   rfl
 
-/-- HasDerivAt of the inner covariant derivative section, with the value left as
-the sum of the partial-second-derivative term and the Christoffel Leibniz term. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma hasDerivAt_innerW
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s, t))
@@ -649,8 +560,7 @@ lemma hasDerivAt_innerW
   have hterm2 := hasDerivAt_chartChristoffelContraction (I := I) g α hP hQ hR hΓ'
   exact hterm1.add hterm2
 
-/-- The chart-covariant double derivative `∇_s ∇_t Y` (fixed chart `α`), as a
-concrete `E`-value: `deriv W s + Γ(D₁, W s, y₀)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma nabla_s_nabla_t_eq
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ) :
     chartCovDerivAlong (I := I) g α (fun u : ℝ => f u t)
@@ -664,8 +574,8 @@ lemma nabla_s_nabla_t_eq
   rw [chartCovDerivAlong_def]
   rfl
 
-/-- Mirror of `hasDerivAt_innerW`: inner cov-deriv along `u ↦ f u v` differentiated in `v`. -/
-lemma hasDerivAt_innerW'
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+lemma hasDerivAt_innerW_snd
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s, t))
     (hY : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (s, t))
@@ -714,7 +624,7 @@ lemma hasDerivAt_innerW'
   have hterm2 := hasDerivAt_chartChristoffelContraction (I := I) g α hP hQ hR hΓ'
   exact hterm1.add hterm2
 
-/-- The chart-covariant double derivative `∇_t ∇_s Y`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma nabla_t_nabla_s_eq
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ) :
     chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v)
@@ -735,12 +645,10 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- Generic basis expansion of a Fréchet derivative as a `chartCoord`-weighted
-sum of `partialDeriv`s. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_eq_sum_partialDeriv (u : E → ℝ) (y v : E) :
     fderiv ℝ u y v =
       ∑ k : Fin (Module.finrank ℝ E),
@@ -756,10 +664,12 @@ lemma fderiv_eq_sum_partialDeriv (u : E → ℝ) (y v : E) :
   rw [map_smul, smul_eq_mul]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_basis (b s : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) s (chartModelBasis E b) = if b = s then 1 else 0 := by
   rw [chartCoord]; exact (chartModelBasis E).repr_self_apply b s
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_sum_smul_basis (c : Fin (Module.finrank ℝ E) → ℝ)
     (s : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) s (∑ m, c m • chartModelBasis E m) = c s := by
@@ -781,14 +691,13 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open Aux5
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
-/-- The `l`-th chart coordinate of the Christoffel contraction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma chartCoord_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : E) (l : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) l (chartChristoffelContraction (I := I) g x v w y)
@@ -801,8 +710,7 @@ lemma chartCoord_chartChristoffelContraction
       (fun l => ∑ i, ∑ j, chartChristoffel (I := I) g x i j l y *
         chartCoord (E := E) i v * chartCoord (E := E) j w) l]
 
-/-- `partialDeriv` is insensitive to the symmetric swap of the lower Christoffel
-indices. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartChristoffel_symm
     (g : SmoothRiemannianMetric I M) (x : M) (i j l d : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) d (chartChristoffel (I := I) g x i j l) y
@@ -811,8 +719,7 @@ lemma partialDeriv_chartChristoffel_symm
     funext y'; exact chartChristoffel_symm (I := I) g x i j l y'
   rw [hfun]
 
-/-- Pure-algebra matching: the curvature part of the commutator equals the
-chart-Riemann CLM, evaluated at the chart-self point. -/
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma curvPart_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (x : M) (D₁ D₂ Yv : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -1067,15 +974,13 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open Aux4 Aux6
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The fixed-chart `∇_s,∇_t` commutator on a chart-coordinate section equals the
-chart-Riemann CLM of the two chart-coordinate velocities and `Y s t`. -/
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma commutator_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t))
@@ -1101,7 +1006,7 @@ lemma commutator_eq_chartRiemannCLM
   rw [nabla_s_nabla_t_eq (I := I) g α f Y s t,
       nabla_t_nabla_s_eq (I := I) g α f Y s t]
   rw [(hasDerivAt_innerW (I := I) g α f Y s t hF hY hΓ).deriv,
-      (hasDerivAt_innerW' (I := I) g α f Y s t hF hY hΓ).deriv]
+      (hasDerivAt_innerW_snd (I := I) g α f Y s t hF hY hΓ).deriv]
   have hWs : chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v) (fun v : ℝ => Y s v) t
       = fderiv ℝ (fun v : ℝ => Y s v) t (1 : ℝ)
         + chartChristoffelContraction (I := I) g α
@@ -1219,18 +1124,6 @@ lemma commutator_eq_chartRiemannCLM
 
 end Aux7
 
-/-- Curvature commutation identity in the fixed chart at `f s t`. For a
-chart-coordinate section `Y : ℝ → ℝ → E` that is jointly `C²` at `(s, t)`, along
-a smooth two-parameter variation `f`, the commutator of the chart-covariant
-derivatives `∇_s` and `∇_t` (with the chart basepoint pinned to `f s t`) equals
-the Riemann curvature operator `riemannOp` of the Levi-Civita connection,
-evaluated on the two chart-pushed velocities and the section value `Y s t`.
-
-The proof rewrites the commutator as the chart-Riemann CLM via
-`Aux7.commutator_eq_chartRiemannCLM`, then converts that CLM to the abstract
-Riemann operator via `riemannOp_eq_chartRiemannCLM_apply_of_basis_identity`
-fed the Levi-Civita basis-coordinate identity
-`chartRiemannBasisIdentity_LeviCivita`. -/
 theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)

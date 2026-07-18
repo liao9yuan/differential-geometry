@@ -4,12 +4,12 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Four-tensor metric traces
 
-Smooth field producer for the Ricci-style metric trace of standard-slot
-`(0,4)` tensors, tracing slots `0` and `3`.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -50,8 +50,8 @@ theorem metricTrace_finCons_vec3_eq_vec4 {x : M}
   funext a
   fin_cases a <;> rfl
 
-/-- Slot permutation turning the first-two trace input `(i,j,tail₀,tail₁)`
-into the standard Ricci trace input `(i,tail₀,tail₁,j)`. -/
+
+
 def trace04Perm : Equiv.Perm (Fin 4) where
   toFun q := if q = 0 then 0 else if q = 1 then 2 else if q = 2 then 3 else 1
   invFun q := if q = 0 then 0 else if q = 1 then 3 else if q = 2 then 1 else 2
@@ -237,8 +237,8 @@ private theorem trace04Coeff
     (trace04Event (I := I) g A x₀ tail)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smooth `(0,2)` field obtained by the standard Ricci trace of a smooth
-`(0,4)` tensor field, tracing slots `0` and `3`. -/
+
+
 def trace04Field
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

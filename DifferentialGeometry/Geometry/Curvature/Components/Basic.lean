@@ -28,27 +28,27 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Basic pointwise curvature components
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
 
-/-- Two tensor slots encoded as a `Fin 2` index function. -/
+
+
+
+
+
 def slots2 (i j : Idx) : Fin 2 -> Idx :=
   fun a => if a = 0 then i else j
 
-/-- Four tensor slots encoded as a `Fin 4` index function. -/
+
 def slots4 (i j k l : Idx) : Fin 4 -> Idx :=
   fun a => if a = 0 then i else if a = 1 then j else if a = 2 then k else l
 
-/-- Pointwise Ricci component in a tangent basis. -/
+
 def ricciCompAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Ric : Tensor02At (I := I) (M := M) x) (i j : Idx) : Real :=
   component0S (I := I) basis Ric (slots2 i j)
 
-/-- Pointwise lowered Riemann component in a tangent basis. -/
+
 def rm04CompAt
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x) (i j k l : Idx) : Real :=
@@ -93,7 +93,7 @@ theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {s : ℕ}
           (∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real))) v) =
         (T a : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v +
           ∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v
-      rw [ContinuousMultilinearMap.add_apply, ih]
+      rw [Tensor0SSpace.add_apply, ih]
 
 private theorem basisTensor0S_empty_eq_scalarOne
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -109,8 +109,8 @@ private theorem basisTensor0S_empty_eq_scalarOne
   rw [harg] at hcomp
   simpa [scalarOne0S] using hcomp
 
-/-- Components of the symbolically defined Ricci tensor are the components of
-the tensor trace contraction of the `(1,3)` curvature tensor. -/
+
+
 theorem ricciCompAt_eq_contractTrace
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm13 : Tensor13At (I := I) (M := M) x) (i j : Idx) :
@@ -122,8 +122,8 @@ theorem ricciCompAt_eq_contractTrace
     component0S
   rw [basisTensor0S_empty_eq_scalarOne (I := I) basis Fin.elim0]
 
-/-- Basis-coordinate evaluation of the intrinsic trace contraction defining
-Ricci from a `(1,3)` tensor. -/
+
+
 theorem contract_trace13_component_basis
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm13 : Tensor13At (I := I) (M := M) x) (i j : Idx) :
@@ -185,8 +185,8 @@ theorem contract_trace13_component_basis
   · change vec2 (basis i) (basis j) 1 = basis j
     simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Basis-coordinate evaluation of the intrinsic trace contraction defining
-Ricci from a `(1,3)` tensor, with arbitrary second and third inputs. -/
+
+
 theorem ricciFromRm13At_apply_basis_trace
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm13 : Tensor13At (I := I) (M := M) x)

@@ -8,7 +8,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Geometry.Operator.Gradient
@@ -18,26 +18,10 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# Continuity and integrability of the gradient inner-product integrand
-
-For a closed smooth Riemannian manifold `(M, g)`, this file establishes that
-the pointwise gradient inner product `tensorCovDerivPointwiseInner g r s S T`
-is globally continuous and integrable against the Riemannian volume measure.
-
-The continuity is glued from chart-local smoothness: the covariant derivative
-applied to a chart-basis tangent frame is a smooth bundle section, the
-metric-lowered composite is smooth into the model fibre, and the
-coordinate-invariance identity transports chart-local smoothness to the
-canonical model-frame integrand. Integrability then follows from continuity,
-compact support, and the local-finiteness of the Riemannian volume measure on
-a closed manifold.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -58,7 +42,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,9 +53,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The covariant derivative of a smooth compactly-supported tensor section
-applied to a chart-basis tangent vector field is smooth as a tensor section
-on the chart base set. -/
+omit [CompactSpace M] in
 lemma tensorCovDeriv_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -113,9 +95,7 @@ lemma tensorCovDeriv_chartBasis_contMDiffOn
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
   exact hcov_at.clm_bundle_apply hX_at
 
-/-- The trivialization-α-image of `cov_S b · chartBasisVecFiber α i b` is smooth on
-chart α base set. By bundle smoothness of the section, the chart-α trivialization
-image is smooth in `b`. -/
+omit [CompactSpace M] in
 lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -146,7 +126,6 @@ lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
   rw [hbase_eq]
   exact hsection
 
-/-- Linear "evaluation at all basis tuples" map on `Tensor0SModel n ℝ E`. -/
 private noncomputable def evalAtBasisLinearLocal (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
@@ -158,14 +137,14 @@ private noncomputable def evalAtBasisLinearLocal (n : ℕ) :
     funext φ
     simp [ContinuousMultilinearMap.smul_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma evalAtBasisLinearLocal_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisLinearLocal (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- `evalAtBasisLinearLocal` is injective: two multilinear forms agreeing on
-all model-basis tuples are equal. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma evalAtBasisLinearLocal_injective (n : ℕ) :
     Function.Injective (evalAtBasisLinearLocal (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -174,7 +153,7 @@ private lemma evalAtBasisLinearLocal_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
-/-- Dimension of the model fibre `Tensor0SModel n ℝ E`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma finrank_tensor0SModel_local (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -197,12 +176,14 @@ private lemma finrank_tensor0SModel_local (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma finrank_basis_pi_local (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma evalAtBasisLinearLocal_bijective (n : ℕ) :
     Function.Bijective (evalAtBasisLinearLocal (E := E) n) := by
   have h_inj := evalAtBasisLinearLocal_injective (E := E) n
@@ -218,15 +199,14 @@ private noncomputable def evalAtBasisCLELocal (n : ℕ) :
   (LinearEquiv.ofBijective (evalAtBasisLinearLocal (E := E) n)
     (evalAtBasisLinearLocal_bijective (E := E) n)).toContinuousLinearEquiv
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma evalAtBasisCLELocal_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisCLELocal (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- Smoothness into `Tensor0SModel n ℝ E` from smoothness of basis-tuple
-evaluations. Sister of the private
-`TensorMetricLowering.contMDiffOn_into_tensor0SModel_of_eval_basis`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -248,7 +228,7 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
   intro b _
   exact ((evalAtBasisCLELocal (E := E) n).symm_apply_apply (Φ b)).symm
 
-/-- Local unfolding of `loweredCompose` at a model-basis tuple. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma loweredCompose_at_basis_tuple_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T : TensorRSModel r s ℝ E)
@@ -261,7 +241,7 @@ private lemma loweredCompose_at_basis_tuple_local
   rw [loweredCompose_apply]
   rfl
 
-/-- Smoothness of `(chartGramMatrix g α ·)⁻¹ i j` on the chart-α base set. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrixInv_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -285,10 +265,6 @@ private lemma chartGramMatrixInv_entry_contMDiffOn
   have hpos_ne : (chartGramMatrix (I := I) g α b).det ≠ 0 := ne_of_gt hpos
   exact (ContMDiffWithinAt.inv₀ hdet hpos_ne).mul hadj
 
-/-- The `(0, r)` separable-form bundle section, attached to a chart-α base
-point, evaluated at the chart-α basis indexed by `φ_first`. The trivialisation
-fibre at `α` evaluates, on a model-basis tuple `e_ψ`, to a product of
-chart-Gram-matrix entries. -/
 private noncomputable def separableFormBundleSectionLocal
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
@@ -299,13 +275,10 @@ private noncomputable def separableFormBundleSectionLocal
       (separableFormAt (I := I) (M := M) g b r
         (fun k : Fin r => chartBasisVecFiber (I := I) α (φ_first k) b)))
 
-/-- The trivialisation fibre at `α` of the `(0, r)` separable-form bundle
-section, evaluated on a model-basis tuple `e_ψ`, equals a product of
-chart-Gram-matrix entries. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem trivializationAt_separableFormBundleSectionLocal_eval_basis
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) {b : M}
-    (_hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (ψ : Fin r → Fin (Module.finrank ℝ E)) :
     (trivializationAt (Tensor0SModel r ℝ E)
         (fun y : M => Tensor0SSpace r I y) α
@@ -325,9 +298,7 @@ private theorem trivializationAt_separableFormBundleSectionLocal_eval_basis
   rw [chartGramMatrix_apply]
   rfl
 
-/-- The `(0, r)` separable-form bundle section is smooth on the chart base set
-at `α` — a sister of `TensorMetricLowering.contMDiffOn_separableFormBundleSection`
-that we re-derive here to avoid the `private` qualifier on the original. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma contMDiffOn_separableFormBundleSectionLocal
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
@@ -356,14 +327,11 @@ private lemma contMDiffOn_separableFormBundleSectionLocal
       (trivializationAt E (TangentSpace I) α).baseSet := by
     refine contMDiffOn_finset_prod (fun k _ => ?_)
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
-  refine h_prod_smooth.congr (fun b hb => ?_)
+  refine h_prod_smooth.congr (fun b _hb => ?_)
   exact trivializationAt_separableFormBundleSectionLocal_eval_basis
-    (I := I) (M := M) g r α φ_first hb ψ
+    (I := I) (M := M) g r α φ_first ψ
 
-/-- Chart-local smoothness of
-`b ↦ lowerAllUpperIndices g r s b (toModel (cov_S(b) · chartBasisVecFiber α i b))
-        (chartBasisVec α (φ ·) b)`
-on the chart base set. -/
+omit [CompactSpace M] in
 private lemma contMDiffOn_lower_chartCov_at_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -451,9 +419,7 @@ private lemma contMDiffOn_lower_chartCov_at_basis
   rw [lowerAllUpperIndices_apply]
   rfl
 
-/-- Chart-local smoothness of
-`b ↦ loweredCompose g r s α b (toModel (cov_S(b) · chartBasisVecFiber α i b))`
-as a function valued in `Tensor0SModel (r + s) ℝ E`, on the chart base set. -/
+omit [CompactSpace M] in
 private lemma contMDiffOn_loweredCompose_chartCov
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -475,7 +441,7 @@ private lemma contMDiffOn_loweredCompose_chartCov
           (chartBasisVecFiber (I := I) α i b))) φ).symm)
   exact contMDiffOn_lower_chartCov_at_basis (I := I) (M := M) g r s S α i φ
 
-/-- Chart-local continuity (as `ContinuousOn`) of the above. -/
+omit [CompactSpace M] in
 private lemma continuousOn_loweredCompose_chartCov
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -488,10 +454,7 @@ private lemma continuousOn_loweredCompose_chartCov
       (trivializationAt E (TangentSpace I) α).baseSet :=
   (contMDiffOn_loweredCompose_chartCov (I := I) (M := M) g r s S α i).continuousOn
 
-/-- Chart-local continuity, on the chart-α base set, of
-`b ↦ tensorInnerPointwise g r s b
-       (toModel (cov_S(b) · chartBasisVecFiber α i b))
-       (toModel (cov_T(b) · chartBasisVecFiber α j b))`. -/
+omit [CompactSpace M] in
 private lemma continuousOn_tensorInnerPointwise_chartCov
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -529,6 +492,7 @@ private lemma continuousOn_tensorInnerPointwise_chartCov
       (tensorCovDerivAt (I := I) (M := M) g r s T b
         (chartBasisVecFiber (I := I) α j b)))
 
+omit [CompactSpace M] in
 private lemma chartTensorCovDerivPointwiseInner_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -543,9 +507,6 @@ private lemma chartTensorCovDerivPointwiseInner_continuousOn
   · exact (chartGramMatrixInv_entry_contMDiffOn (I := I) (M := M) g α i j).continuousOn
   · exact continuousOn_tensorInnerPointwise_chartCov (I := I) (M := M) g r s S T α i j
 
-/-- **Global continuity** of the gradient integrand
-`tensorCovDerivPointwiseInner g r s S T`. The proof glues chart-local continuity
-(via the coordinate-invariance identity) over the chart cover of `M`. -/
 theorem tensorCovDerivPointwiseInner_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -570,9 +531,6 @@ theorem tensorCovDerivPointwiseInner_continuous
     h_chart_cont.congr h_cong
   exact h_local.continuousAt (hOpen.mem_nhds hx_base)
 
-/-- **Integrability** of the gradient integrand against the Riemannian volume
-measure on a closed manifold. Follows from continuity and compact support of
-the integrand, plus the local-finiteness of the Riemannian volume measure. -/
 theorem tensorCovDerivPointwiseInner_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

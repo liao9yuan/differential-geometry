@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -37,18 +38,6 @@ variable
 
 namespace CutoffExtensionAux
 
-/-! ### A smooth time-cutoff and the scalar-multiplication of a tangent-bundle map
-
-The interior datum `hint` records the joint `C∞` regularity of the geometric DeTurck
-field only on the open time interval `(0, T)`.  To globalize it we multiply by a
-smooth time cutoff `cutoffEta a b δ` that equals `1` on `(a - δ, b + δ)` and vanishes
-outside the compact window `[a - 2δ, b + 2δ] ⊆ (0, T)`.  The product is then globally
-smooth (away from the window the cutoff is identically `0`).  The helper
-`smul_tangentMap_global` packages exactly this "scale by a time cutoff supported in the
-interior" step at the level of tangent-bundle-valued maps. -/
-
-/-- A smooth time cutoff equal to `1` on `(a - δ, b + δ)` and supported in
-`[a - 2δ, b + 2δ]`, built from `Real.smoothTransition`. -/
 noncomputable def cutoffEta (a b δ : ℝ) (s : ℝ) : ℝ :=
   Real.smoothTransition ((s - (a - 2 * δ)) / δ) *
     Real.smoothTransition (((b + 2 * δ) - s) / δ)
@@ -85,19 +74,15 @@ theorem cutoffEta_mem_Icc_of_ne_zero (a b δ s : ℝ) (hδ : 0 < δ)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- The base section `q ↦ ⟨q.2, η q.1⟩` time-cutoff scalar viewed on `ℝ × M` is `C∞`. -/
+
+omit [IsManifold I ∞ M] in
 theorem cutoffEta_section_contMDiff (a b δ : ℝ) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => cutoffEta a b δ q.1) :=
   (cutoffEta_contDiff a b δ).contMDiff.comp contMDiff_fst
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Scalar-multiplication of a tangent-bundle map (pointwise).** If `q ↦ η q.1` is
-`C^∞` within `u` at `q₀` and the geometric map `q ↦ ⟨q.2, X q.1 q.2⟩` is `C^∞` within
-`u` at `q₀`, then so is the scaled map `q ↦ ⟨q.2, η q.1 • X q.1 q.2⟩`.  The fibre
-coordinate of a tangent-bundle trivialization is fibre-linear, so it commutes with the
-scalar, reducing the goal to `ContMDiffWithinAt.smul` of the scalar with the fibre
-coordinate. -/
+
 theorem smul_tangentMap_cmdwa
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ)
     {u : Set (ℝ × M)} {q₀ : ℝ × M}
@@ -125,12 +110,8 @@ theorem smul_tangentMap_cmdwa
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [SigmaCompactSpace M] in
-/-- **Global scalar-multiplication of a tangent-bundle map by a cutoff supported in the
-interior.** The geometric field `X` is jointly `C^∞` only on the open window
-`(0, T) ×ˢ univ`; multiplying by a scalar `η` whose support sits inside that window
-produces a *globally* `C^∞` tangent-bundle map: inside the window the per-point smul
-lemma applies, and outside the support the product is the (globally smooth) zero
-section composed with the base projection. -/
+
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem smul_tangentMap_global
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ) (T : ℝ)
     (hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => η q.1))
@@ -175,13 +156,12 @@ theorem smul_tangentMap_global
 end CutoffExtensionAux
 
 open CutoffExtensionAux in
-set_option linter.unusedVariables false in
 theorem interior_field_global_cutoff_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    {a b : ℝ} (hab : 0 < a) (hab' : a < b) (hbT : b < T) :
+    {a b : ℝ} (hab : 0 < a) (_hab' : a < b) (hbT : b < T) :
     ∃ (Xt : ℝ → ∀ x : M, TangentSpace I x) (δ : ℝ), 0 < δ ∧
       (∀ s ∈ Set.Ioo (a - δ) (b + δ), ∀ x : M, Xt s x = X_DT s x) ∧
       ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -242,6 +222,7 @@ theorem interior_field_global_cutoff_extension
       exact smul_tangentMap_global X_DT (cutoffEta a b δ) T hηsm hint htsupp
     exact autonomizedFieldJointC1_of_contMDiff (fun s x => cutoffEta a b δ s • X_DT s x) hsm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem deturck_vf_autonomized_c1
     (Xt : ℝ → ∀ x : M, TangentSpace I x)
     (hXt : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

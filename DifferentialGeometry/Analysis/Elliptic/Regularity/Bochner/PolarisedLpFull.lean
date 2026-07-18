@@ -1,76 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.PolarisedLpSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
 
-/-!
-# Lp-class lift of the polarised Bochner-Weitzenböck identity (smooth case)
-
-For a closed Riemannian manifold `(M, g)` and smooth scalars
-`φ : C^∞⟮I, M; ℝ⟯`, `v : SmoothScalar g`, this module derives the
-**Lp-class identity**
-
-```
-gradInnerLaplacianCandidateUnconditional g φ
-    (smoothToH1Compl_mem_laplacianDomainPow_two g v) =
-  smoothToLp((gradInnerSmoothBundle g φ v).oneSubLapClassical),
-```
-
-i.e. the smooth-case discharge of `smoothCandidate_identification_target`
-from `GradInnerLaplacianVariational.lean`.
-
-The proof works by combining:
-
-* The **pointwise polarised Bochner identity** in `(1 - Δ_g)` form, applied to
-  smooth `(φ, v)` (from `BochnerPolarised.bochner_polarised_pointwise_oneSubLap`):
-  ```
-  (1 - Δ_g)(g(∇φ, ∇v))(x) =
-      g(∇φ, ∇v)(x)
-    - g(∇v, ∇Δφ)(x) - g(∇φ, ∇Δv)(x)
-    - 2 · hessPairingChart g φ v x
-    - 2 · ricciTensor g x (∇φ x) (∇v x).
-  ```
-* **Smooth-case identifications** of each CLM summand in the unconditional
-  Bochner candidate as `smoothToLp` of a specific smooth scalar:
-  - `gradInnerCLM g φ (smoothToH1Compl v) = smoothToLp(gradInnerSmoothBundle g φ v)`.
-  - `gradInnerCLM g (Δφ) (smoothToH1Compl v) = smoothToLp(gradInnerSmoothBundle g (Δφ) v)`.
-  - `gradInnerLapU g φ hu_h = smoothToLp(gradInnerSmoothBundle g φ v) -
-        smoothToLp(gradInnerSmoothBundle g φ v.oneSubLapClassical)`
-    (after identifying `preimageLift g hu_h = smoothToH1Compl(v.oneSubLapClassical)`).
-  - `ricciPairingCLM g φ (smoothToH1Compl v) = smoothToLp(smoothRicciPairingBundle g φ v)`.
-  - `hessPairingLpOnLapDom g φ (...) = smoothToLp(hessPairingSmoothLp g φ v)`
-    (taken as a hypothesis; this Hessian-piece bridge requires substantial
-    chart-side infrastructure and is exposed as `hessPairingLpOnLapDom_smoothCase`).
-
-Once each summand is identified with a `smoothToLp(...)`, the candidate
-equals `smoothToLp` of an explicit sum of smooth scalars. By the pointwise
-polarised Bochner identity, this sum agrees pointwise with
-`(gradInnerSmoothBundle g φ v).oneSubLapClassical`, hence the Lp classes
-are equal.
-
-## Main results
-
-* `H1ComplToLp_injOn_laplacianDomain` — H1ComplToLp restricted to
-  laplacianDomain is injective.
-
-* `preimageLift_smoothCase` — for smooth v, the Classical.choose lift
-  `preimageLift g hu_h` equals `smoothToH1Compl(v.oneSubLapClassical)`.
-
-* `gradInnerLapU_smoothCase` — Lp identification of `gradInnerLapU` for
-  smooth `v`.
-
-* `gradInnerLapU_smoothCase_eq_smoothToLp` — direct Lp identification
-  with `smoothToLp(gradInnerSmoothBundle g φ v) -
-  smoothToLp(gradInnerSmoothBundle g φ v.oneSubLapClassical)`.
-
-* `gradInnerLapU_smoothCase_pointwise` — the pointwise smoothScalar
-  identification, in terms of the polarised identity.
-
-* `smoothCandidate_identification_smooth_of_hessHypothesis` —
-  the smooth-case candidate identification, conditional on the Hessian
-  bridge hypothesis.
-
-* `smoothCandidate_identification_smooth_unconditional_target` — the
-  target statement for the Hessian bridge.
--/
 
 noncomputable section
 
@@ -110,9 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Injectivity of `H1ComplToLp` on `laplacianDomain`.** For
-`w₁, w₂ ∈ laplacianDomain g` with `H1ComplToLp w₁ = H1ComplToLp w₂`,
-`w₁ = w₂`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_injOn_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {w₁ w₂ : H1Compl (I := I) (M := M) g}
@@ -158,9 +86,7 @@ theorem H1ComplToLp_injOn_laplacianDomain
   have h_sub_zero : w₁ - w₂ = 0 := norm_eq_zero.mp h_norm_zero
   exact sub_eq_zero.mp h_sub_zero
 
-/-- For smooth `v`, the H1Compl-lift `preimageLift g hu_h` (where
-`hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`) equals
-`smoothToH1Compl(v.oneSubLapClassical)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem preimageLift_smoothCase
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     preimageLift (I := I) (M := M) g
@@ -204,8 +130,6 @@ theorem preimageLift_smoothCase
   exact H1ComplToLp_injOn_laplacianDomain (I := I) (M := M) g h_pl_dom h_st_dom
     h_H1ComplToLp_eq
 
-/-- Smooth-case identification of `gradInnerLapU` as a difference of two
-smoothToLp classes. -/
 theorem gradInnerLapU_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerLapU (I := I) (M := M) g φ
@@ -222,15 +146,13 @@ theorem gradInnerLapU_smoothCase
   rw [preimageLift_smoothCase]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
-/-- The smooth scalar arising from `v - v.oneSubLapClassical = Δ_g v`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem v_sub_oneSubLap_eq_lap
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) (x : M) :
     v.toFun x - v.oneSubLapClassical.toFun x = Δ_g (I := I) g v.smooth x := by
   rw [SmoothScalar.oneSubLapClassical_toFun, Pi.sub_apply]
   ring
 
-/-- Pointwise identity: `gradInnerSmoothBundle g φ v - gradInnerSmoothBundle g φ v.oneSubLapClassical`
-has the toFun `b ↦ g(∇φ, ∇(Δ_g v))(b)`. -/
 theorem gradInnerSmoothBundle_sub_oneSubLap_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (b : M) :
@@ -271,27 +193,23 @@ theorem gradInnerSmoothBundle_sub_oneSubLap_apply
     exact v_sub_oneSubLap_eq_lap (I := I) (M := M) g v y
   rw [h_fun_eq]
 
-/-- The classical Laplacian Δφ of a smooth bundled `φ`, as a `SmoothScalar`. -/
 noncomputable def smoothLaplacianAsScalar
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) : SmoothScalar g where
   toFun := Δ_g (I := I) g φ.contMDiff
   smooth := Δ_g_contMDiff (I := I) g φ.contMDiff
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 @[simp] lemma smoothLaplacianAsScalar_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun =
       Δ_g (I := I) g φ.contMDiff := rfl
 
-/-- The smoothLaplacianBundle and smoothLaplacianAsScalar agree as bundled
-smooth functions / smooth scalars (their underlying functions are equal). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma smoothLaplacianBundle_toFun_eq_smoothLaplacianAsScalar
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ((smoothLaplacianBundle (I := I) (M := M) g φ) : M → ℝ) =
       (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun := rfl
 
-/-- Pointwise polarised Bochner identity, expressed via `(gradInnerSmoothBundle ...)`
-and `hessPairingChart`, using `φ.contMDiff` as the smoothness witness for the
-classical Laplacian of `φ`. -/
 theorem oneSubLapClassical_gradInner_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -323,8 +241,6 @@ theorem oneSubLapClassical_gradInner_apply
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ ⟨v.toFun, v.smooth⟩) x
   exact h_polar
 
-/-- The unconditional candidate, smooth-case, conditional on the Hessian
-bridge hypothesis. -/
 theorem gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_hess :
@@ -525,8 +441,6 @@ theorem gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
     exact h
   linarith [h_diff_eq]
 
-/-- The `smoothCandidate_identification_target` statement is discharged by
-`gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis`. -/
 theorem smoothCandidate_identification_target_of_hessHypothesis
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_hess :

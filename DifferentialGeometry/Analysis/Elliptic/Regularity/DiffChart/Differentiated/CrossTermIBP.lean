@@ -3,63 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Integration by parts for the Leibniz cross-term in the differentiated
-# chart-bilinear identity
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)`,
-the differentiated chart-bilinear identity packaged in
-`DiffChartBilinearH1ComplData g α` contains, on its right-hand side, the
-Leibniz cross-term
-
-```
-∫_{chartTarget} ∑_{i,j} weightedInvGramDerivOnEuclid g α i j direction y *
-                       base.weak_partial i y *
-                       (fderiv ℝ ψ y) (EuclideanSpace.single j 1) ∂vol.
-```
-
-This module rewrites this cross-term, via integration by parts in direction
-`j`, into the sum of two integrals against `ψ` (no test-function derivative
-remaining). The integration by parts uses two ingredients:
-
-* the smooth chart-target coefficient
-  `weightedInvGramDerivOnEuclid g α i j direction` (only smooth on
-  `chartTargetEuclid α`, with junk values elsewhere), which is *extended* to
-  a globally smooth representative agreeing with the original on a
-  neighborhood of `tsupport ψ`;
-* the canonical second chosen weak partial
-  `chosenSecondPartialChartPushedU g α u_h i j`, which is a weak `j`-partial
-  of the chart-pushed first weak partial
-  `(chartPushedWeakPartialLp g α i _ u_h).coeFn` on the whole chart target.
-
-## Main results
-
-* `chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialLp`
-  — the canonical chosen second weak partial is a weak `j`-partial of
-  `D.base.weak_partial i = (chartPushedWeakPartialLp g α i _ u_h).coeFn` on
-  the chart target. This is a public re-export of the corresponding internal
-  bridge from `DiffChartBilinearH1ComplFromDomainPow`.
-
-* `cross_derivative_term_ibp` — the headline IBP identity for the Leibniz
-  cross-term, expressed as a single integrated identity over the chart
-  target.
-
-## Strategy
-
-1. Apply the smooth-coefficient integration-by-parts primitive
-   `Sobolev.Euclidean.integral_smul_weak_partial_eq` to each pair `(i, j)`,
-   with weak coefficient `v := (chartPushedWeakPartialLp g α i _ u_h).coeFn`
-   and weak partials `w j' := chosenSecondPartialChartPushedU g α u_h i j'`.
-   The smooth scalar coefficient is supplied via a smooth global extension
-   of `weightedInvGramDerivOnEuclid g α i j direction`, obtained from a
-   smooth cutoff function which equals `1` on a neighborhood of
-   `tsupport ψ`.
-2. Equality between the integrals against the global extension and the
-   original chart-target restriction is a `setIntegral_congr_fun` step.
-3. The doubly-summed identity is assembled via finite-sum manipulation of
-   the per-pair identities.
-
--/
 
 noncomputable section
 
@@ -99,11 +42,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical chosen second weak partial
-`chosenSecondPartialChartPushedU g α u_h i l` is a weak `l`-partial of
-`(chartPushedWeakPartialLp g α i _ u_h).coeFn` on `chartTargetEuclid α`,
-for `u_h ∈ laplacianDomainPow g 2`. This is a public alias for the internal
-bridge in `DiffChartBilinearH1ComplFromDomainPow`. -/
 theorem chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -118,15 +56,6 @@ theorem chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialL
   hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
     (I := I) (M := M) g α hu_h i l
 
-/-- Smooth global extension of a function `φ` that is `ContDiffOn` of any
-order on the open chart target, agreeing with `φ` on a neighborhood of a
-prescribed compact `K ⊆ chartTargetEuclid α`. Concretely we multiply `φ`
-extended by zero off the chart target by a smooth cutoff `η` that is `1` on
-a neighborhood of `K` and has `tsupport η ⊆ chartTargetEuclid α`.
-
-The output is `(δ, η, φExt)` where `φExt := fun y => η y * φ y` is globally
-smooth, with `φExt = φ` pointwise on `cthickening δ K` (a neighborhood of
-`K`). -/
 lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))
@@ -170,9 +99,6 @@ lemma exists_smooth_global_extension
     rw [hη_one y hy]
     ring
 
-/-- The `l`-partial Frechet derivative of `weightedInvGramOnEuclid` is smooth
-on the chart target. (Public alias for `weightedInvGramDerivOnEuclid_contDiffOn`,
-re-stated in the namespace of this file for ergonomics.) -/
 private lemma weightedInvGramDerivOnEuclid_contDiffOn_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :
@@ -181,9 +107,6 @@ private lemma weightedInvGramDerivOnEuclid_contDiffOn_chart
   have h := weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α i j l
   exact h
 
-/-- For fixed indices `i, j, direction`, the per-pair IBP identity for the
-Leibniz cross-term coefficient, applied against a smooth compactly supported
-test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`. -/
 private lemma cross_derivative_term_ibp_single
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -322,24 +245,6 @@ private lemma cross_derivative_term_ibp_single
   rw [← hLHS_eq, ← hLeibniz1_eq, ← hLeibniz2_eq]
   exact h_ibp_ext
 
-/-- **Doubly-summed IBP identity for the Leibniz cross-derivative term in
-the differentiated chart-bilinear identity.**
-
-For `u_h ∈ laplacianDomainPow g 2`, chart point `α`, direction
-`l : Fin (Module.finrank ℝ E)`, and a smooth compactly supported test
-function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`, the cross-derivative
-term obtained by formally differentiating the chart-bilinear identity
-admits the integration-by-parts identity
-
-```
-∫ ∑_{i,j} weightedInvGramDerivOnEuclid g α i j l y *
-           (chartPushedWeakPartialLp g α i _ u_h) y *
-           (fderiv ψ y)(eⱼ) ∂vol
-  = -[ ∫ ∑_{i,j} (fderiv (weightedInvGramDerivOnEuclid g α i j l) y)(eⱼ) *
-           (chartPushedWeakPartialLp g α i _ u_h) y * ψ y ∂vol
-     + ∫ ∑_{i,j} weightedInvGramDerivOnEuclid g α i j l y *
-           (chosenSecondPartialChartPushedU g α u_h i j) y * ψ y ∂vol ].
-``` -/
 theorem cross_derivative_term_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

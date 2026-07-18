@@ -2,26 +2,6 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
 import Mathlib.LinearAlgebra.Determinant
 
-/-!
-# Operator-norm bound on the determinant of an endomorphism
-
-For a continuous linear endomorphism `L : E →L[ℝ] E` of a finite-dimensional
-real inner-product space `E` of dimension `n = Module.finrank ℝ E`, the
-absolute value of the determinant is bounded by `n! · ‖L‖ ^ n`.
-
-The proof goes via the matrix representation in an orthonormal basis. With
-respect to any orthonormal basis `e : OrthonormalBasis (Fin n) ℝ E`, each
-matrix entry of `L` is an inner product
-`⟪e i, L (e j)⟫`, which by Cauchy–Schwarz, orthonormality, and the
-operator-norm inequality is bounded by `‖L‖`. The classical entrywise bound
-`Matrix.det_le` then gives the result.
-
-## Main result
-
-* `ContinuousLinearMap.abs_det_le_factorial_mul_opNormPow_finrank` —
-  `|det L| ≤ n! · ‖L‖ ^ n` where `n = Module.finrank ℝ E`.
--/
-
 noncomputable section
 
 open scoped InnerProductSpace
@@ -31,13 +11,6 @@ namespace ContinuousLinearMap
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 
-/-- For a continuous linear endomorphism `L : E →L[ℝ] E` of a finite-dimensional
-real inner-product space `E`, the absolute value of the determinant of `L` is
-bounded by `n! · ‖L‖ ^ n`, where `n = Module.finrank ℝ E`.
-
-The proof picks an orthonormal basis and combines the entrywise determinant
-bound `Matrix.det_le` with the Cauchy–Schwarz / operator-norm bound on each
-matrix entry. -/
 theorem abs_det_le_factorial_mul_opNormPow_finrank
     (L : E →L[ℝ] E) :
     |LinearMap.det (L : E →ₗ[ℝ] E)| ≤

@@ -17,12 +17,12 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F Trace Algebra
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
--/
+
+
+
+
+
 
 section GeometryFormula510
 
@@ -35,9 +35,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Coordinate-frame action formula for the constructed connection-trace field.
-This is the first local realization needed to identify the book's
-`g^{ij} A^p_{ij} ∂_p f` term with the intrinsic tangent-section action. -/
+
+
+
 theorem connTraceAction_coord
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -78,7 +78,7 @@ theorem connTraceAction_coord
   rw [hcoeff]
   exact smul_eq_mul ..
 
-/-- Intrinsic raw divergence trace of the constructed field `tr_g A`. -/
+
 def connTraceRawDiv
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -87,9 +87,9 @@ def connTraceRawDiv
     DifferentialGeometry.Integral.DivergenceTheorem.divergence_g
       (I := I) g (DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A) x
 
-/-- Pointwise coordinate-centered action trace of `tr_g A` on a scalar
-potential.  The chart is centered at the point being evaluated, so this is a
-global scalar function without choosing a fixed chart. -/
+
+
+
 def connTraceAction
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -108,9 +108,9 @@ def connTraceAction
         extDerivFun (I := I) potential x
           (coordinateFrameAt (I := I) x p x)
 
-/-- Coordinate action trace written directly from Christoffel-variation
-components and potential-gradient components.  The finite-sum order matches
-`connTraceAction`, so the bridge is only component substitution. -/
+
+
+
 def gammaActionTrace
     (g : SmoothRiemannianMetric I M)
     (christoffelVariation :
@@ -127,8 +127,8 @@ def gammaActionTrace
             christoffelVariation x p i j) *
         gradPotential x p
 
-/-- The raw scalar trace of `nabla_p A^p_ij`, contracted with the inverse
-metric in the point-centered coordinate frame. -/
+
+
 def gammaRawDivergenceTrace
     (g : SmoothRiemannianMetric I M)
     (nablaChristoffelVariation :
@@ -406,8 +406,8 @@ theorem traceNablaAlg
            (∑ a : Idx, Gamma d j a * A d i a))) := by
       rw [traceUpperAlg A Gamma hGamma i j]
 
-/-- Scalar contraction of the weighted Christoffel-divergence tensor
-`nabla_p A^p_ij - A^p_ij partial_p f`. -/
+
+
 def christoffelWeightedDivergenceTrace
     (g : SmoothRiemannianMetric I M)
     (nablaChristoffelVariation :
@@ -426,11 +426,11 @@ def christoffelWeightedDivergenceTrace
           christoffelWeightedDivergenceInFrame nablaChristoffelVariation
             christoffelVariation gradPotential x i j
 
-/-- The scalar contraction of
-`nabla_p A^p_ij - A^p_ij partial_p f` is the raw divergence trace minus the
-trace-field action term.  This is only finite-sum algebra; the geometric
-frontier remains identifying `gammaRawDivergenceTrace` with
-`divergence_g(tr_g A)`. -/
+
+
+
+
+
 theorem weightedTrace_eq
     (g : SmoothRiemannianMetric I M)
     (nablaChristoffelVariation :
@@ -535,8 +535,8 @@ theorem weightedTrace_eq
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [Finset.sum_mul]
 
-/-- The coordinate-centered `connTraceAction` is the intrinsic tangent action
-of the constructed field. -/
+
+
 theorem connTraceAction_eq
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -550,10 +550,10 @@ theorem connTraceAction_eq
     connTraceAction_coord (I := I) g A potential x
       (coordinateFrameAt_mem (I := I) x)
 
-/-- Component bridge for the action term: once `A` realizes the Christoffel
-variation tensor and `gradPotential` realizes the coordinate directional
-derivatives of the potential, the intrinsic action trace is the corresponding
-finite component contraction. -/
+
+
+
+
 theorem connTraceAction_eq_gamma
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -588,9 +588,9 @@ theorem connTraceAction_eq_gamma
   intro j _
   rw [hA x p i j]
 
-/-- Once the raw divergence of `tr_g A` has been identified with
-`gammaRawDivergenceTrace`, the weighted scalar trace is automatically
-`div(tr_g A) - (tr_g A)(f)`. -/
+
+
+
 theorem weightedTrace_of_raw
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)

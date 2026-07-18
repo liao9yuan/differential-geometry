@@ -8,31 +8,7 @@ import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.TwoTensor
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Affine reparametrisation of geodesics
-
-The tangent-bundle chain rule plus affine reparametrisation of geodesics.
-The main declarations below include:
-
-* `chartChristoffelContraction_smul_left_right` — bilinear scaling of the
-  chart-Christoffel contraction in both vector slots simultaneously:
-  `Γ(a v, a w) = a² · Γ(v, w)`.
-* `chartFiberCoord_fiberScale` — effect of fibre rescaling on the chart
-  fibre coordinate of a tangent vector.
-* `hasMFDerivWithinAt_of_chartPhase_at_zero_section`,
-  `hasMFDerivWithinAt_of_chartDeriv_self` — chart-phase / chart-derivative
-  `MFDerivWithinAt` lemmas along the zero section.
-* `tangentCoordChange_zero_section_geodesicVF`,
-  `chartPhaseVF_extChartAt_zero_section` — chart-coordinate expressions of
-  the geodesic vector field on the zero section.
-* `scaledTangentLift_transport` — rescaling an integral curve of
-  `geodesicVectorFieldChart g α` by an affine reparametrisation and a
-  fibre rescaling yields another integral curve of the same field.
-* `pathELength_comp_affineHomeo` — invariance of the path length under an
-  affine reparametrisation.
--/
 
 noncomputable section
 
@@ -49,12 +25,11 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Bilinear scaling of the chart-Christoffel contraction in both vector
-slots: `Γ(a v, a w)(y) = a² · Γ(v, w)(y)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelContraction_smul_left_right
     (g : SmoothRiemannianMetric I M) (α : M) (a : ℝ) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α (a • v) (a • w) y
@@ -85,11 +60,7 @@ theorem chartChristoffelContraction_smul_left_right
         intro j _
         ring
 
-/-- **Fibre-coordinate scaling under fibre rescaling.** Scaling the fibre
-vector of a tangent-bundle point by `c` scales its chart-`α` fibre
-coordinate by `c`: `chartFiberCoord α ⟨q.proj, c • q.snd⟩ = c • chartFiberCoord α q`.
-This holds whenever `q.proj` lies in the chart-`α` source (so that the
-trivialisation at `α` acts linearly on the fibre over `q.proj`). -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFiberCoord_fiberScale
     (α : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -121,17 +92,6 @@ theorem chartFiberCoord_fiberScale
 
 section ChartCoordBridges
 
-/-- **Within-set, fixed-base forward chart bridge.** For a curve
-`f : ℝ → TangentBundle I M` that is an integral curve of
-`geodesicVectorFieldChart g α` on `S`, and a time `t ∈ S` whose
-projection lies in the chart-`α` source, the chart-pushed curve at the
-fixed zero-section base `⟨α, 0⟩` has the chart-phase ODE
-`HasDerivWithinAt` form on `S` at `t`.
-
-This is the `IsMIntegralCurveOn` / `HasDerivWithinAt` analogue of the
-neighbourhood-form `eventually_hasDerivAt_chartPhaseVF_at_zero_section`;
-it works at endpoints of `S` because it never passes to a full
-neighbourhood. -/
 theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ} {t : ℝ}
@@ -173,18 +133,7 @@ theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     ContinuousLinearMap.toSpanSingleton_apply, one_smul]
   exact hval
 
-/-- **Within-set, fixed-base reverse chart bridge.** From the chart-`⟨α,0⟩`
-push's chart-phase `HasDerivWithinAt` (plus continuity and the condition that
-the curve's current projection lies in the chart-`α` source), reconstruct the
-manifold `HasMFDerivWithinAt`. The reconstructed manifold derivative is the
-chart-coordinate derivative `w` carried back by `tangentCoordChange`.
-
-This is the within-set inverse of the forward bridge, mirroring Mathlib's
-`exists_isMIntegralCurveAt_of_contMDiffAt` reconstruction
-(`HasFDerivWithinAt.comp` of `hasFDerivWithinAt_tangentCoordChange` with the
-chart-`⟨α,0⟩` push derivative). It works at endpoints of `S'` because it never
-passes to a full neighbourhood: the chart-source membership only has to hold
-eventually within `S'` near the base time. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasMFDerivWithinAt_of_chartPhase_at_zero_section
     (α : M) {c : ℝ → TangentBundle I M} {S' : Set ℝ} {s₀ : ℝ} {w : E × E}
     (hcont : ContinuousWithinAt c S' s₀)
@@ -257,12 +206,7 @@ theorem hasMFDerivWithinAt_of_chartPhase_at_zero_section
 
 end ChartCoordBridges
 
-/-- **Own-base reverse chart bridge.** From the chart-of-`TM`-at-the-curve's-
-own-value `HasDerivWithinAt` plus continuity, reconstruct the manifold
-`HasMFDerivWithinAt`. Because the chart base is the curve's own value `c s₀`,
-the carrying `tangentCoordChange` is the identity; this version works
-unconditionally (no chart-`α` source hypothesis), so it handles the locus
-where the lift's projection lies outside the chart-`α` source. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasMFDerivWithinAt_of_chartDeriv_self
     {c : ℝ → TangentBundle I M} {S' : Set ℝ} {s₀ : ℝ} {w : E × E}
     (hcont : ContinuousWithinAt c S' s₀)
@@ -276,10 +220,7 @@ theorem hasMFDerivWithinAt_of_chartDeriv_self
   simp only [mfld_simps] at hd ⊢
   convert hd using 1
 
-/-- **Off-chart vanishing of the chart-fixed geodesic vector field.** When the
-projection of `p` lies outside the chart-`α` source, the trivialisation of
-`T(TM)` at `⟨α, 0⟩` is degenerate (its `symm` is the zero map off the base set),
-so `geodesicVectorFieldChart g α p = 0`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     (g : SmoothRiemannianMetric I M) (α : M) (p : TangentBundle I M)
     (hp : p.proj ∉ (chartAt H α).source) :
@@ -291,9 +232,6 @@ theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     exact fun hh => hp (proj_mem_chartAt_source_of_mem_geodesicChartDomain (I := I) hh)
   rw [Bundle.Trivialization.symm_apply_of_notMem _ hbase]
 
-/-- **Chart-push rescale.** The chart-`⟨β,0⟩` push of the fibre-rescaled
-tangent-bundle point `⟨q.proj, c • q.snd⟩` equals `rescaleChartOrbit c` of the
-chart-`⟨β,0⟩` push of `q`, whenever `q.proj` lies in the chart-`β` source. -/
 theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H β).source) :
     extChartAt I.tangent (⟨β, (0 : E)⟩ : TangentBundle I M)
@@ -306,11 +244,7 @@ theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle
       rescaleChartOrbit_apply]
   exact Prod.ext rfl (chartFiberCoord_fiberScale (I := I) β c hq)
 
-/-- **Inverse chart change for the geodesic vector field.** The chart change
-from `⟨α,0⟩` to `q` carries the chart-`α` fibre coordinate
-`geodesicVectorFieldChartFiber g α q` back to the abstract vector
-`geodesicVectorFieldChart g α q`, the inverse of
-`tangentCoordChange_tangent_geodesicVF`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tangentCoordChange_zero_section_geodesicVF
     (g : SmoothRiemannianMetric I M) (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -327,9 +261,6 @@ theorem tangentCoordChange_zero_section_geodesicVF
       exact (mem_chartAt_modelProd_zero_source_iff (I := I) α q).mpr hq
     exact ⟨⟨hself, hα⟩, hself⟩
 
-/-- The chart-phase vector field at the chart-`⟨α,0⟩` push of `p` equals the
-chart-`α` fibre coordinate `geodesicVectorFieldChartFiber g α p`, whenever
-`p.proj` lies in the chart-`α` source. -/
 theorem chartPhaseVF_extChartAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M} (hp : p.proj ∈ (chartAt H α).source) :
@@ -339,17 +270,16 @@ theorem chartPhaseVF_extChartAt_zero_section
   rw [extChartAt_tangent_zero_apply_chartFiber (I := I) α hp]
   rfl
 
-/-- The affine map `s ↦ c * s + d` has derivative `c` everywhere. -/
 private theorem hasDerivAt_affine (c d s₀ : ℝ) :
     HasDerivAt (fun s : ℝ => c * s + d) c s₀ := by
   have h1 : HasDerivAt (fun s : ℝ => c * s + d) (c * 1) s₀ :=
     ((hasDerivAt_id s₀).const_mul c).add_const d
   simpa using h1
 
-/-- The fibre-rescale continuous linear map `(x, v) ↦ (x, c • v)` on `E × E`. -/
 private noncomputable def fiberRescaleCLM (c : ℝ) : (E × E) →L[ℝ] (E × E) :=
   (ContinuousLinearMap.id ℝ E).prodMap (c • (ContinuousLinearMap.id ℝ E))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem fiberRescaleCLM_apply (c : ℝ) (y : E × E) :
     fiberRescaleCLM (E := E) c y = (y.1, c • y.2) := by
   change ((ContinuousLinearMap.id ℝ E) y.1, (c • (ContinuousLinearMap.id ℝ E)) y.2) = _
@@ -357,12 +287,6 @@ private theorem fiberRescaleCLM_apply (c : ℝ) (y : E × E) :
   change (c • (ContinuousLinearMap.id ℝ E)) y.2 = c • y.2
   rw [ContinuousLinearMap.smul_apply]; rfl
 
-/-- **In-chart-`α` derivative of the rescaled-lift chart push.** On the locus
-where `(f (c·s₀+d)).proj` lies in the chart-`α` source, the chart-`⟨α,0⟩` push
-of the candidate lift has the chart-phase `HasDerivWithinAt`. Proof: the
-forward bridge gives `f`'s push a chart-phase derivative at `c·s₀+d`; compose
-with the affine map (slope `c`) and the linear fibre rescale, matched by
-`chartChristoffelContraction_smul_left_right`. -/
 private theorem inchart_rescaledLift_chartPhase
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -463,11 +387,6 @@ private theorem inchart_rescaledLift_chartPhase
     rw [extChartAt_tangent_zero_fiberScale (I := I) α c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
-/-- **Off-chart-`α` derivative of the rescaled-lift chart push (own base).** On
-the locus where `(f (c·s₀+d)).proj` lies *outside* the chart-`α` source, the
-geodesic spray vanishes, so `f`'s own-base chart push has zero derivative at
-`c·s₀+d`; composing with the affine map and the linear fibre rescale keeps the
-derivative zero. -/
 private theorem offchart_rescaledLift_chartDeriv_self
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -537,11 +456,7 @@ private theorem offchart_rescaledLift_chartDeriv_self
     rw [← hpe, extChartAt_tangent_zero_fiberScale (I := I) β c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
-/-- **Continuity of the rescaled lift.** The candidate lift
-`s ↦ ⟨(f(c·s+d)).proj, c • (f(c·s+d)).snd⟩` is `ContinuousWithinAt` on
-`{s | c·s+d ∈ S}` at any `s₀` with `c·s₀+d ∈ S`. The projection inherits
-continuity from `f`; the fibre coordinate is, eventually, `c` times that of
-`f ∘ (·c+d)` via `chartFiberCoord_fiberScale`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rescaledLift_continuousWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -576,29 +491,6 @@ private theorem rescaledLift_continuousWithinAt
   exact chartFiberCoord_fiberScale (I := I) (L s₀).proj c (q := f (aff s₀))
     (mem_chart_source H (L s₀).proj)
 
-/-- An `IsMIntegralCurveOn` of `geodesicVectorFieldChart g α`, rescaled in
-the time variable by an affine reparametrisation and in the fibre by the
-matching constant, yields another `IsMIntegralCurveOn` of the same
-field. This is the degree-two homogeneity of the geodesic spray on `T(TM)`:
-combining time-rescaling-by-`c` with the matching fibre rescaling on the lift
-exactly cancels the extra `c`, returning the same vector field.
-
-The proof splits per time `s₀` according to whether the current projection
-`(f (c·s₀+d)).proj` lies in the chart-`α` source.
-
-* **In-chart**: the forward bridge gives `f`'s chart-`⟨α,0⟩` push a chart-phase
-  derivative at `c·s₀+d`; composing with the affine map and the linear fibre
-  rescale (matched by `chartChristoffelContraction_smul_left_right`) gives the
-  chart-phase derivative of the lift's push (`inchart_rescaledLift_chartPhase`),
-  which the reverse bridge `hasMFDerivWithinAt_of_chartPhase_at_zero_section`
-  carries back to the manifold derivative, identified with the spray via
-  `tangentCoordChange_zero_section_geodesicVF`.
-
-* **Off-chart**: the spray vanishes
-  (`geodesicVectorFieldChart_eq_zero_of_notMem_source`), so the lift's own-base
-  chart push has zero derivative (`offchart_rescaledLift_chartDeriv_self`), and
-  the own-base reverse bridge `hasMFDerivWithinAt_of_chartDeriv_self` produces
-  the (zero) manifold derivative consistently. -/
 theorem scaledTangentLift_transport
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -649,10 +541,8 @@ open Manifold
 
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-/-- Affine reparametrisation invariance of `pathELength` with positive
-slope. If `c > 0` and `a ≤ b`, then the path length of `s ↦ γ (c * s + d)`
-on `Icc ((a - d) / c) ((b - d) / c)` equals the path length of `γ` on
-`Icc a b`, provided `γ` is `MDifferentiableOn` `Icc a b`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem pathELength_comp_affineHomeo
     (γ : ℝ → M) {a b : ℝ} (c d : ℝ) (hab : a ≤ b) (hc : 0 < c)
     (hγ : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Icc a b)) :

@@ -8,15 +8,15 @@ import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
-/-!
-# Pointwise Riemann and Ricci tensors
 
-This file starts a definition-first curvature layer.  The auxiliary curvature
-operator is the usual vector-field formula, and the pointwise tensors are the
-objects intended for downstream use.  The constructors use chart-constant
-tangent-field representatives; arbitrary smooth-field tensoriality is a separate
-extension theorem frontier, not part of these definitions.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -368,11 +368,11 @@ theorem cov_tangentConst_smul_apply_eventuallyEq
   rw [cov.isCovariantDerivativeOnUniv.smul_const a hv]
   simp [Pi.smul_apply]
 
-/-- The curvature operator of a covariant derivative, before tensorial descent.
 
-The sign convention is
-`∇_X ∇_Y Z - ∇_Y ∇_X Z - ∇_[X,Y] Z`.
--/
+
+
+
+
 def riemannCurvatureAux
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z : (p : M) → TangentSpace I p) (x : M) : TangentSpace I x :=
@@ -387,8 +387,8 @@ theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
     riemannCurvatureAux cov X Y Z x =
       connectionRiemannCurvatureField cov X Y Z x := rfl
 
-/-- Germ congruence for the connection curvature operator on smooth bundled
-tangent sections. -/
+
+
 theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -556,9 +556,9 @@ theorem connectionRiemannCurvatureField_tensorial_middle
     rw [hleft]
     module
 
-/-- Pointwise tensoriality in the two curvature-direction slots.  The third
-slot is harder because its scalar rule contains the second-derivative bracket
-commutator cancellation. -/
+
+
+
 theorem connectionRiemannCurvatureField_congr_first_two_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -595,12 +595,12 @@ theorem connectionRiemannCurvatureField_congr_first_two_point
           (connectionRiemannCurvatureField_tensorial_middle
             (I := I) cov hcov X' Z x).pointwise hYmd hY'md hY
 
-/-- Smooth scalar linearity in the curvature-output slot.
 
-This is the Leibniz-expansion cancellation:
-the extra coefficient is
-`X(Y f) - Y(X f) - [X,Y] f`, hence vanishes by the scalar Lie-bracket
-commutator formula. -/
+
+
+
+
+
 private theorem connectionRiemannCurvatureField_smul_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -710,7 +710,7 @@ private theorem connectionRiemannCurvatureField_smul_right_smooth
   simp [YZ, XZ, Xf, Yf, hscalar]
   module
 
-/-- Smooth additivity in the curvature-output slot. -/
+
 private theorem connectionRiemannCurvatureField_add_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -929,13 +929,13 @@ private theorem smooth_linear_tangentSection_pointwise
   rw [hsum_zero, sub_zero] at hloc
   exact hloc
 
-/-- Pointwise tensoriality of the connection curvature operator on smooth
-bundled tangent sections.
 
-This is the central curvature tensoriality frontier.  Mathlib's covariant
-derivative congruence gives germ dependence of one derivative; this stronger
-statement needs the usual `C∞(M)`-linearity cancellation in all three curvature
-slots. -/
+
+
+
+
+
+
 theorem connectionRiemannCurvatureField_congr_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

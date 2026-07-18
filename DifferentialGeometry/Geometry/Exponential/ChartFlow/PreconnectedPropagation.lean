@@ -1,77 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Identification of the manifold lift with the canonical maximal geodesic
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the manifold lift
-`F_v := chartFlowOrbitLift Φ p v` of the chart-pushed flow orbit
-(constructed in `Exponential/ChartFlowToTangentLift.lean`) admits the
-explicit identification
-
-```
-(chartFlowOrbitLift Φ p v s).proj = maximalGeodesic g p v s
-```
-
-on a `v`-dependent open neighbourhood of `0` contained in `Ioo (-T) T`,
-for every `v ∈ Metric.ball (0 : E) ρ`. Here `(ρ, T) > 0` are the uniform
-radii produced by the headline of `Exponential/ChartFlowToTangentLift.lean`.
-
-## Strategy
-
-The argument is per-`v` and proceeds in three steps:
-
-1. **Local equality with the Picard–Lindelöf lift.** Mathlib's local
-   uniqueness of integral curves of the chart-fixed geodesic vector
-   field (`isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq`
-   from `Geodesic/Uniqueness.lean`) identifies `F_v` near `0` with any
-   local Picard–Lindelöf lift `g_v` of the same initial data.
-
-2. **A maximal-geodesic witness on a fixed interval.** The lift `g_v` is
-   a local integral curve of `geodesicVectorFieldChart g p` at `0`. We
-   restrict to its existence ball `J := Metric.ball 0 ε`, on which it
-   is a genuine `IsMIntegralCurveOn`. Its projection then carries the
-   `IsGeodesicOnWithInitial` predicate on `J`, packaging a
-   `MaximalGeodesicWitness g p v t` for every `t ∈ J`.
-
-3. **Pointwise identification on `J`.** Along `J`, the canonical
-   `maximalGeodesic g p v` equals `projectCurve g_v`. We prove this by
-   a clopen propagation argument: the set
-   `A := {s ∈ J ∩ J' | g_v s = f' s}` (with `J'` the witness interval
-   of the chosen-curve at `t` and `f'` its lift) is open and closed
-   inside the preconnected set `K := J ∩ J'`, and contains `0`. Hence
-   `A = K`, and in particular at `s = t` the projections agree.
-
-Combining the three steps yields the identification on an open
-neighbourhood of `0` contained in `Ioo (-T) T`. The neighbourhood is
-`v`-dependent (its size depends on the Picard–Lindelöf existence
-interval at `(p, v)`); uniformity in `v` over the full `Ioo (-T) T` is
-a separate downstream step (the preconnected-propagation strategy here
-provides the per-`v` agreement at every point of the witness's open
-interval, which is the input the rescaling step consumes).
-
-## Main results
-
-* `picardLift_proj_eq_maximalGeodesic_on_ball` — given any
-  Picard–Lindelöf lift `g_v` of `(p, v)`, there is an open metric
-  ball `Metric.ball 0 ε ∋ 0` on which
-  `maximalGeodesic g p v t = (g_v t).proj` for every `t` in the ball.
-
-* `chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually` — per-`v`
-  eventually-near-`0` form: there is an open neighbourhood `S ∈ 𝓝 0`
-  of `0` on which `(F_v s).proj = maximalGeodesic g p v s`.
-
-* `exists_chartFlowOrbitLift_proj_eq_maximalGeodesic_data` — headline
-  packaging: there exist a chart-pushed flow `Φ` and uniform radii
-  `(ρ, T) > 0` such that, for every `v ∈ Metric.ball (0 : E) ρ`:
-  * the R.D.1 manifold-lift data is available on `Ioo (-T) T`;
-  * the chart-coordinate orbit `Φ((x₀, v), ·)` satisfies the genuine
-    chart-phase ODE on `Ioo (-T) T`;
-  * the manifold lift's projection equals `maximalGeodesic g p v`
-    eventually near `0`.
--/
 
 noncomputable section
 
@@ -84,7 +13,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -95,11 +24,6 @@ section MaximalGeodesicWitnessFromLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Maximal-geodesic witness packaging from a Picard–Lindelöf lift.**
-A local integral curve `g_v` of `geodesicVectorFieldChart g p` at `0`
-with `g_v 0 = ⟨p, v⟩` produces an open metric ball `J = ball 0 ε ∋ 0`,
-the `IsMIntegralCurveOn g_v _ J`, the `IsGeodesicOnWithInitial`
-predicate on `J`, and a chart-source confinement of the projection. -/
 theorem exists_picardLift_witness_interval
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {g_v : ℝ → TangentBundle I M}
@@ -145,9 +69,6 @@ section ClopenPropagation
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Clopen propagation of equality of two integral curves on a
-preconnected open set.** Both curves project to the same chart-`p`
-source on `K`, so local uniqueness applies pointwise inside `K`. -/
 theorem isMIntegralCurveOn_eq_of_isPreconnected
     (g : SmoothRiemannianMetric I M) (p : M)
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -265,9 +186,6 @@ section PicardLiftProjEqMaximalGeodesic
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Pointwise identification on the witness interval.** At any
-`t ∈ ball 0 ε` (the witness interval of a Picard–Lindelöf lift `g_v`),
-the value `maximalGeodesic g p v t` equals `(g_v t).proj`. -/
 theorem picardLift_proj_eq_maximalGeodesic_on_ball
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {g_v : ℝ → TangentBundle I M}
@@ -324,11 +242,6 @@ section ChartFlowOrbitLiftProjEqMaximalGeodesic
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Eventually-near-`0` identification of the manifold lift's
-projection with the canonical maximal geodesic.** Given the R.D.1
-manifold-lift data for `F_v := chartFlowOrbitLift Φ p v`, there is an
-open neighbourhood `S ∈ 𝓝 0` of `0` on which
-`(F_v s).proj = maximalGeodesic g p v s`. -/
 theorem chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -369,24 +282,6 @@ section HeadlineRD2
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Headline R.D.2 — projection of the manifold lift equals the
-canonical maximal geodesic eventually near `0`, uniformly across the
-ball.** There exist a chart-pushed flow `Φ : (E × E) × ℝ → E × E` and
-uniform radii `(ρ, T) > 0` such that, for every
-`v ∈ Metric.ball (0 : E) ρ`:
-
-* all R.D.1 manifold-lift data is available on `Ioo (-T) T`;
-* the chart-coordinate orbit `Φ((x₀, v), ·)` satisfies the genuine
-  chart-phase ODE on `Ioo (-T) T`;
-* the manifold lift `F_v := chartFlowOrbitLift Φ p v` starts at
-  `⟨p, v⟩` at `s = 0` and is a local integral curve of
-  `geodesicVectorFieldChart g p` at `0`;
-* the projection of the manifold lift agrees with `maximalGeodesic g p v`
-  on an open neighbourhood of `0` (the neighbourhood is `v`-dependent
-  and contained in `Ioo (-T) T`).
-
-The remaining step to obtain the identification on the full uniform
-`Ioo (-T) T` (uniform-in-`v`) is a separate downstream task. -/
 theorem exists_chartFlowOrbitLift_proj_eq_maximalGeodesic_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

@@ -8,59 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Final assembly: chart-`H⁴` regularity of the chart-pushed function
-
-For a closed Riemannian manifold `(M, g)` and an element
-`u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed POU-cut
-representative
-
-  `chartPushed POU α (H1ComplToLp g u_h).coeFn`
-
-lies in `MemWkp 4 2 (chartTargetEuclid α)`, conditioned on a per-pair
-hypothesis of the twice-differentiated chart-bilinear variational identity
-(one identity per ordered pair `(l₁, l₂)`).
-
-## Strategy
-
-By two applications of `MemWkp_succ`:
-
-* `MemWkp 4 2 u Ω ↔ MemW1p 2 u Ω ∧ ∀ i, MemWkp 3 2 (chosen weak i-partial of u) Ω`
-* `MemWkp 3 2 v Ω ↔ MemW1p 2 v Ω ∧ ∀ j, MemWkp 2 2 (chosen weak j-partial of v) Ω`
-
-The chart-`H³` regularity of the chart-pushed function and of each chosen
-first weak partial follows unconditionally from
-`chartPushed_memWkp_three_two_of_laplacianDomainPow_two`. The remaining
-piece is the chart-`H²` regularity of each chosen second mixed weak partial
-on the full chart target.
-
-The chart-`H²` regularity of the chosen second mixed weak partial on a
-precompact open subdomain `Ω''` of the chart target is given by
-`twiceDerivedChartBilinear_memWkp_two_two_interior`. This module extends
-the interior regularity to the full chart target by multiplying the chosen
-second mixed weak partial against a smooth cutoff supported inside `Ω''`
-and equal to `1` on a neighborhood of the POU support
-`chartImagePOUTsupport α`, then transferring the membership via
-`MemWkp.extend_zero` and `MemWkp_congr_ae`, exactly as in the chart-`H³`
-template.
-
-## Main results
-
-* `chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity` —
-  chart-`H²` of the chosen second mixed weak partial on the full chart
-  target, hypothesis-bearing on the twice-differentiated variational
-  identity for the fixed pair `(l₁, l₂)`.
-* `chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities` —
-  chart-`H³` of each chosen first weak partial on the full chart target,
-  hypothesis-bearing on the family of twice-differentiated identities for
-  all pairs `(l₁, l₂)`.
-* `chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities` —
-  chart-`H⁴` of the chart-pushed function on the full chart target,
-  hypothesis-bearing on the family of twice-differentiated identities.
-* `chartSideH2kBridge_two_of_twice_diff_identities` — discharge of the
-  per-chart `ChartSideH2kBridge g 2` from the family of twice-differentiated
-  identities (one per chart point `α` and ordered pair `(l₁, l₂)`).
--/
 
 noncomputable section
 
@@ -102,16 +49,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Cutoff-based extension of `MemWkp k 2` from a precompact open
-subdomain.** A function in `MemWkp k 2` of an open precompact `Ω' ⊆ Ω`
-that vanishes a.e. on `Ω \ K` (for some compact `K ⊆ Ω'`) lies in
-`MemWkp k 2 Ω`.
-
-The proof multiplies by a smooth cutoff equal to `1` on a neighborhood of
-`K` and supported inside `Ω'`, applies `MemWkp.smul_smooth_bounded` to
-obtain the product in `MemWkp k 2 Ω'`, extends by zero via
-`MemWkp.extend_zero` to `Ω`, and transfers back to the original function
-via `MemWkp_congr_ae`. -/
 private theorem MemWkp_two_extend_via_cutoff_aux
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -207,21 +144,6 @@ private theorem MemWkp_two_extend_via_cutoff_aux
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
-/-- **Chart-`H²` of the chosen second mixed weak partial on the full chart
-target.**
-
-For `u_h ∈ laplacianDomainPow g 2`, fixed coordinate directions `l₁, l₂`,
-and the twice-differentiated chart-bilinear variational identity for that
-pair supplied as a hypothesis, the chosen second mixed weak partial
-`chosenSecondPartialChartPushedU g α u_h l₁ l₂` lies in
-`MemWkp 2 2 (chartTargetEuclid α)`.
-
-The proof obtains the chart-`H²` regularity on a precompact open
-neighborhood `Ω''` of `chartImagePOUTsupport α` from
-`twiceDerivedChartBilinear_memWkp_two_two_interior`, and promotes it to
-the entire chart target via the cutoff-based extension lemma, using the
-ae-vanishing of the chosen second mixed partial off
-`chartImagePOUTsupport α`. -/
 theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -245,7 +167,7 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
             ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
@@ -278,19 +200,6 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
     h_chart_open hΩ''_open hΩ''_in_chart hK_α_compact hK_α_in_Ω''
     h_memWkp22_Ω'' h_ae_zero_off_K_α
 
-/-- **Chart-`H³` of each chosen first weak partial on the full chart target.**
-
-For `u_h ∈ laplacianDomainPow g 2` and the family of twice-differentiated
-chart-bilinear variational identities (one per ordered pair `(l₁, l₂)`),
-the canonical chosen first weak partial in any direction `i` of the
-chart-pushed POU-cut representative lies in
-`MemWkp 3 2 (chartTargetEuclid α)`.
-
-The proof uses `MemWkp_succ` at order `3`: chart-`H³` of the first weak
-partial decomposes into `MemW1p 2` of the first weak partial (unconditional
-via `chartPushedChosenFirstPartial_memW1p_two`) and chart-`H²` of every
-chosen second mixed weak partial (the per-pair hypothesis-bearing result
-above). -/
 theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -314,7 +223,7 @@ theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN))
     (l₁ : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -338,19 +247,6 @@ theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
     (chartTargetEuclid (I := I) (M := M) α)
   exact h_chosenSecond
 
-/-- **Chart-`H⁴` of the chart-pushed function on the full chart target.**
-
-For `u_h ∈ laplacianDomainPow g 2` and the family of twice-differentiated
-chart-bilinear variational identities (one per ordered pair `(l₁, l₂)`),
-the canonical chart-pushed POU-cut representative
-`chartPushed POU α (H1ComplToLp g u_h).coeFn` lies in
-`MemWkp 4 2 (chartTargetEuclid α)`.
-
-The proof uses `MemWkp_succ` at order `4`: chart-`H⁴` decomposes into
-`MemW1p 2` of the chart-pushed function (unconditional via
-`chartPushed_memW1p_two_of_laplacianDomainPow_two`) and chart-`H³` of
-every chosen first weak partial (the per-pair hypothesis-bearing result
-above). -/
 theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -374,7 +270,7 @@ theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_iden
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 4 2
@@ -395,19 +291,6 @@ theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_iden
   exact chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
     (I := I) (M := M) g α hu_h h_twice_identities l₁
 
-/-- **Discharge of `ChartSideH2kBridge g 2` for the canonical function
-representative.**
-
-For `u_h ∈ laplacianDomainPow g 2` and the family of twice-differentiated
-chart-bilinear variational identities (now indexed by chart points
-`α : M` and ordered pairs `(l₁, l₂)`), the predicate
-`ChartSideH2kBridge g 2 ((H1ComplToLp g u_h).coeFn)` holds.
-
-Combined with `laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge`,
-this discharges the manifold-level `MemWkpChart g 4 2` for the canonical
-function representative, with a finite chart-based norm. Equivalently, by
-`chartSideH4Bridge_of_chartSideH2kBridge_two`, it discharges the
-`ChartSideH4Bridge` predicate from the `H⁴` infrastructure. -/
 theorem chartSideH2kBridge_two_of_twice_diff_identities
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -431,7 +314,7 @@ theorem chartSideH2kBridge_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     ChartSideH2kBridge (I := I) (M := M) g 2
       (((H1ComplToLp (I := I) (M := M) g u_h :
@@ -442,13 +325,6 @@ theorem chartSideH2kBridge_two_of_twice_diff_identities
   exact chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities
     (I := I) (M := M) g α hu_h (h_twice_identities α)
 
-/-- **Manifold-level `MemWkpChart g 4 2` for `u_h ∈ laplacianDomainPow g 2`.**
-
-Combining `chartSideH2kBridge_two_of_twice_diff_identities` with
-`laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge`, the canonical
-function representative of `u_h ∈ laplacianDomainPow g 2` lies in
-`MemWkpChart g 4 2` with a finite chart-based norm, given the family of
-twice-differentiated chart-bilinear variational identities. -/
 theorem laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -472,7 +348,7 @@ theorem laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
       (I := I) (M := M) g 4 2

@@ -3,76 +3,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.QuasiMeasurePreserving
 
-/-!
-# Reconciliation of a single transport term of the smooth eigenvector section
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and an eigenbasis
-index `i`, the per-chart smooth section
-`eigenvectorSmoothChart g r s i γ` is a genuine smooth
-compactly-supported `(r, s)`-tensor section realising the chart-`γ` piece of the
-connection-Laplacian resolvent eigenvector
-`tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i`.
-
-The canonical chart-`β` component of the smooth representative is governed,
-chart by chart, by the abstract partition-of-unity transport sum of the
-eigenvector. This file establishes the **single transport-term
-reconciliation**: the per-`γ` term of the smooth-section side — a
-transformation-law expression in the smooth transition coefficient
-`transitionCoeff` and the raw chart-`γ` frame component of
-`eigenvectorSmoothChart γ` — equals, almost everywhere on the
-chart-`β` `L²` measure, the per-`γ` term of the eigenvector's transport sum,
-namely the chart-transition transport `chartTransitionTransportCLM` applied to
-the abstract chart-`γ` component.
-
-## The mechanism
-
-Both sides carry the common pushed partition-of-unity weight of `β`,
-`chartPushedRaw I β (chartAtlasPOU I M β)`. The transport side unfolds, by
-`chartTransitionTransportCLM_coeFn_aeEq`, into the chart-`β` pushforward of the
-transport coefficient `transportCoeffManifold g r s γ β` — the product of the
-two chart-kernel cutoffs and `transitionCoeff` — times the chart-transition
-precomposition of the abstract chart-`γ` component.
-
-The smooth-section side's second factor is the chart-`β` pushforward of the
-`(r, s)`-tensor transformation-law term, in which the raw chart-`γ` frame
-component of `eigenvectorSmoothChart γ` is, by
-`tensorChartComponentRaw_eigenvectorSmoothChart_self`, the chosen
-smooth chart-`γ` representative `chosenComp γ`, itself almost
-everywhere the eigenvector's chart-`γ` component
-(`chosenComp_ae_eq`). That chart-`γ` almost-everywhere identity is
-transported into the chart-`β`-precomposed setting across
-`chartTransitionEuclid β γ` by `chartTransitionEuclid_comp_ae_eq_restrict`.
-
-The two chart-kernel cutoffs in the transport coefficient are redundant almost
-everywhere. The chart-`γ` cutoff is `1` wherever the eigenvector's chart-`γ`
-component is nonzero — the off-kernel vanishing
-`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel` — and the
-chart-`β` cutoff is `1` wherever the common pushed partition-of-unity weight of
-`β` is nonzero. The `if x ∈ (chartAt H γ).source` cutoff on the smooth-section
-side matches the chart-overlap domain `chartOverlapEuclid β γ` of the chart
-transition.
-
-## Main result
-
-* `eigenvectorSmoothChart_transport_term_aeEq` — the per-`γ`
-  transformation-law term of the smooth section equals, almost everywhere on
-  the chart-`β` `L²` measure and after the common pushed partition-of-unity
-  weight, the per-`γ` term of the eigenvector's chart-transition transport sum.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -103,9 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- If two functions agree almost everywhere with respect to `μ.restrict s` and
-agree everywhere off the measurable set `s`, then they agree almost everywhere
-with respect to `μ` itself. -/
 private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
     {X : Type*} [MeasurableSpace X] {μ : Measure X}
     {f h : X → ℝ} {s : Set X} (hs : MeasurableSet s)
@@ -127,9 +60,6 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-/-- A Euclidean chart-target point `y` of `β` lies in the chart overlap
-`chartOverlapEuclid β γ` exactly when its chart-`β` inverse image lies in the
-chart-`γ` source. -/
 lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     (β γ : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) β) :
@@ -158,16 +88,10 @@ lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
   · intro hz_srcγ
     exact ⟨extChartAt I β z, ⟨z, ⟨hz_srcβ, hz_srcγ⟩, rfl⟩, hy_eq⟩
 
-/-- The chart-`γ` kernel cutoff `chartKernelCutoff γ`, pushed to the Euclidean
-chart target of `γ`. -/
 private def chartKernelCutoffPushed (γ : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) γ
     (fun x => ((chartKernelCutoff (I := I) (M := M) γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
-/-- On the partition-of-unity kernel `chartPouKernel γ` the pushed chart-`γ`
-kernel cutoff equals `1`: a kernel point is the chart-`γ` Euclidean image of a
-point of the closed support of the partition-of-unity weight, where the
-chart-kernel cutoff is `1`. -/
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
     (γ : M) {y : EuclN}
     (hy : y ∈ chartPouKernel (I := I) (M := M) γ) :
@@ -189,8 +113,6 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) γ _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) γ hw_supp
 
-/-- For a point `z` of the chart-`γ` source, the pushed chart-`γ` kernel cutoff
-read at the chart-`γ` Euclidean image of `z` recovers `chartKernelCutoff γ z`. -/
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
     (γ : M) {z : M} (hz : z ∈ (chartAt H γ).source) :
     chartKernelCutoffPushed (I := I) (M := M) γ
@@ -201,9 +123,6 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) γ hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) γ hz]
 
-/-- The eigenvector chart-`γ` `Q`-component (intrinsic-compactness keying)
-equals, almost everywhere on the Lebesgue volume restricted to the Euclidean
-chart target of `γ`, the pushed chart-`γ` kernel cutoff times itself. -/
 private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -264,10 +183,6 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
   · exact hy_on hy_mem
   · exact hy_off hy_mem
 
-/-- The chosen smooth chart-`γ` representative (intrinsic-compactness keying)
-agrees, almost everywhere on the chart overlap `chartOverlapEuclid β γ` after
-precomposition with the chart transition `chartTransitionEuclid β γ`, with the
-eigenvector chart-`γ` component. -/
 private lemma chosenComp_comp_chartTransition_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -289,10 +204,6 @@ private lemma chosenComp_comp_chartTransition_ae_eq
       (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) γ β)) h_target
   exact chartTransitionEuclid_comp_ae_eq_restrict (I := I) (M := M) β γ h_overlap
 
-/-- The eigenvector chart-`γ` component (intrinsic-compactness keying),
-precomposed with the chart transition `chartTransitionEuclid β γ`, equals almost
-everywhere on the chart overlap `chartOverlapEuclid β γ` the pushed chart-`γ`
-kernel cutoff (also precomposed) times itself. -/
 private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -323,27 +234,7 @@ private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
 
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Single transport-term reconciliation of the smooth eigenvector section**
-(intrinsic-compactness keying).
 
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, chart base points `β` and `γ`, and component multi-indices `(P₀, Q)`, the
-per-`γ` term of the smooth-section side — the chart-`β` pushforward of the
-`(r, s)`-tensor transformation-law expression `transitionCoeff r s γ β P₀ Q ·
-(raw chart-γ component of eigenvectorSmoothChart γ)`, cut off to
-the chart-`γ` source — equals, almost everywhere on the chart-`β` `L²` measure
-and after the common pushed partition-of-unity weight of `β`, the per-`γ` term
-of the eigenvector's chart-transition transport sum, namely
-`chartTransitionTransportCLM g r s γ β P₀ Q` applied to the abstract chart-`γ`
-`Q`-component of the resolvent eigenvector.
-
-The transport operator unfolds via `chartTransitionTransportCLM_coeFn_aeEq` into
-the chart-`β` pushforward of the transport coefficient
-`transportCoeffManifold g r s γ β` times the chart-transition precomposition of
-the abstract component; the two chart-kernel cutoffs in the transport
-coefficient are redundant almost everywhere, against the common pushed
-partition-of-unity weight (chart-`β` cutoff) and the off-kernel vanishing of the
-eigenvector component (chart-`γ` cutoff). -/
 theorem eigenvectorSmoothChart_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

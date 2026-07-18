@@ -1,19 +1,9 @@
 import Mathlib.RingTheory.Derivation.Basic
 import Mathlib.Tactic
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-
-/-!
-# DifferentialGeometry Time Derivatives
-
-This is the local DifferentialGeometry scalar time-derivative interface.
--/
 
 namespace DifferentialGeometry
 
-/-- Time derivative data as a derivation on an auxiliary time-function algebra. -/
 structure TimeDerivativeData (R : Type*) (A : Type*) (Time : Type*)
     [CommRing R] [CommRing A] [Algebra R A] where
   dt : Derivation R A A
@@ -24,7 +14,6 @@ structure TimeDerivativeData (R : Type*) (A : Type*) (Time : Type*)
   eval_mul : forall (a b : A) (t : Time), eval (a * b) t = eval a t * eval b t
   eval_algebraMap : forall (c : R) (t : Time), eval (algebraMap R A c) t = c
 
-/-- Regular-in-time families for a fixed time derivative datum. -/
 class TimeRegularFam {R : Type*} {A : Type*} {Time : Type*}
     [CommRing R] [CommRing A] [Algebra R A]
     (td : TimeDerivativeData R A Time) where
@@ -46,7 +35,6 @@ namespace TimeDerivativeData
 
 variable {R A Time : Type*} [CommRing R] [CommRing A] [Algebra R A]
 
-/-- The regular-family predicate attached to `td`. -/
 abbrev isSmoothFam (td : TimeDerivativeData R A Time) [TimeRegularFam td] :
     (Time -> R) -> Prop :=
   TimeRegularFam.isSmoothFam (td := td)
@@ -116,7 +104,6 @@ theorem isSmoothFam_const_mul (td : TimeDerivativeData R A Time) [TimeRegularFam
   rw [h]
   exact td.isSmoothFam_mul _ _ (td.isSmoothFam_const c) hf
 
-/-- Apply the time derivative to a scalar family and evaluate at time `t`. -/
 def dt_apply (td : TimeDerivativeData R A Time) (f : Time -> R) (t : Time) : R :=
   td.eval (td.dt (td.lift f)) t
 

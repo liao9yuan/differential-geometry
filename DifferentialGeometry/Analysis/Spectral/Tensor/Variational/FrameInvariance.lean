@@ -6,7 +6,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Geometry.Operator.Gradient
@@ -16,26 +16,10 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# Frame-invariance of the gradient inner product
-
-For a closed smooth Riemannian manifold `(M, g)`, the inverse-Gram-weighted
-gradient inner product `tensorCovDerivPointwiseInner g r s S T b` is
-independent of the tangent-frame used to compute it. This file proves the
-abstract change-of-basis trace identity, the chart-frame form
-`chartTensorCovDerivPointwiseInner` and its coincidence with the canonical
-model-frame form on the chart base set, the analogous statement for an
-arbitrary tangent basis frame, and the diagonal form for an orthonormal
-frame.
-
-These coordinate-invariance identities are what let the global continuity of
-the integrand be glued from chart-local smoothness.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -56,7 +40,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -67,15 +51,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- An abstract linear-algebra identity: for any change-of-basis matrix `T` and
-any inner product matrix `G` with `G' := T^T G T` (the Gram matrix under the new
-basis), the trace expression `∑_{ij} G⁻¹_{ij} ⟨L(e_i), L(e_j)⟩` is independent of
-the basis, when `L` is linear and `⟨·,·⟩` is a bilinear form.
-
-Formulated as: if `e_i' = ∑_k T_{ki} e_k`, then
-`∑_{ij} G'⁻¹_{ij} B(e_i', e_j') = ∑_{ij} G⁻¹_{ij} B(e_i, e_j)`
-where `B(u, v) := ⟨L(u), L(v)⟩` and `G'_{ij} := ⟨e_i', e_j'⟩` (Gram), provided
-`G_{ij} := ⟨e_i, e_j⟩`. -/
 private lemma trace_invariance_under_change_of_basis
     {n : ℕ} (T : Matrix (Fin n) (Fin n) ℝ) (hT : IsUnit T)
     (G : Matrix (Fin n) (Fin n) ℝ) (hG : IsUnit G)
@@ -129,9 +104,6 @@ private lemma trace_invariance_under_change_of_basis
   rw [hreassoc, Matrix.trace_mul_comm T⁻¹ (G⁻¹ * Bᵀ * T)]
   rw [mul_assoc (G⁻¹ * Bᵀ) T T⁻¹, hT_T_inv, mul_one]
 
-/-- The integrand `tensorCovDerivPointwiseInner g r s S T b` rewritten using the
-chart-α basis `chartBasisVecFiber α i b` instead of `chartModelBasis E i`. The
-expression involves the chart-α Gram matrix `chartGramMatrix g α b`. -/
 noncomputable def chartTensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M) : ℝ :=
@@ -145,17 +117,12 @@ noncomputable def chartTensorCovDerivPointwiseInner
           (tensorCovDerivAt (I := I) (M := M) g r s T b
             (chartBasisVecFiber (I := I) α j b)))
 
-/-- The change-of-basis matrix from `chartModelBasis E` to `chartBasisFamily α b`
-(at base-set points `b`). The `(k, i)` entry is the `e_k`-coefficient of
-`chartBasisVecFiber α i b` in the basis `chartModelBasis E`. -/
 private noncomputable def chartBasisTransitionMatrix (α : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i =>
     ((chartModelBasis E).repr (chartBasisVecFiber (I := I) α i b)) k
 
-/-- Recovery formula: `chartBasisVecFiber α i b = ∑_k T_{ki} (chartModelBasis E k)`,
-where `T = chartBasisTransitionMatrix α b`. This is `Module.Basis.sum_repr` for the
-basis `chartModelBasis E` applied to the vector `chartBasisVecFiber α i b`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_eq_sum_chartModelBasis
     (α : M) (b : M) (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) α i b =
@@ -167,8 +134,7 @@ private lemma chartBasisVecFiber_eq_sum_chartModelBasis
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i b))).symm
 
-/-- Identification: `chartBasisTransitionMatrix α b = (chartModelBasis E).toMatrix
-(fun i => chartBasisVecFiber α i b)`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisTransitionMatrix_eq_toMatrix
     (α : M) (b : M) :
     chartBasisTransitionMatrix (I := I) α b =
@@ -180,7 +146,7 @@ private lemma chartBasisTransitionMatrix_eq_toMatrix
   ext k i
   rw [Module.Basis.toMatrix_apply, Matrix.of_apply]
 
-/-- The change-of-basis matrix is invertible at base-set points. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisTransitionMatrix_isUnit
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -200,8 +166,7 @@ private lemma chartBasisTransitionMatrix_isUnit
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
 
-/-- A helper: a continuous bilinear form on `E` evaluated on linear combinations of
-basis vectors. -/
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_bilinear_expand
     (g : SmoothRiemannianMetric I M) (b : M) {n : ℕ}
     (a c : Fin n → ℝ) (u : Fin n → E) :
@@ -225,8 +190,7 @@ private lemma g_inner_bilinear_expand
   rw [map_smul, smul_eq_mul]
   ring
 
-/-- Gram-matrix transformation: `chartGramMatrix g α b = T^T * gramMatrixAt g b * T`
-where `T = chartBasisTransitionMatrix α b`. This holds for all `b`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartGramMatrix (I := I) g α b =
@@ -253,7 +217,7 @@ private lemma chartGramMatrix_eq_transition
   rw [Matrix.transpose_apply, gramMatrixAt_apply]
   ring
 
-/-- Bilinearity of `tensorInnerPointwise` in the left argument over a finite sum. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_sum_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : ι → TensorRSModel r s ℝ E)
@@ -269,7 +233,7 @@ lemma tensorInnerPointwise_sum_left
       rw [Finset.sum_insert hi₀, tensorInnerPointwise_add_left,
           tensorInnerPointwise_smul_left, ih, Finset.sum_insert hi₀]
 
-/-- Bilinearity of `tensorInnerPointwise` in the right argument over a finite sum. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : TensorRSModel r s ℝ E)
@@ -285,9 +249,7 @@ lemma tensorInnerPointwise_sum_right
       rw [Finset.sum_insert hj₀, tensorInnerPointwise_add_right,
           tensorInnerPointwise_smul_right, ih, Finset.sum_insert hj₀]
 
-/-- The B-matrix transformation: `B'_{ij} = (T^T B T)_{ij}` where
-`B'_{ij} = tensorInnerPointwise (toModel(cov_S e'_i)) (toModel(cov_T e'_j))`,
-`B_{ij}` is the same with `e_i`, and `T = chartBasisTransitionMatrix α b`. -/
+omit [CompactSpace M] in
 private lemma chartTensorCovDeriv_innerMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -370,8 +332,7 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
   rw [Matrix.transpose_apply, Matrix.of_apply]
   ring
 
-/-- **The coordinate-invariance identity**: on the chart base set,
-the chart-α-frame integrand equals the model-basis integrand. -/
+omit [CompactSpace M] in
 lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {b : M}
@@ -492,16 +453,12 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     exact ne_of_gt hdet_pos
   exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
 
-/-- The transition matrix from the canonical model basis `chartModelBasis E`
-to an arbitrary tangent frame `frame : Fin n → E`: the `(k, i)`-entry is the
-`e_k`-coefficient of `frame i` in the model basis. -/
 private noncomputable def frameTransitionMatrix
     (frame : Fin (Module.finrank ℝ E) → E) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i => ((chartModelBasis E).repr (frame i)) k
 
-/-- Recovery formula: each frame vector is the model-basis expansion with the
-transition-matrix coefficients. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma frame_eq_sum_chartModelBasis
     (frame : Fin (Module.finrank ℝ E) → E) (i : Fin (Module.finrank ℝ E)) :
     frame i =
@@ -512,7 +469,7 @@ private lemma frame_eq_sum_chartModelBasis
   simp only [Matrix.of_apply]
   exact ((chartModelBasis E).sum_repr (frame i)).symm
 
-/-- The transition matrix of a basis frame is invertible. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma frameTransitionMatrix_isUnit
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) :
     IsUnit (frameTransitionMatrix (E := E)
@@ -529,9 +486,7 @@ private lemma frameTransitionMatrix_isUnit
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
 
-/-- The frame Gram matrix `(g(b)(frameᵢ, frameⱼ))` equals `Tᵀ * G * T`, where
-`T` is the transition matrix from the model basis to the frame and `G` is the
-model-basis Gram matrix `gramMatrixAt g b`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma frameGram_eq_transition
     (g : SmoothRiemannianMetric I M) (b : M)
     (frame : Fin (Module.finrank ℝ E) → E) :
@@ -558,8 +513,7 @@ private lemma frameGram_eq_transition
   rw [Matrix.transpose_apply, gramMatrixAt_apply]
   ring
 
-/-- The frame inner-product matrix `(⟨∇_{frameᵢ}S, ∇_{frameⱼ}T⟩)ᵢⱼ` equals
-`Tᵀ * B * T`, where `B` is the model-basis inner-product matrix. -/
+omit [CompactSpace M] in
 private lemma frameInnerMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -636,10 +590,7 @@ private lemma frameInnerMatrix_eq_transition
   rw [Matrix.transpose_apply, Matrix.of_apply]
   ring
 
-/-- **Frame-invariance of the gradient inner product.** For any tangent
-*basis* frame `frame` at `b`, the inverse-frame-Gram-weighted double sum of
-the directional covariant derivatives equals the canonical
-`tensorCovDerivPointwiseInner`. -/
+omit [CompactSpace M] in
 lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -746,11 +697,7 @@ lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
     exact ne_of_gt hposdef.det_pos
   exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
 
-/-- **Orthonormal-frame diagonal form of the gradient inner product.** For a
-`g(b)`-orthonormal *basis* frame `frame` at `b`, the Dirichlet integrand
-`tensorCovDerivPointwiseInner g r s S T b` equals the plain diagonal sum
-`∑ᵢ ⟨∇_{frameᵢ}S, ∇_{frameᵢ}T⟩` of the pointwise tensor inner products of the
-directional covariant derivatives. -/
+omit [CompactSpace M] in
 lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)

@@ -1,48 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.NonSmooth
 
-/-!
-# Construction of `SmoothApproximation` from a smooth weak solution
-
-This module supplies a constructive existence theorem for the
-hypothesis-bearing structure
-`DifferentialGeometry.Analysis.Sobolev.NirenbergNonSmooth.SmoothApproximation`,
-which packages a smooth approximating sequence to a (potentially non-smooth)
-weak solution of an elliptic divergence-form equation `B(u, ·) = ⟨f, ·⟩` on
-Euclidean space, together with a uniform-in-`n` integrated `L²(Ω')` bound on
-the combined `H¹`+data energy over every precompact open `Ω'`.
-
-## The integrated-bound formulation
-
-For a generic `H¹`-only weak solution `u`, the natural mollification
-`u_n := u ⋆ mollifierEps ε_n` does not satisfy a uniform pointwise sup-norm
-bound (the mollifier scaling factor `‖mollifierEps_ε‖_∞` blows up as `ε → 0`).
-The structure therefore exposes only an integrated `L²` bound on the
-energy `∑_j (∂_j u_n)² + (u_n)² + (f_n)²`, which is realisable for
-mollified `H¹` data.
-
-For the smooth-input baseline case captured here, both formulations are
-available: a smooth compactly-supported `u` admits sup-norm bounds on
-itself, on its first partials, and on the data `f`; the integrated
-`L²(Ω')` energy is then simply controlled by the sum of the squared
-sup-norms times the (finite) volume of `Ω'`. This yields the simplest
-possible `SmoothApproximation`, the constant approximating sequence
-`u_n := u`, `f_n := f`, with a `data_bound` derived from the squared
-sup-norms.
-
-## Main theorem
-
-* `exists_smoothApproximation_of_smooth_compactSupport` — given a smooth
-  compactly-supported `u` with bounded first partials, a smooth
-  compactly-supported `f` (equivalently bounded by continuity), and the
-  smooth weak-solution identity `B(u, φ) = ∫ f · φ` for every smooth
-  compactly-supported test `φ` with `tsupport φ ⊆ Ω`, returns a
-  `SmoothApproximation B u f` (constant approximating sequence).
-
-* `exists_smoothApproximation_of_isSmoothWeakSolution` — convenience
-  wrapper packaging the smoothness of `u` and the weak-solution identity
-  inside `SmoothEllipticBilinearForm.IsSmoothWeakSolution`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -58,8 +15,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- A continuous function with compact support on `E` admits a nonneg
-sup-norm bound. -/
+
 private lemma exists_abs_bound_of_continuous_compactSupport
     {h : E → ℝ} (h_cont : Continuous h) (h_cs : HasCompactSupport h) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x : E, |h x| ≤ M := by
@@ -68,9 +24,7 @@ private lemma exists_abs_bound_of_continuous_compactSupport
   exact (hM x).trans (le_max_left _ _)
 
 omit [NeZero d] in
-/-- A continuous function with compact support is in `L²` on every
-restricted set whose closure is compact (in fact on the full space, but we
-target the local form needed by `SmoothApproximation.f_seq_l2_loc`). -/
+
 private lemma memLp_two_restrict_of_continuous_compactSupport
     {h : E → ℝ} (h_cont : Continuous h) (h_cs : HasCompactSupport h)
     (S : Set E) :
@@ -80,8 +34,7 @@ private lemma memLp_two_restrict_of_continuous_compactSupport
   exact hMemLp_volume.restrict S
 
 omit [NeZero d] in
-/-- Each component of the gradient of a smooth compactly-supported function
-is continuous with compact support, hence sup-bounded. -/
+
 private lemma exists_grad_component_bound
     {u : E → ℝ}
     (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u) (hu_cs : HasCompactSupport u) :
@@ -115,27 +68,6 @@ private lemma exists_grad_component_bound
     exact hN_fun_nn k
   exact (hN_fun_le j x).trans hsingle
 
-/-- **Construction of `SmoothApproximation` from a smooth weak solution.**
-
-Given a smooth compactly-supported `u : E → ℝ`, a smooth compactly-supported
-data function `f : E → ℝ`, and the smooth weak-solution identity
-`B.bilin u φ = ∫ f · φ` for every smooth compactly-supported test function
-`φ` with `tsupport φ ⊆ Ω`, this theorem produces a `SmoothApproximation B u f`
-in which the approximating sequence is the constant sequence `u_n := u`,
-`f_n := f`.
-
-Each clause of `SmoothApproximation` is then immediate:
-
-* smoothness and the smooth weak-solution identity hold by hypothesis;
-* `f_seq_l2_loc`, `u_seq_l2_loc`, `grad_seq_l2_loc` follow from
-  continuity and compact support;
-* the integrated `H¹`+data bound follows from continuous sup-norm bounds
-  on `u`, `∇u`, `f` combined with finite measure of `Ω'`.
-
-The `data_bound` produced is `M_u² + d · N_grad² + M_f²`, the squared
-sum of the sup-norms — a single nonneg scalar that, combined with the
-`Ω'`-dependent factor `(volume Ω').toReal`, controls the integrated
-energy on every precompact open `Ω'`. -/
 theorem exists_smoothApproximation_of_smooth_compactSupport
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -354,22 +286,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
     rw [h_combine_eq] at h_combined
     exact h_combined
 
-/-- **Convenience form: construction from an `IsSmoothWeakSolution`.**
-
-When the smoothness of `u` and the weak-solution identity are already
-packaged in `B.IsSmoothWeakSolution u f`, the construction simplifies to
-extracting `u`'s smoothness and the identity from the predicate, and
-supplying the additional sup-norm-data hypotheses on `u` and `f`.
-
-The hypotheses on the data:
-
-* `hu_cs` — `u` has compact support;
-* `hf_cont` — `f` is continuous (suffices for `f_seq_l2_loc`);
-* `hf_cs` — `f` has compact support (gives the sup-norm bound on `f`).
-
-Compact support of `f` is equivalent to "smooth compactly-supported `f`"
-in the standard analytic setting where `f` arises as `L u` for the
-classical operator applied to a smooth compactly-supported `u`. -/
 theorem exists_smoothApproximation_of_isSmoothWeakSolution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

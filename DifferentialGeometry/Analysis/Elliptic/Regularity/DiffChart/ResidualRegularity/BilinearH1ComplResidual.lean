@@ -4,34 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpIdentity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevBanach
 
-/-!
-# Unconditional discharge of `MemW1p 2 fChartResidual` for the smooth case
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and a
-smooth scalar `v : SmoothScalar g`, the chart-pulled residual function
-`fChartResidual g α (smoothToH1Compl g v)` lies in `MemW1p 2
-chartTargetEuclid α` unconditionally. The smooth-case discharge is
-provided by `memW1p_fChartResidual_smoothToH1Compl` from
-`DiffChartBilinearH1ComplResidualMemW1p`.
-
-This module packages the smooth-case discharge into the
-`DiffChartBilinearH1ComplData` constructor by dropping the
-`h_residual_memW1p` hypothesis from the `_via_residual` constructor and
-substituting it with the smooth-case discharge automatically. The
-membership `smoothToH1Compl v ∈ laplacianDomainPow g 2` is automatic via
-`smoothToH1Compl_mem_laplacianDomainPow_two`.
-
-## Constructor
-
-* `diffChartBilinearH1ComplData_of_smoothToH1Compl_unconditional` —
-  the smooth-case unconditional constructor. Takes a smooth scalar
-  `v : SmoothScalar g`, a direction, and the differentiated variational
-  identity (the only remaining hypothesis, identical in shape to the
-  general `_via_residual` constructor). The `MemW1p 2 fChartResidual`
-  hypothesis is discharged internally via
-  `memW1p_fChartResidual_smoothToH1Compl`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -69,14 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Smooth-case unconditional constructor for `DiffChartBilinearH1ComplData
-g α`**.
-
-For `v : SmoothScalar g`, this constructor produces a
-`DiffChartBilinearH1ComplData g α` instance with `u_h := smoothToH1Compl
-g v` from the differentiated variational identity alone. The residual
-`MemW1p 2 fChartResidual chartTarget α` is discharged internally via
-`memW1p_fChartResidual_smoothToH1Compl`. -/
 noncomputable def diffChartBilinearH1ComplData_of_smoothToH1Compl_unconditional
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (direction : Fin (Module.finrank ℝ E))
@@ -141,8 +105,6 @@ noncomputable def diffChartBilinearH1ComplData_of_smoothToH1Compl_unconditional
     (memW1p_fChartResidual_smoothToH1Compl (I := I) (M := M) g α v)
     h_identity
 
-/-- For `v : SmoothScalar g`, the smooth-case chart-pulled residual
-function in `MemW1p 2 chartTargetEuclid α` form. -/
 noncomputable def smoothFChartResidual
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : EuclN → ℝ :=
   DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
@@ -156,11 +118,6 @@ lemma smoothFChartResidual_memW1p
   unfold smoothFChartResidual
   exact memW1p_fChartResidual_smoothToH1Compl (I := I) (M := M) g α v
 
-/-- For `u_h ∈ laplacianDomainPow g 2` and a sequence of smooth scalars
-`v : ℕ → SmoothScalar g` with `smoothToH1Compl v_n → u_h` in `H1Compl`, the
-sequence of chart-pulled residuals `smoothFChartResidual g α (v n)`
-converges to `fChartResidual g α u_h` in `Lp 2 (chartPulledWeightedMeasure
-g α .restrict chartTargetEuclid α)`. -/
 lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -342,17 +299,6 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
   funext n
   exact eLpNorm_congr_ae (h_subFun_aeEq n).symm
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, given a smooth approximator
-sequence `v : ℕ → SmoothScalar g` with H¹Compl convergence, plus a
-`wkpNorm 1 2`-Cauchy hypothesis on the chart-pulled residual sequence
-**and** a hypothesis identifying the Cauchy limit with `fChartResidual
-g α u_h` (in `volume.restrict chartTarget` ae-equality), the chart-
-pulled residual `fChartResidual g α u_h` is in `MemW1p 2 chartTargetEuclid α`.
-
-The identification hypothesis (`h_lim_eq`) captures the irreducible
-elliptic-regularity content: it asserts that the `wkpNorm 1 2`-limit
-of the smooth-approximator chart-pulled residuals matches the chart-
-pulled residual of the actual `u_h ∈ laplacianDomainPow g 2`. -/
 theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -361,7 +307,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (_h_conv_H1Compl : Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h))
     (_h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -370,7 +316,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) ∧
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))
@@ -389,21 +335,13 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     h_F_lim_aeEq).mp h_F_lim_w1p
 
-/-- **Density-form discharge via the W^{1,2}-Cauchy hypothesis and the
-identification of the Cauchy limit.**
-
-Given a smooth approximator sequence `v : ℕ → SmoothScalar g` with the
-`wkpNorm 1 2`-Cauchy property and the **ae-identification** of the
-`wkpNorm`-limit with `fChartResidual g α u_h` on `volume.restrict
-chartTarget`, the chart-pulled residual `fChartResidual g α u_h` is in
-`MemW1p 2 chartTargetEuclid α`. -/
 theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (_hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (v : ℕ → SmoothScalar g)
     (h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -412,7 +350,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))
@@ -448,26 +386,12 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hF_lim_aeEq).mp hF_lim_W1p
 
-/-- **W^{1,2}-density-form constructor for `DiffChartBilinearH1ComplData
-g α` from `u_h ∈ laplacianDomainPow g 2`**.
-
-This constructor packages:
-* The W^{1,2}-Cauchy hypothesis on the smooth-approximator chart-pulled
-  residuals.
-* The identification hypothesis (the `wkpNorm 1 2`-limit is ae-equal to
-  `fChartResidual g α u_h`).
-* The differentiated variational identity (same shape as in
-  `_via_residual`).
-
-The `MemW1p 2 fChartResidual` requirement of the `_via_residual`
-constructor is discharged internally via
-`memW1p_fChartResidual_of_wkpNorm_cauchy_identification`. -/
 noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_density
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (v : ℕ → SmoothScalar g)
     (h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -476,7 +400,7 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_den
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))

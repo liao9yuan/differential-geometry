@@ -9,42 +9,6 @@ import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-/-!
-# The cotangent extension of a covariant derivative
-
-Given a covariant derivative `cov : CovariantDerivative I E (TangentSpace I)` on the tangent
-bundle of a smooth manifold `M`, we define the induced covariant derivative on the cotangent
-bundle by Leibniz over the canonical pairing:
-$$
-  (\nabla_X \omega)(Y) := X\bigl(\omega(Y)\bigr) - \omega(\nabla_X Y).
-$$
-
-The cotangent fibre at `x : M` is `TangentSpace I x →L[ℝ] ℝ`. The cotangent bundle as a Mathlib
-fibre bundle is `fun x : M ↦ TangentSpace I x →L[ℝ] ℝ`, the `Hom`-bundle of `TangentSpace I`
-with the trivial bundle `Bundle.Trivial M ℝ`. Mathlib's `extDerivFun` lives in this bundle,
-confirming the identification.
-
-## Main definitions
-
-* `cotangentCov cov` — the induced covariant derivative on the cotangent bundle, as a bundled
-  `CovariantDerivative I E (fun x : M ↦ TangentSpace I x →L[ℝ] ℝ)`.
-
-## Main theorems
-
-* `cotangentCov_dualPairing` — the defining Leibniz identity:
-  `(mfderiv I 𝓘(ℝ, ℝ) (b ↦ θ b (Y b)) x) v
-       = (cotangentCov cov θ x v) (Y x) + θ x (cov Y x v)`.
-
-* `cotangentCov_metricDuality` — when `cov = LeviCivita g`, the metric "♭" map intertwines:
-  for any tangent-bundle section `X` differentiable at `x`, any tangent vector `v`, and any
-  tangent vector `y`:
-  `(cotangentCov (LeviCivita g)) (b ↦ g.inner b (X b)) x v y
-       = g.inner x ((LeviCivita g) X x v) y`.
-
-The construction at each point uses `TensorialAt.mkHom₂` applied to the bilinear-in-(X, Y)
-formula `X(θ(Y))(x) − θ(x)(∇_X Y)(x)`. Tensoriality follows from the Leibniz rule for `cov`
-together with the Leibniz rule for `mfderiv` of products of scalar functions.
--/
 
 noncomputable section
 
@@ -63,31 +27,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- Local instance: the cotangent bundle is a fibre bundle with model fibre `E →L[ℝ] ℝ`. -/
 local instance cotangentFiberBundle :
     FiberBundle (E →L[ℝ] ℝ) (fun x : M => TangentSpace I x →L[ℝ] ℝ) :=
   inferInstance
 
-/-- Local instance: the cotangent bundle is a vector bundle. -/
 local instance cotangentVectorBundle :
     VectorBundle ℝ (E →L[ℝ] ℝ) (fun x : M => TangentSpace I x →L[ℝ] ℝ) :=
   inferInstance
 
-/-- The "cotangent-bundle section is differentiable" predicate, in the explicit
-total-space-embedding form. The cotangent bundle is `fun x : M ↦ TangentSpace I x →L[ℝ] ℝ`,
-the `Hom`-bundle with the trivial bundle `Bundle.Trivial M ℝ` as target. -/
 def MDiffAtCotangent
     (θ : Π x : M, TangentSpace I x →L[ℝ] ℝ) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
     (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
       (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (θ b)) x
 
-/-- The auxiliary scalar functional `Φ(X, Y) := X(θ(Y))(x) - θ(x)(∇_X Y)(x)`.
-
-The first term uses Mathlib's `extDerivFun` (which packages `mfderiv` together with the
-canonical identification `TangentSpace 𝓘(ℝ, ℝ) (g x) ≃L[ℝ] ℝ` via
-`NormedSpace.fromTangentSpace`), so that the result lives in `ℝ` and can be subtracted
-from the second term `θ(x)(∇_X Y) : ℝ`. -/
 def cotangentScalar
     (cov : (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -95,7 +48,7 @@ def cotangentScalar
     (X Y : Π x : M, TangentSpace I x) : ℝ :=
   extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) - θ x (cov Y x (X x))
 
-/-- A simp-reducing rewriting of `cotangentScalar` exposing its definition. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma cotangentScalar_def
     (cov : (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -104,7 +57,7 @@ lemma cotangentScalar_def
     cotangentScalar cov θ x X Y =
       extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) - θ x (cov Y x (X x)) := rfl
 
-/-- Leibniz formula for `extDerivFun` applied to a product of two ℝ-valued functions. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma extDerivFun_mul_apply
     {p q : M → ℝ} {x : M}
     (hp : MDifferentiableAt I 𝓘(ℝ, ℝ) p x) (hq : MDifferentiableAt I 𝓘(ℝ, ℝ) q x)
@@ -124,8 +77,7 @@ lemma extDerivFun_mul_apply
   rw [hmf_v]
   rw [smul_eq_mul, smul_eq_mul]
 
-/-- Differentiability of the scalar pairing `b ↦ θ b (Y b)` at `x`, from differentiability
-of `θ` and `Y`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_pairing
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -143,7 +95,7 @@ lemma mdifferentiableAt_pairing
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
-/-- `Φ(X, Y)` is tensorial in `X` at a point `x` (the X-argument enters only via `X(x)`). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentScalar_tensorialAt_X
     (_covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -168,8 +120,7 @@ lemma cotangentScalar_tensorialAt_X
     rw [hXX', map_add, ContinuousLinearMap.map_add, map_add]
     abel
 
-/-- `Φ(X, Y)` is tensorial in `Y` at a point `x` (smul case combines Leibniz of `cov` with
-Leibniz of `extDerivFun` for products of scalar functions; the cross terms cancel exactly). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentScalar_tensorialAt_Y
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -231,7 +182,6 @@ lemma cotangentScalar_tensorialAt_Y
         ContinuousLinearMap.map_add]
     abel
 
-/-- The cotangent connection's value at a single point `x : M` on a section `θ`. -/
 def cotangentCovAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (θ : Π x : M, TangentSpace I x →L[ℝ] ℝ) (x : M) :
@@ -245,7 +195,7 @@ def cotangentCovAt
       (fun X hX => cotangentScalar_tensorialAt_Y cov.isCovariantDerivativeOnUniv hθ X hX)
   · exact 0
 
-/-- When `θ` is differentiable at `x`, `cotangentCovAt` evaluates the defining `Φ` formula. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentCovAt_apply_of_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -258,7 +208,7 @@ lemma cotangentCovAt_apply_of_diff
   rw [dif_pos hθ]
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
-/-- When `θ` is not differentiable at `x`, the cotangent connection's value is zero. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCovAt_of_not_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -268,19 +218,19 @@ lemma cotangentCovAt_apply_of_diff
   unfold cotangentCovAt
   rw [dif_neg hθ]
 
-/-- The cotangent covariant derivative as an unbundled map of sections. -/
 def cotangentCovFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (Π x : M, TangentSpace I x →L[ℝ] ℝ) →
       (Π x : M, TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)) :=
   fun θ x => cotangentCovAt cov θ x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCovFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (θ : Π x : M, TangentSpace I x →L[ℝ] ℝ) (x : M) :
     cotangentCovFun cov θ x = cotangentCovAt cov θ x := rfl
 
-/-- The cotangent covariant derivative satisfies `IsCovariantDerivativeOn _ Set.univ`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentCovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (V := (fun x : M => TangentSpace I x →L[ℝ] ℝ))
@@ -384,9 +334,6 @@ lemma cotangentCovFun_isCovariantDerivativeOn
     simp only [smul_eq_mul]
     ring
 
-/-- The **cotangent covariant derivative** induced by a tangent-bundle covariant derivative,
-as a bundled `CovariantDerivative I (E →L[ℝ] ℝ) (cotangent bundle)`. The model fiber of
-the cotangent bundle is `E →L[ℝ] ℝ`. -/
 def cotangentCov
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     CovariantDerivative I (E →L[ℝ] ℝ)
@@ -394,14 +341,12 @@ def cotangentCov
   toFun := cotangentCovFun cov
   isCovariantDerivativeOnUniv := cotangentCovFun_isCovariantDerivativeOn cov
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCov_toFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (cotangentCov cov).toFun = cotangentCovFun cov := rfl
 
-/-- The defining **dual-pairing Leibniz identity** for the cotangent connection. The
-directional derivative `(extDerivFun (b ↦ θ b (Y b)) x) v` decomposes into the cotangent
-covariant derivative applied to `Y(x)`, plus the cotangent section applied to the tangent
-covariant derivative. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem cotangentCov_dualPairing
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -424,21 +369,17 @@ theorem cotangentCov_dualPairing
 
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The cotangent-bundle section `♭X := b ↦ g.inner b (X b)` of the cotangent bundle
-obtained from a tangent-bundle section `X` by lowering the index with the metric `g`. -/
 def metricFlat (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x) :
     Π x : M, TangentSpace I x →L[ℝ] ℝ :=
   fun b => g.inner b (X b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma metricFlat_apply
     (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x)
     (b : M) (Y : TangentSpace I b) :
     metricFlat g X b Y = g.inner b (X b) Y := rfl
 
-/-- Differentiability of `metricFlat g X` at `x` as an `MDiffAt`-statement on the explicit
-total-space embedding (avoiding the `T%` macro for the cotangent fiber type, which would
-require a local `FiberBundle` instance). The metric `g` is smooth as a section of
-`Hom(T, Hom(T, ℝ))`, so its application to `X` is smooth as a section of `Hom(T, ℝ)`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricFlat_mdiff_total
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
@@ -457,16 +398,13 @@ lemma metricFlat_mdiff_total
     (b := fun b : M => b)
     (ϕ := fun b => g.inner b) (v := fun b => X b) hg hX
 
-/-- Differentiability of `metricFlat g X` at `x`, in the `MDiffAtCotangent` form. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricFlat_mdiff
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
     MDiffAtCotangent (metricFlat g X) x :=
   metricFlat_mdiff_total g hX
 
-/-- **Metric duality intertwining for the Levi-Civita connection.** The Riesz isomorphism
-`v ↦ g.inner x v` intertwines the Levi-Civita connection on `TM` and the induced cotangent
-connection on `T*M`. -/
 theorem cotangentCov_metricDuality
     (g : SmoothRiemannianMetric I M)
     {X : Π x : M, TangentSpace I x} {x : M} (hX : MDiffAt (T% X) x)
@@ -493,14 +431,7 @@ theorem cotangentCov_metricDuality
   rw [hYx] at heq
   exact add_right_cancel heq
 
-/-- Bridge: pointwise smoothness of a CLM-bundle-valued section on every smooth tangent
-section lifts to total-space smoothness of the corresponding Hom-bundle section. This is the
-"missing adjoint" of `ContMDiff.clm_bundle_apply`, specialised to the source being the
-tangent bundle and the target an arbitrary smooth vector bundle.
-
-The hypothesis `h` provides, for every smooth tangent section `Y`, smoothness of the section
-`x ↦ ⟨x, φ x (Y x)⟩` of `V₂`. The conclusion is smoothness of the operator section of the
-Hom-bundle. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_clmSection_smooth_aux
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
     {V₂ : M → Type*} [∀ x, AddCommGroup (V₂ x)] [∀ x, Module ℝ (V₂ x)]
@@ -572,9 +503,7 @@ theorem cotangentCov_clmSection_smooth_aux
   rw [show ⇑(e₂.continuousLinearMapAt ℝ x) = ⇑(e₂.linearMapAt ℝ x) from rfl,
     e₂.coe_linearMapAt_of_mem hx₂]
 
-/-- Smoothness of the exterior derivative of a smooth scalar function as a section of the
-cotangent bundle. The key tool is `ContMDiffAt.mfderiv_const`, packaged through the
-`Hom(TM, ℝ)` characterisation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_extDerivFun_smooth
     {h : M → ℝ} (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -602,8 +531,7 @@ theorem cotangentCov_extDerivFun_smooth
     ContinuousLinearMap.coe_id', id_eq]
   rfl
 
-/-- For smooth `θ` (a section of the cotangent bundle) and smooth `Y` (a section of the
-tangent bundle), the scalar function `x ↦ θ x (Y x)` is smooth. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_pairing_contMDiff
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ}
     (hθ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -623,11 +551,7 @@ theorem cotangentCov_pairing_contMDiff
   intro x
   exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
 
-/-- For a smooth tangent-bundle covariant derivative `cov` and a globally smooth tangent
-section `Y`, the section `x ↦ ⟨x, cov.toFun Y x⟩` of `Hom(TM, TM)` is smooth.
-
-This packages the `ContMDiffCovariantDerivative.contMDiff` field as a global ContMDiff
-statement (rather than a `ContMDiffOn ... Set.univ` one). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_covApply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -645,12 +569,6 @@ theorem cotangentCov_covApply_smooth
   intro x
   exact (hres x (Set.mem_univ x)).contMDiffAt Filter.univ_mem
 
-/-- For smooth `θ`, smooth `Y`, smooth `Z` (tangent sections), and a smooth covariant
-derivative `cov`, the cotangent connection's value scalar
-`x ↦ (cotangentCov cov θ x)(Y x)(Z x)` is smooth. The proof uses
-`cotangentCovAt_apply_of_diff` to express the value as the `cotangentScalar` formula
-`extDerivFun (b ↦ θ b (Z b)) x (Y x) - θ x (cov.toFun Z x (Y x))`, then verifies smoothness of
-each piece. -/
 theorem cotangentCov_double_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -718,9 +636,6 @@ theorem cotangentCov_double_apply_smooth
   intro x
   exact h_eq x
 
-/-- **Smoothness of the cotangent covariant derivative.** Given a tangent-bundle covariant
-derivative `cov` of class `C^∞`, the induced cotangent covariant derivative
-`cotangentCov cov` is also of class `C^∞`. -/
 instance cotangentCov_isContMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞] :

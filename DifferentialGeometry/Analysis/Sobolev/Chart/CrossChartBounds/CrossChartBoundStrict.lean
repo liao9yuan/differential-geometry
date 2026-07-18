@@ -6,22 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-/-!
-# Strict per-pair cross-chart `W^{1,p}` bound
-
-For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
-compact set `K_α ⊆ (chartAt H α).source`, the chart-γ pushed cross-pullback
-`chartPushed g γ (chartPullback I α χ)` is bounded in `W^{1,p}(chartTargetEuclid γ)`
-by a constant times `‖χ‖_{W^{1,p}(chartTargetEuclid α)}`, for every smooth
-compactly-supported `χ` whose closed support sits inside the chart-α image of
-`K_α`.
-
-This file packages the `chartTransition_smoothDiffeoBoundedAtOrder` machinery
-together with the smooth chain rule and the Leibniz bound to deliver the
-quantitative cross-chart bound used downstream by the chart-Sobolev smooth
-density program.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -33,8 +17,6 @@ namespace Sobolev
 
 namespace Euclidean
 
-/-- For a continuous function `f` whose closed support lies inside an open set
-`Ω' ⊆ Ω`, the indicator on `Ω` agrees pointwise with the indicator on `Ω'`. -/
 private lemma indicator_eq_indicator_of_tsupport_subset
     {α : Type*} [Zero α]
     {X : Type*} [TopologicalSpace X] {f : X → α}
@@ -51,9 +33,6 @@ private lemma indicator_eq_indicator_of_tsupport_subset
       exact image_eq_zero_of_notMem_tsupport hx_off
     · simp [Set.indicator_of_notMem hxΩ]
 
-/-- For a continuous function `f` whose closed support lies inside an open set
-`Ω' ⊆ Ω`, the `eLpNorm` on `volume.restrict Ω` agrees with the one on
-`volume.restrict Ω'`. -/
 private lemma eLpNorm_restrict_eq_of_tsupport_subset
     {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
     {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
@@ -65,13 +44,6 @@ private lemma eLpNorm_restrict_eq_of_tsupport_subset
       ← eLpNorm_indicator_eq_eLpNorm_restrict hΩ'_meas]
   rw [indicator_eq_indicator_of_tsupport_subset hΩΩ' hf_supp]
 
-/-- For a smooth compactly supported function `ψ` whose closed support lies
-inside an open set `Ω' ⊆ Ω` (both open), the `wkpNorm 1 p` of `ψ` on `Ω` equals
-the `wkpNorm 1 p` on `Ω'`.
-
-Argument: the chosen weak partial of `ψ` on either set is a.e. equal to the
-classical `fderiv` (since `ψ` is smooth), and this classical `fderiv` vanishes
-outside `tsupport ψ ⊆ Ω' ⊆ Ω`. Hence the integrals over `Ω` and `Ω'` agree. -/
 lemma wkpNorm_eq_of_compactSupport_smooth_subset
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -81,7 +53,7 @@ lemma wkpNorm_eq_of_compactSupport_smooth_subset
     (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cpt : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ Ω') :
-    wkpNorm (d := d) 1 p ψ Ω = wkpNorm (d := d) 1 p ψ Ω' := by
+    iteratedWeakSobolevNorm (d := d) 1 p ψ Ω = iteratedWeakSobolevNorm (d := d) 1 p ψ Ω' := by
   classical
   have hψ_mem_Ω : MemWkp (d := d) 1 p ψ Ω :=
     MemWkp_of_smooth_compactSupport_pub
@@ -169,7 +141,7 @@ lemma wkpNorm_eq_of_compactSupport_smooth_subset
     exact eLpNorm_restrict_eq_of_tsupport_subset hΩ_meas hΩ'_meas hΩΩ'
       (h_classical_supp i)
   let _ := h_classical_cpt
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [show (1 : ℕ) + 1 = 1 + 1 from rfl, Finset.sum_range_succ, Finset.sum_range_one]
   rw [show (1 : ℕ) + 1 = 1 + 1 from rfl, Finset.sum_range_succ, Finset.sum_range_one]
   have h0_unique : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) :=
@@ -217,9 +189,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For two chart points `γ α : M` and a fixed compact set `K_α` inside the
-chart-α source, the cross-chart compact `K_M := K_α ∩ tsupport ρ_γ` lies in
-both chart sources and is compact. -/
 private lemma crossChartK_isCompact
     [T2Space M] [SigmaCompactSpace M]
     (γ : M) {K_α : Set M} (hK_compact : IsCompact K_α) :
@@ -247,10 +216,6 @@ private lemma crossChartK_subset_chartγ_source
   intro x hx
   exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ hx.2
 
-/-- A strengthened version of `chartTransition_smoothDiffeoBoundedAtOrder`
-which additionally exposes the equation `Φ.toFun = chartTransitionEuclid γ α`
-on the open set `Ω_γα`. This is the variant we use in the strict-strong-support
-bound. -/
 theorem chartTransition_smoothDiffeoBoundedAtOrder_strict
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -755,9 +720,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder_strict
       change T_αγ z = chartTransitionEuclid (I := I) (M := M) α γ z
       exact hT_αγ_eq_on_Ωαγ z hz
 
-/-- When `K_α ∩ tsupport ρ_γ = ∅` and `tsupport χ ⊆ chart-α image of K_α`, the
-chart-γ pushed cross-pullback `chartPushed g γ (chartPullback I α χ)` is
-identically zero on `EuclN`. -/
 lemma chartPushed_chartPullback_zero_of_K_M_empty
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (γ α : M) {K_α : Set M}
@@ -827,12 +789,6 @@ lemma chartPushed_chartPullback_zero_of_K_M_empty
       rw [hKM_empty] at hz_in_K_M
       exact Set.notMem_empty z hz_in_K_M
 
-/-- **Headline theorem**. For two chart points `γ α : M` on a closed Riemannian
-manifold and a fixed compact set `K_α ⊆ (chartAt H α).source`, there exists a
-positive constant `K` (depending only on `γ`, `α`, `K_α`, the chart-atlas
-partition of unity, and `p`) such that for every smooth compactly-supported
-`χ : EuclN → ℝ` whose closed support sits inside the chart-α Euclidean image of
-`K_α`, the chart-γ pushed cross-pullback satisfies the `W^{1,p}` bound. -/
 theorem cross_chart_bound_strict_strong
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -846,14 +802,14 @@ theorem cross_chart_bound_strict_strong
         HasCompactSupport χ →
         tsupport χ ⊆
           (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
             (chartPullback I α χ))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p χ
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -980,7 +936,7 @@ theorem cross_chart_bound_strict_strong
     refine ⟨?_, ?_⟩
     · exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg γ x
     · exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).le_one γ x
-  set ργE : EuclN → ℝ := etaEuclid (I := I) (M := M) γ ρ_γ_M with hργE_def
+  set ργE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) γ ρ_γ_M with hργE_def
   have hργE_smooth : ContDiff ℝ (⊤ : ℕ∞) ργE :=
     contDiff_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt
       hρ_γ_M_supp_in_chart
@@ -1355,25 +1311,25 @@ theorem cross_chart_bound_strict_strong
   have hUγ_subset_target : Uγ ⊆ Ωγ_target := fun y hy => hy.2
   have hUγ_subset_Ωγα : Uγ ⊆ Ω_γα := fun y hy => hy.1
   have h_wkp_target_eq_Uγ :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Ωγ_target =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Uγ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_of_compactSupport_smooth_subset
         (d := Module.finrank ℝ E) hp_one hΩγ_target_open hUγ_open hUγ_subset_target
         hψ_total_smooth hψ_total_cpt hψ_total_supp_in_Uγ
   have h_wkp_Ωγα_eq_Uγ :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Ω_γα =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Uγ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_of_compactSupport_smooth_subset
         (d := Module.finrank ℝ E) hp_one hΩγα_open hUγ_open hUγ_subset_Ωγα
         hψ_total_smooth hψ_total_cpt hψ_total_supp_in_Uγ
   have h_wkp_target_eq_Ωγα :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Ωγ_target =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Ω_γα := by
     rw [h_wkp_target_eq_Uγ, h_wkp_Ωγα_eq_Uγ]
   rw [h_wkp_target_eq_Ωγα]
@@ -1383,17 +1339,17 @@ theorem cross_chart_bound_strict_strong
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.comp_smoothDiffeoBoundedAtOrder
       (d := Module.finrank ℝ E) 1 (le_refl 1) hp_one hp_top hΩγα_open hΩαγ_open Φ
       hχ_loc_mem_Ωαγ hχ_loc_cpt hχ_loc_supp_in_Ωαγ
-  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p ψ_total Ω_γα ≤
       ENNReal.ofReal K_leib *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p (fun y => χ_loc (Φ.toFun y)) Ω_γα :=
     hK_leib_bound h_χ_loc_comp_mem
   have h_chain_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun y => χ_loc (Φ.toFun y)) Ω_γα ≤
       ENNReal.ofReal K_chain *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p χ_loc Ω_αγ := by
     have h := DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       hp_one hp_top hΩγα_open hΩαγ_open Φ 1 (le_refl 1)
@@ -1406,25 +1362,25 @@ theorem cross_chart_bound_strict_strong
   have hUα_subset_target : Uα ⊆ Ωα_target := fun y hy => hy.2
   have hUα_subset_Ωαγ : Uα ⊆ Ω_αγ := fun y hy => hy.1
   have h_wkp_subset_α_step1 :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Ω_αγ =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Uα :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_of_compactSupport_smooth_subset
         (d := Module.finrank ℝ E) hp_one hΩαγ_open hUα_open hUα_subset_Ωαγ
         hχ_loc_smooth hχ_loc_cpt hχ_loc_supp_in_Uα
   have h_wkp_subset_α_step2 :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Ωα_target =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Uα :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_of_compactSupport_smooth_subset
         (d := Module.finrank ℝ E) hp_one hΩα_target_open hUα_open hUα_subset_target
         hχ_loc_smooth hχ_loc_cpt hχ_loc_supp_in_Uα
   have h_wkp_subset_α :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Ω_αγ =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p χ_loc Ωα_target := by
     rw [h_wkp_subset_α_step1, h_wkp_subset_α_step2]
   have hχ_supp_in_Ωα_target : tsupport χ ⊆ Ωα_target := by
@@ -1441,39 +1397,39 @@ theorem cross_chart_bound_strict_strong
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
         (d := Module.finrank ℝ E) hΩα_target_open hχ_smooth hχ_cpt hχ_supp_in_Ωα_target
         hp_one 1
-  have h_leib_α_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_leib_α_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p χ_loc Ωα_target ≤
       ENNReal.ofReal K_leib_α *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p χ Ωα_target := by
     have h_eq : χ_loc = (fun y => η_α_loc y * χ y) := rfl
     rw [h_eq]
     exact hK_leib_α_bound hχ_mem_Ωα_target
-  have h_chain_combined : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_chain_combined : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p (fun y => χ_loc (Φ.toFun y)) Ω_γα ≤
       ENNReal.ofReal K_chain *
         (ENNReal.ofReal K_leib_α *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p χ Ωα_target) := by
     refine h_chain_step.trans ?_
     rw [h_wkp_subset_α]
     exact mul_le_mul_of_nonneg_left h_leib_α_step (zero_le _)
   have h_combined :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p ψ_total Ω_γα ≤
       ENNReal.ofReal K_leib * (ENNReal.ofReal K_chain *
         (ENNReal.ofReal K_leib_α *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p χ Ωα_target)) := by
     refine h_leib_step.trans ?_
     exact mul_le_mul_of_nonneg_left h_chain_combined (zero_le _)
   refine h_combined.trans ?_
   have h_K_eq : ENNReal.ofReal K_leib *
       (ENNReal.ofReal K_chain * (ENNReal.ofReal K_leib_α *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p χ Ωα_target)) =
       ENNReal.ofReal K *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p χ Ωα_target := by
     rw [hK_def]
     rw [ENNReal.ofReal_mul (mul_pos hK_leib_pos hK_chain_pos).le]

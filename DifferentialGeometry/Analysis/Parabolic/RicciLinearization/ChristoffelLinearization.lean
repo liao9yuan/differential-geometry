@@ -1,41 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 
-/-!
-# The principal part of the linearized Christoffel symbol
-
-The chart Christoffel symbol of the second kind is the algebraic expression
-$$\Gamma^k{}_{ij}(g, \alpha)(y) = \tfrac12 \sum_l G^{kl}(y)\,
-    \bigl(\partial_i G_{lj} + \partial_j G_{li} - \partial_l G_{ij}\bigr)(y),$$
-a function of the chart Gram matrix `G`, its first partial derivatives, and the chart
-inverse Gram matrix `G⁻¹`.
-
-Linearizing in a metric-perturbation direction `h` (with chart components `h_{ab}(y)`)
-splits into two pieces:
-
-* the **principal part**, which carries a *derivative* of `h`,
-  $$(D\Gamma)^k{}_{ij}[h](y) = \tfrac12 \sum_l G^{kl}(y)\,
-      \bigl(\partial_i h_{lj} + \partial_j h_{li} - \partial_l h_{ij}\bigr)(y);$$
-* the lower-order part `D(G^{kl})[h] \cdot (\partial G\ldots)`, which carries `h`
-  undifferentiated — this is the `invGramPerturbation` contribution and is treated
-  elsewhere.
-
-This file builds **only** the principal part.  It is the term that survives into the
-second-order symbol of the linearized Ricci tensor.
-
-## Contents
-
-* `chartLinearizedChristoffelPrincipal` — the closed-form principal part, together with
-  its unfolding lemma `chartLinearizedChristoffelPrincipal_def`.  The index convention
-  matches `chartChristoffel`: the two lower indices `i, j` come first, then the upper
-  index `k`, then the chart-coordinate point `y ∈ E`.
-* `chartLinearizedChristoffelPrincipal_symm` — symmetry in the lower index pair.
-* algebraic instances `Add`, `SMul ℝ` on `ChartMetricPerturbation E`, plus
-  `chartLinearizedChristoffelPrincipal_add`, `chartLinearizedChristoffelPrincipal_smul`,
-  `chartLinearizedChristoffelPrincipal_zero` — linearity of the principal part in the
-  perturbation direction.
-* `chartLinearizedChristoffelPrincipal_contDiffOn` — smoothness on the chart target
-  `(extChartAt I α).target`, the form the second-order symbol step consumes.
--/
 
 noncomputable section
 
@@ -58,7 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 namespace ChartMetricPerturbation
 
-/-- Pointwise sum of two perturbations: `(h₁ + h₂) i j y = h₁ i j y + h₂ i j y`. -/
 instance : Add (ChartMetricPerturbation E) :=
   ⟨fun h₁ h₂ =>
     { toFun := fun i j y => h₁ i j y + h₂ i j y
@@ -66,11 +29,11 @@ instance : Add (ChartMetricPerturbation E) :=
         simp only [ChartMetricPerturbation.symm h₁ i j y, ChartMetricPerturbation.symm h₂ i j y]
       smooth' := fun i j => (h₁.smooth i j).add (h₂.smooth i j) }⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma add_apply (h₁ h₂ : ChartMetricPerturbation E)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (h₁ + h₂) i j y = h₁ i j y + h₂ i j y := rfl
 
-/-- Pointwise real-scalar multiple of a perturbation: `(c • h) i j y = c • (h i j y)`. -/
 instance : SMul ℝ (ChartMetricPerturbation E) :=
   ⟨fun c h =>
     { toFun := fun i j y => c • h i j y
@@ -78,23 +41,13 @@ instance : SMul ℝ (ChartMetricPerturbation E) :=
         simp only [ChartMetricPerturbation.symm h i j y]
       smooth' := fun i j => (h.smooth i j).const_smul c }⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smul_apply (c : ℝ) (h : ChartMetricPerturbation E)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (c • h) i j y = c • h i j y := rfl
 
 end ChartMetricPerturbation
 
-/-- The **principal part of the linearized Christoffel symbol** in the chart at `α`, in
-the perturbation direction `h`, evaluated at the chart-coordinate point `y ∈ E`:
-$$(D\Gamma)^k{}_{ij}[h](y) = \tfrac12 \sum_l G^{kl}(y)\,
-    \bigl(\partial_i h_{lj} + \partial_j h_{li} - \partial_l h_{ij}\bigr)(y),$$
-where `G^{kl} = chartInvGramOnE g α k l` is the chart inverse Gram matrix pulled back to
-the chart target and `h_{ab} = h a b` are the chart components of the perturbation.
-
-The index convention matches `chartChristoffel`: the two lower indices `i, j` come
-first, then the upper index `k`.  This is the term of the Christoffel linearization that
-carries a derivative of `h`; the complementary `D(G^{kl})[h]` term carries `h`
-undifferentiated and is the `invGramPerturbation` contribution handled separately. -/
 def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
@@ -103,6 +56,7 @@ def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M
        partialDeriv (E := E) j (h l i) y -
        partialDeriv (E := E) l (h i j) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLinearizedChristoffelPrincipal_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -113,7 +67,6 @@ def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M
            partialDeriv (E := E) j (h l i) y -
            partialDeriv (E := E) l (h i j) y) := rfl
 
-/-- **Symmetry of the principal linearized Christoffel part** in the lower indices. -/
 theorem chartLinearizedChristoffelPrincipal_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -128,7 +81,7 @@ theorem chartLinearizedChristoffelPrincipal_symm
         partialDeriv (E := E) l (h j i) y from by rw [h.symm_fun i j]]
   ring
 
-/-- The principal linearized Christoffel part vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLinearizedChristoffelPrincipal_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -149,8 +102,6 @@ theorem chartLinearizedChristoffelPrincipal_symm
     ring
   rw [Finset.sum_congr rfl (fun l _ => hzero l), Finset.sum_const_zero, mul_zero]
 
-/-- **Additivity** of the principal linearized Christoffel part in the perturbation
-direction: `(DΓ)[h₁ + h₂] = (DΓ)[h₁] + (DΓ)[h₂]`. -/
 theorem chartLinearizedChristoffelPrincipal_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -178,8 +129,6 @@ theorem chartLinearizedChristoffelPrincipal_add
   rw [hi, hj, hl]
   ring
 
-/-- **Scalar homogeneity** of the principal linearized Christoffel part in the
-perturbation direction: `(DΓ)[c • h] = c • (DΓ)[h]`. -/
 theorem chartLinearizedChristoffelPrincipal_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -215,8 +164,7 @@ theorem chartLinearizedChristoffelPrincipal_smul
   rw [Finset.sum_congr rfl (fun l _ => hsummand l), ← Finset.mul_sum]
   ring
 
-/-- Each `partialDeriv` of a globally `C^∞` real function on the model space is itself
-globally `C^∞`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_contDiff_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i u) := by
@@ -225,15 +173,13 @@ private lemma partialDeriv_contDiff_of_contDiff
   unfold partialDeriv
   exact hfderiv.clm_apply contDiff_const
 
-/-- Each `partialDeriv` of a perturbation component field is globally `C^∞`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_perturbation_contDiff
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
-/-- **Smoothness of the principal linearized Christoffel part.**  As a function of the
-chart-coordinate point `y`, `(DΓ)^k{}_{ij}[h]` is `C^∞` on the chart target
-`(extChartAt I α).target`. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedChristoffelPrincipal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) :

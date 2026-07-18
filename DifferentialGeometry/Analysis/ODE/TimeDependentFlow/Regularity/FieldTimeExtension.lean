@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 
-/-!
-# Time-clamp extension of a regular time-dependent field
 
-A field `X_DT` defined and regular on the closed time interval `[0, T]` is extended to a
-field `Xext` on all of `ℝ × M` by clamping the time argument into `[0, T]`.  The extension
-agrees with `X_DT` on `[0, T]`, is globally jointly continuous on `ℝ × M`, and retains the
-chart-spatial-gradient continuity (continuity of `z ↦ fderiv ℝ (chartRawRepr α (Xext t)) z`)
-globally — all because the clamp is continuous and is the identity on `[0, T]`.
--/
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -22,9 +22,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- The time-clamp extension of a field regular on `[0, T]`: `Xext s x := X_DT (clamp s) x`
-where `clamp` maps `ℝ` into `[0, T]` and fixes `[0, T]`.  It agrees with `X_DT` on `[0, T]`,
-is globally jointly continuous, and keeps the chart-spatial gradient globally continuous. -/
+
+
+
 theorem field_time_clamp_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hcont0 : ContinuousOn (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2)) (Set.Icc (0 : ℝ) T ×ˢ Set.univ))

@@ -1,57 +1,10 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Hilbert-Schmidt-style partition-of-unity-weighted chart-Sobolev norm
-for tensor sections
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional
-real inner-product space `E`, and a smooth compactly-supported
-`(r, s)`-tensor section `T`, this file defines a Hilbert-Schmidt-style
-aggregated chart-Sobolev norm `tensorPouSobolevHsNorm g k T`.
-
-The norm collects, on every chart, the sum-of-squares (Hilbert-Schmidt
-expansion) of the iterated Fréchet derivative components of the raw
-chart-frame scalar components pulled back through the model-Euclidean
-representation map, in the orthonormal basis `EuclideanSpace.basisFun`.
-
-Schematically, with `n = finrank ℝ E`, `IJ = (Idx, Jdx)` the component
-multi-index pair, and writing `ρ_α := chartAtlasPOU I M α` for the chart-`α`
-partition-of-unity weight,
-`tensorPouSobolevHsNorm g k T` is
-
-`(∑'α, ∑_{IJ} ∑_{j ≤ 2k} ∑_{basisIdx : Fin j → Fin n}
-  ∫ ρ_α(pull(y)) · |D^j (Tᵅ_{IJ} ∘ pull)(y)(e_{basisIdx_1}, ..., e_{basisIdx_j})|² dy)^{1/2}`,
-
-where `pull := (extChartAt I α).symm ∘ toEuclidean.symm : EuclN → M`, the
-iterated derivative is taken of the EuclN-pulled scalar, and the multilinear
-evaluation uses the standard orthonormal basis `EuclideanSpace.basisFun`.
-
-The crucial difference from `tensorPouSobolevNorm` (which uses the
-*operator norm* of the iterated Fréchet derivative) is that the
-inner-most term here is `|A(e_{i₁}, ..., e_{iⱼ})|²` summed over
-all index tuples `(i₁, ..., iⱼ) ∈ (Fin n)^j`. This is the
-Hilbert-Schmidt norm-squared expansion of `A`, equal to the L² norm of
-its component vector in the chosen basis, and therefore satisfies the
-parallelogram law. It is consequently induced by an inner product.
-
-## Main definitions
-
-* `tensorPouSobolevHsNorm g k T` — the Hilbert-Schmidt partition-of-unity-
-  weighted chart-Sobolev norm of `T` at regularity order `2k`.
-
-## Main results
-
-* `tensorPouSobolevHsNorm_nonneg`, `tensorPouSobolevHsNorm_zero_section` —
-  basic non-negativity and vanishing-at-zero.
-* `tensorPouSobolevHsNorm_le_succ` — monotonicity in `k`:
-  `tensorPouSobolevHsNorm g k T ≤ tensorPouSobolevHsNorm g (k + 1) T`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -75,26 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm of a
-smooth compactly-supported `(r, s)`-tensor section `T` at regularity order
-`2k`.
-
-Concretely, a square root of a `tsum` over chart base points `α : M` of the
-finite sum, over component multi-indices `IJ`, over Fréchet-derivative
-orders `j ≤ 2k`, and over basis-index tuples `basisIdx : Fin j → Fin n`
-(where `n = finrank ℝ E`), of the integral, against the volume measure of
-the chart target in `EuclideanSpace ℝ (Fin n)`, of the partition-of-unity
-weight at `α` (composed with the Euclidean representation map back to `M`)
-times the squared absolute value of the multilinear evaluation of the
-`j`-th Fréchet derivative of the EuclN-pulled raw chart-frame
-`(Idx, Jdx)`-component on the standard `EuclideanSpace.basisFun` argument
-tuple indexed by `basisIdx`.
-
-The Hilbert-Schmidt summation `∑_{basisIdx} |·|²` over all index tuples is
-the squared HS norm of the iterated derivative, equal to the L² norm of its
-component vector in the chosen orthonormal basis, and therefore
-satisfies the parallelogram law. Consequently this norm is induced by an
-inner product. -/
 noncomputable def tensorPouSobolevHsNorm
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) : ℝ≥0∞ :=
@@ -119,7 +52,7 @@ noncomputable def tensorPouSobolevHsNorm
               Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))) ^
     (1 / 2 : ℝ)
 
-/-- Unfolding lemma for `tensorPouSobolevHsNorm`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevHsNorm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -145,18 +78,14 @@ theorem tensorPouSobolevHsNorm_eq
                   Measure (EuclideanSpace ℝ
                     (Fin (Module.finrank ℝ E))))) ^ (1 / 2 : ℝ) := rfl
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is
-non-negative. (Trivially `0 ≤ ·` on `ℝ≥0∞`; recorded for downstream
-convenience.) -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevHsNorm_nonneg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
     0 ≤ tensorPouSobolevHsNorm (I := I) (M := M) g k T :=
   zero_le _
 
-/-- The composite of the raw chart-frame scalar component of the zero
-tensor section with the Euclidean pull-back map vanishes identically on
-`EuclideanSpace ℝ (Fin n)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -199,8 +128,7 @@ private lemma tensorChartComponentRaw_comp_euclid_zero_section
     exact this
   exact hM
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm of
-the zero tensor section is zero. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevHsNorm_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     tensorPouSobolevHsNorm (I := I) (M := M) g k
@@ -288,10 +216,7 @@ theorem tensorPouSobolevHsNorm_zero_section
   rw [htsum]
   exact ENNReal.zero_rpow_of_pos (by norm_num)
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is
-monotone in the regularity order: passing from order `2k` to order `2(k+1)`
-cannot decrease the norm, because the additional iterated-derivative
-orders contribute non-negative summands to the inner finite sum. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevHsNorm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -389,9 +314,7 @@ theorem tensorPouSobolevHsNorm_le_succ
     exact ENNReal.tsum_le_tsum hper_chart
   exact ENNReal.rpow_le_rpow htsum_le (by norm_num)
 
-/-- The raw chart-frame scalar component, post-composed with
-`(extChartAt I α).symm ∘ (toEuclidean.symm)`, of a scaled tensor section
-equals the scaled component (a pointwise identity on `EuclN`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_smul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g r s) (α : M)
@@ -412,8 +335,7 @@ private lemma tensorChartComponentRaw_comp_euclid_smul_eq
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
   exact h
 
-/-- The composite `tensorChartComponentRaw ∘ extChartAt.symm ∘ toEuclidean.symm`
-is `ContDiff ℝ ∞` on `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRawEuclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -462,9 +384,7 @@ private lemma tensorChartComponentRawEuclidPull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
-/-- The iterated Fréchet derivative of the EuclN-pulled scaled raw chart
-component, evaluated on the basis-`basisIdx`-tuple, equals `c` times the
-corresponding value for the unscaled section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem iteratedFDeriv_basisEval_smul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g r s) (α : M)
@@ -512,9 +432,7 @@ theorem iteratedFDeriv_basisEval_smul_eq
   rw [iteratedFDeriv_const_smul_apply h_cdAt_n]
   exact ContinuousMultilinearMap.smul_apply _ _ _
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is
-homogeneous in the scalar multiplier: scaling the tensor section by `c`
-multiplies the norm by `|c|`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem tensorPouSobolevHsNorm_smul
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (c : ℝ) (T : SmoothCcTensor g r s) :
@@ -694,8 +612,7 @@ theorem tensorPouSobolevHsNorm_smul
   rw [← ENNReal.rpow_natCast, ← ENNReal.rpow_mul]
   simp
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is
-invariant under negation of the tensor section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem tensorPouSobolevHsNorm_neg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -707,10 +624,7 @@ theorem tensorPouSobolevHsNorm_neg
   have h_abs : |(-1 : ℝ)| = 1 := by simp
   rw [h_abs, ENNReal.ofReal_one, one_mul]
 
-/-- Bound for the per-`(α, IJ, j, basisIdx)` Lebesgue integral inside
-`tensorPouSobolevHsNorm`. The integrand vanishes off the compact set
-`chartImagePOUTsupport α` (POU pulled back to the chart target is zero there),
-and on the compact set the integrand is bounded by a continuous function. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorPouSobolevHsNorm_inner_integral_lt_top'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -925,8 +839,7 @@ theorem tensorPouSobolevHsNorm_inner_integral_lt_top'
   rw [ENNReal.coe_toReal, Real.coe_toNNReal']
   exact (hB y hy).trans (le_max_left _ _)
 
-/-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm of a
-smooth compactly-supported tensor section is finite. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorPouSobolevHsNorm_lt_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -1016,18 +929,12 @@ theorem tensorPouSobolevHsNorm_lt_top
   exact tensorPouSobolevHsNorm_inner_integral_lt_top'
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j basisIdx
 
-/-- The square of the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev
-norm. Equals the explicit double-sum-of-integrals representation without the
-outer square root, the form most convenient for the polarised inner-product
-construction. -/
 noncomputable def tensorPouSobolevHsNormSq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) : ℝ≥0∞ :=
   tensorPouSobolevHsNorm (I := I) (M := M) g k T ^ 2
 
-/-- Unfolding lemma for `tensorPouSobolevHsNormSq`: the explicit
-double-sum-of-integrals representation, equal to the `tsum`/`Finset.sum`
-expression inside `tensorPouSobolevHsNorm` before the outer `^(1/2)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevHsNormSq_eq_inner_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -1059,7 +966,7 @@ theorem tensorPouSobolevHsNormSq_eq_inner_sum
       ← ENNReal.rpow_mul]
   simp
 
-/-- The squared HS-norm is finite on smooth compactly-supported sections. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorPouSobolevHsNormSq_lt_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -1068,9 +975,7 @@ theorem tensorPouSobolevHsNormSq_lt_top
   exact ENNReal.pow_lt_top
     (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g k T)
 
-/-- The raw chart-frame scalar component, post-composed with
-`(extChartAt I α).symm ∘ (toEuclidean.symm)`, of a sum of tensor sections
-equals the sum of components (a pointwise identity on `EuclN`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_add_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₁ T₂ : SmoothCcTensor g r s) (α : M)
@@ -1090,9 +995,7 @@ private lemma tensorChartComponentRaw_comp_euclid_add_eq
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   exact h
 
-/-- The iterated Fréchet derivative of the EuclN-pulled raw chart component
-of a sum of tensor sections, evaluated on the basis-`basisIdx`-tuple, equals
-the sum of the corresponding values for the summand sections. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem iteratedFDeriv_basisEval_add_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₁ T₂ : SmoothCcTensor g r s) (α : M)

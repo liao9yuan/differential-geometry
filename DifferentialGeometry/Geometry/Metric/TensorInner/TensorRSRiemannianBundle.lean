@@ -16,37 +16,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Riemannian
 
-/-!
-# Model-fibre inner-product CLM for the `(r, s)`-tensor bundle
-
-Given a smooth Riemannian metric `g` on a manifold `M` (encoded as a
-`SmoothRiemannianMetric I M`, i.e., a
-`Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`), this file
-exposes the mixed `(r, s)` pointwise inner product
-`tensorInnerPointwise g r s b` as a continuous bilinear pairing
-`innerModelCLMRS g r s b` on the model fibre `TensorRSModel r s ℝ E`.
-
-The mixed `(r, s)` pointwise inner product is defined in
-`Geometry/Metric/PointwiseInner/Defs.lean` by lowering the `r` upper indices
-via `lowerAllUpperIndices` and reducing to the covariant `(0, r + s)`
-inner product `tensorInnerPointwise_0s` at arity `r + s`. The algebraic
-properties (bilinearity, symmetry, non-negativity, positive
-definiteness) are established in `Geometry/Metric/PointwiseInner/Algebra.lean`.
-
-The construction here packages the inner product as a continuous bilinear
-`→L[ℝ] · →L[ℝ] ·` pairing, the natural object for further use in
-Mathlib's `Bundle.RiemannianMetric` and `IsContinuousRiemannianBundle`
-machinery. Lifting this pairing through the bundle/norm topology diamond
-to obtain a bundle-fibre pairing on `TensorRSSpace r s I b` (and ultimately
-a `Bundle.RiemannianMetric` structure) requires diamond-handling along the
-same lines as `TangentRiemannian.lean`; the model-fibre data delivered
-here is the canonical algebraic input to that further construction.
-
-We also prove von-Neumann boundedness of the diagonal-inner-product unit
-ball on the model fibre, reducing to the abstract positive-definite
-bilinear-form lemma `posDef_bilin_unit_ball_isBounded` already established
-in `Tensor0SRiemannian.lean`.
--/
 
 noncomputable section
 
@@ -66,17 +35,10 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The mixed `(r, s)` pointwise inner product on the model fibre as a CLM
-
-The pointwise inner product `tensorInnerPointwise g r s b` is bilinear and
-the model fibre is finite-dimensional, so it is automatically a continuous
-bilinear map. We package it as a `→L[ℝ] · →L[ℝ] ·` CLM. -/
-
-/-- Underlying bilinear (`LinearMap`-valued) pairing on the model fibre. -/
 private def innerModelBilinRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     TensorRSModel r s ℝ E →ₗ[ℝ] TensorRSModel r s ℝ E →ₗ[ℝ] ℝ :=
@@ -97,8 +59,6 @@ private def innerModelBilinRS
     innerModelBilinRS (I := I) (M := M) g r s b T S =
       tensorInnerPointwise (I := I) (M := M) g r s b T S := rfl
 
-/-- The "outer" linear map: for each `T`, the inner-argument `S ↦ inner T S`
-is linear and (since the model fibre is finite-dimensional) continuous. -/
 private def innerModelLinearOuterRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     TensorRSModel r s ℝ E →ₗ[ℝ] (TensorRSModel r s ℝ E →L[ℝ] ℝ) where
@@ -120,8 +80,6 @@ private def innerModelLinearOuterRS
     rw [tensorInnerPointwise_smul_left]
     rfl
 
-/-- The mixed `(r, s)` pointwise inner product as a continuous bilinear
-pairing on the model fibre. -/
 def innerModelCLMRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E →L[ℝ] ℝ :=
@@ -134,9 +92,6 @@ def innerModelCLMRS
     innerModelCLMRS (I := I) (M := M) g r s b T S =
       tensorInnerPointwise (I := I) (M := M) g r s b T S := rfl
 
-/-! ## Algebraic properties of `innerModelCLMRS` at the model-fibre level -/
-
-/-- Symmetry of the model-fibre mixed inner product. -/
 lemma innerModelCLMRS_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -145,7 +100,6 @@ lemma innerModelCLMRS_symm
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b _ _
 
-/-- Positive definiteness on the diagonal: `inner b T T > 0` for `T ≠ 0`. -/
 lemma innerModelCLMRS_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) (hT : T ≠ 0) :
@@ -160,7 +114,6 @@ lemma innerModelCLMRS_pos
     exact (tensorInnerPointwise_eq_zero_iff
       (I := I) (M := M) g r s b T).mp heq.symm
 
-/-- Non-negativity of the model-fibre mixed inner product on the diagonal. -/
 lemma innerModelCLMRS_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -168,7 +121,6 @@ lemma innerModelCLMRS_nonneg
   rw [innerModelCLMRS_apply]
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s b T
 
-/-- Left additivity of the model-fibre mixed inner product. -/
 lemma innerModelCLMRS_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T₁ T₂ S : TensorRSModel r s ℝ E) :
@@ -178,7 +130,6 @@ lemma innerModelCLMRS_add_left
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_add_left (I := I) (M := M) g r s b _ _ _
 
-/-- Right additivity of the model-fibre mixed inner product. -/
 lemma innerModelCLMRS_add_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S₁ S₂ : TensorRSModel r s ℝ E) :
@@ -188,7 +139,6 @@ lemma innerModelCLMRS_add_right
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_add_right (I := I) (M := M) g r s b _ _ _
 
-/-- Left scalar-multiplication of the model-fibre mixed inner product. -/
 lemma innerModelCLMRS_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -197,7 +147,6 @@ lemma innerModelCLMRS_smul_left
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_smul_left (I := I) (M := M) g r s b c _ _
 
-/-- Right scalar-multiplication of the model-fibre mixed inner product. -/
 lemma innerModelCLMRS_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -206,26 +155,15 @@ lemma innerModelCLMRS_smul_right
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_smul_right (I := I) (M := M) g r s b c _ _
 
-/-! ## Bundle-fibre `(r, s)` inner CLM via the CLE bridge
-
-The bundle fibre `TensorRSSpace r s I b` is canonically continuously linearly equivalent
-to the model fibre `TensorRSModel r s ℝ E` via `tensorRSSpace_continuousLinearEquiv`.
-We package the model-fibre CLM `innerModelCLMRS` as a bundle-fibre CLM by precomposing
-with this CLE on each argument. -/
-
-/-- Shorthand for the CLE between the bundle fibre and the model fibre. -/
 private def bundleCLERS (r s : ℕ) (b : M) :
     TensorRSSpace r s I b ≃L[ℝ] TensorRSModel r s ℝ E :=
   Tensor0SBundle.tensorRSSpace_continuousLinearEquiv
     (𝕜 := ℝ) (E := E) (I := I) (M := M) r s b
 
-/-- The forward CLM of `bundleCLERS`. -/
 private def bundleToModelCLMRS (r s : ℕ) (b : M) :
     TensorRSSpace r s I b →L[ℝ] TensorRSModel r s ℝ E :=
   (bundleCLERS (I := I) (M := M) (E := E) r s b).toContinuousLinearMap
 
-/-- The "pre-compose into bundle" CLM, post-composing a model-fibre CLM
-`TensorRSModel r s ℝ E →L[ℝ] ℝ` with `bundleToModelCLMRS`. -/
 private def precompBundleCLMRS (r s : ℕ) (b : M) :
     (TensorRSModel r s ℝ E →L[ℝ] ℝ) →L[ℝ]
       (TensorRSSpace r s I b →L[ℝ] ℝ) :=
@@ -239,8 +177,6 @@ private def precompBundleCLMRS (r s : ℕ) (b : M) :
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b) T) :=
   rfl
 
-/-- The `(r, s)` pointwise inner product packaged as a continuous bilinear
-pairing on the bundle fibre `TensorRSSpace r s I b`. -/
 def tensorRSRiemannianInnerCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     TensorRSSpace r s I b →L[ℝ] TensorRSSpace r s I b →L[ℝ] ℝ :=
@@ -260,9 +196,6 @@ def tensorRSRiemannianInnerCLM
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b) S) := by
   rfl
 
-/-! ## Algebraic properties of the bundle-fibre CLM -/
-
-/-- Symmetry of the bundle-fibre `(r, s)` inner product. -/
 theorem tensorRSRiemannianInnerCLM_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSSpace r s I b) :
@@ -271,7 +204,6 @@ theorem tensorRSRiemannianInnerCLM_symm
   rw [tensorRSRiemannianInnerCLM_apply, tensorRSRiemannianInnerCLM_apply]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b _ _
 
-/-- Positive-definiteness on the diagonal: `inner b T T > 0` for `T ≠ 0`. -/
 theorem tensorRSRiemannianInnerCLM_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) (hT : T ≠ 0) :
@@ -305,7 +237,6 @@ theorem tensorRSRiemannianInnerCLM_pos
     exact (tensorInnerPointwise_eq_zero_iff
       (I := I) (M := M) g r s b _).mp heq.symm
 
-/-- Left scalar-homogeneity. -/
 theorem tensorRSRiemannianInnerCLM_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSSpace r s I b) :
@@ -317,7 +248,6 @@ theorem tensorRSRiemannianInnerCLM_smul_left
   rw [h]
   rfl
 
-/-- Right scalar-homogeneity. -/
 theorem tensorRSRiemannianInnerCLM_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSSpace r s I b) :
@@ -329,44 +259,29 @@ theorem tensorRSRiemannianInnerCLM_smul_right
   rw [h]
   rfl
 
-/-! ## Diagonal continuity
-
-We prove that `v ↦ tensorRSRiemannianInnerCLM g r s b v v` is continuous on
-the bundle fibre `TensorRSSpace r s I b`. The argument transports through the
-continuous CLE `bundleCLERS` to the model fibre, where the bilinear CLM
-`innerModelCLMRS g r s b` has straightforward continuity. -/
-
-/-- The model-fibre diagonal `T ↦ tensorInnerPointwise g r s b T T` is continuous
-on the model fibre, viewed as a finite-dim normed space.
-
-Proof strategy: Expand the quadratic form in a basis. Coordinates are continuous
-(finite-dim linear functionals), products are continuous, finite sums of continuous
-are continuous. -/
-lemma innerModelRS_quadratic_continuous
+private lemma innerModelRS_quadratic_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Continuous (fun T : TensorRSModel r s ℝ E =>
       tensorInnerPointwise (I := I) (M := M) g r s b T T) := by
   classical
-  -- Use the canonical basis of the finite-dim model fibre.
+
   let ι := Fin (Module.finrank ℝ (TensorRSModel r s ℝ E))
   let basis : Module.Basis ι ℝ (TensorRSModel r s ℝ E) :=
     Module.finBasis ℝ (TensorRSModel r s ℝ E)
-  -- Coordinate functionals `φ_i : M →ₗ[ℝ] ℝ`, each continuous in finite-dim.
+
   let φ : ι → (TensorRSModel r s ℝ E →ₗ[ℝ] ℝ) := fun i => basis.coord i
   have hφ_cont : ∀ i, Continuous (φ i) := fun i =>
     LinearMap.continuous_of_finiteDimensional (φ i)
-  -- Expansion: `T = ∑ φ i T • basis i`.
+
   have hexpand : ∀ T : TensorRSModel r s ℝ E,
       T = ∑ i : ι, (φ i T) • basis i := by
     intro T
     have := basis.linearCombination_repr T
-    -- `linearCombination` over a Finsupp; convert to Finset.sum over Fintype.
+
     rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype] at this
     · exact this.symm
     · intros; rw [zero_smul]
-  -- Bilin T T = ∑_{i,j} φ_i T * φ_j T * tensorInnerPointwise g r s b (basis i) (basis j)
-  -- A general distributivity lemma: for any coefficient vector `a : ι → ℝ`, the
-  -- inner product of `∑ i, a i • basis i` with itself expands to the double sum.
+
   have hgen_left : ∀ (a : ι → ℝ) (S : TensorRSModel r s ℝ E),
       tensorInnerPointwise (I := I) (M := M) g r s b
         (∑ i : ι, a i • basis i) S =
@@ -413,8 +328,7 @@ lemma innerModelRS_quadratic_continuous
     intro j _
     rw [RR.map_smul]
     rfl
-  -- Now the desired bilinear expansion. We separate coefficient computation from
-  -- the structural rewrite using an auxiliary `aux T S` lemma.
+
   have hbilin_aux : ∀ (T : TensorRSModel r s ℝ E) (a : ι → ℝ),
       T = ∑ i : ι, a i • basis i →
       tensorInnerPointwise (I := I) (M := M) g r s b T T =
@@ -448,20 +362,18 @@ lemma innerModelRS_quadratic_continuous
           tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j) := by
     intro T
     exact hbilin_aux T (fun i => φ i T) (hexpand T)
-  -- The function `T ↦ ∑_{i,j} ...` is continuous.
+
   have hcont : Continuous (fun T : TensorRSModel r s ℝ E =>
       ∑ i : ι, ∑ j : ι, (φ i T) * (φ j T) *
         tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j)) := by
     refine continuous_finset_sum _ (fun i _ => ?_)
     refine continuous_finset_sum _ (fun j _ => ?_)
     refine ((hφ_cont i).mul (hφ_cont j)).mul continuous_const
-  -- Conclude by rewriting via `hbilin_expand`.
+
   refine hcont.congr ?_
   intro T
   exact (hbilin_expand T).symm
 
-/-- For each base point `b`, the function `v ↦ tensorRSRiemannianInnerCLM g r s b v v`
-on the bundle fibre is continuous. Pulled back through the continuous CLE `toModel`. -/
 lemma tensorRSRiemannianInnerCLM_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Continuous (fun v : TensorRSSpace r s I b =>
@@ -480,24 +392,14 @@ lemma tensorRSRiemannianInnerCLM_diagonal_continuous
     (Tensor0SBundle.TensorRSSpace.toModel_continuous
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b))
 
-/-- `ContinuousAt` form of the diagonal continuity at `0` on the bundle fibre. -/
 theorem tensorRSRiemannianInnerCLM_diagonal_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     ContinuousAt (fun v : TensorRSSpace r s I b =>
       tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b v v) 0 :=
   (tensorRSRiemannianInnerCLM_diagonal_continuous (I := I) (M := M) g r s b).continuousAt
 
-
-/-! ## Von-Neumann boundedness of the inner-product unit ball
-
-The set `{v : TensorRSSpace r s I b | inner b v v < 1}` is von-Neumann bounded.
-We follow the Tensor0S strategy: transfer the unit ball to the model fibre via
-the CLE `bundleCLERS` and use `posDef_bilin_unit_ball_isBounded`. -/
-
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 800000 in
-/-- Boundedness on the model fibre: the diagonal sublevel set is metrically
-bounded as a subset of `TensorRSModel r s ℝ E`. -/
 private lemma innerModelRS_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Bornology.IsBounded
@@ -528,8 +430,7 @@ private lemma innerModelRS_diagonal_sublevel_isBounded
       exact innerModelCLMRS_smul_right (I := I) (M := M) g r s b c v w
     exact Tensor0SRiemannian.posDef_bilin_unit_ball_isBounded
       (innerModelCLMRS (I := I) (M := M) g r s b) hPD hNN hSmulL hSmulR
-  · -- Trivial case: subsingleton model fibre.
-    have hSubsingleton : Subsingleton (TensorRSModel r s ℝ E) :=
+  · have hSubsingleton : Subsingleton (TensorRSModel r s ℝ E) :=
       not_nontrivial_iff_subsingleton.mp hNT
     haveI := hSubsingleton
     refine (Metric.isBounded_iff_subset_ball 0).mpr ⟨1, ?_⟩
@@ -540,7 +441,6 @@ private lemma innerModelRS_diagonal_sublevel_isBounded
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
-/-- The model-side von-Neumann boundedness. -/
 private lemma innerModelRS_diagonal_sublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -549,7 +449,6 @@ private lemma innerModelRS_diagonal_sublevel_isVonNBounded
   NormedSpace.isVonNBounded_of_isBounded ℝ
     (innerModelRS_diagonal_sublevel_isBounded (I := I) (M := M) g r s b)
 
-/-- Diagonal-clm-apply form of `tensorRSRiemannianInnerCLM` at fixed `b`. -/
 private lemma tensorRSRiemannianInner_diagonal_clm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -562,7 +461,6 @@ private lemma tensorRSRiemannianInner_diagonal_clm_apply
   rw [tensorRSRiemannianInnerCLM_apply]
 
 set_option maxHeartbeats 800000 in
-/-- Von-Neumann boundedness of the inner-product unit ball on the bundle fibre. -/
 theorem tensorRSRiemannianInnerCLM_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -606,18 +504,13 @@ theorem tensorRSRiemannianInnerCLM_isVonNBounded
   rw [← hSetEq]
   exact hImg
 
-/-! ## Bundle `RiemannianMetric` packaging
-
-We package the algebraic / continuity / boundedness data into Mathlib's
-`Bundle.RiemannianMetric` structure on the `(r, s)`-tensor bundle. -/
-
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The bundle Riemannian metric on the `(r, s)`-tensor bundle. -/
+
 noncomputable def tensorRSRiemannianMetric
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Bundle.RiemannianMetric (E := fun b : M => TensorRSSpace r s I b) where
@@ -636,21 +529,16 @@ end TensorRSRiemannianBundle
 end Tensor
 end DifferentialGeometry
 
-/-! ## Public `RiemannianBundle` instance for the `(r, s)`-tensor bundle -/
-
 namespace Tensor0SBundle
 
 open DifferentialGeometry.Tensor.TensorRSRiemannianBundle
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `RiemannianBundle` class instance for the `(r, s)`-tensor bundle, built
-from a smooth tangent-bundle Riemannian metric `g`. Supplied as a definition
-parameterised by the metric for downstream `letI`-style installation. -/
 @[reducible]
 noncomputable def tensorRS_riemannianBundle
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -658,12 +546,3 @@ noncomputable def tensorRS_riemannianBundle
   ⟨tensorRSRiemannianMetric (I := I) (M := M) g r s⟩
 
 end Tensor0SBundle
-
-/-! ## `IsContinuousRiemannianBundle` instance for the `(r, s)`-tensor bundle
-
-The `IsContinuousRiemannianBundle` typeclass instance for the `(r, s)`-tensor
-bundle is installed at a higher layer in the project, in
-`Analysis/Spectral/Tensor/ChartTensor/Inner/TensorRSContRiemannianBundle.lean`,
-where the chart-frame `(r, s)`-inner product machinery
-(`chartTensorInnerPointwise_rs_model`, with its smoothness theorem and bridge
-identity) is available. -/

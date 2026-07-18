@@ -1,59 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.WeightedCoeffMulENormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDiv
 
-/-!
-# Explicit-norm bound for the cross-right gradient-divergence limit
-
-The cross-right gradient-term divergence has, as its `n → ∞` `L²`-limit, the
-explicit finite-sum object `crossRightGradCoeffDivLimit g r s i α P₀`.
-By definition it is a sum of two three-fold finite sums, indexed by a chart
-direction `l` and a pair of component multi-indices `(P, Q)`:
-
-* a **component-atom** group: the kernel-indicator-cut chart-Euclidean partial of
-  the test-independent `C^∞` factor `crossRightDivFactor`, times the cutoff
-  chart-component limit object `crossRightLimitComponent g r s i α P`;
-* a **chart-partial-atom** group: the kernel-indicator-cut `C^∞` factor
-  `crossRightDivFactor`, times the cutoff chart-partial limit object
-  `cutoffPartialLpLimit g r s i α P l`.
-
-Each three-fold-sum summand is a product `Set.indicator (chartPouKernel α) c · w`
-of an indicator-cut coefficient with an `L²` chart-component / chart-partial atom.
-The coefficient `c` — `crossRightDivFactor` or its chart-Euclidean partial — is
-itself `C^∞` on the open chart target *and vanishes off the compact
-partition-of-unity kernel* `chartPouKernel α`. Hence the kernel indicator acts as
-the identity (`Set.indicator (chartPouKernel α) c = c` pointwise), and `c` is
-globally bounded — its sup over the compact kernel, extended by zero. The
-pointwise norm domination `‖c y · w y‖ ≤ ‖C • w y‖` then gives, by monotonicity
-and homogeneity of `eLpNorm`, the per-summand estimate
-
-```
-eLpNorm (fun y => Set.indicator (chartPouKernel α) c y * w y) 2 μw
-  ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-Summing over the (finitely many) triples `(l, P, Q)` — every summand's atom
-`eLpNorm` bounded by the full atom-family sum, and the coefficient sup constants
-together with the triple-index cardinality folded into a single constant — and
-applying the triangle inequality across the two groups yields the headline
-estimate: the weighted `eLpNorm` of `crossRightGradCoeffDivLimit` is bounded by an
-explicit nonnegative constant times the sum of the weighted `eLpNorm`s of the
-distinct atoms `crossRightLimitComponent` (indexed by `P`) and
-`cutoffPartialLpLimit` (indexed by `P` and `l`).
-
-## Main result
-
-* `eLpNorm_crossRightGradCoeffDivLimit_le_uniform` — the
-  quantitative uniform-constant weighted-`eLpNorm` bound for the cross-right
-  gradient-divergence limit, in terms of the weighted `eLpNorm`s of its two atom
-  families.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -90,26 +37,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section PerSummandBound
 
-set_option linter.unusedSectionVars false in
-/-- **Per-summand weighted-`eLpNorm` bound.** Let `c : EuclN → ℝ` be `C^∞` on the
-open chart target `chartTargetEuclid α`, and let `w : EuclN → ℝ` be arbitrary.
-Then there is a nonnegative constant `C` with
 
-```
-eLpNorm (fun y => Set.indicator (chartPouKernel α) c y * w y) 2 μw
-  ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-The constant `C` is the sup of `‖c‖` over the compact kernel `chartPouKernel α`.
-On the kernel `‖c y‖ ≤ C`; off the kernel the indicator-cut coefficient vanishes,
-so `‖Set.indicator (chartPouKernel α) c y‖ ≤ C` holds for *every* `y`. This
-global bound gives the pointwise norm domination
-`‖Set.indicator (chartPouKernel α) c y · w y‖ ≤ ‖C • w y‖`. Monotonicity of
-`eLpNorm` under that domination, the homogeneity
-`eLpNorm (C • w) 2 μw = ‖C‖ₑ * eLpNorm w 2 μw`, and the conversion
-`‖C‖ₑ = ENNReal.ofReal C` for `C ≥ 0` give the estimate. -/
 private lemma eLpNorm_indicatorPou_mul_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -169,24 +97,7 @@ private lemma eLpNorm_indicatorPou_mul_le
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw := h_mono
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
-set_option linter.unusedSectionVars false in
-/-- **Uniform-constant per-summand weighted-`eLpNorm` bound.** Let
-`c : EuclN → ℝ` be `C^∞` on the open chart target `chartTargetEuclid α`. Then
-there is a single nonnegative constant `C` — the sup of `‖c‖` over the compact
-partition-of-unity kernel, depending only on `c` — such that for *every*
-`w : EuclN → ℝ`,
 
-```
-eLpNorm (fun y => Set.indicator (chartPouKernel α) c y * w y) 2 μw
-  ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-This is the constant-uniform form of `eLpNorm_indicatorPou_mul_le`: the constant
-of that per-`w` bound — the coefficient's sup over the compact kernel — does not
-depend on `w`, so it can be exhibited once, before the universally quantified
-`w`. -/
 private lemma eLpNorm_indicatorPou_mul_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -250,11 +161,7 @@ end PerSummandBound
 
 section MeasurabilityTransfer
 
-set_option linter.unusedSectionVars false in
-/-- A function almost-everywhere strongly measurable for the chart `L²` measure is
-almost-everywhere strongly measurable for the chart-pulled weighted measure
-restricted to the chart target: the latter is absolutely continuous with respect
-to the former. -/
+
 private lemma aestronglyMeasurable_weighted_of_chartL2
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}
@@ -270,10 +177,8 @@ end MeasurabilityTransfer
 
 section UniformConstant
 
-set_option linter.unusedSectionVars false in
-/-- Given, for every element of a finite type, a nonnegative constant and a
-weighted-`eLpNorm` bound governed by it, the sum of all those constants is a
-single nonnegative constant for which the same bound holds for every element. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_uniform_eLpNorm_bound
     {ι : Type*} [Finite ι]
     {μ : Measure EuclN} {f : ι → EuclN → ℝ} {a : ι → ℝ≥0∞}
@@ -292,22 +197,6 @@ end UniformConstant
 
 section MainBound
 
-/-- **Uniform-constant explicit weighted-`eLpNorm` bound for the cross-right
-gradient-divergence limit (chart-locality-free).** Chart-locality-free twin of
-`eLpNorm_crossRightGradCoeffDivLimit_le_uniform`, re-keyed onto the unconditional
-cross-right gradient-divergence limit `crossRightGradCoeffDivLimit`
-and its two atom families `crossRightLimitComponent` /
-`cutoffPartialLpLimit` (all built from
-`tensorResolventEigenbasisVec` at the unconditional compactness witness
-`tensorResolventL2_isCompactOperator g r s`, hence carrying no
-chart-selection hypothesis).
-
-A single nonnegative constant `C` serves every eigenbasis index `i`. The
-per-`i` bound's constant is the larger of two finite sums, over the triple
-summation index, of the per-summand sup constants of the `i`-free `C^∞` factor
-`crossRightDivFactor` (or its chart-Euclidean partial) over the compact
-partition-of-unity kernel; that constant does not depend on `i` and is hoisted
-before the `∀ i`. -/
 theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

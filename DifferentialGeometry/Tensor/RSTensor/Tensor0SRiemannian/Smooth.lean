@@ -4,13 +4,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
 
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -50,7 +50,14 @@ private theorem totalNabla0SRealizes_eval_point_vector_smooth_slots
     (I := I) hA Wsec V x
   simpa [hWsec] using h0
 
-private theorem cotangentSharp_cov_eq_sharp_curry_of_mdiffAt
+
+
+
+
+
+
+
+theorem cotangentSharp_cov_eq_sharp_curry_of_mdiffAt
     [T2Space M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -234,7 +241,7 @@ private theorem cotangentInner_metricCompatible_extDerivFun_of_sharp_mdiffAt
   rw [hcovA, hcovB]
   rfl
 
-/-- Differentiability of the induced `(0,2)` tensor inner product. -/
+
 theorem inner0S_two_mdiff
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -346,10 +353,10 @@ theorem inner0S_two_mdiff
       (by filter_upwards with y; simp [Finset.sum_apply])
   exact hsum.congr_of_eventuallyEq hlocal
 
-/-- Directional metric compatibility for the induced `(0,2)` tensor inner product.
 
-This version is stated directly with `nabla0SFun`, so it can be used for
-frozen auxiliary tensor fields without constructing a bundled total derivative. -/
+
+
+
 theorem inner0S_two_nabla
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -781,19 +788,19 @@ theorem inner0S_two_nabla
           (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X B x) := by
           rw [hsplit, ← hRhsA, ← hRhsB]
 
-/-- Metric compatibility lifted to the induced inner product on `(0,2)`
-covariant tensor fibers.
 
-This is the tensor-metric API bridge needed by Bochner product rules.  The
-base assumption `Connection.IsMetricCompatible_gen` only differentiates tangent
-inner products; this theorem is the induced compatibility statement for
-`inner0S g x 2` and the total covariant derivative on `(0,2)` tensors.
 
-The remaining lower frontier is the component-to-invariant assembly: in a
-coordinate-frame neighborhood, rewrite `inner0S g y 2 (A y) (B y)` as the
-four-index inverse-metric contraction, differentiate that local expression,
-use localized `nabla gInv = 0`, then invoke
-`inner0S_two_metricCompatible_coord_algebra`. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem inner0S_two_metricCompatible_extDerivFun
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)

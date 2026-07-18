@@ -1,6 +1,6 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
@@ -12,40 +12,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.Topology.VectorBundle.FiniteDimensional
 
-/-!
-# Dual of the Multilinear Bundle
-
-This file explicitly establishes the canonical equivalence between the dual of the `r`-multilinear
-bundle and the `r`-multilinear bundle of the dual, developed in four progressive stages:
-
-1. **Model-Fiber Level**: We construct the canonical linear equivalence
-   `(MLF r) →L[𝕜] 𝕜 ≃ₗ[𝕜] ContinuousMultilinearMap 𝕜 (Fin r → (F →L[𝕜] 𝕜)) 𝕜`
-   between the continuous dual of `r`-multilinear maps on `F` and `r`-multilinear maps on `F*`
-   (`ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual`).
-
-2. **Bundle Instances**: We define the topological, fiber bundle, and vector bundle structures
-   for the dual of the multilinear bundle to resolve topology diamonds explicitly
-   (`Bundle.continuousMultilinearMap.dualBundleVectorBundle`).
-
-3. **Bundle-Fiber Level**: We lift the model-level equivalence to the fibers of a vector bundle `E`,
-   yielding `(MLF r at x) →L[𝕜] 𝕜 ≃L[𝕜] mlf-of-dual r at x`
-   (`Bundle.continuousMultilinearMap.dualMultilinearLinearEquivAt`).
-
-4. **Bundle Equivalence**: The fiberwise linear equivalence `dualMultilinearFiberwiseEquiv`
-   is assembled by composing the trivialization CLEs with the model-level equivalence, and
-   total-space smoothness is proved directly via the trivialization compatibility lemmas
-   (`dualUnliftFiber_triv_eq`, `dualLiftFiber_triv_eq`). This yields the final `C^n` vector
-   bundle equivalence `dualBundle_multilinearOfDual_equiv`, proving `(T_k(E))* ≃ T_k(E*)`
-   over any `NontriviallyNormedField 𝕜` via
-   `ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
-
-## Tags
-
-multilinear map, dual bundle, vector bundle, fiberwise equivalence
--/
 
 noncomputable section
-
 
 open Module
 
@@ -54,15 +22,6 @@ namespace ContinuousMultilinearMap
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
 
-/-! ## The "tensor of duals" multilinear map -/
-
-/-- The "tensor of dual linear forms as a multilinear map" continuous multilinear map at
-the model-fiber level: sends `(α₁,…,αᵣ) ∈ (F →L[𝕜] 𝕜)^r` to the `r`-multilinear map
-`(v₁,…,vᵣ) ↦ ∏ αᵢ(vᵢ) ∈ 𝕜`.
-
-Built by composing the "product" multilinear map `mkPiAlgebra 𝕜 (Fin r) 𝕜` with linear
-maps in each slot, packaged as a multilinear map in those linear maps via
-`compContinuousLinearMapLRight`. -/
 noncomputable def tensorOfDualLinearForms (r : ℕ) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜)
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) :=
@@ -80,13 +39,8 @@ theorem tensorOfDualLinearForms_apply (r : ℕ) (α : Fin r → (F →L[𝕜] �
     ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
 
-/-! ## The forward linear map -/
-
 variable (𝕜 F)
 
-/-- The linear map from `(MLF r)*` (continuous dual of `r`-multilinear maps on `F`) to
-the space of `r`-multilinear maps on the dual `F →L[𝕜] 𝕜`, sending a linear functional
-`φ` to `(α₁,…,αᵣ) ↦ φ((v₁,…,vᵣ) ↦ ∏ αᵢ(vᵢ))`. -/
 noncomputable def dualMultilinearLinearMap (r : ℕ) :
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) →L[𝕜] 𝕜) →ₗ[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 where
@@ -112,13 +66,8 @@ theorem dualMultilinearLinearMap_apply (r : ℕ)
     dualMultilinearLinearMap 𝕜 F r φ α =
       φ ((tensorOfDualLinearForms 𝕜 F r) α) := rfl
 
-/-! ## Basis identification of `tensorOfDualLinearForms` -/
-
 variable (𝕜 F)
 
-/-- The basis element `continuousMultilinearMap_basisElem b r σ` of `MLF r` (a tensor
-product of coordinate functionals) coincides with `tensorOfDualLinearForms` applied to
-the dual basis at the index `σ`. -/
 theorem basisElem_eq_tensorOfDualLinearForms {d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F) (r : ℕ) (σ : Fin r → Fin d) :
     continuousMultilinearMap_basisElem (𝕜 := 𝕜) (F := F) b r σ
@@ -130,19 +79,6 @@ theorem basisElem_eq_tensorOfDualLinearForms {d : ℕ}
   simp [continuousMultilinearMap_basisElem,
     ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiRing_apply]
-
-/-! ## The explicit inverse map
-
-We construct the inverse `dualMultilinearInverseMap` in two steps:
-
-1. First, we build a `LinearMap` directly from `Basis.constr`. This uses
-   `Basis.constr 𝕜 (data Ψ) : (MLF r) →ₗ[𝕜] 𝕜` for each `Ψ`, then promotes to a
-   continuous linear map via `LinearMap.toContinuousLinearMap` (a `LinearEquiv` in
-   finite dimensions).
-2. Then, we prove `map_add'` and `map_smul'` by reducing each goal via
-   `ContinuousLinearMap.coe_injective` and `Basis.ext` to verifying equality on basis
-   elements, where everything reduces to `Basis.constr_basis`.
--/
 
 private noncomputable def dualMultilinearInverseAux (r : ℕ)
     (Ψ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜) :
@@ -169,12 +105,12 @@ private theorem dualMultilinearInverseAux_basisElem (r : ℕ)
     continuousMultilinearMap_finiteDimensional r
   let b := Module.finBasis 𝕜 F
   let bMLF := continuousMultilinearMap_basis (𝕜 := 𝕜) (F := F) b r
-  -- bMLF σ definitionally equals continuousMultilinearMap_basisElem b r σ.
+
   have hb_eq : (bMLF σ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) =
       continuousMultilinearMap_basisElem b r σ :=
     congr_fun (Module.Basis.coe_mk
       (continuousMultilinearMap_basisElem_linearIndependent b r) _) σ
-  -- Unfold the definition to expose the Basis.constr.
+
   change LinearMap.toContinuousLinearMap
       (bMLF.constr 𝕜 (fun σ => Ψ (fun i =>
         LinearMap.toContinuousLinearMap (b.coord (σ i)))))
@@ -183,10 +119,6 @@ private theorem dualMultilinearInverseAux_basisElem (r : ℕ)
 
 variable (𝕜 F)
 
-/-- The explicit inverse of `dualMultilinearLinearMap`, built via `Basis.constr` on the
-explicit basis of `MLF r`. Given a multilinear map `Ψ` on `(F →L[𝕜] 𝕜)^r`, produces the
-continuous linear functional on `MLF r` whose value on the basis element
-`continuousMultilinearMap_basisElem b r σ` is `Ψ (b.coord ∘ σ)`. -/
 noncomputable def dualMultilinearInverseMap (r : ℕ) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 →ₗ[𝕜]
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) →L[𝕜] 𝕜) where
@@ -249,9 +181,6 @@ noncomputable def dualMultilinearInverseMap (r : ℕ) :
 
 variable {𝕜 F}
 
-/-- Defining property of `dualMultilinearInverseMap`: it sends `Ψ` to a functional whose
-value on the basis element `continuousMultilinearMap_basisElem b r σ` is `Ψ (b.coord ∘ σ)`,
-where `b = Module.finBasis 𝕜 F`. -/
 theorem dualMultilinearInverseMap_basisElem (r : ℕ)
     (Ψ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
     (σ : Fin r → Fin (Module.finrank 𝕜 F)) :
@@ -261,11 +190,8 @@ theorem dualMultilinearInverseMap_basisElem (r : ℕ)
         LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 F).coord (σ i))) :=
   dualMultilinearInverseAux_basisElem r Ψ σ
 
-/-! ## Round-trip identities -/
-
 variable (𝕜 F)
 
-/-- Left inverse: `dualMultilinearInverseMap ∘ dualMultilinearLinearMap = id`. -/
 theorem dualMultilinearInverseMap_dualMultilinearLinearMap (r : ℕ) :
     (dualMultilinearInverseMap 𝕜 F r).comp (dualMultilinearLinearMap 𝕜 F r) =
       LinearMap.id := by
@@ -303,7 +229,6 @@ theorem dualMultilinearInverseMap_dualMultilinearLinearMap (r : ℕ) :
     exact congrFun (congrArg DFunLike.coe this) y
   exact hAll x
 
-/-- Right inverse: `dualMultilinearLinearMap ∘ dualMultilinearInverseMap = id`. -/
 theorem dualMultilinearLinearMap_dualMultilinearInverseMap (r : ℕ) :
     (dualMultilinearLinearMap 𝕜 F r).comp (dualMultilinearInverseMap 𝕜 F r) =
       LinearMap.id := by
@@ -344,11 +269,6 @@ theorem dualMultilinearLinearMap_dualMultilinearInverseMap (r : ℕ) :
         (fun j => LinearMap.toContinuousLinearMap (b.coord (σ j))) i) from rfl,
     ContinuousMultilinearMap.map_smul_univ, smul_eq_mul]
 
-/-! ## The linear equivalence -/
-
-/-- The linear equivalence `(MLF r)* ≃ₗ MLF r over F*`, built explicitly via the
-forward map `dualMultilinearLinearMap` and the inverse `dualMultilinearInverseMap`,
-with the round-trip identities. -/
 noncomputable def dualMultilinearEquivMultilinearOfDual (r : ℕ) :
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) →L[𝕜] 𝕜) ≃ₗ[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 :=
@@ -359,8 +279,6 @@ noncomputable def dualMultilinearEquivMultilinearOfDual (r : ℕ) :
     (dualMultilinearInverseMap_dualMultilinearLinearMap 𝕜 F r)
 
 end ContinuousMultilinearMap
-
-
 
 open Bundle
 
@@ -373,11 +291,6 @@ variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace
 variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 
-/-! ## The bundle-fiber-level dual equivalence -/
-
-/-- The bundle-fiber-level continuous linear equivalence between the dual of
-`r`-multilinear maps on the fiber `E x` and `r`-multilinear maps on the dual fiber
-`E x →L[𝕜] 𝕜`. -/
 noncomputable def dualMultilinearLinearEquivAt (r : ℕ) (x : B) :
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜] 𝕜) ≃ₗ[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (E x →L[𝕜] 𝕜)) 𝕜 :=
@@ -391,8 +304,6 @@ theorem dualMultilinearLinearEquivAt_apply (r : ℕ) (x : B)
       φ ((ContinuousMultilinearMap.tensorOfDualLinearForms 𝕜 (E x) r) α) := rfl
 
 end Bundle.continuousMultilinearMap
-
-
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -410,15 +321,6 @@ variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable {r : ℕ}
 
-/-!
-## Bundle instances
-
-The dual bundle of the multilinear bundle is the hom bundle from the multilinear bundle to
-the trivial `𝕜`-bundle, using `Bundle.ContinuousLinearMap`.
--/
-
-/-- Topology on the total space of `Bundle.dual 𝕜 (Bundle.continuousMultilinearMap 𝕜 r F E)`,
-induced by viewing it as the hom bundle from the multilinear bundle to the trivial `𝕜`-bundle. -/
 noncomputable instance dualBundleTopology (r : ℕ) :
     TopologicalSpace (TotalSpace
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)
@@ -429,7 +331,6 @@ noncomputable instance dualBundleTopology (r : ℕ) :
     𝕜
     (fun _ : B => 𝕜)
 
-/-- The dual bundle of the multilinear bundle is a fiber bundle. -/
 noncomputable instance dualBundleFiberBundle (r : ℕ) :
     @FiberBundle B
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)
@@ -442,7 +343,6 @@ noncomputable instance dualBundleFiberBundle (r : ℕ) :
     𝕜
     (fun _ : B => 𝕜)
 
-/-- The dual bundle of the multilinear bundle is a vector bundle. -/
 noncomputable instance dualBundleVectorBundle (r : ℕ) :
     @VectorBundle 𝕜 B
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)
@@ -458,10 +358,6 @@ noncomputable instance dualBundleVectorBundle (r : ℕ) :
     𝕜
     (fun _ : B => 𝕜)
 
-/-!
-## Smooth bundle instance
--/
-
 section smooth
 
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
@@ -472,7 +368,6 @@ variable [ChartedSpace HB B]
 variable (n : WithTop ℕ∞)
 variable [ContMDiffVectorBundle n F E IB]
 
-/-- The dual bundle of the multilinear bundle is a `C^n` vector bundle. -/
 noncomputable instance dualBundleSmoothVectorBundle (r : ℕ) :
     @ContMDiffVectorBundle n 𝕜 B
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)
@@ -485,16 +380,6 @@ noncomputable instance dualBundleSmoothVectorBundle (r : ℕ) :
 
 end smooth
 
-/-!
-## Fiber normed instances
-
-The fiber type `Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜` inherits normed
-structure via the topology equality `topology_eq` (from `Multilinear/Fiber.lean`), which
-shows that the bundle and norm topologies on each multilinear fiber agree. -/
-
-/-- The CLM from the multilinear bundle fiber (with bundle topology) to `𝕜` is the same type
-as the CLM from `ContinuousMultilinearMap` (with norm topology) to `𝕜`, since the topologies
-agree by `topology_eq`. -/
 private theorem dualBundleFiber_type_eq (r : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) =
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜 →L[𝕜] 𝕜) := by
@@ -502,7 +387,6 @@ private theorem dualBundleFiber_type_eq (r : ℕ) (x : B) :
   congr 1
   exact topology_eq (𝕜 := 𝕜) (F := F) (E := E) _ x
 
-/-- Transport `NormedAddCommGroup` and `NormedSpace` from the norm-topology type. -/
 private def dualBundleFiber_normedInstances (r : ℕ) (x : B) :
     Σ' (ng : NormedAddCommGroup
           (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜)),
@@ -511,48 +395,25 @@ private def dualBundleFiber_normedInstances (r : ℕ) (x : B) :
         _ ng.toSeminormedAddCommGroup :=
   (dualBundleFiber_type_eq (𝕜 := 𝕜) (F := F) (E := E) r x) ▸ ⟨inferInstance, inferInstance⟩
 
-/-- The dual-of-multilinear fiber is a normed additive commutative group. -/
 instance dualBundleFiber_instNormedAddCommGroup (r : ℕ) (x : B) :
     NormedAddCommGroup (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) :=
   (dualBundleFiber_normedInstances (𝕜 := 𝕜) (F := F) (E := E) r x).1
 
-/-- The dual-of-multilinear fiber is a normed `𝕜`-module. -/
 instance dualBundleFiber_instNormedSpace (r : ℕ) (x : B) :
     NormedSpace 𝕜 (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) :=
   (dualBundleFiber_normedInstances (𝕜 := 𝕜) (F := F) (E := E) r x).2
 
-/-- Scalar multiplication on the dual-of-multilinear fiber is continuous. -/
 instance dualBundleFiber_instContinuousSMul (r : ℕ) (x : B) :
     ContinuousSMul 𝕜 (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) :=
   inferInstanceAs (ContinuousSMul 𝕜
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜))
 
-/-!
-## Continuous linear equivalence to model fiber
-
-The CLE from the dual-of-multilinear fiber to its model fiber is constructed via
-`ContinuousLinearEquiv.arrowCongr` applied to `continuousLinearEquivAt` for the source
-multilinear bundle and the identity on the codomain `𝕜`. -/
-
-/-- The continuous linear equivalence from the dual-of-multilinear fiber at `x` to the
-model fiber `MLF →L[𝕜] 𝕜`, constructed via `arrowCongr` of the multilinear CLE and the
-identity on `𝕜`. -/
 def dualBundleContinuousLinearEquivAt (r : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) ≃L[𝕜]
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜) :=
   (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r x).arrowCongr
     (ContinuousLinearEquiv.refl 𝕜 𝕜)
 
-/-!
-## Inverse trivialization formula for the dual bundle
-
-The inverse trivialization `(trivAt (F*) (dual E) x₀).symmL 𝕜 x ζ` (for `ζ : F →L[𝕜] 𝕜`
-and `x ∈ baseSet`) equals `ζ.comp ((trivAt F E x₀).continuousLinearMapAt 𝕜 x)`, following
-from the hom bundle's pretrivialization formula (with trivial target). -/
-
-/-- The inverse trivialization of `Bundle.dual 𝕜 E` at `x₀`, applied to a model-fiber
-element `ζ : F →L[𝕜] 𝕜` at point `x ∈ baseSet`, equals `ζ.comp ((trivAt F E x₀).cLMA x)`.
-This is the analog of `triv_symmL_eq_compContinuousLinearMap` for the dual bundle. -/
 theorem dualBundle_triv_symmL_eq_comp (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (ζ : F →L[𝕜] 𝕜) (v : E x) :
@@ -568,7 +429,7 @@ theorem dualBundle_triv_symmL_eq_comp (x₀ x : B)
   have h_rt : (e ⟨x, e.symm x ζ⟩ : B × _) = (x, ζ) := e.apply_mk_symm hbase ζ
   have h_snd : (e ⟨x, e.symm x ζ⟩ : B × _).2 = ζ := congrArg Prod.snd h_rt
   have hxTriv : x ∈ (trivializationAt 𝕜 (fun _ : B => 𝕜) x₀).baseSet := by
-    show x ∈ Set.univ; trivial
+    change x ∈ Set.univ; trivial
   have h_fwd : (e ⟨x, e.symm x ζ⟩).2
       ((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x v) =
     ((Trivialization.continuousLinearEquivAt 𝕜 (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv)
@@ -590,8 +451,6 @@ theorem dualBundle_triv_symmL_eq_comp (x₀ x : B)
 
 end Bundle.continuousMultilinearMap
 
-
-
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Set ContinuousLinearMap
@@ -609,20 +468,13 @@ variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace
   [TopologicalSpace (TotalSpace F E)]
   [FiberBundle F E] [VectorBundle 𝕜 F E]
 
-/-- Abbreviation for the model fiber of the `r`-multilinear bundle on `F`. -/
 local notation "MLF" => fun r => ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜
 
-/-- Abbreviation for the model fiber of the `r`-multilinear bundle on `F →L[𝕜] 𝕜`. -/
 local notation "MLF_dual" => fun r =>
   ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜
 
-/-! ## Naturality of `tensorOfDualLinearForms` -/
-
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-/-- Naturality of `tensorOfDualLinearForms` with respect to composition with a continuous
-linear map. For any `L : G →L[𝕜] F` and `β : Fin r → (F →L[𝕜] 𝕜)`,
-`(tensorOfDualLinearForms 𝕜 F r β).compContinuousLinearMap (fun _ => L)` equals
-`tensorOfDualLinearForms 𝕜 G r (fun i => (β i).comp L)`. -/
+
 theorem tensorOfDualLinearForms_compContinuousLinearMap_naturality
     {G : Type*}
     [NormedAddCommGroup G] [NormedSpace 𝕜 G] (r : ℕ) (L : G →L[𝕜] F)
@@ -637,19 +489,8 @@ theorem tensorOfDualLinearForms_compContinuousLinearMap_naturality
       ContinuousMultilinearMap.tensorOfDualLinearForms_apply]
   rfl
 
-/-! ## Pointwise lift via the model-fiber-level inverse iso
-
-We define the pointwise value of the lifted section by transporting through the
-multilinear bundle's fiber-level CLE (`continuousLinearEquivAt`) on each side of the
-model-level inverse iso `dualMultilinearEquivMultilinearOfDual 𝕜 F r`. -/
-
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
-/-- The pointwise lifted section value at `x`: given an element `a` of the
-multilinear-of-dual bundle fiber `Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x`,
-trivialize via `continuousLinearEquivAt` (for the dual bundle of `E`), apply the model-level
-inverse iso, then untrivialize via the dual of `continuousLinearEquivAt` (for the multilinear
-bundle of `E`). -/
 noncomputable def dualLiftFiber (r : ℕ) (x : B)
     (a : Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) :
     Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜 :=
@@ -657,9 +498,6 @@ noncomputable def dualLiftFiber (r : ℕ) (x : B)
     ((ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm
       (continuousLinearEquivAt (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x a))
 
-/-- Pointwise formula for `dualLiftFiber a`: it equals the model-level inverse iso applied
-to the trivialized `a`, postcomposed with `cleBundle r x` (via `arrowCongr.symm`).
-Spelled out: `dualLiftFiber r x a T = (model_inv (cle_dual a)) (cle_bundle T)`. -/
 theorem dualLiftFiber_apply (r : ℕ) (x : B)
     (a : Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x)
     (T : Bundle.continuousMultilinearMap 𝕜 r F E x) :
@@ -669,10 +507,6 @@ theorem dualLiftFiber_apply (r : ℕ) (x : B)
         (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r x T) := by
   rfl
 
-/-- The pointwise inverse of `dualLiftFiber`: given `ψ : mlb r F E x →L[𝕜] 𝕜`,
-trivialize via `dualBundleContinuousLinearEquivAt`, apply the model-level FORWARD iso
-`dualMultilinearEquivMultilinearOfDual`, then untrivialize via `continuousLinearEquivAt`
-for the multilinear-of-dual bundle. -/
 noncomputable def dualUnliftFiber (r : ℕ) (x : B)
     (ψ : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) :
     Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x :=
@@ -682,11 +516,6 @@ noncomputable def dualUnliftFiber (r : ℕ) (x : B)
 
 end Bundle.continuousMultilinearMap
 
-/-! ## The dual bundle section type -/
-
-/-- A `C^n` section of the dual of the `r`-multilinear bundle over a vector bundle `E`.
-The fiber at `x` is `Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜`, i.e., continuous
-linear functionals on the `r`-multilinear forms on the fiber `E x`. -/
 abbrev DualBundleSection
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F]
@@ -718,8 +547,6 @@ variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 variable {r : ℕ}
 
-/-- Local instance: the type `ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜`
-is a normed additive commutative group. -/
 local instance dualMultilinear_instNormedAddCommGroup :
     NormedAddCommGroup (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜) :=
   inferInstance
@@ -736,8 +563,6 @@ local instance dualOfMultilinear_instNormedSpace :
     NormedSpace 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜) :=
   inferInstance
 
-/-- The model-level inverse iso `(dualMME 𝕜 F r).symm`, packaged as a continuous linear map
-between the model fibers. -/
 noncomputable def Bundle.continuousMultilinearMap.modelDualInvCLM (𝕜 : Type*)
     [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
@@ -759,7 +584,6 @@ noncomputable def Bundle.continuousMultilinearMap.modelDualInvCLM (𝕜 : Type*)
     (ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual
       (𝕜 := 𝕜) (F := F) r).symm.toLinearMap
 
-/-- Trivialization compatibility lemma for `dualLiftFiber`. -/
 theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (a : Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) :
@@ -781,17 +605,17 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
         (𝕜 := 𝕜) (F := F) r).apply_symm_apply _]
   apply ContinuousMultilinearMap.ext
   intro β
-  show (ContinuousMultilinearMap.dualMultilinearLinearMap 𝕜 F r
+  change (ContinuousMultilinearMap.dualMultilinearLinearMap 𝕜 F r
     (_ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)) β = _
   rw [ContinuousMultilinearMap.dualMultilinearLinearMap_apply]
   rw [hom_trivializationAt_apply]
   have hxTriv : x ∈ (trivializationAt 𝕜 (fun _ : B => 𝕜) x₀).baseSet := by
-    show x ∈ Set.univ; trivial
+    change x ∈ Set.univ; trivial
   have hxMlb : x ∈ (trivializationAt
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
     (fun x => Bundle.continuousMultilinearMap 𝕜 r F E x) x₀).baseSet := hx
   rw [ContinuousLinearMap.inCoordinates_eq hxMlb hxTriv]
-  show ((Trivialization.continuousLinearEquivAt 𝕜
+  change ((Trivialization.continuousLinearEquivAt 𝕜
       (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv : 𝕜 →L[𝕜] 𝕜).comp
     ((Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a).comp
       ((Trivialization.continuousLinearEquivAt 𝕜
@@ -808,7 +632,7 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
         (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv : 𝕜 →L[𝕜] 𝕜) : 𝕜 → 𝕜) z = z := by
     intro z; rfl
   rw [h_cle_triv]
-  show (Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a)
+  change (Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a)
     ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
       (Bundle.continuousMultilinearMap 𝕜 r F E) x₀).symmL 𝕜 x
       (ContinuousMultilinearMap.tensorOfDualLinearForms 𝕜 F r β)) = _
@@ -838,11 +662,11 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
     have h2 := congr_fun (congr_arg DFunLike.coe this) γ
     exact h2
   rw [h_rt]
-  show (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+  change (Bundle.continuousMultilinearMap.continuousLinearEquivAt
       (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x a)
     (fun i => (β i).comp (((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x).comp
       ((trivializationAt F E x).symmL 𝕜 x))) = _
-  show a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
+  change a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
     ((β i).comp (((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x).comp
       ((trivializationAt F E x).symmL 𝕜 x)))) = _
   change a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
@@ -860,8 +684,6 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
   rw [(trivializationAt F E x).symmL_continuousLinearMapAt
     (mem_baseSet_trivializationAt F E x)]
 
-/-- The model-level forward iso `dualMME 𝕜 F r`, packaged as a continuous linear map
-between the model fibers. Analogous to `modelDualInvCLM` but for the forward direction. -/
 noncomputable def Bundle.continuousMultilinearMap.modelDualFwdCLM (𝕜 : Type*)
     [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
@@ -887,11 +709,6 @@ noncomputable def Bundle.continuousMultilinearMap.modelDualFwdCLM (𝕜 : Type*)
     (ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual
       (𝕜 := 𝕜) (F := F) r).toLinearMap
 
-/-- Trivialization compatibility lemma for `dualUnliftFiber`. For `x` in the base set of
-`trivializationAt F E x₀`, trivializing `dualUnliftFiber r x ψ` at `x₀` (in the bundle
-`Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E)`) equals
-`modelDualFwdCLM 𝕜 F r` applied to the trivialization of `ψ` at `x₀` (in the bundle
-`Bundle.dual 𝕜 (Bundle.continuousMultilinearMap 𝕜 r F E)`). -/
 theorem dualUnliftFiber_triv_eq {r : ℕ} (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (ψ : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) :
@@ -906,7 +723,7 @@ theorem dualUnliftFiber_triv_eq {r : ℕ} (x₀ x : B)
         ⟨x, ψ⟩).2) := by
   have h_rt_fiber : Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x
       (Bundle.continuousMultilinearMap.dualUnliftFiber (F := F) r x ψ) = ψ := by
-    show (Bundle.continuousMultilinearMap.dualBundleContinuousLinearEquivAt
+    change (Bundle.continuousMultilinearMap.dualBundleContinuousLinearEquivAt
           (𝕜 := 𝕜) (F := F) (E := E) r x).symm
         ((ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm
           ((Bundle.continuousMultilinearMap.continuousLinearEquivAt
@@ -929,8 +746,6 @@ theorem dualUnliftFiber_triv_eq {r : ℕ} (x₀ x : B)
     (𝕜 := 𝕜) (F := F) r).apply_symm_apply triv_mlbdual).symm
 
 end MultilinearSection
-
-/-! ## Bundle equivalence via fiberwise data -/
 
 section BundleEquiv
 
@@ -958,14 +773,6 @@ local instance : NormedAddCommGroup
 local instance : NormedSpace 𝕜
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜) := inferInstance
 
-/-- The fiberwise linear equivalence between the dual of the `r`-multilinear bundle fiber
-and the `r`-multilinear-of-dual bundle fiber at `x`. Constructed as the composition:
-1. `dualBundleContinuousLinearEquivAt`: trivialize the source fiber
-2. `dualMultilinearEquivMultilinearOfDual`: model-level equivalence
-3. `(continuousLinearEquivAt ...).symm`: untrivialize the target fiber
-
-The forward map is definitionally equal to `dualUnliftFiber r x` and the inverse
-is definitionally equal to `dualLiftFiber r x`. -/
 noncomputable def dualMultilinearFiberwiseEquiv (r : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] 𝕜) ≃ₗ[𝕜]
     Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x :=
@@ -974,12 +781,6 @@ noncomputable def dualMultilinearFiberwiseEquiv (r : ℕ) (x : B) :
       (continuousLinearEquivAt (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜)
         (E := Bundle.dual 𝕜 E) r x).symm.toLinearEquiv)
 
-/-! ### Total-space smoothness -/
-
-/-- The total-space map induced by `dualMultilinearFiberwiseEquiv` (forward direction) is `C^n`.
-In local trivializations the map reduces to the constant continuous linear map
-`modelDualFwdCLM 𝕜 F r` applied to the source fiber coordinate, by
-`dualUnliftFiber_triv_eq`. -/
 theorem dualMultilinearFiberwiseEquiv_smooth (r : ℕ) :
     ContMDiff
       (IB.prod 𝓘(𝕜, ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜))
@@ -1017,10 +818,6 @@ theorem dualMultilinearFiberwiseEquiv_smooth (r : ℕ) :
     ] with p hp
     exact dualUnliftFiber_triv_eq p₀.proj p.proj hp p.snd
 
-/-- The total-space map induced by the inverse of `dualMultilinearFiberwiseEquiv` is `C^n`.
-In local trivializations the map reduces to the constant continuous linear map
-`modelDualInvCLM 𝕜 F r` applied to the source fiber coordinate, by
-`dualLiftFiber_triv_eq`. -/
 theorem dualMultilinearFiberwiseEquiv_symm_smooth (r : ℕ) :
     ContMDiff
       (IB.prod 𝓘(𝕜, ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜))
@@ -1066,11 +863,6 @@ theorem dualMultilinearFiberwiseEquiv_symm_smooth (r : ℕ) :
 
 end Bundle.continuousMultilinearMap
 
-/-- The dual of the `r`-multilinear bundle is `C^n`-equivalent to the `r`-multilinear bundle
-of the dual, proved directly via `ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
-
-This works over any `NontriviallyNormedField 𝕜` and does not require `IsManifold`,
-`SigmaCompactSpace`, `T2Space`, or `FiniteDimensional 𝕜 EM`. -/
 noncomputable def dualBundle_multilinearOfDual_equiv
     {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
@@ -1095,13 +887,6 @@ noncomputable def dualBundle_multilinearOfDual_equiv
 
 end BundleEquiv
 
-/-! ## Section-level constructions
-
-The section maps `fromDualBundleSection` and `toDualBundleSection` are induced by the
-fiberwise equivalence `dualMultilinearFiberwiseEquiv`. Smoothness follows from
-composition with the smooth total-space map; all algebraic properties follow from the
-`LinearEquiv` structure of the fibers. -/
-
 namespace MultilinearSection
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -1114,9 +899,6 @@ variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace
   [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
-/-- Convert a smooth section of the dual of the multilinear bundle to a smooth section of
-the multilinear bundle of the dual, via `dualMultilinearFiberwiseEquiv` applied fiberwise.
-Smoothness follows from composing the section with the smooth total-space map. -/
 noncomputable def fromDualBundleSection {r : ℕ}
     (ψ : DualBundleSection 𝕜 F IB E n r) :
     MultilinearSection 𝕜 (F →L[𝕜] 𝕜) IB (Bundle.dual 𝕜 E) n r :=
@@ -1124,17 +906,12 @@ noncomputable def fromDualBundleSection {r : ℕ}
    (Bundle.continuousMultilinearMap.dualMultilinearFiberwiseEquiv_smooth r |>.comp
      ψ.contMDiff).congr fun _ => rfl⟩
 
-/-- Convert a smooth section of the multilinear bundle of the dual to a smooth section of
-the dual of the multilinear bundle, via `dualMultilinearFiberwiseEquiv.symm` applied fiberwise.
-Smoothness follows from composing the section with the smooth inverse total-space map. -/
 noncomputable def toDualBundleSection {r : ℕ}
     (α : MultilinearSection 𝕜 (F →L[𝕜] 𝕜) IB (Bundle.dual 𝕜 E) n r) :
     DualBundleSection 𝕜 F IB E n r :=
   ⟨fun x => (Bundle.continuousMultilinearMap.dualMultilinearFiberwiseEquiv r x).symm (α x),
    (Bundle.continuousMultilinearMap.dualMultilinearFiberwiseEquiv_symm_smooth r |>.comp
      α.contMDiff).congr fun _ => rfl⟩
-
-/-! ## Round-trip identities -/
 
 @[simp]
 theorem toDualBundleSection_fromDualBundleSection {r : ℕ}
@@ -1149,8 +926,6 @@ theorem fromDualBundleSection_toDualBundleSection {r : ℕ}
     fromDualBundleSection n (toDualBundleSection n α) = α := by
   apply ContMDiffSection.ext; intro x
   exact (Bundle.continuousMultilinearMap.dualMultilinearFiberwiseEquiv r x).apply_symm_apply (α x)
-
-/-! ## Algebraic properties -/
 
 theorem fromDualBundleSection_add {r : ℕ}
     (ψ₁ ψ₂ : DualBundleSection 𝕜 F IB E n r) (x : B) :
@@ -1180,4 +955,3 @@ theorem toDualBundleSection_smulByFun {r : ℕ}
 end MultilinearSection
 
 end
-

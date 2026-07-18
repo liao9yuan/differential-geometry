@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution Commutator
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +25,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -49,10 +49,10 @@ private theorem curvatureAction0SAt_vec2_eq
   rw [DifferentialGeometry.Integral.Connection.curvatureAction0SAt]
   simp [Fin.sum_univ_two, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Contract the first curvature-action identity obtained from the `(0,2)`
-Ricci identity.  This is the convention-correct finite-index curvature algebra
-`R_ikjl Ric^kl + Ric_i^k Ric_kj` for standard lowered slots
-`Rm04(X,Y,Z,W)=<R(X,Y)Z,W>`. -/
+
+
+
+
 private theorem contractedCurvatureAction_left_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -106,8 +106,8 @@ private theorem contractedCurvatureAction_left_eq
     ricciQuadraticCompInFrame, DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
     hgInvAt, hbasis] using hmain
 
-/-- Contract the natural right curvature-action identity obtained from the
-`(0,2)` Ricci identity. -/
+
+
 private theorem contractedCurvatureAction_right_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -186,10 +186,10 @@ private theorem contractedCurvatureAction_right_eq
             ricciQuadraticCompInFrame, DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
             hgInvAt, hbasis]
 
-/-- Produce the raw second-derivative commutator identities from the invariant
-`(0,2)` tensor Ricci identity.  The curvature-action contraction is the only
-nontrivial finite-index algebra left here: it converts the two slot actions on
-`Ric` into `R_ikjl Ric^kl + Ric_i^k Ric_kj` in the project curvature convention. -/
+
+
+
+
 @[deprecated "use a local or pointwise commutator producer instead" (since := "2026-05-22")]
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -453,11 +453,11 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             rw [hrightAction]
             ring
 
-/-- Local version of the raw Ricci-identity commutator producer.  This is the
-same finite-index contraction as
-`ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity`, but it
-uses the local-frame membership proof at the current point instead of a global
-cover of `M`. -/
+
+
+
+
+
 theorem ricciSecCommLocId
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -719,10 +719,10 @@ theorem ricciSecCommLocId
             rw [hrightAction]
             ring
 
-/-- The two contracted commutator identities used in Lemma 6.3:
-both second-derivative contractions equal
-`1/2 Hess R + R_ikjl Ric^kl + Ric_i^k Ric_kj`, and the two divergence trace
-terms in `∇_i A^k_kj` cancel for a symmetric Ricci tensor. -/
+
+
+
+
 def RicciContractedCommutatorsInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -751,7 +751,7 @@ def RicciContractedCommutatorsInFrame
         contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j
 
-/-- Local version of the contracted commutator identities used by Lemma 6.3. -/
+
 def RicciContractedCommutatorsInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -812,8 +812,8 @@ theorem ricci_trace_terms_eq_of_differentiatedBianchi
   have hB := (hbianchi t x i j).2
   rw [hA, hB]
 
-/-- Local differentiated contracted Bianchi gives equality of the two trace
-terms in the final local commutator package. -/
+
+
 theorem traceTermsEqLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -831,8 +831,8 @@ theorem traceTermsEqLoc
   have hB := (hbianchi t x hx i j).2
   rw [hA, hB]
 
-/-- Local Lemma 6.3 commutator assembly from local differentiated Bianchi and
-the local raw Ricci-identity commutator step. -/
+
+
 theorem ricciCommLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -875,8 +875,8 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutato
     ricci_trace_terms_eq_of_differentiatedBianchi
       (M := M) gInv nabla2Ric hbianchi t x i j⟩
 
-/-- Lemma 6.3 contracted commutator producer from differentiated contracted
-Bianchi plus the invariant `(0,2)` Ricci identity. -/
+
+
 @[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -927,8 +927,8 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
         nabla2RicTensor nabla2Ric
         hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic))
 
-/-- Contracted commutator producer with Rm04 and Ricci symmetries produced from
-regular Levi-Civita curvature data. -/
+
+
 @[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     [IsManifold I (∞ + 1) M]
@@ -940,7 +940,6 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
@@ -967,11 +966,11 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric := by
   have hOutput :=
-    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hFirst :=
-    rm04FirstBianchi_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04FirstBianchi_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hPair :=
-    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hInput :=
     rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
   have hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
@@ -1088,8 +1087,8 @@ private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
   dsimp [left, right, rough, hess, traceA, traceB]
   ring
 
-/-- The Lemma 6.3 expanded Ricci-variation RHS reduces to the Hamilton RHS
-once the contracted commutator identities are supplied. -/
+
+
 theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1111,8 +1110,8 @@ theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
   simp [ricciEvolutionRHSInFrame]
   ring
 
-/-- Contracted second Bianchi in fixed-frame components:
-`∇^k Ric_ik = (1/2) ∇_i R`. -/
+
+
 def contractedBianchiInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -1121,24 +1120,24 @@ def contractedBianchiInFrame
     (∑ k : Idx, ∑ l : Idx, gInv t x k l * nablaRic t x l i k) =
       (1 / 2 : Real) * gradScalar t x i
 
-/-- Commutator step for the second derivatives appearing after substituting
-the Ricci-flow Christoffel variation into the Ricci variation formula. -/
+
+
 def ricciSecondDerivativeCommute
     (secondDerivRic commutedSecondDerivRic :
       Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
   forall t x a b i j,
     secondDerivRic t x a b i j = commutedSecondDerivRic t x a b i j
 
-/-- Gauge cancellation after contracted Bianchi:
-the Hessian/scalar-divergence terms in the Ricci variation formula cancel. -/
+
+
 def ricciVariationGaugeTerms_cancel
     (gaugeTerms : Real -> M -> Idx -> Idx -> Real) : Prop :=
   forall t x i j, gaugeTerms t x i j = 0
 
-/-- Curvature commutator reduction in Lemma 6.3:
-the remaining commutator terms are exactly
-`-2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj` in the project
-lowered-curvature convention. -/
+
+
+
+
 def ricciCurvatureTerms_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1151,9 +1150,9 @@ def ricciCurvatureTerms_eq
       2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame t x i j -
         2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j
 
-/-- Lemma 6.3 producer from the Ricci variation formula after substituting the
-Ricci-flow Christoffel variation.  The remaining hypothesis is the precise
-contracted-Bianchi plus commutator reduction. -/
+
+
+
 theorem ricciEvolutionEquationInFrame_of_variation_expanded
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1173,8 +1172,8 @@ theorem ricciEvolutionEquationInFrame_of_variation_expanded
         (M := M) gInv nabla2Ric (t : Real) x i j).trans
       (h_reduce t x i j))
 
-/-- Local Lemma 6.3 producer from the local Ricci variation formula after
-substituting the Ricci-flow Christoffel variation. -/
+
+
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1196,8 +1195,8 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
         (M := M) gInv nabla2Ric (t : Real) x i j).trans
       (h_reduce t x i j))
 
-/-- Lemma 6.3 producer from the Ricci variation formula and the two contracted
-commutator identities in the textbook proof. -/
+
+
 theorem ricciEvolution_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1216,8 +1215,8 @@ theorem ricciEvolution_of_variation_commutators
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
       (I := I) S Rm04 gInv frame nabla2Ric hcomm)
 
-/-- Local Lemma 6.3 producer from the local Ricci variation formula and the
-contracted commutator identities in the textbook proof. -/
+
+
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1238,8 +1237,8 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
       (I := I) S Rm04 gInv frame nabla2Ric hcomm)
 
-/-- Local Lemma 6.3 producer using only contracted commutators on the local
-frame domain. -/
+
+
 theorem ricciEvolLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

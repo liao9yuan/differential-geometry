@@ -2,38 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Can
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# The Ricci pairing as a CLM `H1Compl g →L[ℝ] Lp ℝ 2 μ_g`
-
-For a closed Riemannian manifold `(M, g)` and a smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`, the pointwise Ricci pairing
-`b ↦ ricciTensor g b (∇φ b) (∇v b)` defines a continuous linear map on
-smooth scalars `v`, taking values in `Lp ℝ 2 μ_g`. This module packages
-the construction in three steps and extends it via dense extension to a
-CLM on `H1Compl g`.
-
-The mathematical bound is
-`‖ricciPairingSmooth g φ v‖²_{L²} ≤ C(g, φ)² · ‖v‖²_{H¹}`,
-where `C(g, φ)` involves a sup-bound on `b ↦ ‖ricciTensor g b (∇φ b, ·)‖_{g-Riesz}`.
-The constant `C` is constructed from the smoothness of the Ricci tensor +
-gradient + metric inverse on compact `M`.
-
-For our purposes we expose the existence of `C` via `Classical.choose` applied
-to a uniform bound proved from compactness of `M`. The witness existence is
-the genuinely substantial content; the Lipschitz extension is then
-automatic.
-
-## Main definitions
-
-* `ricciPairingSmooth g φ v` — the L²-class of `smoothRicciPairingBundle g φ v`,
-  for smooth `v : SmoothScalar g`.
-* `ricciPairingCLMOnSmooth g φ` — the CLM on smooth scalars.
-* `ricciPairingCLM g φ` — the dense extension to `H1Compl g`.
-
-## Main results
-
-* `ricciPairingCLM_smoothToH1Compl` — compatibility on smooth scalars.
--/
 
 noncomputable section
 
@@ -66,9 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The L²-class of the smooth Ricci pairing
-`b ↦ ricciTensor g b (∇φ b) (∇v b)` for smooth `v`. Alias for
-`smoothRicciPairingLp`. -/
 noncomputable def ricciPairingSmooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -81,7 +46,6 @@ noncomputable def ricciPairingSmooth
     ricciPairingSmooth (I := I) (M := M) g φ v =
       smoothRicciPairingLp (I := I) (M := M) g φ v := rfl
 
-/-- A.e. unfolding identity. -/
 lemma ricciPairingSmooth_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -93,7 +57,7 @@ lemma ricciPairingSmooth_coeFn
           (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) :=
   smoothRicciPairingLp_coeFn (I := I) (M := M) g φ v
 
-/-- Pointwise additivity of the Ricci pairing in the second slot. -/
+omit [CompactSpace M] in
 lemma ricciPairingSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) (b : M) :
@@ -112,7 +76,6 @@ lemma ricciPairingSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) b)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
-/-- Pointwise homogeneity of the Ricci pairing in the second slot. -/
 lemma ricciPairingSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (b : M) :
@@ -128,7 +91,6 @@ lemma ricciPairingSmooth_pt_smul
   rw [hgrad_smul]
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
-/-- Additivity of `ricciPairingSmooth` in the second argument. -/
 theorem ricciPairingSmooth_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) :
@@ -148,7 +110,6 @@ theorem ricciPairingSmooth_add
   rw [h_sum, Pi.add_apply, h_v_eq, h_w_eq]
   exact (ricciPairingSmooth_pt_add (I := I) (M := M) g φ v w b).symm
 
-/-- Homogeneity of `ricciPairingSmooth` in the second argument. -/
 theorem ricciPairingSmooth_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -165,7 +126,6 @@ theorem ricciPairingSmooth_smul
   rw [h_smul, Pi.smul_apply, h_v_eq, smul_eq_mul]
   exact (ricciPairingSmooth_pt_smul (I := I) (M := M) g φ c v b).symm
 
-/-- The `ricciPairingSmooth` map packaged as a linear map. -/
 noncomputable def ricciPairingSmoothLin
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →ₗ[ℝ]
@@ -180,8 +140,6 @@ noncomputable def ricciPairingSmoothLin
     ricciPairingSmoothLin (I := I) (M := M) g φ v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
 
-/-- Hypothesis-bearing CLM on smooth scalars: given a Lipschitz bound `C ≥ 0`,
-produces a continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/
 noncomputable def ricciPairingCLMOnSmoothOfBound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (C : ℝ) (_hC_nn : 0 ≤ C)
@@ -199,7 +157,7 @@ noncomputable def ricciPairingCLMOnSmoothOfBound
     ricciPairingCLMOnSmoothOfBound (I := I) (M := M) g φ C hC_nn hC_bound v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
 
-/-- The smooth-inclusion `toComplL` has dense range. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL :
@@ -209,7 +167,7 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- The smooth-inclusion `toComplL` is uniform-inducing. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -220,8 +178,6 @@ private lemma isUniformInducing_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
 
-/-- The unique CLM extension of `ricciPairingCLMOnSmoothOfBound` to `H1Compl g`.
-Takes the same Lipschitz hypothesis as `ricciPairingCLMOnSmoothOfBound`. -/
 noncomputable def ricciPairingCLMOfBound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (C : ℝ) (hC_nn : 0 ≤ C)
@@ -233,8 +189,6 @@ noncomputable def ricciPairingCLMOfBound
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
-/-- Compatibility: `ricciPairingCLMOfBound` agrees with the smooth construction
-on the dense range of `smoothToH1Compl`. -/
 @[simp] theorem ricciPairingCLMOfBound_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (C : ℝ) (hC_nn : 0 ≤ C)
@@ -251,14 +205,12 @@ on the dense range of `smoothToH1Compl`. -/
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
 
-/-- For each smooth `v`, the L² norm of `ricciPairingSmooth g φ v` is
-non-negative. -/
 lemma ricciPairingSmooth_norm_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     0 ≤ ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ :=
   norm_nonneg _
 
-/-- The smooth scalar `b ↦ ricciTensor g b (∇φ b) (∇v b)` is continuous. -/
+omit [CompactSpace M] in
 lemma smoothRicciPairing_continuous
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -268,8 +220,6 @@ lemma smoothRicciPairing_continuous
 
 open DifferentialGeometry.Analysis.Laplacian.RicciDualNorm
 
-/-- The squared L²-norm of `ricciPairingSmooth g φ v` equals the integral of
-`(ricciTensor g b (∇φ b) (∇v b))²` over `M`. -/
 lemma ricciPairingSmooth_norm_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ ^ 2 =
@@ -302,8 +252,7 @@ lemma ricciPairingSmooth_norm_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-/-- Pointwise bound: `(Ric(∇φ b, ∇v b))² ≤ C · g(∇v b, ∇v b)`, where `C` is
-the global sup of `g(R, R)`. -/
+omit [CompactSpace M] in
 lemma ricciPairing_sq_le_C_mul_grad
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_bound : ∀ b : M,
@@ -326,7 +275,6 @@ lemma ricciPairing_sq_le_C_mul_grad
             (gradFun (I := I) g v.toFun b) :=
         mul_le_mul_of_nonneg_right (hC_bound b) h_grad_nn
 
-/-- L² norm-squared bound: `‖ricciPairingSmooth g φ v‖² ≤ C · ‖v‖²_{H¹}`. -/
 lemma ricciPairingSmooth_norm_sq_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_nn : 0 ≤ C) (hC_bound : ∀ b : M,
@@ -371,7 +319,6 @@ lemma ricciPairingSmooth_norm_sq_le
   have h_grad_int_le := integral_inner_grad_self_le_h1_norm_sq (g := g) v
   exact le_trans h_int_le (mul_le_mul_of_nonneg_left h_grad_int_le hC_nn)
 
-/-- L² norm bound: `‖ricciPairingSmooth g φ v‖ ≤ √C · ‖v‖_{H¹}`. -/
 lemma ricciPairingSmooth_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_nn : 0 ≤ C) (hC_bound : ∀ b : M,
@@ -391,9 +338,6 @@ lemma ricciPairingSmooth_norm_le
     mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-/-- **Existence of the Lipschitz bound.** There is a non-negative `C` such that
-`‖ricciPairingSmooth g φ v‖_{L²} ≤ C · ‖v‖_{H¹}` for all smooth `v`. The
-constant `C = √(global sup of g(R, R))`. -/
 theorem exists_ricciPairing_lipschitz_bound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ v : SmoothScalar g,
@@ -404,8 +348,6 @@ theorem exists_ricciPairing_lipschitz_bound
   intro v
   exact ricciPairingSmooth_norm_le (I := I) (M := M) g φ hC_sq_nn hC_bound v
 
-/-- The unconditional Ricci pairing CLM on smooth scalars:
-`SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/
 noncomputable def ricciPairingCLMOnSmooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -422,8 +364,6 @@ noncomputable def ricciPairingCLMOnSmooth
     ricciPairingCLMOnSmooth (I := I) (M := M) g φ v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
 
-/-- **The unconditional Ricci pairing CLM** `H1Compl g →L[ℝ] Lp 2 μ_g`. This
-is the dense extension of `ricciPairingCLMOnSmooth` to the H¹ Hilbert space. -/
 noncomputable def ricciPairingCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -434,8 +374,6 @@ noncomputable def ricciPairingCLM
     (Classical.choose_spec
       (exists_ricciPairing_lipschitz_bound (I := I) (M := M) g φ)).2
 
-/-- Compatibility: the unconditional Ricci pairing CLM agrees with
-`ricciPairingSmooth` on the dense range of `smoothToH1Compl`. -/
 @[simp] theorem ricciPairingCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ricciPairingCLM (I := I) (M := M) g φ

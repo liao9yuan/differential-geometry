@@ -2,49 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-/-!
-# Chart-pullback smoothness and chart-transition pipeline
-
-This file develops smoothness lemmas used in the manifold-Sobolev smooth-density
-program.
-
-## Item 1: chart-pullback global smoothness
-
-* `chartPullback_contMDiff`: smoothness of `chartPullback I α ψ` on `M` for a
-  smooth, compactly-supported `ψ : EuclN → ℝ` with
-  `tsupport ψ ⊆ chartTargetEuclid α`.
-
-## Item 2: chart-transition pipeline (helper layer)
-
-The chart-transition machinery in chart-Euclidean coordinates:
-
-* `chartTransitionEuclid γ α`: the literal composition
-  `toEuclidean ∘ extChartAt I α ∘ (extChartAt I γ).symm ∘ toEuclidean.symm`,
-  defined globally (with default values outside its natural source).
-* `chartCenterEuclid α`: a distinguished constant in chart-α target Euclid,
-  serving as the extension constant for cutoffs.
-* `chartTransitionExtended γ α η c`: the cutoff-extended chart-transition map,
-  globally defined and (under the right hypotheses) globally smooth.
-* `chartOverlapEuclid γ α`: the chart-Euclidean overlap region.
-* `chartTransitionExtensionSubC γ α η c = T̃_γα - c`, the variable part of the
-  cutoff-extended map.
-
-Key smoothness / structural lemmas:
-
-* `chartOverlapEuclid_isOpen`, `kEuclid_subset_overlap`, `kEuclid_compact`.
-* `chartTransitionEuclid_contDiffOn_overlap`: `T_γα` is smooth on the overlap.
-* `chartTransitionExtensionSubC_contDiff`,
-  `chartTransitionExtended_contDiff`,
-  `chartTransitionExtended_hasCompactSupport_sub`,
-  `chartTransitionExtended_iter_deriv_bound`: properties of the cutoff-extended
-  map.
-* `chartTransitionEuclid_left_inv`,
-  `chartTransitionEuclid_injOn_overlap`,
-  `chartTransitionEuclid_surjOn_overlap`,
-  `chartTransitionEuclid_bijOn_overlap`: bijection of the chart-transition map
-  between the two overlap regions.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -62,11 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/--
-The compact set in `M` carrying the support of `chartPullback I α ψ`, when
-`ψ` has compact tsupport contained in `chartTargetEuclid α`. This is the image
-of `tsupport ψ` under the inverse chart map.
--/
+omit [IsManifold I ∞ M] in
 private lemma tsupport_chartPullback_subset
     [I.Boundaryless] [T2Space M]
     (α : M)
@@ -129,8 +82,7 @@ private lemma tsupport_chartPullback_subset
     closure_minimal hfun_support_subset hK_M_closed
   exact h_close hx
 
-/-- The compact set `K_M = (extChartAt I α).symm '' (toEuclidean.symm '' tsupport ψ)`
-is contained in the chart source. -/
+omit [IsManifold I ∞ M] in
 private lemma tsupport_chartPullback_image_subset_chartAt_source
     [I.Boundaryless]
     (α : M)
@@ -151,15 +103,6 @@ private lemma tsupport_chartPullback_image_subset_chartAt_source
   rw [extChartAt_source (I := I)] at hx_in_src
   exact hx_in_src
 
-/--
-The chart-pullback `chartPullback I α ψ` is `C^∞` on `M`, provided `ψ` is
-smooth and has compact tsupport contained in `chartTargetEuclid α`.
-
-The proof is local: on the chart source, `chartPullback I α ψ` agrees with
-`ψ ∘ toEuclidean ∘ extChartAt I α`, which is smooth as a composition of smooth
-maps. Off the chart source, `chartPullback I α ψ` is identically zero on a
-neighborhood (by compactness of `tsupport ψ`), hence smooth.
--/
 theorem chartPullback_contMDiff
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -224,10 +167,6 @@ theorem chartPullback_contMDiff
     intro y hy
     exact h_zero_on hy
 
-/-- The (Euclidean-side) chart-transition map from chart `γ` to chart `α`:
-literal composition `toEuclidean ∘ extChartAt I α ∘ (extChartAt I γ).symm ∘
-toEuclidean.symm`. Defined globally as a function `EuclN → EuclN` (using
-the partial-equiv coercion's default values outside the natural source). -/
 def chartTransitionEuclid (γ α : M) :
     EuclN → EuclN := fun y =>
   (toEuclidean (E := E)) (extChartAt I α
@@ -240,8 +179,7 @@ lemma chartTransitionEuclid_apply (γ α : M) (y : EuclN) :
         ((extChartAt I γ).symm ((toEuclidean (E := E)).symm y))) := rfl
 
 omit [IsManifold I ∞ M] in
-/-- For `x ∈ chart-γ source`, the transition formula relates the chart-γ Euclidean
-image of `x` to the chart-α Euclidean image of `x`. -/
+
 lemma chartTransitionEuclid_eq_chartα_image
     (γ α : M) {x : M}
     (hx_γ : x ∈ (chartAt H γ).source) :
@@ -255,16 +193,9 @@ lemma chartTransitionEuclid_eq_chartα_image
     exact hx_γ
   rw [(extChartAt I γ).left_inv hx_src]
 
-/-- A constant in chart-α target Euclid: `c_α := toEuclidean (extChartAt I α α)`.
-This serves as the "extension constant" for cutoff-extending the chart-transition
-map outside its natural domain. -/
 def chartCenterEuclid (α : M) : EuclN :=
   (toEuclidean (E := E)) (extChartAt I α α)
 
-/-- The cutoff-extended chart-transition map: `T̃_γα(y) = η(y) • T_γα(y) +
-(1 - η(y)) • c`. When `η ≡ 1` near `K_E_γ` and `η ≡ 0` outside the chart-γ
-overlap, this extends `T_γα` to a globally defined function on `EuclN` that
-agrees with `T_γα` near `K_E_γ` and is constant `c` outside the support of `η`. -/
 def chartTransitionExtended
     (γ α : M)
     (η : EuclN → ℝ)
@@ -272,7 +203,7 @@ def chartTransitionExtended
   η y • chartTransitionEuclid (I := I) (M := M) γ α y + (1 - η y) • c
 
 omit [IsManifold I ∞ M] in
-/-- Pointwise rewriting: `T̃_γα(y) - c = η_γ(y) • (T_γα(y) - c)`. -/
+
 lemma chartTransitionExtended_sub_const
     (γ α : M)
     (η : EuclN → ℝ)
@@ -283,7 +214,7 @@ lemma chartTransitionExtended_sub_const
   module
 
 omit [IsManifold I ∞ M] in
-/-- On the open set `(tsupport η)ᶜ`, `chartTransitionExtended γ α η c = c`. -/
+
 lemma chartTransitionExtended_eq_const_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
@@ -295,8 +226,7 @@ lemma chartTransitionExtended_eq_const_off_tsupport
   simp
 
 omit [IsManifold I ∞ M] in
-/-- On a point `y` with `η y = 1`, the extended map equals the original chart
-transition. -/
+
 lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
     (γ α : M)
     {η : EuclN → ℝ}
@@ -307,13 +237,11 @@ lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
   rw [hy_eta]
   simp
 
-/-- The "overlap" open set in chart-γ Euclidean coordinates: the toEuclidean image
-of `extChartAt I γ '' ((chartAt H γ).source ∩ (chartAt H α).source)`. -/
 def chartOverlapEuclid (γ α : M) : Set EuclN :=
   (toEuclidean (E := E)) '' (extChartAt I γ '' ((chartAt H γ).source ∩ (chartAt H α).source))
 
 omit [IsManifold I ∞ M] in
-/-- The chart-overlap-Euclid set is contained in `chartTargetEuclid γ`. -/
+
 lemma chartOverlapEuclid_subset_chartTarget
     [I.Boundaryless]
     (γ α : M) :
@@ -329,7 +257,7 @@ lemma chartOverlapEuclid_subset_chartTarget
   exact (extChartAt I γ).map_source hx_src
 
 omit [IsManifold I ∞ M] in
-/-- The chart-overlap-Euclid set is open in `EuclN`. -/
+
 lemma chartOverlapEuclid_isOpen
     [I.Boundaryless]
     (γ α : M) :
@@ -360,8 +288,7 @@ lemma chartOverlapEuclid_isOpen
   exact (toEuclidean (E := E)).toHomeomorph.isOpenMap _ h_I_image
 
 omit [IsManifold I ∞ M] in
-/-- The image of a compact `K ⊆ chart-γ source ∩ chart-α source` lies in
-`chartOverlapEuclid γ α`. -/
+
 lemma kEuclid_subset_overlap
     [I.Boundaryless]
     (γ α : M) {K : Set M}
@@ -375,7 +302,7 @@ lemma kEuclid_subset_overlap
   exact ⟨x, ⟨hK_γ hx_in, hK_α hx_in⟩, rfl⟩
 
 omit [IsManifold I ∞ M] in
-/-- The image of a compact `K ⊆ chart-γ source` is compact in `EuclN`. -/
+
 lemma kEuclid_compact
     [I.Boundaryless]
     (γ : M) {K : Set M} (hK_compact : IsCompact K)
@@ -395,7 +322,6 @@ lemma kEuclid_compact
       (hcont_extChart x hx) (Set.mapsTo_univ _ _)
   exact hcomp.mono hK_γ
 
-/-- Smoothness of the chart-transition map `T_γα` on `chartOverlapEuclid γ α`. -/
 lemma chartTransitionEuclid_contDiffOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -463,10 +389,7 @@ lemma chartTransitionEuclid_contDiffOn_overlap
     htoE_contDiff.comp_contDiffOn h_step2
   exact h_step3
 
-/-- The function `η y • (T_γα y - c)`, used as the variable part of the cutoff-extended
-chart-transition map. It vanishes outside `tsupport η`, and on `chartOverlapEuclid γ α`
-agrees with the smooth product `η • (T_γα - c)`. -/
-def chartTransitionExtensionSubC
+def chartTransitionCutoffShifted
     (γ α : M)
     (η : EuclN → ℝ)
     (c : EuclN) : EuclN → EuclN := fun y =>
@@ -477,21 +400,21 @@ lemma chartTransitionExtensionSubC_zero_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
     (c : EuclN) {y : EuclN} (hy : y ∉ tsupport η) :
-    chartTransitionExtensionSubC (I := I) (M := M) γ α η c y = 0 := by
+    chartTransitionCutoffShifted (I := I) (M := M) γ α η c y = 0 := by
   have hη_zero : η y = 0 := image_eq_zero_of_notMem_tsupport hy
-  unfold chartTransitionExtensionSubC
+  unfold chartTransitionCutoffShifted
   rw [hη_zero]
   simp
 
 omit [IsManifold I ∞ M] in
-/-- The `chartTransitionExtensionSubC` is smooth on the open complement of `tsupport η`. -/
+
 lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
     (c : EuclN) :
-    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       ((tsupport η)ᶜ) := by
-  have h_zero : Set.EqOn (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+  have h_zero : Set.EqOn (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       (fun _ : EuclN => (0 : EuclN)) ((tsupport η)ᶜ) := by
     intro y hy
     simp only [Set.mem_compl_iff] at hy
@@ -500,16 +423,15 @@ lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     contDiffOn_const
   exact h_const.congr (fun y hy => h_zero hy)
 
-/-- The `chartTransitionExtensionSubC` is smooth on `chartOverlapEuclid γ α`. -/
 lemma chartTransitionExtensionSubC_contDiffOn_overlap
     [I.Boundaryless]
     (γ α : M)
     {η : EuclN → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (c : EuclN) :
-    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       (chartOverlapEuclid (I := I) (M := M) γ α) := by
-  unfold chartTransitionExtensionSubC
+  unfold chartTransitionCutoffShifted
   have h_T : ContDiffOn ℝ (⊤ : ℕ∞)
       (chartTransitionEuclid (I := I) (M := M) γ α)
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
@@ -520,8 +442,6 @@ lemma chartTransitionExtensionSubC_contDiffOn_overlap
     h_T.sub contDiffOn_const
   exact hη_smooth.contDiffOn.smul h_T_sub_c
 
-/-- The `chartTransitionExtensionSubC` is globally smooth, when `η` is smooth and
-`tsupport η ⊆ chartOverlapEuclid γ α`. -/
 lemma chartTransitionExtensionSubC_contDiff
     [I.Boundaryless]
     (γ α : M)
@@ -529,7 +449,7 @@ lemma chartTransitionExtensionSubC_contDiff
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_supp : tsupport η ⊆ chartOverlapEuclid (I := I) (M := M) γ α)
     (c : EuclN) :
-    ContDiff ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) := by
+    ContDiff ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) := by
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy_supp : y ∈ tsupport η
@@ -537,7 +457,7 @@ lemma chartTransitionExtensionSubC_contDiff
     have h_overlap_open : IsOpen (chartOverlapEuclid (I := I) (M := M) γ α) :=
       chartOverlapEuclid_isOpen (I := I) (M := M) γ α
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
-        (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+        (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
         (chartOverlapEuclid (I := I) (M := M) γ α) :=
       chartTransitionExtensionSubC_contDiffOn_overlap (I := I) (M := M) γ α
         hη_smooth c
@@ -545,12 +465,11 @@ lemma chartTransitionExtensionSubC_contDiff
   · have h_open : IsOpen ((tsupport η)ᶜ) := (isClosed_tsupport _).isOpen_compl
     have hy_in : y ∈ ((tsupport η)ᶜ) := hy_supp
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
-        (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+        (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
         ((tsupport η)ᶜ) :=
       chartTransitionExtensionSubC_contDiffOn_off_tsupport (I := I) (M := M) γ α c
     exact h_smooth_on.contDiffAt (h_open.mem_nhds hy_in)
 
-/-- The cutoff-extended chart transition is globally `C^∞`. -/
 lemma chartTransitionExtended_contDiff
     [I.Boundaryless]
     (γ α : M)
@@ -560,7 +479,7 @@ lemma chartTransitionExtended_contDiff
     (c : EuclN) :
     ContDiff ℝ (⊤ : ℕ∞) (chartTransitionExtended (I := I) (M := M) γ α η c) := by
   have h_eq : chartTransitionExtended (I := I) (M := M) γ α η c =
-      fun y => c + chartTransitionExtensionSubC (I := I) (M := M) γ α η c y := by
+      fun y => c + chartTransitionCutoffShifted (I := I) (M := M) γ α η c y := by
     funext y
     have h_sub := chartTransitionExtended_sub_const (I := I) (M := M) γ α η c y
     rw [show (chartTransitionExtended (I := I) (M := M) γ α η c) y =
@@ -572,7 +491,7 @@ lemma chartTransitionExtended_contDiff
     γ α hη_smooth hη_supp c)
 
 omit [IsManifold I ∞ M] in
-/-- The cutoff-extended chart transition has compact support modulo a constant. -/
+
 lemma chartTransitionExtended_hasCompactSupport_sub
     (γ α : M)
     {η : EuclN → ℝ}
@@ -581,12 +500,12 @@ lemma chartTransitionExtended_hasCompactSupport_sub
     HasCompactSupport
       (fun y => chartTransitionExtended (I := I) (M := M) γ α η c y - c) := by
   have h_eq : (fun y => chartTransitionExtended (I := I) (M := M) γ α η c y - c) =
-      chartTransitionExtensionSubC (I := I) (M := M) γ α η c := by
+      chartTransitionCutoffShifted (I := I) (M := M) γ α η c := by
     funext y
     exact chartTransitionExtended_sub_const (I := I) (M := M) γ α η c y
   rw [h_eq]
   have h_supp_sub : Function.support
-      (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) ⊆ tsupport η := by
+      (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) ⊆ tsupport η := by
     intro y hy
     by_contra hy_not
     apply hy
@@ -596,13 +515,11 @@ lemma chartTransitionExtended_hasCompactSupport_sub
     h_tsupport_compact (isClosed_tsupport _) ?_
   intro y hy
   have hy_not : y ∉ Function.support
-      (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) := by
+      (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) := by
     intro hy_supp
     exact hy (h_supp_sub hy_supp)
   simpa [Function.mem_support, not_not] using hy_not
 
-/-- Per-order iterated-derivative bound for the cutoff-extended chart-transition
-map: every order `≤ kmax` is uniformly bounded by some `M`. -/
 lemma chartTransitionExtended_iter_deriv_bound
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (γ α : M)
@@ -624,7 +541,7 @@ lemma chartTransitionExtended_iter_deriv_bound
     (d := Module.finrank ℝ E) hT_smooth hT_diff_cpt kmax
 
 omit [IsManifold I ∞ M] in
-/-- For `y ∈ chartOverlapEuclid γ α`, `T_γα y ∈ chartOverlapEuclid α γ`. -/
+
 lemma chartTransitionEuclid_mapsTo_overlap
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -641,8 +558,7 @@ lemma chartTransitionEuclid_mapsTo_overlap
   refine ⟨x, ⟨hx_in.2, hx_in.1⟩, rfl⟩
 
 omit [IsManifold I ∞ M] in
-/-- The chart-transition map is a left-inverse on the overlap:
-`T_αγ ∘ T_γα = id` on `chartOverlapEuclid γ α`. -/
+
 lemma chartTransitionEuclid_left_inv
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -664,7 +580,7 @@ lemma chartTransitionEuclid_left_inv
   rw [h_T2, hy_eq]
 
 omit [IsManifold I ∞ M] in
-/-- The chart-transition map is injective on the overlap. -/
+
 lemma chartTransitionEuclid_injOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -676,7 +592,7 @@ lemma chartTransitionEuclid_injOn_overlap
   rw [← h1, ← h2, heq]
 
 omit [IsManifold I ∞ M] in
-/-- The chart-transition map is surjective from overlap_γα to overlap_αγ. -/
+
 lemma chartTransitionEuclid_surjOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -692,8 +608,7 @@ lemma chartTransitionEuclid_surjOn_overlap
     rw [← hwz, ← hxw]
 
 omit [IsManifold I ∞ M] in
-/-- The chart-transition map is a bijection from `chartOverlapEuclid γ α` to
-`chartOverlapEuclid α γ`. -/
+
 lemma chartTransitionEuclid_bijOn_overlap
     [I.Boundaryless]
     (γ α : M) :

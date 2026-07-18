@@ -1,38 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-/-!
-# Chart-α (Idx, Jdx)-projection of the chart-frame trace identity
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, and multi-indices `Idx, Jdx`, this file ships the identity
-that distributes the chart-α (Idx, Jdx) scalar projection (built from the
-trivialization-at-`α` and the model-fiber dual projection) through the
-frame-trace expansion of the raw tensor connection Laplacian.
-
-Concretely, applying
-
-```
-tensorChartComponentProjection r s Idx Jdx ∘
-  (trivializationAt _ _ α).continuousLinearMapAt ℝ b
-```
-
-— a continuous linear functional `TensorRSSpace r s I b →L[ℝ] ℝ` — to both sides
-of the chart-α frame trace identity
-`rawTensorConnLap_via_chartFrameNormGlobalSmooth` yields a finite sum
-representation of the chart-α (Idx, Jdx) scalar projection of the trivialized
-raw tensor connection Laplacian, valid at every base point `b` in the
-intersection of the chart-α partition-of-unity tsupport with the chart-α
-Levi-Civita good set. No predicate on the atlas is required: the identity
-relies solely on linearity of the projecting composition and on the existing
-unconditional frame trace identity.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
 
@@ -58,22 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Chart-α (Idx, Jdx)-projection of the chart-frame trace identity for
-`rawTensorConnLap`.** Applying the continuous linear functional
-
-```
-tensorChartComponentProjection r s Idx Jdx ∘
-  (trivializationAt _ _ α).continuousLinearMapAt ℝ b
-```
-
-to both sides of `rawTensorConnLap_via_chartFrameNormGlobalSmooth` and using
-linearity (`map_sum`), the chart-α (Idx, Jdx) scalar component of the
-trivialized raw tensor connection Laplacian at a base point `b` in the
-chart-α partition-of-unity tsupport intersected with the chart-α Levi-Civita
-good set is the finite sum over the chart-frame index `i` of the chart-α
-(Idx, Jdx) scalar component of the trivialized `i`-th frame trace summand.
-
-No predicate on the atlas is required. -/
+omit [I.Boundaryless] in
 theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

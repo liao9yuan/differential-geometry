@@ -2,67 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.Resolvent
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.Normed.Operator.FredholmAlternative
 
-/-!
-# Spectrum of the L²-side resolvent and the variational Laplacian
-
-For a closed Riemannian manifold `(M, g)`, this file develops the spectral
-decomposition of the L²-side resolvent
-
-  `R := resolventL2 g : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g`
-
-of the variational Laplacian, conditional on the explicit hypothesis that
-`R` is a compact operator.
-
-Given the compactness hypothesis, Mathlib's spectral theorem for compact
-self-adjoint operators (`ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot`
-and `ContinuousLinearMap.finite_dimensional_eigenspace`) yields:
-
-* the eigenspaces of `R` at non-zero eigenvalues are finite-dimensional;
-* the eigenspaces of `R` (across all eigenvalues) span a dense subspace of
-  `Lp ℝ 2 μ_g` (their orthogonal complement is trivial);
-* every nonzero eigenvalue lies in `[0, 1]` (non-negative by symmetry of the
-  variational form, ≤ 1 by coercivity);
-* on each shell `{|μ| ≥ ε}`, `ε > 0`, only finitely many eigenvalues occur,
-  so the nonzero eigenvalues form a discrete set with `0` as the sole
-  possible accumulation point.
-
-The translation between resolvent eigenvalues and Laplacian eigenvalues:
-if `R u = μ u` with `μ ≠ 0` and `u ≠ 0`, then `(1 - Δ_g) u = μ⁻¹ u`,
-i.e. `Δ_g u = -((1 - μ)/μ) u`. With the geometer convention
-`Δ_g = div_g ∘ grad_g`, the corresponding non-negative Laplacian eigenvalue
-is `λ := (1 - μ)/μ`. Resolvent eigenvectors lift uniquely to elements of
-`laplacianDomain g` via the resolvent.
-
-## Main definitions
-
-* `resolventEigenspace g μ` — the eigenspace of `resolventL2 g` at `μ`,
-  packaged as a `Submodule ℝ (Lp ℝ 2 μ_g)`.
-* `laplacianEigenvalueOf μ` — the Laplacian eigenvalue `(1 - μ)/μ`
-  corresponding to a non-zero resolvent eigenvalue `μ`.
-
-## Main results
-
-* `resolventEigenspace_finiteDim` — under compactness, each non-zero
-  eigenspace is finite-dimensional.
-* `resolventEigenspaces_iSup_orthogonal_eq_bot` — under compactness, the
-  orthogonal complement of the supremum of eigenspaces is trivial.
-* `resolvent_eigenvalue_le_one` — every eigenvalue of `R` with non-zero
-  eigenvector lies in `[0, 1]`.
-* `laplacianEigenvalueOf_nonneg_of_resolventEigenvalue` — translation:
-  the corresponding Laplacian eigenvalue is non-negative.
-* `resolventEigenvector_lifts_to_laplacianDomain` — every non-zero
-  resolvent eigenvector lifts uniquely to `laplacianDomain g`.
-* `laplacianOp_of_resolventEigenvector_lift` — the variational Laplacian
-  acts on the lifted eigenvector by multiplication by the corresponding
-  negative Laplacian eigenvalue.
-* `resolvent_eigenvalues_finite_above` — for any `ε > 0`, only finitely
-  many eigenvalues `μ` of `R` satisfy `ε ≤ |μ|`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_g = div_g ∘ grad_g`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_g)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -75,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -89,7 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The pointwise bound `‖H1ComplToLp v‖ ≤ ‖v‖` for `v ∈ H1Compl g`. -/
 lemma norm_H1ComplToLp_apply_le (g : SmoothRiemannianMetric I M)
     (v : H1Compl g) :
     ‖H1ComplToLp (I := I) (M := M) g v‖ ≤ ‖v‖ := by
@@ -111,20 +49,11 @@ lemma norm_H1ComplToLp_apply_le (g : SmoothRiemannianMetric I M)
     rw [h_eq, h_norm]
     exact a.norm_smoothToLp_le
 
-/-- The eigenspace of the resolvent `R = resolventL2 g` at the scalar `μ`,
-viewed as an `ℝ`-submodule of `Lp ℝ 2 μ_g`.
-
-For `μ ≠ 0`, under the compactness hypothesis on `R` this submodule is
-finite-dimensional (`resolventEigenspace_finiteDim`). The eigenspaces
-across all `μ` span a dense subspace of `Lp ℝ 2 μ_g`
-(`resolventEigenspaces_iSup_orthogonal_eq_bot`). -/
 noncomputable def resolventEigenspace (g : SmoothRiemannianMetric I M) (μ : ℝ) :
     Submodule ℝ (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :=
   Module.End.eigenspace
     ((resolventL2 (I := I) (M := M) g).toLinearMap) μ
 
-/-- Membership in the resolvent eigenspace: `u ∈ resolventEigenspace g μ`
-iff `R u = μ • u`. -/
 lemma mem_resolventEigenspace_iff (g : SmoothRiemannianMetric I M) (μ : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     u ∈ resolventEigenspace (I := I) (M := M) g μ ↔
@@ -133,10 +62,6 @@ lemma mem_resolventEigenspace_iff (g : SmoothRiemannianMetric I M) (μ : ℝ)
   rw [Module.End.mem_eigenspace_iff]
   rfl
 
-/-- **Finite-dimensionality of nonzero eigenspaces.** Under compactness of
-`R = resolventL2 g`, each eigenspace at a non-zero scalar is
-finite-dimensional. This is the spectral theorem for compact operators
-applied to `R`. -/
 theorem resolventEigenspace_finiteDim
     (g : SmoothRiemannianMetric I M)
     (hCompact : IsCompactOperator (resolventL2 (I := I) (M := M) g))
@@ -144,12 +69,6 @@ theorem resolventEigenspace_finiteDim
     FiniteDimensional ℝ (resolventEigenspace (I := I) (M := M) g μ) := by
   exact ContinuousLinearMap.finite_dimensional_eigenspace hCompact μ hμ
 
-/-- **Spectral theorem (totality of eigenspaces).** Under compactness of
-`R = resolventL2 g`, the eigenspaces span `Lp ℝ 2 μ_g` densely: the
-orthogonal complement of their supremum is trivial.
-
-This is `ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot`
-applied to the (already established) self-adjointness of `R`. -/
 theorem resolventEigenspaces_iSup_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M)
     (hCompact : IsCompactOperator (resolventL2 (I := I) (M := M) g)) :
@@ -160,18 +79,8 @@ theorem resolventEigenspaces_iSup_orthogonal_eq_bot
   exact ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot
     hCompact hSymm
 
-/-- Translation of a non-zero resolvent eigenvalue `μ` to the
-corresponding Laplacian eigenvalue `λ := (1 - μ)/μ`.
-
-Mathematical content: if `R u = μ u` with `R = (1 - Δ_g)⁻¹` and `μ ≠ 0`,
-then `(1 - Δ_g) u = μ⁻¹ u`, hence `Δ_g u = -((1 - μ)/μ) u`. With the
-geometer convention `spectrum(Δ_g) ⊆ (-∞, 0]`, the corresponding
-non-negative Laplacian eigenvalue is `λ`. -/
 def laplacianEigenvalueOf (μ : ℝ) : ℝ := (1 - μ) / μ
 
-/-- For a resolvent eigenvector `u` with eigenvalue `μ`, the defining
-variational identity
-  `μ * ‖u‖² = ⟨R u, u⟩_{L²} = ‖resolvent g u‖²_{H¹}`. -/
 private lemma mul_norm_sq_eq_h1Norm_resolvent_sq
     (g : SmoothRiemannianMetric I M)
     {μ : ℝ}
@@ -201,10 +110,6 @@ private lemma mul_norm_sq_eq_h1Norm_resolvent_sq
   rw [real_inner_self_eq_norm_sq] at h_h1
   linarith
 
-/-- Every resolvent eigenvalue (with eigenvector `u ≠ 0`) is non-negative.
-This follows from the variational identity
-  `μ * ‖u‖² = ‖resolvent g u‖²_{H¹}`,
-whose RHS is non-negative. -/
 theorem resolvent_eigenvalue_nonneg
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -218,15 +123,6 @@ theorem resolvent_eigenvalue_nonneg
   have h_prod_nn : 0 ≤ μ * (‖u‖ ^ 2) := h.symm ▸ h_rhs_nn
   exact (mul_nonneg_iff_of_pos_right hu_pos).mp h_prod_nn
 
-/-- For a resolvent eigenvalue `μ` with non-zero eigenvector `u`, the
-bound `μ ≤ 1` holds (by coercivity of the H¹ inner product and the norm
-bound `‖H1ComplToLp v‖_{L²} ≤ ‖v‖_{H¹}`).
-
-Proof: from the variational identity
-  `μ * ‖u‖² = ‖resolvent g u‖²_{H¹}`,
-and the bound `‖μ u‖² = ‖R u‖² = ‖H1ComplToLp(resolvent g u)‖²_{L²} ≤ ‖resolvent g u‖²_{H¹}`,
-we get `μ² ‖u‖² ≤ μ ‖u‖²`. With `‖u‖² > 0`, this yields `μ ≤ 1`
-(combined with `μ ≥ 0`). -/
 theorem resolvent_eigenvalue_le_one
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -274,8 +170,6 @@ theorem resolvent_eigenvalue_le_one
   have h_lt : μ < μ ^ 2 := by nlinarith
   linarith
 
-/-- Combined: every eigenvalue of `R` with non-zero eigenvector lies in
-`[0, 1]`. -/
 theorem resolvent_eigenvalue_mem_unit_interval
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -284,11 +178,6 @@ theorem resolvent_eigenvalue_mem_unit_interval
   ⟨resolvent_eigenvalue_nonneg (I := I) (M := M) g hu hu_ne,
     resolvent_eigenvalue_le_one (I := I) (M := M) g hu hu_ne⟩
 
-/-- The translation `λ = (1 - μ)/μ` of a positive resolvent eigenvalue `μ`
-yields a non-negative Laplacian eigenvalue.
-
-Proof: a positive eigenvalue of `R` lies in `(0, 1]` (by the previous
-results), so `1 - μ ≥ 0` and `μ > 0`, hence `(1 - μ)/μ ≥ 0`. -/
 theorem laplacianEigenvalueOf_nonneg_of_resolventEigenvalue
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -301,12 +190,6 @@ theorem laplacianEigenvalueOf_nonneg_of_resolventEigenvalue
   have h_num_nn : 0 ≤ 1 - μ := by linarith
   exact div_nonneg h_num_nn hμ_pos.le
 
-/-- A non-zero resolvent eigenvector lifts uniquely to an element of the
-Laplacian domain `laplacianDomain g ⊆ H1Compl g`.
-
-Specifically: if `R u = μ • u` with `μ ≠ 0`, then setting
-`v := μ⁻¹ • resolvent g u`, we have `v ∈ laplacianDomain g` (it is in the
-range of `resolvent g`) and `H1ComplToLp v = u`. -/
 theorem resolventEigenvector_lifts_to_laplacianDomain
     (g : SmoothRiemannianMetric I M) {μ : ℝ} (hμ : μ ≠ 0)
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -327,12 +210,6 @@ theorem resolventEigenvector_lifts_to_laplacianDomain
     rw [(H1ComplToLp (I := I) (M := M) g).map_smul]
     rw [h_replace, hRu, smul_smul, inv_mul_cancel₀ hμ, one_smul]
 
-/-- The variational Laplacian on the lifted resolvent eigenvector acts as
-multiplication by the (negative of the) Laplacian eigenvalue.
-
-Specifically, with `v := μ⁻¹ • resolvent g u`, we have `v ∈ laplacianDomain g`
-and
-  `Δ_g v = -((1 - μ)/μ) • u = -laplacianEigenvalueOf μ • u`. -/
 theorem laplacianOp_of_resolventEigenvector_lift
     (g : SmoothRiemannianMetric I M) {μ : ℝ} (hμ : μ ≠ 0)
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -380,7 +257,6 @@ theorem laplacianOp_of_resolventEigenvector_lift
     ring
   rw [h_alg, neg_smul]
 
-/-- An eigenvalue of `R` admits a unit eigenvector (we choose one). -/
 private lemma exists_unit_eigenvector
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     (hμ : Module.End.HasEigenvalue
@@ -398,11 +274,6 @@ private lemma exists_unit_eigenvector
   · rw [norm_smul, norm_inv, norm_norm]
     exact inv_mul_cancel₀ (ne_of_gt hu_pos)
 
-/-- Eigenvectors with distinct eigenvalues are L²-orthogonal.
-
-This is a standard consequence of self-adjointness; the eigenspaces are
-mutually orthogonal. We cite the underlying Mathlib result
-`LinearMap.IsSymmetric.orthogonalFamily_eigenspaces`. -/
 private lemma resolvent_eigenvectors_orthogonal
     (g : SmoothRiemannianMetric I M) {μ ν : ℝ} (hμν : μ ≠ ν)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -415,8 +286,6 @@ private lemma resolvent_eigenvectors_orthogonal
   have hortho := hSymm.orthogonalFamily_eigenspaces hμν
   exact hortho ⟨u, hu⟩ ⟨v, hv⟩
 
-/-- The image of an `R`-eigenvector at eigenvalue `μ` (with eigenvector
-`u`) under `R` is `μ • u`. -/
 private lemma resolventL2_apply_eigenvector
     (g : SmoothRiemannianMetric I M) {μ : ℝ}
     {u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -424,9 +293,6 @@ private lemma resolventL2_apply_eigenvector
     resolventL2 (I := I) (M := M) g u = μ • u :=
   (mem_resolventEigenspace_iff (I := I) (M := M) g μ u).mp hu
 
-/-- For an injection `f : ℕ → ℝ` of distinct eigenvalues with `|f n| ≥ ε`,
-together with chosen unit eigenvectors `v n`, the images `R (v n)` are
-mutually `√2 ε`-separated. -/
 private lemma resolventL2_image_separated_of_distinct_eigenvalues
     (g : SmoothRiemannianMetric I M)
     {ε : ℝ} (hε : 0 < ε)
@@ -489,18 +355,6 @@ private lemma resolventL2_image_separated_of_distinct_eigenvalues
   rw [← h_sqrt_eq]
   exact h_target
 
-/-- **Discreteness of the resolvent spectrum.** Under compactness of `R`,
-for every `ε > 0`, only finitely many eigenvalues `μ` of `R` satisfy
-`|μ| ≥ ε`.
-
-Proof sketch (by contradiction): if there were infinitely many distinct
-eigenvalues `μ_n` with `|μ_n| ≥ ε`, pick unit eigenvectors `v_n`. By
-orthogonality of distinct eigenspaces and `‖v_n‖ = 1`, the images
-`R v_n = μ_n v_n` are mutually `√2 ε`-separated. The sequence `(v_n)`
-is bounded in the closed unit ball, so by compactness of `R` (mapping
-the closed unit ball into a compact set), `(R v_n)` admits a convergent
-(hence Cauchy) subsequence — but a Cauchy sequence cannot have all pairs
-separated by `√2 ε > 0`. -/
 theorem resolvent_eigenvalues_finite_above
     (g : SmoothRiemannianMetric I M)
     (hCompact : IsCompactOperator (resolventL2 (I := I) (M := M) g))

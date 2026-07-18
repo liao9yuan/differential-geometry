@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution GammaAlgebra
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -33,26 +33,26 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-! ## Ricci variation route for Lemma 6.3 -/
 
-/-- Trace of the covariant derivative of the infinitesimal connection
-variation:
-`∇_k A^k_ij - ∇_i A^k_kj`.
 
-Here `nablaGammaDt t x d k i j` denotes the fixed-frame component
-`(∇_d A)^k_ij`, where `A^k_ij = ∂_t Γ^k_ij`. -/
+
+
+
+
+
+
 def ricciVariationFromConnectionRHSInFrame
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   (∑ k : Idx, nablaGammaDt t x k k i j) -
     (∑ k : Idx, nablaGammaDt t x i k k j)
 
-/-- Ricci variation formula in a fixed frame:
-`∂_t Ric_ij = ∇_k A^k_ij - ∇_i A^k_kj`.
 
-This is the realized component target obtained by differentiating the
-curvature trace of the connection using the current `(1,3)` convention
-`Ric(e_i,e_j) = trace (e_k ↦ R(e_k,e_i)e_j)`. -/
+
+
+
+
+
 def RicciVariationFormulaInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -66,7 +66,7 @@ def RicciVariationFormulaInFrameOn
       D.carrier
       (t : Real)
 
-/-- Local version of the Ricci variation formula in a fixed frame domain. -/
+
 def RicciVariationFormulaInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -82,8 +82,8 @@ def RicciVariationFormulaInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Local version of Lemma 6.3's Ricci evolution equation in a fixed frame
-domain. -/
+
+
 def RicciEvolutionEquationInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -115,14 +115,14 @@ theorem ricciVariationFormulaInFrameOn_of_local_cover
   intro t x i j
   exact hlocal t x (hcover x) i j
 
-/-- The covariant derivative of the Ricci-flow connection variation after
-substituting
-`A^k_ij = -g^{kl} nabla_i Ric_jl - g^{kl} nabla_j Ric_il
-  + g^{kl} nabla_l Ric_ij`.
 
-Here `nabla2Ric t x d a i j` denotes `(nabla_d nabla_a Ric)_ij`.  Metric
-compatibility is already reflected in this component expression: no derivative
-falls on `gInv`. -/
+
+
+
+
+
+
+
 def nablaGammaDtFromNabla2RicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)

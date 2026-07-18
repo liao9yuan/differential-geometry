@@ -1,31 +1,10 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapChartCoeffsUniformBound
 
-/-!
-# Pointwise bound on `riemannianFiberNormSq` of the raw tensor connection
-Laplacian by chart-`α` second-derivative and zeroth-derivative data.
-
-For a smooth closed Riemannian manifold `(M, g)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀`, and a chart base point
-`α : M`, this file ships a pointwise bound on the intrinsic Riemannian
-fiber norm-squared of the raw tensor connection Laplacian
-`rawTensorConnLap g r s T₀.toSection b` at any `b` in the chart-`α`
-partition-of-unity tsupport intersected with the chart-`α` Levi-Civita good
-set, by a constant times the chart-`α` second-derivative and
-zeroth-derivative data of `T₀`'s raw chart components plus a constant.
-
-The proof composes the intrinsic-to-raw-component bound
-(`riemannianFiberNormSq_le_raw_components_on_pouTsupport`), the per-`(Idx,
-Jdx)` uniform second-derivative bound on the raw chart component of the
-connection Laplacian
-(`rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport`), and a small
-bridge bounding the second Euclidean partial by the iterated Fréchet
-derivative norm. The bound is unconditional in the chart atlas. -/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -56,9 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For a `C^2` (at `y`) scalar function on Euclidean space, the squared
-second Euclidean partial `∂_l ∂_k f y` is bounded by the operator norm
-squared of `iteratedFDeriv ℝ 2 f y`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -141,28 +118,6 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
 
-/-- **Pointwise bound: `riemannianFiberNormSq` of the raw tensor connection
-Laplacian by chart-`α` second-derivative and zeroth-derivative data.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a
-chart base point `α : M`, and a smooth compactly-supported `(r, s)`-tensor
-section `T₀ : SmoothCcTensor g r s`, there exists a non-negative constant `C`
-such that for every base point `b` in the intersection of the chart-`α`
-partition-of-unity tsupport and the chart-`α` Levi-Civita good set,
-
-```
-riemannianFiberNormSq g r s b (rawTensorConnLap g r s T₀.toSection b)
-  ≤ C * (∑ Idx Jdx,
-            (‖iteratedFDeriv ℝ 2
-                (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α Idx Jdx)) y‖^2
-            + (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α Idx Jdx) y)^2)
-         + 1)
-```
-where `y = (toEuclidean) ((extChartAt I α) b)`.
-
-The constant `C` depends on the metric, ranks, chart-base point, and the
-input section `T₀`, but not on `b`. The bound is unconditional in the chart
-atlas: no chart-locality predicate is required. -/
 theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_goodSet
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

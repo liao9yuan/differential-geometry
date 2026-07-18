@@ -4,39 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform sup bound for chart Christoffel symbols on the POU-support image
-
-For a closed Riemannian manifold `(M, g)` and a chart-atlas index `α : M`, the
-chart Christoffel symbols `chartChristoffel g α i j k : E → ℝ` are smooth on
-the interior of `(extChartAt I α).target`. Under the boundaryless assumption,
-`(extChartAt I α).target` is open, hence equal to its own interior, so the
-Christoffel symbols are smooth on the whole chart target.
-
-The image `extChartAt I α '' (tsupport (chartAtlasPOU I M α))` is:
-
-* compact, because `tsupport` is compact on a compact manifold and continuous
-  images of compact sets are compact;
-* contained in `(extChartAt I α).target`, because the partition of unity is
-  subordinate to the chart source and `extChartAt I α` maps the source to the
-  target.
-
-Continuity of `chartChristoffel g α i j k` on this compact set therefore
-yields a uniform sup bound. Taking the maximum over the finitely many
-`(i, j, k)` index triples gives a single uniform constant `C` such that
-`|chartChristoffel g α i j k y| ≤ C` for every `y` in the chart image of the
-POU support and every `(i, j, k)`.
-
-This is a structural input for the chart-Sobolev / tensor-spectral
-machinery: it shows that the Christoffel correction terms appearing in the
-chart-coordinate Levi-Civita formula are uniformly bounded on the
-relevant compact region.
-
-## Main results
-
-* `chartChristoffel_bdd_on_pou_tsupport`: the headline uniform sup bound for
-  every Christoffel symbol entry on the chart image of the POU support.
--/
 
 noncomputable section
 
@@ -58,8 +25,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-- The chart image of the closed support of the canonical POU weight at `α`
-is compact on a closed manifold. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_isCompact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact ((extChartAt I α) ''
@@ -88,7 +54,7 @@ theorem chartImage_pouTsupport_isCompact
     (continuousOn_extChartAt α).mono h_tsupp_sub_extSrc
   exact h_tsupp_compact.image_of_continuousOn h_cont
 
-/-- The chart image of `tsupport (POU α)` is contained in `(extChartAt I α).target`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_subset_target
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     (extChartAt I α) ''
@@ -107,9 +73,7 @@ theorem chartImage_pouTsupport_subset_target
     exact h_tsupp_sub_src hx
   exact (extChartAt I α).map_source hx_src
 
-/-- Under the boundaryless assumption, the chart image of `tsupport (POU α)`
-is contained in `interior ((extChartAt I α).target)`, on which the chart
-Christoffel symbols are smooth. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_subset_interior_target
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] (α : M) :
     (extChartAt I α) ''
@@ -121,15 +85,6 @@ theorem chartImage_pouTsupport_subset_interior_target
   rw [h_open.interior_eq]
   exact chartImage_pouTsupport_subset_target (I := I) (M := M) α
 
-/-- **Uniform sup bound for the chart-α Christoffel symbols on an arbitrary
-compact subset of `interior ((extChartAt I α).target)`.**
-
-For a closed (compact, boundaryless) Riemannian manifold `(M, g)`, each
-Christoffel symbol entry `chartChristoffel g α i j k` is smooth on the
-interior of `(extChartAt I α).target`. On any compact subset `K` of this
-interior, the finite collection of `n³` Christoffel-symbol functions (indexed
-by `(i, j, k) : Fin n × Fin n × Fin n`) is uniformly bounded by a single
-constant `C`. -/
 theorem chartChristoffel_bdd_on_compact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -198,19 +153,6 @@ theorem chartChristoffel_bdd_on_compact
     have hp_mem : (i, j, k) ∈ s := Finset.mem_univ _
     exact Finset.le_sup' (fun p => Cijk p.1 p.2.1 p.2.2) hp_mem
 
-/-- **Uniform sup bound for the chart-α Christoffel symbols on the chart
-image of `tsupport (chartAtlasPOU I M α)`.**
-
-For a closed (compact, boundaryless) Riemannian manifold `(M, g)`, each
-Christoffel symbol entry `chartChristoffel g α i j k` is smooth on the
-interior of `(extChartAt I α).target`. The chart image of
-`tsupport (chartAtlasPOU I M α)` is a compact subset of this interior, so
-the finite collection of `n³` Christoffel-symbol functions (indexed by
-`(i, j, k) : Fin n × Fin n × Fin n`) is uniformly bounded by a single
-constant `C` on this compact set.
-
-This is the specialisation of `chartChristoffel_bdd_on_compact` to the chart
-image of the closed support of the chart-atlas partition-of-unity weight. -/
 theorem chartChristoffel_bdd_on_pou_tsupport
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :

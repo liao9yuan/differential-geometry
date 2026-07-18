@@ -2,45 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrd
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
-/-!
-# Higher-order manifold Morrey bound on closed Riemannian manifolds
-
-For a closed Riemannian manifold `M` of dimension `n` modelled on a
-finite-dimensional real inner-product space `E`, and for `p > n`, every smooth
-`v : M → ℝ` satisfies, for each chart `α : M` and each point `y : EuclN`, a
-sup bound on the `m`-th iterated derivative of the chart-pulled smooth
-extension `chartSmoothExt α (ρ_α · v)`:
-
-  `‖iteratedFDeriv ℝ m (chartSmoothExt α (ρ_α · v)) y‖
-       ≤ C_α · (wkpNormChart g (m+1) p v).toReal`
-
-with a constant `C_α ≥ 0` depending on the metric `g`, the chart `α`, the
-exponent `p`, and `m`.
-
-The proof reduces to the Euclidean order-`m` Morrey theorem
-`smooth_morrey_iteratedFDeriv_bound_uniform`, applied to the chart-pulled
-extension on the Euclidean ball `B(0, R_α)` whose half-radius interior
-contains `chartCarrier α`. Off that half-ball, the extension is identically
-zero, so all iterated derivatives vanish there too, making the bound trivial
-on the complement.
-
-The Euclidean Sobolev norms appearing on the right-hand side are then
-related to `wkpNormChart g (m+1) p v` via a chain that mirrors the order-1
-construction in `MorreyManifold.lean`:
-
-1. `eLpNorm (‖iteratedFDeriv ℝ j (chartSmoothExt α (ρ_α v))‖) p (vol.restrict (B(0, R_α)))`
-    `= eLpNorm ... (vol.restrict Ω_α)` (support inside chartCarrier ⊆ Ω_α);
-2. `∑_{j ≤ m+1} eLpNorm (‖iteratedFDeriv ℝ j ...‖) p ≤ wkpNorm (m+1) p (chartSmoothExt) Ω_α`
-    (`eLpNorm_iteratedFDeriv_le_wkpNorm`);
-3. `wkpNorm (m+1) p (chartSmoothExt α (ρ_α v)) Ω_α
-    = wkpNorm (m+1) p (chartPushed α v) Ω_α` (a.e. equality on `Ω_α`);
-4. `wkpNorm (m+1) p (chartPushed α v) Ω_α ≤ wkpNormChart g (m+1) p v`
-    (it is a summand in the `tsum`).
-
-Finiteness of `wkpNormChart g (m+1) p v` for smooth `v` follows from
-`MemWkp_of_smooth_compactSupport_pub` applied to `chartSmoothExt α (ρ_α v)`,
-combined with the a.e. equality on `Ω_α`.
--/
 
 noncomputable section
 
@@ -66,8 +27,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- For any smooth scalar function `h : EuclN → ℝ` and any `y` not in its
-`tsupport`, every iterated derivative of order ≥ 0 vanishes at `y`. -/
+omit [FiniteDimensional ℝ E] in
 private lemma iteratedFDeriv_eq_zero_of_notMem_tsupport
     {h : EuclN → ℝ} {y : EuclN} (hy : y ∉ tsupport h) (m : ℕ) :
     iteratedFDeriv ℝ m h y = 0 := by
@@ -76,8 +36,7 @@ private lemma iteratedFDeriv_eq_zero_of_notMem_tsupport
     exact hy ((support_iteratedFDeriv_subset (𝕜 := ℝ) (n := m)) hy_in)
   exact Function.notMem_support.mp hy_off
 
-/-- The chart-pulled smooth extension `chartSmoothExt α (ρ_α · u)` has all
-iterated derivatives equal to zero off `chartCarrier α`. -/
+omit [I.Boundaryless] in
 private lemma iteratedFDeriv_chartSmoothExt_pou_mul_eq_zero_off_carrier
     (α : M) (u : M → ℝ) {y : EuclN}
     (hy : y ∉ chartCarrier (I := I) (M := M) α) (m : ℕ) :
@@ -92,9 +51,7 @@ private lemma iteratedFDeriv_chartSmoothExt_pou_mul_eq_zero_off_carrier
       (I := I) (M := M) α u hy_in)
   exact iteratedFDeriv_eq_zero_of_notMem_tsupport hy_off m
 
-/-- Iterated derivatives of `chartSmoothExt α (ρ_α · u)` vanish off the
-half-ball `B(0, R_α/2)`, since the function has tsupport in `chartCarrier α`
-which is contained in that half-ball. -/
+omit [I.Boundaryless] in
 private lemma iteratedFDeriv_chartSmoothExt_pou_mul_eq_zero_off_half_ball
     (α : M) (u : M → ℝ) {y : EuclN}
     (hy : y ∉ Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α / 2))
@@ -107,9 +64,7 @@ private lemma iteratedFDeriv_chartSmoothExt_pou_mul_eq_zero_off_half_ball
   exact iteratedFDeriv_chartSmoothExt_pou_mul_eq_zero_off_carrier
     (I := I) (M := M) α u hy_off_carrier m
 
-/-- For `h = chartSmoothExt α (ρ_α · u)` and any order `j`, the `eLpNorm` of
-`‖iteratedFDeriv ℝ j h‖` on the ball `B(0, R_α)` equals its `eLpNorm` on
-`chartTargetEuclid α`. Both equal the full-space `eLpNorm`. -/
+omit [I.Boundaryless] in
 private lemma eLpNorm_norm_iteratedFDeriv_chartSmoothExt_pou_mul_restrict_ball_eq_restrict_target
     (α : M) (u : M → ℝ) (q : ℝ≥0∞) (j : ℕ) :
     eLpNorm (fun z : EuclN => ‖iteratedFDeriv ℝ j (chartSmoothExt (I := I) (M := M) α
@@ -164,9 +119,6 @@ private lemma eLpNorm_norm_iteratedFDeriv_chartSmoothExt_pou_mul_restrict_ball_e
     _ = eLpNorm fnNorm q (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
-/-- For smooth `u : M → ℝ`, the sum `∑_{j ≤ k} eLpNorm (‖iteratedFDeriv ℝ j h‖)`
-on the chart target is bounded by `wkpNorm k p h Ω_α`, where
-`h = chartSmoothExt α (ρ_α u)`. -/
 private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
     [NeZero (Module.finrank ℝ E)]
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -176,7 +128,7 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x)) z‖) p
         (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -210,12 +162,11 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.eLpNorm_iteratedFDeriv_le_wkpNorm
     (d := Module.finrank ℝ E) hΩ_open hp_one k hh_smooth_top hh_compact hh_supp
 
-/-- The Euclidean `wkpNorm` of `chartPushed ρ α u` at chart `α` is bounded
-by `wkpNormChart u` at order `k`. -/
+omit [CompactSpace M] in
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -226,17 +177,16 @@ private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
   unfold wkpNormChart
   exact ENNReal.le_tsum α
 
-/-- The Euclidean `wkpNorm` of `chartSmoothExt α (ρ_α u)` on `Ω_α` equals
-that of `chartPushed ρ α u` on `Ω_α`. -/
+omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) x * u x))
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -246,12 +196,11 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (chartSmoothExt_ae_eq_chartPushed (I := I) (M := M) α u)
 
-/-- The Euclidean `wkpNorm` of `chartSmoothExt α (ρ_α u)` on `Ω_α` is bounded
-by `wkpNormChart g k q u`. -/
+omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -264,8 +213,6 @@ private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart_k
   exact wkpNorm_chartPushed_target_le_wkpNormChart_k
     (I := I) (M := M) g k α u
 
-/-- The chart-pulled smooth extension `chartSmoothExt α (ρ_α u)` belongs to
-`MemWkp k p` of `Ω_α`, for every smooth `u : M → ℝ` and every `k`. -/
 private lemma memWkp_chartSmoothExt_pou_mul
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ) :
@@ -302,8 +249,6 @@ private lemma memWkp_chartSmoothExt_pou_mul
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
     (d := Module.finrank ℝ E) hΩ_open hh_smooth_top hh_compact hh_supp hp_one k
 
-/-- The chart-pushed `chartPushed ρ α u` belongs to `MemWkp k p` of `Ω_α`
-for every smooth `u : M → ℝ` and every `k`. -/
 private lemma memWkp_chartPushed_of_contMDiff
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ) :
@@ -320,8 +265,6 @@ private lemma memWkp_chartPushed_of_contMDiff
   refine (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) hp_one hΩ_open h_ae).mp hExt
 
-/-- Every smooth function on a closed Riemannian manifold lies in the
-chart-based `W^{k,p}` space, for every order `k`. -/
 theorem memWkpChart_of_contMDiff_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ)
@@ -330,8 +273,6 @@ theorem memWkpChart_of_contMDiff_k
   intro α
   exact memWkp_chartPushed_of_contMDiff (I := I) (M := M) α hu hp_one k
 
-/-- For smooth `u : M → ℝ` on a closed manifold, `wkpNormChart g k p u` is
-finite at every order `k`. -/
 private lemma wkpNormChart_lt_top_of_contMDiff_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ)
@@ -340,10 +281,6 @@ private lemma wkpNormChart_lt_top_of_contMDiff_k
   wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp_one
     (memWkpChart_of_contMDiff_k (I := I) (M := M) g hp_one k hu)
 
-/-- For each chart `α` and each order `m`, smooth `u : M → ℝ`, and `p > n`,
-there is a uniform constant `C_α ≥ 0` (independent of `u`) such that for ALL
-`y : EuclN`:
-`‖iteratedFDeriv ℝ m (chartSmoothExt α (ρ_α · u)) y‖ ≤ C_α · ∑_{j ≤ m+1} eLpNorm (‖iteratedFDeriv ℝ j (chartSmoothExt α (ρ_α · u))‖) p (vol.restrict B(0, R_α))`. -/
 private lemma chartSmoothExt_morrey_iteratedFDeriv_sup_uniform
     (α : M) {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
     [NeZero (Module.finrank ℝ E)] :
@@ -387,10 +324,6 @@ private lemma chartSmoothExt_morrey_iteratedFDeriv_sup_uniform
     apply mul_nonneg hC_nn
     exact Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
 
-/-- For each chart `α`, smooth `u : M → ℝ`, `p > n`, and order `m`, there is
-a constant `C_α ≥ 0` such that, for every smooth `u`:
-`‖iteratedFDeriv ℝ m (chartSmoothExt α (ρ_α · u)) y‖ ≤ C_α · (wkpNormChart g (m+1) p u).toReal`
-holds for ALL `y : EuclN`. -/
 private lemma per_chart_smooth_iteratedFDeriv_sup_bound
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
@@ -451,7 +384,7 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
       ∑ j ∈ Finset.range (m + 2),
         eLpNorm (fun z : EuclN => ‖iteratedFDeriv ℝ j f z‖) (ENNReal.ofReal p)
           (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) (m + 1) (ENNReal.ofReal p) f
         (chartTargetEuclid (I := I) (M := M) α) := by
     rw [hf_def]
@@ -459,7 +392,7 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
       (I := I) (M := M) α hu hp_enn_one (m + 1)
     exact this
   have h_wkpNorm_le_wkpNormChart :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) (m + 1) (ENNReal.ofReal p) f
         (chartTargetEuclid (I := I) (M := M) α) ≤
       wkpNormChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u := by
@@ -507,8 +440,6 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
     mul_le_mul_of_nonneg_left h_total_le_N hCmorrey_nn
   exact le_trans h_bound_chain h_final
 
-/-- Per-chart constant from `per_chart_smooth_iteratedFDeriv_sup_bound`,
-packaged as a function `M → ℝ`. -/
 private noncomputable def perChartMorreyIteratedConst
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
@@ -539,17 +470,6 @@ private lemma perChartMorreyIteratedConst_bound
     (per_chart_smooth_iteratedFDeriv_sup_bound
       (I := I) (M := M) g hp m α)).2 hu y
 
-/-- **Higher-order per-chart manifold Morrey bound** (uniform in `v`). For a
-closed Riemannian manifold and `p > n = dim ℝ E`, every chart `α : M` and
-every order `m`, there is a uniform constant `C_α ≥ 0` (depending on `g`, `p`,
-`m`, the chart `α`, and the canonical chart-atlas POU) such that for every
-smooth `v : M → ℝ` and every `y : EuclN`:
-
-  `‖iteratedFDeriv ℝ m (chartSmoothExt α (ρ_α · v)) y‖ ≤ C_α · (wkpNormChart g (m+1) p v).toReal`.
-
-For `m = 0`, this is a per-chart variant of `smooth_manifold_morrey_sup_bound_uniform`.
-For `m ≥ 1`, the bound on iterated derivatives of the chart-pulled extension is
-exactly what downstream chains (chart-Sobolev → `C^∞`) require. -/
 theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform_perChart
     {E H M : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -567,18 +487,6 @@ theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform_perChart
             (wkpNormChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) v).toReal :=
   per_chart_smooth_iteratedFDeriv_sup_bound (I := I) (M := M) g hp m α
 
-/-- **Higher-order manifold Morrey bound** (atlas-quantified form, uniform in
-`v`). For a closed Riemannian manifold and `p > n = dim ℝ E`, every order `m`,
-and every chart `α : M`, there is a uniform constant `C_α ≥ 0` such that for
-every smooth `v : M → ℝ` and every `y : EuclN`:
-
-  `‖iteratedFDeriv ℝ m (chartSmoothExt α (ρ_α · v)) y‖ ≤ C_α · (wkpNormChart g (m+1) p v).toReal`.
-
-The constant `C_α` is the per-chart Morrey constant from the Euclidean
-order-`m` Morrey theorem applied to the chart-pulled extension; it depends on
-`α`. This is the canonical per-chart formulation used in the chart-Sobolev to
-`C^∞` chain: downstream users instantiate it per-chart and combine via the
-partition of unity. -/
 theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform
     {E H M : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

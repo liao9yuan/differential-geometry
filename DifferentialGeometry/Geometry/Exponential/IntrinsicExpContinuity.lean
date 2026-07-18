@@ -5,69 +5,7 @@ import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Continuity of the intrinsic exponential map in the initial velocity
-
-For a complete Riemannian manifold the intrinsic exponential map
-`expMapIntrinsic g hEnorm p v = intrinsicGeodesic g hEnorm p v 1`
-(`Exponential/IntrinsicExp.lean`) follows the *complete* moving-foot geodesic
-through `p` with launch velocity `v`.  Unlike the chart-fixed `expMap`, this
-object is genuinely defined and geodesic across charts, so continuity in `v` is
-*true* (the chart-fixed `expMap` continuity, by contrast, can only be stated on
-small balls because `maximalGeodesic` reverts to its junk value once the
-geodesic leaves the home chart).
-
-This file develops the continuity of `v ↦ expMapIntrinsic g hEnorm p v`.  The
-metric-geometry compactness endpoint (e.g. `bonnet_myers_compactSpace_of_ricci_bound`) consumes it as
-"`M = expMapIntrinsic g p '' closedBall` is a continuous image of a compact
-set".
-
-## Mathematical structure
-
-The geodesic `intrinsicGeodesic g hEnorm p v` depends continuously on the
-initial velocity `v` because:
-
-* the geodesic flow is continuous in initial conditions **per chart** — the
-  per-chart Picard–Lindelöf phase-flow `Φ` of `SmoothFlow.exists_chartPhase_…`
-  is jointly `C¹` (in particular continuous) in `(z, t)`, where `z = (x, w)` is
-  the chart-coordinate position/velocity;
-* the arc `[0, 1] ∋ t ↦ intrinsicGeodesic g hEnorm p v t` is a **compact** subset
-  of `M` (continuous image of `[0, 1]`), so by the Lebesgue-number lemma the
-  *time* interval `[0, 1]` is covered by finitely many subintervals each of whose
-  arc-image lies in a single chart source;
-* on each such subinterval the per-chart continuous-in-`(v, t)` flow applies,
-  re-based at the foot point `intrinsicGeodesic g hEnorm p v₀ τ` via the proven
-  cross-chart re-basing `Geodesic.gc_cross_vf_projection_uniqueness`, and
-  the *uniqueness* of the geodesic with prescribed initial data identifies
-  `intrinsicGeodesic g hEnorm p v` with the chained flow uniformly in `v` over a
-  small ball;
-* chaining the finitely many per-chart flows yields the joint continuity of
-  `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on `ball v₀ ρ ×ˢ [0, 1]`, whence
-  continuity of `v ↦ … 1` by restriction to the `t = 1` slice.
-
-## What this file establishes unconditionally
-
-* `intrinsicGeodesic_compactArc` — the arc image `… '' Icc 0 1` is compact (from
-  the proven `intrinsicGeodesic_continuous`).
-* `intrinsicGeodesic_arc_finite_chart_cover` — the *time* interval `[0, 1]` is
-  covered by finitely many open subintervals each carrying the arc into a single
-  chart source (Lebesgue number lemma + finite subcover).
-* `expMapIntrinsic_continuous_of_jointContinuity` — the headline-from-joint
-  reduction: given the per-ball joint continuity of the chained flow, the
-  intrinsic exponential map is continuous.  This mirrors the chart-fixed
-  `expMap_continuous` but for the genuine complete geodesic.
-
-## Residual (single isolated analytic input)
-
-The remaining input is the *uniform-in-`v`* joint continuity of
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on a ball `ball v₀ ρ ×ˢ [0, 1]`
-(`intrinsicGeodesic_jointContinuity`).  It is the only `sorry` below and the only
-genuinely analytic piece; the headline `expMapIntrinsic_continuous` is then a
-one-step corollary.  Its sub-lemma decomposition is recorded in the docstring of
-`intrinsicGeodesic_jointContinuity`.
--/
 
 noncomputable section
 
@@ -84,7 +22,7 @@ open DifferentialGeometry.Geometry.Riemannian.HopfRinow
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -94,13 +32,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Compactness of the intrinsic geodesic arc.** The image of the unit time
-interval `[0, 1]` under the intrinsic complete geodesic through `p` with launch
-velocity `v` is a compact subset of `M`.
 
-This is fully unconditional: `intrinsicGeodesic g hEnorm p v` is continuous on all
-of `ℝ` (`intrinsicGeodesic_continuous`), and `[0, 1]` is compact, so the image is
-compact (`IsCompact.image_of_continuousOn`). -/
 theorem intrinsicGeodesic_compactArc
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -114,16 +46,7 @@ theorem intrinsicGeodesic_compactArc
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Finite chart cover of the time interval.** There is a mesh `δ > 0` such that
-for every `t ∈ [0, 1]` there is a base point `q : M` with the whole
-`δ`-time-neighbourhood `ball t δ` of `t` carrying the arc into the single chart
-source `(chartAt H q).source`:
-`∀ s ∈ ball t δ, intrinsicGeodesic g hEnorm p v s ∈ (chartAt H q).source`.
 
-Construction: the chart sources `{(chartAt H q).source | q : M}` cover `M`, so
-their preimages under the continuous arc cover `[0, 1] ⊆ ℝ`.  The Lebesgue-number
-lemma `lebesgue_number_lemma_of_metric` on the compact metric set `[0, 1]` yields
-the uniform mesh `δ`. -/
 theorem intrinsicGeodesic_arc_lebesgue_mesh
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -159,14 +82,7 @@ theorem intrinsicGeodesic_arc_lebesgue_mesh
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Finite chart cover of the time interval (finite-subcover form).** There is a
-mesh `δ > 0`, a finite index set `s : Finset (Set.Icc (0 : ℝ) 1)` of times, and
-for each indexed time a base point `q`, such that the open `δ`-balls of the chosen
-times cover `[0, 1]` and each such ball carries the arc into one chart source.
 
-This packages `intrinsicGeodesic_arc_lebesgue_mesh` with the compactness of
-`[0, 1]` (`IsCompact.elim_finite_subcover`) into the explicit finite partition
-data consumed by the chained-flow gluing. -/
 theorem intrinsicGeodesic_arc_finite_chart_cover
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -207,31 +123,7 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Converse lift from the moving-foot geodesic equation.**  If `γ` is a
-geodesic (`IsGeodesic g γ`, i.e. it satisfies the moving-foot geodesic equation
-at every time) and is continuous, then at every time `t` there is a
-chart-`γ(t)`-centred local integral curve `f₁` of the chart-fixed geodesic
-vector field at `γ t` whose projection agrees with `γ` on a neighbourhood of
-`t`.
 
-This is the mirror of `Geodesic.gc_cross_vf_projection_uniqueness` but
-starting from the *moving-foot* geodesic equation (the structure the intrinsic
-geodesic exposes through `intrinsicGeodesic_isGeodesic`) rather than from
-`IsGeodesicAt`.  The proof:
-
-* extracts the chart velocity `v := deriv (chartCurve (γ t) γ) t`;
-* builds, via `exists_chartCenteredLift_at`, the chart-`γ(t)`-centred integral
-  curve `f₁` with `f₁ t = ⟨γ t, v⟩`;
-* reduces both the fixed-`γ(t)`-chart curve of `γ` and the chart-pushed lift of
-  `f₁` to first-order solutions of the chart-phase ODE `chartPhaseVF g (γ t)` on
-  a neighbourhood of `t` (the `γ`-side via the moving-foot → fixed-chart
-  conversion `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` and its
-  eventual first-derivative companion
-  `hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt`, applied at every
-  nearby time using `IsGeodesic`), matching at `t`, and applies the proven
-  chart-phase ODE uniqueness `chartPhaseVF_orbit_uniqueness` to conclude the two
-  agree, hence `γ` agrees with `projectCurve f₁` near `t` after applying the
-  chart inverse. -/
 theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ) (t : ℝ) :
@@ -354,19 +246,16 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The base-manifold projection of the chart-`α`-centred phase flow `Φ` started
-at phase point `z` and run for time `s`. -/
+
 private def flowProj (α : M) (Φ : (E × E) × ℝ → E × E) (z : E × E) (s : ℝ) : M :=
   (extChartAt I α).symm (Φ (z, s)).1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint continuity of the foot-varying flow projection.** Suppose `Φ` is
-continuous on the phase-product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter
-map `z : N → E × E` is continuous on the parameter set `s` with values in
-`ball z₀ ρ`, and for every `(n, τ)` in `s ×ˢ Ioo (-T) T` the flowed first
-component `(Φ (z n, τ)).1` lies in the (open) chart target `(extChartAt I α).target`.
-Then `(n, τ) ↦ flowProj α Φ (z n) τ` is continuous on `s ×ˢ Ioo (-T) T`. -/
+
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private theorem flowProj_continuousOn
     [I.Boundaryless]
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T : ℝ}
@@ -404,21 +293,7 @@ private theorem flowProj_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-chart foot-varying joint continuity, from a flow identification.**
-This is the reusable producer of the induction step: on a window
-`ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, suppose the intrinsic geodesic
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` agrees with the foot-varying flow
-projection `flowProj α Φ (z v) (t - tₖ)`, where `Φ` is continuous on the phase
-product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter `z` is continuous in `v`
-on `ball v₀ r` with values in `ball z₀ ρ`, and the flowed first component stays in
-the chart target.  Then the intrinsic geodesic is jointly continuous on the
-window.
 
-The hypothesis `hident` is a genuine geometric *identification* of two a priori
-distinct objects (the intrinsic geodesic and the projection of a per-chart phase
-flow), supplied by geodesic uniqueness at the foot; it is **not** the continuity
-conclusion.  Joint continuity then follows from `flowProj_continuousOn` and a
-change of time variable `t ↦ t - tₖ`. -/
 private theorem perChart_jointContinuity_of_flowIdentifiedOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -469,14 +344,325 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
   intro vt hvt
   exact hident vt.1 hvt.1 vt.2 hvt.2
 
+
+
+
+
+
+
+private theorem dist_le_of_speed_bound_on_Icc
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {c : ℝ → F} {c' : ℝ → F} {z₀ : F} {R M T'' : ℝ}
+    (hMpos : 0 < M) (hMT'' : M * T'' ≤ R) (hT''_pos : 0 < T'')
+    (hc0 : c 0 = z₀)
+    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) T'', HasDerivWithinAt c (c' s) (Set.Icc 0 T'') s)
+    (hbound : ∀ s ∈ Set.Icc (0:ℝ) T'', dist (c s) z₀ ≤ R → ‖c' s‖ ≤ M) :
+    ∀ s ∈ Set.Icc (0:ℝ) T'', dist (c s) z₀ ≤ M * s := by
+  classical
+  have hR_pos : 0 < R := lt_of_lt_of_le (by positivity) hMT''
+  set G : Set ℝ := {t ∈ Set.Icc (0:ℝ) T'' | ∀ s ∈ Set.Icc (0:ℝ) t, dist (c s) z₀ ≤ R}
+    with hG_def
+  have hc_cont : ContinuousOn c (Set.Icc 0 T'') :=
+    fun s hs => (hderiv s hs).continuousWithinAt
+
+  have hbd_on_G : ∀ t ∈ G, ∀ s ∈ Set.Icc (0:ℝ) t, dist (c s) z₀ ≤ M * s := by
+    intro t ht s hs
+    obtain ⟨ht_Icc, ht_R⟩ := ht
+    have hsT : s ∈ Set.Icc (0:ℝ) T'' := ⟨hs.1, le_trans hs.2 ht_Icc.2⟩
+    have hsub : Set.Icc (0:ℝ) s ⊆ Set.Icc (0:ℝ) T'' := Set.Icc_subset_Icc le_rfl hsT.2
+    have hderiv' : ∀ r ∈ Set.Icc (0:ℝ) s, HasDerivWithinAt c (c' r) (Set.Icc 0 s) r :=
+      fun r hr => (hderiv r (hsub hr)).mono hsub
+    have hbnd' : ∀ r ∈ Set.Icc (0:ℝ) s, ‖c' r‖ ≤ M := fun r hr =>
+      hbound r (hsub hr) (ht_R r ⟨hr.1, le_trans hr.2 hs.2⟩)
+    have hseg := norm_image_sub_le_of_norm_deriv_le_segment' (f := c) (f' := c')
+      (C := M) (a := (0:ℝ)) (b := s) hderiv'
+      (fun r hr => hbnd' r ⟨hr.1, le_of_lt hr.2⟩) s (Set.right_mem_Icc.mpr hs.1)
+    rw [dist_eq_norm]
+    calc ‖c s - z₀‖ = ‖c s - c 0‖ := by rw [hc0]
+      _ ≤ M * (s - 0) := hseg
+      _ = M * s := by rw [sub_zero]
+  have h0_G : (0:ℝ) ∈ G := by
+    refine ⟨⟨le_refl _, le_of_lt hT''_pos⟩, fun s hs => ?_⟩
+    have hs0 : s = 0 := le_antisymm hs.2 hs.1
+    rw [hs0, hc0, dist_self]; exact le_of_lt hR_pos
+  have hG_bdd : BddAbove G := ⟨T'', fun t ht => ht.1.2⟩
+  have hG_ne : G.Nonempty := ⟨0, h0_G⟩
+  set t0 : ℝ := sSup G with ht0_def
+  have ht0_nonneg : 0 ≤ t0 := le_csSup hG_bdd h0_G
+  have ht0_le : t0 ≤ T'' := csSup_le hG_ne (fun t ht => ht.1.2)
+  have ht0_G : t0 ∈ G := by
+    refine ⟨⟨ht0_nonneg, ht0_le⟩, fun s hs => ?_⟩
+    rcases lt_or_eq_of_le hs.2 with hst | hst
+    · obtain ⟨t, ht_G, hst'⟩ := exists_lt_of_lt_csSup hG_ne hst
+      exact ht_G.2 s ⟨hs.1, le_of_lt hst'⟩
+    ·
+      rw [hst]
+      rcases eq_or_lt_of_le ht0_nonneg with h0 | h0
+      · rw [← h0, hc0, dist_self]; exact le_of_lt hR_pos
+      · have hsub_cwa : ContinuousWithinAt (fun r => c r - z₀) (Set.Ico 0 t0) t0 :=
+          (((hderiv t0 ⟨ht0_nonneg, ht0_le⟩).continuousWithinAt).mono
+            (Set.Ico_subset_Icc_self.trans (Set.Icc_subset_Icc le_rfl ht0_le))).sub
+            continuousWithinAt_const
+        have hφ_within : ContinuousWithinAt (fun r => dist (c r) z₀) (Set.Ico 0 t0) t0 := by
+          simpa only [dist_eq_norm] using hsub_cwa.norm
+        haveI : (nhdsWithin t0 (Set.Ico (0:ℝ) t0)).NeBot := by
+          rw [← mem_closure_iff_nhdsWithin_neBot, closure_Ico (ne_of_lt h0)]
+          exact ⟨ht0_nonneg, le_refl _⟩
+        refine le_of_tendsto hφ_within.tendsto ?_
+        filter_upwards [self_mem_nhdsWithin] with r hr
+        obtain ⟨t, ht_G, hrt⟩ := exists_lt_of_lt_csSup hG_ne hr.2
+        exact ht_G.2 r ⟨hr.1, le_of_lt hrt⟩
+
+  have ht0_eq : t0 = T'' := by
+    by_contra hne
+    have ht0_lt : t0 < T'' := lt_of_le_of_ne ht0_le hne
+    have hstrict : dist (c t0) z₀ ≤ M * t0 := hbd_on_G t0 ht0_G t0 ⟨ht0_nonneg, le_refl _⟩
+    have hstrict' : dist (c t0) z₀ < R :=
+      lt_of_le_of_lt hstrict (lt_of_lt_of_le (mul_lt_mul_of_pos_left ht0_lt hMpos) hMT'')
+    have hball_nhds : {x : F | dist x z₀ < R} ∈ nhds (c t0) :=
+      (isOpen_lt (continuous_id.dist continuous_const) continuous_const).mem_nhds hstrict'
+    have hpreim : c ⁻¹' {x : F | dist x z₀ < R} ∈ nhdsWithin t0 (Set.Icc 0 T'') :=
+      (hderiv t0 ⟨ht0_nonneg, ht0_le⟩).continuousWithinAt.preimage_mem_nhdsWithin hball_nhds
+    rw [Metric.mem_nhdsWithin_iff] at hpreim
+    obtain ⟨δ, hδ_pos, hδ_sub⟩ := hpreim
+    set t1 : ℝ := min (t0 + δ / 2) T'' with ht1_def
+    have ht1_gt : t0 < t1 := by
+      rw [ht1_def]; exact lt_min (by linarith) ht0_lt
+    have ht1_le : t1 ≤ T'' := min_le_right _ _
+    have ht1_G : t1 ∈ G := by
+      refine ⟨⟨le_trans ht0_nonneg (le_of_lt ht1_gt), ht1_le⟩, fun s hs => ?_⟩
+      by_cases hsl : s ≤ t0
+      · exact ht0_G.2 s ⟨hs.1, hsl⟩
+      · push_neg at hsl
+        have hs_time : s ∈ Metric.ball t0 δ ∩ Set.Icc (0:ℝ) T'' := by
+          refine ⟨?_, ⟨hs.1, le_trans hs.2 ht1_le⟩⟩
+          rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+          refine ⟨by linarith, ?_⟩
+          have h1 : t1 ≤ t0 + δ / 2 := min_le_left _ _
+          linarith [hs.2]
+        have hres := hδ_sub hs_time
+        rw [Set.mem_preimage, Set.mem_setOf_eq] at hres
+        exact le_of_lt hres
+    exact absurd (le_csSup hG_bdd ht1_G) (not_le.mpr ht1_gt)
+
+  intro s hs
+  rw [← ht0_eq] at hs
+  exact hbd_on_G t0 ht0_G s hs
+
+
+
+private theorem chartPhaseVF_bddOn_closedBall
+    (g : SmoothRiemannianMetric I M) (α : M) (z₀ : E × E) {R : ℝ} (hR : 0 ≤ R)
+    (hsub : Metric.closedBall z₀ R ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
+    ∃ M : ℝ, 0 < M ∧
+      ∀ x ∈ Metric.closedBall z₀ R, ‖chartPhaseVF (I := I) g α x‖ ≤ M := by
+  obtain ⟨L, hL⟩ := chartPhaseVF_lipschitzOnWith_of_compact (I := I) g α
+    (isCompact_closedBall z₀ R) hsub
+  obtain ⟨C, hC⟩ :=
+    (isCompact_closedBall z₀ R).exists_bound_of_continuousOn hL.continuousOn
+  exact ⟨|C| + 1, by positivity, fun x hx => le_trans (hC x hx) (by linarith [le_abs_self C])⟩
+
+
+
+
+
+private theorem orbit_speed_confined_fwd
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {c : ℝ → E × E} {z₀ : E × E} {R ρ M T_f : ℝ}
+    (hMpos : 0 < M) (hRρ : ρ < R) (hρ_nonneg : 0 ≤ ρ) (hT_f : 0 < T_f)
+    (hz_c : dist (c 0) z₀ ≤ ρ)
+    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min T_f ((R - ρ) / M)),
+      HasDerivWithinAt c (chartPhaseVF (I := I) g α (c s))
+        (Set.Icc 0 (min T_f ((R - ρ) / M))) s)
+    (hM : ∀ x ∈ Metric.closedBall z₀ R, ‖chartPhaseVF (I := I) g α x‖ ≤ M) :
+    ∀ s ∈ Set.Icc (0:ℝ) (min T_f ((R - ρ) / M)), c s ∈ Metric.closedBall z₀ R := by
+  set T' : ℝ := min T_f ((R - ρ) / M) with hT'_def
+  have hT'_pos : 0 < T' := lt_min hT_f (div_pos (by linarith) hMpos)
+  have hMne : M ≠ 0 := ne_of_gt hMpos
+  have hMT' : M * T' ≤ R - ρ := by
+    calc M * T' ≤ M * ((R - ρ) / M) := by
+          apply mul_le_mul_of_nonneg_left (min_le_right _ _) (le_of_lt hMpos)
+      _ = R - ρ := by field_simp
+  have hbound' : ∀ s ∈ Set.Icc (0:ℝ) T', dist (c s) (c 0) ≤ R - ρ →
+      ‖chartPhaseVF (I := I) g α (c s)‖ ≤ M := by
+    intro s _ hds
+    refine hM (c s) ?_
+    rw [Metric.mem_closedBall]
+    calc dist (c s) z₀ ≤ dist (c s) (c 0) + dist (c 0) z₀ := dist_triangle _ _ _
+      _ ≤ (R - ρ) + ρ := by linarith [hds, hz_c]
+      _ = R := by ring
+  have hkey := dist_le_of_speed_bound_on_Icc
+    (c := c) (c' := fun s => chartPhaseVF (I := I) g α (c s))
+    (z₀ := c 0) (R := R - ρ) (M := M) (T'' := T') hMpos hMT' hT'_pos rfl hderiv hbound'
+  intro s hs
+  rw [Metric.mem_closedBall]
+  have hMs : M * s ≤ R - ρ := le_trans
+    (by apply mul_le_mul_of_nonneg_left hs.2 (le_of_lt hMpos)) hMT'
+  calc dist (c s) z₀ ≤ dist (c s) (c 0) + dist (c 0) z₀ := dist_triangle _ _ _
+    _ ≤ (R - ρ) + ρ := by linarith [hkey s hs, hz_c]
+    _ = R := by ring
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Uniform confinement of a parameter-varying flow orbit.** Suppose `Φ` is
-continuous on `ball z₀ ρ_f ×ˢ Ioo (-T_f) T_f` with `Φ (z₀, 0) = z₀`, the
-phase-parameter map `z : N → E × E` is continuous at `v₀` with `z v₀ = z₀`, and
-`W` is a neighbourhood of `z₀`.  Then there are a parameter neighbourhood `S` of
-`v₀` with `z '' S ⊆ ball z₀ ρ_f` and a time horizon `T' ∈ (0, T_f)` such that the
-orbit `Φ (z v, s)` lies in `W` for all `v ∈ S` and `s ∈ Ioo (-T') T'`. -/
+
+
+
+
+private theorem flowOrbit_speed_confined_uniform
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {N : Type*} [TopologicalSpace N]
+    {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : N → E × E} {S : Set N}
+    {R ρ Mb T_f : ℝ}
+    (hMpos : 0 < Mb) (hRρ : ρ < R) (hρ_nonneg : 0 ≤ ρ) (hT_f : 0 < T_f)
+    (hRMT : R - ρ < Mb * T_f)
+    (hz_ball : ∀ v ∈ S, dist (z v) z₀ ≤ ρ)
+    (hΦinit : ∀ v ∈ S, Φ (z v, 0) = z v)
+    (hΦ_phase : ∀ v ∈ S, ∀ s ∈ Set.Ioo (-T_f) T_f,
+      HasDerivAt (fun τ => Φ (z v, τ)) (chartPhaseVF (I := I) g α (Φ (z v, s))) s)
+    (hM : ∀ x ∈ Metric.closedBall z₀ R, ‖chartPhaseVF (I := I) g α x‖ ≤ Mb) :
+    ∀ v ∈ S, ∀ s ∈ Set.Icc (0:ℝ) ((R - ρ) / Mb),
+      Φ (z v, s) ∈ Metric.closedBall z₀ R := by
+  intro v hv s hs
+  have hdivlt : (R - ρ) / Mb < T_f := by rw [div_lt_iff₀ hMpos]; linarith [hRMT]
+  have hmin : min T_f ((R - ρ) / Mb) = (R - ρ) / Mb := min_eq_right (le_of_lt hdivlt)
+  have hconf := orbit_speed_confined_fwd g α (c := fun τ => Φ (z v, τ)) (z₀ := z₀)
+    (R := R) (ρ := ρ) (T_f := T_f) hMpos hRρ hρ_nonneg hT_f
+    (by show dist (Φ (z v, 0)) z₀ ≤ ρ; rw [hΦinit v hv]; exact hz_ball v hv)
+    (fun s' hs' => by
+      rw [hmin] at hs'
+      have hs'_Ioo : s' ∈ Set.Ioo (-T_f) T_f :=
+        ⟨by linarith [hs'.1], lt_of_le_of_lt hs'.2 hdivlt⟩
+      exact (hΦ_phase v hv s' hs'_Ioo).hasDerivWithinAt)
+    hM
+  rw [hmin] at hconf
+  exact hconf s hs
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+
+private theorem flowOrbit_cutoff_confined_explicit
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
+    (hMpos : 0 < Mb) (hρ_nonneg : 0 ≤ ρ) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
+    (hzc : dist z_c z₀ ≤ ρ) (horbit0 : orbit 0 = z_c)
+    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min εPL ((b.rIn - ρ) / Mb)),
+      HasDerivWithinAt orbit
+        (chartPhaseVFTime (I := I) g α z₀ b s (orbit s))
+        (Set.Icc 0 (min εPL ((b.rIn - ρ) / Mb))) s)
+    (hM : ∀ x ∈ Metric.closedBall z₀ b.rIn, ‖chartPhaseVF (I := I) g α x‖ ≤ Mb) :
+    ∀ s ∈ Set.Icc (0:ℝ) (min εPL ((b.rIn - ρ) / Mb)),
+      orbit s ∈ Metric.closedBall z₀ b.rIn := by
+  set T'' : ℝ := min εPL ((b.rIn - ρ) / Mb) with hT''_def
+  have hT''_pos : 0 < T'' := lt_min hεPL (div_pos (by linarith) hMpos)
+  have hMT'' : Mb * T'' ≤ b.rIn - ρ := by
+    calc Mb * T'' ≤ Mb * ((b.rIn - ρ) / Mb) := by
+          apply mul_le_mul_of_nonneg_left (min_le_right _ _) (le_of_lt hMpos)
+      _ = b.rIn - ρ := by field_simp
+  have hbound : ∀ s ∈ Set.Icc (0:ℝ) T'', dist (orbit s) z_c ≤ b.rIn - ρ →
+      ‖chartPhaseVFTime (I := I) g α z₀ b s (orbit s)‖ ≤ Mb := by
+    intro s _ hds
+    have hin : orbit s ∈ Metric.closedBall z₀ b.rIn := by
+      rw [Metric.mem_closedBall]
+      calc dist (orbit s) z₀ ≤ dist (orbit s) z_c + dist z_c z₀ := dist_triangle _ _ _
+        _ ≤ (b.rIn - ρ) + ρ := by linarith [hds, hzc]
+        _ = b.rIn := by ring
+    have heq : chartPhaseVFTime (I := I) g α z₀ b s (orbit s) =
+        chartPhaseVF (I := I) g α (orbit s) := by
+      rw [chartPhaseVFTime_apply]
+      exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α z₀ b hin
+    rw [heq]; exact hM (orbit s) hin
+  have hkey := dist_le_of_speed_bound_on_Icc
+    (c := orbit) (c' := fun s => chartPhaseVFTime (I := I) g α z₀ b s (orbit s))
+    (z₀ := z_c) (R := b.rIn - ρ) (M := Mb) (T'' := T'')
+    hMpos hMT'' hT''_pos horbit0 hderiv hbound
+  intro s hs
+  rw [Metric.mem_closedBall]
+  have hMs : Mb * s ≤ b.rIn - ρ :=
+    le_trans (mul_le_mul_of_nonneg_left hs.2 (le_of_lt hMpos)) hMT''
+  calc dist (orbit s) z₀ ≤ dist (orbit s) z_c + dist z_c z₀ := dist_triangle _ _ _
+    _ ≤ (b.rIn - ρ) + ρ := by linarith [hkey s hs, hzc, hMs]
+    _ = b.rIn := by ring
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+private theorem flowOrbit_cutoff_confined_symm
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
+    (hMpos : 0 < Mb) (hρ_nonneg : 0 ≤ ρ) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
+    (hRMT : b.rIn - ρ < Mb * εPL)
+    (hzc : dist z_c z₀ ≤ ρ) (horbit0 : orbit 0 = z_c)
+    (hderiv : ∀ s ∈ Set.Ioo (-εPL) εPL,
+      HasDerivAt orbit (chartPhaseVFTime (I := I) g α z₀ b s (orbit s)) s)
+    (hM : ∀ x ∈ Metric.closedBall z₀ b.rIn, ‖chartPhaseVF (I := I) g α x‖ ≤ Mb) :
+    ∀ s ∈ Set.Ioo (-((b.rIn - ρ) / Mb)) ((b.rIn - ρ) / Mb),
+      orbit s ∈ Metric.closedBall z₀ b.rIn := by
+  have hdivlt : (b.rIn - ρ) / Mb < εPL := by rw [div_lt_iff₀ hMpos]; linarith [hRMT]
+  have hmin : min εPL ((b.rIn - ρ) / Mb) = (b.rIn - ρ) / Mb :=
+    min_eq_right (le_of_lt hdivlt)
+  set T' : ℝ := (b.rIn - ρ) / Mb with hT'_def
+  have hT'_pos : 0 < T' := div_pos (by linarith) hMpos
+  have hMT' : Mb * T' ≤ b.rIn - ρ := le_of_eq (by rw [hT'_def]; field_simp)
+  have hfwd : ∀ s ∈ Set.Icc (0:ℝ) T', orbit s ∈ Metric.closedBall z₀ b.rIn := by
+    have h := flowOrbit_cutoff_confined_explicit g α b hMpos hρ_nonneg hρ_lt hεPL hzc
+      horbit0
+      (by
+        rw [hmin]
+        intro s hs
+        exact (hderiv s ⟨by linarith [hs.1, hεPL], by linarith [hs.2, hdivlt]⟩).hasDerivWithinAt)
+      hM
+    rw [hmin] at h; exact h
+  have hbwd : ∀ u ∈ Set.Icc (0:ℝ) T', orbit (-u) ∈ Metric.closedBall z₀ b.rIn := by
+    have hkey := dist_le_of_speed_bound_on_Icc
+      (c := fun u => orbit (-u))
+      (c' := fun u => -(chartPhaseVFTime (I := I) g α z₀ b (-u) (orbit (-u))))
+      (z₀ := z_c) (R := b.rIn - ρ) (M := Mb) (T'' := T') hMpos hMT' hT'_pos
+      (by simp only [neg_zero]; exact horbit0)
+      (fun u hu => by
+        have hu_Ioo : -u ∈ Set.Ioo (-εPL) εPL :=
+          ⟨by linarith [hu.2, hdivlt], by linarith [hu.1, hεPL]⟩
+        simpa using ((hderiv (-u) hu_Ioo).scomp u ((hasDerivAt_id u).neg)).hasDerivWithinAt)
+      (fun u _ hds => by
+        have hin : orbit (-u) ∈ Metric.closedBall z₀ b.rIn := by
+          rw [Metric.mem_closedBall]
+          calc dist (orbit (-u)) z₀ ≤ dist (orbit (-u)) z_c + dist z_c z₀ :=
+                dist_triangle _ _ _
+            _ ≤ (b.rIn - ρ) + ρ := by linarith [hds, hzc]
+            _ = b.rIn := by ring
+        rw [norm_neg]
+        have heq : chartPhaseVFTime (I := I) g α z₀ b (-u) (orbit (-u)) =
+            chartPhaseVF (I := I) g α (orbit (-u)) := by
+          rw [chartPhaseVFTime_apply]
+          exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α z₀ b hin
+        rw [heq]; exact hM (orbit (-u)) hin)
+    intro u hu
+    rw [Metric.mem_closedBall]
+    have hMu : Mb * u ≤ b.rIn - ρ :=
+      le_trans (mul_le_mul_of_nonneg_left hu.2 (le_of_lt hMpos)) hMT'
+    calc dist (orbit (-u)) z₀ ≤ dist (orbit (-u)) z_c + dist z_c z₀ := dist_triangle _ _ _
+      _ ≤ (b.rIn - ρ) + ρ := by linarith [hkey u hu, hzc, hMu]
+      _ = b.rIn := by ring
+  intro s hs
+  by_cases hs0 : (0:ℝ) ≤ s
+  · exact hfwd s ⟨hs0, le_of_lt hs.2⟩
+  · push_neg at hs0
+    have hneg := hbwd (-s) ⟨by linarith, by linarith [hs.1]⟩
+    rwa [neg_neg] at hneg
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+omit [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem flowOrbit_uniform_confinement
     {N : Type*} [TopologicalSpace N]
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ_f T_f : ℝ}
@@ -546,18 +732,7 @@ private theorem flowOrbit_uniform_confinement
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Geodesic-side fixed-chart phase curve satisfies `chartPhaseVF` on a
-window.** Let `γ` be a geodesic, continuous, whose values on an open set
-`U ∋ t` all lie in the chart-`α` source.  Then the fixed-`α`-chart phase curve
-`c s := (extChartAt I α (γ s), deriv (extChartAt I α ∘ γ) s)` satisfies the
-chart-phase ODE `HasDerivAt c (chartPhaseVF g α (c s)) s` at every `s ∈ U`, and
-`(c s).1 ∈ interior (extChartAt I α).target`.
 
-This is the fixed-chart reading of the moving-foot geodesic equation: at each
-`s ∈ U`, `γ s` lies in the chart-`α` source, so the moving-foot equation
-`hγ.hasGeodesicEquationAt s` transforms (via the chart-transition Christoffel law)
-into the fixed-`α`-chart second-order ODE, which combines with the first-order
-differentiability companion into the first-order phase system on `E × E`. -/
 private theorem geodesic_chartPhaseVF_on_open
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ)
@@ -614,16 +789,7 @@ private theorem geodesic_chartPhaseVF_on_open
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction uniform geodesic↔flow-projection identification.** On a window
-`ball v₀ r ×ˢ Ioo (tₖ - T') (tₖ + T')`, with `Φ` continuous on the phase product
-`ball z₀ ρ ×ˢ Ioo (-T) T` and satisfying the chart-phase ODE along each orbit
-`Φ (z v, ·)` confined to the compact ball `closedBall z₀ R ⊆ interior target ×ˢ
-univ`, the geodesic `intrinsicGeodesic g hEnorm p v` confined in chart `α` to the
-same ball, and matching initial phase data `z v = (extChartAt I α (γ_v tₖ),
-deriv (chartCurve α γ_v) tₖ)`, the intrinsic geodesic agrees with the foot-varying
-flow projection `flowProj α Φ (z v) (t - tₖ)` on the window.
 
-This is the uniform identification feeding `perChart_jointContinuity_of_flowIdentifiedOn`. -/
 private theorem perJunction_flowIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -733,14 +899,7 @@ private theorem perJunction_flowIdentification
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction full-phase identification.** Same hypotheses as
-`perJunction_flowIdentification`, but the conclusion identifies the *entire* phase
-pair (position and velocity) of the geodesic in chart `α` with the flow orbit
-`Φ (z v, t - tₖ)`, not merely the position component.  The velocity component is
-exactly the second-component identification proven internally inside
-`perJunction_flowIdentification` (the uniform chart-phase ODE uniqueness on the
-compact confinement ball); here it is exposed.  This drives the velocity
-continuity across junctions. -/
+
 private theorem perJunction_phaseIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1044,10 +1203,7 @@ private theorem intrinsicGeodesic_window_of_junction_data
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesic's **velocity tangent-bundle lift**: the point
-`⟨γ_v s, mfderiv γ_v s (1)⟩` of `TM`, where `γ_v := intrinsicGeodesic g hEnorm p v`.
-Its projection is the foot `γ_v s`, and its chart-`α` fibre coordinate is the
-chart-`α` velocity `deriv (chartCurve α γ_v) s` (the velocity bridge below). -/
+
 private def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1060,7 +1216,7 @@ private def intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The projection of the velocity lift is the foot. -/
+
 private theorem intrinsicVelocityLift_proj
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1073,11 +1229,7 @@ private theorem intrinsicVelocityLift_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Velocity bridge.** At a time `s` where the geodesic foot `γ_v s` lies in the
-chart-`α` source, the chart-`α` fibre coordinate of the velocity lift equals the
-chart-`α` velocity `deriv (chartCurve α γ_v) s`.  This is the chain-rule identity
-`MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`
-combined with `fderiv (extChartAt I α ∘ γ_v) s 1 = deriv (chartCurve α γ_v) s`. -/
+
 private theorem chartFiberCoord_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1123,10 +1275,7 @@ private theorem chartFiberCoord_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Phase point as a chart-of-`TM` reading of the velocity lift.** At a time `s`
-where the foot `γ_v s` lies in the chart-`α` source, the phase point
-`(chartCurve α γ_v s, deriv (chartCurve α γ_v) s)` equals the chart-`⟨α, 0⟩` reading
-`extChartAt I.tangent ⟨α, 0⟩ (liftPt v s)` of the velocity lift. -/
+
 private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1158,16 +1307,7 @@ private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction velocity-lift window producer.** Same junction data as
-`intrinsicGeodesic_window_of_junction_data`, but the conclusion is the joint
-continuity of the *velocity tangent-bundle lift*
-`(v, s) ↦ intrinsicVelocityLift g hEnorm p v s` on a window around `tₖ`.  The proof
-mirrors the position-window producer: it builds the per-chart joint-`C¹` phase flow
-`Φ`, the uniform orbit confinement, the full-phase identification
-`perJunction_phaseIdentification` (geodesic phase pair `= Φ (z v, t - tₖ)`), and
-then expresses the velocity lift as the chart-of-`TM` inverse of the flow orbit,
-whose joint continuity follows from continuity of `Φ`, of `z`, and of the
-chart-of-`TM` inverse on its target. -/
+
 private theorem intrinsicVelocityLift_window_of_junction_data
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1495,15 +1635,7 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Junction data from local velocity-lift continuity.** If the velocity lift
-`(v, s) ↦ intrinsicVelocityLift g hEnorm p v s` is jointly continuous on a window
-`ball v₀ r₀ ×ˢ Ioo a c` containing `(v₀, t)` (with `t ∈ Ioo a c`), then with chart
-centre `α := γ_{v₀} t` the phase point `z v = (chartCurve α γ_v t,
-deriv (chartCurve α γ_v) t)` is continuous on a small ball and the geodesic-side
-confinement holds on a small window.  This is the chart-of-`TM` reading of the lift
-continuity: the phase point equals `extChartAt I.tangent ⟨α, 0⟩ (liftPt v ·)`, and
-all confinement facts are continuity statements about this reading, anchored at
-the base value `(x₀, w₀)` at `(v₀, t)`. -/
+
 private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1697,13 +1829,7 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **One velocity-lift continuity step.** If the velocity lift is jointly
-continuous on a window `ball v₀ r₀ ×ˢ Ioo a c` containing `(v₀, τ)`, then it is
-jointly continuous on a window `ball v₀ r' ×ˢ Ioo (τ - ε') (τ + ε')` for some
-`r', ε' > 0`.  This composes the junction-data extraction
-`intrinsicGeodesic_junctionData_of_lift_continuousOn` (chart centre `α := γ_{v₀} τ`)
-with the velocity-lift window producer
-`intrinsicVelocityLift_window_of_junction_data`. -/
+
 private theorem intrinsicVelocityLift_continuousOn_step
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1756,55 +1882,1032 @@ private theorem intrinsicVelocityLift_continuousOn_step
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint continuity of the chained intrinsic geodesic flow (analytic
-residual).** For every launch velocity `v₀` there is a radius `ρ > 0` such that
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` is jointly continuous on
-`ball v₀ ρ ×ˢ [0, 1]`.
 
-Its closure is reduced to the per-junction phase-point/confinement data by the
-fully-proven producers above:
 
-* `flowProj_continuousOn` — the foot-varying flow projection
-  `(n, τ) ↦ (extChartAt I α).symm (Φ (z n, τ)).1` is jointly continuous whenever
-  the per-chart phase flow `Φ` is continuous, the phase parameter `z` is
-  continuous, and the flowed first component stays in the chart target;
-* `perChart_jointContinuity_of_flowIdentifiedOn` — given a *uniform-in-`v`*
-  identification of the intrinsic geodesic with the foot-varying flow projection
-  on a window `ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, the intrinsic geodesic is
-  jointly continuous there;
-* `geodesic_chartPhaseVF_on_open` — the geodesic's *fixed*-`α`-chart phase curve
-  satisfies the genuine chart-phase ODE `chartPhaseVF g α` wherever the geodesic
-  stays in the chart-`α` source (the fixed-chart reading of the moving-foot
-  geodesic equation);
-* `perJunction_flowIdentification` — the **uniform-in-`v` identification**
-  `intrinsicGeodesic g hEnorm p v t = flowProj α Φ (z v) (t - tₖ)` on a window,
-  from the geodesic-side and flow-side chart-phase ODEs together with confinement
-  of both to a common compact ball and matching initial phase data, via
-  `chartPhaseVF_orbit_uniqueness_uniform_Ioo`.  This is the genuine analytic
-  heart (STEP 1, the residual bootstrap) — fully proven.
+private theorem intrinsicGeodesic_phasePoint_continuous_zero
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    Continuous (fun v : TangentSpace I p =>
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v) 0,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v)) 0) : E × E)) := by
+  classical
+  set CLM : E →L[ℝ] E :=
+    (trivializationAt E (TangentSpace I) p).continuousLinearMapAt ℝ p with hCLM
+  have hfun : (fun v : TangentSpace I p =>
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v) 0,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v)) 0) : E × E))
+      = (fun v : TangentSpace I p => ((extChartAt I p p, CLM v) : E × E)) := by
+    funext v
+    have h1 : DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+        (intrinsicGeodesic (I := I) g hEnorm p v) 0 = extChartAt I p p := by
+      rw [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def,
+        intrinsicGeodesic_zero (I := I) g hEnorm p v]
+    have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I
+        (intrinsicGeodesic (I := I) g hEnorm p v) 0 :=
+      (((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p v).contMDiffAt
+        Filter.univ_mem).mdifferentiableAt one_ne_zero)
+    have h2 : deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve
+        (I := I) p (intrinsicGeodesic (I := I) g hEnorm p v)) 0 = CLM v := by
+      rw [hCLM]
+      exact chartCurve_deriv_zero_eq (I := I) p hmdiff
+        (intrinsicGeodesic_zero (I := I) g hEnorm p v)
+        (intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p v)
+    rw [h1, h2]
+  rw [hfun]
+  exact continuous_const.prodMk CLM.continuous
 
-What remains is the finite-cover induction (STEP 2): supply, junction by junction
-along the finite chart cover `intrinsicGeodesic_arc_finite_chart_cover`, the data
-feeding `perJunction_flowIdentification` / `perChart_jointContinuity_of_flowIdentifiedOn`.
-The per-chart phase flow `Φ` comes from
-`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined` (jointly
-`C¹` hence continuous), centred at the base-velocity phase point at the junction;
-`flowOrbit_uniform_confinement` produces the uniform-in-`v` confinement window for
-the flow orbit.  The base case `tₖ = 0` has chart centre `p` and phase point
-`(extChartAt I p p, v)` (continuous in `v` directly).  The genuinely remaining
-analytic content is the **cross-junction propagation of the phase-point
-continuity** `z : v ↦ (extChartAt I α (γ_v tₖ), deriv (chartCurve α γ_v) tₖ)`: at
-an interior junction the chart velocity `deriv (chartCurve α γ_v) tₖ` must be
-shown continuous in `v`, which couples the joint continuity established on the
-*previous* window (for the foot continuity) with the `C¹`-in-time regularity
-`intrinsicGeodesic_contMDiffOn` and the `C¹` flow `Φ` (for the velocity
-continuity).  Once that phase-point continuity is propagated, `ContinuousOn.union`
-over the finite cover assembles joint continuity on `ball v₀ (min_k r_k) ×ˢ [0, 1]`.
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 
-Everything else in the file (`intrinsicGeodesic_compactArc`,
-`intrinsicGeodesic_arc_finite_chart_cover`, and the producers above) is proved
-unconditionally, and `expMapIntrinsic_continuous` follows from this residual in
-one step. -/
+
+private theorem intrinsicGeodesic_window_of_flowData
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p)
+    {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : TangentSpace I p → E × E}
+    {tₖ r R T' ρ : ℝ}
+    (hT'_pos : 0 < T')
+    (hball : Metric.closedBall z₀ R ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (hΦ_cont : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T'))
+    (hΦ_phase : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt (fun τ => Φ (z v, τ))
+        (chartPhaseVF (I := I) g α (Φ (z v, s))) s)
+    (hΦ_in : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
+      Φ (z v, s) ∈ Metric.closedBall z₀ R)
+    (hgeo_src : ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - T') (tₖ + T'),
+      intrinsicGeodesic (I := I) g hEnorm p v t ∈ (chartAt H α).source)
+    (hgeo_in : ∀ v ∈ Metric.ball v₀ r, ∀ t ∈ Set.Ioo (tₖ - T') (tₖ + T'),
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) t,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E)
+        ∈ Metric.closedBall z₀ R)
+    (hinit : ∀ v ∈ Metric.ball v₀ r,
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E) = z v)
+    (hΦinit : ∀ v ∈ Metric.ball v₀ r, Φ (z v, 0) = z v)
+    (hz_cont : ContinuousOn z (Metric.ball v₀ r))
+    (hz_ball : ∀ v ∈ Metric.ball v₀ r, z v ∈ Metric.ball z₀ ρ) :
+    ContinuousOn
+      (fun vt : TangentSpace I p × ℝ =>
+        intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
+      ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - T') (tₖ + T')) := by
+  have hident := perJunction_flowIdentification (I := I) g hEnorm p v₀
+    (α := α) (Φ := Φ) (z₀ := z₀) (z := z) (tₖ := tₖ) (r := r) (R := R) (T' := T')
+    hT'_pos hball hΦ_phase hΦ_in hgeo_src hgeo_in hinit hΦinit
+  have htgt : ∀ v ∈ Metric.ball v₀ r, ∀ τ ∈ Set.Ioo (-T') T',
+      (Φ (z v, τ)).1 ∈ (extChartAt I α).target := by
+    intro v hv τ hτ
+    exact interior_subset (hball (hΦ_in v hv τ hτ)).1
+  exact perChart_jointContinuity_of_flowIdentifiedOn (I := I) g hEnorm p v₀
+    (α := α) (Φ := Φ) (z₀ := z₀) (z := z) (tₖ := tₖ) (ε := T') (r := r) (ρ := ρ) (T := T')
+    (le_refl T') hΦ_cont hz_cont hz_ball htgt hident
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem exists_chartFlowData_of_zContinuousAt
+    {N : Type*} [TopologicalSpace N]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {z₀ : E × E} {z : N → E × E} {v₀ : N}
+    (hx₀ : (z₀).1 ∈ interior (extChartAt I α).target)
+    (hz_cont : ContinuousAt z v₀) (hz0 : z v₀ = z₀) :
+    ∃ (Φ : (E × E) × ℝ → E × E) (S : Set N) (T' R ρ : ℝ),
+      IsOpen S ∧ v₀ ∈ S ∧ 0 < T' ∧ 0 < R ∧ 0 < ρ ∧
+      Metric.closedBall z₀ R ⊆
+        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) ∧
+      ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T') ∧
+      (∀ v ∈ S, ∀ s ∈ Set.Ioo (-T') T',
+        HasDerivAt (fun τ => Φ (z v, τ))
+          (chartPhaseVF (I := I) g α (Φ (z v, s))) s) ∧
+      (∀ v ∈ S, ∀ s ∈ Set.Ioo (-T') T', Φ (z v, s) ∈ Metric.closedBall z₀ R) ∧
+      (∀ v ∈ S, Φ (z v, 0) = z v) ∧
+      (∀ v ∈ S, z v ∈ Metric.ball z₀ ρ) := by
+  classical
+  obtain ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hflow, hΦ_C1, hΦ_init⟩ :=
+    exists_chartPhase_contDiffOn_isLocalFlow_combined (I := I) g α
+      (x₀ := (z₀).1) (v₀ := (z₀).2) hx₀
+
+
+  set ρ_f : ℝ := min ρ (rN : ℝ) with hρf_def
+  set T_f : ℝ := min T εN with hTf_def
+  have hρf_pos : 0 < ρ_f := lt_min hρ_pos (by exact_mod_cast hrN)
+  have hTf_pos : 0 < T_f := lt_min hT_pos hεN
+  have hρf_le_rN : ρ_f ≤ (rN : ℝ) := min_le_right _ _
+  have hΦ_cont_f : ContinuousOn Φ ((Metric.ball z₀ ρ_f) ×ˢ Set.Ioo (-T_f) T_f) :=
+    hΦ_C1.continuousOn.mono (Set.prod_mono (Metric.ball_subset_ball (min_le_left _ _))
+      (Set.Ioo_subset_Ioo (by linarith [min_le_left T εN]) (min_le_left _ _)))
+  have hΦ0 : Φ (z₀, 0) = z₀ := hΦ_init
+  have hW_nhds : Metric.ball z₀ b.rIn ∈ nhds z₀ :=
+    Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self b.rIn_pos)
+  obtain ⟨S, T'c, hS_open, hv₀_S, hT'c_pos, hT'c_lt, hzS_ball, horbit_in⟩ :=
+    flowOrbit_uniform_confinement (N := N) (Φ := Φ) (z₀ := z₀)
+      (ρ_f := ρ_f) (T_f := T_f) (z := z) (v₀ := v₀) (W := Metric.ball z₀ b.rIn)
+      hρf_pos hTf_pos hΦ_cont_f hΦ0 hz_cont hz0 hW_nhds
+  have hzv_rN : ∀ v ∈ S, z v ∈ Metric.closedBall z₀ (rN : ℝ) := fun v hv =>
+    Metric.ball_subset_closedBall (Metric.ball_subset_ball hρf_le_rN (hzS_ball v hv))
+  have hT'c_le_εN : T'c ≤ εN := le_trans (le_of_lt hT'c_lt) (min_le_right _ _)
+  refine ⟨Φ, S, T'c, b.rOut, ρ_f, hS_open, hv₀_S, hT'c_pos, b.rOut_pos, hρf_pos,
+    ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact hb_sub
+  · exact hΦ_cont_f.mono (Set.prod_mono (le_refl _)
+      (Set.Ioo_subset_Ioo (by linarith) (le_of_lt hT'c_lt)))
+  · intro v hv s hs
+    have hs_ioo_εN : s ∈ Set.Ioo (-(εN : ℝ)) εN :=
+      ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have hd := hflow.hasDerivWithinAt (z v) (hzv_rN v hv) s
+      (Set.Ioo_subset_Icc_self hs_ioo_εN)
+    have hda := hd.hasDerivAt (Icc_mem_nhds hs_ioo_εN.1 hs_ioo_εN.2)
+    have horbit_rin : Φ (z v, s) ∈
+        Metric.closedBall (((z₀).1, (z₀).2) : E × E) b.rIn :=
+      Metric.ball_subset_closedBall (horbit_in v hv s hs)
+    have hVF : chartPhaseVFTime (I := I) g α ((z₀).1, (z₀).2) b s (Φ (z v, s))
+        = chartPhaseVF (I := I) g α (Φ (z v, s)) := by
+      show chartPhaseVFCutoff (I := I) g α ((z₀).1, (z₀).2) b (Φ (z v, s))
+        = chartPhaseVF (I := I) g α (Φ (z v, s))
+      exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α
+        ((z₀).1, (z₀).2) b horbit_rin
+    rw [hVF] at hda
+    exact hda
+  · intro v hv s hs
+    have h_in := horbit_in v hv s hs
+    exact Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)
+      (Metric.ball_subset_closedBall h_in)
+  · intro v hv
+    exact hflow.apply_initial (z v) (hzv_rN v hv)
+  · exact hzS_ball
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem exists_chartFlow_confined
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {z₀ : E × E}
+    (hx₀ : (z₀).1 ∈ interior (extChartAt I α).target) :
+    ∃ (Φ : (E × E) × ℝ → E × E) (b : ContDiffBump z₀) (T' ρ : ℝ),
+      0 < T' ∧ 0 < ρ ∧
+      Metric.closedBall z₀ b.rOut ⊆
+        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) ∧
+      ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T') ∧
+      (∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+        HasDerivAt (fun τ => Φ (w, τ))
+          (chartPhaseVF (I := I) g α (Φ (w, s))) s) ∧
+      (∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+        Φ (w, s) ∈ Metric.closedBall z₀ b.rIn) ∧
+      (∀ w ∈ Metric.ball z₀ ρ, Φ (w, 0) = w) := by
+  classical
+  obtain ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hflow, hΦ_C1, hΦ_init⟩ :=
+    exists_chartPhase_contDiffOn_isLocalFlow_combined (I := I) g α
+      (x₀ := (z₀).1) (v₀ := (z₀).2) hx₀
+  have hbcenter : ((z₀).1, (z₀).2) = z₀ := rfl
+  set ρ_f : ℝ := min ρ (rN : ℝ) with hρf_def
+  have hρf_pos : 0 < ρ_f := lt_min hρ_pos (by exact_mod_cast hrN)
+  have hρf_le_rN : ρ_f ≤ (rN : ℝ) := min_le_right _ _
+
+  have hballIn_sub : Metric.closedBall z₀ b.rIn ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
+    subset_trans (Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)) hb_sub
+  obtain ⟨Mb, hMb_pos, hMb⟩ :=
+    chartPhaseVF_bddOn_closedBall (I := I) g α z₀ (le_of_lt b.rIn_pos) hballIn_sub
+
+  set ρ_z : ℝ := b.rIn - min b.rIn (Mb * εN) / 2 with hρz_def
+  have hmin_pos : 0 < min b.rIn (Mb * εN) := lt_min b.rIn_pos (by positivity)
+  have hρz_pos : 0 < ρ_z := by
+    rw [hρz_def]
+    have h1 : min b.rIn (Mb * εN) ≤ b.rIn := min_le_left _ _
+    linarith
+  have hρz_lt : ρ_z < b.rIn := by rw [hρz_def]; linarith
+  have hRMT : b.rIn - ρ_z < Mb * εN := by
+    rw [hρz_def]
+    have h2 : min b.rIn (Mb * εN) ≤ Mb * εN := min_le_right _ _
+    have : (0:ℝ) < Mb * εN := by positivity
+    linarith
+  set ρ_w : ℝ := min ρ_f ρ_z with hρw_def
+  have hρw_pos : 0 < ρ_w := lt_min hρf_pos hρz_pos
+  have hρw_le_ρf : ρ_w ≤ ρ_f := min_le_left _ _
+  have hρw_le_ρz : ρ_w ≤ ρ_z := min_le_right _ _
+  have hw_ball_rN : ∀ w ∈ Metric.ball z₀ ρ_w, w ∈ Metric.closedBall z₀ (rN : ℝ) := fun w hw =>
+    Metric.ball_subset_closedBall (Metric.ball_subset_ball
+      (le_trans hρw_le_ρf hρf_le_rN) hw)
+  have hρf_le_ρ : ρ_f ≤ ρ := min_le_left _ _
+  set Tconf : ℝ := (b.rIn - ρ_z) / Mb with hTconf_def
+  have hTconf_pos : 0 < Tconf := div_pos (by linarith) hMb_pos
+  have hTconf_lt_εN : Tconf < εN := by rw [hTconf_def, div_lt_iff₀ hMb_pos]; linarith [hRMT]
+  set T' : ℝ := min Tconf T with hT'_def
+  have hT'_pos : 0 < T' := lt_min hTconf_pos hT_pos
+  have hT'_le_Tconf : T' ≤ Tconf := min_le_left _ _
+  have hT'_le_T : T' ≤ T := min_le_right _ _
+  have hT'_lt_εN : T' < εN := lt_of_le_of_lt hT'_le_Tconf hTconf_lt_εN
+
+  have hΦ_in : ∀ w ∈ Metric.ball z₀ ρ_w, ∀ s ∈ Set.Ioo (-T') T',
+      Φ (w, s) ∈ Metric.closedBall z₀ b.rIn := by
+    intro w hw s hs
+    have hderiv_v : ∀ r ∈ Set.Ioo (-(εN : ℝ)) εN,
+        HasDerivAt (fun τ => Φ (w, τ))
+          (chartPhaseVFTime (I := I) g α z₀ b r (Φ (w, r))) r := fun r hr =>
+      (hflow.hasDerivWithinAt w (hw_ball_rN w hw) r
+        (Set.Ioo_subset_Icc_self hr)).hasDerivAt (Icc_mem_nhds hr.1 hr.2)
+    have hzc : dist w z₀ ≤ ρ_z :=
+      le_of_lt (lt_of_lt_of_le (Metric.mem_ball.mp hw) hρw_le_ρz)
+    have hconf := flowOrbit_cutoff_confined_symm (I := I) g α b hMb_pos
+      (le_of_lt hρz_pos) hρz_lt hεN hRMT hzc
+      (hflow.apply_initial w (hw_ball_rN w hw)) hderiv_v hMb
+    exact hconf s ⟨by linarith [hs.1, hT'_le_Tconf], by linarith [hs.2, hT'_le_Tconf]⟩
+  refine ⟨Φ, b, T', ρ_w, hT'_pos, hρw_pos, hb_sub, ?_, ?_, hΦ_in, ?_⟩
+  · exact hΦ_C1.continuousOn.mono (Set.prod_mono
+      (Metric.ball_subset_ball (le_trans hρw_le_ρf hρf_le_ρ))
+      (Set.Ioo_subset_Ioo (by linarith [hT'_le_T]) hT'_le_T))
+  · intro w hw s hs
+    have hsεN : s ∈ Set.Ioo (-(εN : ℝ)) εN :=
+      ⟨by linarith [hs.1, hT'_lt_εN], by linarith [hs.2, hT'_lt_εN]⟩
+    have hda := (hflow.hasDerivWithinAt w (hw_ball_rN w hw) s
+      (Set.Ioo_subset_Icc_self hsεN)).hasDerivAt (Icc_mem_nhds hsεN.1 hsεN.2)
+    have horbit_in : Φ (w, s) ∈ Metric.closedBall z₀ b.rIn := hΦ_in w hw s hs
+    have hVF : chartPhaseVFTime (I := I) g α z₀ b s (Φ (w, s))
+        = chartPhaseVF (I := I) g α (Φ (w, s)) := by
+      rw [chartPhaseVFTime_apply]
+      exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α z₀ b horbit_in
+    rw [hVF] at hda
+    exact hda
+  · intro w hw
+    exact hflow.apply_initial w (hw_ball_rN w hw)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem intrinsicGeodesic_chart_confined_of_orbit
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v : TangentSpace I p) {α : M} {φ : ℝ → E × E} {tₖ T' : ℝ}
+    (hφ_tgt : ∀ s ∈ Set.Ioo (-T') T',
+      (φ s).1 ∈ interior (extChartAt I α).target)
+    (hφ_phase : ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt φ (chartPhaseVF (I := I) g α (φ s)) s)
+    (hmatch0 : ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+        (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+      deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+        (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E) = φ 0)
+    (hsrc0 : intrinsicGeodesic (I := I) g hEnorm p v tₖ ∈ (chartAt H α).source) :
+    ∀ s ∈ Set.Ioo (-T') T',
+      intrinsicGeodesic (I := I) g hEnorm p v (tₖ + s) ∈ (chartAt H α).source ∧
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) (tₖ + s),
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) (tₖ + s)) : E × E) = φ s := by
+  classical
+  set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v with hγ_def
+  have hγ_geo : IsGeodesic (I := I) g γ :=
+    intrinsicGeodesic_isGeodesic (I := I) g hEnorm p v
+  have hγ_cont : Continuous γ := intrinsicGeodesic_continuous (I := I) g hEnorm p v
+
+
+  set K : Set ℝ := Set.Ioo (tₖ - T') (tₖ + T') with hK_def
+  set cγ : ℝ → E × E := fun t =>
+    ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ t,
+      deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ) t)
+      : E × E) with hcγ_def
+  set phiS : ℝ → E × E := fun t => φ (t - tₖ) with hphiS_def
+
+  have hphiS_phase : ∀ t ∈ K, HasDerivAt phiS (chartPhaseVF (I := I) g α (phiS t)) t := by
+    intro t ht
+    have hts : t - tₖ ∈ Set.Ioo (-T') T' := by
+      rw [hK_def, Set.mem_Ioo] at ht
+      exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    have hd := (hφ_phase (t - tₖ) hts).scomp t ((hasDerivAt_id t).sub_const tₖ)
+    simpa [hphiS_def] using hd
+  have hphiS_tgt : ∀ t ∈ K, (phiS t).1 ∈ interior (extChartAt I α).target := by
+    intro t ht
+    have hts : t - tₖ ∈ Set.Ioo (-T') T' := by
+      rw [hK_def, Set.mem_Ioo] at ht
+      exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    exact hφ_tgt (t - tₖ) hts
+
+  set psiS : ℝ → M := fun t => (extChartAt I α).symm (phiS t).1 with hpsiS_def
+  have hpsiS_src : ∀ t ∈ K, psiS t ∈ (chartAt H α).source := by
+    intro t ht
+    have h1 : (phiS t).1 ∈ (extChartAt I α).target := interior_subset (hphiS_tgt t ht)
+    have h2 := (extChartAt I α).map_target h1
+    rwa [extChartAt_source (I := I) α] at h2
+  have hphiS_cont : ContinuousOn phiS K :=
+    fun t ht => (hphiS_phase t ht).continuousAt.continuousWithinAt
+  have hpsiS_cont : ContinuousOn psiS K := by
+    have h1 : ContinuousOn (fun t => (phiS t).1) K := hphiS_cont.fst
+    have h2 : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+      continuousOn_extChartAt_symm (I := I) α
+    exact h2.comp h1 (fun t ht => interior_subset (hphiS_tgt t ht))
+
+
+  have hpos_of_phase : ∀ t ∈ K, γ t ∈ (chartAt H α).source → cγ t = phiS t →
+      γ t = psiS t := by
+    intro t ht hsrc hphase
+    have h1 : extChartAt I α (γ t) = (phiS t).1 := by
+      have h := congrArg Prod.fst hphase
+      simpa [hcγ_def, DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+        using h
+    rw [hpsiS_def]
+    show γ t = (extChartAt I α).symm (phiS t).1
+    rw [← h1]
+    exact ((extChartAt I α).left_inv
+      (by rw [extChartAt_source (I := I) α]; exact hsrc)).symm
+
+
+  suffices hKagree : ∀ t ∈ K, γ t ∈ (chartAt H α).source ∧ cγ t = phiS t by
+    intro s hs
+    have ht : tₖ + s ∈ K := by
+      rw [hK_def, Set.mem_Ioo]
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    obtain ⟨hsrc, hphase⟩ := hKagree (tₖ + s) ht
+    refine ⟨hsrc, ?_⟩
+    have hps : phiS (tₖ + s) = φ s := by simp only [hphiS_def, add_sub_cancel_left]
+    exact hphase.trans hps
+
+
+  set A : Set ℝ := {t ∈ K | γ t ∈ (chartAt H α).source ∧ cγ t = phiS t} with hA_def
+  have hK_open : IsOpen K := isOpen_Ioo
+  have hK_conn : IsPreconnected K := isPreconnected_Ioo
+
+
+  have hA_rel_open : ∀ t ∈ A, ∃ U : Set ℝ, IsOpen U ∧ t ∈ U ∧ U ∩ K ⊆ A := by
+    intro t₀ ht₀A
+    obtain ⟨ht₀K, ht₀src, ht₀phase⟩ := ht₀A
+    have hVsrc_open : IsOpen (γ ⁻¹' (chartAt H α).source) :=
+      (chartAt H α).open_source.preimage hγ_cont
+    set W : Set ℝ := (γ ⁻¹' (chartAt H α).source) ∩ K with hW_def
+    have hW_open : IsOpen W := hVsrc_open.inter hK_open
+    have ht₀_W : t₀ ∈ W := ⟨ht₀src, ht₀K⟩
+    have hgeo := geodesic_chartPhaseVF_on_open (I := I) hγ_geo hγ_cont hW_open
+      (fun s hs => hs.1)
+
+    set c₁ : ℝ → E × E := fun r => cγ (t₀ + r) with hc₁_def
+    set c₂ : ℝ → E × E := fun r => phiS (t₀ + r) with hc₂_def
+    set z₀ : E × E := cγ t₀ with hz₀_def
+    have hz₀_mem : z₀ ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+      refine ⟨?_, Set.mem_univ _⟩
+      simpa [hz₀_def, hcγ_def] using (hgeo t₀ ht₀_W).2
+    have hc₁0 : c₁ 0 = z₀ := by simp [hc₁_def, hz₀_def]
+    have hc₂0 : c₂ 0 = z₀ := by
+      simp only [hc₂_def, add_zero, hz₀_def]; exact ht₀phase.symm
+    have hshift_to : Filter.Tendsto (fun r : ℝ => t₀ + r) (nhds 0) (nhds t₀) := by
+      have h : Filter.Tendsto (fun r : ℝ => t₀ + r) (nhds 0) (nhds (t₀ + 0)) :=
+        (continuous_const.add continuous_id).continuousAt
+      simpa using h
+    have hd1 : ∀ᶠ r in nhds (0:ℝ),
+        HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ r)) r ∧
+          c₁ r ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+      have hr_W : ∀ᶠ r in nhds (0:ℝ), t₀ + r ∈ W :=
+        hshift_to.eventually (hW_open.mem_nhds ht₀_W)
+      filter_upwards [hr_W] with r hr
+      obtain ⟨hderiv, htgt⟩ := hgeo (t₀ + r) hr
+      refine ⟨?_, ?_, Set.mem_univ _⟩
+      · have hsd : HasDerivAt (fun r : ℝ => t₀ + r) 1 r := (hasDerivAt_id r).const_add t₀
+        simpa [hc₁_def, hcγ_def, Function.comp, one_smul] using hderiv.scomp r hsd
+      · simpa [hc₁_def, hcγ_def] using htgt
+    have hd2 : ∀ᶠ r in nhds (0:ℝ),
+        HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ r)) r ∧
+          c₂ r ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+      have hr_K : ∀ᶠ r in nhds (0:ℝ), t₀ + r ∈ K :=
+        hshift_to.eventually (hK_open.mem_nhds ht₀K)
+      filter_upwards [hr_K] with r hr
+      refine ⟨?_, ?_, Set.mem_univ _⟩
+      · have hsd : HasDerivAt (fun r : ℝ => t₀ + r) 1 r := (hasDerivAt_id r).const_add t₀
+        simpa [hc₂_def, Function.comp, one_smul] using (hphiS_phase (t₀ + r) hr).scomp r hsd
+      · simpa [hc₂_def] using hphiS_tgt (t₀ + r) hr
+    have huniq : c₁ =ᶠ[nhds (0:ℝ)] c₂ :=
+      chartPhaseVF_orbit_uniqueness (I := I) hz₀_mem hc₁0 hc₂0 hd1 hd2
+
+    have heq_t₀ : ∀ᶠ t in nhds t₀, cγ t = phiS t := by
+      have hshift_back : Filter.Tendsto (fun t : ℝ => t - t₀) (nhds t₀) (nhds (0:ℝ)) := by
+        have h : Filter.Tendsto (fun t : ℝ => t - t₀) (nhds t₀) (nhds (t₀ - t₀)) :=
+          (continuous_id.sub continuous_const).continuousAt
+        simpa using h
+      filter_upwards [hshift_back.eventually huniq] with t ht
+      simp only [hc₁_def, hc₂_def] at ht
+      rwa [show t₀ + (t - t₀) = t from by ring] at ht
+    have hcomb : ∀ᶠ t in nhds t₀, γ t ∈ (chartAt H α).source ∧ cγ t = phiS t := by
+      filter_upwards [hVsrc_open.mem_nhds ht₀src, heq_t₀] with t hs he using ⟨hs, he⟩
+    obtain ⟨U, hU_sub, hU_open, ht₀U⟩ := _root_.mem_nhds_iff.mp hcomb
+    exact ⟨U, hU_open, ht₀U, fun x hx => ⟨hx.2, (hU_sub hx.1).1, (hU_sub hx.1).2⟩⟩
+
+
+  have hA_closed : closure A ∩ K ⊆ A := by
+    rintro t₀ ⟨ht₀_cl, ht₀K⟩
+    rw [mem_closure_iff_seq_limit] at ht₀_cl
+    obtain ⟨u, hu_A, hu_lim⟩ := ht₀_cl
+    have hu_K : ∀ n, u n ∈ K := fun n => (hu_A n).1
+    have hu_within : Filter.Tendsto u Filter.atTop (nhdsWithin t₀ K) :=
+      tendsto_nhdsWithin_iff.mpr ⟨hu_lim, Filter.Eventually.of_forall hu_K⟩
+
+    have hγψ : (fun n => γ (u n)) = (fun n => psiS (u n)) :=
+      funext fun n => hpos_of_phase (u n) (hu_A n).1 (hu_A n).2.1 (hu_A n).2.2
+    have hlim_γ : Filter.Tendsto (fun n => γ (u n)) Filter.atTop (nhds (γ t₀)) :=
+      (hγ_cont.continuousAt.tendsto).comp hu_lim
+    have hlim_ψ : Filter.Tendsto (fun n => psiS (u n)) Filter.atTop (nhds (psiS t₀)) :=
+      (hpsiS_cont t₀ ht₀K).tendsto.comp hu_within
+    have hγt₀ : γ t₀ = psiS t₀ := by
+      rw [hγψ] at hlim_γ
+      exact tendsto_nhds_unique hlim_γ hlim_ψ
+    have ht₀src : γ t₀ ∈ (chartAt H α).source := by rw [hγt₀]; exact hpsiS_src t₀ ht₀K
+
+    set W₀ : Set ℝ := (γ ⁻¹' (chartAt H α).source) ∩ K with hW₀_def
+    have hW₀_open : IsOpen W₀ :=
+      ((chartAt H α).open_source.preimage hγ_cont).inter hK_open
+    have hgeo0 := geodesic_chartPhaseVF_on_open (I := I) hγ_geo hγ_cont hW₀_open
+      (fun s hs => hs.1)
+    have hcγ_cont : ContinuousAt cγ t₀ := (hgeo0 t₀ ⟨ht₀src, ht₀K⟩).1.continuousAt
+    have hlim_cγ : Filter.Tendsto (fun n => cγ (u n)) Filter.atTop (nhds (cγ t₀)) :=
+      hcγ_cont.tendsto.comp hu_lim
+    have hlim_phiS : Filter.Tendsto (fun n => phiS (u n)) Filter.atTop (nhds (phiS t₀)) :=
+      (hphiS_cont t₀ ht₀K).tendsto.comp hu_within
+    have hcφ : (fun n => cγ (u n)) = (fun n => phiS (u n)) :=
+      funext fun n => (hu_A n).2.2
+    have hcγt₀ : cγ t₀ = phiS t₀ := by
+      rw [hcφ] at hlim_cγ
+      exact tendsto_nhds_unique hlim_cγ hlim_phiS
+    exact ⟨ht₀K, ht₀src, hcγt₀⟩
+  have hKnA_rel_open : ∀ t ∈ K \ A, ∃ U : Set ℝ, IsOpen U ∧ t ∈ U ∧ U ∩ K ⊆ K \ A := by
+    intro t₀ ht₀
+    obtain ⟨ht₀K, ht₀nA⟩ := ht₀
+    have ht₀_ncl : t₀ ∉ closure A := fun h => ht₀nA (hA_closed ⟨h, ht₀K⟩)
+    refine ⟨(closure A)ᶜ, isClosed_closure.isOpen_compl, ht₀_ncl, ?_⟩
+    rintro x ⟨hxU, hxK⟩
+    exact ⟨hxK, fun hxA => hxU (subset_closure hxA)⟩
+  intro t htK
+  have hT'_pos : 0 < T' := by
+    rw [hK_def, Set.mem_Ioo] at htK; linarith [htK.1, htK.2]
+  have htₖ_K : tₖ ∈ K := by
+    rw [hK_def, Set.mem_Ioo]; exact ⟨by linarith, by linarith⟩
+  have hphase_tₖ : cγ tₖ = phiS tₖ := by
+    have hp0 : phiS tₖ = φ 0 := by simp [hphiS_def]
+    rw [hp0]; exact hmatch0
+  have h0_A : tₖ ∈ A := ⟨htₖ_K, hsrc0, hphase_tₖ⟩
+  by_contra h_neq
+  have hs_KnA : t ∈ K \ A := ⟨htK, fun h => h_neq h.2⟩
+  set U_A : Set ℝ := ⋃ (u : ℝ) (huA : u ∈ A),
+    Classical.choose (hA_rel_open u huA) with hU_A_def
+  have hU_A_open : IsOpen U_A := by
+    apply isOpen_iUnion; intro u
+    apply isOpen_iUnion; intro huA
+    exact (Classical.choose_spec (hA_rel_open u huA)).1
+  have hA_sub_U_A : A ⊆ U_A := by
+    intro x hx
+    simp only [hU_A_def, Set.mem_iUnion]
+    exact ⟨x, hx, (Classical.choose_spec (hA_rel_open x hx)).2.1⟩
+  have hU_A_inter_K_sub_A : U_A ∩ K ⊆ A := by
+    intro x hx
+    obtain ⟨hx_U, hx_K⟩ := hx
+    simp only [hU_A_def, Set.mem_iUnion] at hx_U
+    obtain ⟨u, huA, hx_u⟩ := hx_U
+    exact (Classical.choose_spec (hA_rel_open u huA)).2.2 ⟨hx_u, hx_K⟩
+  set U_KnA : Set ℝ := ⋃ (u : ℝ) (huKnA : u ∈ K \ A),
+    Classical.choose (hKnA_rel_open u huKnA) with hU_KnA_def
+  have hU_KnA_open : IsOpen U_KnA := by
+    apply isOpen_iUnion; intro u
+    apply isOpen_iUnion; intro huKnA
+    exact (Classical.choose_spec (hKnA_rel_open u huKnA)).1
+  have hKnA_sub_U_KnA : K \ A ⊆ U_KnA := by
+    intro x hx
+    simp only [hU_KnA_def, Set.mem_iUnion]
+    exact ⟨x, hx, (Classical.choose_spec (hKnA_rel_open x hx)).2.1⟩
+  have hU_KnA_inter_K_sub_KnA : U_KnA ∩ K ⊆ K \ A := by
+    intro x hx
+    obtain ⟨hx_U, hx_K⟩ := hx
+    simp only [hU_KnA_def, Set.mem_iUnion] at hx_U
+    obtain ⟨u, huKnA, hx_u⟩ := hx_U
+    exact (Classical.choose_spec (hKnA_rel_open u huKnA)).2.2 ⟨hx_u, hx_K⟩
+  have hK_cover : K ⊆ U_A ∪ U_KnA := by
+    intro x hx_K
+    by_cases hxA : x ∈ A
+    · exact Or.inl (hA_sub_U_A hxA)
+    · exact Or.inr (hKnA_sub_U_KnA ⟨hx_K, hxA⟩)
+  have hcontra : (K ∩ (U_A ∩ U_KnA)).Nonempty :=
+    hK_conn U_A U_KnA hU_A_open hU_KnA_open hK_cover
+      ⟨tₖ, htₖ_K, hA_sub_U_A h0_A⟩
+      ⟨t, htK, hKnA_sub_U_KnA hs_KnA⟩
+  obtain ⟨x, hx_K, hx_UA, hx_UKnA⟩ := hcontra
+  have hxA : x ∈ A := hU_A_inter_K_sub_A ⟨hx_UA, hx_K⟩
+  have hxKnA : x ∈ K \ A := hU_KnA_inter_K_sub_KnA ⟨hx_UKnA, hx_K⟩
+  exact hxKnA.2 hxA
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem intrinsicVelocityLift_window_of_flow
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p)
+    (α : M) {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
+    {T' ρ : ℝ} (hT'_pos : 0 < T') (hρ_pos : 0 < ρ)
+    (hballOut : Metric.closedBall z₀ b.rOut ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (hΦ_cont : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T'))
+    (hΦ_phase : ∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt (fun τ => Φ (w, τ)) (chartPhaseVF (I := I) g α (Φ (w, s))) s)
+    (hΦ_in : ∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+      Φ (w, s) ∈ Metric.closedBall z₀ b.rIn)
+    (hΦinit : ∀ w ∈ Metric.ball z₀ ρ, Φ (w, 0) = w)
+    {z : TangentSpace I p → E × E} {tₖ : ℝ} {rz : ℝ} (hrz : 0 < rz)
+    (hz_cont : ContinuousOn z (Metric.ball v₀ rz)) (hz0 : z v₀ ∈ Metric.ball z₀ ρ)
+    (hzmatch : ∀ v ∈ Metric.ball v₀ rz,
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E) = z v)
+    (hsrc : ∀ v ∈ Metric.ball v₀ rz,
+      intrinsicGeodesic (I := I) g hEnorm p v tₖ ∈ (chartAt H α).source) :
+    ∃ r : ℝ, 0 < r ∧
+      ContinuousOn
+        (fun vt : TangentSpace I p × ℝ =>
+          intrinsicVelocityLift (I := I) g hEnorm p vt.1 vt.2)
+        ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - T') (tₖ + T')) := by
+  classical
+
+  have hz_pre : z ⁻¹' Metric.ball z₀ ρ ∈ nhds v₀ :=
+    (hz_cont.continuousAt (Metric.ball_mem_nhds _ hrz)).preimage_mem_nhds
+      (Metric.isOpen_ball.mem_nhds hz0)
+  obtain ⟨r₀, hr₀_pos, hr₀_sub⟩ := Metric.mem_nhds_iff.mp hz_pre
+  set rfin : ℝ := min r₀ rz with hrfin_def
+  have hrfin_pos : 0 < rfin := lt_min hr₀_pos hrz
+  have hrfin_le_r₀ : rfin ≤ r₀ := min_le_left _ _
+  have hrfin_le_rz : rfin ≤ rz := min_le_right _ _
+  have hz_ballρ : ∀ v ∈ Metric.ball v₀ rfin, z v ∈ Metric.ball z₀ ρ :=
+    fun v hv => hr₀_sub (Metric.ball_subset_ball hrfin_le_r₀ hv)
+  have hballIn_sub : Metric.closedBall z₀ b.rIn ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
+    subset_trans (Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)) hballOut
+
+  have hB2 : ∀ v ∈ Metric.ball v₀ rfin, ∀ s ∈ Set.Ioo (-T') T',
+      intrinsicGeodesic (I := I) g hEnorm p v (tₖ + s) ∈ (chartAt H α).source ∧
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) (tₖ + s),
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) (tₖ + s)) : E × E) = Φ (z v, s) := by
+    intro v hv s hs
+    have hvz : v ∈ Metric.ball v₀ rz := Metric.ball_subset_ball hrfin_le_rz hv
+    exact intrinsicGeodesic_chart_confined_of_orbit (I := I) g hEnorm p v (α := α)
+      (φ := fun s => Φ (z v, s)) (tₖ := tₖ) (T' := T')
+      (fun s' hs' => (hballIn_sub (hΦ_in (z v) (hz_ballρ v hv) s' hs')).1)
+      (fun s' hs' => hΦ_phase (z v) (hz_ballρ v hv) s' hs')
+      ((hzmatch v hvz).trans (hΦinit (z v) (hz_ballρ v hv)).symm)
+      (hsrc v hvz) s hs
+  refine ⟨rfin, hrfin_pos, ?_⟩
+  have htgt : ∀ v ∈ Metric.ball v₀ rfin, ∀ τ ∈ Set.Ioo (-T') T',
+      Φ (z v, τ) ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
+    intro v hv τ hτ
+    exact hballIn_sub (hΦ_in (z v) (hz_ballρ v hv) τ hτ)
+  have hz_cont_r : ContinuousOn z (Metric.ball v₀ rfin) :=
+    hz_cont.mono (Metric.ball_subset_ball hrfin_le_rz)
+  have hshift_cont : ContinuousOn (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (tₖ - T') (tₖ + T')) :=
+    (continuousOn_fst).prodMk ((continuousOn_snd).sub continuousOn_const)
+  have hshift_maps : Set.MapsTo (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (tₖ - T') (tₖ + T'))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T') := by
+    intro vt hvt
+    refine ⟨hvt.1, ?_, ?_⟩
+    · exact lt_sub_iff_add_lt.mpr (by linarith [hvt.2.1])
+    · exact sub_lt_iff_lt_add.mpr (by linarith [hvt.2.2])
+  have hΦorbit_cont : ContinuousOn
+      (fun vτ : TangentSpace I p × ℝ => Φ (z vτ.1, vτ.2))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T') := by
+    have hpair_cont : ContinuousOn
+        (fun vτ : TangentSpace I p × ℝ => ((z vτ.1, vτ.2) : (E × E) × ℝ))
+        ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T') := by
+      refine ContinuousOn.prodMk ?_ continuousOn_snd
+      exact hz_cont_r.comp continuousOn_fst (fun x hx => hx.1)
+    have hpair_maps : Set.MapsTo
+        (fun vτ : TangentSpace I p × ℝ => ((z vτ.1, vτ.2) : (E × E) × ℝ))
+        ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T')
+        ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T') :=
+      fun vτ hvτ => ⟨hz_ballρ vτ.1 hvτ.1, hvτ.2⟩
+    exact hΦ_cont.comp hpair_cont hpair_maps
+  have hsymm_cont : ContinuousOn
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).target :=
+    continuousOn_extChartAt_symm (I := I.tangent) (⟨α, (0 : E)⟩ : TangentBundle I M)
+  have horbit_maps : Set.MapsTo
+      (fun vτ : TangentSpace I p × ℝ => Φ (z vτ.1, vτ.2))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T')
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).target := by
+    intro vτ hvτ
+    exact mem_extChartAt_tangent_zero_target (I := I) α (htgt vτ.1 hvτ.1 vτ.2 hvτ.2)
+  have hlift_orbit_cont : ContinuousOn
+      (fun vτ : TangentSpace I p × ℝ =>
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+          (Φ (z vτ.1, vτ.2)))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-T') T') :=
+    hsymm_cont.comp hΦorbit_cont horbit_maps
+  have hcomp_cont : ContinuousOn
+      (fun vt : TangentSpace I p × ℝ =>
+        (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+          (Φ (z vt.1, vt.2 - tₖ)))
+      ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (tₖ - T') (tₖ + T')) :=
+    hlift_orbit_cont.comp hshift_cont hshift_maps
+  apply hcomp_cont.congr
+  rintro ⟨v, s⟩ ⟨hv, hs⟩
+  have hs' : s - tₖ ∈ Set.Ioo (-T') T' := by
+    rw [Set.mem_Ioo] at hs ⊢
+    exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  have hB2vs := hB2 v hv (s - tₖ) hs'
+  rw [show tₖ + (s - tₖ) = s from by ring] at hB2vs
+  have hgeo_src_s : intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source :=
+    hB2vs.1
+  have hphase :
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) s,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) s) : E × E) =
+        Φ (z v, s - tₖ) := hB2vs.2
+  have hbridge := phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
+    (I := I) g hEnorm p v α s hgeo_src_s
+  have hread : extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
+      (intrinsicVelocityLift (I := I) g hEnorm p v s) = Φ (z v, s - tₖ) := by
+    rw [← hbridge]; exact hphase
+  have hlift_mem : intrinsicVelocityLift (I := I) g hEnorm p v s ∈
+      (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
+    rw [extChartAt_source]
+    rw [TangentBundle.mem_chart_source_iff (I := I) (M := M)
+      (intrinsicVelocityLift (I := I) g hEnorm p v s)
+      (⟨α, (0 : E)⟩ : TangentBundle I M)]
+    exact hgeo_src_s
+  calc intrinsicVelocityLift (I := I) g hEnorm p v s
+      = (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+          (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
+            (intrinsicVelocityLift (I := I) g hEnorm p v s)) :=
+        ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).left_inv hlift_mem).symm
+    _ = (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
+          (Φ (z v, s - tₖ)) := by rw [hread]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem intrinsicGeodesic_window_of_zContinuousOn
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p) (tₖ : ℝ) {r₀ : ℝ} (hr₀ : 0 < r₀)
+    (hz_cont : ContinuousOn
+      (fun v : TangentSpace I p =>
+        ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I)
+            (intrinsicGeodesic (I := I) g hEnorm p v₀ tₖ)
+            (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+          deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I)
+            (intrinsicGeodesic (I := I) g hEnorm p v₀ tₖ)
+            (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E))
+      (Metric.ball v₀ r₀))
+    (hfootsrc : ∀ v ∈ Metric.ball v₀ r₀,
+      intrinsicGeodesic (I := I) g hEnorm p v tₖ ∈
+        (chartAt H (intrinsicGeodesic (I := I) g hEnorm p v₀ tₖ)).source) :
+    ∃ r ε : ℝ, 0 < r ∧ 0 < ε ∧
+      ContinuousOn
+        (fun vt : TangentSpace I p × ℝ =>
+          intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
+        ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) := by
+  classical
+  set α : M := intrinsicGeodesic (I := I) g hEnorm p v₀ tₖ with hα_def
+  set z : TangentSpace I p → E × E :=
+    fun v =>
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) tₖ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) tₖ) : E × E)
+    with hz_def
+  have hx₀_eq : (z v₀).1 = extChartAt I α α := by
+    simp only [hz_def, DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+    rw [hα_def]
+  have hx₀ : (z v₀).1 ∈ interior (extChartAt I α).target := by
+    rw [hx₀_eq]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α ((extChartAt I α).map_source (mem_extChartAt_source (I := I) α))
+  have hzca : ContinuousAt z v₀ := hz_cont.continuousAt (Metric.ball_mem_nhds v₀ hr₀)
+  obtain ⟨Φ, S, T', R, ρ, hS_open, hv₀_S, hT'_pos, hR_pos, hρ_pos,
+      hball, hΦ_cont, hΦ_phase, hΦ_in, hΦinit, hz_ball⟩ :=
+    exists_chartFlowData_of_zContinuousAt (I := I) g α hx₀ hzca rfl
+  obtain ⟨rS, hrS_pos, hrS_sub⟩ := Metric.isOpen_iff.mp hS_open v₀ hv₀_S
+  set r : ℝ := min rS r₀ with hr_def
+  have hr_pos : 0 < r := lt_min hrS_pos hr₀
+  have hr_S : Metric.ball v₀ r ⊆ S := fun x hx =>
+    hrS_sub (Metric.ball_subset_ball (min_le_left _ _) hx)
+
+
+  have hB2 : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
+      intrinsicGeodesic (I := I) g hEnorm p v (tₖ + s) ∈ (chartAt H α).source ∧
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) (tₖ + s),
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) (tₖ + s)) : E × E) = Φ (z v, s) := by
+    intro v hv s hs
+    exact intrinsicGeodesic_chart_confined_of_orbit (I := I) g hEnorm p v (α := α)
+      (φ := fun s => Φ (z v, s)) (tₖ := tₖ) (T' := T')
+      (fun s' hs' => (hball (hΦ_in v (hr_S hv) s' hs')).1)
+      (fun s' hs' => hΦ_phase v (hr_S hv) s' hs')
+      (hΦinit v (hr_S hv)).symm
+      (hfootsrc v (Metric.ball_subset_ball (min_le_right _ _) hv)) s hs
+  refine ⟨r, T', hr_pos, hT'_pos, ?_⟩
+  exact intrinsicGeodesic_window_of_flowData (I := I) g hEnorm p v₀
+    (α := α) (Φ := Φ) (z₀ := z v₀) (z := z) (tₖ := tₖ) (r := r) (R := R) (T' := T') (ρ := ρ)
+    hT'_pos hball hΦ_cont
+    (fun v hv s hs => hΦ_phase v (hr_S hv) s hs)
+    (fun v hv s hs => hΦ_in v (hr_S hv) s hs)
+    (fun v hv t ht => by
+      have hs' : t - tₖ ∈ Set.Ioo (-T') T' := by
+        rw [Set.mem_Ioo] at ht; rw [Set.mem_Ioo]; constructor <;> linarith [ht.1, ht.2]
+      have h := (hB2 v hv (t - tₖ) hs').1
+      rwa [show tₖ + (t - tₖ) = t from by ring] at h)
+    (fun v hv t ht => by
+      have hs' : t - tₖ ∈ Set.Ioo (-T') T' := by
+        rw [Set.mem_Ioo] at ht; rw [Set.mem_Ioo]; constructor <;> linarith [ht.1, ht.2]
+      have h := (hB2 v hv (t - tₖ) hs').2
+      rw [show tₖ + (t - tₖ) = t from by ring] at h
+      rw [h]; exact hΦ_in v (hr_S hv) (t - tₖ) hs')
+    (fun v _ => rfl)
+    (fun v hv => hΦinit v (hr_S hv))
+    (hz_cont.mono (Metric.ball_subset_ball (min_le_right _ _)))
+    (fun v hv => hz_ball v (hr_S hv))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem intrinsicVelocityLift_window_base
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p) :
+    ∃ r ε : ℝ, 0 < r ∧ 0 < ε ∧
+      ContinuousOn (fun vs : TangentSpace I p × ℝ =>
+        intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
+        ((Metric.ball v₀ r) ×ˢ Set.Ioo (-ε) ε) := by
+  classical
+  set z : TangentSpace I p → E × E :=
+    fun v =>
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v) 0,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+          (intrinsicGeodesic (I := I) g hEnorm p v)) 0) : E × E)
+    with hz_def
+  set x₀ : E := (z v₀).1 with hx₀_def
+  set w₀ : E := (z v₀).2 with hw₀_def
+  have hx₀_eq : x₀ = extChartAt I p p := by
+    rw [hx₀_def, hz_def]
+    simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+    rw [intrinsicGeodesic_zero (I := I) g hEnorm p v₀]
+  have hx₀ : x₀ ∈ interior (extChartAt I p).target := by
+    rw [hx₀_eq]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) p ((extChartAt I p).map_source (mem_extChartAt_source (I := I) p))
+  have hz_cont_all : Continuous z :=
+    intrinsicGeodesic_phasePoint_continuous_zero (I := I) g hEnorm p
+  have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
+  have hgeo : ∀ (b : ContDiffBump ((x₀, w₀) : E × E)),
+      Metric.closedBall ((x₀, w₀) : E × E) b.rOut ⊆
+        (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) →
+      ∃ rgeo εgeo : ℝ, 0 < rgeo ∧ 0 < εgeo ∧ rgeo ≤ 1 ∧
+      (∀ v ∈ Metric.ball v₀ rgeo, z v ∈ Metric.ball ((x₀, w₀) : E × E) b.rIn) ∧
+      (∀ v ∈ Metric.ball v₀ rgeo, ∀ t ∈ Set.Ioo ((0:ℝ) - εgeo) (0 + εgeo),
+        intrinsicGeodesic (I := I) g hEnorm p v t ∈ (chartAt H p).source) ∧
+      (∀ v ∈ Metric.ball v₀ rgeo, ∀ t ∈ Set.Ioo ((0:ℝ) - εgeo) (0 + εgeo),
+        ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v) t,
+          deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E)
+          ∈ Metric.closedBall ((x₀, w₀) : E × E) b.rIn) ∧
+      (∀ v ∈ Metric.ball v₀ rgeo,
+        ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v) 0,
+          deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v)) 0) : E × E) = z v) := by
+    intro b hb_sub
+
+    obtain ⟨Φ, S, T', R, ρ, hS_open, hv₀_S, hT'_pos, hR_pos, hρ_pos,
+        hball, hΦ_cont, hΦ_phase, hΦ_in, hΦinit, hz_ball⟩ :=
+      exists_chartFlowData_of_zContinuousAt (I := I) g p hx₀ hz_cont_all.continuousAt rfl
+    obtain ⟨rS, hrS_pos, hrS_sub⟩ := Metric.isOpen_iff.mp hS_open v₀ hv₀_S
+
+    have hB2 : ∀ v ∈ Metric.ball v₀ rS, ∀ s ∈ Set.Ioo (-T') T',
+        intrinsicGeodesic (I := I) g hEnorm p v (0 + s) ∈ (chartAt H p).source ∧
+        ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v) (0 + s),
+          deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
+            (intrinsicGeodesic (I := I) g hEnorm p v)) (0 + s)) : E × E) = Φ (z v, s) := by
+      intro v hv s hs
+      exact intrinsicGeodesic_chart_confined_of_orbit (I := I) g hEnorm p v (α := p)
+        (φ := fun s => Φ (z v, s)) (tₖ := 0) (T' := T')
+        (fun s' hs' => (hball (hΦ_in v (hrS_sub hv) s' hs')).1)
+        (fun s' hs' => hΦ_phase v (hrS_sub hv) s' hs')
+        (hΦinit v (hrS_sub hv)).symm
+        (by rw [intrinsicGeodesic_zero (I := I) g hEnorm p v]; exact mem_chart_source H p)
+        s hs
+
+
+    set W : Set (TangentSpace I p × ℝ) :=
+      (Metric.ball v₀ rS) ×ˢ Set.Ioo (-T') T' with hW_def
+    have hW_open : IsOpen W := Metric.isOpen_ball.prod isOpen_Ioo
+    have hF_cont : ContinuousOn (fun vs : TangentSpace I p × ℝ => Φ (z vs.1, vs.2)) W := by
+      have h1 : ContinuousOn (fun vs : TangentSpace I p × ℝ => (z vs.1, vs.2)) W :=
+        (hz_cont_all.comp_continuousOn continuousOn_fst).prodMk continuousOn_snd
+      have hmaps : Set.MapsTo (fun vs : TangentSpace I p × ℝ => (z vs.1, vs.2)) W
+          ((Metric.ball (z v₀) ρ) ×ˢ Set.Ioo (-T') T') :=
+        fun vs hvs => ⟨hz_ball vs.1 (hrS_sub hvs.1), hvs.2⟩
+      exact hΦ_cont.comp h1 hmaps
+    have hF_v₀0 : Φ (z v₀, 0) = ((x₀, w₀) : E × E) := by rw [hΦinit v₀ hv₀_S, hz0]
+    have hpre_open : IsOpen (W ∩ (fun vs : TangentSpace I p × ℝ => Φ (z vs.1, vs.2)) ⁻¹'
+        Metric.ball ((x₀, w₀) : E × E) b.rIn) :=
+      hF_cont.isOpen_inter_preimage hW_open Metric.isOpen_ball
+    have hpt_pre : ((v₀, 0) : TangentSpace I p × ℝ) ∈
+        W ∩ (fun vs : TangentSpace I p × ℝ => Φ (z vs.1, vs.2)) ⁻¹'
+          Metric.ball ((x₀, w₀) : E × E) b.rIn := by
+      refine ⟨⟨Metric.mem_ball_self hrS_pos, ⟨by linarith, hT'_pos⟩⟩, ?_⟩
+      rw [Set.mem_preimage, hF_v₀0]; exact Metric.mem_ball_self b.rIn_pos
+    obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.isOpen_iff.mp hpre_open _ hpt_pre
+
+    have hz_pre : z ⁻¹' Metric.ball ((x₀, w₀) : E × E) b.rIn ∈ nhds v₀ :=
+      (hz_cont_all.continuousAt).preimage_mem_nhds
+        (by rw [hz0]; exact Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self b.rIn_pos))
+    obtain ⟨δz, hδz_pos, hδz_sub⟩ := Metric.mem_nhds_iff.mp hz_pre
+    refine ⟨min (min δ rS) (min δz 1), min δ T', lt_min (lt_min hδ_pos hrS_pos)
+      (lt_min hδz_pos one_pos), lt_min hδ_pos hT'_pos, le_trans (min_le_right _ _)
+      (min_le_right _ _), ?_, ?_, ?_, ?_⟩
+    ·
+      intro v hv
+      exact hδz_sub (Metric.ball_subset_ball
+        (le_trans (min_le_right _ _) (min_le_left _ _)) hv)
+    ·
+      intro v hv t ht
+      have hvS : v ∈ Metric.ball v₀ rS := Metric.ball_subset_ball
+        (le_trans (min_le_left _ _) (min_le_right _ _)) hv
+      have htT' : t ∈ Set.Ioo (-T') T' := by
+        rw [Set.mem_Ioo] at ht ⊢
+        exact ⟨by linarith [ht.1, min_le_right δ T'], by linarith [ht.2, min_le_right δ T']⟩
+      have h := (hB2 v hvS t htT').1
+      rwa [zero_add] at h
+    ·
+      intro v hv t ht
+      have hvS : v ∈ Metric.ball v₀ rS := Metric.ball_subset_ball
+        (le_trans (min_le_left _ _) (min_le_right _ _)) hv
+      have htT' : t ∈ Set.Ioo (-T') T' := by
+        rw [Set.mem_Ioo] at ht ⊢
+        exact ⟨by linarith [ht.1, min_le_right δ T'], by linarith [ht.2, min_le_right δ T']⟩
+      have hmatch := (hB2 v hvS t htT').2
+      rw [zero_add] at hmatch
+      rw [hmatch]
+
+      have hvt_δ : (v, t) ∈ Metric.ball ((v₀, 0) : TangentSpace I p × ℝ) δ := by
+        rw [Metric.mem_ball, Prod.dist_eq]
+        refine max_lt ?_ ?_
+        · have : dist v v₀ < δ := by
+            have := Metric.ball_subset_ball
+              (le_trans (min_le_left _ _) (min_le_left _ _)) hv
+            rwa [Metric.mem_ball] at this
+          exact this
+        · rw [Real.dist_eq, sub_zero, abs_lt]
+          rw [Set.mem_Ioo] at ht
+          exact ⟨by linarith [ht.1, min_le_left δ T'], by linarith [ht.2, min_le_left δ T']⟩
+      exact Metric.ball_subset_closedBall (hδ_sub hvt_δ).2
+    ·
+      intro v _
+      rfl
+  obtain ⟨r, ε, hr, hε, hlift⟩ :=
+    intrinsicVelocityLift_window_of_junction_data (I := I) g hEnorm p v₀ p
+      (x₀ := x₀) (w₀ := w₀) hx₀ (z := z) (tₖ := 0) (rz := 1) one_pos
+      hz_cont_all.continuousOn hz0 hgeo
+  exact ⟨r, ε, hr, hε, by simpa only [zero_sub, zero_add] using hlift⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+private theorem intrinsicVelocityLift_step_uniformWidth
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (v₀ : TangentSpace I p) (α : M) (τ : ℝ)
+    {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
+    {T' ρ : ℝ} (hT'_pos : 0 < T') (hρ_pos : 0 < ρ)
+    (hballOut : Metric.closedBall z₀ b.rOut ⊆
+      (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
+    (hΦ_cont : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T'))
+    (hΦ_phase : ∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+      HasDerivAt (fun τ' => Φ (w, τ')) (chartPhaseVF (I := I) g α (Φ (w, s))) s)
+    (hΦ_in : ∀ w ∈ Metric.ball z₀ ρ, ∀ s ∈ Set.Ioo (-T') T',
+      Φ (w, s) ∈ Metric.closedBall z₀ b.rIn)
+    (hΦinit : ∀ w ∈ Metric.ball z₀ ρ, Φ (w, 0) = w)
+    (hα_src : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (chartAt H α).source)
+    (hphase_near :
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v₀) τ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v₀)) τ) : E × E) ∈ Metric.ball z₀ ρ)
+    {r₀ a c : ℝ} (hr₀ : 0 < r₀) (hτ_mem : τ ∈ Set.Ioo a c)
+    (hlift_cont : ContinuousOn
+      (fun vs : TangentSpace I p × ℝ =>
+        intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
+      ((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c)) :
+    ∃ r : ℝ, 0 < r ∧
+      ContinuousOn
+        (fun vs : TangentSpace I p × ℝ =>
+          intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
+        ((Metric.ball v₀ r) ×ˢ Set.Ioo (τ - T') (τ + T')) := by
+  classical
+  set z : TangentSpace I p → E × E :=
+    fun v =>
+      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v) τ,
+        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
+          (intrinsicGeodesic (I := I) g hEnorm p v)) τ) : E × E)
+    with hz_def
+  set x₀ : E := (z v₀).1 with hx₀_def
+  set w₀ : E := (z v₀).2 with hw₀_def
+  have hx₀_eq : x₀ = extChartAt I α (intrinsicGeodesic (I := I) g hEnorm p v₀ τ) := by
+    simp only [hx₀_def, hz_def,
+      DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+  have hx₀ : x₀ ∈ interior (extChartAt I α).target := by
+    rw [hx₀_eq]
+    have hsrc' : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hα_src
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α ((extChartAt I α).map_source hsrc')
+  have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
+
+  obtain ⟨rz, hrz, hz_cont, _hgeo⟩ :=
+    intrinsicGeodesic_junctionData_of_lift_continuousOn (I := I) g hEnorm p v₀ τ
+      (α := α) hα_src (z := z) hz_def (x₀ := x₀) (w₀ := w₀) hx₀_def hw₀_def hx₀ hz0
+      hr₀ hτ_mem hlift_cont
+
+  set L : TangentSpace I p × ℝ → TangentBundle I M :=
+    fun vs => intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2 with hL_def
+  have hfoot_cont : ContinuousOn (fun vs : TangentSpace I p × ℝ => (L vs).proj)
+      ((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c) :=
+    (FiberBundle.continuous_proj E (TangentSpace I)).comp_continuousOn hlift_cont
+  have hpreim_open : IsOpen
+      (((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c) ∩
+        (fun vs : TangentSpace I p × ℝ => (L vs).proj) ⁻¹' (chartAt H α).source) :=
+    hfoot_cont.isOpen_inter_preimage (Metric.isOpen_ball.prod isOpen_Ioo)
+      (chartAt H α).open_source
+  have hpt_preim : ((v₀, τ) : TangentSpace I p × ℝ) ∈
+      ((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c) ∩
+        (fun vs : TangentSpace I p × ℝ => (L vs).proj) ⁻¹' (chartAt H α).source := by
+    refine ⟨⟨Metric.mem_ball_self hr₀, hτ_mem⟩, ?_⟩
+    rw [Set.mem_preimage]; exact hα_src
+  obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.isOpen_iff.mp hpreim_open _ hpt_preim
+  have hsrc : ∀ v ∈ Metric.ball v₀ δ,
+      intrinsicGeodesic (I := I) g hEnorm p v τ ∈ (chartAt H α).source := by
+    intro v hv
+    have hvτ : ((v, τ) : TangentSpace I p × ℝ) ∈
+        Metric.ball ((v₀, τ) : TangentSpace I p × ℝ) δ := by
+      rw [Metric.mem_ball, Prod.dist_eq]
+      exact max_lt (Metric.mem_ball.mp hv) (by rw [dist_self]; exact hδ_pos)
+    exact (hδ_sub hvτ).2
+
+  refine intrinsicVelocityLift_window_of_flow (I := I) g hEnorm p v₀ α
+    (z₀ := z₀) (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hT'_pos hρ_pos hballOut
+    hΦ_cont hΦ_phase hΦ_in hΦinit
+    (z := z) (tₖ := τ) (rz := min rz δ) (lt_min hrz hδ_pos)
+    (hz_cont.mono (Metric.ball_subset_ball (min_le_left _ _)))
+    ?_ ?_ ?_
+  · show z v₀ ∈ Metric.ball z₀ ρ
+    rw [hz_def]; exact hphase_near
+  · intro v _; rw [hz_def]
+  · intro v hv
+    exact hsrc v (Metric.ball_subset_ball (min_le_right _ _) hv)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
 theorem intrinsicGeodesic_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1820,6 +2923,160 @@ theorem intrinsicGeodesic_jointContinuity
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+
+  have key : ∀ t ∈ Set.Icc (0:ℝ) 1, ∃ r₀ a c : ℝ, 0 < r₀ ∧ t ∈ Set.Ioo a c ∧
+      ContinuousOn (fun vs : TangentSpace I p × ℝ =>
+        intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
+        ((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c) := by
+    set L : TangentSpace I p × ℝ → TangentBundle I M :=
+      fun vs => intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2 with hL_def
+    set Good : Set ℝ := {c : ℝ | 0 < c ∧ c ≤ 2 ∧ ∃ r a : ℝ, 0 < r ∧ a < 0 ∧
+      ContinuousOn L ((Metric.ball v₀ r) ×ˢ Set.Ioo a c)} with hGood_def
+    obtain ⟨rb, εb, hrb, hεb, hbase⟩ :=
+      intrinsicVelocityLift_window_base (I := I) g hEnorm p v₀
+    have hc0_Good : min εb 2 ∈ Good := by
+      refine ⟨lt_min hεb (by norm_num), min_le_right _ _, rb, -εb, hrb, by linarith, ?_⟩
+      exact hbase.mono (Set.prod_mono_right (Set.Ioo_subset_Ioo le_rfl (min_le_left _ _)))
+    have hGood_ne : Good.Nonempty := ⟨min εb 2, hc0_Good⟩
+    have hGood_bdd : BddAbove Good := ⟨2, fun c hc => hc.2.1⟩
+    set S : ℝ := sSup Good with hS_def
+    have hc0_le_S : min εb 2 ≤ S := le_csSup hGood_bdd hc0_Good
+    have hS_pos : 0 < S := lt_of_lt_of_le (lt_min hεb (by norm_num)) hc0_le_S
+    have hS_gt1 : 1 < S := by
+      by_contra hle
+      push_neg at hle
+
+
+      set αS : M := intrinsicGeodesic (I := I) g hEnorm p v₀ S with hαS_def
+      have hzc1_int :
+          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E).1 ∈
+            interior (extChartAt I αS).target := by
+        simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
+        rw [← hαS_def]
+        exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+          (I := I) αS ((extChartAt I αS).map_source (mem_extChartAt_source (I := I) αS))
+      obtain ⟨Φ, b, T', ρ, hT'_pos, hρ_pos, hballOut, hΦ_cont, hΦ_phase, hΦ_in, hΦinit⟩ :=
+        exists_chartFlow_confined (I := I) g αS
+          (z₀ := ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E)) hzc1_int
+
+      have hγcont : Continuous (intrinsicGeodesic (I := I) g hEnorm p v₀) :=
+        intrinsicGeodesic_continuous (I := I) g hEnorm p v₀
+      have hαS_src : intrinsicGeodesic (I := I) g hEnorm p v₀ S ∈ (chartAt H αS).source := by
+        rw [← hαS_def]; exact mem_chart_source H αS
+      have hUpre : (intrinsicGeodesic (I := I) g hEnorm p v₀) ⁻¹' (chartAt H αS).source ∈ 𝓝 S :=
+        hγcont.continuousAt.preimage_mem_nhds ((chartAt H αS).open_source.mem_nhds hαS_src)
+      obtain ⟨U, hU_sub, hU_open, hSU⟩ := _root_.mem_nhds_iff.mp hUpre
+      have hζ_contAt : ContinuousAt
+          (fun t : ℝ => ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) t,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) t) : E × E)) S :=
+        (geodesic_chartPhaseVF_on_open (I := I) (g := g) (α := αS)
+          (γ := intrinsicGeodesic (I := I) g hEnorm p v₀)
+          (intrinsicGeodesic_isGeodesic (I := I) g hEnorm p v₀) hγcont hU_open
+          (fun s hs => hU_sub hs) S hSU).1.continuousAt
+      have hpre1 :
+          (fun t : ℝ => ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) t,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) t) : E × E)) ⁻¹'
+            Metric.ball ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E) ρ ∈ 𝓝 S :=
+        hζ_contAt.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ_pos)
+      obtain ⟨δS, hδS_pos, hδS_sub⟩ :=
+        Metric.mem_nhds_iff.mp (Filter.inter_mem hpre1 hUpre)
+
+      have hmin_pos : 0 < min δS T' := lt_min hδS_pos hT'_pos
+      obtain ⟨c', hc'_Good, hc'_gt⟩ :=
+        exists_lt_of_lt_csSup hGood_ne (show S - min δS T' / 2 < S from by linarith)
+      have hc'_le_S : c' ≤ S := le_csSup hGood_bdd hc'_Good
+      obtain ⟨hc'_pos, _hc'_le2, r', a', hr', ha', hcont'⟩ := hc'_Good
+      have hca_pos : 0 < c' - a' := by linarith
+      set m : ℝ := min (min δS T') (c' - a') with hm_def
+      have hm_le1 : m ≤ min δS T' := min_le_left _ _
+      have hm_le2 : m ≤ c' - a' := min_le_right _ _
+      have hm_pos : 0 < m := lt_min hmin_pos hca_pos
+      have hδST' : min δS T' ≤ δS := min_le_left _ _
+      have hδST'2 : min δS T' ≤ T' := min_le_right _ _
+      have hSc' : S - c' < min δS T' / 2 := by linarith
+      set τ : ℝ := c' - m / 4 with hτ_def
+      have hτ_lt_c' : τ < c' := by rw [hτ_def]; linarith
+      have hτ_gt_a' : a' < τ := by rw [hτ_def]; linarith
+      have hτ_mem : τ ∈ Set.Ioo a' c' := ⟨hτ_gt_a', hτ_lt_c'⟩
+      have hτ_ball : τ ∈ Metric.ball S δS := by
+        rw [Metric.mem_ball, Real.dist_eq, abs_lt]
+        refine ⟨?_, ?_⟩
+        · rw [hτ_def]; linarith
+        · rw [hτ_def]; linarith
+      have hτ_inter := hδS_sub hτ_ball
+      have hα_src_τ : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (chartAt H αS).source :=
+        hτ_inter.2
+      have hphase_near :
+          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) τ,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) τ) : E × E) ∈
+            Metric.ball ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E) ρ :=
+        hτ_inter.1
+      obtain ⟨r'', hr'', hstep⟩ :=
+        intrinsicVelocityLift_step_uniformWidth (I := I) g hEnorm p v₀ αS τ
+          (z₀ := ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
+            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
+              (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E))
+          (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hT'_pos hρ_pos hballOut
+          hΦ_cont hΦ_phase hΦ_in hΦinit hα_src_τ hphase_near
+          (r₀ := r') (a := a') (c := c') hr' hτ_mem hcont'
+
+
+      set rg : ℝ := min r' r'' with hrg_def
+      set cg : ℝ := max c' (τ + T') with hcg_def
+      have hglue : ContinuousOn L ((Metric.ball v₀ rg) ×ˢ Set.Ioo a' cg) := by
+        rintro ⟨v, s⟩ ⟨hv, hs⟩
+        rw [Set.mem_Ioo] at hs
+        by_cases hsc : s < c'
+        · have hmem1 : ((v, s) : TangentSpace I p × ℝ) ∈
+              (Metric.ball v₀ r') ×ˢ Set.Ioo a' c' :=
+            ⟨Metric.ball_subset_ball (min_le_left _ _) hv, ⟨hs.1, hsc⟩⟩
+          exact ((hcont' _ hmem1).continuousAt
+            ((Metric.isOpen_ball.prod isOpen_Ioo).mem_nhds hmem1)).continuousWithinAt
+        · push_neg at hsc
+          have hs_lt : s < τ + T' := (lt_max_iff.mp hs.2).resolve_left (not_lt.mpr hsc)
+          have hmem2 : ((v, s) : TangentSpace I p × ℝ) ∈
+              (Metric.ball v₀ r'') ×ˢ Set.Ioo (τ - T') (τ + T') :=
+            ⟨Metric.ball_subset_ball (min_le_right _ _) hv,
+              ⟨by rw [hτ_def]; linarith, hs_lt⟩⟩
+          exact ((hstep _ hmem2).continuousAt
+            ((Metric.isOpen_ball.prod isOpen_Ioo).mem_nhds hmem2)).continuousWithinAt
+      have hcg_gt_c' : c' ≤ cg := le_max_left _ _
+      have hnew_Good : min cg 2 ∈ Good := by
+        refine ⟨lt_of_lt_of_le hc'_pos (le_min hcg_gt_c' ?_), min_le_right _ _,
+          rg, a', lt_min hr' hr'', ha', ?_⟩
+        · linarith
+        · exact hglue.mono (Set.prod_mono_right
+            (Set.Ioo_subset_Ioo le_rfl (min_le_left _ _)))
+      have hnew_gt : S < min cg 2 := by
+        have hcg_gt_S : S < cg := by
+          have hτT' : S < τ + T' := by rw [hτ_def]; linarith
+          exact lt_of_lt_of_le hτT' (le_max_right _ _)
+        exact lt_min hcg_gt_S (by linarith)
+      exact absurd (le_csSup hGood_bdd hnew_Good) (not_le.mpr hnew_gt)
+    obtain ⟨c, hc_Good, hc_gt1⟩ := exists_lt_of_lt_csSup hGood_ne hS_gt1
+    obtain ⟨_hc_pos, _hc_le2, r, a, hr, ha, hcont⟩ := hc_Good
+    intro t ht
+    exact ⟨r, a, c, hr, ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 hc_gt1⟩, hcont⟩
   refine continuousOn_ball_prod_Icc_of_local_windows (V := TangentSpace I p) v₀
     (fun vt => intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2) ?_
   intro t ht
@@ -1866,24 +3123,25 @@ theorem intrinsicGeodesic_jointContinuity
               (intrinsicGeodesic (I := I) g hEnorm p v) t,
             deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
               (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E) = z v)) := by
-    sorry
+
+
+    obtain ⟨r₀, a, c, hr₀, ht_mem, hlift⟩ :
+        ∃ r₀ a c : ℝ, 0 < r₀ ∧ t ∈ Set.Ioo a c ∧
+          ContinuousOn (fun vs : TangentSpace I p × ℝ =>
+            intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
+            ((Metric.ball v₀ r₀) ×ˢ Set.Ioo a c) := key t ht
+    have hα_src : intrinsicGeodesic (I := I) g hEnorm p v₀ t ∈ (chartAt H α).source := by
+      rw [hα_foot]; exact mem_chart_source H α
+    exact intrinsicGeodesic_junctionData_of_lift_continuousOn (I := I) g hEnorm p v₀ t
+      (α := α) hα_src (z := z) hz_def (x₀ := x₀) (w₀ := w₀) hx₀_def hw₀_def hx₀ hz0
+      hr₀ ht_mem hlift
   exact intrinsicGeodesic_window_of_junction_data (I := I) g hEnorm p v₀ α
     (x₀ := x₀) (w₀ := w₀) hx₀ (z := z) (tₖ := t) (rz := rz) hrz hz_cont hz0 hgeo
 
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Continuity-from-joint reduction.** Given the per-ball joint continuity of
-the chained intrinsic geodesic flow (the producer
-`intrinsicGeodesic_jointContinuity`), the intrinsic exponential map
-`v ↦ expMapIntrinsic g hEnorm p v` is continuous.
 
-This is the structural reduction: `expMapIntrinsic g hEnorm p v =
-intrinsicGeodesic g hEnorm p v 1` definitionally, and continuity at each `v₀`
-follows from the joint continuity on the neighbourhood `ball v₀ ρ ×ˢ [0, 1]`
-precomposed with the continuous slice map `v ↦ (v, 1)`.  It mirrors the
-chart-fixed `expMap_continuous` but consumes the *intrinsic*
-joint-continuity producer.  Fully unconditional (no `sorry`); the only analytic
-content is delegated to the hypothesis `hjoint`. -/
 theorem expMapIntrinsic_continuous_of_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1923,20 +3181,8 @@ theorem expMapIntrinsic_continuous_of_jointContinuity
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Continuity of the intrinsic exponential map.** On a complete Riemannian
-manifold the intrinsic exponential map `v ↦ expMapIntrinsic g hEnorm p v` is
-continuous in the tangent vector `v`.
 
-The hypothesis `hEnorm` is the supplied compatibility identity stating that the
-tangent bundle's extended norm `‖w‖ₑ` equals `√(g.inner x w w)`, i.e. the bundle
-norm is the Riemannian norm of `g`.
 
-The compactness / diameter endpoint `bonnet_myers_compactSpace_of_ricci_bound`
-consumes this statement as "`M` is the continuous image of a compact ball under
-the exponential map".
-
-The proof composes the reduction `expMapIntrinsic_continuous_of_jointContinuity`
-with the joint-continuity producer `intrinsicGeodesic_jointContinuity`. -/
 theorem expMapIntrinsic_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]

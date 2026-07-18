@@ -7,12 +7,12 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Metric variation bounds for tensor maximum-principle barriers
 
-This file connects compact unit-tangent quadratic-form bounds to the metric
-gain input consumed by Hamilton's tensor weak maximum principle.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -29,8 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A uniform metric-relative bound on the metric variation gives the half
-metric gain used by Hamilton's positive barrier. -/
+
+
 private theorem metric_gain_of_quad_bound
     {epsilon delta c C g dg : Real}
     (hepsilon : 0 < epsilon)
@@ -62,8 +62,8 @@ private theorem metric_gain_of_quad_bound
   have hmul := mul_le_mul_of_nonneg_left hinside (le_of_lt hepsilon)
   nlinarith
 
-/-- Fixed-start metric gain from a tensor-valued metric variation whose
-quadratic form is compactly bounded on the geometric time slab. -/
+
+
 theorem metricGainAt_of_timeSlabQuadBound
     (G : Real -> SmoothRiemannianMetric I M)
     (A : (t : Real) -> (x : M) ->
@@ -158,8 +158,8 @@ theorem metricGainAt_of_timeSlabQuadBound
       hepsilon.1 hC hdelta_le_recip htime_nonneg htime_le hmetric_nonneg
       (hbound t ht_raw x v)
 
-/-- Fixed-start metric gain from total-space continuity of the metric family
-and the tensor-valued metric variation on the compact test slab. -/
+
+
 theorem metricGainAt_of_totalCont
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : Real -> SmoothRiemannianMetric I M)
@@ -210,12 +210,12 @@ theorem metricGainAt_of_totalCont
   · exact timeSlabAbsQuadCont (I := I) (M := M)
       G A (Set.Icc t0 (t0 + deltaRaw)) hAcont
 
-/-- Ricci-flow regular-time derivative specialization of
-`metricGainAt_of_totalCont`.
 
-The tensor WMP metric-gain route only asks for derivative data on the
-left-open local slab `Set.Ioc t0 (t0 + delta)`.  For finite test slabs strictly
-inside a closed-open Ricci-flow interval, those times are regular. -/
+
+
+
+
+
 theorem metricGainAt_of_metricVariationDerivAt
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -273,11 +273,11 @@ theorem metricGainAt_of_metricVariationDerivAt
   · exact hGcont
   · exact hAcont
 
-/-- Local regular-time metric-variation data produce exactly the
-`metricGainControl` field consumed by the tensor WMP barrier regularity
-package.  The hypotheses are transparent: a local time room, regular-time
-metric variation derivative on `Set.Ioc`, tensor equality with `-2 Ric`, and
-total-space continuity inputs on each chosen slab. -/
+
+
+
+
+
 theorem metricGainControl_of_metricVariation
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -333,14 +333,14 @@ theorem metricGainControl_of_metricVariation
     (G := G) (Ric := Ric) (A := A) (T := T) (t0 := t0) (deltaRaw := deltaRaw)
     hdeltaRaw hdeltaRawT hEq hA hGcont hAcont
 
-/-- Interval Ricci-flow metric variation produces the metric-gain field shape
-on regular-time local slabs.
 
-This is the regular-time bridge from the solution-level equation
-`MetricVariationEquationOn` to the tensor WMP metric-gain input.  It does not
-add a new producer predicate: callers explicitly supply the local carrier and
-regular-time inclusions, plus the same transparent total-space continuity
-inputs used by `metricGainControl_of_metricVariation`. -/
+
+
+
+
+
+
+
 theorem metricGainControl_of_metricVariationOn
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -412,12 +412,12 @@ theorem metricGainControl_of_metricVariationOn
   · exact hGcont
   · exact hAcont
 
-/-- Closed-open interval convenience wrapper for the regular-time metric-gain
-bridge.
 
-For a solution interval `[0, omega)`, every left-open local test slab ending
-before `T < omega` consists of regular times.  The resulting conclusion is the
-same `metricGainControl` field shape used by the tensor WMP. -/
+
+
+
+
+
 theorem metricGainControl_of_metricVariationOn_closedOpen
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {omega T : Real} (h0ω : 0 < omega) (hTω : T < omega)

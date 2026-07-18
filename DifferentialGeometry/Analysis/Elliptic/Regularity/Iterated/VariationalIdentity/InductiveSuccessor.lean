@@ -1,19 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentity.SuccessorSource
 
-/-!
-# Polymorphic inductive step of the iterated chart-bilinear identity
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, element
-`u_h : H1Compl g`, and any level-`m` data instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, this module constructs
-the level-`(m+1)` instance by applying one more directional integration by
-parts and consolidating the resulting contributions using the
-five-layer `fChartEffStepNumerator` packaged in the scaffolding module.
-
-The new direction multi-index is `Fin.snoc D_m.directions l`; the new
-effective `L²` source is
-`fChartEffStep g α u_h m D_m.directions D_m.fChartEff l`.
--/
 
 noncomputable section
 
@@ -54,7 +40,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The partial of a smooth function is smooth. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -67,7 +53,7 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
-/-- The partial of a compactly supported smooth function is compactly supported. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -75,14 +61,14 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
-/-- The tsupport of the partial is contained in the tsupport. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-- Schwarz symmetry of mixed partials for a smooth function. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -124,8 +110,7 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-- If `u` is in `MemW1p p Ω` and `u =ᵐ 0` on an open subset `V ⊆ Ω`,
-then `chosenWeakPartial' p i u Ω =ᵐ 0` on `V`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -185,7 +170,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
-/-- The base chart-pushed POU representative vanishes a.e. off `chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -206,10 +191,6 @@ private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
-/-- Polymorphic propagation: assuming chart-`H^m` of the parent, the level-`m`
-chosen mixed weak partial vanishes a.e. on `chartTargetEuclid α \
-chartImagePOUTsupport α`. Induction on `m` using
-`chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero`. -/
 private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -271,9 +252,6 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
-/-- IBP for the previous-level effective source `fChartEff` (in `MemW1p 2`)
-multiplied by the density `c`, against the partial `∂_l ψ` of a smooth
-compactly supported test function. -/
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -416,8 +394,6 @@ private theorem ibp_density_fChartEffPrev
   rw [← hLHS_eq, ← hLeib1_eq, ← hLeib2_eq]
   exact h_ibp_ext
 
-/-- For any element `i`, multi-index `dirs : Fin m → α`, and element `l`, we have
-`Fin.snoc (Fin.cons i dirs) l = Fin.cons i (Fin.snoc dirs l)`. -/
 private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
     (i : β) (dirs : Fin m → β) (l : β) :
     @Fin.snoc m.succ (fun _ => β) (Fin.cons i dirs) l =
@@ -594,6 +570,7 @@ private theorem ibp_inner_j
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)
@@ -656,13 +633,7 @@ private lemma integrable_triple_helper
   exact full_int.restrict
 
 set_option maxHeartbeats 4000000 in
-/-- **Polymorphic inductive step** of the iterated chart-bilinear variational
-identity: given a level-`m` instance `D_m`, the three regularity inputs
-(chart-`H^{m+1}`, chart-`H^{m+2}`, `MemW1p 2` of `D_m.fChartEff`), and the
-auxiliary "vanishing off `chartImagePOUTsupport α`" hypothesis for
-`D_m.fChartEff`, construct the level-`(m+1)` instance. The new direction
-multi-index is `Fin.snoc D_m.directions l`; the new effective `L²` source is
-`fChartEffStep g α u_h m D_m.directions D_m.fChartEff l`. -/
+
 noncomputable def iteratedDiffChartBilinearData_step
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -679,21 +650,21 @@ noncomputable def iteratedDiffChartBilinearData_step
           ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
         (chartTargetEuclid (I := I) (M := M) α))
     (h_fChartEff_memW1p :
-      DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.fChartEff
+      DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.diffChartForcing
         (chartTargetEuclid (I := I) (M := M) α))
     (h_fChartEff_ae_zero_off_K :
-      D_m.fChartEff =ᵐ[(volume : Measure EuclN).restrict
+      D_m.diffChartForcing =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \
           chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ))) :
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h (m + 1) :=
   IteratedDiffChartBilinearData.mk_from_hypotheses
     (Fin.snoc D_m.directions l)
-    (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions D_m.fChartEff l)
+    (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions D_m.diffChartForcing l)
     (fChartEffStep_memLp_two_weighted (I := I) (M := M)
       (g := g) (α := α) (u_h := u_h) (m := m) (dirs := D_m.directions)
       h_chart_H_m_plus_1 h_chart_H_m_plus_2
-      (fChartEffPrev := D_m.fChartEff)
+      (fChartEffPrev := D_m.diffChartForcing)
       D_m.fChartEff_memLp_weighted (l := l))
     (by
       classical
@@ -854,18 +825,18 @@ noncomputable def iteratedDiffChartBilinearData_step
           (chosenMthMixedPartialChartPushedU_locally_memLp (I := I) (M := M) g α u_h
             (m + 2) h_chart_H_m_plus_2 idx
             hK_compact hK_in).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-      have h_fChartEff_int : IntegrableOn D_m.fChartEff K (volume : Measure EuclN) := by
-        have h_global : MemLp D_m.fChartEff 2
+      have h_fChartEff_int : IntegrableOn D_m.diffChartForcing K (volume : Measure EuclN) := by
+        have h_global : MemLp D_m.diffChartForcing 2
             ((volume : Measure EuclN).restrict Ω) := h_fChartEff_memW1p.1
         have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
             (volume : Measure EuclN).restrict K := by
           rw [Measure.restrict_restrict hK_meas]; congr 1
           exact Set.inter_eq_self_of_subset_left hK_in
-        have h_K : MemLp D_m.fChartEff 2 ((volume : Measure EuclN).restrict K) := by
+        have h_K : MemLp D_m.diffChartForcing 2 ((volume : Measure EuclN).restrict K) := by
           rw [← h_eq]; exact h_global.restrict K
         exact h_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       have h_fChartEff_wp_int : IntegrableOn
-          (chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω)
+          (chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.diffChartForcing Ω)
           K (volume : Measure EuclN) := by
         have h_global := chosenWeakPartial'_memLp_of_mem h_fChartEff_memW1p l
         have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
@@ -873,7 +844,7 @@ noncomputable def iteratedDiffChartBilinearData_step
           rw [Measure.restrict_restrict hK_meas]; congr 1
           exact Set.inter_eq_self_of_subset_left hK_in
         have h_K : MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 l
-            D_m.fChartEff Ω) 2
+            D_m.diffChartForcing Ω) 2
             ((volume : Measure EuclN).restrict K) := by
           rw [← h_eq]; exact h_global.restrict K
         exact h_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -933,7 +904,7 @@ noncomputable def iteratedDiffChartBilinearData_step
           ∂(volume : Measure EuclN) with hINT_LHS_mass_m_l_def
       set INT_RHS_m_l : ℝ :=
         ∫ y in Ω,
-          densityOnEuclid (I := I) g α y * D_m.fChartEff y * ψ_l y
+          densityOnEuclid (I := I) g α y * D_m.diffChartForcing y * ψ_l y
           ∂(volume : Measure EuclN) with hINT_RHS_m_l_def
       have h_level_m' :
           INT_LHS_principal_m_l + INT_LHS_mass_m_l = INT_RHS_m_l := h_level_m
@@ -1005,17 +976,17 @@ noncomputable def iteratedDiffChartBilinearData_step
         rfl
       set N_D : ℝ :=
         ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
-          D_m.fChartEff y * ψ y
+          D_m.diffChartForcing y * ψ y
           ∂(volume : Measure EuclN) with hN_D_def
       set N_E : ℝ :=
         ∫ y in Ω, densityOnEuclid (I := I) g α y *
-          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y * ψ y
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.diffChartForcing Ω y * ψ y
           ∂(volume : Measure EuclN) with hN_E_def
       have h_rhs_ibp : INT_RHS_m_l = -(N_D + N_E) := by
         have hb := ibp_density_fChartEffPrev (I := I) (M := M) g α
           h_fChartEff_memW1p l hψ_smooth hψ_cs hψ_supp
         change (∫ y in Ω,
-            densityOnEuclid (I := I) g α y * D_m.fChartEff y * ψ_l y
+            densityOnEuclid (I := I) g α y * D_m.diffChartForcing y * ψ_l y
             ∂(volume : Measure EuclN)) = _
         rw [hb]
         rfl
@@ -1029,7 +1000,7 @@ noncomputable def iteratedDiffChartBilinearData_step
         ∫ y in Ω,
           densityOnEuclid (I := I) g α y *
             fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y
+              D_m.diffChartForcing l y * ψ y
           ∂(volume : Measure EuclN) with hI_step_RHS_def
       set LHS_principal_new : ℝ :=
         ∫ y in Ω,
@@ -1072,7 +1043,7 @@ noncomputable def iteratedDiffChartBilinearData_step
         chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
           (I := I) (M := M) g α u_h (m + 2) h_chart_H_m_plus_2 idx
       have h_fChartEff_wp_ae :
-          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.diffChartForcing Ω
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
             (fun _ : EuclN => (0 : ℝ)) := by
         exact
@@ -1083,7 +1054,7 @@ noncomputable def iteratedDiffChartBilinearData_step
       have h_numer_ae_zero :
           ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y = 0 := by
+              D_m.diffChartForcing l y = 0 := by
         have h_M_m1_each : ∀ i : Fin (Module.finrank ℝ E),
             ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
               chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h (m + 1)
@@ -1134,39 +1105,39 @@ noncomputable def iteratedDiffChartBilinearData_step
           ∫ y in Ω,
             Set.indicator Kα
               (fun z => fChartEffStepNumerator (I := I) (M := M) g α u_h m
-                D_m.directions D_m.fChartEff l z) y * ψ y
+                D_m.directions D_m.diffChartForcing l z) y * ψ y
             ∂(volume : Measure EuclN) := by
         change (∫ y in Ω,
             densityOnEuclid (I := I) g α y *
               fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-                D_m.fChartEff l y * ψ y
+                D_m.diffChartForcing l y * ψ y
             ∂(volume : Measure EuclN)) = _
         refine setIntegral_congr_fun hΩ_meas (fun y hy => ?_)
         have h_pt := density_mul_fChartEffStep_eq_indicator_numerator
-          (I := I) (M := M) g α u_h m D_m.directions D_m.fChartEff l y hy
+          (I := I) (M := M) g α u_h m D_m.directions D_m.diffChartForcing l y hy
         rw [show densityOnEuclid (I := I) g α y *
             fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y =
+              D_m.diffChartForcing l y * ψ y =
             (densityOnEuclid (I := I) g α y *
               fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-                D_m.fChartEff l y) * ψ y from rfl]
+                D_m.diffChartForcing l y) * ψ y from rfl]
         rw [h_pt]
       have h_indicator_eq_numerator :
           ∫ y in Ω,
             Set.indicator Kα
               (fun z => fChartEffStepNumerator (I := I) (M := M) g α u_h m
-                D_m.directions D_m.fChartEff l z) y * ψ y
+                D_m.directions D_m.diffChartForcing l z) y * ψ y
             ∂(volume : Measure EuclN) =
           ∫ y in Ω,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y
+              D_m.diffChartForcing l y * ψ y
             ∂(volume : Measure EuclN) := by
         refine MeasureTheory.integral_congr_ae ?_
         refine (ae_restrict_iff' hΩ_meas).mpr ?_
         have h_off : ∀ᵐ y ∂(volume : Measure EuclN),
             y ∈ Ω \ Kα →
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y = 0 := by
+              D_m.diffChartForcing l y = 0 := by
           rw [← ae_restrict_iff' hΩ_diff_Kα_meas]
           exact h_numer_ae_zero
         filter_upwards [h_off] with y hy hy_Ω
@@ -1178,7 +1149,7 @@ noncomputable def iteratedDiffChartBilinearData_step
       have h_step_RHS_eq_num : I_step_RHS =
           ∫ y in Ω,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y
+              D_m.diffChartForcing l y * ψ y
             ∂(volume : Measure EuclN) := by
         rw [h_step_RHS_eq_indicator]; exact h_indicator_eq_numerator
       have h_int_C : Integrable (fun y =>
@@ -1189,20 +1160,20 @@ noncomputable def iteratedDiffChartBilinearData_step
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           h_dens_deriv_cont h_M_m_int hψ_cont hψ_supp_K
       have h_int_D : Integrable (fun y =>
-          densityDerivOnEuclid (I := I) g α l y * D_m.fChartEff y * ψ y)
+          densityDerivOnEuclid (I := I) g α l y * D_m.diffChartForcing y * ψ y)
           ((volume : Measure EuclN).restrict Ω) :=
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           h_dens_deriv_cont h_fChartEff_int hψ_cont hψ_supp_K
       have h_int_E : Integrable (fun y =>
           densityOnEuclid (I := I) g α y *
-          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y * ψ y)
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.diffChartForcing Ω y * ψ y)
           ((volume : Measure EuclN).restrict Ω) :=
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           h_dens_cont h_fChartEff_wp_int hψ_cont hψ_supp_K
       have h_numer_decomp :
           (∫ y in Ω,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y
+              D_m.diffChartForcing l y * ψ y
             ∂(volume : Measure EuclN)) =
           (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) - N_C + N_D + N_E := by
         set f_A : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
@@ -1222,14 +1193,14 @@ noncomputable def iteratedDiffChartBilinearData_step
               D_m.directions y * ψ y) with hf_C_def
         set f_D : EuclN → ℝ := fun y =>
           densityDerivOnEuclid (I := I) g α l y *
-            D_m.fChartEff y * ψ y with hf_D_def
+            D_m.diffChartForcing y * ψ y with hf_D_def
         set f_E : EuclN → ℝ := fun y =>
           densityOnEuclid (I := I) g α y *
-            chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y *
+            chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.diffChartForcing Ω y *
             ψ y with hf_E_def
         have h_integrand_eq : ∀ y : EuclN,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
-              D_m.fChartEff l y * ψ y =
+              D_m.diffChartForcing l y * ψ y =
             f_A y + f_B y + f_C y + f_D y + f_E y := by
           intro y
           unfold fChartEffStepNumerator

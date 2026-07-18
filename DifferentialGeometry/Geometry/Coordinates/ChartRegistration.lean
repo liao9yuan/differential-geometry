@@ -4,12 +4,12 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Chart registration helpers
 
-This file contains general manifold/chart API used by coordinate constructions.
-It is not normal-coordinate-specific.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -24,11 +24,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 namespace OpenPartialHomeomorph
 
-/-- A model-space open partial homeomorphism with smooth forward and inverse
-maps belongs to the `C^n` groupoid.
 
-This is the remaining chart/groupoid API bridge behind registering smooth
-partial diffeomorphisms as maximal-atlas charts. -/
+
+
+
+
 private theorem model_mem_contDiffGroupoid_of_contMDiffOn
     {n : WithTop ℕ∞} {e : OpenPartialHomeomorph H H}
     (he : ContMDiffOn I I n e e.source)
@@ -57,8 +57,8 @@ private theorem model_mem_contDiffGroupoid_of_contMDiffOn
   exact (contDiffGroupoid n I).mem_of_eqOnSource
     (closedUnderRestriction' he'G e.open_source) hrestr
 
-/-- An open partial homeomorphism from a manifold to its model space is a
-maximal-atlas chart if it is `C^n` in both directions. -/
+
+
 theorem mem_maximalAtlas_of_contMDiffOn
     {n : WithTop ℕ∞}
     [IsManifold I n M]
@@ -93,9 +93,9 @@ end OpenPartialHomeomorph
 
 namespace PartialDiffeomorph
 
-/-- Restrict an open partial homeomorphism to an open subset of its source and
-upgrade it to a partial diffeomorphism when the forward and inverse maps are
-`C^n` on the restricted source and target. -/
+
+
+
 def ofOpenPartialHomeomorphRestr
     {E₁ : Type*} [NormedAddCommGroup E₁] [NormedSpace Real E₁]
     {H₁ : Type*} [TopologicalSpace H₁]
@@ -128,7 +128,7 @@ def ofOpenPartialHomeomorphRestr
   contMDiffOn_toFun := he
   contMDiffOn_invFun := he_symm
 
-/-- Postcompose a partial diffeomorphism with a global diffeomorphism. -/
+
 def transDiffeomorph
     {E₁ : Type*} [NormedAddCommGroup E₁] [NormedSpace Real E₁]
     {H₁ : Type*} [TopologicalSpace H₁]
@@ -163,8 +163,8 @@ theorem transDiffeomorph_toOpenPartialHomeomorph
       Φ.toOpenPartialHomeomorph.transHomeomorph Ψ.toHomeomorph := by
   rfl
 
-/-- A smooth partial diffeomorphism from a manifold to its model space gives a
-chart in the maximal atlas. -/
+
+
 theorem toOpenPartialHomeomorph_mem_maximalAtlas
     {n : WithTop ℕ∞}
     [IsManifold I n M]

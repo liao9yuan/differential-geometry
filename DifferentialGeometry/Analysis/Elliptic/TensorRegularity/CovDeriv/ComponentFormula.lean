@@ -1,73 +1,12 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 
-/-!
-# The chart-coordinate covariant-derivative component formula
-
-For a smooth, compactly-supported `(r, s)`-tensor section `S` over a closed
-Riemannian manifold `(M, g)` and a chart center `α : M`, the chart-coordinate
-covariant derivative `chartTensorRSCovariantDerivative r s g α S.toSection X b`
-decomposes (see `ChartTensorRSCovariantDerivative.lean`) as
-
-```
-tensorRSIntrinsicChartCLM r s α S.toSection b (X b)
-  + ∑ₖ chartTensorRSInputSlotCorrection …
-  − ∑ₗ chartTensorRSOutputSlotCorrection …
-```
-
-The two companion files isolate the three pieces and compute their raw
-chart-scalar components:
-
-* the intrinsic (Fréchet-derivative) piece projects, along the `m`-th
-  chart-coordinate basis vector field, to the `m`-th chart-Euclidean partial
-  derivative of the Euclidean push-forward of the raw component
-  (`tensorRSIntrinsicChartCLM_component_eq_euclidPartial`);
-* each Christoffel slot correction projects to a finite linear combination of
-  *undifferentiated* raw chart components, with `C^∞` coefficients
-  (`chartTensorRSInputSlotCorrection_component_eq`,
-  `chartTensorRSOutputSlotCorrection_component_eq`).
-
-This file combines the three contributions. The raw chart-scalar component of
-the chart-coordinate covariant derivative, along the chart-coordinate basis
-vector field `chartBasisVecFiber α m`, is the plain chart-Euclidean partial
-derivative `euclidPartial m` of the raw component, plus a *zeroth-order*
-correction: a finite linear combination of undifferentiated raw chart
-components of `S`, with `C^∞` coefficients on the Euclidean chart target. The
-correction coefficients `covDerivLowerOrderCoeff` package the slot-correction
-coefficients (`inputSlotCoeff`, `outputSlotCoeff`) of the two companion files,
-summed over the input and output slot indices and re-indexed by full
-component multi-index pairs.
-
-This is the precise statement that the chart-coordinate covariant derivative
-of a tensor component is, in chart-Euclidean coordinates, the plain partial
-derivative plus first-order (in the metric, zeroth-order in `S`) Christoffel
-corrections — the headline used by elliptic-regularity arguments to lift
-component-wise scalar regularity to covariant tensor regularity.
-
-## Main results
-
-* `covDerivLowerOrderCoeff` — the `C^∞` coefficient family of the lower-order
-  (zeroth-order in `S`) correction term.
-* `covDerivLowerOrderCoeff_contDiffOn` — each coefficient is `C^∞` on the
-  Euclidean chart target.
-* `covDerivComponent_eq_euclidPartial_add_lowerOrder` — the headline: the raw
-  chart-scalar component of the chart-coordinate covariant derivative is the
-  chart-Euclidean partial derivative of the raw component plus the lower-order
-  correction term.
-* `covDerivComponent_lowerOrder_contDiffOn` — the lower-order correction term
-  is `ContDiffOn ℝ ∞` on the Euclidean chart target.
-* `covDerivComponent_lowerOrder_eq_linearCombination` — the lower-order term
-  is, by construction, a finite linear combination of undifferentiated raw
-  chart components of `S`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -91,15 +30,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The lower-order correction coefficient of the chart-coordinate covariant
-derivative along the chart-coordinate basis vector field `chartBasisVecFiber α
-m`. For a source component multi-index pair `(Idx, Jdx)` and a target pair
-`(Idx', Jdx')`, it is the sum over input slots `k` of the input-slot
-coefficient `inputSlotCoeff` (restricted to `Jdx' = Jdx` by a Kronecker
-delta), minus the sum over output slots `l` of the output-slot coefficient
-`outputSlotCoeff` (restricted to `Idx' = Idx` by a Kronecker delta). As a
-function on the Euclidean chart target, it is `C^∞`
-(`covDerivLowerOrderCoeff_contDiffOn`). -/
 noncomputable def covDerivLowerOrderCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -114,7 +44,7 @@ noncomputable def covDerivLowerOrderCoeff
           outputSlotCoeff (I := I) (M := M) g s α m l Jdx Jdx' y *
             (if Idx' = Idx then (1 : ℝ) else 0)
 
-/-- Unfolding lemma for `covDerivLowerOrderCoeff`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covDerivLowerOrderCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -129,10 +59,6 @@ lemma covDerivLowerOrderCoeff_def
             outputSlotCoeff (I := I) (M := M) g s α m l Jdx Jdx' y *
               (if Idx' = Idx then (1 : ℝ) else 0) := rfl
 
-/-- **The lower-order correction coefficient is `C^∞` on the Euclidean chart
-target.** Each summand is a `C^∞` slot-correction coefficient
-(`inputSlotCoeff_contDiffOn`, `outputSlotCoeff_contDiffOn`) times a constant
-Kronecker delta; a finite sum and difference of `C^∞` functions is `C^∞`. -/
 theorem covDerivLowerOrderCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -164,9 +90,6 @@ theorem covDerivLowerOrderCoeff_contDiffOn
   refine hsub.congr (fun y _ => ?_)
   rw [covDerivLowerOrderCoeff_def]
 
-/-- The wrapped raw-component projection as a continuous linear functional on
-the `(r, s)`-tensor fibre at `b`: the `continuousLinearMapAt`-trivialisation
-at `b` composed with the `(Idx, Jdx)`-component projection. -/
 noncomputable def wrappedComponentProj
     (r s : ℕ) (α b : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -176,9 +99,7 @@ noncomputable def wrappedComponentProj
     ((trivializationAt (TensorRSModel r s ℝ E)
         (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b)
 
-/-- `wrappedComponentProj` applied to a fibre element is exactly the
-`continuousLinearMapAt`-wrapped raw-component projection convention used by the
-two companion files. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma wrappedComponentProj_apply
     (r s : ℕ) (α b : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -190,11 +111,7 @@ lemma wrappedComponentProj_apply
             (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           T) := rfl
 
-/-- The raw-component projection of the intrinsic-piece value, regrouped by
-`chartTensorRSCovariantDerivative_def`. This records that the intrinsic term of
-the 3-way split projects, along `chartBasisVecFiber α m`, to the
-chart-Euclidean partial derivative — the content of companion file 1, recast
-for the `wrappedComponentProj` functional. -/
+omit [CompleteSpace E] in
 private lemma wrappedComponentProj_intrinsic_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -216,9 +133,6 @@ private lemma wrappedComponentProj_intrinsic_eq
   exact tensorRSIntrinsicChartCLM_component_eq_euclidPartial
     (I := I) (M := M) g r s S α Idx Jdx m hy
 
-/-- The raw-component projection of the `k`-th input-slot correction value,
-recast for the `wrappedComponentProj` functional — the content of companion
-file 2 (input-slot case). -/
 private lemma wrappedComponentProj_inputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -240,9 +154,6 @@ private lemma wrappedComponentProj_inputSlot_eq
   exact chartTensorRSInputSlotCorrection_component_eq
     (I := I) (M := M) g r s S α m k Idx Jdx hy
 
-/-- The raw-component projection of the `l`-th output-slot correction value,
-recast for the `wrappedComponentProj` functional — the content of companion
-file 2 (output-slot case). -/
 private lemma wrappedComponentProj_outputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -264,11 +175,7 @@ private lemma wrappedComponentProj_outputSlot_eq
   exact chartTensorRSOutputSlotCorrection_component_eq
     (I := I) (M := M) g r s S α m l Idx Jdx hy
 
-/-- Re-indexing of the input-slot contribution: the finite sum, over input
-multi-indices `Idx'`, of `inputSlotCoeff · raw(Idx', Jdx)` equals the finite
-sum over full component multi-index *pairs* `(Idx', Jdx')` of
-`(inputSlotCoeff · [Jdx' = Jdx]) · raw(Idx', Jdx')`. The Kronecker delta
-collapses the `Jdx'`-sum to the single term `Jdx' = Jdx`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma inputSlot_sum_reindex
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -296,11 +203,7 @@ private lemma inputSlot_sum_reindex
   · intro h
     exact absurd (Finset.mem_univ Jdx) h
 
-/-- Re-indexing of the output-slot contribution: the finite sum, over output
-multi-indices `Jdx'`, of `outputSlotCoeff · raw(Idx, Jdx')` equals the finite
-sum over full component multi-index *pairs* `(Idx', Jdx')` of
-`(outputSlotCoeff · [Idx' = Idx]) · raw(Idx', Jdx')`. The Kronecker delta
-collapses the `Idx'`-sum to the single term `Idx' = Idx`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma outputSlot_sum_reindex
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -328,9 +231,6 @@ private lemma outputSlot_sum_reindex
   · intro h
     exact absurd (Finset.mem_univ Idx) h
 
-/-- The lower-order correction term: the finite sum over component multi-index
-pairs of `covDerivLowerOrderCoeff · raw(component)`. Defined separately so the
-headline and its corollaries refer to a single expression. -/
 noncomputable def covDerivLowerOrderTerm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -344,7 +244,7 @@ noncomputable def covDerivLowerOrderTerm
       tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-/-- Unfolding lemma for `covDerivLowerOrderTerm`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covDerivLowerOrderTerm_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -359,9 +259,6 @@ lemma covDerivLowerOrderTerm_def
           tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- The sum, over input slots `k`, of the input-slot contributions equals the
-input part of the lower-order term: the finite sum over component multi-index
-pairs of `(∑ₖ inputSlotCoeff · [Jdx' = Jdx]) · raw(component)`. -/
 private lemma sum_inputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -403,9 +300,6 @@ private lemma sum_inputSlot_eq
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [Finset.sum_mul]
 
-/-- The sum, over output slots `l`, of the output-slot contributions equals the
-output part of the lower-order term: the finite sum over component multi-index
-pairs of `(∑ₗ outputSlotCoeff · [Idx' = Idx]) · raw(component)`. -/
 private lemma sum_outputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -447,8 +341,6 @@ private lemma sum_outputSlot_eq
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [Finset.sum_mul]
 
-/-- The input part minus the output part collects into the lower-order term
-with `covDerivLowerOrderCoeff` coefficients. -/
 private lemma inputSlot_sub_outputSlot_eq_lowerOrderTerm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -477,10 +369,6 @@ private lemma inputSlot_sub_outputSlot_eq_lowerOrderTerm
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [covDerivLowerOrderCoeff_def, ← sub_mul]
 
-/-- The `wrappedComponentProj` functional distributes across the 3-way
-decomposition `chartTensorRSCovariantDerivative_def` of the covariant
-derivative: being a continuous linear functional it commutes with the finite
-sum and the difference. -/
 private lemma wrappedComponentProj_covDeriv_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -506,24 +394,6 @@ private lemma wrappedComponentProj_covDeriv_split
   rw [chartTensorRSCovariantDerivative_def]
   rw [map_sub, map_add, map_sum, map_sum]
 
-/-- **The chart-coordinate covariant-derivative component formula.** Let
-`S : SmoothCcTensor g r s`, let `α : M` be a chart center, let
-`m : Fin (finrank ℝ E)` index the chart-coordinate basis vector field
-`chartBasisVecFiber α m`, and let `(Idx, Jdx)` be a component multi-index
-pair. For `y` in the Euclidean chart target `chartTargetEuclid α`, set
-`b := (extChartAt I α).symm (toEuclidean.symm y)`. Then the
-`continuousLinearMapAt`-wrapped raw chart-scalar component, at `(Idx, Jdx)`, of
-the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α m)`
-at `b` equals the `m`-th chart-Euclidean partial derivative `euclidPartial m`
-of the Euclidean push-forward of the raw component, plus the lower-order
-correction term `covDerivLowerOrderTerm` — a finite linear combination of
-*undifferentiated* raw chart components of `S`, with `C^∞` coefficients
-`covDerivLowerOrderCoeff`.
-
-In words: the chart-coordinate covariant derivative of a tensor component is,
-in chart-Euclidean coordinates, the plain partial derivative plus a
-zeroth-order (in `S`) Christoffel correction. -/
 theorem covDerivComponent_eq_euclidPartial_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -554,13 +424,6 @@ theorem covDerivComponent_eq_euclidPartial_add_lowerOrder
   rw [inputSlot_sub_outputSlot_eq_lowerOrderTerm (I := I) (M := M) g r s S α m
     Idx Jdx hy]
 
-/-- **The lower-order correction term is `C^∞` on the Euclidean chart
-target.** Given that every Euclidean push-forward
-`chartPushedRaw I α (tensorChartComponentRaw g r s S α Idx' Jdx')` of a raw
-chart component of `S` is `ContDiffOn ℝ ∞` on the Euclidean chart target, the
-lower-order correction term `covDerivLowerOrderTerm` — a finite linear
-combination of those push-forwards with the `C^∞` coefficients
-`covDerivLowerOrderCoeff` — is itself `ContDiffOn ℝ ∞` there. -/
 theorem covDerivComponent_lowerOrder_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -612,16 +475,7 @@ theorem covDerivComponent_lowerOrder_contDiffOn
     ContDiffOn.sum (fun p _ => hsummand p)
   exact hsum
 
-/-- **The lower-order correction term is a finite linear combination of
-undifferentiated raw chart components.** The lower-order correction term
-`covDerivLowerOrderTerm` of the headline equals, at every Euclidean chart
-target point `y`, the finite sum over component multi-index pairs
-`(Idx', Jdx')` of `covDerivLowerOrderCoeff … y` times the raw chart component
-`tensorChartComponentRaw g r s S α Idx' Jdx' b` of `S`, with
-`b := (extChartAt I α).symm (toEuclidean.symm y)`. No derivative of `S`
-appears: the correction is zeroth order in `S`, the coefficients
-`covDerivLowerOrderCoeff` being `C^∞` (`covDerivLowerOrderCoeff_contDiffOn`)
-and independent of `S`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covDerivComponent_lowerOrder_eq_linearCombination
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

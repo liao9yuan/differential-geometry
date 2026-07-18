@@ -5,13 +5,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
 
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -24,8 +24,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Inner product of a pointwise `(0,1) ⊗ (0,2)` tensor product splits into
-the product of the induced tensor inner products. -/
+
+
 theorem inner0S_product_one_two
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -36,9 +36,9 @@ theorem inner0S_product_one_two
     (A B : Tensor0SSpace 2 I x) :
     inner0S (I := I) g x 3
         (Bundle.continuousMultilinearMap.product_fun
-          (s := 1) (q := 2) α A)
+          (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A)
         (Bundle.continuousMultilinearMap.product_fun
-          (s := 1) (q := 2) β B) =
+          (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) β B) =
       inner0S (I := I) g x 1 α β *
         inner0S (I := I) g x 2 A B := by
   classical
@@ -47,9 +47,9 @@ theorem inner0S_product_one_two
     inner0S_eq_coord (I := I) g x 2 basis gInv hinv]
   rw [coordInner0S_succ_eq (I := I) 2 gInv
     (Bundle.continuousMultilinearMap.product_fun
-      (s := 1) (q := 2) α A)
+      (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A)
     (Bundle.continuousMultilinearMap.product_fun
-      (s := 1) (q := 2) β B) basis]
+      (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) β B) basis]
   simp_rw [tensor0S_curry_product_one_two (I := I)]
   simp_rw [coordInner0S_smul_smul (I := I) 2 gInv A B basis]
   rw [coordInner0S_one_eq (I := I) gInv α β basis]
@@ -62,8 +62,8 @@ theorem inner0S_product_one_two
   intro j _
   ring
 
-/-- Contracting a `(0,3)` tensor against a product `alpha tensor A` is the
-same as raising `alpha` and contracting the first slot of the `(0,3)` tensor. -/
+
+
 theorem inner0S_three_product_right
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -75,7 +75,7 @@ theorem inner0S_three_product_right
     (A : Tensor0SSpace 2 I x) :
     inner0S (I := I) g x 3 N
         (Bundle.continuousMultilinearMap.product_fun
-          (s := 1) (q := 2) α A) =
+          (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A) =
       inner0S (I := I) g x 2
         ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 2 x N)
           (cotangentSharp_gen (I := I) g x α))
@@ -85,7 +85,7 @@ theorem inner0S_three_product_right
     inner0S_eq_coord (I := I) g x 2 basis gInv hinv]
   rw [coordInner0S_succ_eq (I := I) 2 gInv N
     (Bundle.continuousMultilinearMap.product_fun
-      (s := 1) (q := 2) α A) basis]
+      (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A) basis]
   simp_rw [tensor0S_curry_product_one_two (I := I)]
   simp_rw [coordInner0S_smul_right (I := I) 2 gInv _ A basis]
   rw [cotangentSharp_eq_sum_inv_gen (I := I) g x basis gInv hinv α]
@@ -105,7 +105,7 @@ theorem inner0S_three_product_right
   intro j _
   ring
 
-/-- Squared norm of `r • N - α ⊗ A` for a `(0,1) ⊗ (0,2)` product. -/
+
 theorem normSq0S_smul_sub_product_one_two
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -118,17 +118,20 @@ theorem normSq0S_smul_sub_product_one_two
     (A : Tensor0SSpace 2 I x) :
     normSq0S (I := I) g x 3
         (r • N -
-          Bundle.continuousMultilinearMap.product_fun
-            (s := 1) (q := 2) α A) =
+          (show Tensor0SSpace 3 I x from
+            Bundle.continuousMultilinearMap.product_fun
+              (𝕜 := Real) (F := E) (E := TangentSpace I)
+              (s := 1) (q := 2) α A)) =
       r ^ 2 * normSq0S (I := I) g x 3 N -
         2 * r * inner0S (I := I) g x 3 N
           (Bundle.continuousMultilinearMap.product_fun
-            (s := 1) (q := 2) α A) +
+            (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A) +
         inner0S (I := I) g x 1 α α *
           normSq0S (I := I) g x 2 A := by
   classical
   let P : Tensor0SSpace 3 I x :=
-    Bundle.continuousMultilinearMap.product_fun (s := 1) (q := 2) α A
+    Bundle.continuousMultilinearMap.product_fun
+      (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 1) (q := 2) α A
   have hprod :
       inner0S (I := I) g x 3 P P =
         inner0S (I := I) g x 1 α α *

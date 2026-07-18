@@ -13,12 +13,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.G
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
-/-!
-# Interior local flow and chart-cover orbits
 
-Builds the local interior flow of the DeTurck vector field, identifies the chart-cover orbit as a
-bare integral curve, and glues the local pieces into a uniqueness statement for the interior flow.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -118,14 +118,14 @@ theorem chartcover_orbit_is_bare_integral_curve
   rw [hcurve, hvel]
   exact hbridge
 
-/-- **Chart-flow input bundle for the manifold flow-family engine.**
 
-The chart-overlap forward/reverse agreement and per-chart bijectivity data consumed
-by `manifoldFlowFamily_exists_chartRepr` / `time_dependent_vf_flow_diffeomorph_on_closed_manifold`.
-Packaged as a private `structure` purely so the (otherwise verbatim-repeated) three
-hypotheses of the engine can be carried as a single signature binder and re-exported to
-the engine.  This is genuine separable chart-flow data (smooth-in-space chart conjugation
-and short-time mutual-inverse property), not a packaging of the conclusion. -/
+
+
+
+
+
+
+
 private structure ChartFlowEngineInputs
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
@@ -168,10 +168,10 @@ private structure ChartFlowEngineInputs
             ∀ s ∈ Set.Ico (0 : ℝ) S_α,
               Ψ s (Φ s x) = x ∧ Φ s (Ψ s x) = x
 
-/-- The chart-cover global flow of a field `Y` (with chart-local Picard data `hperY`),
-together with its initial-condition / `U`-membership chart representation, named via
-`Classical.choose` of `time_dependent_vf_global_flow_glue` so it can be referenced in the
-validity-domain hypotheses of `interior_flow_uniqueness_glue`. -/
+
+
+
+
 private noncomputable def glueFlow
     (Y : ℝ → ∀ x : M, TangentSpace I x)
     (hperY : ∀ α : M, ChartLocalPicardData (I := I) Y α) : ℝ → M → M :=
@@ -190,10 +190,10 @@ private theorem glueFlow_spec
   obtain ⟨α, _hαS, hxU, hrepr⟩ := hspec.2 x
   exact ⟨α, hxU, hrepr⟩
 
-/-- The positive short-time **mutual-inverse horizon** of the chart-cover forward/reverse
-flows, from `chart_cover_flow_bijective_two_sided_uniform_horizon`.  Named via
-`Classical.choose` so the validity-domain hypothesis `hThoriz : T ≤ flowBijectiveHorizon …`
-of `interior_flow_uniqueness_glue` can refer to it. -/
+
+
+
+
 private noncomputable def flowBijectiveHorizon
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)

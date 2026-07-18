@@ -1,69 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Polymorphic-in-`K` `W^{k,2}` regularity of the differentiated numerator
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the level-`m`
-differentiated numerator `eigenvectorChartRHSDiffNumerator` of the eigenvector
-chart variational identity is the explicit five-layer Leibniz combination
-`A + B − C + D + E` (built in `EigenvectorDifferentiatedRHS`). This module
-discharges its polymorphic `W^{k,2}` regularity: for each `K : ℕ`, given
-
-* `MemWkp` of sufficiently high order of the eigenvector chart component, and
-* `MemWkp (K + 1) 2` of the level-`m` differentiated right-hand side
-  `fChartEffPrev` (which is ae-zero off the partition-of-unity kernel
-  `chartPouKernel α`),
-
-the numerator lies in `MemWkp K 2` on the open chart target, and so does the
-chart-density-divided numerator `numerator / densityOnEuclid g α`.
-
-## Strategy
-
-`eigenvectorChartRHSDiffNumerator g r s i α P₀ m l fChartEffPrev`
-unfolds into five layers:
-
-* layers A, B, C carry the recursive `m`-fold mixed weak partials
-  `eigenvectorChartIteratedPartial` at levels `m + 1` / `m`, each `MemWkp K 2`
-  by the polymorphic regularity bridge
-  `eigenvectorChartIteratedPartial_memWkp_of_memWkp` and ae-zero off
-  `chartPouKernel α` by `eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel`;
-* layers D, E carry `fChartEffPrev` and its chosen weak `lₙ`-partial — `D`
-  directly, `E` via the inductive-hypothesis `MemWkp (K + 1) 2` and
-  `MemWkp.chosenWeakPartial_mem` — both ae-zero off `chartPouKernel α`.
-
-Each layer is one such `MemWkp K 2` factor (ae-zero off `chartPouKernel α`)
-multiplied by a smooth chart-target coefficient (`∂_b weightedInvGramDerivOnEuclid`,
-`weightedInvGramDerivOnEuclid`, `densityDerivOnEuclid`, `densityOnEuclid`, and
-the reciprocal `1 / densityOnEuclid`). The workhorse `memWkp_coef_mul_factor`
-glues a smooth coefficient to such a factor: it cuts the coefficient off into a
-globally smooth, compactly supported representative agreeing with it on a
-neighbourhood of the kernel, uniformly bounds its iterated derivatives via
-`exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport`, multiplies via
-`MemWkp.smul_smooth_bounded`, and transfers the result back through the
-ae-vanishing of the factor outside the kernel.
-
-Summing the five layers with `MemWkp.add` / `MemWkp.sub` gives the numerator;
-rewriting `numerator / density` as `(1 / density) · numerator` and applying the
-workhorse once more gives the divided numerator.
-
-## Main results
-
-* `eigenvectorChartRHSDiffNumerator_memWkp` — the differentiated
-  numerator is `MemWkp K 2` on the chart target.
-* `eigenvectorChartRHSDiffNumerator_div_density_memWkp` — the
-  chart-density-divided differentiated numerator is `MemWkp K 2` on the chart
-  target.
-
-These are intermediate campaign lemmas: the iterated-regularity bootstrap of the
-level-`(m+1)` differentiated right-hand side consumes them.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -97,29 +34,22 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The compact partition-of-unity kernel `chartPouKernel α`, a closed subset of
-the open chart target. -/
 private abbrev Kα (α : M) : Set EuclN :=
   chartPouKernel (I := I) (M := M) α
 
-/-- The open Euclidean chart target. -/
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_compact (α : M) : IsCompact (Kα (I := I) (M := M) α) :=
   chartPouKernel_isCompact (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_meas (α : M) : MeasurableSet (Kα (I := I) (M := M) α) :=
   chartPouKernel_measurableSet (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
@@ -302,9 +232,7 @@ private lemma layer_E_memWkp
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
-open chart target: the chart density is `C^∞` (`densityOnEuclid_contDiffOn`) and
-strictly positive (`densityOnEuclid_pos`) there. -/
+
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -312,8 +240,6 @@ private lemma one_div_densityOnEuclid_contDiffOn
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
-/-- The iterated mixed weak partials of the chart-locality-free eigenvector chart
-component are ae-zero on `Ωα α \ Kα α`. -/
 private lemma iteratedPartial_ae_zero_off_Kα_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -567,9 +493,6 @@ private lemma layer_C_memWkp_unconditional
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
-/-- **The chart-locality-free level-`m` differentiated numerator is `MemWkp K 2`
-on the chart target.** Re-keyed onto the intrinsic compactness witness, the
-assembled five-layer numerator lies in `MemWkp K 2` on the chart target. -/
 lemma eigenvectorChartRHSDiffNumerator_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -653,8 +576,6 @@ lemma eigenvectorChartRHSDiffNumerator_memWkp
   rw [← h_eq]
   exact h_step4
 
-/-- **The chart-locality-free differentiated numerator ae-vanishes off the
-partition-of-unity kernel.** -/
 private lemma eigenvectorChartRHSDiffNumerator_unconditional_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -788,8 +709,6 @@ private lemma eigenvectorChartRHSDiffNumerator_unconditional_ae_zero_off_Kα
   unfold eigenvectorChartRHSDiffNumerator
   rw [hA, hB, hC, hD, hE]; ring
 
-/-- **The chart-density-divided chart-locality-free differentiated numerator is
-`MemWkp K 2` on the chart target.** -/
 lemma eigenvectorChartRHSDiffNumerator_div_density_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -831,8 +750,6 @@ lemma eigenvectorChartRHSDiffNumerator_div_density_memWkp
     (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_num_memWkp h_num_ae_zero
 
-/-- **The chart-density-divided chart-locality-free differentiated numerator
-ae-vanishes off the partition-of-unity kernel.** -/
 lemma eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

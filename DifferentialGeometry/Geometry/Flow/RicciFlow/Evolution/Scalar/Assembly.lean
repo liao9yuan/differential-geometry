@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Scalar evolution assembly
 
-Product-rule assembly and local-frame wrappers for scalar curvature evolution.
--/
+
+
+
+
 
 noncomputable section
 
@@ -22,14 +22,13 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- Product-rule derivative of the scalar trace `g^{ij} Ric_ij`. -/
+
 theorem scalarTraceInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -83,7 +82,7 @@ theorem scalarTraceInFrame_hasDerivWithinAt
                   have hRic := h_ricci t x i j
                   exact hInv.mul hRic))))
 
-/-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation. -/
+
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution
     [DecidableEq Idx]
@@ -138,8 +137,8 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-/-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation, with Ricci
-symmetry required only at regular flow times. -/
+
+
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     [DecidableEq Idx]
@@ -193,8 +192,8 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-/-- Scalar-curvature evolution with Rm04 and Ricci symmetries produced from
-regular Levi-Civita curvature data. -/
+
+
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     [DecidableEq Idx]
@@ -208,7 +207,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
@@ -230,11 +228,11 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
       (ricciNormSqInFrame (I := I) S gInv frame) := by
   have hOutput :=
-    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hFirst :=
-    rm04FirstBianchi_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04FirstBianchi_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hPair :=
-    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hInput :=
     rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
   have hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame :=

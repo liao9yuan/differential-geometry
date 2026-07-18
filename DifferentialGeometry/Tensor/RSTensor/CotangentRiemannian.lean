@@ -1,18 +1,18 @@
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannianRealized
 import Mathlib.Data.Matrix.Mul
 import Mathlib.LinearAlgebra.Dual.Basis
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Cotangent Fibers
 
-The Riemannian metric on `T_x M` induces the dual metric on `T_x^* M` by
-raising covectors with the tangent sharp map.
--/
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -25,13 +25,13 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Interpret a realized cotangent vector as a continuous linear functional. -/
+
 def cotangentToCLM_gen {x : M} (α : Tensor0SSpace 1 I x) :
     TangentSpace I x →L[Real] Real :=
   continuousMultilinearCurryFin1 Real (TangentSpace I x) Real
     (Tensor0SSpace.toModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) α)
 
-/-- Interpret a realized cotangent vector as an algebraic dual vector. -/
+
 def cotangentToDual_gen {x : M} (α : Tensor0SSpace 1 I x) :
     Module.Dual Real (TangentSpace I x) :=
   (cotangentToCLM_gen (I := I) α).toLinearMap
@@ -44,8 +44,8 @@ def cotangentToDual_gen {x : M} (α : Tensor0SSpace 1 I x) :
     congrArg (fun v : Fin 1 -> TangentSpace I x => α v)
     (funext fun i => by fin_cases i; rfl)
 
-/-- The linear identification from realized one-covariant tensors to the
-algebraic dual of the tangent space. -/
+
+
 def cotangentToDualLinear_gen {x : M} :
     Tensor0SSpace 1 I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
   toFun := cotangentToDual_gen (I := I)
@@ -73,10 +73,10 @@ theorem cotangentToDualLinear_injective_gen {x : M} :
   have h0 := congrArg (fun L : Module.Dual Real (TangentSpace I x) => L (v 0)) h
   simpa [cotangentToDualLinear_gen, cotangentToDual_apply_gen, hv] using h0
 
-/-- Realize an algebraic cotangent vector as a `(0,1)` tensor.
 
-In finite dimension the algebraic linear functional is automatically continuous,
-so it can be uncurried into the one-slot continuous multilinear tensor model. -/
+
+
+
 def dualToCotangent_gen {x : M} (α : Module.Dual Real (TangentSpace I x)) :
     Tensor0SSpace 1 I x :=
   Tensor0SSpace.ofModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -116,13 +116,13 @@ def dualToCotangentLinear {x : M} :
   ext X
   simp
 
-/-- The linear sharp map `T_x^*M -> T_xM` induced by `g`. -/
+
 def cotangentSharpLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     Tensor0SSpace 1 I x →ₗ[Real] TangentSpace I x :=
   ((tangentMetricData_gen (I := I) g x).metric.sharp).toLinearMap.comp
     (cotangentToDualLinear_gen (I := I) (x := x))
 
-/-- Raise a realized cotangent vector using the Riemannian metric. -/
+
 def cotangentSharp_gen (g : SmoothMetric_gen I M) (x : M)
     (α : Tensor0SSpace 1 I x) : TangentSpace I x :=
   cotangentSharpLinear_gen (I := I) g x α
@@ -139,8 +139,8 @@ theorem cotangentSharpLinear_injective_gen
   apply cotangentToDualLinear_injective_gen (I := I) (x := x)
   exact ((tangentMetricData_gen (I := I) g x).metric.sharp.injective h)
 
-/-- The dual metric on cotangent vectors:
-`<α, β> = g(α#, β#)`. -/
+
+
 def cotangentInner_gen (g : SmoothMetric_gen I M) (x : M)
     (α β : Tensor0SSpace 1 I x) : Real :=
   g.inner x
@@ -155,8 +155,8 @@ def cotangentInner_gen (g : SmoothMetric_gen I M) (x : M)
         (cotangentSharp_gen (I := I) g x β) := by
   rfl
 
-/-- The flat map on `T_x^*M`, obtained by pulling the tangent metric back along
-the sharp map. -/
+
+
 def cotangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     Tensor0SSpace 1 I x →ₗ[Real] Module.Dual Real (Tensor0SSpace 1 I x) where
   toFun α :=
@@ -245,10 +245,10 @@ theorem cotangentFlatLinear_injective_gen
     rwa [hmap] at hsub
   exact sub_eq_zero.mp hdiff
 
-/-- Metric data on `T_x^*M` induced by the tangent Riemannian metric.
 
-This is the pullback of the tangent metric along the sharp map
-`T_x^*M -> T_xM`. -/
+
+
+
 def cotangentMetricData_gen (g : SmoothMetric_gen I M) (x : M) :
     MetricFiberData (Tensor0SSpace 1 I x) :=
   MetricFiberData.ofFlat
@@ -274,7 +274,7 @@ def cotangentMetricData_gen (g : SmoothMetric_gen I M) (x : M) :
         simp
       · exact le_of_lt (g.pos x (cotangentSharpLinear_gen (I := I) g x α) hα))
 
-/-- The packaged cotangent metric computes the sharp-definition inner product. -/
+
 theorem cotangentMetricData_inner_gen
     (g : SmoothMetric_gen I M) (x : M)
     (α β : Tensor0SSpace 1 I x) :
@@ -282,13 +282,13 @@ theorem cotangentMetricData_inner_gen
       cotangentInner_gen (I := I) g x α β := by
   rfl
 
-/-- The inverse Gram-matrix predicate for an indexed finite family of
-tangent vectors.
 
-This is intentionally not used as a hypothesis for tensor coordinate
-formulas: an arbitrary finite family with an inverse Gram matrix on its span
-does not by itself give a basis of the tangent fiber. Use
-`MetricInverseInBasis_gen` for coordinate identities. -/
+
+
+
+
+
+
 def MetricInverseOnFiniteFrameGram_gen {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (frame : Idx -> TangentSpace I x)
@@ -299,9 +299,9 @@ def MetricInverseOnFiniteFrameGram_gen {Idx : Type*} [Fintype Idx] [DecidableEq 
       (∑ k : Idx, g.inner x (frame i) (frame k) * gInv k j) =
         (if i = j then 1 else 0)
 
-/-- A basis inverse-metric predicate at one point. This is the correct
-hypothesis for coordinate formulas: the indexed vectors must span the tangent
-fiber, not just have an invertible Gram matrix on their own span. -/
+
+
+
 def MetricInverseInBasis_gen {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -312,14 +312,14 @@ def MetricInverseInBasis_gen {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       (∑ k : Idx, g.inner x (basis i) (basis k) * gInv k j) =
         (if i = j then 1 else 0)
 
-/-- Canonical inverse-metric components in a tangent-space basis. -/
+
 noncomputable def basisInvMetric {Idx : Type*}
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (i j : Idx) : Real :=
   basis.coord j ((tangentFlatEquiv_gen (I := I) g x).symm (basis.coord i))
 
-/-- Canonical inverse-metric components in a basis are symmetric. -/
+
 theorem basisInvMetric_symm {Idx : Type*}
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -351,8 +351,8 @@ theorem basisInvMetric_symm {Idx : Type*}
     _ = basisInvMetric (I := I) g x basis j i := by
           simpa [basisInvMetric, sharp] using hright.symm
 
-/-- The canonical basis components satisfy the two-sided inverse-metric
-predicate. -/
+
+
 theorem basisInvMetric_real {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -417,7 +417,34 @@ theorem basisInvMetric_real {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
             · have hji : j ≠ i := fun h => hij h.symm
               simp [hij, hji]
 
-/-- Inverse-metric components in a basis are symmetric. -/
+
+theorem invBasis_unique {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric_gen I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv₁ gInv₂ : Idx → Idx → Real)
+    (h₁ : MetricInverseInBasis_gen (I := I) g x basis gInv₁)
+    (h₂ : MetricInverseInBasis_gen (I := I) g x basis gInv₂) :
+    gInv₁ = gInv₂ := by
+  classical
+  let A : Matrix Idx Idx Real := gInv₁
+  let B : Matrix Idx Idx Real := gInv₂
+  let G : Matrix Idx Idx Real := fun i j => g.inner x (basis i) (basis j)
+  have hAG : A * G = 1 := by
+    ext i j
+    simpa [A, G, Matrix.mul_apply] using (h₁ i j).1
+  have hGB : G * B = 1 := by
+    ext i j
+    simpa [B, G, Matrix.mul_apply] using (h₂ i j).2
+  have hAB : A = B := by
+    calc
+      A = A * 1 := by simp
+      _ = A * (G * B) := by rw [hGB]
+      _ = (A * G) * B := by rw [Matrix.mul_assoc]
+      _ = 1 * B := by rw [hAG]
+      _ = B := by simp
+  simpa [A, B] using hAB
+
+
 theorem invMetric_symm {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -452,8 +479,8 @@ theorem invMetric_symm {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   have hentry := congrArg (fun B : Matrix Idx Idx Real => B j i) hAt
   simpa [A] using hentry
 
-/-- Basis coordinates are inverse-metric contractions of metric-lowered
-basis pairings. -/
+
+
 theorem coord_eq_invInner {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -490,7 +517,7 @@ theorem coord_eq_invInner {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     _ = basis.coord a V := by
           simp
 
-/-- Raising a covector is inverse to lowering by the metric. -/
+
 theorem cotangentSharp_inner_gen
     (g : SmoothMetric_gen I M) (x : M)
     (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
@@ -508,10 +535,10 @@ theorem cotangentSharp_inner_gen
       cotangentToDual_gen (I := I) α X
   exact h
 
-/-- Fiberwise evaluation form of `cotangentSharp_inner_gen`.
 
-This is the convenient rewrite for moving between the sharped tangent field and
-the original one-form slot evaluation. -/
+
+
+
 theorem cotangentSharp_inner_eval
     (g : SmoothMetric_gen I M) (x : M)
     (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
@@ -519,8 +546,28 @@ theorem cotangentSharp_inner_eval
       α (fun _ : Fin 1 => X) := by
   rw [cotangentSharp_inner_gen, cotangentToDual_apply_gen]
 
-/-- Two tangent vectors are equal if they have the same metric pairing with a
-basis. -/
+
+theorem cotangentSharp_dualToCotangent_tangentFlat_gen
+    (g : SmoothMetric_gen I M) (x : M) (X : TangentSpace I x) :
+    cotangentSharp_gen (I := I) g x
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x X)) = X := by
+  apply tangentFlatLinear_injective_gen (I := I) g x
+  ext Y
+  simp [tangentFlatLinear_apply_gen, cotangentSharp_inner_gen]
+
+
+theorem cotangentInner_dualToCotangent_tangentFlat_gen
+    (g : SmoothMetric_gen I M) (x : M) (X Y : TangentSpace I x) :
+    cotangentInner_gen (I := I) g x
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x X))
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x Y)) =
+        g.inner x X Y := by
+  rw [cotangentInner_eq_sharp_gen,
+    cotangentSharp_dualToCotangent_tangentFlat_gen,
+    cotangentSharp_dualToCotangent_tangentFlat_gen]
+
+
+
 theorem eq_of_inner_basis_eq_gen
     {Idx : Type*} [Finite Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -549,7 +596,7 @@ theorem eq_of_inner_basis_eq_gen
     _ = tangentFlatLinear_gen (I := I) g x Y Z := by
           exact (hcoord (tangentFlatLinear_gen (I := I) g x Y)).symm
 
-/-- Coordinate reconstruction of the raised covector. -/
+
 theorem cotangentSharp_eq_sum_inv_gen
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -610,7 +657,7 @@ theorem cotangentSharp_eq_sum_inv_gen
           (basis l) := by
           simp [map_sum]
 
-/-- Coordinate formula for the cotangent metric in a basis. -/
+
 theorem cotangentInner_eq_coord_gen
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -654,7 +701,7 @@ theorem cotangentInner_eq_coord_gen
               cotangentToDual_gen (I := I) β (basis j)
           ring
 
-/-- Coordinate formula for the packaged cotangent metric. -/
+
 theorem cotangentMetricData_inner_eq_coord_gen
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)

@@ -24,11 +24,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak First Null
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 structure TensorFirstNullData
     (G : Real -> SmoothRiemannianMetric I M)
@@ -47,8 +47,8 @@ structure TensorFirstNullData
   null :
     tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t1 x1 v v = 0
 
-/-- At a section-backed first-null point, positive semidefiniteness plus
-symmetry makes the null vector a left-kernel vector for the barrier tensor. -/
+
+
 theorem firstNullKernel_left
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -144,7 +144,7 @@ theorem firstNullKernel_left
           exact (eval02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 d.v w).symm
     _ = 0 := hkernel w
 
-/-- Right-kernel version of `firstNullKernel_left`, using barrier symmetry. -/
+
 theorem firstNullKernel_right
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -175,8 +175,8 @@ theorem firstNullKernel_right
   rw [hBsym w d.v]
   exact firstNullKernel_left (I := I) (M := M) hsym d w
 
-/-- Transfer the first-null left-kernel fact from the raw barrier evaluator to
-a local `(0,2)` tensor field whose left-null evaluations agree with it. -/
+
+
 theorem firstNullFieldKerL
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -201,8 +201,8 @@ theorem firstNullFieldKerL
   rw [hB w]
   exact firstNullKernel_left (I := I) (M := M) hsym d w
 
-/-- Transfer the first-null right-kernel fact from the raw barrier evaluator to
-a local `(0,2)` tensor field whose right-null evaluations agree with it. -/
+
+
 theorem firstNullFieldKerR
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -227,10 +227,10 @@ theorem firstNullFieldKerR
   rw [hB w]
   exact firstNullKernel_right (I := I) (M := M) hsym d w
 
-/-- One-dimensional derivative sign at a right-end minimum.
 
-If `phi` is nonnegative on `[a,t]`, vanishes at `t`, and has derivative `d`
-within a larger open interval `(a,b]` at `t`, then `d <= 0`. -/
+
+
+
 private theorem deriv_nonpos_of_nonneg_left
     {phi : Real -> Real} {a b t d : Real}
     (hat : a < t) (htb : t ≤ b)
@@ -278,7 +278,7 @@ private theorem deriv_nonpos_of_nonneg_left
   rw [hlin, hderiv_eq] at hnonneg_deriv
   exact nonpos_of_mul_nonneg_right hnonneg_deriv (sub_neg.mpr hmt)
 
-/-- The fixed-vector time derivative at a first-null point is nonpositive. -/
+
 theorem firstNullTime_nonpos
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -302,10 +302,10 @@ theorem firstNullTime_nonpos
     d.null
     (hderiv d.t1 d.t1_mem d.x1 d.v)
 
-/-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
 
-This is the first-derivative product rule specialized to a point where the
-moving test vector fields have zero covariant derivative. -/
+
+
+
 theorem nablaEval_extDeriv
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -346,14 +346,14 @@ theorem nablaEval_extDeriv
   rw [hsum]
   simp
 
-/--
-First-derivative product rule at a null vector in the kernel of the two-tensor.
 
-This variant does not require the moving test vector fields to have zero
-covariant derivative in the differentiating direction.  The two correction
-terms in the tensor product rule vanish because the null vector is in the left
-and right kernel of `B x`.
--/
+
+
+
+
+
+
+
 private theorem nablaEval_ker
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -417,12 +417,12 @@ private theorem nablaEval_ker
   rw [hsum]
   simp
 
-/--
-Pointwise version of `nablaEval_ker` for an arbitrary tangent direction.
 
-The required smooth direction field is chosen internally; this is useful when
-the direction is a correction term such as `(∇_X Y)_x`.
--/
+
+
+
+
+
 private theorem nablaEval_ker_tangent
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -457,8 +457,8 @@ private theorem nablaEval_ker_tangent
     nablaEval_ker (I := I) (M := M) hreal Ysec V hV' hkerL hkerR
   simpa [V, hYsec, vec2_self_eq_const] using hcalc
 
-/-- The derivative of a correction term `B(A,V)` vanishes when `A` vanishes at
-the point and `V` is a right-null vector for `B` there. -/
+
+
 private theorem deriv_eval_zero_left
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -538,8 +538,8 @@ private theorem deriv_eval_zero_left
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-/-- The derivative of a correction term `B(V,A)` vanishes when `A` vanishes at
-the point and `V` is a left-null vector for `B` there. -/
+
+
 private theorem deriv_eval_zero_right
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -619,8 +619,8 @@ private theorem deriv_eval_zero_right
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-/-- C¹-slot version of `deriv_eval_zero_left`.  The moved slot need only be a
-locally `C¹` tangent field near the evaluation point. -/
+
+
 private theorem deriv_eval_zero_left_C1
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -721,8 +721,8 @@ private theorem deriv_eval_zero_left_C1
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-/-- C¹-slot version of `deriv_eval_zero_right`.  The moved slot need only be a
-locally `C¹` tangent field near the evaluation point. -/
+
+
 private theorem deriv_eval_zero_right_C1
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -823,8 +823,8 @@ private theorem deriv_eval_zero_right_C1
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-/-- Second-derivative moving-slot product rule at a point where all moved
-slots have zero covariant derivative in the differentiating direction. -/
+
+
 theorem nabla2Eval_extDeriv
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -898,13 +898,13 @@ theorem nabla2Eval_extDeriv
   rw [hfun, hsum]
   simp
 
-/--
-Second-derivative moving-slot product rule with the `∇_X Y` correction kept.
 
-This is the form that matches the covariant Hessian definition.  The repeated
-test vector section has zero covariant derivative at the point, so only the
-correction from the middle slot `Y` remains.
--/
+
+
+
+
+
+
 private theorem nabla2Eval_extDeriv_oneSec_corr
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1008,14 +1008,14 @@ private theorem nabla2Eval_extDeriv_oneSec_corr
         simp [W, vec2_self_eq_const, Fin.cons_succ]
   rw [hfun, hsum]
 
-/--
-Second-derivative product rule with the correction term rewritten as the
-directional derivative of the scalar test function `phi = B(V,V)`.
 
-This is the local calc matching the covariant Hessian formula: the `∇_X Y`
-correction in the tensor derivative becomes the corresponding `d phi` term by
-the first-null kernel product rule.
--/
+
+
+
+
+
+
+
 private theorem nabla2Eval_extDeriv_oneSec_corr_phi
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1078,16 +1078,16 @@ private theorem nabla2Eval_extDeriv_oneSec_corr_phi
                 x (X x) - z)
             hA
 
-/--
-Corrected second-derivative product rule for the scalar test
-`phi = B(V,V)` at a PSD-null vector.
 
-The correction terms in the first derivative of `B(V,V)` are
-`B(∇_Y V,V)` and `B(V,∇_Y V)`.  If `V` has zero covariant derivative at the
-point, those correction fields vanish there; the left/right kernel hypotheses
-make their derivatives vanish in the `X` direction.  This leaves exactly the
-covariant scalar Hessian expression.
--/
+
+
+
+
+
+
+
+
+
 private theorem nabla2Eval_extDeriv_oneSec_hess
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1280,8 +1280,8 @@ private theorem nabla2Eval_extDeriv_oneSec_hess
   rw [hleft_deriv] at hcorr_phi
   simpa [phi, dphiY] using hcorr_phi
 
-/-- Product-rule bridge from the tensor second derivative to a supplied scalar
-Hessian realization for `phi = B(V,V)`. -/
+
+
 private theorem nabla2Eval_hess
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1371,7 +1371,7 @@ private theorem nabla2Eval_hess
     _ = nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y x) := hnabla_phi.symm
     _ = Hess x (vec2 (I := I) (X x) (Y x)) := (hHess X (Y x)).symm
 
-/-- Slot-level form of `nabla2Eval_hess`, suitable for the metric trace. -/
+
 theorem nabla2Eval_hess_slots
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1474,11 +1474,11 @@ theorem nabla2Eval_hess_slots
     _ = Hess x (vec2 (I := I) U W) := by
         rw [hXsec, hYsec]
 
-/-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
 
-This is the first-derivative product rule specialized to a point where the
-moving test vector fields have zero covariant derivative and the scalar test
-has zero spatial derivative in the drift direction. -/
+
+
+
+
 theorem nablaEval_zero
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1502,9 +1502,9 @@ theorem nablaEval_zero
   rw [nablaEval_extDeriv (I := I) (M := M) hreal X V hV hcovV]
   exact hphi
 
-/-- The scalar test function obtained by evaluating the first-null barrier on
-local repeated vector slots has a spatial local minimum at the first-null base
-point. -/
+
+
+
 theorem firstNullLocalMin
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}

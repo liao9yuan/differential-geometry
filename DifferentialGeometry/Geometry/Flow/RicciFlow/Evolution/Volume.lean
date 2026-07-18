@@ -6,14 +6,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Volume evolution under Ricci flow
 
-This file connects the local volume-variation interface to the realized Ricci-flow
-metric equation.  It deliberately keeps the volume regularity hypotheses
-explicit: proving that a Ricci-flow solution supplies
-`Volume.MetricFamilyRegularAt` is a separate analytic/chart-continuity theorem.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,19 +37,19 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The canonical moving chart frame used by the volume trace at each point. -/
+
 abbrev volumeTraceFrame :
     Fin (Module.finrank Real E) → (x : M) → TangentSpace I x :=
   fun i x => chartBasisVecFiber (I := I) x i x
 
-/-- The inverse Gram components in the canonical moving chart frame. -/
+
 abbrev volumeTraceInvMetricComponents
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) :
     M → Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real :=
   fun x i j => ((chartGramMatrix (I := I) g x x)⁻¹) i j
 
-/-- Canonical scalar curvature for a realized Ricci tensor, using the volume
-trace frame attached to the metric family. -/
+
+
 abbrev scalarCurvatureFromRicciInVolumeFrame
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real) :
@@ -59,8 +59,8 @@ abbrev scalarCurvatureFromRicciInVolumeFrame
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
       (volumeTraceFrame (I := I) (M := M))
 
-/-- The canonical volume-frame scalar curvature realizes the Ricci trace by
-definition. -/
+
+
 theorem scalarCurvatureFromRicciInVolumeFrame_realizes
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real) (t : Real) :
@@ -74,11 +74,11 @@ theorem scalarCurvatureFromRicciInVolumeFrame_realizes
     (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
     (volumeTraceFrame (I := I) (M := M))
 
-/-- The volume-layer trace is the trace of the matrix of metric time
-derivatives in the chart frame at the base point.
 
-The hypothesis `hdt` is the bridge saying the chosen abstract time-derivative
-datum agrees with the classical `deriv` at this time. -/
+
+
+
+
 theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
     (td : TimeDerivativeData Real A Real)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -102,7 +102,7 @@ theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
   simpa [metricFamilyForMeasure, DifferentialGeometry.Integral.Connection.metricTimeDerivative, chartGramMatrix_apply]
     using h.symm
 
-/-- Algebraic symmetry of the inverse chart Gram matrix. -/
+
 private theorem chartGramMatrix_inv_symm
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank Real E)) :
@@ -113,9 +113,9 @@ private theorem chartGramMatrix_inv_symm
     (chartGramMatrix_isHermitian (I := I) g x x).inv
   simpa [star_trivial] using hHerm.apply i j
 
-/-- The existing scalar-trace realization, specialized to the canonical moving
-volume trace frame, gives exactly the raw component sum used by the trace
-calculation. -/
+
+
+
 theorem scalar_trace_eq_volume_trace_components
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.RawTwoTensorField (I := I) (M := M))
@@ -136,11 +136,11 @@ theorem scalar_trace_eq_volume_trace_components
       (volumeTraceInvMetricComponents (I := I) (M := M) g)
       (volumeTraceFrame (I := I) (M := M)) hScalar x
 
-/-- Trace specialization of the volume variation term under the Ricci-flow
-metric equation.
 
-The scalar hypothesis is pointwise and uses the chart frame at `x`.  It is the
-local form of the existing scalar-as-Ricci-trace realization. -/
+
+
+
+
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar
     (td : TimeDerivativeData Real A Real)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -232,9 +232,9 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar
     _ = (-2 : Real) * scalar t x := by
           rw [hScalar]
 
-/-- Trace specialization under the Ricci-flow metric equation, using the
-canonical scalar-trace realization predicate instead of an expanded component
-sum hypothesis. -/
+
+
+
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_scalarTrace
     (td : TimeDerivativeData Real A Real)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -254,9 +254,9 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_scalarTrace
     (scalar_trace_eq_volume_trace_components
       (I := I) (M := M) (G.metric t) (Ric t) (scalar t) hScalar x)
 
-/-- Trace specialization under the classical full-time Ricci-flow metric
-variation equation. This is the preferred trace theorem for volume evolution,
-because `traceTimeDerivMetricAt` is defined using classical `deriv`. -/
+
+
+
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
@@ -346,8 +346,8 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv
           rw [scalar_trace_eq_volume_trace_components
             (I := I) (M := M) (G.metric t) (Ric t) (scalar t) hScalar x]
 
-/-- Ricci-flow specialization of the clean volume variation formula, assuming
-the pointwise trace identity has already been supplied. -/
+
+
 theorem volume_variation_ricciFlow_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -380,8 +380,8 @@ theorem volume_variation_ricciFlow_at
     _ = deriv (fun s : Real => f s x) t₀ - scalar t₀ x * f t₀ x := by
           ring
 
-/-- Ricci-flow specialization of volume variation using the metric variation
-equation and a scalar-Ricci trace realization in the chart frame. -/
+
+
 theorem volume_variation_ricciFlow_at_of_metricVariationEquation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (td : TimeDerivativeData Real A Real)
@@ -408,8 +408,8 @@ theorem volume_variation_ricciFlow_at_of_metricVariationEquation
   exact traceTimeDerivMetricAt_eq_neg_two_scalar_of_scalarTrace
     (I := I) (M := M) td G Ric scalar hdt hEq (t := t₀) hScalar x
 
-/-- Ricci-flow specialization of volume variation using the classical full-time
-metric family derivative equation. -/
+
+
 theorem volume_variation_ricciFlow_at_of_metricDeriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -434,8 +434,8 @@ theorem volume_variation_ricciFlow_at_of_metricDeriv
   exact traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv
     (I := I) (M := M) G Ric scalar hEq hScalar x
 
-/-- Ricci-flow volume variation using the canonical scalar curvature obtained
-as the volume-frame trace of Ricci. -/
+
+
 theorem volume_variation_ricciFlow_at_of_metricDeriv_canonicalScalar
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -458,8 +458,8 @@ theorem volume_variation_ricciFlow_at_of_metricDeriv_canonicalScalar
     (scalarCurvatureFromRicciInVolumeFrame_realizes (I := I) (M := M) G Ric t₀)
     hg hf
 
-/-- Total Riemannian volume evolves by `-∫ R dμ` under Ricci flow, with the
-scalar curvature taken as the canonical volume-frame trace of Ricci. -/
+
+
 theorem total_volume_variation_ricciFlow_at_of_metricDeriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

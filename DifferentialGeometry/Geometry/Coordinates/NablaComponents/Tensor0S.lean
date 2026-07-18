@@ -3,14 +3,14 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-/-!
-# Coordinate `(0,s)` covariant derivative evaluation
 
-This file contains the general covariant-tensor analogue of the one-form
-moving-slot smoothness route.  The model algebra already lives in
-`Tensor.RSTensor.NablaOnTensors`; this module keeps the 𝕜 coordinate/local
-frame consumers out of the one-form-specific file.
--/
+
+
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -351,13 +351,13 @@ private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s :
     (I := I) X x₀ φ f hpair heq
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Pointwise moving-slot derivation formula for `nabla0SFun` in arbitrary
-covariant valence.
 
-This is the `(0,s)` version of
-`nabla0SFun_one_eval_coordFrame_moving_raw`. The hypotheses are deliberately
-local: the moving slots only need the fixed-chart model differentiability needed
-by the product rule and the vector-field covariant-derivative chart formula. -/
+
+
+
+
+
+
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -618,11 +618,11 @@ private theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of a `(0,s)` tensor field evaluated on the coordinate-frame
-fields of one chart.
 
-This is the all-slot version of the one-form helper
-`oneForm_eval_coordinateFrame_contMDiffAt`. -/
+
+
+
+
 theorem tensor0S_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -691,8 +691,8 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
   exact (hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of one coordinate-frame correction term in the `(0,s)` tensor
-derivation formula. -/
+
+
 theorem tensor0S_eval_coordinateFrame_covariantDerivative_slot_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -759,10 +759,10 @@ theorem tensor0S_eval_coordinateFrame_covariantDerivative_slot_contMDiffAt
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Coordinate-frame scalar smoothness for `nabla0SFun s`.
 
-This is the all-valence version of
-`nabla0SFun_one_eval_coordinateFrame_contMDiffAt`. -/
+
+
+
 theorem nabla0SFun_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -858,12 +858,12 @@ theorem nabla0SFun_eval_coordinateFrame_contMDiffAt
     (I := I) cov X V α p hpair_md hV_md hVmodel_p hcoord_p]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Reconstruct smoothness of a `(0,s)` tensor section from smoothness of all
-coordinate-frame evaluations.
 
-This is the general version of the final local-frame step in
-`nabla0SFun_one_contMDiff`; the only remaining analytic input is the coefficient
-smoothness supplied by a moving-slot derivation formula. -/
+
+
+
+
+
 theorem nabla0SFun_contMDiff_of_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -930,13 +930,13 @@ theorem nabla0SFun_contMDiff_of_eval_coordinateFrame_contMDiffAt
   rw [hslot]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the canonical raw covariant derivative for `𝕜` `(0,s)`
-tensor fields.
 
-This closes the local-frame route: coefficient smoothness comes from
-`nabla0SFun_eval_coordinateFrame_contMDiffAt`, then
-`nabla0SFun_contMDiff_of_eval_coordinateFrame_contMDiffAt` reconstructs the
-bundle section. -/
+
+
+
+
+
+
 theorem nabla0SFun_contMDiff
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -956,13 +956,13 @@ theorem nabla0SFun_contMDiff
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov hcov X α
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Bundled finite-dimensional `(0,s)` covariant derivative section in a coordinate
-component setting.
 
-This is the practical smooth connection-on-covariant-tensors wrapper produced
-by the tensor-layer local-frame theorem. It returns an `∞`-smooth tensor field;
-coordinate modules now consume `Tensor0SBundle.nabla0S_reg` instead of owning the
-smoothness proof. -/
+
+
+
+
+
+
 noncomputable def nabla0SCoord (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

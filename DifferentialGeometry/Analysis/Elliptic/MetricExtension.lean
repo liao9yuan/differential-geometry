@@ -4,60 +4,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Smooth global extension of the chart-pulled volume-weighted inverse Gram matrix
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` and a chart point
-`α : M`, the chart-Gram-matrix-times-volume `√(det G(α)) · G(α)⁻¹` is a smooth,
-symmetric, positive-definite matrix-valued function defined on the open set
-`(extChartAt I α).target ⊆ E`. After identification with the standard Euclidean
-space `EuclideanSpace ℝ (Fin n)` (via `toEuclidean`), it gives a smooth
-matrix-valued function on the open set
-`chartTargetEuclid α := toEuclidean '' (extChartAt I α).target`.
-
-This file packages a smooth global extension of that function from a precompact
-piece `K ⊆ chartTargetEuclid α` to all of `EuclideanSpace ℝ (Fin n)`. The
-extension agrees with the original on `K` and equals the identity matrix
-outside a slightly larger compact set. Uniform ellipticity is preserved on the
-whole space, with a constructive lower bound `min(1, λ_K)` where `λ_K > 0` is
-the smallest eigenvalue (equivalently, the infimum of the Rayleigh quotient on
-the unit sphere) of the chart-pulled `√det · G⁻¹` over the compact support of
-the cutoff function.
-
-The end product is a `SmoothEllipticBilinearForm` (from
-`Sobolev/Nirenberg/H2Regularity/Defs.lean`) on `Set.univ`, ready to feed into
-the Nirenberg difference-quotient interior-regularity machinery.
-
-## Setting
-
-Throughout this file we work in the boundaryless setting:
-`[I.Boundaryless]`, `[T2Space M]`, `[SigmaCompactSpace M]`. The model fibre is
-a finite-dimensional real inner-product space `E` with positive dimension.
-The metric `g` is a `SmoothRiemannianMetric I M` from
-`Geometry/Metric/Basic.lean`.
-
-## Strategy
-
-1. Pull the chart Gram matrix and chart density back through
-   `(extChartAt I α).symm ∘ toEuclidean.symm` to land in
-   `EuclideanSpace ℝ (Fin n)`.
-2. Take the inverse Gram matrix and multiply componentwise by the (positive)
-   chart density. Call this `weightedInvGramOnEuclid`.
-3. Pick a smooth cutoff `χ` equal to `1` on `K` and supported in a slightly
-   thickened compact set inside `chartTargetEuclid α`.
-4. Define
-   `extendedMatrix y i j := χ y * weightedInvGramOnEuclid α y i j +
-                            (1 - χ y) * δ_{ij}`.
-5. Verify smoothness, symmetry, and ellipticity.
-6. Package as a `SmoothEllipticBilinearForm` with `c := 0` (no zeroth-order
-   term).
-
-## Main public theorem
-
-* `exists_smooth_metric_extension`: existence of a smooth elliptic bilinear
-  form on `EuclideanSpace ℝ (Fin n)` that, on `K`, agrees pointwise with the
-  chart-pulled `√det G · G⁻¹`.
--/
 
 noncomputable section
 
@@ -85,12 +31,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart `α` target image transferred to `EuclideanSpace ℝ (Fin n)` via
-the canonical linear isomorphism `toEuclidean`. -/
 def chartTargetEuclid (α : M) : Set EuclN :=
   toEuclidean '' (extChartAt I α).target
 
-/-- The chart-target image is open under the boundaryless assumption. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma chartTargetEuclid_isOpen [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) := by
   unfold chartTargetEuclid
@@ -98,8 +42,7 @@ lemma chartTargetEuclid_isOpen [I.Boundaryless] (α : M) :
     isOpen_extChartAt_target (I := I) α
   exact toEuclidean.toHomeomorph.isOpenMap _ hOpenE
 
-/-- Every point of `chartTargetEuclid α` corresponds to a point in
-`(extChartAt I α).target` via `toEuclidean.symm`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma toEuclidean_symm_mem_target {α : M} {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
@@ -109,33 +52,25 @@ lemma toEuclidean_symm_mem_target {α : M} {y : EuclN}
   rw [hyz]
   exact hz_target
 
-/-- The chart-pulled Gram-matrix `(i, j)` entry: at `y ∈ EuclN`, the value is
-`G(α, x_y)_{ij}` where `x_y := (extChartAt I α).symm (toEuclidean.symm y)`.
-Smooth on `chartTargetEuclid α`; junk values elsewhere. -/
 def gramOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   chartGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) i j
 
-/-- The chart-pulled inverse-Gram-matrix `(i, j)` entry. -/
 def invGramOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   chartInvGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) i j
 
-/-- The chart-pulled volume density `√det G(α, x_y)`. -/
 def densityOnEuclid (g : SmoothRiemannianMetric I M) (α : M) (y : EuclN) : ℝ :=
   chartDensity (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-/-- The volume-weighted inverse Gram matrix `(i, j)` entry, pulled back to
-`EuclideanSpace`: `√det G(α, x_y) · G(α, x_y)⁻¹_{ij}`. -/
 def weightedInvGramOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y
 
-/-- `(extChartAt I α).symm ∘ toEuclidean.symm` is smooth on
-`chartTargetEuclid α` as a manifold map into `M`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma contMDiffOn_chart_symm (α : M) :
     ContMDiffOn 𝓘(ℝ, EuclN) I ∞
       (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -155,8 +90,7 @@ lemma contMDiffOn_chart_symm (α : M) :
     exact toEuclidean_symm_mem_target (I := I) hy
   exact h_outer.comp h_inner.contMDiffOn h_maps
 
-/-- Helper: the chart-symm composition maps `chartTargetEuclid α` into the
-chart source (which equals the trivialization base set). -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mapsTo_chart_symm_baseSet (α : M) :
     MapsTo (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) α)
@@ -170,8 +104,7 @@ private lemma mapsTo_chart_symm_baseSet (α : M) :
     (extChartAt I α).map_target h_tgt
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
 
-/-- Each entry of the chart-pulled Gram matrix is smooth on
-`chartTargetEuclid α` viewed as a `ContDiffOn` statement on `EuclideanSpace`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -192,8 +125,7 @@ lemma gramOnEuclid_contDiffOn
     h_g.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-/-- Each entry of the chart-pulled inverse Gram matrix is smooth on
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -214,7 +146,7 @@ lemma invGramOnEuclid_contDiffOn
     h_g.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-/-- The chart-pulled volume density is smooth on `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (densityOnEuclid (I := I) g α)
@@ -234,8 +166,7 @@ lemma densityOnEuclid_contDiffOn
     h_dens.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-/-- Each entry of the volume-weighted inverse Gram matrix is smooth on
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (weightedInvGramOnEuclid (I := I) g α i j)
@@ -244,7 +175,7 @@ lemma weightedInvGramOnEuclid_contDiffOn
   exact (densityOnEuclid_contDiffOn (I := I) g α).mul
     (invGramOnEuclid_contDiffOn (I := I) g α i j)
 
-/-- The chart-pulled inverse Gram matrix is symmetric on the chart base set. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -270,7 +201,7 @@ lemma invGramOnEuclid_symm_of_mem
   rw [star_trivial] at h_apply
   exact h_apply.symm
 
-/-- The volume-weighted inverse Gram matrix is symmetric on the chart base set. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -280,8 +211,7 @@ lemma weightedInvGramOnEuclid_symm_of_mem
   unfold weightedInvGramOnEuclid
   rw [invGramOnEuclid_symm_of_mem (I := I) g α i j hy]
 
-/-- The chart-pulled volume density is strictly positive on the chart-target
-image. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_pos
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -296,8 +226,7 @@ lemma densityOnEuclid_pos
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
   exact chartDensity_pos (I := I) g α h_base
 
-/-- The chart-pulled inverse Gram matrix is positive-definite on
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_posDef
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -324,10 +253,7 @@ lemma invGramOnEuclid_posDef
   rw [hmat_eq]
   exact hGinv
 
-/-- The Rayleigh-quotient lower bound from positive-definiteness: for the
-weighted inverse Gram matrix at any point in `chartTargetEuclid α`, the
-quadratic form is bounded below by a strictly positive multiple of `‖ξ‖²`,
-where the constant is the smallest eigenvalue. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weighted_quadForm_pos_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -389,15 +315,13 @@ lemma weighted_quadForm_pos_of_mem
   rw [h_smul_quad]
   exact mul_pos h_dens_pos h_quad_pos
 
-/-- The continuous map `(y, ξ) ↦ ⟪ξ, A(y) ξ⟫` for `A := Matrix.of weightedInvGram`.
-This is the integrand of the Rayleigh quotient. -/
 private def rayleighInt
     (g : SmoothRiemannianMetric I M) (α : M) (y : EuclN) (ξ : EuclN) : ℝ :=
   ⟪ξ, DeGiorgi.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ
 
-/-- Pointwise sum-of-products formula for `rayleighInt`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rayleighInt_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (y ξ : EuclN) :
     rayleighInt (I := I) g α y ξ =
@@ -424,8 +348,7 @@ private lemma rayleighInt_eq_sum
   intro j _
   ring
 
-/-- Continuity of the Rayleigh integrand on `chartTargetEuclid α` jointly in
-`(y, ξ)`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rayleighInt_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun p : EuclN × EuclN =>
@@ -474,10 +397,6 @@ private lemma rayleighInt_continuousOn
     h_xi_j.continuousOn.comp h_snd (Set.mapsTo_univ _ _)
   exact (h_a.mul h_xi_i_p).mul h_xi_j_p
 
-/-- A uniform-in-`y` Rayleigh-quotient lower bound on a compact subset `K` of
-`chartTargetEuclid α`: there is `lamK > 0` such that
-`lamK ‖ξ‖² ≤ ⟪ξ, A(y) ξ⟫_ℝ` for every `y ∈ K` and every `ξ ∈ EuclN`,
-where `A(y) := Matrix.of (weightedInvGramOnEuclid · · y)`. -/
 lemma exists_unif_lower_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -599,33 +518,27 @@ lemma exists_unif_lower_bound_on_compact
     rw [hK_empty] at hy
     exact hy.elim
 
-/-- The Kronecker-delta entry of the identity matrix on `Fin n`. -/
 private def kronDelta (i j : Fin (Module.finrank ℝ E)) : ℝ := if i = j then 1 else 0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma kronDelta_self (i : Fin (Module.finrank ℝ E)) :
     kronDelta (E := E) i i = 1 := by
   simp [kronDelta]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma kronDelta_symm (i j : Fin (Module.finrank ℝ E)) :
     kronDelta (E := E) i j = kronDelta (E := E) j i := by
   by_cases h : i = j
   · subst h; rfl
   · simp [kronDelta, h, Ne.symm h]
 
-/-- The globally-defined matrix entry combining the volume-weighted inverse
-Gram (modulated by the cutoff `χ`) with the identity matrix.
-
-On the support of `χ`, this is the actual chart-pulled `√det · G⁻¹`. Off the
-support of `χ`, this is the identity matrix `δ_{ij}`. -/
 def extendedMatrix
     (g : SmoothRiemannianMetric I M) (α : M) (χ : EuclN → ℝ)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   χ y * weightedInvGramOnEuclid (I := I) g α i j y +
     (1 - χ y) * kronDelta (E := E) i j
 
-/-- Symmetry of the extended matrix on the support of the cutoff: relies on the
-chart-pulled metric being symmetric there, plus symmetry of the Kronecker
-delta. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M) (χ : EuclN → ℝ)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -636,8 +549,7 @@ lemma extendedMatrix_symm_of_mem
   rw [weightedInvGramOnEuclid_symm_of_mem (I := I) g α i j hy]
   rw [kronDelta_symm (E := E) i j]
 
-/-- Symmetry off `tsupport χ` (where `χ y = 0`): both sides reduce to
-`(1) * δ_{ij}`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm_off_tsupport
     (g : SmoothRiemannianMetric I M) (α : M) {χ : EuclN → ℝ}
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN} (hy : y ∉ tsupport χ) :
@@ -652,8 +564,7 @@ lemma extendedMatrix_symm_off_tsupport
     rw [hχ_zero]; ring
   rw [h_lhs, h_rhs, kronDelta_symm]
 
-/-- Combined symmetry: the extended matrix is symmetric provided the cutoff
-is supported inside the chart target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm
     (g : SmoothRiemannianMetric I M) (α : M) {χ : EuclN → ℝ}
     (hχ_supp : tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -664,6 +575,7 @@ lemma extendedMatrix_symm
   · exact extendedMatrix_symm_of_mem (I := I) g α χ i j (hχ_supp hy)
   · exact extendedMatrix_symm_off_tsupport (I := I) g α i j hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_contDiff
     (g : SmoothRiemannianMetric I M) (α : M) [I.Boundaryless]
     {χ : EuclN → ℝ} (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
@@ -705,9 +617,7 @@ lemma extendedMatrix_contDiff
     exact h_const_smooth.congr (fun y hy => hf_eq_const y hy)
   exact contDiff_of_contDiffOn_union_of_isOpen hf_on_s hf_on_t hcov hs_open ht_open
 
-/-- Decomposition of the Rayleigh quotient of the extended matrix into a
-χ-weighted weighted-inverse-Gram piece plus a (1 - χ)-weighted identity
-piece. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_quad_decomp
     (g : SmoothRiemannianMetric I M) (α : M)
     (χ : EuclN → ℝ) (y : EuclN) (ξ : EuclN) :
@@ -802,10 +712,7 @@ lemma extendedMatrix_quad_decomp
     · intro h_not_mem
       exact absurd (Finset.mem_univ i) h_not_mem
 
-/-- On the support of `χ` (where `χ y > 0` a fortiori `≥ 0`), the extended
-matrix is a convex combination of the (positive-definite) chart-pulled
-`√det · G⁻¹` and the (positive-definite) identity. The Rayleigh quotient
-inherits a positive lower bound. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_coercive_on_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}
@@ -854,8 +761,7 @@ lemma extendedMatrix_coercive_on_chart
       χ y * (lamK * ‖ξ‖ ^ 2) + (1 - χ y) * ‖ξ‖ ^ 2 := by ring
   linarith
 
-/-- Off the support of `χ` (where `χ y = 0`), the extended matrix equals the
-identity, so its Rayleigh quotient is exactly `‖ξ‖²`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_eq_kronDelta_off_tsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}
@@ -866,7 +772,7 @@ lemma extendedMatrix_eq_kronDelta_off_tsupport
   rw [hχ_zero]
   ring
 
-/-- Identity-matrix Rayleigh quotient: `⟪ξ, kronDelta-Matrix ξ⟫ = ‖ξ‖²`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
     ⟪ξ, DeGiorgi.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
@@ -888,8 +794,7 @@ lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
   rw [hmul1]
   rw [real_inner_self_eq_norm_sq]
 
-/-- Coercivity of the extended matrix in the universal sense: for any `y` and
-any `ξ`, the Rayleigh quotient is bounded below by `min(1, lamK) ‖ξ‖²`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_coercive
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}
@@ -935,30 +840,6 @@ lemma extendedMatrix_coercive
       mul_le_mul_of_nonneg_right hlamK_le h_norm_sq_nn
     linarith
 
-/-- **Smooth global extension of the chart-pulled volume-weighted inverse Gram
-matrix.**
-
-For a smooth Riemannian metric `g` on a smooth boundaryless manifold `M`, a
-chart point `α : M`, and any compact `K ⊆ chartTargetEuclid α` (the Euclidean
-image of the chart-target via `toEuclidean`), there is:
-
-* a smooth elliptic bilinear-form data `B : SmoothEllipticBilinearForm n univ`
-  (with `c = 0`),
-* a precompact open neighborhood `Ω' ⊇ K` (the open thickening that defines
-  the cutoff support, contained in `chartTargetEuclid α`),
-
-such that:
-* `B.a y i j` agrees on `K` with the volume-weighted inverse Gram matrix
-  entry `√(det G(α, x_y)) · G(α, x_y)⁻¹_{ij}`,
-* `B` is uniformly elliptic with `B.lam = min(1, lamK0) > 0` where
-  `lamK0 > 0` is the strict positive lower bound on the Rayleigh quotient
-  of the volume-weighted inverse Gram matrix over a compact thickening of
-  `K`,
-* outside the support of the cutoff, `B.a y i j = δ_{ij}` (identity matrix).
-
-The construction uses a smooth cutoff function `χ` to interpolate between
-the chart-pulled metric data on a neighborhood of `K` and the identity matrix
-elsewhere; see `extendedMatrix` for the explicit formula. -/
 theorem exists_smooth_metric_extension
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

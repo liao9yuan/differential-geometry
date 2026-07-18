@@ -19,15 +19,15 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Realized Metric Families
 
-The realized V2 core stores the geometric objects: a time-indexed Riemannian
-metric, a time-indexed mathlib covariant derivative on the tangent bundle, and
-the compatibility proof saying the connection is metric-compatible with the
-metric at each time. Smoothness and Ricci-flow evolution remain separate
-predicate interfaces.
--/
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -40,21 +40,21 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-/-- A realized time-dependent metric and connection.
 
-It does not assert that the connection is torsion-free, that the family is
-smooth in time, or that it solves Ricci flow.  It does assert the basic
-geometric compatibility between the stored metric and connection. -/
+
+
+
+
 structure RealizedMetricFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
     DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t) (metric t)
 
-/-- A realized metric family over a concrete real time interval.
 
-The functions are defined on all real times, but later predicates only require
-the Ricci-flow data on the interval's carrier or regular subdomain. -/
+
+
+
 structure RealizedMetricFamilyOn (D : RealTimeInterval) where
   metric : Real -> SmoothRiemannianMetric I M
   connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
@@ -99,7 +99,7 @@ end RealizedMetricFamily
 
 namespace RealizedMetricFamilyOn
 
-/-- View an interval family as a family indexed by its flow-time subtype. -/
+
 def toFlowTimeFamily
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
@@ -108,7 +108,7 @@ def toFlowTimeFamily
   connection := fun t => G.connection (t : Real)
   metricCompatible := fun t => G.metricCompatible t
 
-/-- View an interval family as a family indexed by regular times. -/
+
 def toRegularTimeFamily
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
@@ -117,7 +117,7 @@ def toRegularTimeFamily
   connection := fun t => G.connection (t : Real)
   metricCompatible := fun t => G.metricCompatible (RealTimeInterval.regularToFlow t)
 
-/-- Metric at a flow time. -/
+
 def metricAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -125,7 +125,7 @@ def metricAt
     SmoothRiemannianMetric I M :=
   G.metric (t : Real)
 
-/-- Connection at a flow time. -/
+
 def connectionAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -147,7 +147,7 @@ def connectionAt
     G.connectionAt t = G.connection (t : Real) := by
   rfl
 
-/-- Metric compatibility of the connection and metric at a flow time. -/
+
 theorem metricCompatibleAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -155,7 +155,7 @@ theorem metricCompatibleAt
     DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t) (G.metricAt t) := by
   exact G.metricCompatible t
 
-/-- Metric compatibility of the connection and metric at a regular time. -/
+
 theorem metricCompatibleAt_regular
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -168,21 +168,21 @@ end RealizedMetricFamilyOn
 
 section FamilyCompatibility
 
-/-- Metric compatibility for an interval metric family. -/
+
 def IsMetricCompatibleFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
     DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t) (G.metricAt t)
 
-/-- The metric-family field supplies interval metric compatibility. -/
+
 theorem isMetricCompatibleFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
     IsMetricCompatibleFamilyOn (I := I) G :=
   fun t => G.metricCompatibleAt t
 
-/-- Family metric compatibility at a flow time. -/
+
 theorem metric_compatible_family_apply
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
@@ -203,16 +203,16 @@ section TimeSmoothness
 
 variable {A Time : Type*} [CommRing A] [Algebra Real A]
 
-/-- Pointwise time-regularity of the metric coefficients.
 
-This is intentionally a predicate, not a field of `RealizedMetricFamily`. -/
+
+
 def MetricFamilySmoothInTime
     (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
     (G : RealizedMetricFamily (I := I) (M := M) Time) : Prop :=
   forall (x : M) (X Y : TangentSpace I x),
     td.isSmoothFam (fun t : Time => (G.metric t).inner x X Y)
 
-/-- Extract a metric coefficient's time smoothness from the predicate interface. -/
+
 theorem metric_smooth_coeff_of_metricFamilySmoothInTime
     (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -221,7 +221,7 @@ theorem metric_smooth_coeff_of_metricFamilySmoothInTime
     td.isSmoothFam (fun t : Time => (G.metric t).inner x X Y) :=
   hG x X Y
 
-/-- The pointwise metric time derivative evaluated on fixed tangent vectors. -/
+
 noncomputable def metricTimeDerivative
     (td : TimeDerivativeData Real A Time)
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -243,12 +243,12 @@ section IntervalSmoothness
 variable [Module.Finite Real E] [FiniteDimensional Real E]
 variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Joint total-space continuity of a real-time `(0,s)` tensor family over a
-set of times.
 
-This is the reusable time-dependent tensor continuity shape used by compact
-time-slab arguments.  It records continuity of `(t, x) |-> A t x` as a section
-of the tensor bundle over the product `{t // t in K} x M`. -/
+
+
+
+
+
 def Tensor0SFamilyContinuousOnSet
     (s : Nat) (K : Set Real)
     (A : (t : Real) -> (x : M) ->
@@ -258,17 +258,17 @@ def Tensor0SFamilyContinuousOnSet
     TotalSpace.mk' (Tensor0SModel s Real E)
       (E := fun x : M => Tensor0SSpace s I x) q.2 (A q.1.1 q.2))
 
-/-- A real-time family of smooth covariant two-tensor fields.  Each fixed time
-is a bundled smooth section; time regularity is recorded by separate predicates
-such as `SmoothTwoTensorFamilyOnSet`. -/
+
+
+
 abbrev SmoothTwoTensorFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 2
 
-/-- Regularity package for a real-time family of smooth two-tensor fields on a
-time set.  The fields are spatially smooth by type, have smooth fixed-vector
-time coefficients, and are jointly continuous as a tensor section over
-`K × M`. -/
+
+
+
+
 structure SmoothTwoTensorFamilyOnSet
     (K : Set Real) (A : SmoothTwoTensorFamily (I := I) (M := M)) : Prop where
   coeff :
@@ -281,7 +281,7 @@ structure SmoothTwoTensorFamilyOnSet
 
 namespace Tensor0SFamilyContinuousOnSet
 
-/-- Restrict a time-dependent tensor continuity statement to a smaller time set. -/
+
 theorem mono
     {s : Nat} {K L : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -300,7 +300,7 @@ theorem mono
     exact htime.prodMk continuous_snd
   exact hA.comp hincl
 
-/-- Pull time-dependent tensor continuity back along a continuous time map. -/
+
 theorem comp_time
     {s : Nat} {K L : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -320,7 +320,69 @@ theorem comp_time
     exact htime.prodMk continuous_snd
   exact hA.comp hpull
 
-/-- Constant scalar multiplication preserves time-dependent tensor continuity. -/
+
+
+
+
+theorem of_union_closedOpen
+    {s : Nat} {a c b : Real} (hac : a < c)
+    {A : (t : Real) -> (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x}
+    (h1 : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s (Set.Ico a c) A)
+    (h2 : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s (Set.Ioo a b) A) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) s (Set.Ico a b) A := by
+  unfold Tensor0SFamilyContinuousOnSet at h1 h2 ⊢
+  rw [continuous_iff_continuousAt]
+  rintro q
+  rcases lt_or_ge (q.1.1 : Real) c with hlt | hge
+  ·
+    have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | (q'.1.1 : Real) < c} :=
+      isOpen_lt (continuous_subtype_val.comp continuous_fst) continuous_const
+    have hcont : ContinuousOn
+        (fun q' : {t : Real // t ∈ Set.Ico a b} × M =>
+          TotalSpace.mk' (Tensor0SModel s Real E)
+            (E := fun x : M => Tensor0SSpace s I x) q'.2 (A q'.1.1 q'.2))
+        {q' : {t : Real // t ∈ Set.Ico a b} × M | (q'.1.1 : Real) < c} := by
+      rw [continuousOn_iff_continuous_restrict]
+      refine h1.comp (f := fun w : {q' : {t : Real // t ∈ Set.Ico a b} × M //
+          (q'.1.1 : Real) < c} =>
+          (⟨w.1.1.1, Set.mem_Ico.mpr ⟨(Set.mem_Ico.mp w.1.1.2).1, w.2⟩⟩, w.1.2)) ?_
+      exact (((continuous_subtype_val.comp continuous_fst).comp
+        continuous_subtype_val).subtype_mk _).prodMk
+        (continuous_snd.comp continuous_subtype_val)
+    exact hcont.continuousAt (hopen.mem_nhds hlt)
+  ·
+    have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | a < (q'.1.1 : Real)} :=
+      isOpen_lt continuous_const (continuous_subtype_val.comp continuous_fst)
+    have hcont : ContinuousOn
+        (fun q' : {t : Real // t ∈ Set.Ico a b} × M =>
+          TotalSpace.mk' (Tensor0SModel s Real E)
+            (E := fun x : M => Tensor0SSpace s I x) q'.2 (A q'.1.1 q'.2))
+        {q' : {t : Real // t ∈ Set.Ico a b} × M | a < (q'.1.1 : Real)} := by
+      rw [continuousOn_iff_continuous_restrict]
+      refine h2.comp (f := fun w : {q' : {t : Real // t ∈ Set.Ico a b} × M //
+          a < (q'.1.1 : Real)} =>
+          (⟨w.1.1.1, Set.mem_Ioo.mpr ⟨w.2, (Set.mem_Ico.mp w.1.1.2).2⟩⟩, w.1.2)) ?_
+      exact (((continuous_subtype_val.comp continuous_fst).comp
+        continuous_subtype_val).subtype_mk _).prodMk
+        (continuous_snd.comp continuous_subtype_val)
+    exact hcont.continuousAt (hopen.mem_nhds (lt_of_lt_of_le hac hge))
+
+
+
+
+theorem congr
+    {s : Nat} {K : Set Real}
+    {A B : (t : Real) -> (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x}
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K A)
+    (hAB : ∀ t ∈ K, ∀ x : M, A t x = B t x) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K B := by
+  unfold Tensor0SFamilyContinuousOnSet at hA ⊢
+  refine hA.congr (fun q => ?_)
+  rw [hAB q.1.1 q.1.2 q.2]
+
+
 theorem const_smul
     {s : Nat} {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -337,7 +399,7 @@ theorem const_smul
   refine ⟨hAq.1, ?_⟩
   simpa [map_smul] using (hAq.2.const_smul c)
 
-/-- Addition preserves time-dependent tensor continuity. -/
+
 theorem add
     {s : Nat} {K : Set Real}
     {A B : (t : Real) -> (x : M) ->
@@ -355,8 +417,8 @@ theorem add
   refine ⟨hAq.1, ?_⟩
   simpa [map_add] using hAq.2.add hBq.2
 
-/-- Multiplication by a jointly continuous scalar family preserves
-time-dependent tensor continuity. -/
+
+
 theorem smul
     {s : Nat} {K : Set Real}
     {f : Real -> M -> Real}
@@ -376,8 +438,8 @@ theorem smul
   refine ⟨hAq.1, ?_⟩
   simpa [map_smul] using hfq.smul hAq.2
 
-/-- Pull time-dependent tensor continuity from the base product to the
-time/tangent-bundle product by using the tangent bundle projection. -/
+
+
 theorem tangentBundle
     {s : Nat} {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -396,12 +458,12 @@ theorem tangentBundle
       ((FiberBundle.continuous_proj E (TangentSpace I)).comp continuous_snd)
   exact hA.comp hpull
 
-/-- Evaluate a continuous time-dependent `(0,s)` tensor family on continuous
-time and tangent-vector inputs.
 
-This is the component-continuity projection used by local-coordinate
-arguments: a jointly continuous tensor family has continuous scalar components
-when tested against continuous vector fields. -/
+
+
+
+
+
 theorem eval_continuous
     {s : Nat} {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -436,8 +498,8 @@ theorem eval_continuous
 
 end Tensor0SFamilyContinuousOnSet
 
-/-- Quadratic evaluation of a time-dependent `(0,2)` tensor family on the
-tautological tangent vector is continuous on a time/tangent-bundle product. -/
+
+
 theorem tensor0SFamily_quadCont
     {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -470,37 +532,62 @@ theorem tensor0SFamily_quadCont
     b hb T hT v hv
   simpa [quad02, P, b, T, v] using hEval
 
-/-- Time smoothness of metric coefficients over a concrete real interval,
-together with joint total-space continuity of the metric tensor family. -/
+
+
+
+
+
+
+
+
+
+
 structure MetricFamilySmoothOn
     (D : RealTimeInterval)
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop where
   coeff :
     forall (x : M) (X Y : TangentSpace I x),
-    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier
+    ContDiffOn Real ∞ (fun t : Real => (G.metric t).inner x X Y) D.regular
+  coeff_cont :
+    forall (x : M) (X Y : TangentSpace I x),
+    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => metricTensorField (I := I) (G.metric t) x)
+
+
+
+
+
   frameCompSmooth :
     forall {Idx : Type} [Fintype Idx]
       (frame : Idx -> (x : M) -> TangentSpace I x) {u : Set M},
-      IsLocalFrameOn I E 1 frame u ->
+      IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u ->
       forall i j : Idx,
-        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M =>
             (G.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
-          (D.carrier ×ˢ u)
+          (D.regular ×ˢ u)
 
-/-- Extract a metric coefficient's interval time smoothness. -/
+
 theorem metric_smooth_coeff_of_metricFamilySmoothOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (x : M) (X Y : TangentSpace I x) :
-    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+    ContDiffOn Real ∞ (fun t : Real => (G.metric t).inner x X Y) D.regular :=
   hG.coeff x X Y
 
-/-- Extract the metric tensor total-space continuity from a smooth metric family. -/
+
+theorem metric_coeff_cont_of_metricFamilySmoothOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (x : M) (X Y : TangentSpace I x) :
+    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+  hG.coeff_cont x X Y
+
+
 theorem metricTensor_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -509,7 +596,7 @@ theorem metricTensor_cont_of_metricFamilySmoothOn
       (fun t x => metricTensorField (I := I) (G.metric t) x) :=
   hG.metricTensor_cont
 
-/-- Metric tensor continuity on a smaller time set. -/
+
 theorem metricTensor_cont_restrict_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -520,7 +607,7 @@ theorem metricTensor_cont_restrict_of_metricFamilySmoothOn
   Tensor0SFamilyContinuousOnSet.mono (I := I) (M := M)
     hG.metricTensor_cont hK
 
-/-- Metric tensor continuity pulled back to the time/tangent-bundle product. -/
+
 theorem metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -534,8 +621,8 @@ theorem metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
     (metricTensor_cont_restrict_of_metricFamilySmoothOn (I := I) (M := M)
       G hG hK)
 
-/-- The scalar metric quadratic form on a time/tangent-bundle product is
-continuous for any time set contained in the smooth metric-family interval. -/
+
+
 theorem metricTimeBundleQuad_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -549,7 +636,7 @@ theorem metricTimeBundleQuad_cont_of_metricFamilySmoothOn
         G hG hK)
   simpa [metricTimeBundleQuad, quad02, metricTensorField_apply] using hquad
 
-/-- The scalar metric coefficient used in interval derivative statements. -/
+
 noncomputable def metricCoeff
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

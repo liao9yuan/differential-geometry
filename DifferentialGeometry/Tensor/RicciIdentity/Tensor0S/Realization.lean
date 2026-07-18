@@ -6,12 +6,12 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# General `(0,s)` Ricci identity realization helpers
 
-This file contains the reusable realization predicates and evaluation formulas
-for covariant tensor Ricci-identity proofs.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -27,8 +27,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- A supplied `(0,s+1)` tensor field realizes the covariant derivative of a
-bundled `(0,s)` tensor at one point. -/
+
+
 def Nabla0SRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -43,7 +43,7 @@ def Nabla0SRealizesAt
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         s cov X alpha x slots
 
-/-- Section-level realization of `nablaAlpha = ∇ alpha` for `(0,s)` tensors. -/
+
 def Nabla0SSectionRealizes
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -52,8 +52,8 @@ def Nabla0SSectionRealizes
     (nablaAlpha : Tensor0SSection (I := I) (M := M) (s + 1)) : Prop :=
   ∀ x : M, Nabla0SRealizesAt (I := I) s cov alpha (fun y => nablaAlpha y) x
 
-/-- A supplied `(0,s+2)` tensor realizes the true second covariant derivative of
-a bundled `(0,s)` tensor at one point. -/
+
+
 def Nabla20SRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -71,8 +71,8 @@ def Nabla20SRealizesAt
         nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           (s + 1) cov X nablaAlpha x slots
 
-/-- Definition 14.5 for a realized first covariant derivative of a `(0,s)`
-tensor section. -/
+
+
 theorem Nabla0SSectionRealizes.eval_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -106,10 +106,10 @@ theorem Nabla0SSectionRealizes.eval_smooth_slots
             (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             cov X V alpha x
 
-/-- Definition 14.5 for a realized first covariant derivative, evaluated on an
-arbitrary tangent vector in the derivative slot and smooth moving tensor slots.
-The proof extends the tangent vector to a smooth section and reuses
-`eval_smooth_slots`. -/
+
+
+
+
 theorem Nabla0SSectionRealizes.eval_point_vector_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -136,8 +136,8 @@ theorem Nabla0SSectionRealizes.eval_point_vector_smooth_slots
     (I := I) h Wsec V x
   simpa [hWsec] using h0
 
-/-- Definition 14.5 for a realized first covariant derivative with only `C¹`
-moving slots. -/
+
+
 theorem Nabla0SSectionRealizes.eval_C1_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -173,9 +173,9 @@ theorem Nabla0SSectionRealizes.eval_C1_slots
             (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             cov X V alpha x hV_at
 
-/-- Definition 14.5 for a realized second covariant derivative of a `(0,s)`
-tensor section, applied to the outer derivative slot and smooth moving
-remaining slots. -/
+
+
+
 theorem Nabla20SRealizesAt.eval_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

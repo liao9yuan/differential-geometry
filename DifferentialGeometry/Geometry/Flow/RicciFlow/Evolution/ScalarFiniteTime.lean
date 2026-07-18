@@ -4,15 +4,15 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Positive Scalar Curvature Forces Finite Time
 
-This file records the native Corollary 7.4 route.  The analytic input is the
-Corollary 7.3 lower barrier on every compact time slab before the pole.  The
-new content is the endpoint argument: a smooth scalar function is bounded above
-on the compact pole slab, while the lower barrier becomes arbitrarily large
-before its pole.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,18 +29,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Scalar blow-up time and slab bounds -/
 
-/-- The pole time of the Corollary 7.3 scalar lower barrier. -/
+
+
 def scalarBlowupTime (n c0 : Real) : Real :=
   n / (2 * c0)
 
-/-- The scalar function is bounded above on the closed time slab `[0,T]`. -/
+
 def ScalarBoundedAboveOnSlab (scalar : Real -> M -> Real) (T : Real) : Prop :=
   exists B : Real, forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, scalar t x <= B
 
-/-- The Corollary 7.3 lower barrier is available on every finite slab before
-the endpoint and before its pole. -/
+
+
 def ScalarLowerBarrierBoundUpToPole
     (scalar : Real -> M -> Real) (n c0 omega : Real) : Prop :=
   forall T : Real, 0 < T -> T < omega -> T < scalarBlowupTime n c0 ->
@@ -171,7 +171,7 @@ theorem of_continuousOn
 
 end ScalarBoundedAboveOnSlab
 
-/-! ## Corollary 7.4 wrappers -/
+
 
 theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
@@ -218,9 +218,9 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       hinit (hF_lip T hT_pos hT_omega hT_blow)
   exact hbound T ⟨le_of_lt hT_pos, le_rfl⟩ x
 
-/-- Corollary 7.4 in scalar-evolution form: a positive initial scalar minimum
-forces the right endpoint of a closed-open solution interval to lie no later
-than the scalar lower-barrier pole. -/
+
+
+
 theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -231,9 +231,9 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     (K : Real -> NNReal)
     (hinit_min : InitialScalarMinimum (M := M) scalar c0)
     (hinit_pos : forall x : M, 0 < scalar 0 x)
-    (hscalar_cont : ContinuousOn
-      (fun p : Real × M => scalar p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) (scalarBlowupTime n c0)))
+    (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
+      ContinuousOn (fun p : Real × M => scalar p.1 p.2)
+        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime n c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T n c0 scalar (K T))
@@ -262,17 +262,23 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
       (I := I) h0ω G n c0 hn hc0 scalar scalarLap ricciNormSq K
       hreg hevol hlap hricci
       (InitialScalarMinimum.lowerBound (M := M) hinit_min) hF_lip
+  by_contra hnot
+  have hlt_omega : scalarBlowupTime n c0 < omega := lt_of_not_ge hnot
+  have hblow_pos : 0 < scalarBlowupTime n c0 :=
+    scalarBlowupTime_pos hn hc0
   have hbounded :
       ScalarBoundedAboveOnSlab (M := M) scalar (scalarBlowupTime n c0) :=
-    ScalarBoundedAboveOnSlab.of_continuousOn (M := M) hscalar_cont
-  exact scalar_endpoint_le_blowupTime_of_lower_barrier_bound
+    ScalarBoundedAboveOnSlab.of_continuousOn (M := M)
+      (hscalar_cont (scalarBlowupTime n c0) (le_of_lt hblow_pos) hlt_omega)
+  have hle := scalar_endpoint_le_blowupTime_of_lower_barrier_bound
     (M := M) hn hc0 hlower hbounded
+  exact hnot hle
 
-/-- Lemma 11.1 in the normalized scalar-evolution form.
 
-This is exactly Corollary 7.4 specialized to dimension three: if the scalar
-curvature has positive initial minimum `c0`, then the right endpoint of the
-maximal `[0, omega)` flow is bounded by `3 / (2 * c0)`. -/
+
+
+
+
 theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -283,9 +289,9 @@ theorem finiteTime3D
     (K : Real -> NNReal)
     (hinit_min : InitialScalarMinimum (M := M) scalar c0)
     (hinit_pos : forall x : M, 0 < scalar 0 x)
-    (hscalar_cont : ContinuousOn
-      (fun p : Real × M => scalar p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) (scalarBlowupTime 3 c0)))
+    (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
+      ContinuousOn (fun p : Real × M => scalar p.1 p.2)
+        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime 3 c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T 3 c0 scalar (K T))

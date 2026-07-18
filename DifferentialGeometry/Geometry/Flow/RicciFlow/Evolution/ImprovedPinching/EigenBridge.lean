@@ -5,12 +5,12 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching eigenvalue bridges
 
-This file contains pointwise bridges from Section 9 tensor inequalities to the
-dimension-three eigenvalue algebra used in Hamilton Section 10.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Section 9 tensor inequalities give the unordered eigenvalue package used
-by Lemma 10.8.  This is pointwise: no smooth eigenvalue field is selected. -/
+
+
 theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     {g : SmoothRiemannianMetric I M}
     {x : M}
@@ -92,8 +92,8 @@ theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
       lower2 := hlower2
       lower3 := hlower3 }
 
-/-- Raw Section 9 nonnegativity predicates give the unordered eigenvalue
-package after diagonalizing Ricci. -/
+
+
 theorem pinchEigen3Unordered_of_pinchTensor_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -123,8 +123,8 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
     simpa [pinchTensor, DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, SolutionOn.ricciAt]
       using hpinch v
 
-/-- Section 9 pointwise tensor inequalities imply the Lemma 10.8 reaction
-bracket sign for the canonical Section 10 scalar fields. -/
+
+
 theorem cubicQ_sub_nonneg_of_section9_point
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

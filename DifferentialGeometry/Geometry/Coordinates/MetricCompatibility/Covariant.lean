@@ -5,14 +5,14 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Metric compatibility in local-frame components
 
-This file contains coordinate/local-frame consequences of metric compatibility
-that are independent of Ricci-flow time evolution.  In particular it exposes
-the component form of `nabla gInv = 0` for an arbitrary smooth metric and a
-metric-compatible connection.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -34,7 +34,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-- Inverse-metric components for a fixed metric and local frame. -/
+
 def InverseMetricComponentsForMetricInFrameOn [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
@@ -45,7 +45,7 @@ def InverseMetricComponentsForMetricInFrameOn [DecidableEq Idx]
       (∑ k : Idx, metricCompForMetricInFrame (I := I) g frame x i k * gInv x k j) =
         (if i = j then 1 else 0)
 
-/-- A supplied two-sided inverse of a metric frame Gram matrix is symmetric. -/
+
 theorem gInvForMetric_symm [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
@@ -60,7 +60,7 @@ theorem gInvForMetric_symm [DecidableEq Idx]
       simpa [metricCompForMetricInFrame] using hinv y a b)
     x i j
 
-/-- Covariant derivative components of the inverse metric in a local frame. -/
+
 def inverseMetricCovDerivForMetricCompInFrame
     (gInv : M -> Idx -> Idx -> Real)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -120,9 +120,9 @@ theorem metricComp_mdiffAt
   rw [mdifferentiableAt_totalSpace] at htotal
   simpa [metricCompForMetricInFrame] using htotal.2
 
-/-- Metric compatibility in a local frame:
-the directional derivative of the metric components is the Christoffel
-correction in both slots. -/
+
+
+
 theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -159,8 +159,8 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
   rw [covariantDerivative_eq_sum_christoffel (I := I) cov frame hframe hx d b]
   simp [metricCompForMetricInFrame, map_sum]
 
-/-- Metric-compatibility derivative formula in an arbitrary tangent
-direction. -/
+
+
 theorem metricComp_extDeriv_tangent
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -321,7 +321,7 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffelAlong
   rw [hcov_a, hcov_b]
   simp [metricCompForMetricInFrame, map_sum]
 
-/-- Differentiability of a finite sum of scalar functions. -/
+
 theorem mdiffAt_finset_sum_real
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -340,7 +340,7 @@ theorem mdiffAt_finset_sum_real
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
-/-- Directional derivative of a finite sum of scalar functions. -/
+
 theorem extDerivFun_finset_sum_real
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -372,7 +372,7 @@ theorem extDerivFun_finset_sum_real
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
-/-- Directional derivative of a product of scalar functions. -/
+
 theorem extDerivFun_mul_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -506,8 +506,8 @@ theorem inverseMetric_derivative_solve
                           rw [hsymm b j]
                           ring
 
-/-- Metric compatibility in coordinates for the inverse metric:
-`nabla_d g^{kl} = 0`. -/
+
+
 theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
     [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

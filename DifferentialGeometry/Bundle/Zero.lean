@@ -1,21 +1,7 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import Mathlib.Topology.VectorBundle.Basic
-
-/-!
-# Continuity of the Zero Section
-
-The zero section `zeroSection F E : B → TotalSpace F E` of a vector bundle is continuous.
-
-## Main Results
-
-* `continuous_zeroSection`: the zero section of a vector bundle is continuous.
-
-## Tags
-
-zero section, vector bundle, continuous
--/
 
 open Bundle
 
@@ -26,7 +12,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   [TopologicalSpace (TotalSpace F E)] [∀ x, TopologicalSpace (E x)]
   [FiberBundle F E] [VectorBundle 𝕜 F E]
 
-/-- The zero section of a vector bundle is continuous. -/
 theorem continuous_zeroSection (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {B : Type*} [TopologicalSpace B]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]

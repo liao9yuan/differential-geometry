@@ -2,67 +2,11 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
-/-!
-# The chart-transition transport operator on tensor `L²` chart components
-
-For a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)` and two chart
-base points `β`, `α`, this file builds the bounded linear operator that
-transports a chart-`β` `L²` tensor-frame component into a contribution to a
-chart-`α` component. It is the `(P₀, Q)`-entry of the `(r, s)`-tensor
-transformation law: it carries the chart-`β` `Q`-component into the chart-`α`
-`P₀`-component, weighted by a smooth transport coefficient.
-
-## The transport coefficient
-
-`transportCoeffManifold g r s β α P₀ Q` is the manifold-side scalar function
-
-`x ↦ chartKernelCutoff α x · chartKernelCutoff β x · transitionCoeff r s β α P₀ Q x`,
-
-the product of the two chart-kernel cutoffs and the smooth transition
-coefficient of `TensorChartTransition.lean`. The transition coefficient is
-`C^∞` only on the chart overlap; the cutoff factor is compactly supported
-strictly inside that overlap, so the product extends by zero to a globally
-`C^∞`, bounded, compactly-supported function whose support lies inside both
-chart sources.
-
-## The transport operator
-
-`chartTransitionTransportCLM g r s β α P₀ Q` is the continuous linear map
-
-`Lp ℝ 2 (chartL2Measure β) →L[ℝ] Lp ℝ 2 (chartL2Measure α)`
-
-whose underlying map sends an `L²` function `f` on the chart-`β` Euclidean
-target to the chart-`α` `L²` class of
-
-`y ↦ (chart-α pushforward of transportCoeffManifold) y · f (chartTransitionEuclid α β y)`.
-
-Boundedness on `L²` classes follows from the change-of-variables bound for the
-bounded chart-transition diffeomorphism, confined by the compact support of the
-transport coefficient.
-
-## Main definitions
-
-* `transportCoeffManifold` — the smooth, bounded, compactly-supported transport
-  coefficient on `M`.
-* `chartTransitionTransportCLM` — the bounded transport operator.
-
-## Main results
-
-* `contMDiff_transportCoeffManifold` — global `C^∞`-smoothness of the transport
-  coefficient.
-* `chartTransitionTransportCLM_coeFn_smooth` — the smooth-section compatibility
-  identity: on the chart component of a smooth section, the transported
-  component is the chart-`α` pushforward of the transport-coefficient-weighted
-  partition-of-unity component centred at `β`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -90,9 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- If two functions agree almost everywhere with respect to `μ.restrict s` and
-agree everywhere off the measurable set `s`, then they agree almost everywhere
-with respect to `μ` itself. -/
 private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
     {X : Type*} [MeasurableSpace X] {μ : Measure X}
     {f h : X → ℝ} {s : Set X} (hs : MeasurableSet s)
@@ -111,28 +52,16 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact hs.nullMeasurableSet
 
-set_option linter.unusedVariables false in
-/-- **The chart-transition transport coefficient on `M`.** For ranks `(r, s)`,
-chart base points `β`, `α` and a pair of component multi-indices `(P₀, Q)`, the
-function
 
-`x ↦ chartKernelCutoff α x · chartKernelCutoff β x · transitionCoeff r s β α P₀ Q x`.
-
-It is the `(P₀, Q)`-entry of the `(r, s)`-tensor transformation law confined,
-by the two chart-kernel cutoffs, to the overlap of the chart sources at `β` and
-`α`.
-
-The metric `g` is carried in the signature for uniformity with the chart
-components built downstream; the transport coefficient itself depends only on
-the chart structure. -/
 def transportCoeffManifold
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
+    (_g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) : M → ℝ :=
   fun x =>
     ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
       ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
         transitionCoeff (E := E) (I := I) (M := M) r s β α P₀ Q x
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma transportCoeffManifold_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (x : M) :
@@ -141,8 +70,7 @@ def transportCoeffManifold
         ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
           transitionCoeff (E := E) (I := I) (M := M) r s β α P₀ Q x := rfl
 
-/-- The transport coefficient vanishes wherever the chart-`α` kernel cutoff
-does. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportCoeffManifold_eq_zero_of_cutoffα_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) {x : M}
@@ -150,8 +78,7 @@ private lemma transportCoeffManifold_eq_zero_of_cutoffα_zero
     transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x = 0 := by
   rw [transportCoeffManifold_apply, hx]; ring
 
-/-- The transport coefficient vanishes wherever the chart-`β` kernel cutoff
-does. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportCoeffManifold_eq_zero_of_cutoffβ_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) {x : M}
@@ -159,32 +86,32 @@ private lemma transportCoeffManifold_eq_zero_of_cutoffβ_zero
     transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x = 0 := by
   rw [transportCoeffManifold_apply, hx]; ring
 
-/-- The compact set in which the transport coefficient is supported: the
-intersection of the closed supports of the chart-`α` and chart-`β` kernel
-cutoffs. -/
 private def transportSupportSet (α β : M) : Set M :=
   tsupport ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ∩
     tsupport ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_isCompact (α β : M) :
     IsCompact (transportSupportSet (I := I) (M := M) α β) :=
   (chartKernelCutoff_hasCompactSupport (I := I) (M := M) α).inter_right
     (isClosed_tsupport _)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_isClosed (α β : M) :
     IsClosed (transportSupportSet (I := I) (M := M) α β) :=
   (isClosed_tsupport _).inter (isClosed_tsupport _)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_subset_sourceα (α β : M) :
     transportSupportSet (I := I) (M := M) α β ⊆ (chartAt H α).source :=
   fun _ hx => chartKernelCutoff_tsupport_subset_source (I := I) (M := M) α hx.1
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_subset_sourceβ (α β : M) :
     transportSupportSet (I := I) (M := M) α β ⊆ (chartAt H β).source :=
   fun _ hx => chartKernelCutoff_tsupport_subset_source (I := I) (M := M) β hx.2
 
-/-- The topological support of the transport coefficient is contained in the
-compact set `transportSupportSet α β`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -203,8 +130,7 @@ lemma tsupport_transportCoeffManifold_subset
       (I := I) (M := M) g r s β α P₀ Q
       (image_eq_zero_of_notMem_tsupport hxβ))
 
-/-- **The transport coefficient has compact support inside both chart
-sources.** -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasCompactSupport_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -214,8 +140,7 @@ theorem hasCompactSupport_transportCoeffManifold
     (fun _ hx => tsupport_transportCoeffManifold_subset
       (I := I) (M := M) g r s β α P₀ Q (subset_tsupport _ hx))
 
-/-- The topological support of the transport coefficient lies inside the
-chart-`α` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset_sourceα
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -224,8 +149,7 @@ lemma tsupport_transportCoeffManifold_subset_sourceα
   (tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q).trans
     (transportSupportSet_subset_sourceα (I := I) (M := M) α β)
 
-/-- The topological support of the transport coefficient lies inside the
-chart-`β` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset_sourceβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -234,7 +158,7 @@ lemma tsupport_transportCoeffManifold_subset_sourceβ
   (tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q).trans
     (transportSupportSet_subset_sourceβ (I := I) (M := M) α β)
 
-/-- **The transport coefficient is globally `C^∞` on `M`.** -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem contMDiff_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -284,15 +208,14 @@ theorem contMDiff_transportCoeffManifold
     by_contra hne
     exact hy_notin hne
 
-/-- The transport coefficient is continuous on `M`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma continuous_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
     Continuous (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q) :=
   (contMDiff_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q).continuous
 
-/-- **The transport coefficient is globally bounded.** There is a non-negative
-constant bounding `|transportCoeffManifold g r s β α P₀ Q x|` for all `x`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_bound_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -306,15 +229,13 @@ theorem exists_bound_transportCoeffManifold
   rw [Real.norm_eq_abs] at hx
   exact hx.trans (le_max_left _ _)
 
-/-- The chart-`α` Euclidean pushforward of the transport coefficient. -/
 private def transportCoeffPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) α
     (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q)
 
-/-- The chart-`α` pushforward of the transport coefficient inherits the global
-bound of the transport coefficient. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma exists_bound_transportCoeffPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -330,11 +251,6 @@ private lemma exists_bound_transportCoeffPushed
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy, abs_zero]
     exact hC_nn
 
-/-- A bundle of the chart-transition diffeomorphism data tailored to the
-transport support set: an open neighbourhood `Ω_αβ` of the chart-`α` image of
-the support, an open `Ω_βα` inside the chart-`β` target, the realising bounded
-diffeomorphism, and the equation `Φ.toFun = chartTransitionEuclid α β` on
-`Ω_αβ`. -/
 private structure TransportDiffeoData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) where
@@ -348,10 +264,7 @@ private structure TransportDiffeoData
   hsupp_subset : ∀ y, transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y ≠ 0 →
     y ∈ Ωαβ
 
-/-- The chart-transition diffeomorphism data tailored to the transport support
-set exists: it is produced by the strict chart-transition diffeomorphism
-constructor for the compact support set, whose chart-`α` image is contained in
-the neighbourhood `Ω_αβ`. -/
+omit [CompleteSpace E] in
 private lemma exists_transportDiffeoData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -401,9 +314,6 @@ private lemma exists_transportDiffeoData
       (by unfold transportCoeffPushed
           exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy_target) hy
 
-/-- The underlying transported function: the chart-`α` pushforward of the
-transport coefficient times the chart-`β` `L²` function composed with the chart
-transition. -/
 private def transportFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -411,9 +321,7 @@ private def transportFun
   fun y => transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y *
     (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)
 
-/-- On the support region the chart transition agrees with the realising
-diffeomorphism, so the transported function equals the
-transport-coefficient-weighted composition with `Φ.toFun` — everywhere. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_comp_Φ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -428,7 +336,7 @@ private lemma transportFun_eq_comp_Φ
   · rw [hy, zero_mul, zero_mul]
   · rw [D.hΦ_eq y (D.hsupp_subset y hy)]
 
-/-- The transported function vanishes off `Ω_αβ`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_zero_off_Ωαβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -442,8 +350,7 @@ private lemma transportFun_eq_zero_off_Ωαβ
     exact hy (D.hsupp_subset y hne)
   rw [hcoeff, zero_mul]
 
-/-- The transported function equals the indicator, on `Ω_αβ`, of the
-transport-coefficient-weighted composition with `Φ.toFun`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_indicator
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -459,8 +366,7 @@ private lemma transportFun_eq_indicator
   · rw [Set.indicator_of_notMem hy,
       transportFun_eq_zero_off_Ωαβ (I := I) (M := M) g r s β α P₀ Q D f hy]
 
-/-- The chart-`α` reference measure restricted to `Ω_αβ` is the plain volume
-restricted to `Ω_αβ`, since `Ω_αβ` lies inside the chart-`α` target. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartL2Measure_restrict_Ωαβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -469,7 +375,7 @@ private lemma chartL2Measure_restrict_Ωαβ
       (volume : Measure EuclN).restrict D.Ωαβ := by
   rw [chartL2Measure, Measure.restrict_restrict_of_subset D.hΩαβ_subset_target]
 
-/-- `Ω_αβ` is measurable. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Ωαβ_measurableSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -477,8 +383,7 @@ private lemma Ωαβ_measurableSet
     MeasurableSet D.Ωαβ :=
   D.hΩαβ_open.measurableSet
 
-/-- The chart-`α` pushforward of the transport coefficient is strongly
-measurable for the chart-`α` Euclidean reference measure. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma aestronglyMeasurable_transportCoeffPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -506,8 +411,7 @@ private lemma aestronglyMeasurable_transportCoeffPushed
   intro y hy
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
-/-- The transported function is strongly measurable for the chart-`α` Euclidean
-reference measure. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma aestronglyMeasurable_transportFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -537,9 +441,7 @@ private lemma aestronglyMeasurable_transportFun
     h_f_meas.comp_quasiMeasurePreserving D.Φ.toFun_quasiMeasurePreserving
   exact h_coeff.mul h_comp
 
-/-- **Uniform `L²` bound for the transported function.** There is a non-negative
-constant `K` such that for every `L²` class `f` on the chart-`β` target the
-`L²` norm of the transported function is bounded by `K · ‖f‖`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma exists_eLpNorm_transportFun_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -623,8 +525,7 @@ private lemma exists_eLpNorm_transportFun_bound
             eLpNorm (f : EuclN → ℝ) 2 (chartL2Measure (I := I) (M := M) β) := by
           rw [ENNReal.ofReal_mul hC_nn, mul_assoc]
 
-/-- The transported function lies in `MemLp 2` of the chart-`α` Euclidean
-reference measure. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_transportFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -640,11 +541,7 @@ private lemma memLp_transportFun
   refine ENNReal.mul_lt_top ENNReal.ofReal_lt_top ?_
   exact (Lp.memLp f).2
 
-/-- **The transported function respects a.e.-equality of the chart-`β` `L²`
-function.** If two functions `u₁`, `u₂` agree almost everywhere with respect to
-the chart-`β` reference measure, then the transport-coefficient-weighted
-compositions with the chart transition agree almost everywhere with respect to
-the chart-`α` reference measure. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_aux_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -690,8 +587,7 @@ private lemma transportFun_aux_ae_eq
     exact hy (D.hsupp_subset y hne)
   rw [hcoeff, zero_mul, zero_mul]
 
-/-- The transported function respects a.e.-equality of the chart-`β` `L²`
-function, stated directly in terms of `transportFun`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_ae_eq_of_coeFn_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -704,7 +600,6 @@ private lemma transportFun_ae_eq_of_coeFn_ae_eq
       transportFun (I := I) (M := M) g r s β α P₀ Q f₂ :=
   transportFun_aux_ae_eq (I := I) (M := M) g r s β α P₀ Q D h
 
-/-- The `L²` class of the transported function. -/
 private def transportLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -713,6 +608,7 @@ private def transportLp
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (memLp_transportFun (I := I) (M := M) g r s β α P₀ Q D f).toLp _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -725,6 +621,7 @@ private lemma transportLp_coeFn
   unfold transportLp
   exact MemLp.coeFn_toLp _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -760,6 +657,7 @@ private lemma transportLp_add
     (transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q D f₂)).symm.trans
     (Lp.coeFn_add _ _).symm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -791,7 +689,6 @@ private lemma transportLp_smul
   refine ((transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q D f).const_smul
     c).symm.trans (Lp.coeFn_smul c _).symm
 
-/-- The transported `L²` class assembled into an `ℝ`-linear map. -/
 private def transportLpLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -802,6 +699,7 @@ private def transportLpLin
   map_add' f₁ f₂ := transportLp_add (I := I) (M := M) g r s β α P₀ Q D f₁ f₂
   map_smul' c f := transportLp_smul (I := I) (M := M) g r s β α P₀ Q D c f
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma transportLpLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -810,7 +708,7 @@ private def transportLpLin
     transportLpLin (I := I) (M := M) g r s β α P₀ Q D f =
       transportLp (I := I) (M := M) g r s β α P₀ Q D f := rfl
 
-/-- Operator-norm bound for the transported-class linear map. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLpLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -847,29 +745,12 @@ private lemma transportLpLin_norm_le
   refine h_toReal_le.trans ?_
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hK_nn, h_f_norm]
 
-/-- A fixed canonical choice of the chart-transition diffeomorphism data. -/
 private def transportDiffeoData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
     TransportDiffeoData (I := I) (M := M) g r s β α P₀ Q :=
   (exists_transportDiffeoData (I := I) (M := M) g r s β α P₀ Q).some
 
-/-- **The chart-transition transport operator.** For a closed Riemannian
-manifold `(M, g)`, ranks `(r, s)`, chart base points `β`, `α` and a pair of
-component multi-indices `(P₀, Q)`, the continuous linear map
-
-`Lp ℝ 2 (chartL2Measure β) →L[ℝ] Lp ℝ 2 (chartL2Measure α)`
-
-whose underlying map sends a chart-`β` `L²` function `f` to the chart-`α` `L²`
-class of
-
-`y ↦ (chart-α pushforward of transportCoeffManifold) y · f (chartTransitionEuclid α β y)`.
-
-It transports the chart-`β` `Q`-component of an `(r, s)`-tensor into the
-contribution to the chart-`α` `P₀`-component dictated by the tensor
-transformation law. Boundedness on `L²` classes follows from the
-change-of-variables bound for the bounded chart-transition diffeomorphism,
-confined to the compact support of the transport coefficient. -/
 def chartTransitionTransportCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -882,8 +763,7 @@ def chartTransitionTransportCLM
     (transportLpLin_norm_le (I := I) (M := M) g r s β α P₀ Q
       (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q)).choose_spec.2
 
-/-- The transport operator applied to an `L²` class agrees almost everywhere
-with the transported function. -/
+omit [CompleteSpace E] in
 lemma chartTransitionTransportCLM_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -901,18 +781,6 @@ lemma chartTransitionTransportCLM_coeFn
   exact transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q
     (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q) f
 
-/-- **General underlying-function description of the transport operator.** For
-an arbitrary `L²` class `f` on the chart-`β` Euclidean target, the transport
-operator value agrees almost everywhere on the chart-`α` Euclidean target with
-the pointwise product of the chart-`α` pushforward of the transport coefficient
-and the chart-transition precomposition of `f`.
-
-Unlike `chartTransitionTransportCLM_coeFn_smooth`, this holds for every `L²`
-argument — not only the chart components of smooth sections — and the
-right-hand side is expressed entirely through publicly available data: the
-chart pushforward `chartPushedRaw`, the transport coefficient
-`transportCoeffManifold`, and the chart-transition diffeomorphism
-`chartTransitionEuclid`. -/
 theorem chartTransitionTransportCLM_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -929,16 +797,7 @@ theorem chartTransitionTransportCLM_coeFn_aeEq
   funext y
   rfl
 
-/-- The transported function of the concrete chart component of a smooth
-section equals — pointwise everywhere — the chart-`α` pushforward of the
-transport-coefficient-weighted partition-of-unity component centred at `β`.
-
-Off the chart-`α` target both sides vanish. On the chart-`α` target both sides
-read the transport coefficient at the same manifold point; where the transport
-coefficient is nonzero the manifold point lies in both chart sources, so the
-chart transition carries the chart-`α` Euclidean coordinate of the point to its
-chart-`β` Euclidean coordinate, identifying the two partition-of-unity
-components. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_tensorChartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (S : SmoothCcTensor g r s)
@@ -1001,18 +860,6 @@ private lemma transportFun_tensorChartComponent_eq
     rw [h_lhs, zero_mul,
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
-/-- **Compatibility of the transport operator with the chart component of a
-smooth section.** For a smooth compactly-supported `(r, s)`-tensor section `S`,
-the transport operator applied to the canonical chart-`β` `Q`-component of `S`
-agrees almost everywhere with the chart-`α` pushforward of the
-transport-coefficient-weighted partition-of-unity `Q`-component of `S` centred
-at `β`.
-
-This identifies the `(P₀, Q)`-entry of the tensor transformation law, on the
-dense subspace of smooth sections, with an explicit chart-coordinate scalar
-field — the bridge that lets the downstream density argument express a
-cutoff-weighted chart component as a finite sum of transported
-partition-of-unity-weighted components. -/
 theorem chartTransitionTransportCLM_coeFn_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (S : SmoothCcTensor g r s)

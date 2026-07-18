@@ -4,31 +4,9 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
-/-!
-# `L^2` integration of the Christoffel slot-correction pointwise sum
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart base
-point `α : M`, and a smooth tangent vector field `X`, this file integrates
-the pointwise sum bound from `ChristoffelCorrectionL2Bound` against the
-Riemannian volume measure on `M`. Multiplying by the partition-of-unity
-factor `ρ_α` (with `0 ≤ ρ_α ≤ 1`) makes the pointwise bound globally
-valid; integrating and using `∫ tensorInnerPointwise(S.toFun)(S.toFun) dμ
-= ‖S.toCcTensor‖^2 ≤ ‖S‖^2` for `S : SmoothCcTensorH1 g r s` produces a
-squared `L^2` bound of `C * ‖S‖^2`. Taking square roots in `ENNReal`
-gives the headline `eLpNorm (..) 2 (..) ≤ ENNReal.ofReal (√C) * ‖S‖₊`.
-
-## Public theorem
-
-* `exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_mul_h1Norm`
-  — uniform-in-`S` `L^2` bound, conditional on the discharge constants
-  `M_F` (slot-substitution operator-norm sup bound) and `K_S`
-  (bundle-fibre section-side bound) from the companion pointwise module.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -56,6 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b')
@@ -218,13 +197,6 @@ private lemma integral_tensorInnerPointwise_diagonal_le_h1NormSq
   rw [h_l2_norm_sq]
   exact SmoothCcTensorH1.l2NormSq_le_h1NormSq (I := I) (M := M) S
 
-/-- **Headline `L²` integration of the Christoffel slot-correction sum**,
-conditional on the operator-norm sup bound `M_F` for the slot substitutions
-and the section-side bundle-fibre bound `K_S`. For every
-`S : SmoothCcTensorH1 g r s`, the partition-of-unity-weighted Euclidean
-square root of the slot-correction sum has `L^2(riemannianVolumeMeasure g)`
-seminorm uniformly bounded by `ENNReal.ofReal C * ‖S‖₊`, where `C` depends
-only on `(g, r, s, α, X, M_F, K_S)`. -/
 theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b')

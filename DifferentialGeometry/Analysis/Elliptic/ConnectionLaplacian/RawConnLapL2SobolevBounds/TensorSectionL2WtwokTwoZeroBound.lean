@@ -2,54 +2,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorChartTwistUniformBound
 
-/-!
-# Manifold L² bound for a smooth compactly-supported tensor section by the
-# order-zero chart-Sobolev norm
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-smooth compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`,
-this file ships the bound
-
-  `∫⁻ x, ‖T.toSection x‖ₑ ^ 2 ∂μ_g ≤ ENNReal.ofReal C · (wtwokTwoNorm g 0 T) ^ 2`
-
-with `C` non-negative and independent of `T`. The right-hand side is the
-square of the order-zero tensor chart-Sobolev norm, which decomposes as the
-unweighted Lebesgue L² norms of the chart-frame scalar components summed over
-the chart atlas and the finite component-index sets.
-
-## Strategy
-
-The proof composes two bridges:
-
-* **Manifold L² to POU aggregate.** Define a chart-target POU-weighted
-  aggregate `chartSobolevSectionNormPou g r s T`, the finite sum over the
-  chart-atlas partition-of-unity support set of the chart-target Lebesgue
-  integrals of `ρ_α(symm y)² · ‖T.toSection (symm y)‖²`. A pointwise
-  Cauchy–Schwarz step `(Σ ρ_α · a)² ≤ N · Σ ρ_α² · a²` with `Σ ρ_α = 1` and
-  the chart-pushforward of each per-α manifold integral give
-
-  `∫⁻ ‖T.toSection x‖ₑ ^ 2 ∂μ_g ≤
-        ENNReal.ofReal C_bridge · chartSobolevSectionNormPou g r s T`.
-
-* **POU aggregate to order-zero chart-Sobolev norm.** Using the chart
-  twist op-norm bound (`chartRSTwist_pointwise_opNorm_isBounded_on_compact`),
-  one bounds `‖T.toSection b‖² ≤ C_twist · ‖tensorRSChartE_section_repr T.toSection b‖²`
-  on `tsupport ρ_α`, then applies the existing order-zero per-α bound
-  `chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq` to obtain
-
-  `chartSobolevSectionNormPou g r s T ≤
-        ENNReal.ofReal C₀ · (wtwokTwoNorm g 0 T) ^ 2`.
-
-The composition produces the headline.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open MeasureTheory
@@ -77,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
@@ -86,14 +43,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **POU-weighted chart-target aggregate for the tensor section.** For a
-smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, and a smooth
-compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`, the
-chart-target POU-weighted aggregate is the finite sum, over the chart-atlas
-partition-of-unity support set `chartAtlasPOU_finset I M`, of the chart-target
-Lebesgue integrals of `ENNReal.ofReal` of
-`ρ_α((extChartAt I α).symm (toEuclidean.symm y))² · (chart-pushed squared
-model-fiber norm of `T.toSection`)(y)`. -/
 noncomputable def chartSobolevSectionNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     ℝ≥0∞ :=
@@ -107,7 +56,7 @@ noncomputable def chartSobolevSectionNormPou
             (fun b : M => T.toSection b) y)
       ∂(volume : Measure EuclN)
 
-/-- Unfolding lemma for `chartSobolevSectionNormPou`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp] lemma chartSobolevSectionNormPou_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevSectionNormPou (I := I) (M := M) g r s T =
@@ -121,6 +70,7 @@ noncomputable def chartSobolevSectionNormPou
                 (fun b : M => T.toSection b) y)
           ∂(volume : Measure EuclN) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     {r s : ℕ} (T : Π b : M, TensorRSSpace r s I b) (x : M) :
     (‖T x‖ ^ 2 : ℝ) ≤
@@ -160,6 +110,7 @@ private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     _ ≤ (sset.card : ℝ) *
           ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 := hCS
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g r s)
@@ -214,6 +165,7 @@ private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
   rw [chartLocalMeasure_lintegral_via_chartTargetEuclid
       (I := I) (M := M) g α hF_meas]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma section_normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g r s)
@@ -229,6 +181,7 @@ private lemma section_normSq_apply_eq_pushedNormSq
       (fun b : M => T.toSection b) hy]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma density_pou_sq_le_section
     (g : SmoothRiemannianMetric I M) (α : M)
     (h_supp_ne :
@@ -271,6 +224,7 @@ private lemma density_pou_sq_le_section
       linarith
     exact mul_le_mul_of_nonneg_right hbound hρ_sq_nn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

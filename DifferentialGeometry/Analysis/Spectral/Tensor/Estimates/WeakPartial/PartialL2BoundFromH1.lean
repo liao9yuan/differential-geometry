@@ -4,73 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 
-/-!
-# Uniform `L^2` partial bound for the chart-pushed tensor scalar component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart base point
-`α : M`, and a coordinate direction `k`, this file establishes the uniform-in-
-`S` `L^2` partial bound
-
-```
-eLpNorm (chosenWeakPartial' 2 k
-  (chartPushed (chartAtlasPOU I M) α (tensorChartComponentScalar g r s S α Idx Jdx))
-  (chartTargetEuclid α)) 2
-  (volume.restrict (chartTargetEuclid α)) ≤
-ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
-```
-
-for every smooth compactly-supported H^1 tensor section `S : SmoothCcTensorH1 g r s`
-and every multi-index pair `(Idx, Jdx)`. The constant `C` is non-negative and
-depends only on `(g, r, s, α, k)`; it is independent of `S`, `Idx`, `Jdx`.
-
-## Strategy
-
-The proof identifies the chosen weak partial of the chart-pushed scalar
-component, almost everywhere on the chart target, with the classical Frechet
-partial in direction `EuclideanSpace.single k 1` of the globally smooth
-extension `chartSmoothExt α (POU_α * u)` of the manifold-side scalar field
-`u := tensorChartComponentScalar g r s S α Idx Jdx` (see
-`ChosenWeakPartialFderivBridge`). The `eLpNorm` of this Frechet partial is
-bounded by the generic envelope
-
-```
-eLpNorm (fderiv (chartSmoothExt α (POU_α * u)) (·) (e_k)) 2 (...)
-  ≤ ENNReal.ofReal C_env *
-      (eLpNorm u 2 (riemannianVolumeMeasure g)
-        + eLpNorm sqrt(g(grad u, grad u)) 2 (riemannianVolumeMeasure g))
-```
-
-provided by `eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul` from the
-chart-Sobolev reverse equivalence module. The first summand is controlled by
-the manifold-side `L^2` uniform bound on the scalar component combined with
-the `H^1 -> L^2` embedding on smooth sections. The second summand — the
-gradient `L^2` norm — is the deliverable of the chart Christoffel `L^2`
-package (the combination of the chart-twist covariant `L^2` bound and the
-Christoffel correction `L^2` bound). This file accepts that gradient `L^2`
-bound as a hypothesis, packaging the assembly into a single, clean uniform-in-
-`S` statement.
-
-## Public theorem
-
-* `exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm`
-  — uniform-in-`S` `L^2` partial bound on the chart-pushed tensor scalar
-  component. Conditional on a uniform-in-`S` `L^2` bound for the manifold-side
-  scalar component gradient norm (delivered by the chart Christoffel
-  decomposition / chart-twist covariant assembly in companion modules).
-
-## Notes on hypotheses
-
-The "gradient `L^2` hypothesis" packages the headline of the chart Christoffel
-`L^2` bound modules (chart-twist covariant `L^2` plus Christoffel slot
-correction `L^2`) without committing to a particular discharge of the slot
-substitution / bundle fibre constants. Any concrete discharge of those
-constants delivers the hypothesis and therefore the headline bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -152,17 +88,6 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
     hB.trans (mul_le_mul_of_nonneg_left h_l2_le_h1 (by exact zero_le _))
   exact hB'
 
-/-- **Headline uniform-in-`S` `L^2` partial bound.** Conditional on a uniform-
-in-`(S, Idx, Jdx)` `L^2` bound for the gradient norm of the chart-component
-scalar, the chart-pushed chosen weak partial of `tensorChartComponentScalar
-g r s S.toCcTensor α Idx Jdx` has `L^2` norm uniformly bounded by `ENNReal.ofReal
-C * (‖S‖₊ : ℝ≥0∞)`, where `C` depends only on `(g, r, s, α, k)`.
-
-The gradient `L^2` hypothesis is the deliverable of the chart-twist covariant
-`L^2` bound (`CovL2BoundFromH1`) combined with the Christoffel slot-correction
-`L^2` bound (`ChristoffelL2BoundFromH1`) through the chart Christoffel
-decomposition of the chart-pulled-back scalar component (and the gradient norm
-comparison between `g(grad u, grad u)` and the squared chart partial sum). -/
 theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k : Fin (Module.finrank ℝ E))

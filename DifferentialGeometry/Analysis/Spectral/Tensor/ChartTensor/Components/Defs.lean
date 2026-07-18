@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
@@ -12,51 +12,10 @@ import Mathlib.Topology.Algebra.Module.Multilinear.Basic
 import Mathlib.Topology.Algebra.Module.Multilinear.Topology
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
-/-!
-# Chart-frame component decomposition of smooth compactly-supported tensor sections
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, this file decomposes the
-chart-pushed tensor along a fixed basis of the model fiber
-`TensorRSModel r s ℝ E` indexed by pairs of multi-indices
-
-* `Idx : Fin r → Fin n` (covariant slots),
-* `Jdx : Fin s → Fin n` (contravariant slots),
-
-where `n := Module.finrank ℝ E`. Each multi-index pair produces a scalar
-function `tensorChartComponent g r s S α Idx Jdx : EuclideanSpace ℝ (Fin n) → ℝ`
-that is smooth, compactly supported, and depends linearly on `S`. The original
-chart-pushed tensor at every Euclidean point is recovered as the finite sum of
-these scalar components against the canonical basis of `TensorRSModel r s ℝ E`,
-and the model-fiber norm-squared is controlled by the sum of squared
-components.
-
-## Strategy
-
-1. The trivialization at the chart center `α` gives a continuous linear map
-   `M → TensorRSModel r s ℝ E` defined on the chart source. We compose with the
-   partition-of-unity weight `chartAtlasPOU I M α` to produce a globally
-   defined scalar-valued function on `M` that vanishes outside the chart
-   source.
-
-2. The basis of `TensorRSModel r s ℝ E` is built explicitly from the fixed
-   `chartModelBasis E` of `E`. For multi-index `Idx : Fin r → Fin n` we set
-
-       dualCovariantCMM r Idx (v_0, …, v_{r-1}) := ∏_k coord_{Idx k}(v_k)
-
-   (where `coord_i` is the `i`-th coordinate functional of `chartModelBasis E`).
-   For the matching basis element of the mixed `(r, s)` model fiber we use the
-   rank-one map `ω ↦ ω(e_Idx) • dualCovariantCMM s Jdx`.
-
-3. Component projections are then the dual functionals to this basis, and the
-   recovery formula is a straightforward expansion of the `Module.finBasis`
-   identity in the multi-index basis.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -84,30 +43,28 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The `(0, r)`-covariant model multilinear map dual to the standard
-chart-frame basis tuple at multi-index `Idx`. -/
-noncomputable def dualCovariantCMM (r : ℕ)
+noncomputable def dualCoordinateProductMultilinearMap (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E)) :
     ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ :=
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
     (fun k : Fin r =>
       LinearMap.toContinuousLinearMap ((chartModelBasis E).coord (Idx k)))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma dualCovariantCMM_apply (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E)) (v : Fin r → E) :
-    dualCovariantCMM (E := E) r Idx v =
+    dualCoordinateProductMultilinearMap (E := E) r Idx v =
       ∏ k : Fin r, ((chartModelBasis E).coord (Idx k)) (v k) := by
   classical
-  unfold dualCovariantCMM
+  unfold dualCoordinateProductMultilinearMap
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
   rfl
 
-/-- Evaluating `dualCovariantCMM r Idx` on the chart-frame basis tuple
-indexed by `Jdx` returns the Kronecker delta `∏_k δ_{Idx k, Jdx k}`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma dualCovariantCMM_apply_basis_tuple (r : ℕ)
     (Idx Jdx : Fin r → Fin (Module.finrank ℝ E)) :
-    dualCovariantCMM (E := E) r Idx
+    dualCoordinateProductMultilinearMap (E := E) r Idx
         (fun k : Fin r => chartModelBasis E (Jdx k)) =
       if Idx = Jdx then (1 : ℝ) else 0 := by
   classical
@@ -137,8 +94,6 @@ lemma dualCovariantCMM_apply_basis_tuple (r : ℕ)
     refine Finset.prod_eq_zero (Finset.mem_univ k₀) ?_
     exact hzero
 
-/-- The continuous linear functional on `TensorRSModel r s ℝ E` picking out
-the `(Idx, Jdx)`-component in the chart-frame basis. -/
 noncomputable def tensorChartComponentProjection (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -147,17 +102,17 @@ noncomputable def tensorChartComponentProjection (r s : ℕ)
       (fun k : Fin s => chartModelBasis E (Jdx k))).comp
     (ContinuousLinearMap.apply ℝ
       (ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
-      (dualCovariantCMM (E := E) r Idx))
+      (dualCoordinateProductMultilinearMap (E := E) r Idx))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorChartComponentProjection_apply (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (T : TensorRSModel r s ℝ E) :
     tensorChartComponentProjection (E := E) r s Idx Jdx T =
-      T (dualCovariantCMM (E := E) r Idx)
+      T (dualCoordinateProductMultilinearMap (E := E) r Idx)
         (fun k : Fin s => chartModelBasis E (Jdx k)) := rfl
 
-/-- The `(Idx, Jdx)`-th chart-frame basis element of `TensorRSModel r s ℝ E`. -/
 noncomputable def tensorChartBasisElement (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -165,18 +120,18 @@ noncomputable def tensorChartBasisElement (r s : ℕ)
   ContinuousLinearMap.smulRight
     (ContinuousMultilinearMap.apply ℝ (fun _ : Fin r => E) ℝ
       (fun k : Fin r => chartModelBasis E (Idx k)))
-    (dualCovariantCMM (E := E) s Jdx)
+    (dualCoordinateProductMultilinearMap (E := E) s Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorChartBasisElement_apply (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (w : ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) :
     tensorChartBasisElement (E := E) r s Idx Jdx w =
       w (fun k : Fin r => chartModelBasis E (Idx k)) •
-        dualCovariantCMM (E := E) s Jdx := rfl
+        dualCoordinateProductMultilinearMap (E := E) s Jdx := rfl
 
-/-- Biorthogonality between the chart-frame basis elements and the
-chart-frame component projections. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartComponentProjection_basisElement (r s : ℕ)
     (Idx₁ Idx₂ : Fin r → Fin (Module.finrank ℝ E))
     (Jdx₁ Jdx₂ : Fin s → Fin (Module.finrank ℝ E)) :
@@ -191,13 +146,12 @@ lemma tensorChartComponentProjection_basisElement (r s : ℕ)
     dualCovariantCMM_apply_basis_tuple (E := E) r Idx₁ Idx₂,
     smul_eq_mul]
 
-/-- A continuous multilinear map on `E` of arity `s` is recovered by its
-values on chart-frame basis tuples via the dual coordinate product. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
     f = ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := by
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := by
   classical
   ext v
   have hexpand : ∀ k : Fin s,
@@ -247,21 +201,21 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
   have h_rhs_eq :
       (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx) v =
+            dualCoordinateProductMultilinearMap (E := E) s Jdx) v =
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) *
             (∏ k : Fin s, ((chartModelBasis E).coord (Jdx k)) (v k)) := by
     classical
     rw [show (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-              dualCovariantCMM (E := E) s Jdx) v =
+              dualCoordinateProductMultilinearMap (E := E) s Jdx) v =
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             (f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-              dualCovariantCMM (E := E) s Jdx) v from
+              dualCoordinateProductMultilinearMap (E := E) s Jdx) v from
       ContinuousMultilinearMap.sum_apply
         (fun Jdx : Fin s → Fin (Module.finrank ℝ E) =>
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx) v]
+            dualCoordinateProductMultilinearMap (E := E) s Jdx) v]
     refine Finset.sum_congr rfl ?_
     intro Jdx _
     rw [ContinuousMultilinearMap.smul_apply,
@@ -272,8 +226,7 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
   intro Jdx _
   ring
 
-/-- An element of `TensorRSModel r s ℝ E` is the finite sum of its chart-frame
-components against the chart-frame basis. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     T = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -286,9 +239,9 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
   set c : (Fin r → Fin (Module.finrank ℝ E)) → ℝ := fun Idx =>
     w (fun k : Fin r => chartModelBasis E (Idx k)) with hc_def
   have hw' : w = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      c Idx • dualCovariantCMM (E := E) r Idx := hw
+      c Idx • dualCoordinateProductMultilinearMap (E := E) r Idx := hw
   have hT : T w = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      c Idx • T (dualCovariantCMM (E := E) r Idx) := by
+      c Idx • T (dualCoordinateProductMultilinearMap (E := E) r Idx) := by
     conv_lhs => rw [hw']
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
@@ -296,12 +249,12 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     rw [map_smul]
   rw [hT]
   have hT_inner : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
-      T (dualCovariantCMM (E := E) r Idx) =
+      T (dualCoordinateProductMultilinearMap (E := E) r Idx) =
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          T (dualCovariantCMM (E := E) r Idx)
+          T (dualCoordinateProductMultilinearMap (E := E) r Idx)
               (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := fun Idx =>
-    cmm_eq_sum_basis_coeffs (E := E) s (T (dualCovariantCMM (E := E) r Idx))
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := fun Idx =>
+    cmm_eq_sum_basis_coeffs (E := E) s (T (dualCoordinateProductMultilinearMap (E := E) r Idx))
   have hrhs :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -326,9 +279,9 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
           (tensorChartBasisElement (E := E) r s Idx Jdx w)) =
       c Idx •
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          T (dualCovariantCMM (E := E) r Idx)
+          T (dualCoordinateProductMultilinearMap (E := E) r Idx)
               (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := by
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := by
     intro Idx
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl ?_
@@ -341,18 +294,17 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
   intro Idx _
   rw [hrhs_simplified Idx, ← hT_inner Idx]
 
-/-- The chart-frame basis-element-norm constant: an upper bound on the norm of
-`tensorChartBasisElement r s Idx Jdx`. We use the `Finset.sum` of all basis
-element norms, which dominates each individual norm. -/
 noncomputable def tensorChartBasisNormConstant (r s : ℕ) : ℝ :=
   ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
     ‖tensorChartBasisElement (E := E) r s p.1 p.2‖
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartBasisNormConstant_nonneg (r s : ℕ) :
     0 ≤ tensorChartBasisNormConstant (E := E) r s :=
   Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartBasisElement_norm_le (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -367,11 +319,6 @@ lemma tensorChartBasisElement_norm_le (r s : ℕ)
     (fun _ _ => norm_nonneg _) (Finset.mem_univ (Idx, Jdx))
   exact h
 
-/-- The trivialization-at-`α` image of `S.toSection x` viewed in the model
-fiber `TensorRSModel r s ℝ E`. On `(chartAt H α).source` this agrees with the
-fiber projection used in the bundle topology; off the chart source it falls
-back to the bundle's default-zero value, which we never use (the partition of
-unity weight vanishes there). -/
 noncomputable def tensorTrivProj
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (x : M) :
@@ -380,8 +327,6 @@ noncomputable def tensorTrivProj
     (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ x
       (S.toSection x)
 
-/-- The `(Idx, Jdx)`-th raw chart-frame scalar component on `M`, prior to
-multiplication by the partition-of-unity weight. -/
 noncomputable def tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -391,6 +336,7 @@ noncomputable def tensorChartComponentRaw
   tensorChartComponentProjection (E := E) r s Idx Jdx
     (tensorTrivProj (I := I) (M := M) g r s S α x)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma tensorChartComponentRaw_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -401,7 +347,6 @@ noncomputable def tensorChartComponentRaw
       tensorChartComponentProjection (E := E) r s Idx Jdx
         (tensorTrivProj (I := I) (M := M) g r s S α x) := rfl
 
-/-- The POU-weighted raw chart-frame scalar component on `M`. -/
 noncomputable def tensorChartComponentPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -411,8 +356,6 @@ noncomputable def tensorChartComponentPou
   (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x *
     tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx x
 
-/-- The `(Idx, Jdx)`-th chart-frame scalar component, chart-pushed to
-Euclidean space. -/
 noncomputable def tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -422,6 +365,7 @@ noncomputable def tensorChartComponent
   chartPushedRaw (I := I) (M := M) α
     (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartComponent_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -431,6 +375,7 @@ noncomputable def tensorChartComponent
       chartPushedRaw (I := I) (M := M) α
         (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x) α).baseSet =
@@ -443,8 +388,7 @@ private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
-/-- The trivialization-at-`α` projection of `S.toSection` is smooth on the
-chart source. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_contMDiffOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -471,7 +415,7 @@ private lemma tensorTrivProj_contMDiffOn_chart_source
       (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x (S.toSection x) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
 
-/-- The raw chart-frame scalar component is smooth on the chart source. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_contMDiffOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -489,7 +433,7 @@ lemma tensorChartComponentRaw_contMDiffOn_chart_source
     (tensorChartComponentProjection (E := E) r s Idx Jdx).contMDiff
   exact hCLM.comp_contMDiffOn hsmooth
 
-/-- The POU-weighted raw scalar component has support inside the chart source. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentPou_support_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -515,7 +459,7 @@ lemma tensorChartComponentPou_support_subset_chart_source
       (g := tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
   exact hsub.trans (chartAtlasPOU_isSubordinate (I := I) (M := M) α)
 
-/-- The POU-weighted raw scalar component is smooth on `M`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentPou_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -557,7 +501,7 @@ theorem tensorChartComponentPou_contMDiff
       exact this hne
     exact hzero
 
-/-- The POU-weighted raw scalar component has compact support on `M`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentPou_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -575,8 +519,7 @@ theorem tensorChartComponentPou_hasCompactSupport
       g r s S α Idx Jdx)) := isClosed_tsupport _
   exact (hcompact.of_isClosed_subset htsupp_closed hsub)
 
-/-- Each chart-frame scalar component is a smooth function on the chart-target
-Euclidean space. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponent_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -697,7 +640,7 @@ theorem tensorChartComponent_contMDiff
       exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
         (I := I) (M := M) α f hz_target
 
-/-- Each chart-frame scalar component has compact support. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponent_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -752,7 +695,7 @@ theorem tensorChartComponent_hasCompactSupport
     exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) (M := M) α f hy_target
 
-/-- The trivialization-projection is additive in the tensor section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M) (x : M) :
@@ -764,7 +707,7 @@ private lemma tensorTrivProj_add
     by rw [SmoothCcTensor.toSection_add]; rfl]
   exact map_add _ _ _
 
-/-- The trivialization-projection is homogeneous in the tensor section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M) (x : M) :
@@ -775,7 +718,7 @@ private lemma tensorTrivProj_smul
     by rw [SmoothCcTensor.toSection_smul]; rfl]
   exact map_smul _ _ _
 
-/-- The raw chart-frame scalar component is additive in the tensor section. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -788,6 +731,7 @@ theorem tensorChartComponentRaw_add
   rw [tensorTrivProj_add (I := I) (M := M) g r s S₁ S₂ α x]
   exact map_add _ _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -799,7 +743,7 @@ theorem tensorChartComponentRaw_smul
   rw [tensorTrivProj_smul (I := I) (M := M) g r s c S α x]
   exact map_smul _ _ _
 
-/-- The POU-weighted chart-frame component is additive in `S`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentPou_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -814,6 +758,7 @@ private lemma tensorChartComponentPou_add
     Pi.add_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentPou_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -828,7 +773,6 @@ private lemma tensorChartComponentPou_smul
   change _ * (c * _) = c * (_ * _)
   ring
 
-/-- The chart-pushed-raw is additive in the underlying scalar function. -/
 private lemma chartPushedRaw_add_fn (α : M) (u₁ u₂ : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw (I := I)
         (M := M) α (u₁ + u₂) =
@@ -878,7 +822,6 @@ private lemma chartPushedRaw_smul_fn (α : M) (c : ℝ) (u : M → ℝ) :
     change (0 : ℝ) = c * 0
     ring
 
-/-- Additivity of the chart-pushed component in the tensor section. -/
 theorem tensorChartComponent_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -891,7 +834,6 @@ theorem tensorChartComponent_add
   rw [tensorChartComponentPou_add (I := I) (M := M) g r s S₁ S₂ α Idx Jdx,
     chartPushedRaw_add_fn (I := I) (M := M) α]
 
-/-- Homogeneity of the chart-pushed component in the tensor section. -/
 theorem tensorChartComponent_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -903,8 +845,6 @@ theorem tensorChartComponent_smul
   rw [tensorChartComponentPou_smul (I := I) (M := M) g r s c S α Idx Jdx,
     chartPushedRaw_smul_fn (I := I) (M := M) α]
 
-/-- The POU-weighted trivialization-projected model-fiber tensor, chart-pushed
-to Euclidean space. -/
 noncomputable def tensorChartPushedRawModel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -920,6 +860,7 @@ noncomputable def tensorChartPushedRawModel
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartPushedRawModel_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -935,6 +876,7 @@ lemma tensorChartPushedRawModel_apply_of_mem
   unfold tensorChartPushedRawModel
   exact if_pos hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartPushedRawModel_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -946,8 +888,6 @@ lemma tensorChartPushedRawModel_apply_of_notMem
   unfold tensorChartPushedRawModel
   exact if_neg hy
 
-/-- The chart-pushed POU-weighted tensor at every Euclidean point is the
-finite sum of its scalar components against the chart-frame basis. -/
 theorem chartPushedRaw_eq_sum_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1012,9 +952,6 @@ theorem chartPushedRaw_eq_sum_tensorChartComponent
       (I := I) (M := M) α _ hy]
     rw [zero_smul]
 
-/-- The model-fiber norm-squared of the chart-pushed POU-weighted tensor is
-bounded by a constant (depending only on `r`, `s`) times the sum of squared
-scalar components. -/
 theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

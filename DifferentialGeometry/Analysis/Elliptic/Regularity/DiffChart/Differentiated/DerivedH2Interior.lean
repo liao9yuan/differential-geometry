@@ -3,47 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Interior chart-`H²` regularity for the derived chart-bilinear data
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, a coordinate
-direction `l`, and an element `u_h ∈ laplacianDomainPow g 2`, the truly
-unconditional once-differentiated chart-bilinear data
-`derivedChartBilinearH1ComplDataUnconditional g α l hu_h` packages a
-`ChartBilinearH1ComplData g α` whose `u_chart` field equals
-`(chartBilinearH1ComplData_of_laplacianDomain g α …).weak_partial l`
-(i.e. the chart-pushed weak `l`-partial coercion of `u_h`).
-
-This module applies the polymorphic chart-`H²` Nirenberg pipeline
-(`chartBilinearH1Compl_uniform_diffQuot_bound_of_data` followed by
-`chart_loc_of_uniform_bound`) to this derived data to extract a
-precompact open `Ω''` containing `chartImagePOUTsupport α` together with a
-proof that the derived `u_chart` lies in `MemWkp 2 2` of `Ω''`.
-
-## Strategy
-
-For each `α : M`:
-
-1. Let `K_α := chartImagePOUTsupport α`. It is compact and contained in
-   `chartTargetEuclid α`.
-2. Pick `R_α > 0` so that `Metric.cthickening R_α K_α ⊆ chartTargetEuclid α`.
-3. Set `ε := R_α / 16` and `R₀ := ε`.
-4. Define `Ω'' := Metric.thickening (2 ε) K_α` and `Ω' := Metric.thickening
-   (8 ε) K_α`.
-5. Build a smooth Nirenberg cutoff `η` with `η ≡ 1` on `Ω''` and
-   `tsupport η ⊆ Ω'`.
-6. Apply `chartBilinearH1Compl_uniform_diffQuot_bound_of_data` with the
-   derived data to obtain a uniform-in-`h` bound on the difference quotients
-   of `D_eff.weak_partial i`.
-7. Apply `chart_loc_of_uniform_bound` to extract weak second partials
-   `g_{i,k}` of `D_eff.weak_partial i` on `Ω''`.
-8. Assemble the iterated chart-`MemWkp 2 2` membership of `D_eff.u_chart`
-   on `Ω''`.
-
-Unlike the manifold-level per-chart witness flow, this module deliberately
-ships only the precompact-open conclusion (no support extension).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -78,8 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- A `r`-thickening of a set is contained in the strict `r'`-thickening for
-any `r' > r`. -/
 private lemma thickening_mono_of_lt
     {α : Type*} [PseudoEMetricSpace α]
     {r r' : ℝ} (hr_lt : r < r') (K : Set α) :
@@ -90,21 +47,13 @@ private lemma thickening_mono_of_lt
   exact lt_of_lt_of_le h
     (ENNReal.ofReal_le_ofReal hr_lt.le)
 
-/-- For `r > 0`, a set `K` is contained in its open `r`-thickening. -/
 private lemma self_subset_thickening_of_pos
     {α : Type*} [PseudoEMetricSpace α]
     {r : ℝ} (hr_pos : 0 < r) (K : Set α) :
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-set_option linter.unusedVariables false in
-/-- **Interior `MemWkp 2 2` regularity for the derived chart-bilinear data.**
 
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, a
-coordinate direction `l`, and an element `u_h ∈ laplacianDomainPow g 2`,
-there exists a precompact open set `Ω''` in the chart target, containing
-`chartImagePOUTsupport α`, on which the derived chart-side `u_chart` (i.e.
-the chart-pushed weak `l`-partial coercion of `u_h`) lies in `MemWkp 2 2`. -/
 theorem derivedChartBilinear_memWkp_two_two_interior
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -256,7 +205,7 @@ theorem derivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

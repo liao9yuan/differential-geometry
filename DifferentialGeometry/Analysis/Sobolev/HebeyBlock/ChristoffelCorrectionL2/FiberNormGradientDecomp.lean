@@ -2,47 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChart
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberToModelOpNorm
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.ChristoffelSlotCorrectionFiberNormBridge
 
-/-!
-# Pointwise gradient bound with naked fiber-norm atoms
-
-The companion bound
-`g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1` in
-`GradNormChartBoundPouWeighted.lean` controls
-`g.inner b (∇u) (∇u)` on the chart-`α` partition-of-unity `tsupport`, with
-right-hand-side covariant-derivative and Christoffel-correction atoms
-expressed through the trivialisation continuous-linear-map
-`(triv α).continuousLinearMapAt ℝ b`. That trivialisation-wrapped form does
-not directly compose with the intrinsic G1↔G3 bridge
-(`intrinsicG1G3BridgePouTsupport`), which presents the bridge with the
-**naked** fiber norm on `TensorRSSpace r s I b` rather than the model-side
-norm of a trivialisation-applied element.
-
-This file re-derives the gradient bound with the trivialisation removed on
-each per-`k` chart-basis atom by applying the unconditional uniform op-norm
-bound
-`tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional` on the
-compact `tsupport` of the chart-`α` partition of unity. The squared op-norm
-factor is absorbed into the per-`α` constant `B`. The resulting headline is
-structurally identical to the existing per-α pointwise bound, except that
-each `‖triv X‖²` is replaced by `‖X‖²` on the fiber `TensorRSSpace r s I b`,
-exposing the atoms in the shape required by the intrinsic G1↔G3 bridge.
-
-The fibre norm on `TensorRSSpace r s I b` is interpreted under the
-`Bundle.RiemannianBundle` instance derived from the tangent-bundle metric
-`g` (installed via `letI`), matching the norm convention used by the
-unconditional op-norm bound.
-
-## Public theorem
-
-* `g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1` —
-  the headline `H¹`-wrapper bound with naked fiber-norm covariant-derivative
-  and Christoffel-correction atoms on the per-`k` chart-basis sum.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 4000000
 
@@ -62,20 +25,16 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-compact (closed in a compact ambient space). -/
 private lemma chartAtlasPOU_tsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-contained in the chart-`α` source. -/
 private lemma chartAtlasPOU_tsupport_subset_chartSource (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -87,12 +46,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Naked fiber-norm gradient bound (`H¹` form).** On the chart-α
-partition-of-unity `tsupport`, the metric self-inner-product of the
-gradient of the chart-frame scalar component is bounded above by
-`A · raw² + B · ρ_α² · (Σ_k ‖∇^chart_k S‖² + Σ_k ‖− Σᵢ inᵢ + Σₗ outₗ‖²)`,
-with the fiber norms on `TensorRSSpace r s I b` taken in the g-induced
-`Bundle.RiemannianBundle` convention. -/
+
 theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

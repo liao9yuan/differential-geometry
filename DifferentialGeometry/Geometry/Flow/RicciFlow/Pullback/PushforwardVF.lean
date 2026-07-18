@@ -3,13 +3,6 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-!
-# Pushforward of a vector field along a diffeomorphism
-
-Defines `Diffeomorph.pushforward`, the pushforward of a tangent vector field through a
-diffeomorphism, used throughout the pullback-naturality development.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

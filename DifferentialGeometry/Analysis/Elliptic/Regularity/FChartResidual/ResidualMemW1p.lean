@@ -2,29 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.MemW1pRe
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothApproxSeq.Cauchy
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothApproxSeq.Identification
 
-/-!
-# Truly unconditional `MemW1p 2` of `fChartResidual g α u_h` for
-`u_h ∈ laplacianDomainPow g 2`
-
-The hypothesis-bearing constructor
-`MemW1pFChartResidualFull.fChartResidual_memW1p_unconditional`
-reduces the chart-target `MemW1p 2` discharge of `fChartResidual g α u_h` to
-two analytical hypotheses on the smooth approximator sequence:
-
-* `h_cauchy`: chart-target `W^{1,2}`-Cauchy property of `smoothFChartResidual`
-  along the smooth approximator sequence.
-* `h_identification`: chart-target `W^{1,2}`-limit identification with
-  `fChartResidual g α u_h` a.e.
-
-Both hypotheses are discharged unconditionally by:
-
-* `SmoothApproxSeqCauchy.smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy`
-* `SmoothApproxSeqIdentification.smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual`
-
-Composing yields the **truly unconditional** form of the residual `MemW1p 2`
-discharge.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -57,19 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Truly unconditional `MemW1p 2 fChartResidual`**.
-
-For any `u_h ∈ laplacianDomainPow g 2` and any chart base point `α : M`, the
-chart-pulled residual `fChartResidual g α u_h` is in `MemW1p 2
-(chartTargetEuclid α)`, **with no further hypotheses**.
-
-This is the unconditional discharge of the chart-pulled residual `MemW1p 2`
-requirement.
-
-Proof: composes the existing hypothesis-bearing constructor
-`fChartResidual_memW1p_unconditional` with the unconditional discharges of its
-two analytical hypotheses (`smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy`
-and `smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual`). -/
 theorem fChartResidual_memW1p_truly_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

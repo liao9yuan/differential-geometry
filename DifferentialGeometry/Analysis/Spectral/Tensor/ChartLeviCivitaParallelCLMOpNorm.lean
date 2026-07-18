@@ -3,33 +3,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUn
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 
-/-!
-# Uniform operator-norm bound for `chartLeviCivitaParallelCLM` along a general vector field
-
-The headline statement extends the basis-vector bound
-`chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport`
-to a general tangent vector argument: there exists a constant `C ≥ 0` such
-that for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every vector-field section `X`, the
-operator norm `‖chartLeviCivitaParallelCLM g α b X‖` is bounded by
-`C * ‖X b‖`.
-
-The key observation is that `chartLeviCivitaParallelCLM g α b X` only
-depends on the value `X b` at the point `b`, via the formula
-
-  `chartLeviCivitaParallelCLM g α b X = (trivFromE α b).comp
-      (christoffelCorrection g α b (trivToE α b (X b)))`.
-
-The proof factors through the Christoffel-correction op-norm bound and the
-two trivialization op-norm bounds (`chartJ`, `chartJinv`), all of which are
-uniformly bounded on the partition-of-unity tsupport under a uniform
-compactness hypothesis on the chart sources.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -55,12 +32,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b')
     (C_J C_Jinv C_χ : ℝ)
-    (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
-    (hCJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
+    (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
+    (hCJinv : ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
     (hCχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖)
     (hCχ_nn : 0 ≤ C_χ) :
     ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ ≤
@@ -75,7 +53,7 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
           ‖christoffelCorrection (I := I) g α b Y‖ :=
     ContinuousLinearMap.opNorm_comp_le _ _
   have h_trivFromE_norm :
-      ‖trivFromE (I := I) α b‖ = ‖chartJinv (I := I) (M := M) α b‖ := rfl
+      ‖trivFromE (I := I) α b‖ = ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := rfl
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := by
     rw [h_trivFromE_norm]; exact hCJinv
   have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
@@ -83,7 +61,7 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
       ‖Y‖ ≤ ‖trivToE (I := I) α b‖ * ‖X b‖ := by
     rw [hY_def]
     exact (trivToE (I := I) α b).le_opNorm (X b)
-  have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+  have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
   have h_Xb_nn : 0 ≤ ‖X b‖ := norm_nonneg _
   have h_Y_le : ‖Y‖ ≤ C_J * ‖X b‖ := by
     refine h_Y_le_triv.trans ?_

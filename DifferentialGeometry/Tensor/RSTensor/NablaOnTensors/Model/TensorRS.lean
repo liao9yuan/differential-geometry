@@ -1,9 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.Tensor0S
 
-/-!
-# Model-space covariant derivative for mixed tensors
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -26,19 +26,19 @@ variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
 
-/-!
-## Implementation layer: model-space tensor formula
 
-These definitions are the fixed-vector-space formulas used after trivializing
-the tensor bundle in a chart.  They are deliberately lower-level than
-`nabla0SFun` / `nablaRSFun`.
--/
 
-/-- Pointwise model formula for the covariant derivative of a covariant tensor.
 
-The input `dα_X` is the first-order derivative of the tensor components in the
-direction `X`, while `ΓX` is the connection endomorphism acting on each input
-slot. -/
+
+
+
+
+
+
+
+
+
+
 theorem fderivWithin_tensorRSModel_eval_slots {r s : ℕ}
     (T : E → TensorRSModel r s 𝕜 E)
     (β : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r)
@@ -272,7 +272,7 @@ private theorem basis_coord_update_sum_comm {d r : ℕ}
       simp [hne]
     rw [hleft_zero, hright_zero]
 
-/-- Lower-slot expansion of the connection correction in basis components. -/
+
 theorem lieDeriv_correctionL_apply_basis_slots_expanded {d s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (ΓX : E →L[𝕜] E)
@@ -293,13 +293,13 @@ theorem lieDeriv_correctionL_apply_basis_slots_expanded {d s : ℕ}
     (fun c : Fin s => basis (lower c)) b (ΓX (basis (lower b)))]
   simp [connectionEndomorphismCoeff]
 
-/-- The connection correction applied to a coordinate-basis covariant tensor.
 
-For a basis covariant tensor with index `upper`, the correction changes the
-`a`-th covariant input basis index from `upper a` to `k` with coefficient
-`Γ^(upper a)_k`.  With the project convention
-`connectionEndomorphismCoeff basis ΓX j k = Γ^k_j`, this is written as
-`connectionEndomorphismCoeff basis ΓX k (upper a)`. -/
+
+
+
+
+
+
 theorem lieDeriv_correctionL_apply_basisTensor0S {d r : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (ΓX : E →L[𝕜] E)
@@ -350,8 +350,8 @@ theorem lieDeriv_correctionL_apply_basisTensor0S {d r : ℕ}
     rw [hslots, continuousMultilinearMap_basis_apply_basis]
   · exact basis_coord_update_sum_comm basis ΓX upper lower a
 
-/-- Basis-slot Christoffel formula for the model covariant derivative of a
-mixed `(r,s)` tensor. -/
+
+
 theorem covariantDeriv_tensorRSModelAt_apply_basis_slots {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (dT_X : TensorRSModel r s 𝕜 E)
@@ -397,11 +397,11 @@ theorem covariantDeriv_tensorRSModelAt_apply_basis_slots {d r s : ℕ}
     smul_eq_mul]
   abel
 
-/-- Subtracting two model covariant derivatives cancels the raw directional
-derivative and leaves only the difference of the upper- and lower-slot
-connection corrections.  This is the model-space algebra behind the first-order
-connection-change formula used in MSM135 Chapter 4, Lemma "Norms of covariant
-derivatives of tensors, I". -/
+
+
+
+
+
 theorem covDerivRS_sub_apply {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (dT_X : TensorRSModel r s 𝕜 E)
@@ -451,8 +451,8 @@ theorem covDerivRS_sub_apply {d r s : ℕ}
   rw [covariantDeriv_tensorRSModelAt_apply_basis_slots basis dT_X ΓX' T upper lower]
   abel
 
-/-- Within-set variant of
-`covariantDeriv_tensorRSModelAt_apply_basis_slots`. -/
+
+
 theorem covariantDeriv_tensorRSModelWithin_apply_basis_slots {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (X : E → E)

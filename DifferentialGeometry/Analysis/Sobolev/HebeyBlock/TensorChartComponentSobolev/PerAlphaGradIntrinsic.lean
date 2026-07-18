@@ -1,34 +1,10 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.PerChartGradientL2Headline
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
 
-/-!
-# Intrinsic per-`α` gradient constants and the `α`-uniform gradient `L²` headline
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file packages
-the per-chart-base-point gradient `L²` constants extracted from the intrinsic
-per-`α` headline
-`exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm`
-and sums them over the chart-atlas **active finset** to obtain a single
-`α`-uniform constant.
-
-These are `Classical.choose` wrappers around the already-proven intrinsic
-headline. Unlike the locality-conditioned companions in
-`TensorChartComponentSobolevBound`, none of these declarations carries a
-`HasLocallyConstantChartAt` hypothesis: the per-`α` constant is sourced from the
-intrinsic (chart-locality-free) headline, and the inactive-`α` branch is
-handled directly via the public active-finset machinery
-(`chartAtlasPOU_eq_zero_of_notMem_activeFinset`,
-`tensorChartComponentScalar_eq_zero_of_pou_zero`).
-
-## Public theorem
-
-* `tensorChartComponentScalar_grad_eLpNorm_le`
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -57,10 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- On a chart base point `α` that is **not** active (its partition-of-unity
-weight is identically zero), the gradient self-inner square-root integrand of
-the chart-frame scalar component has zero `L²` norm. Chart-locality-free
-re-derivation from the public active-finset machinery. -/
 private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -181,13 +153,6 @@ private lemma perAlphaGradConstant_le_totalActiveGradConstant
       perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
 
-/-- **Intrinsic headline theorem (α-uniform L² bound for the metric self-inner
-square-root of the gradient of chart-frame scalar components).** For a closed
-Riemannian manifold `(M, g)` and ranks `(r, s)`, there is a non-negative real
-constant `C_grad` (independent of the chart base point `α`, the section `S`, and
-the multi-indices) bounding the gradient self-inner square-root `L²` norm of
-every chart-frame scalar component. Chart-locality-free counterpart of
-`tensorChartComponentScalar_grad_eLpNorm_le`. -/
 theorem tensorChartComponentScalar_grad_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C_grad : ℝ, 0 ≤ C_grad ∧

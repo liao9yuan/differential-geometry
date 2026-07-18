@@ -8,28 +8,10 @@ import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# H¹ Hilbert completion of tensor sections and the H¹ → L² bounded inclusion
-
-For a closed Riemannian manifold `(M, g)`, the seminormed inner-product space
-`SmoothCcTensorH1 g r s` of compactly-supported smooth `(r, s)`-tensor
-sections (equipped with the H¹ inner product `tensorH1Inner`) has Hausdorff
-completion `TensorH1Compl g r s`. By Mathlib's automatic instances on
-completions of (semi-)inner-product spaces, `TensorH1Compl g r s` is a real
-Hilbert space.
-
-The natural inclusion of smooth compactly-supported tensor sections (with H¹
-norm) into the tensor L² Hilbert space `TensorL2 r s g` is non-expansive,
-since the H¹ inner product equals the L² inner product plus the integral of
-the non-negative pointwise covariant-derivative inner product. By the
-universal property of the uniform completion this extends to a continuous
-linear map `TensorH1Compl g r s →L[ℝ] TensorL2 r s g`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -46,7 +28,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,21 +39,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The tensor H¹ Hilbert space of `(M, g)` defined as the Hausdorff
-completion of the pre-Hilbert space `SmoothCcTensorH1 g r s` of smooth
-compactly-supported `(r, s)`-tensor sections equipped with the H¹ inner
-product.
-
-By the standard theory of completions of inner-product spaces,
-`TensorH1Compl g r s` inherits `NormedAddCommGroup`, `NormedSpace ℝ`,
-`InnerProductSpace ℝ`, and `CompleteSpace`, making it a real Hilbert
-space. -/
 abbrev TensorH1Compl (g : SmoothRiemannianMetric I M) (r s : ℕ) : Type _ :=
   UniformSpace.Completion (SmoothCcTensorH1 g r s)
 
-/-- The canonical embedding `SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s`
-of smooth compactly-supported tensor sections (with H¹ inner product) into
-the H¹ completion as a continuous linear map. -/
 noncomputable def smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s :=
@@ -84,9 +54,8 @@ noncomputable def smoothToTensorH1Compl
       (S : TensorH1Compl g r s) :=
   rfl
 
-set_option linter.unusedSectionVars false in
-/-- The squared seminorm of a smooth compactly-supported tensor section in
-the L² pre-Hilbert space equals the L² self-pairing. -/
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma SmoothCcTensor.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -95,9 +64,7 @@ lemma SmoothCcTensor.norm_sq_eq_inner_self
   rw [SmoothCcTensor.inner_def] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
-/-- The squared seminorm of a smooth compactly-supported tensor section in
-the H¹ pre-Hilbert space equals the H¹ self-pairing. -/
+
 lemma SmoothCcTensorH1.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -107,9 +74,7 @@ lemma SmoothCcTensorH1.norm_sq_eq_inner_self
   rw [SmoothCcTensorH1.inner_def] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
-/-- The squared L² seminorm of a smooth compactly-supported tensor section
-is bounded above by its squared H¹ seminorm. -/
+
 lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -127,9 +92,7 @@ lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
       S.toCcTensor x
   linarith
 
-set_option linter.unusedSectionVars false in
-/-- The L² seminorm of a smooth compactly-supported tensor section is
-bounded above by its H¹ seminorm. -/
+
 lemma SmoothCcTensorH1.l2Norm_le_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -138,17 +101,13 @@ lemma SmoothCcTensorH1.l2Norm_le_h1Norm
   have h_rhs_nn : 0 ≤ ‖S‖ := norm_nonneg _
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-set_option linter.unusedSectionVars false in
-/-- The bound stated in the `mkContinuous` form: `‖S.toCcTensor‖ ≤ 1 * ‖S‖`. -/
+
 lemma SmoothCcTensorH1.l2Norm_le_one_mul_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
     ‖S.toCcTensor‖ ≤ 1 * ‖S‖ := by
   rw [one_mul]; exact SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) S
 
-/-- The linear map from H¹ pre-Hilbert smooth compactly-supported tensor
-sections to the L² Hilbert space, sending each smooth section to its image
-under the canonical L² embedding `SmoothCcTensor g r s → TensorL2 r s g`. -/
 noncomputable def smoothCcTensorH1ToTensorL2Lin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensorH1 g r s →ₗ[ℝ] TensorL2 r s g where
@@ -164,15 +123,14 @@ noncomputable def smoothCcTensorH1ToTensorL2Lin
     rw [SmoothCcTensorH1.toCcTensor_smul]
     exact UniformSpace.Completion.coe_smul _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothCcTensorH1ToTensorL2Lin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
     smoothCcTensorH1ToTensorL2Lin (I := I) (M := M) g r s S =
       (S.toCcTensor : TensorL2 r s g) := rfl
 
-set_option linter.unusedSectionVars false in
-/-- Norm bound for the underlying linear map: the L² norm of the image of
-`S` is bounded by the H¹ norm of `S`. -/
+
 lemma smoothCcTensorH1ToTensorL2Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -186,9 +144,6 @@ lemma smoothCcTensorH1ToTensorL2Lin_norm_le
     _ ≤ 1 * ‖S‖ :=
       SmoothCcTensorH1.l2Norm_le_one_mul_h1Norm (I := I) (M := M) S
 
-/-- The continuous linear map from H¹ pre-Hilbert smooth compactly-supported
-tensor sections into the tensor L² Hilbert space, with operator norm
-bounded by `1`. -/
 noncomputable def smoothCcTensorH1ToTensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensorH1 g r s →L[ℝ] TensorL2 r s g :=
@@ -201,8 +156,6 @@ noncomputable def smoothCcTensorH1ToTensorL2
     smoothCcTensorH1ToTensorL2 (I := I) (M := M) g r s S =
       (S.toCcTensor : TensorL2 r s g) := rfl
 
-/-- `UniformSpace.Completion.toComplL` from `SmoothCcTensorH1 g r s` to
-`TensorH1Compl g r s` has dense range. -/
 private lemma denseRange_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange
@@ -215,8 +168,6 @@ private lemma denseRange_toComplL_smoothCcTensorH1
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- `UniformSpace.Completion.toComplL` from `SmoothCcTensorH1 g r s` to
-`TensorH1Compl g r s` is uniform-inducing. -/
 private lemma isUniformInducing_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsUniformInducing
@@ -229,11 +180,6 @@ private lemma isUniformInducing_toComplL_smoothCcTensorH1
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothCcTensorH1 g r s)
 
-/-- The continuous linear extension of `smoothCcTensorH1ToTensorL2` along the
-dense embedding `smoothToTensorH1Compl`. Since `TensorL2 r s g` is complete
-(a Hilbert space), the extension exists and is the unique continuous linear
-map from the H¹ completion to the L² Hilbert space agreeing with the L²
-embedding on smooth sections. -/
 noncomputable def TensorH1ComplToTensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     TensorH1Compl g r s →L[ℝ] TensorL2 r s g :=
@@ -254,8 +200,6 @@ noncomputable def TensorH1ComplToTensorL2
     (denseRange_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s)
     (isUniformInducing_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s) S
 
-/-- Compatibility: on smooth compactly-supported sections, the H¹-to-L² map
-agrees with the L² embedding of the underlying section. -/
 theorem TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :

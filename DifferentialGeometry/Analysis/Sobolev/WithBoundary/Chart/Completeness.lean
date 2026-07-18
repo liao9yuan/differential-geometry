@@ -3,39 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Euclidean.IteratedSobo
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-/-!
-# Structural building blocks for Banach completeness of `W^{k,p}_chart(M)` (with boundary)
-
-This is the with-boundary parallel of
-`Analysis/Sobolev/Chart/BanachCompleteness/Completeness.lean`.
-
-For a smooth manifold-with-boundary `M` modelled on `EuclideanHalfSpace n`, the
-chart-based half-space Sobolev space `WkpChart g k p hp` (built in
-`WithBoundary/Chart/Banach.lean`) is seminormed. We establish the chart-by-chart
-structural lemmas needed to study sequential completeness of the corresponding
-`WkpChartQuot`:
-
-1. *Cauchy bound translation.* A Mathlib `CauchySeq` of `WkpChart` elements
-   yields the εδ-Cauchy condition in `wkpNormChart` (ENNReal-valued).
-2. *Chart-by-chart Cauchy.* For each chart `α : M`, the chart-pushed sequence
-   is `wkpNormHalfSpace`-Cauchy on the chart target.
-3. *Chart-target limit.* For each chart `α`, the chart-pushed sequence has a
-   `wkpNormHalfSpace`-limit which is itself in `MemWkpHalfSpace k p` of the
-   chart target.
-4. *In-measure convergence on each chart target.*
-5. *A.e. pointwise convergence along a subsequence on each chart target.*
-
-These are the same steps as the boundaryless case; assembling them into a
-`CompleteSpace (WkpChartQuot …)` instance requires the same chart-density /
-Haar-bridge step the boundaryless module is currently missing, and is therefore
-not delivered here. The structural lemmas alone are useful for downstream
-analyses of chart-pushed sequences.
-
-Throughout this module we use `i, j` (rather than `m, n`) for sequence indices
-in inner quantifiers, to avoid shadowing the outer dimension parameter `n` of
-`EuclideanHalfSpace n`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -51,8 +18,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-- The chart-based half-space seminorm satisfies: a `CauchySeq` of `WkpChart`
-elements yields the εδ-Cauchy condition in `wkpNormChart` (ENNReal-valued). -/
 theorem wkpNormChart_cauchy_of_seminormCauchySeq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -90,8 +55,6 @@ theorem wkpNormChart_cauchy_of_seminormCauchySeq
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
 
-/-- For each chart `α`, the chart-pushed sequence is `wkpNormHalfSpace`-Cauchy
-on `chartTargetEuclid α`. -/
 theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -156,8 +119,6 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-- For each chart `α`, the chart-pushed sequence has a `wkpNormHalfSpace`-limit
-which is itself in `MemWkpHalfSpace k p` of `chartTargetEuclid α`. -/
 theorem exists_chart_limit
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -199,9 +160,6 @@ theorem exists_chart_limit
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
 
-/-- The chart-pushed sequence converges in measure on the interior part of
-each chart target. The interior part is the open part, on which measures and
-the half-space Sobolev predicate are evaluated. -/
 theorem chartPushed_tendstoInMeasure
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -283,9 +241,6 @@ theorem chartPushed_tendstoInMeasure
   exact tendstoInMeasure_of_tendsto_eLpNorm_of_ne_top hp_zero hp_top
     h_aesm_seq h_aesm_lim h_eLp
 
-/-- For each chart `α`, there is a strict subsequence along which the
-chart-pushed `wkpChartFun (f N)` converges pointwise a.e. on the interior part
-of the chart target. -/
 theorem exists_subseq_chartPushed_ae_tendsto
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric

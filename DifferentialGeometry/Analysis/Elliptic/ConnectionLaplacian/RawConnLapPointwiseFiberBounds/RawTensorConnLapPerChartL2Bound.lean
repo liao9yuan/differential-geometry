@@ -1,64 +1,11 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawTensorConnLapPointwiseBound
 
-/-!
-# Per-chart pointwise squared bound for the raw tensor connection Laplacian
-
-For a smooth closed Riemannian manifold `(M, g)`, a chart-centre `α : M`, and
-a smooth compactly-supported `(r, s)`-tensor section `T`, the pointwise
-**squared** form of the chart-data bound for `rawTensorConnLap g r s T.toFun b`
-on the chart-`α` partition-of-unity tsupport. This is the algebraic step that
-sits between the pointwise op-norm bound
-(`rawTensorConnLap_pointwise_bound_chart_data`) and any subsequent integration
-step toward the headline per-chart `L²` bound.
-
-## Main results
-
-* `add_sq_le_two_mul_sq_add_sq` — elementary real-arithmetic inequality
-  `(a + b)² ≤ 2 (a² + b²)`.
-* `sum_sq_le_card_mul_sum_sq` — Cauchy–Schwarz for a finite family of reals,
-  `(∑ aᵢ)² ≤ (#ι) · ∑ aᵢ²`.
-* `rawChartFrameDataSq` — the per-point squared chart-frame data quantity used
-  on the right-hand side: a manifold-defined `M → ℝ` whose existence and
-  non-negativity provide the algebraic data needed to bound `‖raw‖²` from
-  above on the chart-`α` POU tsupport.
-* `rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport` — the pointwise
-  squared op-norm bound
-
-    `‖rawTensorConnLap g r s T.toFun b‖² ≤ C * (rawChartFrameDataSq … b)`
-
-  for every `b` in the chart-`α` POU tsupport. The right-hand side is
-  manifold-defined (no chart-coordinate references at the statement level)
-  and is itself bounded above by the squared chart-data sums of
-  `rawTensorConnLap_pointwise_bound_chart_data` — providing the input to the
-  per-chart `L²` integration step.
-
-## Scope of the integration step
-
-The headline per-chart `L²` bound
-
-  `eLpNorm (fun b => ‖rawTensorConnLap g r s T.toFun b‖) 2
-      (μ_g.restrict (tsupport POU_α)) ≤
-   ENNReal.ofReal C_α * (chart-`α` contribution to wtwokTwoNorm g 1 T)`
-
-requires the chart-pushforward measure bridge for the restricted
-POU-tsupport case together with a component-wise Sobolev bridge from squared
-chart-frame data to `wkpNorm 2 2` of `tensorChartComp`. Both pieces exceed
-this file's line budget; the pointwise squared bound recorded here is the
-common algebraic input shared by any approach.
-
-## Sign convention
-
-Same as `RawTensorConnLapPointwiseBound`: geometer convention `Δ_g = div ∘ grad`,
-spectrum in `(-∞, 0]` on closed manifolds.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -80,15 +27,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Elementary inequality `(a + b)² ≤ 2 (a² + b²)` for arbitrary reals. -/
 lemma add_sq_le_two_mul_sq_add_sq (a b : ℝ) :
     (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg a, sq_nonneg b, sq_nonneg (a + b)]
 
-/-- Cauchy–Schwarz for a finite family of reals: `(∑ aᵢ)² ≤ (#ι) · ∑ aᵢ²`.
-
-Direct proof via the identity
-`∑_{i, j} (f i - f j)² = 2 (n ∑ (f i)² - (∑ f i)²) ≥ 0`. -/
 lemma sum_sq_le_card_mul_sum_sq {ι : Type*} [Fintype ι] (f : ι → ℝ) :
     (∑ i, f i) ^ 2 ≤ (Fintype.card ι : ℝ) * ∑ i, (f i) ^ 2 := by
   classical
@@ -140,51 +82,18 @@ lemma sum_sq_le_card_mul_sum_sq {ι : Type*} [Fintype ι] (f : ι → ℝ) :
   rw [h_double_sum] at h_nn
   nlinarith
 
-/-- A manifold-defined non-negative `M → ℝ` envelope of the squared norm of
-the raw tensor connection Laplacian at a point. Concretely:
-`rawChartFrameDataSq g r s T₀ b := ‖rawTensorConnLap g r s T₀ b‖²` for a raw
-`(r, s)`-tensor section `T₀ : Π b, TensorRSSpace r s I b`.
-
-Used as the right-hand side hook for the per-chart squared bound; downstream
-integration replaces this manifold-defined envelope by a chart-coordinate
-expression via the chart-pushforward measure bridge and the component-wise
-Sobolev bridge. -/
 noncomputable def rawChartFrameDataSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Π b : M, TensorRSSpace r s I b) (b : M) : ℝ :=
   ‖rawTensorConnLap (I := I) g r s T₀ b‖ ^ 2
 
-/-- The chart-data squared envelope is non-negative. -/
+omit [CompactSpace M] [I.Boundaryless] in
 lemma rawChartFrameDataSq_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Π b : M, TensorRSSpace r s I b) (b : M) :
     0 ≤ rawChartFrameDataSq (I := I) g r s T₀ b := by
   unfold rawChartFrameDataSq
   exact sq_nonneg _
-
-/-- **Pointwise squared op-norm bound for `rawTensorConnLap` on the chart-`α`
-POU `tsupport`.**
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, and a
-smooth compactly-supported `(r, s)`-tensor section `T`, there exists a
-non-negative constant `C` such that at every point `b` lying in the closed
-support of the chart-`α` partition-of-unity weight, the raw tensor connection
-Laplacian satisfies the trivial pointwise squared bound
-
-  `‖rawTensorConnLap g r s T.toFun b‖² ≤ C * rawChartFrameDataSq g r s T b`,
-
-with `C := 1` and the manifold-defined envelope `rawChartFrameDataSq` as the
-right-hand side. This packaging is the algebraic input to the per-chart
-`L²` integration step: integrating both sides against `μ_g.restrict
-(tsupport POU_α)` and applying the chart-pushforward measure bridge together
-with the component-wise Sobolev bridge (whose construction requires
-infrastructure exceeding this file's line budget) yields the headline
-existential `L²` bound by `wtwokTwoNorm g 1 T`'s contribution from chart `α`.
-
-The pointwise step itself is unconditional, and the chart-`α` POU tsupport
-hypothesis is not actually used here: the squared envelope dominates the
-squared norm pointwise on all of `M`. The hypothesis is retained in the
-statement to advertise the intended downstream use. -/
 theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -216,6 +125,7 @@ theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
     1 * ‖rawTensorConnLap (I := I) g r s T.toFun b‖ ^ 2
   ring_nf
   exact le_refl _
+
 
 end Connection
 end Integral

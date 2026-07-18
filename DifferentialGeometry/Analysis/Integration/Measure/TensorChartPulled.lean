@@ -1,33 +1,6 @@
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
-
-/-!
-# Chart-pulled squared norm of a tensor section
-
-For a smooth Riemannian manifold `(M, g)` and a fiberwise section
-`S : Π b : M, TensorRSSpace r s I b` of the `(r,s)`-tensor bundle, this file
-defines the *chart-pulled squared norm function*
-
-  `tensorTrivProjPushedNormSq g r s α S : EuclN E → ℝ`
-
-obtained by composing `S` with the inverse extended chart at `α`, sending the
-result through the fiber-to-model identification `TensorRSSpace.toModel`, and
-squaring the resulting model-fiber norm. The value is zero outside the chart
-target image (`chartTargetEuclid α`).
-
-The construction mirrors the scalar `chartPushedRaw` infrastructure in the
-companion `Sobolev/Manifold/MeasureBridge.lean` file. We expose the basic
-analytic properties:
-
-* continuity on the chart target (for sections whose total-space map is
-  continuous on the chart source);
-* compact support (for sections whose pointwise norm is supported inside the
-  chart source on a compact manifold);
-* measurability (for sections whose total-space map is measurable);
-* integrability on the chart target (a consequence of the previous two on
-  compact manifolds).
--/
 
 noncomputable section
 
@@ -48,18 +21,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable (I) in
-/-- Chart-pulled squared norm of the tensor section `S` at chart center `α`.
 
-On the chart-target image `chartTargetEuclid α` the value is
-`‖TensorRSSpace.toModel (S ((extChartAt I α).symm (toEuclidean.symm y)))‖^2`;
-outside the chart-target image the value is zero. -/
 def tensorTrivProjPushedNormSq
     (_g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) : EuclN → ℝ := by
@@ -70,8 +38,7 @@ def tensorTrivProjPushedNormSq
         (S ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))‖ ^ 2
     else 0
 
-/-- On the chart-target image, the chart-pulled squared norm has the explicit
-formula in terms of the inverse chart. -/
+@[simp]
 lemma tensorTrivProjPushedNormSq_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -84,7 +51,7 @@ lemma tensorTrivProjPushedNormSq_apply_of_mem
   unfold tensorTrivProjPushedNormSq
   simp [hy]
 
-/-- Outside the chart-target image, the chart-pulled squared norm is zero. -/
+@[simp]
 lemma tensorTrivProjPushedNormSq_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -95,7 +62,6 @@ lemma tensorTrivProjPushedNormSq_apply_of_notMem
   unfold tensorTrivProjPushedNormSq
   simp [hy]
 
-/-- The chart-pulled squared norm vanishes outside the chart-target image. -/
 lemma tensorTrivProjPushedNormSq_eq_zero_off_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -104,7 +70,6 @@ lemma tensorTrivProjPushedNormSq_eq_zero_off_chartTargetEuclid
     tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y = 0 :=
   tensorTrivProjPushedNormSq_apply_of_notMem (I := I) (M := M) g r s α S hy
 
-/-- The chart-pulled squared norm is nonnegative everywhere. -/
 lemma tensorTrivProjPushedNormSq_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -116,11 +81,6 @@ lemma tensorTrivProjPushedNormSq_nonneg
   · exact sq_nonneg _
   · exact le_rfl
 
-/-- The chart-pulled squared norm is continuous on the chart-target image,
-provided the underlying section is continuous on the chart source. The
-continuity hypothesis is phrased as continuity of the model-fiber image
-`x ↦ ‖TensorRSSpace.toModel (S x)‖^2` on `(chartAt H α).source`, which is the
-natural form coming from a smooth or continuous bundle section. -/
 theorem tensorTrivProjPushedNormSq_continuousOn_chartTarget
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -149,8 +109,6 @@ theorem tensorTrivProjPushedNormSq_continuousOn_chartTarget
   intro y hy
   exact tensorTrivProjPushedNormSq_apply_of_mem (I := I) (M := M) g r s α S hy
 
-/-- The chart-pulled squared norm vanishes outside the toEuclidean image of
-the chart-source-contained tsupport of the section. -/
 private lemma tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -178,9 +136,6 @@ private lemma tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport
   rw [hxz]
   exact (extChartAt I α).right_inv hz_target
 
-/-- The chart-pulled squared norm has compact support, provided the underlying
-model-fiber-norm-squared function on `M` has compact support contained in the
-chart source. -/
 theorem tensorTrivProjPushedNormSq_hasCompactSupport
     [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -208,16 +163,12 @@ theorem tensorTrivProjPushedNormSq_hasCompactSupport
   · exact tensorTrivProjPushedNormSq_apply_of_notMem
       (I := I) (M := M) g r s α S hy_target
 
-/-- Auxiliary: the chart-target image `chartTargetEuclid α` is Borel-measurable.
-This is just `chartTargetEuclid_measurableSet` reflected into the current
-namespace for convenience. -/
+omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_measurableSet'
     (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
   chartTargetEuclid_measurableSet (I := I) (M := M) α
 
-/-- The chart-pulled squared norm is Borel measurable on the Euclidean target,
-provided the underlying model-fiber-norm-squared function on `M` is measurable. -/
 theorem tensorTrivProjPushedNormSq_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -282,12 +233,6 @@ theorem tensorTrivProjPushedNormSq_measurable
   rw [heq]
   exact hindic_meas
 
-/-- The chart-pulled squared norm is integrable on the chart-target image,
-provided the underlying model-fiber-norm-squared function on `M` is measurable
-and has compact support contained in the chart source (so the function on
-`EuclN` is bounded with compact support). The manifold is taken compact for
-convenience: this ensures the compact-support consequence holds globally on
-the chart-target image. -/
 theorem tensorTrivProjPushedNormSq_integrableOn
     [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

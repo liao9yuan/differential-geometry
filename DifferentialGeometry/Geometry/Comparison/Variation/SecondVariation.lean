@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 import DifferentialGeometry.Geometry.Comparison.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
@@ -23,31 +23,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Second variation of length and the index form
-
-This file packages the second variation of arc length of a smooth two-parameter
-variation and its identification with the index form, the namesake conclusion of
-the variation chain (arc length → first variation → second variation):
-
-* the index form `indexForm g γ a b V W` and its pointwise integrand
-  `indexFormIntegrand`, on intrinsic bundle-valued sections along `γ`;
-* continuity on a set of the `g`-inner product of two sections along a curve;
-* `second_variation_of_arcLength_eq_indexForm` — for a unit-speed geodesic and an
-  endpoint-fixed smooth variation whose variation field is perpendicular to the
-  velocity, the second `s`-derivative of arc length at `s = 0` equals the index
-  form of the variation field;
-* `indexFormIntegrand_intervalIntegrable` — interval-integrability of the
-  index-form integrand on the sine-modulated parallel frame.
-
-The arc-length and speed setup, the first variation, and the covariant-commutation
-and curvature infrastructure that this file rests on live in the sibling files
-`ArcLength`, `SpeedDerivative`, `FirstVariation`, `CovariantCommutationCurvature`,
-and `RegularParameterFirstVariation`, all re-exported transitively through this
-file's imports.
--/
 
 noncomputable section
 
@@ -71,13 +47,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- The pointwise **integrand** of the second-variation index form,
-on intrinsic bundle-valued sections `V, W : ∀ t, TangentSpace I (γ t)`:
-`⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g`, where `∇_t` is the *intrinsic*
-covariant derivative `covDerivAlong g γ · t` (valued in `T_{γ t} M`),
-not the chart-`(γ t)`-coordinate moving-foot operator. Extracting this
-as a named definition lets downstream lemmas avoid unfolding the inner
-`let`-binders, which was a source of `whnf` heartbeat blow-up. -/
 def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
     (g : SmoothRiemannianMetric I M)
     (γ : ℝ → M) (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
@@ -95,17 +64,10 @@ def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
       (V t) gammaPrime gammaPrime
   g.inner (γ t) nablaV nablaW - g.inner (γ t) riem (W t)
 
-/-- The second-variation **index form** of a smooth curve `γ : ℝ → M`
-on the interval `[a, b]`, evaluated on two intrinsic bundle-valued
-sections `V, W : ∀ t, TangentSpace I (γ t)` along `γ`:
-`I_γ(V, W) := ∫_a^b (⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g) dt`,
-with the intrinsic covariant derivative `∇_t`. -/
 def indexForm (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) : ℝ :=
   ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t
 
-/-- Unfolded form of `indexForm` as an integral of the named
-integrand. -/
 lemma indexForm_eq_intervalIntegral
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) :
@@ -115,13 +77,8 @@ lemma indexForm_eq_intervalIntegral
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Continuity on a set `s ⊆ ℝ` of the scalar `t ↦ g.inner (γ t) (v t) (w t)`
-for a base curve `γ` and two sections `v, w` along `γ` presented through their
-total-space continuity. Mirrors `continuous_g_inner_along_param` in its
-`ContinuousOn` form over a single-parameter base curve. The diamond between
-the project's tangent-space norm instances and the `RiemannianBundle`-derived
-ones is resolved locally; the scalar `ℝ`-valued conclusion is independent of
-the disabled instances. -/
+
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
@@ -143,15 +100,7 @@ lemma continuousOn_g_inner_along_curve
 
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
-/-- **Second variation of arc length.** For a unit-speed geodesic `γ` on `[0, L]`
-and an endpoint-fixed smooth variation `f` of `γ` whose variation field
-`V := ∂_s f|_{s = 0}` is everywhere perpendicular to `γ'` on `[0, L]`, the second
-`s`-derivative of arc length at `s = 0` equals the index form of `V`:
-`d²/ds²|_{s = 0} arcLength g (f s ·) 0 L = indexForm g γ 0 L V V`.
-The hypotheses are supplied explicitly: `γ` is a geodesic on `[0, L]` (`hγ`), the
-central slice `f 0` coincides with `γ` (`hfc`), the slice is unit-speed on `[0, L]`
-(`hUnit`), the endpoints are fixed (`hfix0`, `hfixL`), and `V` is the variation
-field (`hVeq`) and is `g`-orthogonal to the velocity `γ'` on `[0, L]` (`hVperp`). -/
+
 theorem second_variation_of_arcLength_eq_indexForm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (V : ℝ → E)
@@ -238,7 +187,7 @@ theorem second_variation_of_arcLength_eq_indexForm
             (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
           (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
         exact (hf : ContMDiff _ _ _ _).comp hshift
-      have hS1 := S1_moving_foot_metric_compatibility (I := I) g fsh t hfsh_smooth
+      have hS1 := speedSq_hasDerivAt (I := I) g fsh t hfsh_smooth
       have hspeed_shift : ∀ a : ℝ, speedSq (I := I) g fsh a t
           = speedSq (I := I) g f (s + a) t := fun a => rfl
       have hS1' : HasDerivAt (fun a : ℝ => G ((s + a), t))
@@ -447,7 +396,7 @@ theorem second_variation_of_arcLength_eq_indexForm
     have hgs_eq : ∀ t : ℝ,
         g_s t = 2 * g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t) := by
       intro t
-      have hS1 := S1_moving_foot_metric_compatibility (I := I) g f t hf
+      have hS1 := speedSq_hasDerivAt (I := I) g f t hf
       have hGslice : HasDerivAt (fun u : ℝ => G (u, t)) (g_s t) 0 := by
         have := Aux2.hasDerivAt_slice_fst (fun u v : ℝ => G (u, v)) 0 t
           ((hGcdiff.differentiable (by simp)).differentiableAt)
@@ -619,7 +568,7 @@ theorem second_variation_of_arcLength_eq_indexForm
               (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
             (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
           exact (hf : ContMDiff _ _ _ _).comp hshift
-        have hS1 := S1_moving_foot_metric_compatibility (I := I) g fsh t hfsh_smooth
+        have hS1 := speedSq_hasDerivAt (I := I) g fsh t hfsh_smooth
         have hspeed_shift : ∀ a : ℝ, speedSq (I := I) g fsh a t
             = speedSq (I := I) g f (s + a) t := fun a => rfl
         have hS1' : HasDerivAt (fun a : ℝ => G ((s + a), t))
@@ -939,15 +888,7 @@ theorem second_variation_of_arcLength_eq_indexForm
 
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
-set_option maxSynthPendingDepth 4 in
-/-- **Interval-integrability of the index-form integrand on the
-sine-modulated parallel frame.** For a `C¹` unit-speed geodesic `γ` on `[0, L]`
-(`L > 0`) and a differentiable, parallel, orthonormal frame `e` of the
-perpendicular subspace along `γ`, each sine-modulated section
-`t ↦ sin(π t / L) · e i` makes the index-form integrand interval-integrable on
-`[0, L]`. The integrand is continuous on the compact interval: it is built from
-the smooth chart Christoffels, the `C¹` curve `γ`, the smooth sine factor, and
-the differentiable frame `e`. -/
+
 theorem indexFormIntegrand_intervalIntegrable
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (_hL : 0 < L)
     (_hγ_C1 : ContMDiffOn (𝓘(ℝ, ℝ)) I 1 γ (Set.Icc 0 L))
@@ -1129,7 +1070,6 @@ theorem indexFormIntegrand_intervalIntegrable
   unfold indexFormIntegrand
   simp only [SectionAlongCurve.smulFun_toFun]
   rw [hnabla, hfac1, hfac2]
-
 
 end Variation
 end Riemannian

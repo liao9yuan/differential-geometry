@@ -15,36 +15,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-/-!
-# Chart-pulled representation infrastructure for `rawTensorConnLap`
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, and ranks
-`r, s : ℕ`, this file ships the predicate-free smoothness and uniform-bound
-infrastructure used by the pointwise squared op-norm analysis of
-`rawTensorConnLap` against the chart-pulled representation data.
-
-It provides:
-
-* `sq_add_three_le_three_mul_sum_sq` — the arithmetic inequality
-  `(a + b + c)^2 ≤ 3 · (a^2 + b^2 + c^2)`;
-* `reprT_contDiffOn_goodSet` — smoothness of the chart-pulled tensor
-  representation `tensorRSChartE_section_repr r s α T ∘ (extChartAt I α).symm`
-  on the chart-target image of the chart-`α` Levi-Civita good set;
-* `fderiv_reprT_differentiableAt_chart_point` — differentiability of the
-  `fderiv` of that pulled-back representation at the chart point;
-* `chartFrameNormGlobalSmooth_fderiv_repr_bound` — the uniform bound on the
-  `fderiv` of the chart-pulled representation of the fixed globally smooth
-  tangent-bundle section `B_i = chartFrameNormGlobalSmooth g α i` over the
-  chart-`α` partition-of-unity tsupport.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -72,8 +48,6 @@ private lemma sq_add_three_le_three_mul_sum_sq (a b c : ℝ) :
     (a + b + c) ^ 2 ≤ 3 * (a ^ 2 + b ^ 2 + c ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]
 
-/-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
-of the chart-pulled tensor representation. -/
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -162,7 +136,6 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- Differentiability of `fderiv ℝ (repr T ∘ symm)` at the chart point. -/
 private lemma fderiv_reprT_differentiableAt_chart_point
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) {b : M}
@@ -199,10 +172,7 @@ private lemma fderiv_reprT_differentiableAt_chart_point
     (hfd_cd.differentiableOn hne) (extChartAt I α b) hx_mem
   exact hwithin.differentiableAt (hU_open.mem_nhds hx_mem)
 
-/-- Uniform bound on
-`‖fderiv ℝ (chartE_section_repr α B.toFun ∘ (extChartAt I α).symm) (extChartAt I α b)‖`
-over the chart-`α` POU tsupport, for the fixed smooth section
-`B = chartFrameNormGlobalSmooth g α i`. -/
+omit [BoundarylessManifold I M] in
 private lemma chartFrameNormGlobalSmooth_fderiv_repr_bound
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

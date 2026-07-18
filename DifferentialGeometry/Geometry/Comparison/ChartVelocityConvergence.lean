@@ -19,20 +19,7 @@ import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Chart-coordinate velocity convergence at a finite endpoint
-
-The analytic engine forcing the chart-coordinate velocity of a bounded-speed
-geodesic to a genuine limit as the parameter approaches a finite endpoint: the
-mean-value velocity-convergence lemmas on `E`, joint continuity of the
-chart-Christoffel contraction, the chart-velocity convergence statements, and
-the chart-Gram quadratic form whose uniform positive-definiteness on a compact
-neighbourhood yields the near-limit chart-velocity bound.
-
-The headline assembly lives in `Comparison.HopfRinow`, which imports this file.
--/
 
 noncomputable section
 
@@ -52,7 +39,7 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -61,15 +48,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **Velocity convergence from a bounded derivative.** If `P : ℝ → E` has
-derivative `P' s` at every `s < b` (with `b` finite) and `‖P' s‖ ≤ C`
-throughout, then `P` converges to a genuine limit `w : E` as `s → b⁻`.
-
-The proof shows `Filter.map P (𝓝[<] b)` is Cauchy in the complete space `E`
-through `Metric.cauchy_iff`: any two `P`-images of `Ioo (b - η) b` are
-`< ε` apart by the mean-value bound `‖P t - P s‖ ≤ C · (t - s)` (from
-`norm_image_sub_le_of_norm_deriv_le_segment'`) with `η = ε / (C + 1)`.
-Completeness then yields the limit via `cauchy_map_iff_exists_tendsto`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel
     {P P' : ℝ → E} {b C : ℝ}
     (hderiv : ∀ s : ℝ, s < b → HasDerivAt P (P' s) s)
@@ -123,17 +102,7 @@ theorem velocity_converges_of_bounded_accel
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-/-- **Velocity convergence from a bounded derivative on an open interval.**
-The `Set.Ioo`-localised version of `velocity_converges_of_bounded_accel`: if
-`P : ℝ → E` has derivative `P' s` at every `s ∈ Ioo a b` (with `a < b`) and
-`‖P' s‖ ≤ C` throughout that interval, then `P` converges to a genuine limit
-`w : E` as `s → b⁻`.
-
-The proof is identical to the `s < b` version, except every Cauchy-witness
-interval is taken inside `Ioo a b`: for a target tolerance `ε`, the witness is
-`P '' Ioo (max a (b - η)) b` with `η = ε/(C+1)`, which sits in `Ioo a b` (it
-lies above `a` since the lower endpoint is `≥ a`) and the mean-value bound
-`‖P t - P s‖ ≤ C·(t - s)` applies on each subinterval `Icc s t ⊆ Ioo a b`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel_Ioo
     {P P' : ℝ → E} {a b C : ℝ} (hab : a < b)
     (hderiv : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt P (P' s) s)
@@ -196,11 +165,10 @@ theorem velocity_converges_of_bounded_accel_Ioo
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-/-- **Joint continuity of the chart-Christoffel contraction.** As a function
-of `(v, y) : E × E`, the diagonal contraction `Γ_α(v, v)(y)` is continuous on
-`univ ×ˢ interior (extChartAt I α).target`, inheriting continuity in `y` from
-`chartChristoffel_contDiffOn_interior` and linearity in `v` from the
-chart-coordinate functionals `(chartModelBasis E).coord`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartChristoffelContraction_continuousOn_prod
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn
@@ -229,25 +197,10 @@ theorem chartChristoffelContraction_continuousOn_prod
     exact this.comp continuous_fst
   exact (hΓp.mul hci.continuousOn).mul hcj.continuousOn
 
-/-- **Directional velocity limit in a fixed chart.** Let `α : M`, and let
-`u : ℝ → E` be the chart-`α` representation of a curve with chart-velocity
-`u' : ℝ → E`, satisfying the chart-coordinate geodesic equation in the chart
-at `α`.  Concretely we assume, for every `s < b`:
-
-* `HasDerivAt u (u' s) s` — the chart curve is `C¹` with velocity `u'`;
-* `HasDerivAt u' (-Γ_α(u' s, u' s)(u s)) s` — the chart geodesic equation
-  `u'' = -Γ_α(u', u')(u)`;
-* `‖u' s‖ ≤ K₁` — the chart velocity is bounded; and
-* `u s ∈ S` for a fixed compact `S ⊆ interior (extChartAt I α).target` — the
-  chart image stays in a compact subset of the chart domain.
-
-Then the chart-velocity converges to a genuine limit `w : E` as `s → b⁻`.
-
-The chart-acceleration `Γ_α(u' s, u' s)(u s)` is bounded by the supremum of
-the continuous contraction on the compact box `closedBall 0 K₁ ×ˢ S`
-(`chartChristoffelContraction_continuousOn_prod` and
-`IsCompact.exists_bound_of_continuousOn`), so the conclusion follows from
-`velocity_converges_of_bounded_accel` applied to `u'`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint
     (g : SmoothRiemannianMetric I M) (α : M)
     {u u' : ℝ → E} {b K₁ : ℝ} {S : Set E}
@@ -288,12 +241,10 @@ theorem chartVelocity_converges_at_finite_endpoint
   exact velocity_converges_of_bounded_accel (P := u') (P' := P') (b := b) (C := C)
     hderiv_pf hbound_pf
 
-/-- **Directional velocity limit in a fixed chart, open-interval form.** The
-`Set.Ioo`-localised version of `chartVelocity_converges_at_finite_endpoint`:
-the chart-coordinate geodesic data are only assumed on `Ioo a b` (with
-`a < b`), which is all the `𝓝[<] b` filter sees.  Identical proof, with the
-analytic engine replaced by its `Ioo`-localised version
-`velocity_converges_of_bounded_accel_Ioo`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {u u' : ℝ → E} {a b K₁ : ℝ} {S : Set E} (hab : a < b)
@@ -335,18 +286,16 @@ theorem chartVelocity_converges_at_finite_endpoint_Ioo
   exact velocity_converges_of_bounded_accel_Ioo (P := u') (P' := P') (a := a)
     (b := b) (C := C) hab hderiv_pf hbound_pf
 
-/-- The chart-`y` Gram quadratic form on the model space: at a chart-target
-point `z` and a vector `V`, this is `∑ᵢⱼ G_{ij}(z) · Vⁱ · Vʲ`, where
-`G_{ij}(z) = chartGramOnE g y i j z`.  It is the chart-coordinate expression of
-the squared `g`-length of the tangent vector `symmL_y(z) V`. -/
 private def chartGramQuad (g : SmoothRiemannianMetric I M) (y : M)
     (z : E) (V : E) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
     chartGramOnE (I := I) g y i j z *
       chartCoord (E := E) i V * chartCoord (E := E) j V
 
-/-- The Gram quadratic form equals the squared `g`-length of the
-inverse-trivialisation image of `V`, for `z` in the chart target. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_eq_inner
     (g : SmoothRiemannianMetric I M) (y : M) {z : E}
     (_hz : z ∈ (extChartAt I y).target) (V : E) :
@@ -361,9 +310,10 @@ private lemma chartGramQuad_eq_inner
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
   rw [chartGramOnE_def, hx_def]
 
-/-- The Gram quadratic form is nonnegative, and strictly positive when `V ≠ 0`,
-for `z` in the chart target.  Positivity uses the positive-definiteness of `g`
-together with the injectivity of the inverse trivialisation on the base set. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_pos
     (g : SmoothRiemannianMetric I M) (y : M) {z : E}
     (hz : z ∈ (extChartAt I y).target) {V : E} (hV : V ≠ 0) :
@@ -388,8 +338,10 @@ private lemma chartGramQuad_pos
     exact hround.symm
   exact g.pos x _ hsymm_ne
 
-/-- The Gram quadratic form is quadratically homogeneous: scaling `V` by `a`
-multiplies the form by `a²`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_smul
     (g : SmoothRiemannianMetric I M) (y : M) (z : E) (a : ℝ) (V : E) :
     chartGramQuad (I := I) g y z (a • V) = a ^ 2 * chartGramQuad (I := I) g y z V := by
@@ -402,9 +354,10 @@ private lemma chartGramQuad_smul
   rw [chartCoord_smul, chartCoord_smul]
   ring
 
-/-- Joint continuity of the Gram quadratic form `(z, V) ↦ chartGramQuad g y z V`
-on `(extChartAt I y).target ×ˢ univ`: the Gram coefficients are smooth on the
-target, and the chart coordinates are continuous linear functionals. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_continuousOn
     (g : SmoothRiemannianMetric I M) (y : M) :
     ContinuousOn (fun p : E × E => chartGramQuad (I := I) g y p.1 p.2)
@@ -422,15 +375,10 @@ private lemma chartGramQuad_continuousOn
     (((chartModelBasis E).coord j).toContinuousLinearMap).continuous.comp continuous_snd
   exact (hG.mul hci.continuousOn).mul hcj.continuousOn
 
-/-- **Uniform Gram lower bound on a compact subset of the chart target.**
-For a nonempty compact set `S` inside the chart target at `y`, there is a
-positive constant `m` with `m · ‖V‖² ≤ chartGramQuad g y z V` for every
-`z ∈ S` and every `V : E`.
-
-The bound is the minimum of the quadratic form — continuous on
-`target ×ˢ univ`, strictly positive on the compact set `S ×ˢ sphere 0 1`
-(unit vectors, where positivity is `chartGramQuad_pos`) — transferred to a
-general `V` by the quadratic homogeneity `chartGramQuad_smul`. -/
+omit [InnerProductSpace ℝ E] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma exists_chartGramQuad_lower_bound
     (g : SmoothRiemannianMetric I M) (y : M) {S : Set E}
     (hS_compact : IsCompact S) (hS_sub : S ⊆ (extChartAt I y).target)
@@ -486,18 +434,10 @@ private lemma exists_chartGramQuad_lower_bound
       _ ≤ ‖V‖ ^ 2 * chartGramQuad (I := I) g y z Vhat :=
           mul_le_mul_of_nonneg_left hmin hr2_nn
 
-/-- **Chart-coordinate velocity bound near the limit point.** Let `γ` be a
-curve converging (in the manifold topology) to `y` as `s → b⁻`, with squared
-`g`-speed bounded by `c²`.  Then on some left-interval `Ioo (b - ε) b` the
-chart-`y`-coordinate velocity `deriv (chartCurve y γ) s` is bounded in norm by
-`c / √m`, and the chart image `chartCurve y γ s` stays in a fixed compact set
-`S ⊆ interior (extChartAt I y).target`.
-
-The compact set `S` is a closed ball around `extChartAt I y y` inside the
-interior of the target; `γ s → y` and continuity of the chart map keep
-`chartCurve y γ s` inside it for `s` near `b`.  On `S` the chart Gram matrix is
-uniformly positive definite (`exists_chartGramQuad_lower_bound`), so the squared
-speed `chartGramQuad g y (u s)(V s) = ⟨γ', γ'⟩_g ≤ c²` yields `‖V s‖ ≤ c/√m`. -/
+omit [InnerProductSpace ℝ E]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_bound_near_limit
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {a b c : ℝ}
     (hab : a < b) (hc_nonneg : 0 ≤ c)

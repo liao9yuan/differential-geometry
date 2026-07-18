@@ -21,18 +21,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Curvature trace one-form components
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
 
-/-- The signed curvature trace appearing when commuting the first two slots of
-`∇²α` for a one-form `α`.
 
-The leading minus sign matches the realized convention
-`Rm13 alpha X Y Z = alpha (R(X,Y)Z)`, since covectors see the negative
-curvature action. -/
+
+
+
+
+
+
+
+
+
 def curvatureTraceOneFormAt
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
@@ -44,9 +44,9 @@ def curvatureTraceOneFormAt
   -∑ i : Idx, ∑ j : Idx,
     gInv i j * Rm13 x alpha (vec3 (basis i) Y (basis j))
 
-/-- The metric trace of the one-form curvature commutator realizes a Ricci
-pairing with a supplied vector.  In the scalar specialization, the vector is
-`∇u`. -/
+
+
+
 def CurvatureTraceOneFormEqRicVectorAt
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -83,8 +83,8 @@ theorem curvatureActionTraceEqualsRicVectorCoord_of_tensor
           simp_rw [mul_neg, Finset.sum_neg_distrib]
     _ = Ric x (vec2 (basis k) curvatureVector) := hcurv (basis k)
 
-/-- Coordinate covectors are inverse-metric contractions of metric-lowered basis
-covectors. -/
+
+
 theorem basis_coord_eq_sum_inv_inner
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -145,7 +145,7 @@ theorem rm13_dualCoord_apply_eq_sum_inv_flat
   rw [tensor0SSpace_sum_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul]
-  rw [ContinuousMultilinearMap.smul_apply]
+  rw [Tensor0SSpace.smul_apply]
   simp [smul_eq_mul]
 
 theorem curvatureTraceOneFormEqRicVectorAt_of_metric_dual

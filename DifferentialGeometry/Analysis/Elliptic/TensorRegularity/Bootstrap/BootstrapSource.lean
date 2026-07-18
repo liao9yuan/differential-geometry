@@ -1,49 +1,10 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 
-/-!
-# `Ω`-uniform smooth-multiplier infrastructure for the per-component weak source
-
-The per-component scalar weak equation of the connection Laplacian has an
-explicit, test-function-independent right-hand side `tensorComponentWeakRHS`
-(`WeakSolutionGlobal.lean`) which, on the Euclidean chart target, is a finite
-combination of products `c · v` of a `C^∞` chart coefficient `c` (smooth on the
-chart target only) and a chart component `tensorComponentEuclid` — or its
-chart-Euclidean partial — a globally `C^∞` compactly-supported function.
-
-This file builds the analytic infrastructure for the quantitative Sobolev-norm
-bound of that right-hand side. The two main ingredients are:
-
-* an **`Ω`-uniform smooth-multiplier estimate**: for a *globally* `C^∞`
-  function `η` with a global bound on its iterated derivatives, the constant in
-  `wkpNorm m 2 (η · v) Ω ≤ K · wkpNorm m 2 v Ω` is independent of the open set
-  `Ω`. This is `wkpNorm_smul_globalSmooth_uniform`.
-
-* a **globally-smooth extension of the chart coefficient**: multiplying a chart
-  coefficient `c` by a fixed smooth cutoff `ζ` equal to `1` on the compact `K`
-  and supported in the chart target produces a globally `C^∞` compactly-
-  supported function `ζ · c`. When the chart components are supported in `K`,
-  the product `c · v` equals `(ζ · c) · v` everywhere, so the `Ω`-uniform
-  estimate applies with the `K`-dependent — but `v`/`Ω`-independent —
-  derivative bounds of `ζ · c`.
-
-Combining these gives `exists_wkpNorm_chartCoeffSum_bddBy`: for a finite family
-of chart coefficients there is a constant, uniform in the multiplied functions,
-controlling the `W^{m,2}` norm of the finite chart-coefficient sum by a common
-bound on the `W^{m,2}` norms of the multiplied functions. The file also records
-the chart-Euclidean partial's `W^{m,2}` order-drop and the agreement of a
-function and its chart-Euclidean partial with another on an open set.
-
-The quantitative bound for `tensorComponentWeakRHS` itself —
-`tensorComponentWeakRHS_wkpNorm_le` — is assembled from this infrastructure in
-`BootstrapSourceHeadline.lean`.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 3200000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter MeasureTheory Topology Function
 open scoped Manifold Topology ContDiff BigOperators Matrix InnerProductSpace
@@ -81,33 +42,27 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-/-- The `wkpNorm` at order `k` of a single chosen weak partial is bounded by the
-`wkpNorm` at order `k + 1` of the parent: it is one non-negative summand of the
-order-`(k+1)` decomposition. -/
+omit [NeZero d] in
 private lemma wkpNorm_chosenWeakPartial_le_succ
     (k : ℕ) {Ω : Set EE} (u : EE → ℝ) (i : Fin d) :
-    wkpNorm (d := d) k 2 (chosenWeakPartial' 2 i u Ω) Ω ≤
-      wkpNorm (d := d) (k + 1) 2 u Ω := by
+    iteratedWeakSobolevNorm (d := d) k 2 (chosenWeakPartial' 2 i u Ω) Ω ≤
+      iteratedWeakSobolevNorm (d := d) (k + 1) 2 u Ω := by
   classical
   rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k 2 Ω u]
   refine le_trans ?_ le_add_self
   exact Finset.single_le_sum
-    (f := fun j : Fin d => wkpNorm (d := d) k 2 (chosenWeakPartial' 2 j u Ω) Ω)
+    (f := fun j : Fin d => iteratedWeakSobolevNorm (d := d) k 2 (chosenWeakPartial' 2 j u Ω) Ω)
     (fun j _ => zero_le _) (Finset.mem_univ i)
 
-/-- **`Ω`-uniform quantitative smooth-multiplier estimate.** For a globally
-`C^∞` function `η` whose iterated derivatives up to order `k` are globally
-bounded by `C`, there is a constant `K ≥ 0` — depending only on `η`, `k` and the
-dimension — such that for *every* open set `Ω` and every `u ∈ W^{k,2}(Ω)`,
-`wkpNorm k 2 (η · u) Ω ≤ ENNReal.ofReal K · wkpNorm k 2 u Ω`. -/
+omit [NeZero d] in
 theorem wkpNorm_smul_globalSmooth_uniform
     (k : ℕ) {η : EE → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     {C : ℝ} (hC : 0 ≤ C)
     (hbound : ∀ j ≤ k, ∀ x : EE, ‖iteratedFDeriv ℝ j η x‖ ≤ C) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ {Ω : Set EE}, IsOpen Ω → ∀ {u : EE → ℝ},
       MemWkp (d := d) k 2 u Ω →
-      wkpNorm (d := d) k 2 (fun x => η x * u x) Ω ≤
-        ENNReal.ofReal K * wkpNorm (d := d) k 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) k 2 (fun x => η x * u x) Ω ≤
+        ENNReal.ofReal K * iteratedWeakSobolevNorm (d := d) k 2 u Ω := by
   classical
   induction k generalizing η with
   | zero =>
@@ -136,9 +91,9 @@ theorem wkpNorm_smul_globalSmooth_uniform
           (hbound (j + 1) (Nat.succ_le_succ hj) x)
       have h_partial_ih : ∀ i : Fin d, ∃ K' : ℝ, 0 ≤ K' ∧
           ∀ {Ω : Set EE}, IsOpen Ω → ∀ {u : EE → ℝ}, MemWkp (d := d) k 2 u Ω →
-            wkpNorm (d := d) k 2
+            iteratedWeakSobolevNorm (d := d) k 2
               (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω ≤
-              ENNReal.ofReal K' * wkpNorm (d := d) k 2 u Ω := fun i =>
+              ENNReal.ofReal K' * iteratedWeakSobolevNorm (d := d) k 2 u Ω := fun i =>
         ih (h_partial_smooth i) (h_partial_bound i)
       choose Ki hKi_nn hKi using h_partial_ih
       have hsummand_nn : ∀ i : Fin d, 0 ≤ Kη + Ki i :=
@@ -150,7 +105,7 @@ theorem wkpNorm_smul_globalSmooth_uniform
           ‖iteratedFDeriv ℝ j η x‖ ≤ C := fun j hj x _ => hbound j hj x
       rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k 2 Ω
         (fun x => η x * u x)]
-      set D : ℝ≥0∞ := wkpNorm (d := d) (k + 1) 2 u Ω with hD_def
+      set D : ℝ≥0∞ := iteratedWeakSobolevNorm (d := d) (k + 1) 2 u Ω with hD_def
       have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
         intro x _
         have h := hbound 0 (Nat.zero_le _) x
@@ -162,7 +117,7 @@ theorem wkpNorm_smul_globalSmooth_uniform
         rw [hD_def, wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k 2 Ω u]
         exact le_self_add
       have hpartial_le : ∀ i : Fin d,
-          wkpNorm (d := d) k 2
+          iteratedWeakSobolevNorm (d := d) k 2
             (chosenWeakPartial' 2 i (fun x => η x * u x) Ω) Ω ≤
             ENNReal.ofReal (Kη + Ki i) * D := by
         intro i
@@ -186,13 +141,13 @@ theorem wkpNorm_smul_globalSmooth_uniform
             hΩ (h_partial_smooth i) (fun j hj x _ => h_partial_bound i j hj x) hu_k
         refine (wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ
           h_eta_du_mem h_dei_u_mem).trans ?_
-        have hA : wkpNorm (d := d) k 2
+        have hA : iteratedWeakSobolevNorm (d := d) k 2
             (fun x => η x * chosenWeakPartial' 2 i u Ω x) Ω ≤
             ENNReal.ofReal Kη * D := by
           refine (hKη hΩ h_du_mem).trans ?_
           exact mul_le_mul_of_nonneg_left
             (wkpNorm_chosenWeakPartial_le_succ (d := d) k u i) (zero_le _)
-        have hB : wkpNorm (d := d) k 2
+        have hB : iteratedWeakSobolevNorm (d := d) k 2
             (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω ≤
             ENNReal.ofReal (Ki i) * D := by
           refine (hKi i hΩ hu_k).trans ?_
@@ -202,7 +157,7 @@ theorem wkpNorm_smul_globalSmooth_uniform
         refine (add_le_add hA hB).trans ?_
         rw [← add_mul, ← ENNReal.ofReal_add hKη_nn (hKi_nn i)]
       have hsum_le :
-          (∑ i : Fin d, wkpNorm (d := d) k 2
+          (∑ i : Fin d, iteratedWeakSobolevNorm (d := d) k 2
             (chosenWeakPartial' 2 i (fun x => η x * u x) Ω) Ω) ≤
             ENNReal.ofReal (∑ i : Fin d, (Kη + Ki i)) * D := by
         refine (Finset.sum_le_sum (fun i _ => hpartial_le i)).trans ?_
@@ -218,11 +173,9 @@ section Headline
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
 
-/-- A function `C^∞` on an open set `U` and vanishing off a closed subset
-`C ⊆ U` is globally `C^∞`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 private lemma contDiff_of_contDiffOn_zero_off_closed
     {P : EuclN → ℝ} {U C : Set EuclN}
     (hU : IsOpen U) (hC : IsClosed C) (hCU : C ⊆ U)
@@ -237,27 +190,21 @@ private lemma contDiff_of_contDiffOn_zero_off_closed
     filter_upwards [hC.isOpen_compl.mem_nhds (fun hyC => hy (hCU hyC))] with z hz
       using hzero z hz
 
-/-- **The cutoff data for the compact `K`.** A smooth cutoff `ζ : EuclN → ℝ`,
-equal to `1` on a neighbourhood of the compact `K`, supported inside a compact
-subset of the open chart target. It depends only on `K` and the chart, not on
-any tensor section. -/
 private structure ChartCutoff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     where
-  /-- The cutoff function. -/
+
   toFun : EuclN → ℝ
-  /-- The cutoff is globally `C^∞`. -/
+
   smooth : ContDiff ℝ ∞ toFun
-  /-- The cutoff is `1` on the compact `K`. -/
+
   one_on : ∀ y ∈ K, toFun y = 1
-  /-- The cutoff has compact support inside the chart target. -/
+
   tsupport_subset : tsupport toFun ⊆ chartTargetEuclid (I := I) (M := M) α
-  /-- The cutoff has compact support. -/
+
   hasCompactSupport : HasCompactSupport toFun
 
-/-- Construction of the cutoff data: interpolate a compact `L` between `K` and
-the open chart target, then take the partition-of-unity cutoff equal to `1` on a
-neighbourhood of `K` and supported in `L`. -/
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_chartCutoff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     Nonempty (ChartCutoff (I := I) (M := M) α hK hK_target) := by
@@ -284,8 +231,6 @@ private lemma exists_chartCutoff (α : M) {K : Set EuclN}
            hasCompactSupport := HasCompactSupport.of_support_subset_isCompact
              hL_compact ((subset_tsupport _).trans hζ_supp) }⟩
 
-/-- For a chart coefficient `c`, smooth on the chart target, the product
-`ζ · c` of the cutoff and `c` is globally `C^∞`. -/
 private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
     {hK : IsCompact K} {hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α}
     (ζ : ChartCutoff (I := I) (M := M) α hK hK_target)
@@ -300,12 +245,6 @@ private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, zero_mul]
 
-/-- **The quantitative single-term multiplier bound.** For a chart coefficient
-`c` smooth on the chart target, there is a constant `Kc ≥ 0` — depending only on
-`c`, `K` and the order `m` — such that for every globally `C^∞`
-compactly-supported function `v` supported inside `K` and every open
-`Ω'' ⊆ chartTargetEuclid α`, the product `c · v` lies in `W^{m,2}(Ω'')` and
-`wkpNorm m 2 (c · v) Ω'' ≤ ENNReal.ofReal Kc · wkpNorm m 2 v Ω''`. -/
 private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {c : EuclN → ℝ}
@@ -314,8 +253,8 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
       tsupport v ⊆ K → ∀ {Ω'' : Set EuclN}, IsOpen Ω'' →
       Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemWkp (d := dimE) m 2 (fun y => c y * v y) Ω'' ∧
-        wkpNorm (d := dimE) m 2 (fun y => c y * v y) Ω'' ≤
-          ENNReal.ofReal Kc * wkpNorm (d := dimE) m 2 v Ω'' := by
+        iteratedWeakSobolevNorm (d := dimE) m 2 (fun y => c y * v y) Ω'' ≤
+          ENNReal.ofReal Kc * iteratedWeakSobolevNorm (d := dimE) m 2 v Ω'' := by
   classical
   obtain ⟨ζ⟩ := exists_chartCutoff (I := I) (M := M) α hK hK_target
   have hζc_smooth : ContDiff ℝ ∞ (fun y => ζ.toFun y * c y) :=
@@ -350,17 +289,14 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
   · rw [h_eq]
     exact hK₀ hΩ''_open hv_mem
 
-/-- The chart-Euclidean partial `euclidPartial l v` of a globally `C^∞`
-function `v` is globally `C^∞`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_contDiff {v : EuclN → ℝ} (hv : ContDiff ℝ ∞ v)
     (l : Fin dimE) :
     ContDiff ℝ ∞ (euclidPartial (E := E) l v) := by
   have h := contDiff_partial_eta (d := dimE) (by simpa using hv) l
   simpa [euclidPartial] using h
 
-/-- The chart-Euclidean partial derivative of a function vanishes off the
-topological support of the function: on the open complement of the support the
-function is locally zero, so its Fréchet derivative is zero there. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport {v : EuclN → ℝ}
     (l : Fin dimE) {y : EuclN} (hy : y ∉ tsupport v) :
     euclidPartial (E := E) l v y = 0 := by
@@ -373,9 +309,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport {v : EuclN → ℝ}
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hv_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- The chart-Euclidean partial `euclidPartial l v` of a compactly-supported
-function `v` is compactly supported, with topological support inside that of
-`v`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_tsupport_subset {v : EuclN → ℝ}
     (l : Fin dimE) :
     tsupport (euclidPartial (E := E) l v) ⊆ tsupport v := by
@@ -384,8 +318,7 @@ lemma euclidPartial_tsupport_subset {v : EuclN → ℝ}
   by_contra hyv
   exact hy (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hyv)
 
-/-- The chart-Euclidean partial `euclidPartial l v` of a function whose
-topological support lies inside a compact `K` has compact support inside `K`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_hasCompactSupport {K : Set EuclN} (hK : IsCompact K)
     {v : EuclN → ℝ} (hv_K : tsupport v ⊆ K) (l : Fin dimE) :
     HasCompactSupport (euclidPartial (E := E) l v) :=
@@ -393,18 +326,13 @@ lemma euclidPartial_hasCompactSupport {K : Set EuclN} (hK : IsCompact K)
     ((subset_tsupport _).trans
       ((euclidPartial_tsupport_subset (E := E) l).trans hv_K))
 
-/-- For a globally `C^∞` function `v` with `v ∈ W^{m+1,2}(Ω'')`, the `W^{m,2}`
-norm of the chart-Euclidean partial `euclidPartial l v` is bounded by the
-`W^{m+1,2}` norm of `v`. -/
 lemma wkpNorm_euclidPartial_le {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
-    wkpNorm (d := dimE) m 2 (euclidPartial (E := E) l v) Ω'' ≤
-      wkpNorm (d := dimE) (m + 1) 2 v Ω'' :=
+    iteratedWeakSobolevNorm (d := dimE) m 2 (euclidPartial (E := E) l v) Ω'' ≤
+      iteratedWeakSobolevNorm (d := dimE) (m + 1) 2 v Ω'' :=
   wkpNorm_classicalPartial_le (d := dimE) hΩ'' (by simpa using hv_smooth) hv l
 
-/-- For a globally `C^∞` function `v` with `v ∈ W^{m+1,2}(Ω'')`, the
-chart-Euclidean partial `euclidPartial l v` lies in `W^{m,2}(Ω'')`. -/
 lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
@@ -412,9 +340,7 @@ lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
   classicalPartial_memWkp_of_memWkp_succ (d := dimE) hΩ''
     (by simpa using hv_smooth) hv l
 
-/-- On the chart target the Christoffel correction `covDerivLowerOrderTerm`
-equals the finite sum over component multi-index pairs of `covDerivLowerOrderCoeff`
-against the chart components `tensorComponentEuclid g r s T α p`. -/
+omit [NeZero dimE] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (k : Fin dimE)
@@ -429,11 +355,6 @@ lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s T α p hy]
 
-/-- For a chart coefficient `c` smooth on the chart target and a globally `C^∞`
-function `v` supported inside the compact `K ⊆ chartTargetEuclid α`, the product
-`c · v` is globally `C^∞`: it equals the globally `C^∞` extension `(ζ · c) · v`
-everywhere, since off `K` the factor `v` vanishes and on `K` the cutoff `ζ` is
-`1`. -/
 private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {c : EuclN → ℝ}
@@ -453,7 +374,6 @@ private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
   rw [h_eq]
   exact hζc_smooth.mul hv
 
-/-- A finite chart-coefficient sum `∑ a, c a · v a` is globally `C^∞`. -/
 lemma chartCoeffSum_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {ι : Type*} (S : Finset ι) (c v : ι → EuclN → ℝ)
@@ -467,8 +387,7 @@ lemma chartCoeffSum_contDiff (α : M) {K : Set EuclN}
   exact chartCoeff_mul_contDiff (I := I) (M := M) α hK hK_target
     (hc a ha) (hv a ha) (hv_K a ha)
 
-/-- A finite chart-coefficient sum `∑ a, c a · v a` has compact support inside
-the compact `K` containing the supports of the `v a`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma chartCoeffSum_hasCompactSupport {K : Set EuclN}
     (hK : IsCompact K)
     {ι : Type*} (S : Finset ι) (c v : ι → EuclN → ℝ)
@@ -483,14 +402,6 @@ lemma chartCoeffSum_hasCompactSupport {K : Set EuclN}
     rw [image_eq_zero_of_notMem_tsupport (fun hy' => hyK (hv_K a ha hy')),
       mul_zero]))
 
-/-- **The quantitative finite-sum chart-coefficient multiplier bound.** For a
-finite family of chart coefficients `c a` smooth on the chart target there is a
-constant `Kc ≥ 0` — depending only on the family `c`, the compact `K` and the
-order `m` — such that for every family of globally `C^∞` compactly-supported
-functions `v a` supported inside `K` and every precompact open
-`Ω'' ⊆ chartTargetEuclid α`, the finite sum `∑ a, c a · v a` lies in
-`W^{m,2}(Ω'')` and its `W^{m,2}` norm is bounded by `Kc` times the sum of the
-`W^{m,2}` norms of the `v a`. The constant is uniform in the `v a`. -/
 private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)
@@ -501,17 +412,17 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
       (∀ a ∈ S, tsupport (v a) ⊆ K) → ∀ {Ω'' : Set EuclN}, IsOpen Ω'' →
       Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemWkp (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ∧
-        wkpNorm (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ≤
+        iteratedWeakSobolevNorm (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ≤
           ENNReal.ofReal Kc *
-            ∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'' := by
+            ∑ a ∈ S, iteratedWeakSobolevNorm (d := dimE) m 2 (v a) Ω'' := by
   classical
   have hper : ∀ a ∈ S, ∃ Ka : ℝ, 0 ≤ Ka ∧
       ∀ {v : EuclN → ℝ}, ContDiff ℝ ∞ v → HasCompactSupport v →
       tsupport v ⊆ K → ∀ {Ω'' : Set EuclN}, IsOpen Ω'' →
       Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemWkp (d := dimE) m 2 (fun y => c a y * v y) Ω'' ∧
-        wkpNorm (d := dimE) m 2 (fun y => c a y * v y) Ω'' ≤
-          ENNReal.ofReal Ka * wkpNorm (d := dimE) m 2 v Ω'' :=
+        iteratedWeakSobolevNorm (d := dimE) m 2 (fun y => c a y * v y) Ω'' ≤
+          ENNReal.ofReal Ka * iteratedWeakSobolevNorm (d := dimE) m 2 v Ω'' :=
     fun a ha => exists_wkpNorm_chartCoeff_mul_le (I := I) (M := M)
       α hK hK_target m (hc a ha)
   choose! Ka hKa_nn hKa using hper
@@ -522,27 +433,20 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     fun a ha => (hKa a ha (hv_smooth a ha) (hv_cpt a ha) (hv_K a ha)
       hΩ''_open hΩ''_target).1
   refine ⟨memWkp_finset_sum (d := dimE) hΩ''_open S _ h_term_mem, ?_⟩
-  set D : ℝ≥0∞ := ∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'' with hD_def
+  set D : ℝ≥0∞ := ∑ a ∈ S, iteratedWeakSobolevNorm (d := dimE) m 2 (v a) Ω'' with hD_def
   have h_term_le : ∀ a ∈ S,
-      wkpNorm (d := dimE) m 2 (fun y => c a y * v a y) Ω'' ≤
+      iteratedWeakSobolevNorm (d := dimE) m 2 (fun y => c a y * v a y) Ω'' ≤
         ENNReal.ofReal (Ka a) * D := by
     intro a ha
     refine ((hKa a ha (hv_smooth a ha) (hv_cpt a ha) (hv_K a ha)
       hΩ''_open hΩ''_target).2).trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
     exact Finset.single_le_sum
-      (f := fun b => wkpNorm (d := dimE) m 2 (v b) Ω'') (fun b _ => zero_le _) ha
+      (f := fun b => iteratedWeakSobolevNorm (d := dimE) m 2 (v b) Ω'') (fun b _ => zero_le _) ha
   refine (wkpNorm_finset_sum_le (d := dimE) hΩ''_open S _ h_term_mem
     Ka (fun a ha => hKa_nn a ha) D h_term_le).trans ?_
   rw [hD_def]
 
-/-- **The quantitative finite-sum chart-coefficient bound against a common
-bound.** A reformulation of `exists_wkpNorm_chartCoeffSum_le`: when every term
-function `v a` has `W^{m,2}` norm bounded by a common `G`, the `W^{m,2}` norm of
-the finite chart-coefficient sum `∑ a, c a · v a` is bounded by a uniform
-constant times `G`. This is the form the coefficient groups of
-`tensorComponentWeakRHS` consume — `G` is the sum of the chart-component norms of
-`F` or `T`. -/
 lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)
@@ -552,9 +456,9 @@ lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
       (∀ a ∈ S, ContDiff ℝ ∞ (v a)) → (∀ a ∈ S, HasCompactSupport (v a)) →
       (∀ a ∈ S, tsupport (v a) ⊆ K) → ∀ {Ω'' : Set EuclN}, IsOpen Ω'' →
       Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α → ∀ {G : ℝ≥0∞},
-      (∀ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'' ≤ G) →
+      (∀ a ∈ S, iteratedWeakSobolevNorm (d := dimE) m 2 (v a) Ω'' ≤ G) →
       MemWkp (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ∧
-        wkpNorm (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ≤
+        iteratedWeakSobolevNorm (d := dimE) m 2 (fun y => ∑ a ∈ S, c a y * v a y) Ω'' ≤
           ENNReal.ofReal Kc * G := by
   classical
   obtain ⟨Kc, hKc_nn, hKc⟩ :=
@@ -563,13 +467,12 @@ lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
   intro v hv_cd hv_cpt hv_K Ω'' hΩ''_open hΩ''_target G hG
   obtain ⟨h_mem, h_le⟩ := hKc hv_cd hv_cpt hv_K hΩ''_open hΩ''_target
   refine ⟨h_mem, h_le.trans ?_⟩
-  have hsum : (∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'') ≤ S.card • G :=
+  have hsum : (∑ a ∈ S, iteratedWeakSobolevNorm (d := dimE) m 2 (v a) Ω'') ≤ S.card • G :=
     Finset.sum_le_card_nsmul S _ G hG
   refine (mul_le_mul_of_nonneg_left hsum (zero_le _)).trans ?_
   rw [nsmul_eq_mul, ← mul_assoc, ENNReal.ofReal_mul hKc_nn, ENNReal.ofReal_natCast]
 
-/-- Two functions equal everywhere on an open set `U` are a.e.-equal for the
-volume measure restricted to `U`. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma eqOn_open_imp_ae_restrict {U : Set EuclN} (hU : IsOpen U)
     {f h : EuclN → ℝ} (hfh : Set.EqOn f h U) :
     f =ᵐ[volume.restrict U] h := by
@@ -577,9 +480,7 @@ lemma eqOn_open_imp_ae_restrict {U : Set EuclN} (hU : IsOpen U)
     ae_restrict_mem hU.measurableSet
   filter_upwards [hmem] with y hy using hfh hy
 
-/-- If two functions agree on an open set `U`, their chart-Euclidean partials
-agree at every point of `U`: on the open set the functions are eventually equal,
-so their Fréchet derivatives coincide there. -/
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_congr_of_eqOn_open {U : Set EuclN} (hU : IsOpen U)
     {f h : EuclN → ℝ} (hfh : Set.EqOn f h U)
     (l : Fin dimE) {y : EuclN} (hy : y ∈ U) :

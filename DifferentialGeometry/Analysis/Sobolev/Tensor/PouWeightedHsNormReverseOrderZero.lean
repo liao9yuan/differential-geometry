@@ -3,56 +3,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.IntrinsicL2Bridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
-/-!
-# Order-`0` reverse comparison: chart Hilbert-Schmidt norm ≤ intrinsic `L²`
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional
-real inner-product space `E`, this file establishes the base case of the
-reverse Sobolev comparison: the order-`0` Hilbert-Schmidt
-partition-of-unity-weighted chart-Sobolev norm of a smooth compactly-supported
-mixed `(r, s)`-tensor section is controlled by a single constant times the
-intrinsic metric `L²` norm:
-
-`(tensorPouSobolevHsNorm g 0 S).toReal
-  ≤ C · tensorL2Norm g r s S.toFun`.
-
-## Strategy
-
-At order `0` the inner finite sum collapses to the single derivative order
-`j = 0`, where the iterated Fréchet derivative evaluated on the empty tuple is
-the function value. The per-chart integrand is therefore
-
-`∫_{ChTE α} ρ_α(pull y) · |raw_{IJ}(pull y)|² dVol_Eucl`,
-
-with the partition-of-unity weight `ρ_α` to the *first* power and Lebesgue
-volume on the Euclidean chart target.
-
-The square-root reshuffle introduces the manifold-side scalar field
-`w_{IJ} := √ρ_α · raw_{IJ}`; since `|√ρ_α · raw|² = ρ_α · |raw|²` (because
-`ρ_α ≥ 0`), the per-chart integrand equals
-`∫_{ChTE α} |chartPushedRaw α w_{IJ}|² dVol_Eucl`, i.e. the squared
-`L²` norm of the raw chart-push of `w_{IJ}`. The reverse change-of-variables
-bridge
-`eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`
-(`tsupport w_{IJ} ⊆ tsupport ρ_α`) bounds this by the intrinsic `L²` norm of
-`w_{IJ}`, which in turn is controlled — via the same trivialization quadratic
-form / projection operator-norm chain as the forward component bound, but with
-`ρ_α ≤ 1` in place of `ρ_α² ≤ 1` — by `tensorL2Norm g r s S.toFun`.
-
-## Main results
-
-* `tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner` — pointwise
-  quadratic bound on the square-root-weighted raw component.
-* `eLpNorm_tensorChartComponentSqrtPou_le_uniform` — uniform intrinsic `L²`
-  bound for the square-root-weighted raw component.
-* `tensorPouSobolevHsNorm_zero_le_tensorL2Norm` — the headline base-case
-  reverse bound.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -81,10 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The square-root-partition-of-unity-weighted raw chart-frame scalar
-component: `√(ρ_α) · raw_{IJ}` as a manifold-side scalar field. Its square is
-`ρ_α · |raw_{IJ}|²`, the (first-power) weight appearing in the order-`0`
-Hilbert-Schmidt chart-Sobolev integrand. -/
 noncomputable def tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -95,6 +45,7 @@ noncomputable def tensorChartComponentSqrtPou
     Real.sqrt (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) *
       tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartComponentSqrtPou_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -104,7 +55,7 @@ noncomputable def tensorChartComponentSqrtPou
       Real.sqrt (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) *
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := rfl
 
-/-- The square of the square-root-weighted raw component is `ρ_α · |raw|²`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentSqrtPou_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -117,9 +68,6 @@ lemma tensorChartComponentSqrtPou_sq
     (chartAtlasPOU I M).nonneg α b
   rw [tensorChartComponentSqrtPou_apply, mul_pow, Real.sq_sqrt hρ_nn]
 
-/-- Pointwise quadratic bound on the square-root-weighted raw component:
-`(√ρ_α · raw_{IJ})² ≤ C · ⟨S, S⟩_g` uniformly in `(S, Idx, Jdx)`, with `C ≥ 0`
-depending only on `(g, r, s, α)`. -/
 lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -265,9 +213,6 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-- Squared intrinsic `L²` bound: the `(eLpNorm)²` of the square-root-weighted
-raw component against the Riemannian volume measure is bounded by
-`ofReal (C · ⟨S, S⟩_{L²})`, uniformly in `(S, Idx, Jdx)`. -/
 private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -335,11 +280,6 @@ private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
 
-/-- **Uniform intrinsic `L²` bound for the square-root-weighted raw
-component.** For each chart `α` and ranks `(r, s)`, there is `C ≥ 0`
-(depending only on `(g, r, s, α)`) so that for every `S`, `(Idx, Jdx)`, the
-intrinsic `L²` norm of `√ρ_α · raw_{IJ}` is at most
-`ofReal C · ofReal (tensorL2Norm g r s S.toFun)`. -/
 theorem eLpNorm_tensorChartComponentSqrtPou_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -387,8 +327,7 @@ theorem eLpNorm_tensorChartComponentSqrtPou_le_uniform
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
   exact h_eLpNorm_le
 
-/-- The support of `√ρ_α` equals the support of `ρ_α` (the square root vanishes
-exactly where its argument does, since `ρ_α ≥ 0`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma support_sqrt_pou_eq
     (α : M) :
     Function.support
@@ -405,7 +344,7 @@ private lemma support_sqrt_pou_eq
       (chartAtlasPOU I M).nonneg α b
     exact hb (le_antisymm hle hρ_nn)
 
-/-- The square-root-weighted raw component is supported in `tsupport ρ_α`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tsupport_tensorChartComponentSqrtPou_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -425,7 +364,7 @@ private lemma tsupport_tensorChartComponentSqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq (I := I) (M := M) α]
 
-/-- The square-root-weighted raw component is globally continuous on `M`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma continuous_tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -471,7 +410,7 @@ private lemma continuous_tensorChartComponentSqrtPou
       by_contra hne; exact hy_notsupp hne
     exact hzero.symm
 
-/-- The square-root-weighted raw component is measurable. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma measurable_tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -482,6 +421,7 @@ private lemma measurable_tensorChartComponentSqrtPou
   (continuous_tensorChartComponentSqrtPou (I := I) (M := M)
     g r s S α Idx Jdx).measurable
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -599,10 +539,6 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
           ENNReal.ofReal (tensorL2Norm (I := I) (M := M) g r s S.toFun) := by
         rw [ENNReal.ofReal_mul hC_pos.le, mul_assoc]
 
-/-- A non-negative real constant `B_α` (depending only on `(g, r, s, α)`) such
-that the Euclidean `L²` norm of the square-root chart-push is bounded by
-`ofReal B_α · ofReal (tensorL2Norm g r s S.toFun)` uniformly in
-`(S, Idx, Jdx)`. -/
 private noncomputable def sqrtPouChartConst
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
   (eLpNorm_chartPushedRaw_sqrtPou_le_uniform (I := I) (M := M) g r s α).choose
@@ -630,12 +566,6 @@ private lemma sqrtPouChartConst_spec
   (eLpNorm_chartPushedRaw_sqrtPou_le_uniform (I := I) (M := M)
     g r s α).choose_spec.2 S Idx Jdx
 
-/-- **Order-`0` reverse comparison.** There is a non-negative real constant `C`
-(depending only on `(g, r, s)`) such that for every smooth compactly-supported
-`(r, s)`-tensor section `S`, the order-`0` Hilbert-Schmidt
-partition-of-unity-weighted chart-Sobolev norm is controlled by the intrinsic
-metric `L²` norm:
-`(tensorPouSobolevHsNorm g 0 S).toReal ≤ C · tensorL2Norm g r s S.toFun`. -/
 theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -881,8 +811,6 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
     _ = Real.sqrt Ksum * L := by
         rw [Real.sqrt_mul hKsum_nn, Real.sqrt_sq hL_nn]
 
-/-- The intrinsic `L²` norm of `S.toFun` agrees with the metric `L²`
-completion-norm of `S`. -/
 lemma tensorL2Norm_toFun_eq_norm
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (S : SmoothCcTensor g r s) :
     tensorL2Norm (I := I) (M := M) g r s S.toFun = ‖S‖ := by
@@ -891,12 +819,6 @@ lemma tensorL2Norm_toFun_eq_norm
   unfold tensorL2Norm
   rw [← h_sq, Real.sqrt_sq (norm_nonneg _)]
 
-/-- **Order-`0` reverse comparison, completion-norm form.** There is a
-non-negative real constant `C` (depending only on `(g, r, s)`) such that for
-every smooth compactly-supported `(r, s)`-tensor section `T`,
-`(tensorPouSobolevHsNorm g 0 T).toReal ≤ C · ‖T‖`. This is exactly the reverse
-seminorm hypothesis consumed by
-`TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`. -/
 theorem tensorPouSobolevHsNorm_zero_toReal_le_norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -8,49 +8,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowGeodesicLink
 import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Chart-of-`TM` identification at the zero section
-
-This file delivers the **chart-of-`TM` identification at `⟨α, 0⟩`**: the
-extended chart of `TangentBundle I M` at the zero-section point
-`⟨α, (0 : E)⟩` factorises as the product of the base chart at `α` and the
-fibre trivialisation at `α`, applied in turn.
-
-The identification is the precise translation between two equivalent
-descriptions of phase-space curves on `E × E`:
-
-1. the *chart-pushed lift* `chartPushLift f t₀ t = extChartAt I.tangent (f t₀) (f t)`,
-   which uses the chart of `TM` at the base point `f t₀`, and is the
-   natural object produced by `IsMIntegralCurveAt.eventually_hasDerivAt`;
-2. the *chart-product expression* `(extChartAt I α p.proj, chartFiberCoord α p)`,
-   which is the natural input to the chart-coordinate phase-space
-   vector field `chartPhaseVF g α : E × E → E × E`.
-
-## Main results
-
-* `extChartAt_tangent_zero_apply` — the headline identification:
-  `extChartAt I.tangent ⟨α, 0⟩ p = (extChartAt I α p.proj, (triv α).continuousLinearMapAt ℝ p.proj p.snd)`.
-  Equivalent restatement in terms of `chartFiberCoord α p`.
-
-* `extChartAt_tangent_apply_proj` — projection of the first component:
-  `(extChartAt I.tangent q p).1 = extChartAt I α p.proj` when both `α`,
-  `p.proj`, and `q.proj` lie in `(chartAt H α).source` (this generalises
-  the headline to chart basepoints other than `⟨α, 0⟩`, since the chart
-  of `TM` depends only on the projection).
-
-* `extChartAt_tangent_apply_snd` — fibre component:
-  `(extChartAt I.tangent q p).2 = chartFiberCoord (q.proj) p` when
-  `p.proj ∈ (chartAt H (q.proj)).source`.
-
-* `chartPushLift_eq_pair` — combining the two: the chart-pushed lift
-  decomposes as `(extChartAt I (f t₀).proj (f t).proj, chartFiberCoord (f t₀).proj (f t))`
-  on the chart-source of `(f t₀).proj`.
-
-* `chartPushLift_self_apply_at_zero_section` — sanity reduction at the
-  zero-section base point `f t₀ = ⟨α, 0⟩`.
--/
 
 noncomputable section
 
@@ -63,7 +21,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -72,10 +30,7 @@ open DifferentialGeometry.Integral.Measure
 
 section ChartOfTM
 
-/-- **Chart-of-`TM` identification at a base point `q`, fibre component.**
-For `p : TangentBundle I M` whose projection lies in the chart-source of
-`q.proj`, the fibre component of `extChartAt I.tangent q p` equals the
-trivialisation's `continuousLinearMapAt` applied to `p.snd`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_apply_snd
     (q : TangentBundle I M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -103,10 +58,7 @@ theorem extChartAt_tangent_apply_snd
   rw [← hcoe_at]
   rfl
 
-/-- **Chart-of-`TM` identification at a base point `q`, base component.**
-For `p : TangentBundle I M` whose projection lies in the chart-source of
-`q.proj`, the base component of `extChartAt I.tangent q p` equals
-`extChartAt I q.proj p.proj`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_apply_fst
     (q : TangentBundle I M) {p : TangentBundle I M}
     (_hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -122,10 +74,7 @@ theorem extChartAt_tangent_apply_fst
     TangentBundle.trivializationAt_fst _ _
   rw [hp1]
 
-/-- **Chart-of-`TM` identification at `⟨α, 0⟩` — full form.** The
-extended chart of `TM` at the zero-section point `⟨α, 0⟩` factors as the
-product of the base extended chart at `α` and the fibre trivialisation
-(viewed as a `continuousLinearMapAt`) at `α`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_zero_apply
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -141,11 +90,7 @@ theorem extChartAt_tangent_zero_apply
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := p) (by exact hp)
     exact h
 
-/-- **Chart-of-`TM` identification at `⟨α, 0⟩` — `chartFiberCoord` form.**
-Same as `extChartAt_tangent_zero_apply` but with the fibre component
-expressed via `chartFiberCoord α p` (which is defined as
-`(triv α p).2`). This is the form directly consumed by the chart-pushed
-lift's component decomposition. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_zero_apply_chartFiber
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -169,8 +114,7 @@ section ChartPushLiftDecomposition
 
 variable [I.Boundaryless]
 
-/-- The chart of `TM` at a point `q` only depends on `q.proj`: it equals
-the chart of `TM` at `⟨q.proj, 0⟩`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem extChartAt_tangent_eq_at_proj
     (q : TangentBundle I M) :
     extChartAt I.tangent q =
@@ -178,10 +122,7 @@ theorem extChartAt_tangent_eq_at_proj
   classical
   rw [FiberBundle.extChartAt, FiberBundle.extChartAt]
 
-/-- **Chart-pushed lift decomposition.** For a curve `f : ℝ → TM` and a
-base time `t₀`, on times where `(f t).proj ∈ (chartAt H (f t₀).proj).source`,
-the chart-pushed lift decomposes as the pair
-`(extChartAt I (f t₀).proj (f t).proj, chartFiberCoord (f t₀).proj (f t))`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_eq_pair
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
@@ -193,25 +134,21 @@ theorem chartPushLift_eq_pair
   rw [extChartAt_tangent_eq_at_proj (I := I) (f t₀)]
   exact extChartAt_tangent_zero_apply_chartFiber (I := I) (f t₀).proj ht
 
-/-- **First component of the chart-pushed lift.** For times where
-`(f t).proj` lies in the chart-source of `(f t₀).proj`, the first
-component is the base-chart image `extChartAt I (f t₀).proj (f t).proj`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_fst
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
     (chartPushLift (I := I) f t₀ t).1 = extChartAt I (f t₀).proj (f t).proj := by
   rw [chartPushLift_eq_pair (I := I) t₀ t ht]
 
-/-- **Second component of the chart-pushed lift.** For times where
-`(f t).proj` lies in the chart-source of `(f t₀).proj`, the second
-component is the fibre coordinate `chartFiberCoord (f t₀).proj (f t)`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_snd
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
     (chartPushLift (I := I) f t₀ t).2 = chartFiberCoord (I := I) (f t₀).proj (f t) := by
   rw [chartPushLift_eq_pair (I := I) t₀ t ht]
 
-/-- **Chart-pushed lift at `t = t₀`.** Self-application identity. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_self_pair
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
     chartPushLift (I := I) f t₀ t₀ =
@@ -221,8 +158,7 @@ theorem chartPushLift_self_pair
   apply chartPushLift_eq_pair
   exact mem_chart_source H (f t₀).proj
 
-/-- **Chart-pushed lift at a zero-section base.** When `f t₀ = ⟨α, 0⟩`,
-the self value is `(extChartAt I α α, 0)`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_self_apply_at_zero_section
     {f : ℝ → TangentBundle I M} {α : M} (t₀ : ℝ)
     (hf : f t₀ = (⟨α, (0 : E)⟩ : TangentBundle I M)) :
@@ -242,13 +178,6 @@ section HeadlineBridge
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Headline bridge (chart-phase-ODE-conditional form).** Given a
-chart basepoint `p : M`, an initial velocity `v_chart : E`, a curve
-`f : ℝ → TM` with `f 0 = ⟨p, v_chart⟩` (the chart-α coordinate of `v`
-being `v_chart`), and the chart-phase-ODE hypothesis on the chart-pushed
-lift, the chart-pushed-flow's projection `(extChartAt I p).symm ∘ Φ`
-agrees with the manifold curve `t ↦ (f t).proj` on a neighbourhood of
-`0`. -/
 theorem chartPushedFlow_eq_lift_proj_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {f : ℝ → TangentBundle I M}
@@ -298,14 +227,6 @@ theorem chartPushedFlow_eq_lift_proj_eventually
     rw [extChartAt_source]; exact ht_src
   exact ((extChartAt I p).left_inv ht_src').symm
 
-/-- **Closure of the bridge headline — chartPushedFlow ↔ witness curve
-(chart-phase-ODE-conditional).** Combining
-`chartPushedFlow_eq_lift_proj_eventually` with the projection identity
-on the lift: if `f` is a lift of a curve `γ` whose lift is an integral
-curve of `geodesicVectorFieldChart g p` on a neighbourhood of `0`,
-`f 0 = ⟨p, v_chart⟩`, and the chart-pushed lift satisfies the chart-phase
-ODE on a neighbourhood of `0`, then the chart-pushed flow's projection
-agrees with `γ` on a neighbourhood of `0`. -/
 theorem chartPushedFlow_eq_witness_curve_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {γ : ℝ → M}
@@ -384,19 +305,6 @@ theorem chartPushedFlow_eq_witness_curve_eventually
   rw [← hproj t]
   exact ht
 
-/-- **Bridge headline against `maximalGeodesicChosenCurve`.** Given a
-maximal-geodesic witness at some `t₁`, and a lift `f` that
-(a) projects to the chosen-witness curve, (b) starts at `⟨p, v⟩`, and
-(c) is a local integral curve of `geodesicVectorFieldChart g p` at `0`,
-and admits a chart-pushed form satisfying the chart-phase ODE near `0`:
-there exists a chart-pushed flow `Φ` such that on a neighbourhood of
-`0`, the chart-pushed flow's projection equals the chosen-witness curve.
-
-The hypothesis `hd` (chart-phase ODE of the chart-pushed lift) is the
-sole input that must be discharged downstream — typically by combining
-`IsMIntegralCurveAt.eventually_hasDerivAt` with the
-`tangentCoordChange I.tangent → chartPhaseVF` identification, which in
-turn uses the chart-of-`TM` factorisation delivered above. -/
 theorem chartPushedFlow_eq_maximalGeodesicChosenCurve_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {t₁ : ℝ} (ht₁ : t₁ ∈ maximalGeodesicInterval (I := I) g p v)

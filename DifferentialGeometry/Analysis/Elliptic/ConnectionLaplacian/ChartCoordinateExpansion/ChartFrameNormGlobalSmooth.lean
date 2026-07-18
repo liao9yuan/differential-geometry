@@ -1,45 +1,13 @@
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
+import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 
-/-!
-# Globally smooth chart-frame Gram-Schmidt section uniformizing the bumped
-orthonormal frame
-
-For a closed Riemannian manifold `(M, g)`, a chart centre `α : M`, and an
-index `i : Fin (Module.finrank ℝ E)`, this file constructs a globally smooth
-tangent-bundle section
-`chartFrameNormGlobalSmooth g α i : Cₛ^∞⟮I; E, TangentSpace I⟯`
-that agrees with the un-bumped Gram-Schmidt chart-frame section
-`chartFrameNorm g α i` on an open neighbourhood of the chart-α
-partition-of-unity tsupport. The local agreement is then upgraded into a
-neighbourhood agreement with `smoothOrthoFrame g b i` for each `b` in the
-partition-of-unity tsupport intersected with the chart-α Levi-Civita good set,
-under the locally-constant chart predicate together with the equation
-`chartAt H b = chartAt H α`.
-
-The construction proceeds by a nested compact-open separation:
-
-1. The chart-α partition-of-unity tsupport `K₁` is compact and contained in
-   `(chartAt H α).source`.
-2. Apply `IsCompact.exists_isOpen_closure_subset` (regular space) to obtain an
-   open `V₁` with `K₁ ⊆ V₁ ⊆ closure V₁ ⊆ (chartAt H α).source`.
-3. Repeat with the compact `closure V₁` to obtain `V₂` with `closure V₁ ⊆ V₂
-   ⊆ closure V₂ ⊆ (chartAt H α).source`.
-4. The manifold Urysohn theorem `exists_contMDiff_zero_iff_one_iff_of_isClosed`
-   delivers a smooth bump `ψ : M → ℝ` with `ψ = 1` on `closure V₁`, `ψ = 0`
-   on the closed `M \ V₂`, and range `⊆ [0,1]`.
-5. The product `ψ • chartFrameNorm g α i` is then globally smooth via
-   `ContMDiffOn.smul_section_of_tsupport`, with `tsupport ψ ⊆ closure V₂
-   ⊆ (chartAt H α).source` (= trivialization base set).
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -62,15 +30,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- File-local: `LocallyCompactSpace M`. The model is finite-dim normed, so it
-is locally compact; transfer through `ChartedSpace.locallyCompactSpace`. -/
+omit [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] : LocallyCompactSpace M := by
   haveI : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
-/-- File-local: `RegularSpace M`, derived from `T2Space` (giving `R1Space`)
-and `LocallyCompactSpace` (giving `WeaklyLocallyCompactSpace`). -/
 private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] [T2Space M] : RegularSpace M := by
   haveI : LocallyCompactSpace M := locallyCompactSpace_M (E := E) (H := H) (M := M) I
@@ -78,15 +43,14 @@ private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
   haveI : R1Space M := T2Space.r1Space
   infer_instance
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-- From a compact `K` inside an open `U`, produce an open `V` with
-`K ⊆ V ⊆ closure V ⊆ U`. Uses `IsCompact.exists_isOpen_closure_subset` with
-the regular-space instance derived locally on `M`. -/
+omit [ChartedSpace H M] [T2Space M] in
 private lemma exists_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -96,9 +60,7 @@ private lemma exists_open_closure_subset_open_of_isCompact
   have hU_nhdsSet : U ∈ 𝓝ˢ K := hU_open.mem_nhdsSet.mpr hKU
   exact hK.exists_isOpen_closure_subset hU_nhdsSet
 
-/-- The doubly-nested separation: from a compact `K` inside an open `U`,
-produce open sets `V₁, V₂` with
-`K ⊆ V₁ ⊆ closure V₁ ⊆ V₂ ⊆ closure V₂ ⊆ U`. -/
+omit [ChartedSpace H M] [T2Space M] in
 private lemma exists_open_closure_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -114,9 +76,7 @@ private lemma exists_open_closure_open_closure_subset_open_of_isCompact
       (M := M) I hclos_V₁_compact hU_open hclos_V₁_U
   refine ⟨V₁, V₂, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_U⟩
 
-/-- Data for the global bump: open sets `V₁ ⊆ V₂` whose closures nest inside
-the chart source, and a smooth bump `ψ : M → ℝ` that is `1` on `closure V₁`,
-`0` on `V₂ᶜ`, and takes values in `[0, 1]`. -/
+omit [I.Boundaryless] in
 private lemma exists_globalBump_data (α : M) :
     ∃ V₁ V₂ : Set M, ∃ ψ : M → ℝ,
       IsOpen V₁ ∧ IsOpen V₂ ∧
@@ -163,20 +123,18 @@ private lemma exists_globalBump_data (α : M) :
   exact ⟨V₁, V₂, ψ, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_src,
     hψ_smooth', hψ_range, hψ_t, hψ_s⟩
 
-/-- The chosen open inner set `V₁` for `α`. -/
 private noncomputable def globalBumpV₁ (α : M) : Set M :=
   Classical.choose (exists_globalBump_data (I := I) (M := M) α)
 
-/-- The chosen open outer set `V₂` for `α`. -/
 private noncomputable def globalBumpV₂ (α : M) : Set M :=
   Classical.choose (Classical.choose_spec
     (exists_globalBump_data (I := I) (M := M) α))
 
-/-- The chosen smooth bump function `ψ` for `α`. -/
 private noncomputable def globalBumpψ (α : M) : M → ℝ :=
   Classical.choose (Classical.choose_spec
     (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
+omit [I.Boundaryless] in
 private lemma globalBumpData_spec (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) ∧
       IsOpen (globalBumpV₂ (I := I) (M := M) α) ∧
@@ -198,42 +156,46 @@ private lemma globalBumpData_spec (α : M) :
     (Classical.choose_spec
       (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
+omit [I.Boundaryless] in
 private lemma globalBumpV₁_isOpen (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).1
 
+omit [I.Boundaryless] in
 private lemma pouTsupport_subset_globalBumpV₁ (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       globalBumpV₁ (I := I) (M := M) α :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.1
 
+omit [I.Boundaryless] in
 private lemma closure_globalBumpV₁_subset_globalBumpV₂ (α : M) :
     closure (globalBumpV₁ (I := I) (M := M) α) ⊆
       globalBumpV₂ (I := I) (M := M) α :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma closure_globalBumpV₂_subset_chartAt_source (α : M) :
     closure (globalBumpV₂ (I := I) (M := M) α) ⊆ (chartAt H α).source :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ) ∞ (globalBumpψ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_eq_one_on_closure_V₁ (α : M) {b : M}
     (hb : b ∈ closure (globalBumpV₁ (I := I) (M := M) α)) :
     globalBumpψ (I := I) (M := M) α b = 1 :=
   ((globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.2.2.1 b).mp hb
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_eq_zero_off_V₂ (α : M) {b : M}
     (hb : b ∈ (globalBumpV₂ (I := I) (M := M) α)ᶜ) :
     globalBumpψ (I := I) (M := M) α b = 0 :=
   ((globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.2.2.2 b).mp hb
 
-/-- A globally smooth tangent-bundle section that, on an open neighbourhood of
-the chart-α partition-of-unity tsupport, agrees with the un-bumped Gram-Schmidt
-chart-frame section `chartFrameNorm g α i`. -/
 noncomputable def chartFrameNormGlobalSmooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -269,7 +231,7 @@ noncomputable def chartFrameNormGlobalSmooth
     globalBumpψ (I := I) (M := M) α b • chartFrameNorm (I := I) g α i b, ?_⟩
   exact h
 
-/-- Pointwise formula for the global section. -/
+omit [I.Boundaryless] in
 private lemma chartFrameNormGlobalSmooth_toFun_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) :
@@ -279,9 +241,7 @@ private lemma chartFrameNormGlobalSmooth_toFun_apply
   unfold chartFrameNormGlobalSmooth
   rfl
 
-/-- An open neighbourhood of the chart-α partition-of-unity tsupport on which
-the globally smooth section equals the un-bumped Gram-Schmidt chart-frame
-section `chartFrameNorm g α i`. -/
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -306,17 +266,7 @@ theorem chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
       globalBumpψ_eq_one_on_closure_V₁ (I := I) (M := M) α (subset_closure hb)
     rw [chartFrameNormGlobalSmooth_toFun_apply, hψ, one_smul]
 
-/-- **Orthonormality of the globally smooth chart-α frame**. On the intersection
-of the chart-α partition-of-unity tsupport with the chart-α Levi-Civita good
-set, the globally smooth section `chartFrameNormGlobalSmooth g α i` satisfies
-the orthonormality identity at every base point `b`.
-
-The proof combines the local-equality lemma
-`chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd` (showing the
-global section equals `chartFrameNorm g α i` on an open neighbourhood of the
-tsupport, contained in the chart-α source) with `chartFrameNorm_orthonormal`
-(asserting pointwise orthonormality of the Gram-Schmidt frame on the chart-α
-trivialization base set). -/
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M}

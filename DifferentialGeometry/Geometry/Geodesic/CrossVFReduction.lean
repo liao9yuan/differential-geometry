@@ -2,25 +2,14 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Geodesic.ProjDerivative
-import DifferentialGeometry.Geometry.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 import Mathlib.Analysis.Calculus.Deriv.Mul
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Cross-chart-basepoint reduction for the geodesic vector field
-
-This file packages the cross-VF reduction bridge: an integral curve of the
-chart-fixed geodesic vector field at one basepoint `α` is, on the overlap of
-chart sources, also an integral curve of the chart-fixed geodesic vector field
-at a different basepoint `α'`. Combined with chart-fixed Picard–Lindelöf
-existence and uniqueness, this yields the unconditional
-`IsGeodesicAt → HasGeodesicEquationAt` bridge.
--/
 
 noncomputable section
 
@@ -38,13 +27,11 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- **Manifold Jacobian = chart Jacobian (boundaryless).** Re-derivation of the
-identity `tangentCoordChange I x y z = chartTransitionAt x y (extChartAt I x z)`
-on the chart overlap. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (x y : M) (z : M) :
     tangentCoordChange I x y z =
@@ -54,18 +41,14 @@ private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
-/-- The "apply the chart-`p.proj`→`α` Jacobian to the velocity slot" map.
-This is the closed form of the fibre block of the iterated-tangent transition
-near the chart base point. -/
 private def applyJac (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   chartTransitionAt (I := I) p.proj α z.1 z.2
 
-/-- Near the chart base point, `secondaryTrivSndForm α p` agrees with
-`applyJac α p`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
-    secondaryTrivSndForm (I := I) α p =ᶠ[𝓝 ((extChartAt I.tangent p) p)]
+    secondaryTrivFiberComponentMap (I := I) α p =ᶠ[𝓝 ((extChartAt I.tangent p) p)]
       applyJac (I := I) α p := by
   classical
   have hbp1 : ((extChartAt I.tangent p) p).1 = extChartAt I p.proj p.proj :=
@@ -97,13 +80,12 @@ private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
   refine Filter.eventuallyEq_of_mem (hUopen.mem_nhds hbp_memU) ?_
   intro z hz
   obtain ⟨hz_tgt, hz_src⟩ := hz
-  unfold secondaryTrivSndForm applyJac
+  unfold secondaryTrivFiberComponentMap applyJac
   rw [tangentCoordChange_eq_chartTransitionAt (I := I) p.proj α ((extChartAt I p.proj).symm z.1)]
   congr 2
   exact (extChartAt I p.proj).right_inv hz_tgt
 
-/-- `applyJac` is differentiable at the chart base point: the foot-Jacobian
-`fderiv (chartTransitionMap p.proj α)` is differentiable there. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) :
     DifferentiableAt ℝ (fun z => chartTransitionAt (I := I) α β z) x := by
@@ -114,10 +96,7 @@ private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     chartTransitionAt_smooth (I := I) α β
   exact (hsmooth.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
 
-/-- **Fréchet derivative of the apply-Jacobian map.** By the bilinear chain
-rule, `fderiv (applyJac α p) bp (a, b) =
-  chartTransitionAt p.proj α x₀ b + (fderiv (chartTransitionAt p.proj α ·) x₀ a) v₀`,
-where `x₀ = bp.1`, `v₀ = bp.2`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_applyJac_apply [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -162,11 +141,7 @@ private lemma fderiv_applyJac_apply [I.Boundaryless]
   rw [hc_fderiv]
   rfl
 
-/-- **Coordinate form of the foot-slot second-derivative correction.** The
-`c`-th chart coordinate of the foot-slot derivative
-`(fderiv (chartTransitionAt p.proj α ·) x₀ v) v` is the symmetric
-second-derivative sum `∑_{i,j} (∂_i J^c_j x₀) vⁱ vʲ`, where
-`J = chartTransitionJacEntry p.proj α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartCoord_fderiv_chartTransitionAt [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -244,19 +219,6 @@ private lemma chartCoord_fderiv_chartTransitionAt [I.Boundaryless]
   rw [hLHS_expand]
   rw [Finset.sum_comm]
 
-/-- **Pointwise chart-invariance of the geodesic spray.** At a tangent-bundle
-point `p` whose foot `p.proj` lies in the chart-source at `α`, the chart-`α`
-fixed geodesic vector field coincides with the basepoint-free geodesic vector
-field `geodesicVectorField g p` (built in the chart centred at `p.proj`).
-
-The first component already coincides by `geodesicVectorFieldChart_fst`
-(both equal `p.snd`). The second component is the genuine content: the
-chart-`α` Christoffel acceleration, pushed through the second-tangent-bundle
-chart transition from `α`-coordinates to `p.proj`-coordinates, equals the
-chart-`p.proj` Christoffel acceleration. This is the non-tensorial
-transformation law of the Christoffel symbols (`chartChristoffelContraction_transform`)
-together with the velocity-Jacobian correction encoded by the `snd`-block of
-the iterated tangent-bundle transition derivative. -/
 theorem geodesicVectorFieldChart_eq_geodesicVectorField
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -301,18 +263,18 @@ theorem geodesicVectorFieldChart_eq_geodesicVectorField
       rw [hh]; exact h2
     have hsnd_clm :
         ((e.continuousLinearMapAt ℝ p) (geodesicVectorFieldChart (I := I) g α p)).2 =
-          (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+          (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp)
             (geodesicVectorFieldChart (I := I) g α p) :=
       snd_continuousLinearMapAt_secondaryTriv (I := I) (α := α) (p := p) hp
         (geodesicVectorFieldChart (I := I) g α p)
     have hkey0 : (geodesicVectorFieldChartFiber (I := I) g α p).2 =
-        (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+        (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp)
           (geodesicVectorFieldChart (I := I) g α p) := by
       rw [← hsnd_clm, hlin_at_gvf]
     have hrangeT : (range (I.tangent) : Set (E × E)) = Set.univ :=
       ModelWithCorners.Boundaryless.range_eq_univ (I := I.tangent)
     have hfderiv_eq :
-        fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp =
+        fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp =
           fderiv ℝ (applyJac (I := I) α p) bp := by
       rw [hrangeT, fderivWithin_univ]
       exact Filter.EventuallyEq.fderiv_eq
@@ -424,11 +386,6 @@ theorem geodesicVectorFieldChart_eq_geodesicVectorField
     rw [hXval, geodesicVectorField_snd]
   apply Prod.ext hfst hsnd
 
-/-- **Cross-basepoint pointwise coincidence of the chart-fixed geodesic vector
-field.** At a tangent-bundle point `p` whose foot lies in both chart-sources,
-the chart-`α` and chart-`α'` fixed geodesic vector fields agree as elements of
-`T_p(TM)`. Both equal the basepoint-free geodesic spray
-`geodesicVectorField g p` by `geodesicVectorFieldChart_eq_geodesicVectorField`. -/
 theorem geodesicVectorFieldChart_eq_of_proj_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α α' : M)
@@ -440,12 +397,6 @@ theorem geodesicVectorFieldChart_eq_of_proj_mem
   rw [geodesicVectorFieldChart_eq_geodesicVectorField (I := I) g α hα,
     geodesicVectorFieldChart_eq_geodesicVectorField (I := I) g α' hα']
 
-/-- **Cross-basepoint coincidence of the chart-fixed geodesic vector field on
-integral curves.** A curve which is a local integral curve at `t₀` of the
-chart-fixed geodesic vector field at one basepoint `α` is also a local
-integral curve at `t₀` of the chart-fixed geodesic vector field at a
-different basepoint `α'`, provided the projection of the curve at `t₀` lies
-in both chart sources. -/
 theorem gc_vf_chart_coincidence
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α α' : M)
@@ -474,11 +425,6 @@ theorem gc_vf_chart_coincidence
     geodesicVectorFieldChart_eq_of_proj_mem (I := I) g α α' (p := f t) ht_α2 ht_α'2
   exact hvf_eq ▸ htD
 
-/-- **Cross-VF projection-uniqueness for `IsGeodesicAt`.** From an
-`IsGeodesicAt`-witness `(α, f)` of `γ` at `t₀`, construct a
-chart-`γ(t₀)`-centred local integral curve `f₁` of the chart-fixed geodesic
-vector field at `γ(t₀)` whose projection agrees with `γ` on a neighbourhood
-of `t₀`. -/
 theorem gc_cross_vf_projection_uniqueness
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
@@ -511,9 +457,6 @@ theorem gc_cross_vf_projection_uniqueness
   filter_upwards [hfe] with t ht
   rw [ht, hproj t]
 
-/-- **Unconditional bridge `IsGeodesicAt → HasGeodesicEquationAt`.** A local
-geodesic at `t₀` satisfies the chart-coordinate second-derivative form of the
-geodesic equation at `t₀`. -/
 theorem IsGeodesicAt.hasGeodesicEquationAt
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
@@ -528,24 +471,6 @@ section MovingFootToFixedChart
 
 variable [I.Boundaryless]
 
-/-- **Moving-foot → fixed-chart geodesic ODE.** Suppose `γ` satisfies the
-moving-foot geodesic equation `HasGeodesicEquationAt g γ t` (the chart-coordinate
-second-order equation read in the chart centred at the moving foot `γ t`), with
-`γ t` lying in the chart at the fixed basepoint `y` and `γ` continuous at `t`.
-Then the fixed-`y`-chart curve `u := chartCurve y γ` satisfies the fixed-chart
-second-order ODE
-`u''(t) = -Γ_y(u'(t), u'(t))(u(t))`,
-in the form `HasDerivAt (deriv u) (-Γ_y(deriv u t, deriv u t)(u t)) t`.
-
-This is the fixed-chart hypothesis fed (pointwise in `t`) to
-`chartVelocity_converges_at_finite_endpoint`. The proof transforms the
-moving-foot equation in the chart at `γ t` to the chart at `y` via the
-chart-transition Jacobian (first derivative) and the chart-Christoffel
-transformation law `chartChristoffelContraction_transform` (second derivative),
-whose inhomogeneous second-derivative correction
-`chartTransitionSecondDerivCorrection` exactly cancels the moving-foot Jacobian
-derivative `fderiv (chartTransitionAt (γ t) y ·) (w t)`, leaving the fixed-`y`
-Christoffel acceleration. -/
 theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
     (hγ_cont : ContinuousAt γ t)
@@ -680,19 +605,7 @@ theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
   rw [hDcollapse] at hUderiv
   exact hUderiv
 
-/-- **Moving-foot → fixed-chart velocity, eventual first-derivative form.**
-Under the same hypotheses as `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`
-(continuity of `γ` at `t` and `γ t` in the chart at the fixed basepoint `y`,
-plus the moving-foot geodesic equation at `t`), the fixed-`y`-chart curve
-`u := chartCurve y γ` has a genuine `HasDerivAt` on a *neighbourhood* of `t`,
-with the textbook derivative `deriv u s` as right-hand side at each nearby `s`.
-
-This is the first-order companion of the second-order velocity ODE: it certifies
-that `u` is differentiable near `t` (so `deriv u` is the genuine derivative), which
-is the missing ingredient — alongside continuity of `deriv u` from the second-order
-ODE — for upgrading `u` to a `C¹` curve in time. The proof reuses the chart-transition
-transfer `u =ᶠ[𝓝 t] chartTransitionMap (γ t) y ∘ chartCurve (γ t) γ` from the
-moving-foot first clause and the differentiability of the chart-transition map. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
     (hγ_cont : ContinuousAt γ t)
@@ -740,14 +653,7 @@ theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
 
 end MovingFootToFixedChart
 
-/-- **Per-time time-translation of the moving-foot geodesic equation.** If `η`
-satisfies the geodesic equation at `t - T`, then the constant-time-translated
-curve `s ↦ η (s - T)` satisfies it at `t`. At base time `t`, the chart-local
-curve of the translated curve is the chart-local curve of `η` at `t - T`
-precomposed with the shift `· - T`, so the two `HasDerivAt` clauses transfer via
-`HasDerivAt.comp_sub_const` (derivatives are unchanged under domain translation)
-and the algebraic Christoffel identity is preserved because the foot point and
-velocity coincide. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasGeodesicEquationAt_comp_sub_const
     {g : SmoothRiemannianMetric I M} {η : ℝ → M} {T t : ℝ}
     (h : HasGeodesicEquationAt (I := I) g η (t - T)) :
@@ -776,22 +682,6 @@ private lemma hasGeodesicEquationAt_comp_sub_const
     rw [hd2]; exact ha.comp_sub_const t T
   · exact hgeo
 
-/-- **Gluing two geodesic arcs at a matching limit point.** Let `γ` be a
-geodesic on `Iio T` and `η` a geodesic on `Ioo (-δ) δ` (`δ > 0`), and suppose
-`γ` agrees with the shifted right-arc `s ↦ η (s - T)` on a punctured-left
-neighbourhood of `T` (i.e. in `𝓝[<] T`). Then the curve obtained by following
-`γ` left of `T` and the shifted `η` at and right of `T` is a geodesic on
-`Iio (T + δ)`.
-
-The proof is a pointwise check of the moving-foot geodesic equation on the glued
-curve `G`. For `t < T` the curve `G` agrees with `γ` on a neighbourhood of `t`,
-for `t > T` it agrees with `s ↦ η (s - T)` on a neighbourhood of `t`, and at the
-matching point `t = T` it agrees with `s ↦ η (s - T)` on a full neighbourhood of
-`T` (assembling the left side via the match hypothesis and the right side
-directly through `nhdsLT_sup_nhdsGE`). In every case the equation transfers from
-the relevant genuine geodesic by the locality lemma
-`HasGeodesicEquationAt.congr_of_eventuallyEq_at`, with the right-arc data
-supplied by `hasGeodesicEquationAt_comp_sub_const`. -/
 theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
@@ -839,19 +729,6 @@ theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_t hηeq
     simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt hgt))]
 
-/-- **Gluing two geodesic arcs at a matching limit point, bounded-left form.**
-Let `γ` be a geodesic on the bounded interval `Ioo a T` (`a < T`) and `η` a
-geodesic on `Ioo (-δ) δ` (`δ > 0`), and suppose `γ` agrees with the shifted
-right-arc `s ↦ η (s - T)` on a punctured-left neighbourhood of `T`.  Then the
-curve obtained by following `γ` left of `T` and the shifted `η` at and right of
-`T` is a geodesic on `Ioo a (T + δ)`.
-
-This is the left-bounded analogue of `isGeodesicOn_glue_at_limit`, needed by the
-`Ioo`-seeded forward-completeness engine where the left endpoint of every
-extension record is held fixed at a finite `a`.  The proof is identical to the
-`Iio` glue except that the `t < T` branch additionally records `a < t` (from
-`t ∈ Ioo a (T + δ)`), so that the left-arc geodesic equation `hγ` (now only on
-`Ioo a T`) applies. -/
 theorem isGeodesicOn_glue_at_limit_Ioo [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {a T δ : ℝ} (hδ : 0 < δ) (haT : a < T)

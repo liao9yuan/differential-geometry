@@ -5,22 +5,9 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.Topology.MetricSpace.Cauchy
 
-/-!
-# Tensor `L²` subsequence extraction from uniform component Sobolev bounds
-
-For a closed Riemannian manifold `(M, g)` and a sequence of smooth
-compactly-supported `H¹` tensor sections whose chart-frame scalar
-components admit a uniform chart-Sobolev bound, this file delivers a
-strictly monotone subsequence together with a tensor `L²` limit point.
-The argument combines the per-component Rellich diagonal extraction with
-the algebraic component-sum upper bound on the tensor `L²` norm, then
-uses completeness of `TensorL2 r s g`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -48,7 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The chart-frame scalar component intertwines pointwise subtraction. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentScalar_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -69,6 +56,7 @@ lemma tensorChartComponentScalar_sub
     g r s (-1 : ℝ) S₂ α Idx Jdx]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -80,6 +68,7 @@ private lemma tensorChartComponentScalar_aestronglyMeasurable
   (tensorChartComponentScalar_contMDiff (I := I) (M := M)
     g r s S α Idx Jdx).continuous.aestronglyMeasurable
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma eLpNorm_diff_le_via_common_limit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -123,6 +112,7 @@ private lemma eLpNorm_diff_le_via_common_limit
   have hp : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   exact eLpNorm_sub_le (hf₁.sub h_u) (hf₂.sub h_u) hp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}
@@ -183,9 +173,6 @@ private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
   have h_half : ε / 2 + ε / 2 = ε := ENNReal.add_halves ε
   exact h_tri.trans (h_sum.trans (le_of_eq h_half))
 
-/-- The squared `L²` norm of a tensor section difference is bounded by
-a uniform constant times the sum of squared `eLpNorm` differences of
-the chart-frame scalar components. -/
 private lemma tensorL2_diff_sq_le_const_mul_sum_componentDiff_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -220,8 +207,6 @@ private lemma tensorL2_diff_sq_le_const_mul_sum_componentDiff_sq
       g r s S₁ S₂ α Idx Jdx
   rw [h_sub]
 
-/-- The diagonal subsequence (viewed through the underlying
-`SmoothCcTensor`) is Cauchy in the tensor `L²` Hilbert space. -/
 private lemma cauchySeq_tensorL2_of_componentBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}
@@ -392,13 +377,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
     linarith [h_norm_le, hε.le]
   exact h_norm_lt
 
-/-- **Headline theorem.** For a closed Riemannian manifold `(M, g)` and a
-sequence `S : ℕ → SmoothCcTensorH1 g r s` of smooth compactly-supported
-`H¹` tensor sections whose every chart-frame scalar component admits a
-uniform-in-`n` chart-Sobolev bound, there exists a strictly monotone
-subsequence `φ : ℕ → ℕ` and a tensor `L²` limit point `T_lim` such that
-the subsequence, viewed through the bounded inclusion
-`TensorH1ComplToTensorL2`, converges to `T_lim` in `TensorL2 r s g`. -/
 theorem tensorH1Compl_to_tensorL2_relatively_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s} {R : ℝ}

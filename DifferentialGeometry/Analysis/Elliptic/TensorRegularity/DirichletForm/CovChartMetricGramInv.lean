@@ -1,54 +1,11 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 
-/-!
-# The chart-frame tensor-metric Gram matrix and its smooth inverse
-
-For a smooth Riemannian metric `g` on a closed manifold `(M, g)`, a chart center
-`α : M`, and tensor ranks `(r, s)`, the per-component-pair scalar
-`covChartMetricGram g r s α P Q` (`CovDerivChartForm.lean`) is the chart-`α`-frame
-`(r, s)`-inner product of the chart-frame basis elements indexed by the component
-multi-index pairs `P, Q`. Collecting these scalars over all pairs assembles a
-matrix indexed by component multi-indices.
-
-This file packages that matrix, proves it is symmetric positive-definite on the
-Euclidean chart target, and builds its inverse. The matrix is positive-definite
-because the chart-frame `(r, s)`-inner product is positive-definite on non-zero
-model tensors and the chart-frame basis family is linearly independent: a
-quadratic form `vᵀ 𝓜 v` expands, by bilinearity, into the chart-frame inner
-product of the tensor `∑ P, v P • basis P` with itself, which is strictly
-positive whenever `v ≠ 0`. The inverse is therefore well-defined; its entries
-are smooth on the chart target by the adjugate / determinant formula
-`A⁻¹ i j = (det A)⁻¹ · adjugate A i j`, with `det A ≠ 0` from positive
-definiteness.
-
-## Main definitions
-
-* `CompIdx r s` — the component multi-index type `(Fin r → Fin n) × (Fin s →
-  Fin n)`, a `Fintype`.
-* `covChartMetricGramMatrix g r s α y` — the chart-frame tensor-metric Gram
-  matrix on `CompIdx r s`, at the chart-target point `y`.
-* `covChartMetricGramInv g r s α y` — its matrix inverse.
-
-## Main results
-
-* `covChartMetricGramMatrix_isSymm` — the Gram matrix is symmetric.
-* `covChartMetricGramMatrix_posDef` — on the Euclidean chart target the Gram
-  matrix is positive-definite.
-* `covChartMetricGramInv_mul`, `mul_covChartMetricGramInv` — on the Euclidean
-  chart target the inverse multiplies the Gram matrix to the identity, on both
-  sides.
-* `covChartMetricGramInv_entry_contDiffOn` — each entry of the inverse Gram
-  matrix is `C^∞` on the Euclidean chart target.
-* `covChartMetricGramInv_symm` — the inverse Gram matrix is symmetric.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -72,23 +29,17 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The component multi-index type for a chart-frame `(r, s)`-tensor: an `r`-tuple
-of chart directions paired with an `s`-tuple of chart directions. As a finite
-product of finite types it is a `Fintype` and has decidable equality. -/
 abbrev CompIdx (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (r s : ℕ) : Type _ :=
   (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))
 
-/-- The chart-frame tensor-metric Gram matrix at a chart-target point `y`: the
-square matrix on `CompIdx r s` whose `(P, Q)`-entry is the chart-frame
-tensor-metric Gram scalar `covChartMetricGram g r s α P Q y`. -/
 noncomputable def covChartMetricGramMatrix
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     Matrix (CompIdx E r s) (CompIdx E r s) ℝ :=
   Matrix.of (fun P Q => covChartMetricGram (I := I) (M := M) g r s α P Q y)
 
-/-- Entry-unfolding lemma for `covChartMetricGramMatrix`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covChartMetricGramMatrix_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))
@@ -96,9 +47,7 @@ lemma covChartMetricGramMatrix_apply
     covChartMetricGramMatrix (I := I) (M := M) g r s α y P Q =
       covChartMetricGram (I := I) (M := M) g r s α P Q y := rfl
 
-/-- **The chart-frame tensor-metric Gram matrix is symmetric.** Its transpose
-equals itself, since each entry is symmetric under the component multi-index
-swap. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGramMatrix_isSymm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -107,11 +56,6 @@ theorem covChartMetricGramMatrix_isSymm
   rw [covChartMetricGramMatrix_apply, covChartMetricGramMatrix_apply]
   exact covChartMetricGram_symm (I := I) (M := M) g r s α Q P y
 
-/-- The chart-frame `(r, s)`-inner product of two model tensors `X, Y` expands
-as a finite component-coupled sum over the chart-frame tensor-metric Gram on the
-basis, against the chart-frame component projections of `X` and `Y`. (A direct
-restatement of the bilinearity expansion, specialised so that the Gram-on-basis
-factor reads as the matrix entry.) -/
 private lemma chartInner_eq_gramMatrix_quadratic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -199,16 +143,10 @@ private lemma chartInner_eq_gramMatrix_quadratic
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
-/-- The chart-frame model tensor assembled from a coefficient vector `v` over
-the component multi-indices: `∑ P, v P • tensorChartBasisElement r s P.1 P.2`. -/
 private noncomputable def gramCoeffTensor (r s : ℕ) (v : CompIdx E r s → ℝ) :
     TensorRSModel r s ℝ E :=
   ∑ P : CompIdx E r s, v P • tensorChartBasisElement (E := E) r s P.1 P.2
 
-/-- The chart-frame component projection of `gramCoeffTensor r s v` at a
-multi-index `P₀` recovers the coefficient `v P₀`. The chart-frame basis family
-is biorthogonal to the chart-frame component projections, so all off-diagonal
-terms of the sum vanish. -/
 private lemma tensorChartComponentProjection_gramCoeffTensor (r s : ℕ)
     (v : CompIdx E r s → ℝ) (P₀ : CompIdx E r s) :
     tensorChartComponentProjection (E := E) r s P₀.1 P₀.2
@@ -231,9 +169,7 @@ private lemma tensorChartComponentProjection_gramCoeffTensor (r s : ℕ)
   · intro hP₀
     exact absurd (Finset.mem_univ P₀) hP₀
 
-/-- If a coefficient vector `v` over the component multi-indices is non-zero,
-the assembled chart-frame tensor `gramCoeffTensor r s v` is non-zero — a
-component projection recovers a non-zero coordinate. -/
+omit [CompleteSpace E] in
 private lemma gramCoeffTensor_ne_zero (r s : ℕ) {v : CompIdx E r s → ℝ}
     (hv : v ≠ 0) :
     gramCoeffTensor (E := E) r s v ≠ 0 := by
@@ -244,8 +180,7 @@ private lemma gramCoeffTensor_ne_zero (r s : ℕ) {v : CompIdx E r s → ℝ}
   rw [hzero, map_zero] at hproj
   exact hproj.symm
 
-/-- The `*ᵥ` / `⬝ᵥ` quadratic form of the Gram matrix against a coefficient
-vector `v` expands as the double sum `∑ P ∑ Q, v P · 𝓜 P Q · v Q`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramMatrix_star_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))
@@ -269,12 +204,6 @@ private lemma gramMatrix_star_dotProduct_mulVec
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   ring
 
-/-- **On the Euclidean chart target the chart-frame tensor-metric Gram matrix
-is positive-definite.** Symmetry comes from `covChartMetricGramMatrix_isSymm`;
-strict positivity of the quadratic form follows because, for `v ≠ 0`, the
-quadratic form `vᵀ 𝓜 v` is the chart-frame `(r, s)`-inner product of the
-non-zero tensor `∑ P, v P • basis P` with itself, which is `> 0` by strict
-positivity of the chart-frame `(r, s)`-quadratic form at a non-zero tensor. -/
 theorem covChartMetricGramMatrix_posDef
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -317,16 +246,12 @@ theorem covChartMetricGramMatrix_posDef
   exact chartTensorInnerPointwise_rs_model_pos_of_ne_zero (I := I) (M := M)
     g r s α hb_base (gramCoeffTensor_ne_zero (E := E) r s hv)
 
-/-- The inverse of the chart-frame tensor-metric Gram matrix at a chart-target
-point `y`. -/
 noncomputable def covChartMetricGramInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     Matrix (CompIdx E r s) (CompIdx E r s) ℝ :=
   (covChartMetricGramMatrix (I := I) (M := M) g r s α y)⁻¹
 
-/-- The determinant of the chart-frame tensor-metric Gram matrix is positive on
-the Euclidean chart target. -/
 private lemma covChartMetricGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -334,8 +259,6 @@ private lemma covChartMetricGramMatrix_det_pos
     0 < (covChartMetricGramMatrix (I := I) (M := M) g r s α y).det :=
   (covChartMetricGramMatrix_posDef (I := I) (M := M) g r s α hy).det_pos
 
-/-- **The inverse Gram matrix is a left inverse of the Gram matrix** on the
-Euclidean chart target. -/
 theorem covChartMetricGramInv_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -347,8 +270,6 @@ theorem covChartMetricGramInv_mul
     (isUnit_iff_ne_zero.mpr
       (ne_of_gt (covChartMetricGramMatrix_det_pos (I := I) (M := M) g r s α hy)))
 
-/-- **The inverse Gram matrix is a right inverse of the Gram matrix** on the
-Euclidean chart target. -/
 theorem mul_covChartMetricGramInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -360,8 +281,7 @@ theorem mul_covChartMetricGramInv
     (isUnit_iff_ne_zero.mpr
       (ne_of_gt (covChartMetricGramMatrix_det_pos (I := I) (M := M) g r s α hy)))
 
-/-- Each entry of the Gram matrix is `C^∞` on the Euclidean chart target — a
-direct restatement of `covChartMetricGram_contDiffOn`. -/
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covChartMetricGramMatrix_entry_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : CompIdx E r s) :
@@ -371,9 +291,7 @@ private lemma covChartMetricGramMatrix_entry_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q
 
-/-- The determinant of the Gram matrix is `C^∞` on the Euclidean chart target.
-The determinant is a polynomial — a finite signed sum over permutations of
-products of matrix entries — and each entry is `C^∞`. -/
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covChartMetricGramMatrix_det_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ContDiffOn ℝ ∞
@@ -399,10 +317,7 @@ private lemma covChartMetricGramMatrix_det_contDiffOn
   exact covChartMetricGramMatrix_entry_contDiffOn (I := I) (M := M) g r s α
     (σ P) P
 
-/-- Each entry of the adjugate of the Gram matrix is `C^∞` on the Euclidean
-chart target. The adjugate entry at `(P, Q)` is the determinant of the matrix
-with the `Q`-th row replaced by a standard basis vector — again a polynomial in
-the entries of the Gram matrix. -/
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covChartMetricGramMatrix_adjugate_entry_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : CompIdx E r s) :
@@ -450,11 +365,6 @@ private lemma covChartMetricGramMatrix_adjugate_entry_contDiffOn
     exact covChartMetricGramMatrix_entry_contDiffOn (I := I) (M := M) g r s α
       (σ K) K
 
-/-- **Each entry of the inverse Gram matrix is `C^∞` on the Euclidean chart
-target.** On the chart target the determinant is positive (hence non-zero), so
-Cramer's rule expresses the inverse entry as `(det A)⁻¹ · adjugate A P Q`; the
-adjugate entry is `C^∞`, and `(det ·)⁻¹` is `C^∞` since the determinant is
-`C^∞` and non-vanishing. -/
 theorem covChartMetricGramInv_entry_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : CompIdx E r s) :
@@ -488,9 +398,7 @@ theorem covChartMetricGramInv_entry_contDiffOn
     g r s α y hy
   exact hsmooth_inv.comp_contDiffWithinAt y h_at
 
-/-- **The inverse Gram matrix is symmetric.** Swapping the two component
-multi-indices leaves an entry of the inverse Gram matrix unchanged, because the
-Gram matrix is symmetric and matrix inversion commutes with transposition. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGramInv_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))

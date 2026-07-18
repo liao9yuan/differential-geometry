@@ -4,72 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Interior chart-`H²` regularity for the iterated chart-bilinear data
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an element
-`u_h : H1Compl g`, a level `m : ℕ`, and an instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, together with the chart-`H^{m+1}`
-regularity of the chart-pushed POU representative (needed to make the
-`m`-fold mixed partial `H¹`) and the chart-`H^{m+2}` regularity (needed to make
-the `(m+1)`-fold mixed partial `L²` locally), this module packages the iterated
-data into a `ChartBilinearH1ComplData g α` whose `u_chart` is
-`chosenMthMixedPartialChartPushedU g α u_h m D_m.directions`. It then applies
-the polymorphic chart-`H²` Nirenberg pipeline to extract a precompact open
-`Ω''` on which the `m`-fold mixed partial lies in `MemWkp 2 2`.
-
-## Polymorphic Schwarz reduction
-
-The `IteratedDiffChartBilinearData` variational identity is stated using
-`chosenMthMixed (m+1) (Fin.cons i directions)` in the LHS principal term — the
-extra `i` direction is *prepended innermost*. To match the
-`ChartBilinearH1ComplData` shape (where `weak_partial i` is the canonical chosen
-weak `i`-partial of `u_chart`, with `i` applied *outermost*), we prove a
-polymorphic Schwarz commutativity identity
-
-```
-chosenMthMixed (m+1) (Fin.cons i dirs) =ae chosenWeakPartial' 2 i (chosenMthMixed m dirs)
-```
-
-by induction on `m`:
-
-* **Base** `m = 0`: `dirs = Fin.elim0`. The `Fin.cons i Fin.elim0`-indexed
-  mixed partial equals `chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn)`
-  on the nose (since `Fin.last 0 = 0` and `Fin.init (Fin.cons i Fin.elim0)
-  = Fin.elim0`).
-
-* **Step** `m → m+1`: unfold `chosenMthMixed (m+2) (Fin.cons i dirs)` one
-  step (outermost direction is `Fin.cons i dirs (Fin.last (m+1)) = dirs
-  (Fin.last m)`, innermost-direction multi-index is `Fin.init (Fin.cons i
-  dirs) = Fin.cons i (Fin.init dirs)`). Apply the inductive hypothesis to
-  the inner `chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs))`,
-  identifying it ae with `chosenWeakPartial' 2 i (chosenMthMixed m (Fin.init
-  dirs))`. Propagate this ae-equality through the outer
-  `chosenWeakPartial' 2 (dirs (Fin.last m))` via `chosenWeakPartial'_ae_congr`,
-  then apply the polymorphic order-two swap
-  `chosenWeakPartial'_swap_ae_of_memWkp_two` to swap the order of the two
-  outermost partials, using that `chosenMthMixed m (Fin.init dirs) ∈
-  MemWkp 2 2` of the chart target (provided by the polymorphic regularity
-  bridge from chart-`H^{m+2}` of the chart-pushed parent).
-
-The total derivative cost is `chart-H^{m+2}` of the chart-pushed parent.
-
-## Strategy for the interior `MemWkp 2 2` result
-
-For each `α : M`:
-
-1. Build the `ChartBilinearH1ComplData` from the iterated data:
-   - `u_chart := chosenMthMixed m D_m.directions`,
-   - `weak_partial i := chosenWeakPartial' 2 i u_chart`,
-   - `variational_identity` discharged via the polymorphic Schwarz reduction.
-2. Repeat the boundaryless geometric setup of the twice-derived
-   `MemWkp 2 2` interior result: choose `R_α > 0` so that
-   `cthickening R_α K_α ⊆ chartTargetEuclid α` with `K_α :=
-   chartImagePOUTsupport α`, define geometric scales, build a smooth
-   Nirenberg cutoff, apply
-   `chartBilinearH1Compl_uniform_diffQuot_bound_of_data` followed by
-   `chart_loc_of_uniform_bound`, and assemble `MemWkp 2 2 D.u_chart Ω''`.
--/
 
 noncomputable section
 
@@ -110,10 +44,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- `Fin.init` of a `Fin.cons` equals `Fin.cons` of `Fin.init` (pointwise
-identity, non-dependent statement). This is the key identity allowing the
-inductive Schwarz proof to swap the `m`-step shape of
-`chosenMthMixedPartialChartPushedU`. -/
 private lemma fin_init_cons {α : Type*} {m : ℕ}
     (x : α) (p : Fin (m + 1) → α) :
     Fin.init (Fin.cons x p : Fin (m + 2) → α) =
@@ -135,27 +65,11 @@ private lemma fin_init_cons {α : Type*} {m : ℕ}
         simp [Fin.init, Fin.cons_succ]
       rw [h1, h2]
 
-/-- `Fin.cons x p (Fin.last (m + 1)) = p (Fin.last m)`. Mathlib's `Fin.cons_last`
-gives the conclusion via `(Fin.last _ : Fin (m+2)) = Fin.succ (Fin.last m)`
-combined with `Fin.cons_succ`. -/
 private lemma fin_cons_last_succ {α : Type*} {m : ℕ}
     (x : α) (p : Fin (m + 1) → α) :
     (Fin.cons x p : Fin (m + 2) → α) (Fin.last (m + 1)) = p (Fin.last m) := by
   simp
 
-/-- **Polymorphic Schwarz reduction.** For any `m : ℕ`, multi-index `dirs : Fin
-m → Fin n`, and direction `i : Fin n`, if the chart-pushed POU representative of
-`u_h.coeFn` lies in chart-`H^{m+2}` (sufficient for the inner factor
-`chosenMthMixed m (Fin.init dirs)` to lie in chart-`H²`, which in turn enables
-the polymorphic order-two swap), then
-```
-chosenMthMixed (m + 1) (Fin.cons i dirs) =ae chosenWeakPartial' 2 i (chosenMthMixed m dirs)
-```
-on `volume.restrict chartTargetEuclid α`.
-
-The proof is by induction on `m`. The base case `m = 0` is a definitional
-equality (no Schwarz swap needed). The inductive step applies the polymorphic
-order-two swap `chosenWeakPartial'_swap_ae_of_memWkp_two`. -/
 theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -291,21 +205,21 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 (m + 1) dirs) Ω := h_final
 
-/-- Auxiliary: the open set `chartTargetEuclid α \ chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTarget_diff_chartImagePOUTsupport_isOpen_aux (α : M) :
     IsOpen ((chartTargetEuclid (I := I) (M := M) α) \
       chartImagePOUTsupport (I := I) (M := M) α) :=
   (chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (chartImagePOUTsupport_isCompact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTarget_diff_chartImagePOUTsupport_subset_aux (α : M) :
     (chartTargetEuclid (I := I) (M := M) α) \
         chartImagePOUTsupport (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
-/-- The chart-pushed POU representative is ae zero on the chart-target
-complement of `chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_ae_zero_off_chartImagePOUTsupport_aux
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -325,9 +239,7 @@ private lemma chartPushed_ae_zero_off_chartImagePOUTsupport_aux
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α _
     hy.1 hy.2
 
-/-- Local integrability on `chartTargetEuclid α \ chartImagePOUTsupport α` of a
-`MemLp 2 (vol.restrict chartTarget)` function. Reproduces the helper of
-`TwiceDerivedChartBilinearH1ComplData` in the local scope. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_memLp_two_chartTarget_aux
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2
@@ -376,8 +288,7 @@ private lemma locallyIntegrableOn_of_memLp_two_chartTarget_aux
   apply Filter.mem_of_superset (Metric.ball_mem_nhds x (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
-/-- Inline form of weak-partial vanishing on an open subset where the base
-function vanishes. (Local copy of the helper used by the twice-derived module.) -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma weakPartial_ae_zero_off_inline_aux
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -432,17 +343,6 @@ private lemma weakPartial_ae_zero_off_inline_aux
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
-/-- **Polymorphic ae-vanishing.** For any `m : ℕ` and multi-index `dirs : Fin m
-→ Fin n`, if the chart-pushed POU representative of `u_h.coeFn` lies in
-chart-`H^{m+1}`, then `chosenMthMixed m dirs` is ae-zero on the chart-target
-complement of `chartImagePOUTsupport α` (under `volume.restrict (chartTarget \
-chartImagePOUTsupport α)`).
-
-The proof is by induction on `m`. The base case `m = 0` reduces to ae-vanishing
-of the chart-pushed POU representative (its support is contained in
-`chartImagePOUTsupport α` by construction). The inductive step uses
-`weakPartial_ae_zero_off_inline_aux`: weak partials inherit ae-vanishing on an
-open set where the base function vanishes. -/
 lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -509,8 +409,6 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       exact weakPartial_ae_zero_off_inline_aux hΩ_open hU_open hU_sub
         (i := dirs (Fin.last m)) h_isWeak hw_li h_ih_zero
 
-/-- The chart-pulled weighted measure restricted to a compact subset of the
-chart target is dominated by `c_max • vol.restrict K`. (Local copy.) -/
 private lemma chartPulledWeighted_le_volume_on_compact_aux
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -546,11 +444,6 @@ private lemma chartPulledWeighted_le_volume_on_compact_aux
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
-/-- **Polymorphic weighted `MemLp 2`.** From chart-`H^m` of the chart-pushed
-parent (sufficient for plain-volume `MemLp 2` of the `m`-mixed partial) and
-chart-`H^{m+1}` of the chart-pushed parent (sufficient for the ae-vanishing
-off `chartImagePOUTsupport α`), the `m`-mixed partial is `MemLp 2` w.r.t. the
-chart-pulled weighted measure on the chart target. -/
 lemma chosenMthMixedPartialChartPushedU_memLp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -656,16 +549,12 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
     h_absCont.ae_eq h_u_eq_ind
   exact (memLp_congr_ae h_u_eq_ind_weighted).mpr h_indicator_memLp_weighted
 
-/-- The chart-side `u_chart` for the iterated data:
-`chosenMthMixedPartialChartPushedU g α u_h m dirs`. -/
 private noncomputable def iterated_u_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs
 
-/-- The chart-side `weak_partial i` for the iterated data: the canonical chosen
-weak `i`-partial of `iterated_u_chart`. -/
 private noncomputable def iterated_weak_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -675,9 +564,6 @@ private noncomputable def iterated_weak_partial
     (iterated_u_chart (I := I) (M := M) g α u_h m dirs)
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Each `iterated_weak_partial i` is a weak `i`-partial of `iterated_u_chart`
-on `chartTargetEuclid α`. Requires chart-`H^{m+1}` of the chart-pushed parent
-(so that `chosenMthMixed m dirs ∈ MemW1p 2`). -/
 private lemma iterated_weak_partial_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -697,9 +583,6 @@ private lemma iterated_weak_partial_isWeakPartial
       (I := I) (M := M) g α u_h m h_parent_m_plus_1 dirs
   exact chosenWeakPartial'_isWeakPartial_of_mem h_memW1p i
 
-/-- Each `iterated_weak_partial i` is locally `MemLp 2` on every compact subset
-of `chartTargetEuclid α`. Requires chart-`H^{m+2}` of the chart-pushed parent
-(so that `chosenWeakPartial' 2 i (chosenMthMixed m dirs)` is `MemLp 2`). -/
 private lemma iterated_weak_partial_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -742,25 +625,6 @@ private lemma iterated_weak_partial_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-- **The iterated chart-bilinear data as a `ChartBilinearH1ComplData g α`
-instance.** Takes an instance of `IteratedDiffChartBilinearData g α u_h m`
-together with two regularity hypotheses on the chart-pushed POU representative
-of `u_h.coeFn`:
-
-* chart-`H^{m+1}` — makes `chosenMthMixed m D_m.directions` lie in `MemW1p 2`
-  (so that its canonical chosen weak partials are genuine weak partials).
-* chart-`H^{m+2}` — makes the canonical chosen weak `i`-partials of
-  `chosenMthMixed m D_m.directions` lie in `MemLp 2 (vol.restrict chartTarget)`
-  (locally `MemLp 2` on every compact subset) and enables the polymorphic
-  Schwarz reduction connecting the iterated identity's
-  `chosenMthMixed (m+1) (Fin.cons i directions)` factor to the canonical
-  `chosenWeakPartial' 2 i (chosenMthMixed m directions)` factor used by the
-  `ChartBilinearH1ComplData` shape.
-
-The chart-side `u_chart` is `iterated_u_chart`, the chart-side `f_chart` is
-`D_m.fChartEff`, and the chart-side `weak_partial i` is the canonical chosen
-weak `i`-partial of `iterated_u_chart`. The variational identity follows from
-`D_m.m_diff_variational_identity` after the Schwarz substitution. -/
 noncomputable def iteratedChartBilinearH1ComplData
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}
@@ -775,7 +639,7 @@ noncomputable def iteratedChartBilinearH1ComplData
       (chartTargetEuclid (I := I) (M := M) α)) :
     ChartBilinearH1ComplData (I := I) (M := M) g α where
   u_chart := iterated_u_chart (I := I) (M := M) g α u_h m D_m.directions
-  f_chart := D_m.fChartEff
+  f_chart := D_m.diffChartForcing
   weak_partial :=
     iterated_weak_partial (I := I) (M := M) g α u_h m D_m.directions
   u_chart_memLp_weighted := by
@@ -866,16 +730,7 @@ private lemma self_subset_thickening_of_pos
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-set_option linter.unusedVariables false in
-/-- **Interior `MemWkp 2 2` regularity for the iterated chart-bilinear data.**
 
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an element
-`u_h : H1Compl g`, a level `m : ℕ`, and an instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, together with chart-`H^{m+1}`
-and chart-`H^{m+2}` regularity of the chart-pushed POU representative of
-`u_h.coeFn`, there exists a precompact open `Ω''` in the chart target containing
-`chartImagePOUTsupport α` on which `chosenMthMixed m D_m.directions` lies in
-`MemWkp 2 2`. -/
 theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -1033,7 +888,7 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

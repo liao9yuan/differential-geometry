@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Lowered connection-pairing evolution
 
-Koszul and Ricci-flow lowered pairing identities for connection variation.
--/
+
+
+
+
 
 noncomputable section
 
@@ -32,19 +32,19 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- The Koszul/Levi-Civita variation identity specialized to Ricci flow:
-the lowered connection derivative is
-`-∇_i Ric_jl - ∇_j Ric_il + ∇_l Ric_ij`. -/
+
+
+
 def KoszulConnectionVariationInFrame
     (pairDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
   forall t x i j l,
     pairDt t x i j l =
       christoffelVariationLoweredRHSInFrame nablaRic t x i j l
 
-/-- The lowered pairing variation formula for the connection along Ricci flow.
 
-The metric is frozen at the differentiating time `t`; only the connection
-family varies in the scalar function. -/
+
+
+
 def ConnectionVariationPairingEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -59,7 +59,7 @@ def ConnectionVariationPairingEquationInFrameOn
       D.carrier
       (t : Real)
 
-/-- Local lowered pairing variation equation. -/
+
 def ConnectionVariationPairingEquationInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -76,8 +76,8 @@ def ConnectionVariationPairingEquationInFrameOnLocal
         D.carrier
         (t : Real)
 
-/-- Component identity behind the general first variation formula, obtained
-by differentiating the finite-difference Koszul identity in time. -/
+
+
 theorem connectionPairDt_eq_metricVariationRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -145,8 +145,8 @@ theorem connectionPairDt_eq_metricVariationRHS
   unfold connectionVariationLoweredRHSFromMetricVariationInFrame
   linarith
 
-/-- General first variation of Christoffel symbols in lowered-pairing form:
-`pairDt = 1/2 (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+
+
 theorem connectionVariationPairing_of_metricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -182,8 +182,8 @@ theorem connectionVariationPairing_of_metricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt
       hvarDiff hmetric hunique t x hx i j l)
 
-/-- Ricci-flow specialization of the general Christoffel first variation,
-using `partial_t g = -2 Ric`. -/
+
+
 theorem connectionVariationPairing_of_ricciFlow
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -221,8 +221,8 @@ theorem connectionVariationPairing_of_ricciFlow
     hmetricRicci (t : Real) x l i j]
   ring
 
-/-- Lemma 6.2, lowered-pairing form, from the connection derivative and the
-Ricci-flow Koszul variation identity. -/
+
+
 theorem connectionVariationPairing_of_koszul
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

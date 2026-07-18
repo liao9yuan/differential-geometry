@@ -3,68 +3,9 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.NablaTensorF
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChristoffelCkBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
-/-!
-# Per-degree covariant order reduction and the unconditional collapsed `C^m`/`C²` embedding
-
-The collapse engine `iteratedCovGrad_toSobolev_embedding_Cm_collapsed` of
-`SobolevEmbeddingCmOrderReduction` turned the `C^m` iterated-covariant-derivative
-embedding into a single multiple of the spectral norm `‖T.toHs (2k)‖`, *given* a
-per-degree rank-reduction hypothesis at the common top order `2k`:
-`‖∇^j T‖_{H^{2k}} ≤ Cred · ‖T‖_{H^{2k}}`.
-
-That same-top-order form is, however, *not the right reduction*: one covariant
-derivative raises the chart-component derivative order by exactly one, so the
-genuine bound is the **order-dropping** one,
-`‖∇^j T‖_{H^σ} ≤ C_j · ‖T‖_{H^{σ+j}}` —
-the higher-valence tensor `∇^j T`, controlled at regularity `σ`, costs the base
-tensor `T` exactly `j` *extra* Sobolev orders.  Asking instead for both sides at
-the common order `2k` (as the top-order hypothesis does) is false in general,
-because `‖∇^j T‖_{H^{2k}}` needs `‖T‖_{H^{2k + j}}`.
-
-This file proves the genuine order-dropping reduction and wires it into a
-*hypothesis-free* collapse.  Crucially, the per-degree summand of the `C^m`
-embedding is `‖∇^j T‖_{H^{2(k-j)}}` — taken at the *natural* lowered order
-`2(k - j)`, not the top order.  Applied there the order-dropping bound costs
-`‖T‖_{H^{2(k-j) + j}} = ‖T‖_{H^{2k - j}} ≤ ‖T‖_{H^{2k}}`: the natural order
-already carries the derivative budget for the `j` covariant slots, so the
-reduction lands back at `‖T‖_{H^{2k}}` with **no** order inflation.
-
-## The analytic core: one covariant derivative consumes one Sobolev order
-
-The single-step bound
-`‖covGrad T‖_{H^σ} ≤ C · ‖T‖_{H^{σ+1}}`
-is proved from the raw chart-component formula
-`tensorChartComponentRaw_covGrad`: in chart-Euclidean coordinates the
-`(r, s + 1)`-component of `covGrad T` reads
-`∂_{m}(component of T) + Γ·(components of T)` with `m` the differentiation slot.
-The Hilbert-Schmidt chart-Sobolev norm of order `σ` of `covGrad T` therefore
-sums, over Fréchet orders `i ≤ 2σ`, the squared basis-evaluations of
-`D^i(∂_m(comp_T) + Γ·comp_T)`.  The `∂_m`-term contributes `D^{i+1}` of the raw
-components of `T` (orders `≤ 2σ + 1 ≤ 2(σ+1)`); the `Γ`-term, by the Leibniz
-product rule `norm_iteratedFDeriv_mul_le`, contributes `D^{≤ i}` of the same raw
-components with the `C^∞` Christoffel coefficients carried as factors, uniformly
-bounded on the (compact) chart image of the partition-of-unity support by the
-`C^k` Christoffel bound `christoffel_Ck_bound_from_metric_Ck1`.  Both
-contributions are dominated by the order-`(σ+1)` Hilbert-Schmidt content of `T`,
-giving the single-step bound.
-
-## Main results
-
-* `covGrad_toHs_norm_le` — the single-step order-dropping bound
-  `‖covGrad T‖_{H^σ} ≤ C · ‖T‖_{H^{σ+1}}`.
-* `iteratedCovGrad_toHs_norm_le` — its `j`-fold iterate
-  `‖∇^j T‖_{H^σ} ≤ C_j · ‖T‖_{H^{σ+j}}`.
-* `iteratedCovGradSobolevNorm_le_baseSpectral` — the per-degree summand of the
-  `C^m` embedding at its natural order is bounded by `C_j · ‖T.toHs (2k)‖`.
-* `iteratedCovGrad_toSobolev_embedding_Cm_unconditional` — the **unconditional**
-  collapsed `C^m` embedding (no rank hypothesis).
-* `iteratedCovGrad_toSobolev_embedding_C2_unconditional` — the unconditional
-  `C²`, `(0, 2)`-tensor instance the DeTurck metric family consumes.
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
@@ -90,10 +31,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Analysis.Sobolev.Chart
   DifferentialGeometry.Analysis.Laplacian.TensorRegularity in
-/-- On the Euclidean chart target, the EuclN-pulled raw `(r, s + 1)`-component of
-`covGrad T` equals `∂_{Jdx 0}(pulled comp_T at (Idx, vecTail Jdx)) +
-(lower-order Christoffel correction)`.  This is the function-level (`Set.EqOn`)
-form of `tensorChartComponentRaw_covGrad`. -/
+
+omit [BoundarylessManifold I M] in
 private lemma covGradCompPull_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -128,7 +67,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 open DifferentialGeometry.Analysis.Sobolev.Chart
   DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-- Shorthand for the Euclidean pull-back of a raw `(r, s)`-component of `T`. -/
 private def rawPull (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -137,8 +75,7 @@ private def rawPull (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
-/-- `rawPull` unfolds to the raw chart component post-composed with the chart
-inverse and the Euclidean representation map. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -148,7 +85,7 @@ private lemma rawPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         ∘ (toEuclidean (E := E)).symm) =
       rawPull (I := I) (M := M) g r s T α Idx Jdx := rfl
 
-/-- `rawPull` is `C^∞` on the (open) Euclidean chart target. -/
+omit [BoundarylessManifold I M] in
 private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -160,7 +97,7 @@ private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
   rfl
 
-/-- `rawPull` is `C^∞` at every point of the (open) Euclidean chart target. -/
+omit [BoundarylessManifold I M] in
 private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -170,10 +107,7 @@ private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (rawPull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-/-- The component of `covGrad T`, pulled to the chart, agrees on a neighbourhood
-of an interior point with `euclidPartial (Jdx 0) (rawPull (vecTail Jdx)) +
-covDerivLowerOrderTerm`.  Locality of `iteratedFDeriv` therefore identifies their
-iterated Fréchet derivatives. -/
+omit [BoundarylessManifold I M] in
 private lemma covGrad_iteratedFDeriv_eq (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -206,9 +140,7 @@ private lemma covGrad_iteratedFDeriv_eq (g : SmoothRiemannianMetric I M)
     filter_upwards [h_open.mem_nhds hy] with z hz using h_eqOn hz
   exact (Filter.EventuallyEq.iteratedFDeriv ℝ h_evEq j).self_of_nhds
 
-/-- Near an interior point, `chartPushedRaw I α (raw component)` agrees with the
-plain `rawPull` of the same component, so their iterated Fréchet derivatives
-coincide there. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eventuallyEq_rawPull (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -223,11 +155,7 @@ private lemma chartPushedRaw_eventuallyEq_rawPull (g : SmoothRiemannianMetric I 
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
   rfl
 
-/-- **The `euclidPartial`-term operator-norm bound.** On the chart target, the
-order-`j` Fréchet derivative of the leading `euclidPartial` term of the
-covariant-gradient component is bounded in operator norm by the order-`(j + 1)`
-Fréchet derivative of the raw component of `T`.  One covariant slot costs exactly
-one Fréchet (hence Sobolev) order. -/
+omit [BoundarylessManifold I M] in
 private lemma euclidPartial_term_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -284,8 +212,7 @@ private lemma euclidPartial_term_iteratedFDeriv_norm_le
         rw [h_single_norm, one_mul]
     _ = ‖iteratedFDeriv ℝ (j + 1) u y‖ := h_fderiv_iter
 
-/-- The lower-order Christoffel-correction coefficient is `C^∞` at every interior
-point of the chart target. -/
+omit [BoundarylessManifold I M] in
 private lemma covDerivLowerOrderCoeff_contDiffAt (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (m : Fin (Module.finrank ℝ E))
     (Idx Idx' : Fin r → Fin (Module.finrank ℝ E))
@@ -296,8 +223,7 @@ private lemma covDerivLowerOrderCoeff_contDiffAt (g : SmoothRiemannianMetric I M
   (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx Idx'
     Jdx Jdx').contDiffAt ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-/-- A `C^∞` function on an open set has, on any compact subset, a uniform bound
-on all its iterated Fréchet derivative norms up to a fixed order `N`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_iteratedFDeriv_norm_bound_on_compact
     {f : EuclN → ℝ} {s : Set EuclN} (hf : ContDiffOn ℝ ∞ f s) (hs : IsOpen s)
     {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ s) (N : ℕ) :
@@ -329,11 +255,7 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
-/-- A uniform bound on the iterated Fréchet derivative norms of *all* lower-order
-correction coefficients `covDerivLowerOrderCoeff` — over the finite sets of the
-differentiation direction `m`, the source input multi-index `Idx`, the source
-output multi-index `Jdx'`, and the target multi-index pair `p` — up to order `N`,
-on the compact partition-of-unity kernel `chartImagePOUTsupport α`. -/
+omit [BoundarylessManifold I M] in
 private lemma exists_lowerOrderCoeff_uniform_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -379,13 +301,7 @@ private lemma exists_lowerOrderCoeff_uniform_bound
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
-/-- **The lower-order-term operator-norm Leibniz bound.** On the chart target the
-order-`j` Fréchet derivative of the zeroth-order Christoffel-correction term
-`covDerivLowerOrderTerm` is bounded, by the Leibniz product rule, by the sum over
-component multi-index pairs `p` and split orders `l ≤ j` of the binomial
-coefficient times `‖D^{j-l} coeff_p‖ · ‖D^l (rawPull p)‖`.  The coefficients
-`coeff_p = covDerivLowerOrderCoeff` are `C^∞` (independent of `T`); only orders
-`l ≤ j` of the raw components of `T` appear. -/
+omit [BoundarylessManifold I M] in
 private lemma lowerOrderTerm_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
@@ -457,9 +373,7 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
       iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
         (f := rawPull (I := I) (M := M) g r s T α p.1 p.2) (j - l) h_open hy]
 
-/-- The pushed partition-of-unity weight `ρ_α` (read at the chart-source preimage
-of a target point `y`) vanishes when `y` lies in the chart target but outside the
-compact kernel `chartImagePOUTsupport α`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
@@ -479,14 +393,7 @@ private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
 
-/-- **The combined covariant-gradient-component operator-norm bound.** On the
-compact partition-of-unity kernel `chartImagePOUTsupport α`, the order-`j`
-Fréchet-derivative operator norm of the chart-pulled `(r, s + 1)`-component of
-`covGrad T` is bounded by the order-`(j + 1)` derivative norm of the lowered
-`(r, s)`-component of `T`, plus a uniform Christoffel constant `Γbd` times the
-binomial-weighted lower-order derivative norms (orders `≤ j`) of `T`.  Both
-ingredients are controlled by derivatives of the raw components of `T` of order
-at most `j + 1`. -/
+omit [BoundarylessManifold I M] in
 private lemma covGrad_component_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (_hΓbd_nn : 0 ≤ Γbd)
@@ -611,10 +518,6 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
             ‖iteratedFDeriv ℝ (j - l)
               (rawPull (I := I) (M := M) g r s T α p.1 p.2) y‖) := by ring
 
-/-- The order-`σ + 1` Hilbert-Schmidt content of `T` at chart `α`, at a fixed
-target point `y`: the finite sum over component multi-index pairs `q`, over
-Fréchet orders `l ≤ 2(σ + 1)`, and over basis-index tuples, of the squared
-basis-evaluation of `D^l (rawPull q)`. -/
 private def rhsHsContent (g : SmoothRiemannianMetric I M) (r s σ : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -625,17 +528,14 @@ private def rhsHsContent (g : SmoothRiemannianMetric I M) (r s σ : ℕ)
             (fun i => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2
 
-/-- `rhsHsContent` is non-negative. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rhsHsContent_nonneg (g : SmoothRiemannianMetric I M) (r s σ : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ rhsHsContent (I := I) (M := M) g r s σ T α y :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
     (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
 
-/-- A single iterated-derivative operator-norm squared of a raw component of `T`,
-at order `l ≤ 2(σ + 1)`, is dominated by the full order-`(σ + 1)` Hilbert-Schmidt
-content `rhsHsContent`.  Combines the operator ≤ Hilbert-Schmidt inequality
-`opNorm_sq_le_sum_sq_basisEval` with single-summand domination. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -673,12 +573,6 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
-/-- **The per-component-and-order operator-norm-to-Hilbert-Schmidt bound.** For
-`y` in the compact kernel `chartImagePOUTsupport α`, the order-`j` (`j ≤ 2σ`)
-basis-evaluation Hilbert-Schmidt sum of the chart-pulled `(r, s + 1)`-component
-of `covGrad T` is bounded by `n^{2σ} · B0²` times the order-`(σ + 1)`
-Hilbert-Schmidt content of `T`, where `B0 = 1 + Γbd · (#multi-index pairs) ·
-2^{2σ}` collects the Christoffel and combinatorial factors. -/
 private lemma covGradComp_basisSum_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)
@@ -838,9 +732,6 @@ private lemma covGradComp_basisSum_le_rhsHsContent
       _ = (n : ℝ) ^ (2 * σ) * B0 ^ 2 * R := by ring
   exact key
 
-/-- The atlas-uniform combined constant `Creal := (#multi-index pairs) ·
-(2σ + 1) · n^{2σ} · B0²` of the per-chart bound, as a function of the
-Christoffel sup `Γbd`. -/
 private def combinedConst (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (r s σ : ℕ) (Γbd : ℝ) : ℝ :=
   (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -853,11 +744,6 @@ private lemma combinedConst_nonneg (r s σ : ℕ) {Γbd : ℝ} (hΓbd_nn : 0 ≤
     0 ≤ combinedConst E r s σ Γbd := by
   unfold combinedConst; positivity
 
-/-- **The per-chart pointwise integrand bound.** For `y` in the chart target, the
-partition-of-unity-weighted full Hilbert-Schmidt content (over all components,
-orders `≤ 2σ`, and basis tuples) of the chart-pulled `covGrad T` component is
-bounded by `combinedConst · ρ_α · rhsHsContent`, where the right side is the
-order-`(σ + 1)` Hilbert-Schmidt content of `T`. -/
 private lemma covGrad_pointwise_integrand_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)
@@ -959,8 +845,7 @@ private lemma covGrad_pointwise_integrand_le
       pouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
-/-- Continuity of the chart-pushed partition-of-unity weight on the chart
-target. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPullCont (α : M) :
     ContinuousOn
       (fun y : EuclN =>
@@ -980,9 +865,7 @@ private lemma pouPullCont (α : M) :
     exact hy
   exact hPOU_cont.comp_continuousOn h_inner
 
-/-- AEMeasurability of one Hilbert-Schmidt integrand term (a partition-of-unity-
-weighted squared basis-evaluation of an iterated derivative of a raw component)
-on the chart-target-restricted volume measure. -/
+omit [BoundarylessManifold I M] in
 private lemma rawPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1022,9 +905,7 @@ private lemma rawPullIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
-/-- The chart-`α` Hilbert-Schmidt inner double-sum-of-integrals of a tensor `S`
-equals the integral of the partition-of-unity-weighted full Hilbert-Schmidt
-content.  (Tonelli for finite sums + `ofReal` of a non-negative finite sum.) -/
+omit [BoundarylessManifold I M] in
 private lemma sumIntegrals_eq_integral_sum
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1220,11 +1101,6 @@ private lemma sumIntegrals_eq_integral_sum
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
-/-- **The per-chart inner-sum bound.** For each chart `α`, the chart-`α`
-Hilbert-Schmidt inner double-sum of `covGrad T` at order `σ` is bounded by
-`ofReal Cmax` times the chart-`α` inner sum of `T` at order `σ + 1`.  On the
-active charts this is the pointwise integrand bound integrated; on the inactive
-charts the partition-of-unity weight vanishes, so the left side is `0`. -/
 private lemma covGrad_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γfun : M → ℝ) (Γmax : ℝ) (hΓmax_nn : 0 ≤ Γmax)
@@ -1358,33 +1234,6 @@ private lemma covGrad_per_alpha_inner_bound
     rw [hzero]
     exact zero_le _
 
-/-- **The single-step order-dropping Hilbert-Schmidt norm bound.** For a closed
-Riemannian manifold there is a non-negative constant `C` such that for every
-smooth compactly-supported `(r, s)`-tensor section `T`,
-`tensorPouSobolevHsNorm g σ (covGrad g r s T) ≤ ENNReal.ofReal C ·
-tensorPouSobolevHsNorm g (σ + 1) T`.  One covariant derivative is bounded by the
-section it differentiates at one higher Sobolev order.
-
-Proof roadmap (the genuine analytic content, derived — not assumed — from the
-chart Christoffel formula): after `tensorPouSobolevHsNorm_eq` and splitting the
-`rpow (1/2)`, reduce by `ENNReal.tsum_le_tsum` + per-chart + per-component to a
-pointwise integrand bound.  On `chartTargetEuclid α` the EuclN-pulled raw
-`(r, s + 1)`-component of `covGrad T` equals, by `tensorChartComponentRaw_covGrad`
-(packaged as `covGradCompPull_eqOn`),
-`euclidPartial (Jdx 0) (chartPushedRaw I α (comp_T at (Idx, vecTail Jdx)))
-  + covDerivLowerOrderTerm` — and `covDerivLowerOrderTerm`, by
-`covDerivComponent_lowerOrder_eq_linearCombination`, is a finite `C^∞`-coefficient
-linear combination of the raw components of `T`.  An order-`i` Fréchet derivative
-of the `euclidPartial` term is, by `norm_iteratedFDeriv_fderiv` /
-`norm_iteratedFDeriv_clm_apply_const`, dominated by the order-`(i+1)` derivative
-of the raw component of `T`; the lower-order term is handled by the Leibniz
-product rule `norm_iteratedFDeriv_mul_le` together with the uniform `C^•`
-Christoffel-coefficient bound `christoffel_Ck_bound_from_metric_Ck1` on the
-compact chart image of the partition-of-unity support
-(`chartImagePOUTsupport_isCompact`).  Both contributions are dominated by the
-order-`(σ + 1)` Hilbert-Schmidt content of `T`; a single absolute constant is
-obtained as a finite maximum over the finitely-many contributing charts
-(`chartAtlasPOU_finset`). -/
 theorem exists_covGrad_tensorPouSobolevHsNorm_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1467,12 +1316,6 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
         rw [ENNReal.ofReal_rpow_of_nonneg hCmax_nn (by norm_num : (0 : ℝ) ≤ 1 / 2),
           ← Real.sqrt_eq_rpow]
 
-/-- **The single-step order-dropping completion-norm bound.** For a closed
-Riemannian manifold there is a non-negative constant `C` such that for every
-smooth compactly-supported `(r, s)`-tensor section `T`,
-`‖(covGrad g r s T).toHs σ‖ ≤ C · ‖T.toHs (σ + 1)‖`.  This is the intrinsic
-`H^σ(∇T) ≤ C · H^{σ+1}(T)` order-dropping inequality, the analytic heart of the
-covariant order reduction. -/
 theorem covGrad_toHs_norm_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1501,13 +1344,6 @@ theorem covGrad_toHs_norm_le
     _ = C * (tensorPouSobolevHsNorm (I := I) (M := M) g (σ + 1) T).toReal := by
         rw [ENNReal.toReal_ofReal hC_nn]
 
-/-- **The iterated order-dropping completion-norm bound.** For each degree `j`
-there is a non-negative constant `C` such that for every order `σ` and every
-smooth compactly-supported `(r, s)`-tensor section `T`,
-`‖(∇^j T).toHs σ‖ ≤ C · ‖T.toHs (σ + j)‖`.  The proof iterates the single-step
-bound `covGrad_toHs_norm_le`, the constant being the product of the single-step
-constants over the `j` steps (with the inner order shifted by the remaining
-slot count at each step). -/
 theorem iteratedCovGrad_toHs_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (j σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1543,11 +1379,6 @@ theorem iteratedCovGrad_toHs_norm_le
               ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (σ + (j + 1)) T‖ := by
             rw [hord]; ring
 
-/-- **The per-degree reduction at the natural order.** For each degree `j ≤ k`
-there is a non-negative constant `C` such that for every smooth
-compactly-supported `(r, s)`-tensor section `T`, the per-degree summand of the
-`C^m` embedding's right-hand side is bounded by `C` times the base spectral norm
-`‖T.toHs (2k)‖`. -/
 theorem iteratedCovGradSobolevNorm_le_baseSpectral
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (hjk : j ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1573,20 +1404,8 @@ theorem iteratedCovGradSobolevNorm_le_baseSpectral
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The unconditional collapsed `C^m` tensor Sobolev embedding.**
 
-For a closed Riemannian manifold and `2k > dim M + 2m` (which forces `m ≤ k`),
-there is a constant `C > 0` such that, for every smooth compactly-supported
-`(r, s)`-tensor `T` and every base point `x`, the sum of the fibre norms of the
-iterated covariant derivatives `∇^j T` (`0 ≤ j ≤ m`) is bounded by `C` times the
-single spectral norm `‖T.toHs (2k)‖`.
-
-Unlike `iteratedCovGrad_toSobolev_embedding_Cm_collapsed`, this carries **no**
-rank-reduction hypothesis: the per-degree order-dropping bound
-`iteratedCovGradSobolevNorm_le_baseSpectral` is proved here from the genuine
-single covariant-derivative chart formula, and each per-degree summand collapses
-to `‖T.toHs (2k)‖` at its natural lowered order without order inflation. -/
-theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
+theorem iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
     ∃ C : ℝ, 0 < C ∧
@@ -1633,14 +1452,8 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The unconditional collapsed `C²`, `(0, 2)`-tensor instance.**
 
-The fully-discharged `C²` collapse for the `(0, 2)`-tensors (`r = 0`, `s = 2`),
-`m = 2`, controlling `‖T(x)‖`, `‖(∇T)(x)‖`, `‖(∇²T)(x)‖` by a single multiple of
-the spectral norm `‖T.toHs (2k)‖`, for `2k > dim M + 4`.  This carries **no**
-rank-reduction hypothesis — it is the unconditional instance the DeTurck metric
-family consumes. -/
-theorem iteratedCovGrad_toSobolev_embedding_C2_unconditional
+theorem iteratedCovGrad_toSobolev_embedding_C2_singleNorm
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :
     ∃ C : ℝ, 0 < C ∧
@@ -1651,7 +1464,7 @@ theorem iteratedCovGrad_toSobolev_embedding_C2_unconditional
             ‖(iteratedCovGrad g 0 2 j T).toSection x‖)) ≤
           C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖ := by
   have h_super' : 2 * k > Module.finrank ℝ E + 2 * 2 := by omega
-  exact iteratedCovGrad_toSobolev_embedding_Cm_unconditional (I := I) (M := M)
+  exact iteratedCovGrad_toSobolev_embedding_Cm_singleNorm (I := I) (M := M)
     g 0 2 k 2 h_super'
 
 end AnalyticCore

@@ -1,100 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
-/-!
-# Chart-invariance of the chart-α tensor Hessian–Frobenius pairing
-
-For smooth `φ : C^∞⟮I, M; ℝ⟯` and a smooth scalar `v : SmoothScalar g` on a closed
-Riemannian manifold `(M, g)`, this module bridges the chart-α tensor smooth
-Hessian–Frobenius pairing on `EuclideanSpace`
-(`smoothTensorPairingChart g α φ v y`, defined in `HessianTensorChartSmooth`)
-with the chart-invariant smooth pairing on `M`
-(`hessPairingChart g φ v_bundle x`, defined in `HessianPairingChart`) via the
-chart-α inverse map `x = (extChartAt α).symm (toEuclidean.symm y)`.
-
-The structural backbone:
-
-1. **Manifold-side chart-α pairing.** Lift `smoothTensorPairingChart` from
-   `EuclN` to a function on `M` by pulling back the chart-α coordinates:
-   `hessPairingByChartα g α φ v x := smoothTensorPairingChart g α φ v
-       (toEuclidean (extChartAt α x))`.
-
-2. **Pointwise identity on the chart target.** For `y ∈ chartTargetEuclid α`,
-   `smoothTensorPairingChart g α φ v y =
-       hessPairingByChartα g α φ v ((extChartAt α).symm (toEuclidean.symm y))`
-   by mechanical chart-pullback algebra.
-
-3. **Chart-invariance of the pointwise pairing.** For `x` in the chart source
-   `(chartAt H α).source`, the chart-α pairing `hessPairingByChartα g α φ v x`
-   equals the chart-invariant pairing `hessPairingChart g φ v_bundle x` (where
-   `v_bundle := smoothScalarToContMDiffMap v`). The proof goes through the
-   common chart-invariant Hilbert–Schmidt inner product of the abstract
-   Hessian operators of `φ` and `v` at `x`.
-
-The chart-invariance step splits into:
-
-   3a. *Chart-α matrix identity.* For `x ∈ (chartAt H α).source`, the abstract
-       Hessian `abstractHessian g f x` on the chart-α basis pair
-       `(chartBasisVecFiber α i x, chartBasisVecFiber α j x)` equals the chart-α
-       tensor Hessian `chartHessianTensor g α f i j x`.
-
-   3b. *Chart-α Hilbert–Schmidt identity.* The chart-α tensor Frobenius squared
-       `chartHessFrobeniusSqOnChartAlpha g α f x` equals `chartHessFrobeniusSq
-       g f x` (the chart-at-x version). The proof mirrors
-       `frobeniusSq_grad_vector_eq_chartHessFrobeniusSq` from `BochnerConcrete`,
-       with the chart-α matrix identity replacing the chart-at-x version.
-
-   3c. *Polarization bridge.* The bilinear pairing `hessPairingByChartα g α φ v
-       x` arises as the polarization
-       `(chartHessFrobeniusSqOnChartAlpha g α (φ + v) x -
-         chartHessFrobeniusSqOnChartAlpha g α (φ - v) x) / 4`,
-       and likewise `hessPairingChart` arises as the chart-at-x polarization.
-       By 3b, the two polarizations agree.
-
-The chart-α matrix identity 3a is the lynchpin lemma; once it holds, the rest
-of the chain (3b, 3c, 2, 1) is mechanical algebra. We package 3a as the
-`chartAlphaMatrixIdentity` hypothesis, exposed as an explicit `Prop`, and
-deliver the full chart-invariant identification chain conditional on it.
-
-## Main definitions
-
-* `hessPairingByChartα g α φ v x` — the pointwise chart-α tensor Frobenius
-  pairing on `M`, defined as the chart-α-Euclidean version pulled back.
-
-* `chartHessFrobeniusSqOnChartAlpha g α f x` — the chart-α tensor Frobenius
-  squared of `f` at `x`, using chart-α basis and chart-α Gram matrices.
-
-* `chartAlphaMatrixIdentity g α f x` — the lynchpin Prop: chart-α tensor
-  Hessian entries equal the abstract Hessian on the chart-α basis pair.
-
-## Main results
-
-* `smoothTensorPairingChart_eq_hessPairingByChartα_pullback` — pointwise
-  pullback identity on the chart target (no chart-α matrix identity needed).
-
-* `chartHessFrobeniusPairOnChartAlpha_eq_polarization_of_smooth` — polarization
-  identity for the chart-α Frobenius bilinear pairing (uses bilinearity in the
-  function argument).
-
-* `chartFrobeniusInvariance_of_HSBridge` — chart-α / chart-at-x agreement for
-  the chart-Frobenius squared, conditional on the chart-α Hilbert–Schmidt
-  bridge for `f` at `x`.
-
-* `chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance` —
-  chart-α / chart-at-x agreement for the pointwise pairing of two smooth
-  scalars, conditional on the chart-α Frobenius invariance for the polarization
-  combinations `φ ± v` at `x`.
-
-* `smoothTensorPairingChart_eq_hessPairingChart_of_invariance` and
-  `smoothTensorPairingChart_eq_hessPairingChart_of_HSBridge` — the bridge
-  identity at the pointwise Euclidean level, conditional respectively on the
-  chart-α Frobenius invariance or the chart-α Hilbert–Schmidt bridge for the
-  polarization combinations at the chart-α image of `x`.
-
-The chart-α matrix identity `chartAlphaMatrixIdentity` is left as an explicit
-hypothesis to be discharged by follow-up work via the chart-α analog of
-`chartHessianMatrixIdentity_holds`.
--/
 
 noncomputable section
 
@@ -125,7 +31,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianBridge
 open DifferentialGeometry.Analysis.Laplacian.HessianTensorChartSmooth
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -135,14 +40,13 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-
-/-- The pointwise chart-α tensor Frobenius pairing on `M`. -/
 noncomputable def hessPairingByChartα
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (x : M) : ℝ :=
   smoothTensorPairingChart (I := I) (M := M) g α φ v
     ((toEuclidean (E := E)) (extChartAt I α x))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma hessPairingByChartα_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (x : M) :
@@ -150,8 +54,6 @@ noncomputable def hessPairingByChartα
       smoothTensorPairingChart (I := I) (M := M) g α φ v
         ((toEuclidean (E := E)) (extChartAt I α x)) := rfl
 
-
-/-- The pullback identity for `smoothTensorPairingChart`. -/
 theorem smoothTensorPairingChart_eq_hessPairingByChartα_pullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -171,8 +73,6 @@ theorem smoothTensorPairingChart_eq_hessPairingByChartα_pullback
     (toEuclidean (E := E)).apply_symm_apply y
   rw [h_chart_inv, h_toE_inv]
 
-
-/-- The chart-α tensor Frobenius squared of `f` at the manifold point `x`. -/
 noncomputable def chartHessFrobeniusSqOnChartAlpha
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
@@ -184,6 +84,7 @@ noncomputable def chartHessFrobeniusSqOnChartAlpha
             chartHessianTensor (I := I) g α f i j x *
             chartHessianTensor (I := I) g α f k l x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessFrobeniusSqOnChartAlpha_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x =
@@ -196,8 +97,6 @@ noncomputable def chartHessFrobeniusSqOnChartAlpha
                 chartHessianTensor (I := I) g α f i j x *
                 chartHessianTensor (I := I) g α f k l x := rfl
 
-
-/-- The chart-α tensor Frobenius bilinear pairing of `f` and `f'` at `x`. -/
 noncomputable def chartHessFrobeniusPairOnChartAlpha
     (g : SmoothRiemannianMetric I M) (α : M) (f f' : M → ℝ) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
@@ -209,6 +108,7 @@ noncomputable def chartHessFrobeniusPairOnChartAlpha
             chartHessianTensor (I := I) g α f i j x *
             chartHessianTensor (I := I) g α f' k l x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessFrobeniusPairOnChartAlpha_def
     (g : SmoothRiemannianMetric I M) (α : M) (f f' : M → ℝ) (x : M) :
     chartHessFrobeniusPairOnChartAlpha (I := I) (M := M) g α f f' x =
@@ -221,14 +121,13 @@ noncomputable def chartHessFrobeniusPairOnChartAlpha
                 chartHessianTensor (I := I) g α f i j x *
                 chartHessianTensor (I := I) g α f' k l x := rfl
 
-/-- `chartHessFrobeniusPairOnChartAlpha g α f f x = chartHessFrobeniusSqOnChartAlpha g α f x`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessFrobeniusPairOnChartAlpha_self
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartHessFrobeniusPairOnChartAlpha (I := I) (M := M) g α f f x =
       chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x := rfl
 
-
-
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma scalarOnE_add_pointwise (α : M) (f f' : M → ℝ) :
     scalarOnE (I := I) α (fun y : M => f y + f' y) =
       (fun y : E => scalarOnE (I := I) α f y + scalarOnE (I := I) α f' y) := by
@@ -236,6 +135,7 @@ private lemma scalarOnE_add_pointwise (α : M) (f f' : M → ℝ) :
   unfold scalarOnE
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma scalarOnE_neg_pointwise (α : M) (f : M → ℝ) :
     scalarOnE (I := I) α (fun y : M => -f y) =
       (fun y : E => -scalarOnE (I := I) α f y) := by
@@ -243,9 +143,7 @@ private lemma scalarOnE_neg_pointwise (α : M) (f : M → ℝ) :
   unfold scalarOnE
   rfl
 
-/-- **Linearity of `chartHessianTensor` in the function argument (additivity),
-on the chart α source.** For smooth scalars `f, f'` and `x ∈ (chartAt H α).source`,
-the chart-α tensor Hessian distributes over sums. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_add_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -390,8 +288,7 @@ lemma chartHessianTensor_add_of_smooth
   rw [h_iter_add, h_chris_sum]
   ring
 
-/-- **Linearity of `chartHessianTensor` in the function argument (negation),
-on the chart α source.** -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_neg_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -458,8 +355,7 @@ lemma chartHessianTensor_neg_of_smooth
   rw [h_iter_neg, h_chris_sum]
   ring
 
-/-- **Linearity of `chartHessianTensor` in the function argument (subtraction),
-on the chart α source.** -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_sub_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -476,17 +372,7 @@ lemma chartHessianTensor_sub_of_smooth
   rw [chartHessianTensor_neg_of_smooth (I := I) g α hf' i j hx]
   ring
 
-/-- **Polarization identity for the chart-α Frobenius pairing.** For two smooth
-scalars `f, f' : M → ℝ` and `x ∈ (chartAt H α).source`, the chart-α bilinear
-pairing equals the polarization of the chart-α Frobenius squared.
-
-The proof relies on:
-1. Linearity of `chartHessianTensor` in the function argument (smoothness needed).
-2. Symmetry of the chart inverse Gram matrix to identify the cross terms in the
-   polarization expansion.
-
-The symmetry-based relabeling of the cross terms is supplied as the explicit
-hypothesis `h_swap_aux`. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_polarization_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -645,10 +531,6 @@ theorem chartHessFrobeniusPairOnChartAlpha_eq_polarization_of_smooth
   rw [h_double]
   ring
 
-
-/-- **The chart-α matrix identity.** For `f : M → ℝ` of class `C^∞` and
-`x ∈ (chartAt H α).source`, the abstract Hessian `abstractHessian g f x` on the
-chart-α basis pair equals the chart-α tensor Hessian entry. -/
 def chartAlphaMatrixIdentity
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) : Prop :=
   ∀ i j : Fin (Module.finrank ℝ E),
@@ -656,6 +538,7 @@ def chartAlphaMatrixIdentity
         (chartBasisVecFiber (I := I) α i x) (chartBasisVecFiber (I := I) α j x) =
       chartHessianTensor (I := I) g α f i j x
 
+omit [CompactSpace M] in
 @[simp] lemma chartAlphaMatrixIdentity_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartAlphaMatrixIdentity (I := I) (M := M) g α f x ↔
@@ -665,10 +548,7 @@ def chartAlphaMatrixIdentity
             (chartBasisVecFiber (I := I) α j x) =
           chartHessianTensor (I := I) g α f i j x := Iff.rfl
 
-
-/-- For `x` in the chart-α base set, the chart-α basis at `x` is the model basis
-trivialized via chart α. We package this fact in a form usable by the
-Hilbert–Schmidt frame trace identity. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_baseSet
     (α : M) (i : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -677,9 +557,7 @@ private lemma chartBasisVecFiber_baseSet
       (chartModelBasis E) i :=
   trivializationAt_chartBasisVec_snd (I := I) α i hx
 
-
-/-- The chart-α tensor Frobenius squared rewritten using the abstract Hessian
-on the chart-α basis pair, conditional on the chart-α matrix identity. -/
+omit [CompactSpace M] in
 theorem chartHessFrobeniusSqOnChartAlpha_eq_abstractHessian
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hM : chartAlphaMatrixIdentity (I := I) (M := M) g α f x) :
@@ -708,9 +586,7 @@ theorem chartHessFrobeniusSqOnChartAlpha_eq_abstractHessian
   intro l _
   rw [hM i j, hM k l]
 
-/-- Similarly, the chart-α bilinear pairing rewritten using abstract Hessians on
-the chart-α basis pair, conditional on the chart-α matrix identity for both
-functions. -/
+omit [CompactSpace M] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_abstractHessian
     (g : SmoothRiemannianMetric I M) (α : M) (f f' : M → ℝ) (x : M)
     (hMf : chartAlphaMatrixIdentity (I := I) (M := M) g α f x)
@@ -740,25 +616,19 @@ theorem chartHessFrobeniusPairOnChartAlpha_eq_abstractHessian
   intro l _
   rw [hMf i j, hMf' k l]
 
-
-/-- **Chart-invariance hypothesis.** The chart-α tensor Frobenius squared at `x`
-equals the chart-at-`x` Frobenius squared `chartHessFrobeniusSq g f x`. This is
-the chart-α analog of `frobeniusSq_grad_vector_eq_chartHessFrobeniusSq`. -/
 def chartFrobeniusInvariance
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) : Prop :=
   chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x =
     chartHessFrobeniusSq (I := I) g f x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartFrobeniusInvariance_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartFrobeniusInvariance (I := I) (M := M) g α f x ↔
       chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x =
         chartHessFrobeniusSq (I := I) g f x := Iff.rfl
 
-/-- **Bridge from chart-α to chart-invariant pairing.** Conditional on the
-chart-α Frobenius invariance for both polarization combinations (`φ + v` and
-`φ - v`), and `x ∈ (chartAt H α).source`, the chart-α bilinear pairing equals
-the chart-invariant Hess pairing. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -846,12 +716,6 @@ theorem chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance
   have h4ne : (4 : ℝ) ≠ 0 := by norm_num
   exact mul_left_cancel₀ h4ne h_4eq
 
-
-/-- **The chart-α tensor pairing at `y` equals the manifold pairing at `x_y`.**
-
-Conditional on the chart-α Frobenius invariance for the polarization
-combinations `φ ± v` at the manifold point `x_y :=
-(extChartAt α).symm (toEuclidean.symm y)`. -/
 theorem smoothTensorPairingChart_eq_hessPairingChart_of_invariance
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -945,32 +809,25 @@ theorem smoothTensorPairingChart_eq_hessPairingChart_of_invariance
   exact chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance
     (I := I) (M := M) g α φ v hx_y_chart h_inv_add h_inv_sub h_swap_aux
 
-
-/-- **The chart-α Hilbert–Schmidt bridge Prop.** The chart-α tensor Frobenius
-squared at `x` equals the abstract Hilbert–Schmidt Frobenius squared
-`frobeniusSq_grad_vector g (gradFun g f) x`. We expose this as a separate Prop
-to keep the chart-α HS frame argument as the single remaining ingredient. -/
-def chartFrobeniusSqHSBridge
+def chartFrobeniusSqGradVectorBridge
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) : Prop :=
   chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x =
     frobeniusSq_grad_vector (I := I) g
       (fun b : M => gradFun (I := I) g f b) x
 
+omit [CompactSpace M] in
 @[simp] lemma chartFrobeniusSqHSBridge_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
-    chartFrobeniusSqHSBridge (I := I) (M := M) g α f x ↔
+    chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α f x ↔
       chartHessFrobeniusSqOnChartAlpha (I := I) (M := M) g α f x =
         frobeniusSq_grad_vector (I := I) g
           (fun b : M => gradFun (I := I) g f b) x := Iff.rfl
 
-/-- **Chart-α Frobenius invariance via the HS bridge.** Given the chart-α HS
-bridge and the existing chart-at-x bridge
-`frobeniusSq_grad_vector_eq_chartHessFrobeniusSq`, the chart-α Frobenius
-squared equals the chart-at-x Frobenius squared. -/
-theorem chartFrobeniusInvariance_of_HSBridge
+omit [CompactSpace M] in
+theorem chartFrobeniusInvariance_of_gradVectorBridge
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hf : ContMDiff I 𝓘(ℝ) ∞ f)
-    (h_HS : chartFrobeniusSqHSBridge (I := I) (M := M) g α f x) :
+    (h_HS : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α f x) :
     chartFrobeniusInvariance (I := I) (M := M) g α f x := by
   classical
   rw [chartFrobeniusInvariance_def]
@@ -978,17 +835,14 @@ theorem chartFrobeniusInvariance_of_HSBridge
   rw [h_HS]
   exact frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x
 
-/-- **Packaged bridge.** Given the chart-α HS bridges for the polarization
-combinations `φ ± v` at the manifold point `x_y`, the chart-α tensor pairing
-at `y` equals the chart-invariant pairing at `x_y`. -/
 theorem smoothTensorPairingChart_eq_hessPairingChart_of_HSBridge
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
-    (h_HS_add : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+    (h_HS_add : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z + v.toFun z)
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
-    (h_HS_sub : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+    (h_HS_sub : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z - v.toFun z)
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
     (h_swap_aux :
@@ -1019,10 +873,10 @@ theorem smoothTensorPairingChart_eq_hessPairingChart_of_HSBridge
     φ.contMDiff.add v.smooth
   have hf_sub : ContMDiff I 𝓘(ℝ) ∞ (fun z : M => (φ : M → ℝ) z - v.toFun z) :=
     φ.contMDiff.sub v.smooth
-  have h_inv_add := chartFrobeniusInvariance_of_HSBridge (I := I) (M := M) g α
+  have h_inv_add := chartFrobeniusInvariance_of_gradVectorBridge (I := I) (M := M) g α
     (fun z : M => (φ : M → ℝ) z + v.toFun z)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) hf_add h_HS_add
-  have h_inv_sub := chartFrobeniusInvariance_of_HSBridge (I := I) (M := M) g α
+  have h_inv_sub := chartFrobeniusInvariance_of_gradVectorBridge (I := I) (M := M) g α
     (fun z : M => (φ : M → ℝ) z - v.toFun z)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) hf_sub h_HS_sub
   exact smoothTensorPairingChart_eq_hessPairingChart_of_invariance

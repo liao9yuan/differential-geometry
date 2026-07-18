@@ -1,64 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.EigenvectorPouWkpNormTwins
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightLimit
 
-/-!
-# Order-`K` iterated-Sobolev norm bounds for two eigenvector chart limit objects
-
-The chart-Euclidean right-hand side of the connection-Laplacian eigenvector's
-weak-solution assembly is built from limit objects that are cutoff Euclidean
-chart components of fixed abstract `L²` elements. Two of them — the cross-Leibniz
-limits — are treated here at the order-`K` iterated-Sobolev (`wkpNorm`) level:
-
-* `crossLeftLimitComponent g r s h_atlas i α P` — the cutoff Euclidean chart
-  component, at `(α, P)`, of the completion-extended covariant gradient
-  `tensorCovGradL2Compl g r s` applied to the eigenvector resolvent;
-* `crossRightLimitComponent g r s h_atlas i α P` — the cutoff Euclidean chart
-  component, at `(α, P)`, of the `L²`-coercion `TensorH1ComplToTensorL2 g r s`
-  of the eigenvector resolvent.
-
-For each, this file records an explicit-constant order-`K` `wkpNorm` bound for
-the Euclidean chart target `chartTargetEuclid α`.
-
-## Strategy
-
-Both limit objects are, by definition, single cutoff Euclidean chart components
-of abstract `L²` elements; the foundational
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` reduces the order-`K` `wkpNorm`
-of any such cutoff component to an explicit constant times a finite double sum,
-over the transport chart centres and the component multi-indices, of the
-order-`K` `wkpNorm` of the underlying abstract element's partition-of-unity
-Euclidean chart components.
-
-* For the cross-right limit the underlying abstract element is the resolvent
-  inclusion `TensorH1ComplToTensorL2 g r s (eigenvectorResolvent …)` itself, so
-  that finite double sum is already the faithful aggregate of order-`K`
-  `wkpNorm` of the resolvent-inclusion partition-of-unity chart components — the
-  regularity hypothesis `h_pou` is exactly the `MemWkp` membership of those same
-  components, and the bound assembles in one step.
-* For the cross-left limit the underlying abstract element is the
-  covariant gradient `tensorCovGradL2Compl g r s (eigenvectorResolvent …)`; each
-  resulting covariant-gradient chart-component norm is in turn controlled — in
-  `MemWkp` (`eigenvectorCovGrad_pou_memWkp`, needed to feed the cutoff lemma) and
-  in `wkpNorm` (`eigenvectorCovGrad_pou_wkpNorm_le`) — by an explicit constant
-  times an order-`(K+1)` aggregate of the resolvent-inclusion partition-of-unity
-  chart components. Composing the two reductions and folding every summation
-  multiplicity and per-summand constant into a single headline constant yields
-  the order-`K` `wkpNorm` bound, with the regularity hypothesis again phrased on
-  the resolvent-inclusion chart components.
-
-## Main results
-
-* `wkpNorm_crossLeftLimitComponent_le`
-* `wkpNorm_crossRightLimitComponent_le`
-* `wkpNorm_crossLeftLimitComponent_le_uniform`
-* `wkpNorm_crossRightLimitComponent_le_uniform`
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -97,11 +39,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A finite double-indexed family of order-`K` `wkpNorm`s, each bounded by
-`ENNReal.ofReal` of a per-summand constant times a per-centre aggregate selected
-by the outer index, has its double sum bounded by `ENNReal.ofReal` of an explicit
-constant times the single sum, over the outer index, of the per-centre
-aggregates. -/
+
 private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum
     {ι κ : Type*} [Fintype κ]
     (S : Finset ι) (W : ι → κ → ℝ≥0∞) (aggr : ι → ℝ≥0∞)
@@ -164,13 +102,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Eigenbasis-uniform double-sum collection. A finite double-indexed family of
-order-`K` `wkpNorm`s, indexed additionally by an eigenbasis index `δ` and each
-bounded by `ENNReal.ofReal` of a `δ`-independent per-summand constant `Cf j q`
-times a per-centre aggregate `aggr δ j` selected by the outer index, has — with
-a *single* constant `C`, hoisted before the `∀ δ` — its double sum bounded, for
-every `δ`, by `ENNReal.ofReal C` times the single sum, over the outer index, of
-the per-centre aggregates. -/
+
 private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
     {δ ι κ : Type*} [Fintype κ]
     (S : Finset ι) (W : δ → ι → κ → ℝ≥0∞) (aggr : δ → ι → ℝ≥0∞)
@@ -232,29 +164,6 @@ section CrossRightWkpNormBoundUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
 
-/-- **Chart-locality-free explicit-constant order-`K` `wkpNorm` bound for the
-cross-right limit object.** Chart-locality-free twin of
-`wkpNorm_crossRightLimitComponent_le`. For a closed Riemannian manifold
-`(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a chart center `α : M`, a
-component multi-index `P : TensorCompIdx r s`, and an order `K`, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (crossRightLimitComponent g r s i α P) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ∑ β ∈ transportChartCenters α, ∑ Q,
-          wkpNorm K 2 (resolvent-inclusion chart Q-component at β),
-```
-
-given the order-`K` `MemWkp` regularity hypothesis `h_pou` on the
-resolvent-inclusion partition-of-unity chart components.
-
-By definition `crossRightLimitComponent` is the cutoff Euclidean
-chart component of the abstract `L²` element `TensorH1ComplToTensorL2 g r s
-(eigenvectorResolvent …)`; the foundational
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` reduces its order-`K` `wkpNorm`
-directly to a finite double sum of the order-`K` `wkpNorm` of the
-resolvent-inclusion partition-of-unity chart components. -/
 theorem wkpNorm_crossRightLimitComponent_le
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2
@@ -265,7 +174,7 @@ theorem wkpNorm_crossRightLimitComponent_le
         (chartTargetEuclid (I := I) (M := M) β))
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((crossRightLimitComponent (I := I) (M := M)
               g r s i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -273,7 +182,7 @@ theorem wkpNorm_crossRightLimitComponent_le
         ≤ ENNReal.ofReal C *
           ∑ β ∈ transportChartCenters (I := I) (M := M) α,
             ∑ Q : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -304,31 +213,6 @@ section CrossRightWkpNormBoundUniformUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
 
-/-- **Chart-locality-free eigenbasis-uniform explicit-constant order-`K`
-`wkpNorm` bound for the cross-right limit object.** Chart-locality-free twin of
-`wkpNorm_crossRightLimitComponent_le_uniform`: a *single* nonnegative constant
-`C`, independent of the eigenbasis index `i`, serves every `i` simultaneously,
-with no chart-selection hypothesis.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P : TensorCompIdx r s`, and an order `K`,
-given the order-`K` `MemWkp` regularity hypothesis `h_pou` on the
-resolvent-inclusion partition-of-unity chart components — phrased uniformly over
-`i` — there is a nonnegative constant `C` with, for every `i`,
-
-```
-wkpNorm K 2 (crossRightLimitComponent g r s i α P) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ∑ β ∈ transportChartCenters α, ∑ Q,
-          wkpNorm K 2 (resolvent-inclusion chart Q-component at β).
-```
-
-No exposed eigenvalue factor appears: `crossRightLimitComponent` is
-by definition the cutoff Euclidean chart component of the resolvent inclusion
-itself, and the foundational cutoff bound
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` is *input-uniform* — its
-constant is chart-transition geometric data, independent of the abstract `L²`
-element and hence of `i`. That single constant is hoisted before the `∀ i`. -/
 theorem wkpNorm_crossRightLimitComponent_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -341,7 +225,7 @@ theorem wkpNorm_crossRightLimitComponent_le_uniform
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((crossRightLimitComponent (I := I) (M := M)
                 g r s i α P :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -349,7 +233,7 @@ theorem wkpNorm_crossRightLimitComponent_le_uniform
           ≤ ENNReal.ofReal C *
             ∑ β ∈ transportChartCenters (I := I) (M := M) α,
               ∑ Q : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                   (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                         (eigenvectorResolvent (I := I) (M := M)
@@ -384,34 +268,6 @@ section CrossRotationWkpNormBoundsUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
 
-/-- **Chart-locality-free explicit-constant order-`K` `wkpNorm` bound for the
-cross-left limit object.** Chart-locality-free twin of
-`wkpNorm_crossLeftLimitComponent_le`. For a closed Riemannian manifold `(M, g)`,
-ranks `(r, s)`, an eigenbasis index `i`, a chart center `α : M`, a component
-multi-index `P : TensorCompIdx r (s + 1)`, and an order `K`, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (crossLeftLimitComponent g r s i α P) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ∑ β ∈ transportChartCenters α,
-          ((∑ Q, wkpNorm (K+1) 2 (resolvent-inclusion chart Q-component at β))
-            + ∑ β' ∈ transportChartCenters β, ∑ Q,
-                wkpNorm (K+1) 2 (resolvent-inclusion chart Q-component at β')),
-```
-
-given the order-`(K+1)` `MemWkp` regularity hypothesis `h_pou` on the
-resolvent-inclusion partition-of-unity chart components.
-
-By definition `crossLeftLimitComponent` is the cutoff Euclidean
-chart component of the abstract `L²` element `tensorCovGradL2Compl g r s
-(eigenvectorResolvent …)`; the foundational
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` reduces its order-`K` `wkpNorm`
-to a finite double sum of the order-`K` `wkpNorm` of the covariant-gradient
-partition-of-unity chart components, each of which is in turn `wkpNorm K 2`-bounded
-by an explicit constant times the order-`(K+1)` resolvent-inclusion aggregate. The
-summation multiplicity and every per-summand constant are folded into the single
-constant `C`. -/
 theorem wkpNorm_crossLeftLimitComponent_le
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
@@ -422,7 +278,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
         (chartTargetEuclid (I := I) (M := M) β))
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((crossLeftLimitComponent (I := I) (M := M)
               g r s i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -430,7 +286,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
         ≤ ENNReal.ofReal C *
           ∑ β ∈ transportChartCenters (I := I) (M := M) α,
             ((∑ Q : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                   (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                         (eigenvectorResolvent (I := I) (M := M)
@@ -440,7 +296,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
                   (chartTargetEuclid (I := I) (M := M) β))
               + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
                   ∑ Q : TensorCompIdx (E := E) r s,
-                    wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                             (eigenvectorResolvent (I := I) (M := M)
@@ -451,7 +307,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
   classical
   set aggr : M → ℝ≥0∞ := fun β =>
     (∑ Q : TensorCompIdx (E := E) r s,
-        wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                 (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -460,7 +316,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
           (chartTargetEuclid (I := I) (M := M) β))
       + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
           ∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -479,7 +335,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
         g r s i K h_pou β Q')
   have h_per : ∀ (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)),
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
                 (tensorCovGradL2Compl (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -492,7 +348,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
   obtain ⟨C₁, hC₁_nn, hC₁_bd⟩ :=
     wkpNorm_doubleSum_le_const_mul_aggregateSum
       (transportChartCenters (I := I) (M := M) α)
-      (fun β Q' => wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun β Q' => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
             (tensorCovGradL2Compl (I := I) (M := M) g r s
               (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -504,7 +360,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
       (fun β _ Q' => (h_per β Q').choose_spec.1)
       (fun β _ Q' => (h_per β Q').choose_spec.2)
   refine ⟨C₀ * C₁, by positivity, ?_⟩
-  have h_chain : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_chain : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((crossLeftLimitComponent (I := I) (M := M)
             g r s i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -534,34 +390,6 @@ section CrossRotationWkpNormBoundsUniformUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
 
-/-- **Chart-locality-free eigenbasis-uniform explicit-constant order-`K`
-`wkpNorm` bound for the cross-left limit object.** Chart-locality-free twin of
-`wkpNorm_crossLeftLimitComponent_le_uniform`: a *single* nonnegative constant `C`,
-independent of the eigenbasis index `i`, serves every `i` simultaneously, with no
-chart-selection hypothesis.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P : TensorCompIdx r (s + 1)`, and an order
-`K`, given the order-`(K+1)` `MemWkp` regularity hypothesis `h_pou` on the
-resolvent-inclusion partition-of-unity chart components — phrased uniformly over
-`i` — there is a nonnegative constant `C` with, for every `i`,
-
-```
-wkpNorm K 2 (crossLeftLimitComponent g r s i α P) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C
-      * ∑ β ∈ transportChartCenters α,
-          ((∑ Q, wkpNorm (K+1) 2 (resolvent-inclusion chart Q-component at β))
-            + ∑ β' ∈ transportChartCenters β, ∑ Q,
-                wkpNorm (K+1) 2 (resolvent-inclusion chart Q-component at β')).
-```
-
-No exposed eigenvalue factor appears: the cutoff-component reduction is
-input-uniform, and the covariant-gradient chart-component bound's
-eigenbasis-uniform companion `eigenvectorCovGrad_pou_wkpNorm_le_uniform`
-is purely geometric (the `‖μ‖ · μ⁻¹` cancellation removes the eigenvalue
-dependence). The constant `C` is the product of the input-uniform cutoff constant
-and the eigenbasis-uniform double-sum collection constant, both `i`-independent
-and hence hoisted before the `∀ i`. -/
 theorem wkpNorm_crossLeftLimitComponent_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -574,7 +402,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((crossLeftLimitComponent (I := I) (M := M)
                 g r s i α P :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -582,7 +410,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
           ≤ ENNReal.ofReal C *
             ∑ β ∈ transportChartCenters (I := I) (M := M) α,
               ((∑ Q : TensorCompIdx (E := E) r s,
-                  wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                           (eigenvectorResolvent (I := I) (M := M)
@@ -592,7 +420,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
                     (chartTargetEuclid (I := I) (M := M) β))
                 + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
                     ∑ Q : TensorCompIdx (E := E) r s,
-                      wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                         (fun y => ((tensorL2ChartComponent (I := I) (M := M)
                             g r s
                             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -605,7 +433,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
   classical
   set aggr : TensorEigenIdx (I := I) (M := M) g r s → M → ℝ≥0∞ := fun i β =>
     (∑ Q : TensorCompIdx (E := E) r s,
-        wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                 (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -614,7 +442,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
           (chartTargetEuclid (I := I) (M := M) β))
       + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
           ∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -634,7 +462,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
   have hCf_spec : ∀ (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)),
       0 ≤ Cf β Q' ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
                   (tensorCovGradL2Compl (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -650,7 +478,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
     wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
       (δ := TensorEigenIdx (I := I) (M := M) g r s)
       (transportChartCenters (I := I) (M := M) α)
-      (fun i β Q' => wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun i β Q' => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
             (tensorCovGradL2Compl (I := I) (M := M) g r s
               (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -662,7 +490,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
       (fun β _ Q' => (hCf_spec β Q').1)
       (fun i β _ Q' => (hCf_spec β Q').2 i)
   refine ⟨C₀ * C₁, by positivity, fun i => ?_⟩
-  have h_chain : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_chain : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((crossLeftLimitComponent (I := I) (M := M)
             g r s i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)

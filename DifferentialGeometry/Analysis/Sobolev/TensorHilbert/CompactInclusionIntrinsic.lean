@@ -1,36 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.TensorChartComponentSobolevIntrinsic
 
-/-!
-# Compactness of the H¹ → L² inclusion for tensor sections (chart-locality-free)
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file
-establishes that the bounded operator
-
-  `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
-
-is a compact operator. This is the chart-locality-free counterpart of
-`TensorH1ComplToTensorL2_isCompactOperator`: no auxiliary chart-selection
-hypothesis appears. The uniform component-wise chart-Sobolev bound, which the
-chart-locality version assumes, is instead supplied unconditionally by the
-intrinsic headline `tensorChartComponent_wkpNormChart_le`.
-
-The argument:
-
-* approximate any bounded H¹ tensor vector by a smooth compactly-supported
-  H¹ tensor section in pre-H¹ norm (density of the canonical embedding),
-* control the chart-Sobolev norm of the smooth approximant uniformly via the
-  intrinsic uniform component bound,
-* extract an `L²`-convergent subsequence via the conditional sequence-level
-  Rellich-Kondrachov result `tensorH1Compl_to_tensorL2_relatively_compact`,
-* conclude that the bounded inclusion sends bounded sequences to
-  `L²`-precompact sequences.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -60,12 +34,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
-/-- For each vector `v ∈ TensorH1Compl g r s` and each `δ > 0`, there
-exists a smooth compactly-supported H¹ tensor section `S` with
-`‖v - smoothToTensorH1Compl g r s S‖ < δ`.
 
-Direct consequence of `denseRange_smoothToTensorH1Compl`. -/
+omit [CompleteSpace E] in
 private lemma exists_smooth_close_to_TensorH1_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) {δ : ℝ} (hδ : 0 < δ) :
@@ -85,24 +55,7 @@ private lemma exists_smooth_close_to_TensorH1_intrinsic
   exact hS_close
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedSectionVars false in
-/-- **Compactness of the tensor H¹ → L² inclusion (chart-locality-free).**
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the bounded
-operator
-`TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
-is a compact operator. No chart-selection hypothesis is required: the uniform
-component-wise chart-Sobolev bound is supplied unconditionally by
-`tensorChartComponent_wkpNormChart_le`.
 
-Argument: any bounded sequence in `TensorH1Compl g r s` can be approximated in
-H¹ norm by smooth compactly-supported sections whose own H¹ norms are uniformly
-bounded; the intrinsic uniform chart-Sobolev bound then yields a uniform
-component-wise Sobolev bound on the smooth approximants; the conditional
-sequence-level Rellich-Kondrachov extraction
-`tensorH1Compl_to_tensorL2_relatively_compact` produces an `L²`-convergent
-subsequence; the residual H¹ approximation error is controlled by the operator
-bound `‖TensorH1ComplToTensorL2 v‖_{L²} ≤ ‖v‖_{H¹}`, so the original subsequence
-also converges in `L²`. -/
 theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) := by

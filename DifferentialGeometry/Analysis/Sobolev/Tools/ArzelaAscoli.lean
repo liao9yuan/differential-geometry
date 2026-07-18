@@ -1,12 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
 
-/-!
-# Arzelà–Ascoli on a compact subset of Euclidean space
-
-This module provides a sequential form of the Arzelà–Ascoli theorem tailored
-to families of uniformly bounded, uniformly Lipschitz functions on a compact
-subset of `EuclideanSpace ℝ (Fin d)`.
--/
 
 noncomputable section
 
@@ -20,10 +13,8 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- A continuous, uniformly Lipschitz family with sup-norm bound `C` on a
-compact set `K ⊆ E`, viewed as a family of bounded continuous functions on
-`K`, has its values contained in the closed interval `[-C, C]`. -/
-private lemma bcfRestrict_values_in_compact
+
+private lemma restrict_mem_Icc_of_abs_le
     {K : Set E} {C : ℝ}
     {f : ℕ → E → ℝ}
     (hf_bdd : ∀ n, ∀ x, |f n x| ≤ C)
@@ -34,17 +25,10 @@ private lemma bcfRestrict_values_in_compact
   exact ⟨hL, hR⟩
 
 omit [NeZero d] in
-/-- The sup-norm bound is non-negative whenever the family is non-empty (which
-will hold automatically when `0 < C`). -/
+
 private lemma C_nonneg_of_pos {C : ℝ} (hC : 0 < C) : 0 ≤ C := hC.le
 
-/-- **Sequential Arzelà–Ascoli.**
-
-Let `K ⊆ E` be a compact subset, and let `f : ℕ → E → ℝ` be a sequence of
-continuous functions which are uniformly bounded by `C` (in absolute value
-on all of `E`) and uniformly `L`-Lipschitz on `E`. Then there exists a
-strictly increasing index sequence `φ : ℕ → ℕ`, a continuous function
-`fInf : E → ℝ`, such that `f ∘ φ` converges to `fInf` uniformly on `K`. -/
+omit [NeZero d] in
 theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
     {K : Set E} (hK_compact : IsCompact K)
     {f : ℕ → E → ℝ}
@@ -71,7 +55,7 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
     have h_range_compact : ∀ (g : K →ᵇ ℝ) (x : K),
         g ∈ Set.range f_bcf → g x ∈ Set.Icc (-C) C := by
       rintro g x ⟨n, rfl⟩
-      simpa [f_bcf] using bcfRestrict_values_in_compact hf_bdd n x
+      simpa [f_bcf] using restrict_mem_Icc_of_abs_le hf_bdd n x
     have h_Icc_compact : IsCompact (Set.Icc (-C) C : Set ℝ) := isCompact_Icc
     have h_lip_restrict : ∀ n, LipschitzWith ⟨L, hL_pos⟩ ((f n) ∘ ((↑) : K → E)) := by
       intro n

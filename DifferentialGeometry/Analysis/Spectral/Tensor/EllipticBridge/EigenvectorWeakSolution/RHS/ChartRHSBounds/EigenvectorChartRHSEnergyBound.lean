@@ -2,81 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.EigenvectorChartLimitEnergyBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSMemWkp
 
-/-!
-# A uniform energy bound for the eigenvector chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, and a component multi-index `P₀`, the chart-Euclidean right-hand side
-`eigenvectorChartRHS g r s i α P₀` of the connection-Laplacian
-eigenvector weak-solution assembly has, by
-`eigenvectorChartRHS_eLpNorm_le_uniform_unconditional`, a weighted-`eLpNorm` bound
-whose right-hand side is `ENNReal.ofReal (μ⁻¹ · C)` times a six-summand source
-aggregate, where `μ := i.fst.val ∈ (0, 1]` is the resolvent eigenvalue attached to
-the eigenbasis index `i`.
-
-This file collapses that six-summand aggregate down to the abstract `L²` norm of
-the unconditional eigenbasis vector. The headline is
-
-```
-∃ C ≥ 0, ∀ i,
-  eLpNorm (eigenvectorChartRHS g r s i α P₀) 2 μw
-    ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖,
-```
-
-with `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)` and
-`C` a chart-geometric constant — depending only on `g r s α P₀`, never
-on the eigenbasis index `i`.
-
-## Why an energy bound is needed
-
-A higher-order norm of a function cannot be bounded by a lower-order norm of the
-same function in general. The bound below is genuine precisely because the
-function is an *eigenvector*: the resolvent eigen-equation supplies the energy
-identity `eigenvectorResolvent_h1Norm_le` and its gradient corollary
-`tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le`. The universal quantifier
-`∀ i` lies *inside* the existential `∃ C`, so a single geometric constant `C`
-controls the chart right-hand side of *every* eigenvector simultaneously; the
-`i`-dependence of the right-hand side is confined to the explicit `μ⁻¹` factor.
-
-## Strategy
-
-Each of the six aggregate atoms is bounded by `C_atom · μ^p · ‖φ‖`
-(`φ` the unconditional eigenbasis vector) where the per-atom `μ`-power `p`
-is `1/2` for the two gradient-order chart-partial atoms and the cross-left
-gradient atom, `1` for the cross-right and chart-component atoms, and `0` for the
-bare chart component:
-
-* atoms `crossLeftLimitComponent` / `crossRightLimitComponent` — the committed
-  uniform lemmas `eLpNorm_crossLeftLimitComponent_le_uniform` /
-  `eLpNorm_crossRightLimitComponent_le_uniform` bound them by an abstract norm,
-  collapsed via `tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le`
-  respectively the eigen-equation `TensorH1ComplToTensorL2 (eigenvectorResolvent
-  …) = μ • φ`;
-* atoms `partialLpLimit` / `cutoffPartialLpLimit` — the committed lemmas
-  `partialLpLimit_eLpNorm_le` / `cutoffPartialLpLimit_eLpNorm_le` bound them on
-  plain Lebesgue volume; a weighted-versus-volume `eLpNorm` comparison
-  (`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact`) transfers the bound
-  to the chart-pulled weighted measure, since each atom vanishes almost
-  everywhere off a compact kernel;
-* atoms `eigenvectorChartComponentFun` / `componentLpLimit` — order-`0`; the
-  uniform weighted bound `eLpNorm_tensorL2ChartComponent_le_uniform` for the
-  canonical chart component controls them.
-
-Since `μ ∈ (0, 1]`, every `μ`-power is `≤ 1`, so the six-summand aggregate is
-bounded by `C' · ‖φ‖`; multiplying by the `μ⁻¹` prefactor of
-`eigenvectorChartRHS_eLpNorm_le_uniform` produces the single explicit `μ⁻¹`
-power of the headline.
-
-## Main result
-
-* `eigenvectorChartRHS_eLpNorm_le_energy` — the uniform energy
-  bound for the eigenvector chart right-hand side.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -112,13 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The resolvent eigenvalue `μ := i.fst.val` lies in the unit interval `(0, 1]`
-(chart-locality-free). Chart-locality-free twin of `eigenvalue_mem_Ioc`, re-keyed
-onto the unconditional eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`: this vector is a unit element of the resolvent eigenspace at `μ`, and
-the resolvent eigenvalues lie in the unit interval. No chart-selection
-hypothesis. -/
+
 private lemma eigenvalue_mem_Ioc
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -140,24 +59,7 @@ private lemma eigenvalue_mem_Ioc
       exact one_ne_zero h_norm.symm)
 
 omit [CompleteSpace E] in
-/-- **Weighted-versus-volume `eLpNorm` comparison on a compact kernel.** For a
-compact subset `K` of the Euclidean chart target `chartTargetEuclid α`, there is
-a nonnegative constant `C` — depending only on `g, α, K` — such that *every*
-function `f` vanishing almost everywhere off `K` (with respect to the plain
-Lebesgue volume restricted to `chartTargetEuclid α \ K`) satisfies
 
-```
-eLpNorm f 2 μw ≤ ENNReal.ofReal C · eLpNorm f 2 (volume.restrict (chartTargetEuclid α)),
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-On the compact kernel the chart density is bounded above, so the weighted
-measure restricted there is dominated by a multiple of `volume`; off the kernel
-`f` vanishes almost everywhere, and the weighted restricted measure is
-absolutely continuous with respect to the plain restricted volume, so the
-a.e.-vanishing transfers. The constant `C` does not depend on `f` — it is the
-square root of an upper bound for the chart density on `K`. -/
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -250,11 +152,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
   rw [h_pow_eq, smul_eq_mul]
 
 omit [CompleteSpace E] in
-/-- The canonical Euclidean chart component vanishes almost everywhere — for the
-plain Lebesgue volume restricted to the off-kernel set — off the compact
-partition-of-unity kernel `chartPouKernel α`. This recasts the
-`chartL2Measure`-a.e. vanishing `tensorL2ChartComponent_ae_zero_off_chartPouKernel`
-as an `=ᵐ` on the off-kernel set. -/
+
 private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -285,24 +183,7 @@ private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 800000 in
-/-- **Uniform-constant weighted-`eLpNorm` bound for the canonical Euclidean chart
-component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart
-center `α : M`, and a component multi-index `P₀`, there is a single nonnegative
-constant `C` — depending only on `g, r, s, α, P₀` — such that for every abstract
-`L²` element `u : TensorL2 r s g`,
 
-```
-eLpNorm (tensorL2ChartComponent g r s u α P₀) 2 μw ≤ ENNReal.ofReal C · ENNReal.ofReal ‖u‖,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-The canonical chart component is the value of the continuous linear map
-`tensorL2ChartComponentCLM g r s α P₀`, so its chart `L²` norm is bounded by the
-operator norm of that map times `‖u‖`. The chart component vanishes almost
-everywhere off the compact partition-of-unity kernel, so the
-weighted-versus-volume comparison upgrades the plain-volume `L²` norm — the chart
-`L²` norm — to the weighted `eLpNorm`. -/
 theorem eLpNorm_tensorL2ChartComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -365,12 +246,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- **Atom 1 — the bare eigenvector chart component (chart-locality-free).**
-Chart-locality-free twin of `eigenvectorChartComponentFun_eLpNorm_le_energy`. The
-unconditional chart component `eigenvectorChartComponentFun_unconditional` is, by
-definition, the canonical Euclidean chart component of the unconditional
-eigenbasis vector; the uniform bound `eLpNorm_tensorL2ChartComponent_le_uniform`
-applies. -/
 private lemma eigenvectorChartComponentFun_eLpNorm_le_energy
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -390,12 +265,6 @@ private lemma eigenvectorChartComponentFun_eLpNorm_le_energy
     (tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)⟩
 
-/-- **Atom 2 — the cross-left limit object (chart-locality-free).**
-Chart-locality-free twin of `crossLeftLimitComponent_eLpNorm_le_energy`. The
-committed `eLpNorm_crossLeftLimitComponent_le_uniform` bounds the
-atom by an abstract gradient norm; the gradient-energy identity
-`tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le` collapses that
-norm to `√μ · ‖φ‖`. -/
 private lemma crossLeftLimitComponent_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -421,12 +290,6 @@ private lemma crossLeftLimitComponent_eLpNorm_le_energy
         (I := I) (M := M) g r s i))) ?_
   rw [ENNReal.ofReal_mul (Real.sqrt_nonneg _), ← mul_assoc]
 
-/-- **Atom 3 — the cross-right limit object (chart-locality-free).**
-Chart-locality-free twin of `crossRightLimitComponent_eLpNorm_le_energy`. The
-committed `eLpNorm_crossRightLimitComponent_le_uniform` bounds the
-atom by `‖TensorH1ComplToTensorL2 (eigenvectorResolvent …)‖`; the
-eigen-equation exhibits `TensorH1ComplToTensorL2 (eigenvectorResolvent
-…) = μ • φ`, so that norm is `μ · ‖φ‖`. -/
 private lemma crossRightLimitComponent_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -471,13 +334,6 @@ private lemma crossRightLimitComponent_eLpNorm_le_energy
   refine (hC_bd i).trans ?_
   rw [h_norm, ENNReal.ofReal_mul hC_nn, ENNReal.ofReal_mul hμ_nn, mul_assoc]
 
-/-- **Atom 4 — the chart-partial limit object (chart-locality-free).**
-Chart-locality-free twin of `partialLpLimit_eLpNorm_le_energy`. The committed
-`partialLpLimit_eLpNorm_le` supplies the bound on plain Lebesgue
-volume; the chart-partial atom vanishes almost everywhere off the compact
-partition-of-unity kernel (it is the `μ`-rescaling of the eigenvector weak chart
-partial, which does), so the weighted-versus-volume comparison transfers the
-bound to the chart-pulled weighted measure. -/
 private lemma partialLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -538,12 +394,6 @@ private lemma partialLpLimit_eLpNorm_le_energy
     show Ccmp * (Cvol * Real.sqrt i.fst.val) =
       Ccmp * Cvol * Real.sqrt i.fst.val from (mul_assoc _ _ _).symm]
 
-/-- **Atom 5 — the chart-component limit object (chart-locality-free).**
-Chart-locality-free twin of `componentLpLimit_eLpNorm_le_energy`. The atom is, by
-definition, `μ` times the canonical Euclidean chart component of the unconditional
-eigenbasis vector; the homogeneity of `eLpNorm` extracts the `μ` factor and the
-uniform bound `eLpNorm_tensorL2ChartComponent_le_uniform` controls the remaining
-chart component. -/
 private lemma componentLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -598,14 +448,6 @@ private lemma componentLpLimit_eLpNorm_le_energy
         g r s) i))) (le_of_eq ?_)
   rw [← mul_assoc, ← ENNReal.ofReal_mul hμ_nn, mul_comm i.fst.val C]
 
-/-- **Atom 6 — the cutoff chart-partial limit object (chart-locality-free).**
-Chart-locality-free twin of `cutoffPartialLpLimit_eLpNorm_le_energy`. The
-committed `cutoffPartialLpLimit_eLpNorm_le` supplies the bound on
-plain Lebesgue volume; the cutoff chart-partial atom vanishes almost everywhere
-off the compact cutoff kernel
-(`cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid`), so the
-weighted-versus-volume comparison transfers the bound to the chart-pulled
-weighted measure. -/
 private lemma cutoffPartialLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -663,9 +505,6 @@ private lemma cutoffPartialLpLimit_eLpNorm_le_energy
 
 end AtomBoundsUnconditional
 
-/-- For `μ ≤ 1` and `0 ≤ C`, both `ENNReal.ofReal (C · √μ)` and
-`ENNReal.ofReal (C · μ)` are bounded above by `ENNReal.ofReal C`: the `μ`-power
-is at most `1`. -/
 private lemma ofReal_mul_muPow_le_ofReal {C μ : ℝ} (hC : 0 ≤ C)
     (hμ_le : μ ≤ 1) :
     ENNReal.ofReal (C * Real.sqrt μ) ≤ ENNReal.ofReal C ∧
@@ -683,29 +522,7 @@ private lemma ofReal_mul_muPow_le_ofReal {C μ : ℝ} (hC : 0 ≤ C)
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The uniform energy bound for the eigenvector chart right-hand side
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_eLpNorm_le_energy`, re-keyed onto `eigenvectorChartRHS`
-and the unconditional eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`.
 
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, and a component multi-index `P₀`, there is a single nonnegative
-constant `C` — geometric (chart-transition / density / dimension / operator-norm
-data), independent of the eigenbasis index — such that for *every* eigenbasis
-index `i`, with resolvent eigenvalue `μ := i.fst.val`, the weighted `eLpNorm` of
-the chart-Euclidean right-hand side `eigenvectorChartRHS g r s i α P₀`
-is bounded by `ENNReal.ofReal (C · μ⁻¹)` times the abstract `L²` norm of the
-unconditional eigenbasis vector.
-
-The explicit eigenvalue factor `μ⁻¹` stays *inside* the `∀ i`; only the geometric
-constant `C` is hoisted before the `∀ i`. The proof transfers verbatim from the
-`h_atlas`-keyed original via the committed `_unconditional` upstream twins: the
-uniform `μ⁻¹`-prefactor bound `eigenvectorChartRHS_eLpNorm_le_uniform_unconditional`
-and the six companion `_unconditional` per-atom energy lemmas, with the `μ`-powers
-folded by `ofReal_mul_muPow_le_ofReal` since the resolvent eigenvalue lies in
-`(0, 1]`. No chart-selection hypothesis. -/
 theorem eigenvectorChartRHS_eLpNorm_le_energy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

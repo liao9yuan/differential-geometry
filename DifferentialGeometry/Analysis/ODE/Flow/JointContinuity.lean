@@ -1,21 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.GlobalExistence
 
-/-!
-# Joint continuity of the parametric linear ODE solution operator
-
-A priori Grönwall growth and comparison estimates for the linear ODE, and the resulting joint
-continuity of the parametric solution in the parameter and time.
-
-## Main results
-
-* `linearODE_gronwall_forward` / `linearODE_gronwall_backward` — forward / backward Grönwall
-  comparison for two linear ODEs with differing coefficients.
-* `linearODESolution_continuousOn` — joint continuity of
-  `(x, t) ↦ linearODESolution A a b h₀ Z₀ x t` on `U ×ˢ Ioo a b` from joint continuity of `A`
-  and continuity of `Z₀`.
-
-`[CompleteSpace G]` is required throughout.
--/
 
 noncomputable section
 
@@ -31,11 +15,7 @@ section JointContinuity
 
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/-- **A priori growth bound for a linear ODE on a closed sub-interval**.
-
-If `Z` solves `Z' t = A t (Z t)` on `Ioo a b` and `‖A t‖ ≤ M` on `Icc α β ⊂ Ioo a b`,
-then for any base time `c ∈ Icc α β` and any `t ∈ Icc α β`,
-`‖Z t‖ ≤ ‖Z c‖ · exp (M · (β - α))`. -/
+omit [CompleteSpace G] in
 private theorem linearODE_apriori_bound
     {A : ℝ → (G →L[ℝ] G)} {a b α β c M : ℝ}
     (_hαβ : α ≤ β) (hα_lt : a < α) (hβ_lt : β < b)
@@ -149,12 +129,7 @@ private theorem linearODE_apriori_bound
       _ ≤ ‖Z c‖ * Real.exp (M * (β - α)) :=
           mul_le_mul_of_nonneg_left h_exp_mono (norm_nonneg _)
 
-/-- **Forward Grönwall comparison** for linear ODEs.
-
-If `Z₁` solves `Z₁' = A₁ Z₁` and `Z₂` solves `Z₂' = A₂ Z₂` on `Icc h₀ β`,
-with `‖A₁ s‖ ≤ K` and `‖(A₂ s - A₁ s)(Z₂ s)‖ ≤ η` on `[h₀, β]`, then for
-`t ∈ [h₀, β]`:
-`‖Z₁ t - Z₂ t‖ ≤ gronwallBound ‖Z₁ h₀ - Z₂ h₀‖ K η (t - h₀)`. -/
+omit [CompleteSpace G] in
 theorem linearODE_gronwall_forward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {h₀ β K η : ℝ}
     (_hh₀β : h₀ ≤ β) (hK_nn : 0 ≤ K)
@@ -200,8 +175,7 @@ theorem linearODE_gronwall_forward
   rw [zero_add] at this
   exact this
 
-/-- **Backward Grönwall comparison** for linear ODEs (mirror of
-`linearODE_gronwall_forward` via time reversal). -/
+omit [CompleteSpace G] in
 theorem linearODE_gronwall_backward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {α h₀ K η : ℝ}
     (hαh₀ : α ≤ h₀) (hK_nn : 0 ≤ K)
@@ -304,11 +278,6 @@ theorem linearODE_gronwall_backward
   rw [h_lhs] at hres
   exact hres
 
-/-- **Joint continuity of `linearODESolution` in `(x, t)`**.
-
-If `A` is jointly continuous on `U × Ioo a b` and `Z₀` is continuous on `U`,
-then the parametric solution `(x, t) ↦ linearODESolution A a b h₀ Z₀ x t` is
-jointly continuous on `U × Ioo a b`. -/
 theorem linearODESolution_continuousOn
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]

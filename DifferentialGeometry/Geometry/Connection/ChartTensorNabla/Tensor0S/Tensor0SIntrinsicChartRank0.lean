@@ -2,34 +2,12 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.TensorSectionMDifferentiability
 
-/-!
-# Rank-0 evaluation of the intrinsic chart Fréchet-derivative CLM
-
-For a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model `I`, a
-chart-centre `α : M`, a base point `b : M` on the chart-Levi-Civita good set, and
-a `(0, 0)`-tensor section `T : Π b' : M, Tensor0SSpace 0 I b'`, the intrinsic
-chart-α Fréchet-derivative CLM `tensor0SIntrinsicChartCLM 0 α T b` evaluated at a
-tangent vector `v` and the unique empty tuple agrees with the manifold-Fréchet
-derivative of the scalar `(0, 0)`-tensor evaluation
-`fun b' : M => T b' (fun i : Fin 0 => Fin.elim0 i)` at `b` along `v`.
-
-This identifies the intrinsic piece in the chart decomposition of
-`tensor0SCovariantDerivative` at rank zero with the abstract manifold-Fréchet
-derivative of the scalar tensor evaluation, closing the rank-0 leg of the
-inductive `Tensor0SCovariantDerivativeAgreementSucc` reasoning.
-
-## Main result
-
-* `tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open scoped Manifold ContDiff Topology
 open Bundle Set Tensor0SBundle
@@ -47,19 +25,15 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- Evaluation of a rank-0 model tensor at the unique empty tuple, as a CLM.
-This is the `ContinuousMultilinearMap.apply` bundled CLM specialised to the
-unique input in `Fin 0 → E`. -/
 private noncomputable def evalEmptyCLM :
     Tensor0SModel 0 ℝ E →L[ℝ] ℝ :=
   ContinuousMultilinearMap.apply ℝ (fun _ : Fin 0 => E) ℝ
     (fun i : Fin 0 => Fin.elim0 i)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma evalEmptyCLM_apply (F : Tensor0SModel 0 ℝ E) :
     evalEmptyCLM (E := E) F = F (fun i : Fin 0 => Fin.elim0 i) := rfl
 
-/-- The chart-α-trivialised rank-0 representation evaluated at the empty tuple
-equals the original fibre value evaluated at the empty tuple. -/
 private lemma tensor0SChartE_section_repr_zero_empty (α : M)
     (T : Π b' : M, Tensor0SSpace 0 I b') {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -75,9 +49,6 @@ private lemma tensor0SChartE_section_repr_zero_empty (α : M)
   funext i
   exact i.elim0
 
-/-- The fibre-from-model map at rank zero, applied to an arbitrary model
-fibre `w`, evaluated at the empty tuple, equals `w` evaluated at the empty
-tuple. -/
 private lemma tensor0SChartFiberFromModel_zero_empty (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (w : Tensor0SModel 0 ℝ E) :
@@ -95,9 +66,6 @@ private lemma tensor0SChartFiberFromModel_zero_empty (α : M) {b : M}
   funext i
   exact i.elim0
 
-/-- Pointwise: the rank-0 chart-α trivialised representation, evaluated at
-the empty tuple, equals the scalar tensor evaluation, on the trivialisation
-base set. -/
 private lemma chartE_eval_eq_scalar (α : M)
     (T : Π b' : M, Tensor0SSpace 0 I b') {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -108,11 +76,6 @@ private lemma chartE_eval_eq_scalar (α : M)
   rw [evalEmptyCLM_apply]
   exact tensor0SChartE_section_repr_zero_empty (I := I) α T hb'
 
-/-- Eventual-equality: the composition `evalEmptyCLM ∘
-tensor0SChartE_section_repr 0 α T ∘ (extChartAt I α).symm` agrees with the
-chart pullback of the scalar evaluation `b' ↦ T b' (Fin.elim0)` in a
-neighbourhood of `extChartAt I α b`, for `b` on the chart Levi-Civita good
-set. -/
 private lemma evalEmpty_chartPullback_eventually_eq_scalar
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -151,9 +114,6 @@ private lemma evalEmpty_chartPullback_eventually_eq_scalar
   rintro y ⟨_hy_int, hy_base⟩
   exact chartE_eval_eq_scalar (I := I) α T (b' := φ.symm y) hy_base
 
-/-- If the bundle-section form of a `(0, 0)`-tensor section `T` is
-manifold-differentiable at a good-set point `b`, then the scalar evaluation
-`b' ↦ T b' (Fin.elim0)` is manifold-differentiable at `b`. -/
 private lemma mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -207,12 +167,6 @@ private lemma mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
     rw [chartE_eval_eq_scalar (I := I) α T hb']
   exact hcomp.congr_of_eventuallyEq hev
 
-/-- **Rank-0 identity.** The intrinsic chart-α Fréchet-derivative CLM of a
-`(0, 0)`-tensor section `T`, applied to a tangent vector `v` and evaluated at
-the unique empty tuple, equals the manifold-Fréchet derivative of the scalar
-evaluation `b' ↦ T b' (Fin.elim0)` at `b` applied to `v`, provided `b` lies
-on the chart-α Levi-Civita good set and the bundle-section form of `T` is
-manifold-differentiable at `b`. -/
 theorem tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

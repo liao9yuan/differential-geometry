@@ -2,9 +2,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Nabla0S
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Raw model-centered tensor covariant derivative definitions
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -29,6 +29,32 @@ section SmoothVectorFieldRSNabla
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
+
+
+
+
+
+theorem modelAt_mcovRS {r s : ℕ}
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (ΓX : E → E →L[𝕜] E)
+    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) r s)
+    (u : Set M) (x₀ : M) :
+    tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x₀
+        (mcovariantDeriv_tensorRSWithin (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) (n := n) r s X ΓX T u x₀) =
+      covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          X (Set.range I))
+        ΓX
+        (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r s x₀ (fun x => T x))
+        ((extChartAt I x₀).symm ⁻¹' u ∩ Set.range I)
+        (extChartAt I x₀ x₀) := by
+  unfold mcovariantDeriv_tensorRSWithin
+  rw [tensorRSModelAt_trivializationAt_symm]
+  rfl
 
 
 theorem mcovariantDeriv_tensor0SWithin_apply_slots {s : ℕ}

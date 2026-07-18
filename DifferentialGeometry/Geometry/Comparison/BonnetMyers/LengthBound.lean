@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
@@ -11,18 +11,18 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Bonnet-Myers length bound
 
-This file packages the analytic core of the Bonnet-Myers diameter
-theorem: a unit-speed minimising geodesic on a complete Riemannian
-manifold whose Ricci curvature is bounded below by `(n-1) K` (with
-`K > 0`) has length at most `π / √K`.
 
-The proof routes through the second-variation index form applied to
-the family `V_i(t) := sin(πt/L) · e_i(t)`, where `e_i` is a parallel
-orthonormal frame of `(γ')⊥` along `γ`.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -49,13 +49,13 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
-/-- The Ricci curvature `Ric(X, X)` of a unit vector `X ∈ T_x M` equals
-the sum `∑_i ⟨R(e_i, X) X, e_i⟩_g` over any `g`-orthonormal family
-`e : Fin (Module.finrank ℝ E - 1) → T_x M` orthogonal to `X`.
 
-The proof realises the Ricci tensor as the trace of `Z ↦ R(Z, X) X`
-in the orthonormal basis `{X, e_1, …, e_{n-1}}`; the `X`-summand
-`⟨R(X, X) X, X⟩` vanishes by curvature antisymmetry. -/
+
+
+
+
+
+
 theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
     (g : SmoothRiemannianMetric I M) (x : M) (X : E)
     (hUnit : g.inner x X X = 1)
@@ -201,13 +201,13 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
   rw [hR_self]
   simp only [map_zero, ContinuousLinearMap.zero_apply, zero_add]
 
-/-- Pointwise integrand identity used by `sum_index_form_frame_evaluation`.
-At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
-`V_i := sin(πt/L) • e_i` equals the trig–Ricci expression. Derivation:
-Leibniz on `chartCovDerivAlong g (γ t) γ (sin(π·/L) • e_i) t` combined
-with parallelism gives `∇_t V_i = (π/L) cos(πt/L) • e_i`; squaring via
-`hON` gives `‖∇_t V_i‖² = (π/L)² cos²(πt/L)`; the curvature sum
-collapses via `ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame`. -/
+
+
+
+
+
+
+
 theorem sum_index_form_integrand_eval
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {L : ℝ} (_hL : 0 < L) (uPrime : ℝ → E)
@@ -482,19 +482,19 @@ theorem sum_index_form_integrand_eval
   rw [h_cast]
   ring
 
-/-- **sum-index-form-frame-evaluation.** For a unit-speed geodesic
-`γ : [0, L] → M`, a parallel orthonormal frame `e_i` of `(γ')⊥`, and
-variation fields `V_i(t) := sin(πt/L) · e_i(t)`,
-`∑_i indexForm g γ 0 L V_i V_i =
-  ∫₀^L [(n-1)(π/L)² cos²(πt/L) - sin²(πt/L) · Ric(γ', γ')] dt`.
 
-Genuine math hypotheses: `huPrimeEq` (geodesic-velocity / uPrime),
-`hUnit` (unit-speed), `heDiff` (frame
-differentiable), `hParallel` (frame parallel), `hON` (orthonormality),
-`hPerp` (perpendicularity to uPrime), `hIntegrandSum` (per-i integrand
-interval-integrable). The proof routes via `indexForm_eq_intervalIntegral`,
-`intervalIntegral.integral_finset_sum`, and `intervalIntegral.integral_congr`
-against `sum_index_form_integrand_eval`. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem sum_index_form_frame_evaluation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
     (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
@@ -605,16 +605,16 @@ theorem sum_index_form_frame_evaluation
       rw [Set.uIcc_of_le hL_nonneg] at ht
       exact hPointwise ht)
 
-/-- **sum-index-form-bound-by-curvature-hypothesis.** Given the lower
-Ricci bound `(n-1) K · g(v, v) ≤ Ric(v, v)` (i.e.
-`RicciBoundedBelow g ((n-1) K)`), the sum of index forms on the family
-`V_i(t) := sin(πt/L) · e_i(t)` is bounded above by
-`(n-1)(L/2)((π/L)² - K)`.
 
-The proof applies monotonicity of the interval integral to
-`sum_index_form_frame_evaluation`, plugs in the Ricci hypothesis on
-the unit speed `γ'`, and evaluates the trigonometric integrals via
-`integral_sin_sq` and `integral_cos_sq`. -/
+
+
+
+
+
+
+
+
+
 theorem sum_index_form_bound_by_curvature_hypothesis
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
     (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
@@ -805,21 +805,21 @@ theorem sum_index_form_bound_by_curvature_hypothesis
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Bonnet-Myers length bound.** For a unit-speed minimising geodesic
-`γ : [0, L] → M` on a Riemannian manifold whose Ricci curvature satisfies
-`(n-1) K · g(v, v) ≤ Ric(v, v)` with `K > 0`, the parameter length `L`
-is at most `π / √K`.
 
-The orthonormal perpendicular parallel frame `e` along `γ`, the
-unit-speed velocity data `uPrime`, and the various integrability and
-minimisation hypotheses are supplied as assumptions.
 
-The proof is by contradiction. If `π/√K < L`, then `(π/L)² < K`, so
-`sum_index_form_bound_by_curvature_hypothesis` produces a strictly
-negative sum of index forms. On the other hand
-`indexForm_nonneg_of_minimising_geodesic` applied to each `V_i`
-gives `0 ≤ indexForm g γ 0 L V_i V_i`, hence the sum is non-negative.
-This contradiction forces `L ≤ π / √K`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem bonnet_myers_length_le_of_ricci_bound
     [T2Space (TangentBundle I M)] [ConnectedSpace M]
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]

@@ -6,18 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-/-!
-# Helper lemmas for the smooth-density argument on `W^{1,p}_chart(M)`
-
-This module collects helper lemmas surrounding the chart-pullback construction
-`chartPullback I α ψ` and finite sums thereof. These lemmas are designed to be
-combined with the per-chart smooth-density theorem
-`MemWkp.exists_smooth_compactSupport_approx` and the chart-transition
-quantitative chain rule
-`SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le` to produce smooth approximations
-in `W^{1,p}_chart(M)`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -40,9 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- A finite sum of smooth chart-pullbacks is smooth on `M`, provided each
-summand has smooth Euclidean data with compact support inside the
-corresponding chart target. -/
 theorem contMDiff_finset_sum_chartPullback
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -83,9 +68,7 @@ theorem contMDiff_finset_sum_chartPullback
       exact h_smooth_i.add ih'
 
 omit [IsManifold I ∞ M] in
-/-- `chartPushed` is linear in the underlying scalar field: for any sum
-`∑ i ∈ S, f i x`, `chartPushed ρ α (Σ_i f_i)` equals the pointwise sum of
-`chartPushed ρ α (f_i)`. -/
+
 lemma chartPushed_finset_sum
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {ι : Type*} (S : Finset ι) (f : ι → M → ℝ) :
@@ -98,7 +81,7 @@ lemma chartPushed_finset_sum
   rw [Finset.mul_sum]
 
 omit [IsManifold I ∞ M] in
-/-- `chartPushed` is additive. -/
+
 lemma chartPushed_sub
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     (u v : M → ℝ) :
@@ -110,7 +93,6 @@ lemma chartPushed_sub
   unfold chartPushed
   ring
 
-/-- `MemWkpChart` is closed under finite sums (as a Finset sum). -/
 theorem MemWkpChart_finset_sum
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -136,8 +118,6 @@ theorem MemWkpChart_finset_sum
       rw [h_eq]
       exact MemWkpChart_add (I := I) (M := M) g hp hi ih'
 
-/-- The chart-based norm of a finite sum is bounded by the sum of chart-based
-norms. -/
 theorem wkpNormChart_finset_sum_le
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -169,9 +149,6 @@ theorem wkpNormChart_finset_sum_le
       gcongr
       exact ih hS_mem
 
-/-- On a compact manifold with the canonical chart-atlas POU, the chart-pushed
-function `chartPushed (chartAtlasPOU I M) α u` vanishes on `chartTargetEuclid α`
-outside the compact set `toEuclidean '' ((extChartAt I α) '' tsupport (ρ_α))`. -/
 theorem chartPushed_eq_zero_off_compact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) {y : EuclN}
@@ -184,9 +161,6 @@ theorem chartPushed_eq_zero_off_compact
   DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_support_subset_compact_in_target
     (I := I) (M := M) α u y hy_target hy_off
 
-/-- On a compact manifold, the chart-based norm equals a finite sum over the
-set `chartAtlasPOU_finset` (the indices where the partition-of-unity
-weight has non-empty support). -/
 theorem wkpNormChart_eq_finset_sum
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -194,7 +168,7 @@ theorem wkpNormChart_eq_finset_sum
     wkpNormChart (I := I) (M := M) g k p u =
       ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
               (I := I) (M := M),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -202,7 +176,7 @@ theorem wkpNormChart_eq_finset_sum
   classical
   unfold wkpNormChart
   set f : M → ℝ≥0∞ := fun α =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -223,7 +197,7 @@ theorem wkpNormChart_eq_finset_sum
       unfold chartPushed
       rw [hρ_zero]
       ring
-    change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

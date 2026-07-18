@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 
-/-!
-# `H¹_0` extension of the chart-bilinear variational identity
-
-The variational identity in `chart_bilinear_identity_h1Compl` is stated for
-`C^∞_c` test functions `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`. Here we
-extend it to test functions of `H¹_0` regularity that are supported in a
-fixed compact subset `K_0 ⊆ chartTargetEuclid α`.
-
-The argument:
-
-1. Apply the smooth-CS variational identity to each smooth-CS approximant
-   `ψ_n`.
-2. Pass to the limit using `L²` convergence of `ψ_n → ψ` and of the
-   classical partials `∂_j ψ_n` to the weak partials `weak_partial_ψ j`,
-   together with the local `L²` integrability of `D.weak_partial i`,
-   `D.u_chart`, `D.f_chart`, and the boundedness of
-   `weightedInvGramOnEuclid g α i j` and `densityOnEuclid g α` on the
-   compact `K_0`.
-
-A common compact support `K_0` is required because the chart target image
-`chartTargetEuclid α` may be unbounded on a closed manifold (e.g.,
-stereographic projection), in which case the density and the weighted
-inverse Gram matrix are not globally bounded.
-
-## Main result
-
-* `chart_bilinear_identity_h1_0`: the variational identity holds for any
-  `H¹_0` test function `ψ` supported in a compact subset of
-  `chartTargetEuclid α`, with weak partials `weak_partial_ψ j`, given a
-  smooth-CS approximating sequence whose supports lie in `K_0` and whose
-  classical partials converge to `weak_partial_ψ j` in `L²`.
--/
 
 noncomputable section
 
@@ -62,8 +30,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Each entry `weightedInvGramOnEuclid g α i j` is bounded above on any
-compact subset `K` of `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weightedInvGramOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -91,8 +58,7 @@ private lemma weightedInvGramOnEuclid_bounded_on_compact
   intro y hy
   exact h_max_eq hy
 
-/-- The density `densityOnEuclid g α` is bounded above on any compact subset
-`K` of `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma densityOnEuclid_bounded_above_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -119,6 +85,7 @@ private lemma densityOnEuclid_bounded_above_on_compact
   intro y hy
   exact h_max_eq hy
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     {μ : Measure EuclN} {Y : EuclN → ℝ} {ψ_n : ℕ → EuclN → ℝ} {ψ : EuclN → ℝ}
     (hY : MemLp Y 2 μ)
@@ -245,7 +212,7 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     simpa [h_eq] using h_aux
   simpa [add_zero] using h_aux'
 
-/-- `D.u_chart` is plain `L²` on any compact subset `K ⊆ chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma uChart_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -257,7 +224,7 @@ private lemma uChart_memLp_volume_restrict_compact
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     (D.u_chart_memLp_weighted) hK_compact hK_meas hK_in
 
-/-- `D.f_chart` is plain `L²` on any compact subset `K ⊆ chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChart_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -269,20 +236,7 @@ private lemma fChart_memLp_volume_restrict_compact
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     (D.f_chart_memLp_weighted) hK_compact hK_meas hK_in
 
-/-- **`H¹_0` extension of the chart-bilinear variational identity.**
-
-The variational identity in `chart_bilinear_identity_h1Compl` is stated for
-`C^∞_c` test functions `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`. By
-density of `C^∞_c` in `H¹_0(K_0)` with `K_0` compact in `chartTargetEuclid α`,
-the same identity extends to test functions `ψ` of `H¹_0` regularity
-supported in `K_0`.
-
-The hypothesis `hψ_seq_*` provides a smooth-CS approximating sequence with
-all supports inside `K_0` (this is the natural setting in which both
-weighted and plain `L²` integrability of `D.u_chart`, `D.f_chart`,
-`D.weak_partial i`, `weightedInvGramOnEuclid`, and `densityOnEuclid` are
-available). Convergence of `ψ_seq n → ψ` and of the classical partials
-`∂_j (ψ_seq n) → weak_partial_ψ j` is required in plain `L²`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

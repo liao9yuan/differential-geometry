@@ -2,9 +2,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 import DifferentialGeometry.Tensor.RSTensor.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Regularity of covariant tensor nabla
--/
+
+
+
 
 set_option linter.unusedSectionVars false
 
@@ -311,8 +311,8 @@ theorem tangentConst_covariantDeriv_apply_contMDiffAt
     (by simp : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of one chart-constant correction term in the `(0,s)` tensor
-derivation formula. -/
+
+
 theorem tensor0S_eval_tangentConst_covariantDerivative_slot_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -643,11 +643,11 @@ theorem localCovariantDerivTensor0SAt_constInChart_contMDiffAt
       congr)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Definition 14.5 for the implemented `(0,s)` covariant derivative.
 
-Evaluating `nabla0SFun` on smooth moving slots agrees with the tensorial
-derivation rule: differentiate the scalar evaluation and subtract the
-connection correction in each covariant slot. -/
+
+
+
+
 theorem nabla0SFun_eval_smooth_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -709,8 +709,8 @@ theorem nabla0SFun_eval_smooth_slots {s : ℕ}
       (I := I) cov X W α x₀ hpair hV_md hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A smooth `(0,s)` tensor field evaluated on smooth moving tangent slots is
-smooth as a scalar function. -/
+
+
 theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -735,8 +735,8 @@ theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A smooth `(0,s)` tensor field evaluated on `C¹` moving tangent slots is
-`C¹` as a scalar function. -/
+
+
 theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -759,7 +759,7 @@ theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Differentiability form of `tensor0SField_eval_C1_slots_contMDiffAt_one`. -/
+
 theorem tensor0SField_eval_C1_slots_mdiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -775,7 +775,7 @@ theorem tensor0SField_eval_C1_slots_mdiffAt {s : ℕ}
     α V x₀ hV_at).mdifferentiableAt (by norm_num)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Definition 14.5 for `nabla0SFun` with only `C¹` moving slots. -/
+
 theorem nabla0SFun_eval_C1_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -821,8 +821,8 @@ theorem nabla0SFun_eval_C1_slots {s : ℕ}
       (I := I) cov X V α x₀ hpair hV_md hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Scalar coefficient smoothness for `nabla0SFun s` on chart-constant
-tangent slots. -/
+
+
 theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -928,9 +928,9 @@ theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     (I := I) cov X V α p hpair_md hV_md hVmodel_p hcoord_p]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the canonical raw covariant derivative for `(0,s)` tensor
-fields, proved by local-frame coefficients in the tangent-bundle
-trivialization. -/
+
+
+
 theorem nabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

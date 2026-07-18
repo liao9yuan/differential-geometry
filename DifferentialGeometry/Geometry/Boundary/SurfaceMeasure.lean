@@ -2,45 +2,6 @@ import DifferentialGeometry.Geometry.Boundary.InducedMetric
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
-/-!
-# Surface measure on the boundary of a Riemannian manifold-with-boundary
-
-Given a smooth manifold `M` modelled on `(E, H, I)` with `[hI : HasSmoothBoundary E H I]`,
-and a smooth Riemannian metric `g` on the tangent bundle of `M`, this file constructs
-the *surface measure* on the boundary submanifold `BoundaryManifold I M` as the
-Riemannian volume measure of the induced (pull-back) metric `inducedMetric g`.
-
-## Main definitions
-
-* `surfaceMeasure g` — the Riemannian volume measure of `inducedMetric g`,
-  as a `MeasureTheory.Measure (BoundaryManifold I M)`.
-
-## Main results
-
-* `surfaceMeasure_isOpenPosMeasure`,
-  `surfaceMeasure_sigmaFinite`,
-  `surfaceMeasure_isLocallyFiniteMeasure`,
-  `surfaceMeasure_isFiniteMeasureOnCompacts` — direct propagation of the
-  corresponding `riemannianVolumeMeasure_*` properties through `inducedMetric`.
-* `surfaceMeasure_eq_zero_of_boundaryless` — when the ambient model `I` is itself
-  boundaryless, `BoundaryManifold I M` is empty, so the surface measure vanishes.
-
-## Implementation notes
-
-The boundary submanifold inherits the typeclass instances needed by
-`riemannianVolumeMeasure`:
-
-* `T2Space (BoundaryManifold I M)` — `BoundaryManifold.instT2Space`.
-* `SigmaCompactSpace (BoundaryManifold I M)` — `BoundaryManifold.instSigmaCompactSpace`
-  (uses closedness of the boundary in a smooth manifold).
-* `ChartedSpace hI.boundaryH (BoundaryManifold I M)` — `BoundaryManifold.chartedSpace`.
-* `IsManifold hI.boundaryI ∞ (BoundaryManifold I M)` — `BoundaryManifold.isManifold`.
-
-The boundary model space `hI.boundaryE` carries `[NormedAddCommGroup _]`,
-`[NormedSpace ℝ _]`, `[FiniteDimensional ℝ _]` from the typeclass fields; the latter
-is definitionally `Module.Finite ℝ _`.
--/
-
 noncomputable section
 
 open MeasureTheory
@@ -64,13 +25,6 @@ private local instance : MeasurableSpace (BoundaryManifold I M) :=
   borel (BoundaryManifold I M)
 private local instance : BorelSpace (BoundaryManifold I M) := ⟨rfl⟩
 
-/-- Surface measure on the boundary of a Riemannian manifold-with-boundary.
-
-Constructed as the Riemannian volume measure of the metric induced on the
-boundary submanifold via the boundary inclusion. The boundary submanifold
-inherits `T2Space`, `SigmaCompactSpace`, and `IsManifold` from the ambient
-manifold; `riemannianVolumeMeasure` then applies directly to the induced
-metric. -/
 noncomputable def surfaceMeasure
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -79,8 +33,6 @@ noncomputable def surfaceMeasure
   Measure.riemannianVolumeMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
-/-- Unfolding lemma: the surface measure is the Riemannian volume measure of the
-induced metric on the boundary submanifold. -/
 lemma surfaceMeasure_def
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -89,7 +41,6 @@ lemma surfaceMeasure_def
       Measure.riemannianVolumeMeasure
         (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g) := rfl
 
-/-- The surface measure is positive on nonempty open subsets of the boundary. -/
 theorem surfaceMeasure_isOpenPosMeasure
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -99,7 +50,6 @@ theorem surfaceMeasure_isOpenPosMeasure
   exact Measure.riemannianVolumeMeasure_isOpenPosMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
-/-- The surface measure is σ-finite. -/
 theorem surfaceMeasure_sigmaFinite
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -109,7 +59,6 @@ theorem surfaceMeasure_sigmaFinite
   exact Measure.riemannianVolumeMeasure_sigmaFinite
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
-/-- The surface measure is locally finite. -/
 theorem surfaceMeasure_isLocallyFiniteMeasure
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -119,7 +68,6 @@ theorem surfaceMeasure_isLocallyFiniteMeasure
   exact Measure.riemannianVolumeMeasure_isLocallyFiniteMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
-/-- The surface measure is finite on compact subsets of the boundary. -/
 theorem surfaceMeasure_isFiniteMeasureOnCompacts
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -129,8 +77,6 @@ theorem surfaceMeasure_isFiniteMeasureOnCompacts
   exact Measure.riemannianVolumeMeasure_isFiniteMeasureOnCompacts
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
-/-- When the ambient model `I` is boundaryless, the boundary submanifold
-`BoundaryManifold I M` is empty and the surface measure vanishes. -/
 theorem surfaceMeasure_eq_zero_of_boundaryless
     [I.Boundaryless] [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]

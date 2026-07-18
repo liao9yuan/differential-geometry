@@ -9,47 +9,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-/-!
-# The Riemann curvature operator of a covariant derivative
-
-Given any covariant derivative `cov : CovariantDerivative I F V` on a vector bundle `V` over a
-smooth manifold `M`, this file develops the section-level Riemann curvature formula
-$$
-  R^{\mathrm{cov}}(X, Y) Z := \nabla_X (\nabla_Y Z) - \nabla_Y (\nabla_X Z) - \nabla_{[X, Y]} Z,
-$$
-together with its pointwise tensoriality in the vector-field arguments `X` and `Y`,
-antisymmetry, and the torsion-free reformulation of the Lie-bracket factor.
-
-## Main definitions
-
-* `covApply cov X Z` — the section `b ↦ cov.toFun Z b (X b)`, written `∇_X Z` on paper.
-* `riemannSec cov X Y Z x` — the bare section-level Riemann formula.
-
-## Main theorems
-
-* `riemannSec_swap` — pointwise antisymmetry `R(X, Y) Z (x) = - R(Y, X) Z (x)`.
-* `riemannSec_self_eq_zero` — `R(X, X) Z (x) = 0`.
-* `riemannSec_add_left`, `riemannSec_add_right` — additivity in the vector-field arguments.
-* `riemannSec_smul_left`, `riemannSec_smul_right` — `C^∞(M)`-scalar multiplication in the
-  vector-field arguments. These two pairs of lemmas establish that, on smooth inputs (with the
-  required differentiability of `covApply`), the section-level Riemann formula is bilinear in
-  `(X, Y)` over the algebra of smooth real-valued functions on `M`.
-* `covApply_sub_eq_mlieBracket` — the torsion-free identity
-  `covApply cov X Y x - covApply cov Y X x = mlieBracket I X Y x` for differentiable `X, Y`.
-* `riemannSec_torsionFree_form` — for a torsion-free covariant derivative on the tangent bundle,
-  the third (Lie-bracket) term of `riemannSec` rewrites in terms of `cov` evaluated at fibre
-  vectors via the torsion-free identity.
-* `LeviCivita_riemannSec_torsionFree_form` — the previous identity specialised to the
-  Levi-Civita covariant derivative.
-* `covApply_contMDiffOn`, `covApply_mdifferentiableAt` — smoothness of `covApply cov X Z` from
-  smoothness of `cov`, `X`, and `Z`.
-
-## Argument convention
-
-We follow Mathlib's convention `cov.toFun σ x v ≅ (∇_v σ)(x)`. Consequently, `∇_X Z` (the
-covariant derivative of a section `Z` along a vector field `X`) is the section
-`b ↦ cov.toFun Z b (X b)`, captured by `covApply cov X Z`.
--/
 
 noncomputable section
 
@@ -72,8 +31,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [∀ x, IsTopologicalAddGroup (V x)] [∀ x, ContinuousSMul ℝ (V x)]
   [FiberBundle F V]
 
-/-- The section `cov_X Z := b ↦ cov.toFun Z b (X b)`. With Mathlib's argument convention
-`cov.toFun σ x v ≅ (∇_v σ)(x)`, this is the section `∇_X Z` written on paper. -/
 def covApply (cov : CovariantDerivative I F V)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, V b) : Π b : M, V b :=
   fun b => cov.toFun Z b (X b)
@@ -82,21 +39,17 @@ def covApply (cov : CovariantDerivative I F V)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, V b) (b : M) :
     covApply cov X Z b = cov.toFun Z b (X b) := rfl
 
-/-- The section-level Riemann formula:
-`R(X, Y) Z (x) = ∇_X (∇_Y Z) (x) - ∇_Y (∇_X Z) (x) - ∇_{[X, Y]} Z (x)`. -/
 def riemannSec (cov : CovariantDerivative I F V)
     (X Y : Π b : M, TangentSpace I b) (Z : Π b : M, V b) (x : M) : V x :=
   cov.toFun (covApply cov Y Z) x (X x) - cov.toFun (covApply cov X Z) x (Y x)
     - cov.toFun Z x (VectorField.mlieBracket I X Y x)
 
-/-- Definitional unfolding of `riemannSec`. -/
 lemma riemannSec_def (cov : CovariantDerivative I F V)
     (X Y : Π b : M, TangentSpace I b) (Z : Π b : M, V b) (x : M) :
     riemannSec cov X Y Z x =
       cov.toFun (covApply cov Y Z) x (X x) - cov.toFun (covApply cov X Z) x (Y x)
         - cov.toFun Z x (VectorField.mlieBracket I X Y x) := rfl
 
-/-- Antisymmetry of `riemannSec` in `(X, Y)`, pointwise. -/
 lemma riemannSec_swap (cov : CovariantDerivative I F V)
     (X Y : Π b : M, TangentSpace I b) (Z : Π b : M, V b) (x : M) :
     riemannSec cov X Y Z x = - riemannSec cov Y X Z x := by
@@ -105,7 +58,6 @@ lemma riemannSec_swap (cov : CovariantDerivative I F V)
   simp
   abel
 
-/-- Vanishing of `riemannSec` on the diagonal `(X, X)`, pointwise. -/
 @[simp] lemma riemannSec_self_eq_zero (cov : CovariantDerivative I F V)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, V b) (x : M) :
     riemannSec cov X X Z x = 0 := by
@@ -129,10 +81,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
 
 variable {cov : CovariantDerivative I F V}
 
-/-- Additivity of `riemannSec` in the X argument, at a single point.
-
-The hypotheses on `covApply` are needed to invoke `IsCovariantDerivativeOn.add` for the second
-piece of the formula. -/
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_add_left
     {X X' Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hX' : MDiffAt (T% X') x)
@@ -163,7 +112,7 @@ lemma riemannSec_add_left
   rw [h1, h2, h3]
   abel
 
-/-- Additivity of `riemannSec` in the Y argument, at a single point. -/
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_add_right
     {X Y Y' : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hY : MDiffAt (T% Y) x) (hY' : MDiffAt (T% Y') x)
@@ -175,8 +124,7 @@ lemma riemannSec_add_right
       riemannSec_swap (cov := cov) (X := Y') (Y := X) (Z := Z)]
   abel
 
-/-- `C^∞(M)`-linearity of `riemannSec` in the X argument: scalar-multiplication by a smooth
-real-valued function `f`. -/
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_smul_left
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hf : MDiffAt f x) (hX : MDiffAt (T% X) x)
@@ -211,8 +159,7 @@ lemma riemannSec_smul_left
   rw [smul_sub, smul_sub]
   module
 
-/-- `C^∞(M)`-linearity of `riemannSec` in the Y argument: scalar-multiplication by a smooth
-real-valued function `f`. -/
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_smul_right
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hf : MDiffAt f x) (hY : MDiffAt (T% Y) x)
@@ -238,10 +185,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
 
 variable {cov : CovariantDerivative I F V}
 
-/-- Smoothness of `covApply cov X Z` from smoothness of `cov`, `X`, and `Z`. The hypothesis on
-`Z` is one degree higher than the hypothesis on the result (Mathlib's
-`ContMDiffCovariantDerivative` convention: `cov` of class `C^k` takes `C^{k+1}`-sections to
-`C^k`-sections). -/
 lemma covApply_contMDiffOn
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b}
@@ -256,8 +199,6 @@ lemma covApply_contMDiffOn
   intro x _hx
   exact (hop.contMDiffAt (Filter.univ_mem)).clm_bundle_apply (v := X) (hX x) |>.contMDiffWithinAt
 
-/-- `MDiffAt`-form of `covApply` smoothness at a single point, useful for invoking the
-tensoriality lemmas. -/
 lemma covApply_mdifferentiableAt
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -281,9 +222,7 @@ variable (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
 variable (htor : cov.torsion = 0)
 
 include htor in
-/-- Torsion-free identity: `cov_X Y - cov_Y X = [X, Y]` at points where `X, Y` are
-differentiable. With Mathlib's argument convention, this reads
-`covApply cov X Y x - covApply cov Y X x = mlieBracket I X Y x`. -/
+
 lemma covApply_sub_eq_mlieBracket
     {X Y : Π b : M, TangentSpace I b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
@@ -301,9 +240,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 2 M]
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
-/-- For a torsion-free covariant derivative on the tangent bundle, the third (Lie-bracket)
-term of `riemannSec` at a differentiable point can be rewritten via the torsion-free identity
-`mlieBracket I X Y x = cov.toFun Y x (X x) - cov.toFun X x (Y x)`. -/
 lemma riemannSec_torsionFree_form
     (htor : cov.torsion = 0)
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, TangentSpace I b} {x : M}
@@ -329,8 +265,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- For the Levi-Civita covariant derivative, the third term of `riemannSec` admits the
-torsion-free form. -/
 theorem LeviCivita_riemannSec_torsionFree_form
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, TangentSpace I b} {x : M}
@@ -363,13 +297,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
 
 variable {cov : CovariantDerivative I F V}
 
-/-- Additivity of `riemannSec` in the Z (section) argument, at a single point.
-
-The key auxiliary section identity `covApply cov Y (Z + Z') =ᶠ[𝓝 x] covApply cov Y Z +
-covApply cov Y Z'` follows from `cov`-additivity at *all* points of a neighbourhood,
-whence the assumption that `Z, Z'` be `MDifferentiable` eventually at `x`. The two
-auxiliary `MDiffAt`-hypotheses on `covApply cov Y Z, covApply cov Y Z'` (and likewise
-for `X`) are needed to invoke `IsCovariantDerivativeOn.congr_of_eventuallyEq`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
 lemma riemannSec_add_third
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
     (hZnhd : ∀ᶠ b in 𝓝 x, MDiffAt (T% Z) b)
@@ -419,19 +347,7 @@ lemma riemannSec_add_third
   simp only [ContinuousLinearMap.add_apply]
   abel
 
-set_option linter.style.show false in
-/-- `C^∞(M)`-linearity of `riemannSec` in the Z (section) argument: scalar-multiplication by a
-smooth real-valued function `f`.
 
-The proof uses the foundation identity `[X, Y] f = X(Y f) - Y(X f)` (provided by
-`extDerivFun_apply_mlieBracket` from `ChartLieBracket.lean`) to cancel the cross terms that
-arise from applying Leibniz twice. This identity is the only place where the chart-interior
-hypothesis `extChartAt I x x ∈ interior ((extChartAt I x).target : Set E)` enters, and is
-automatic under `[BoundarylessManifold I M]` via `BoundarylessManifold.isInteriorPoint`.
-
-The hypotheses are exposed in their max-general `MDiff`/`ContMDiff`-at-a-point form. The
-neighbourhood-MDifferentiability hypotheses on `f, Z` are needed for the eventual section
-equality of `covApply cov · (f • Z)` with `f • (covApply cov · Z) + ((·) f) • Z`. -/
 lemma riemannSec_smul_third
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
@@ -522,11 +438,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- **Auxiliary: section-level torsion-free identity.** For a torsion-free `cov` on the
-tangent bundle, and tangent vector fields `A, B` differentiable on a neighbourhood of `x`,
-the section difference `covApply cov A B - covApply cov B A` agrees on a neighbourhood of
-`x` with the manifold Lie bracket section `mlieBracket I A B`. This is the
-section-level (eventual-equality) form of the torsion-free identity. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma covApply_sub_eventuallyEq_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -537,13 +449,7 @@ private lemma covApply_sub_eventuallyEq_mlieBracket
   filter_upwards [hAnhd, hBnhd] with b hAb hBb
   exact (CovariantDerivative.torsion_eq_zero_iff (cov := cov)).mp htor hAb hBb
 
-/-- **Auxiliary: cov-of-section-difference identity** for a torsion-free covariant
-derivative on the tangent bundle. Under section-level torsion-free, the value of
-`cov.toFun (covApply cov A B) x` minus `cov.toFun (covApply cov B A) x` (as CLMs)
-equals `cov.toFun (mlieBracket I A B) x`. The proof uses `IsCovariantDerivativeOn.add`
-to compute `cov.toFun (covApply cov A B) x - cov.toFun (covApply cov B A) x =
-cov.toFun ((covApply cov A B) - (covApply cov B A)) x`, then `congr_of_eventuallyEq`
-to swap the section difference for `mlieBracket I A B`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cov_covApply_sub_eq_cov_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -581,19 +487,7 @@ private lemma cov_covApply_sub_eq_cov_mlieBracket
       hσ_mdiff hbracket (Filter.univ_mem) hsec_ev
   rw [← hcov_swap, hσ_val]
 
-set_option linter.style.show false in
-/-- **First Bianchi identity for the Levi-Civita derivative.**
 
-The cyclic sum `R(X, Y) Z + R(Y, Z) X + R(Z, X) Y` of the section-level Riemann curvature
-operator vanishes for the Levi-Civita covariant derivative on the tangent bundle.
-
-Hypotheses: `X, Y, Z` are tangent vector fields, all `MDifferentiableAt` at `x`, with
-their pairwise covariant derivatives also `MDifferentiableAt` at `x`. The section-level
-torsion-free identity requires `X, Y, Z` to be `MDifferentiable` on a neighbourhood of
-`x`, plus the pairwise manifold Lie bracket sections `mlieBracket I A B` to be `MDiff`
-at `x` for each cyclic pair. The Jacobi-identity step requires `X, Y, Z` to be
-`ContMDiffAt` of order `minSmoothness ℝ 2 = 2` at `x` (Mathlib's smoothness threshold
-for the manifold-level Jacobi identity). -/
 theorem riemannSec_first_bianchi_levi_civita
     (g : SmoothRiemannianMetric I M)
     {X Y Z : Π b : M, TangentSpace I b} {x : M}
@@ -786,48 +680,33 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
   [FiniteDimensional ℝ F]
 
-/-- Pick a smooth global section of the tangent bundle through a given fibre vector. -/
 noncomputable def smoothExtensionTangent (x : M) (v : TangentSpace I x) :
     Π b : M, TangentSpace I b :=
   fun b => ((ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v).choose : Cₛ^(⊤ : ℕ∞)⟮I; E,
     (TangentSpace I : M → Type _)⟯) b
 
-/-- Pick a smooth global section of `V` through a given fibre vector. -/
 noncomputable def smoothExtensionFiber (x : M) (u : V x) :
     Π b : M, V b :=
   fun b => ((ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := F) (V := V) x u).choose : Cₛ^(⊤ : ℕ∞)⟮I; F, V⟯) b
 
-/-- The chosen smooth tangent extension agrees with the prescribed value at `x`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+@[simp]
 lemma smoothExtensionTangent_eq (x : M) (v : TangentSpace I x) :
     smoothExtensionTangent (I := I) x v x = v := by
   classical
   exact (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v).choose_spec
 
-/-- The chosen smooth fibre extension agrees with the prescribed value at `x`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
+@[simp]
 lemma smoothExtensionFiber_eq (x : M) (u : V x) :
     smoothExtensionFiber (I := I) (F := F) (V := V) x u x = u := by
   classical
   exact (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := F) (V := V) x u).choose_spec
 
-/-- **The section-level Riemann curvature operator at a point**, as a trilinear function
-on fibre values.
-
-For a covariant derivative `cov` on a vector bundle `V` over `M`, and a point `x : M`,
-this is the function
-$$
-  R_{\mathrm{op}}^{\mathrm{cov}, x} : T_x M \times T_x M \times V_x \to V_x,
-  \quad R_{\mathrm{op}}^{\mathrm{cov}, x}(v, w, u) :=
-    R^{\mathrm{cov}}(\widetilde{v}, \widetilde{w}) \widetilde{u} (x),
-$$
-where `$\widetilde{v}, \widetilde{w}, \widetilde{u}$` are arbitrarily chosen smooth global
-extensions of the fibre vectors. The construction uses `Classical.choice` via
-`ContMDiffSection.exists_eq_at` to make the choice. Independence of the chosen extensions
-(which follows from `riemannSec_smul_left/right/third` and the standard "acts pointwise"
-argument) is not formalised here. -/
 noncomputable def riemannOpFun (cov : CovariantDerivative I F V) (x : M) :
     TangentSpace I x → TangentSpace I x → V x → V x :=
   fun v w u =>
@@ -836,11 +715,7 @@ noncomputable def riemannOpFun (cov : CovariantDerivative I F V) (x : M) :
       (smoothExtensionTangent (I := I) x w)
       (smoothExtensionFiber (I := I) (F := F) (V := V) x u) x
 
-/-- **Section-evaluation form of `riemannOpFun`**: for any smooth global extensions
-`X, Y` of `(v, w)` and any smooth global section `Z` agreeing with `u` at `x` (and with
-suitable MDifferentiability hypotheses for `riemannSec`), the value
-`riemannOpFun cov x v w u` equals `riemannSec cov X Y Z x`. **Independence of the choice
-of extensions is left as a separate proof obligation.** -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem riemannOpFun_def (cov : CovariantDerivative I F V) (x : M)
     (v w : TangentSpace I x) (u : V x) :
     riemannOpFun cov x v w u =

@@ -1,28 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
-/-!
-# Iterated interior regularity for smooth weak solutions of uniformly
-elliptic divergence-form equations on Euclidean space.
-
-For a smooth weak solution `u` of `B(u, ·) = ⟨f, ·⟩` on an open set `Ω`,
-the spatial derivative `∂_l u` (for any `l : Fin d`) is itself a smooth
-weak solution of `B(·, ·) = ⟨f'_l, ·⟩` against the same bilinear form,
-where the source `f'_l` is an explicitly constructed smooth function
-involving at most `∂_l f`, the coefficients of `B`, and at most second
-derivatives of `u`. This packaging is the inductive step that bootstraps
-interior `H²` regularity to interior `H^{k+2}` regularity.
-
-## Main results
-
-* `partial_smooth_weak_solution` — for each direction `l`, `∂_l u` is a
-  smooth weak solution of `B(·, ·) = ⟨f'_l, ·⟩` with `f'_l` smooth and
-  pointwise expressible from `f`, the coefficients, and at most second
-  derivatives of `u`.
-* `partial_u_in_h2_loc` — for each `l`, the spatial derivative `∂_l u`
-  satisfies an interior `H²` bound on `Ω''` controlled by the `H²` data
-  of `u` plus the `H¹` data of `f` on `Ω'`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -39,7 +16,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- The classical `l`-partial of a smooth function `u` is itself smooth. -/
+
 private lemma contDiff_partial
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (l : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -53,7 +30,7 @@ private lemma contDiff_partial
   exact h_apply_smooth.comp h_fderiv_smooth
 
 omit [NeZero d] in
-/-- The mixed second partial of a smooth function `u` is smooth. -/
+
 private lemma contDiff_partial_partial
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (l i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -63,10 +40,7 @@ private lemma contDiff_partial_partial
   contDiff_partial (contDiff_partial hu l) i
 
 omit [NeZero d] in
-/-- Integral of the partial derivative of a smooth, compactly supported
-function vanishes. Proof: apply Mathlib's IBP with the constant function
-`1` as the second factor; the boundary term `f * (fderiv 1)` is zero, and
-the remaining identity gives the conclusion. -/
+
 private lemma integral_partial_eq_zero_of_compactSupport
     {F : E → ℝ} (hF : ContDiff ℝ (⊤ : ℕ∞) F) (hF_supp : HasCompactSupport F)
     (l : Fin d) :
@@ -133,10 +107,7 @@ private lemma integral_partial_eq_zero_of_compactSupport
   linarith
 
 omit [NeZero d] in
-/-- For a smooth function `F` with compact support inside an open set `Ω`,
-its partial derivative integrates to zero on `Ω`. The proof reduces to
-the whole-space version `integral_partial_eq_zero_of_compactSupport`
-by extending the integrand by zero. -/
+
 private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
     {F : E → ℝ} (hF : ContDiff ℝ (⊤ : ℕ∞) F) (hF_supp : HasCompactSupport F)
     {Ω : Set E} (h_supp_Ω : tsupport F ⊆ Ω) (l : Fin d) :
@@ -157,9 +128,7 @@ private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
   exact integral_partial_eq_zero_of_compactSupport hF hF_supp l
 
 omit [NeZero d] in
-/-- Product rule for the partial derivative of a triple product of
-differentiable functions: `∂_l(a · b · c) = (∂_l a) b c + a (∂_l b) c +
-a b (∂_l c)`. -/
+
 private lemma fderiv_triple_mul_apply_diff
     {a b c : E → ℝ} {x : E}
     (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x)
@@ -181,8 +150,7 @@ private lemma fderiv_triple_mul_apply_diff
   ring
 
 omit [NeZero d] in
-/-- Product rule for the partial derivative of a triple product of smooth
-functions: `∂_l(a · b · c) = (∂_l a) b c + a (∂_l b) c + a b (∂_l c)`. -/
+
 private lemma fderiv_triple_mul_apply
     {a b c : E → ℝ}
     (ha : ContDiff ℝ (⊤ : ℕ∞) a) (hb : ContDiff ℝ (⊤ : ℕ∞) b)
@@ -195,8 +163,7 @@ private lemma fderiv_triple_mul_apply
     (hb.differentiable (by simp) x) (hc.differentiable (by simp) x) l
 
 omit [NeZero d] in
-/-- Product rule for the partial derivative of a binary product of
-differentiable functions: `∂_l(a · b) = (∂_l a) · b + a · (∂_l b)`. -/
+
 private lemma fderiv_binary_mul_apply_diff
     {a b : E → ℝ} {x : E}
     (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x) (l : Fin d) :
@@ -212,8 +179,7 @@ private lemma fderiv_binary_mul_apply_diff
   ring
 
 omit [NeZero d] in
-/-- Product rule for the partial derivative of a binary product of smooth
-functions: `∂_l(a · b) = (∂_l a) · b + a · (∂_l b)`. -/
+
 private lemma fderiv_binary_mul_apply
     {a b : E → ℝ}
     (ha : ContDiff ℝ (⊤ : ℕ∞) a) (hb : ContDiff ℝ (⊤ : ℕ∞) b)
@@ -224,8 +190,6 @@ private lemma fderiv_binary_mul_apply
   fderiv_binary_mul_apply_diff (ha.differentiable (by simp) x)
     (hb.differentiable (by simp) x) l
 
-/-- The smoothness of the partial-product `a^{ij}(∂_i u)(∂_j ψ)` follows
-from the smoothness of its three factors. -/
 private lemma contDiff_principal_summand
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -242,7 +206,6 @@ private lemma contDiff_principal_summand
     contDiff_partial hψ j
   exact (h_a.mul h_du).mul h_dψ
 
-/-- Compact support of `a^{ij}(∂_i u)(∂_j ψ)` is inherited from `ψ`. -/
 private lemma hasCompactSupport_principal_summand
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ}
@@ -255,7 +218,6 @@ private lemma hasCompactSupport_principal_summand
     hψ_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
   exact h_dψ_supp.mul_left
 
-/-- The tsupport of `a^{ij}(∂_i u)(∂_j ψ)` is contained in tsupport ψ. -/
 private lemma tsupport_principal_summand_subset_tsupport_ψ
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ} (i j : Fin d) :
@@ -273,9 +235,6 @@ private lemma tsupport_principal_summand_subset_tsupport_ψ
   apply hx
   rw [h0]; ring
 
-/-- The integrand `(∂_l a^{ij})(∂_i u)(∂_j ψ) + a^{ij}(∂_i ∂_l u)(∂_j ψ)
-+ a^{ij}(∂_i u)(∂_j ∂_l ψ)` at a point `x` equals the partial derivative
-`(fderiv ℝ (fun y => a^{ij}(y)(∂_i u)(y)(∂_j ψ)(y)) x)(e_l)`. -/
 private lemma principal_summand_partial_decomp
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -305,9 +264,6 @@ private lemma principal_summand_partial_decomp
     contDiff_partial hψ j
   exact fderiv_triple_mul_apply h_a h_du h_dψ x l
 
-/-- For each `(i, j)` pair, the integrals
-`(∂_l a^{ij})(∂_i u)(∂_j ψ) + a^{ij}(∂_i ∂_l u)(∂_j ψ) + a^{ij}(∂_i u)(∂_j ∂_l ψ)`
-sum to zero on `Ω`. -/
 private lemma principal_summand_integral_zero
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -508,9 +464,6 @@ private lemma principal_summand_integral_zero
   rw [integral_add h_int_T1 h_int_T2] at hzero
   exact hzero
 
-/-- For smooth `u, ψ` with `tsupport ψ ⊆ Ω`, the function `c · u · ψ`
-is smooth, has compact support inside `tsupport ψ`, and its partial
-derivative integrates to zero on `Ω`. -/
 private lemma zeroth_summand_integral_zero
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u ψ : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -609,8 +562,6 @@ private lemma zeroth_summand_integral_zero
   rw [integral_add h_int_T1 h_int_T2] at hzero
   exact hzero
 
-/-- The perturbed source for the differentiated equation. Smooth, and
-the source against which `∂_l u` is a smooth weak solution of `B`. -/
 def perturbedSource
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u f : E → ℝ) (l : Fin d) (x : E) : ℝ :=
@@ -622,8 +573,6 @@ def perturbedSource
         (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
       (EuclideanSpace.single j 1)
 
-/-- The perturbed source `f'_l` is smooth provided `f` and `u` are smooth
-(the coefficients of `B` are smooth by hypothesis). -/
 private lemma contDiff_perturbedSource
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -653,7 +602,7 @@ private lemma contDiff_perturbedSource
   exact contDiff_partial (h_dla.mul h_diu) j
 
 omit [NeZero d] in
-/-- IBP for a smooth function against a test function. -/
+
 private lemma ibp_smooth_against_test
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -667,7 +616,6 @@ private lemma ibp_smooth_against_test
     (i := l) (f := f) hf_C1
   exact h_weak ψ hψ hψ_supp hψ_tsub
 
-/-- IBP for the smooth function `(∂_l a^{ij})(∂_i u)` against `∂_j ψ`. -/
 private lemma ibp_principal_correction
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -693,10 +641,6 @@ private lemma ibp_principal_correction
         (fderiv ℝ u y) (EuclideanSpace.single i 1)) := h_dla.mul h_diu
   exact ibp_smooth_against_test (l := j) hg_smooth hΩ hψ hψ_supp hψ_tsub
 
-/-- The integrability needed for `B.bilin u v` to split into principal +
-zeroth-order parts: each summand of the bilinear-form integrand on `Ω`
-is integrable when `u, v` are smooth and at least one has compact support
-inside `Ω`. -/
 private lemma bilin_integrand_pieces_integrable
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u v : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hv : ContDiff ℝ (⊤ : ℕ∞) v)
@@ -754,8 +698,6 @@ private lemma bilin_integrand_pieces_integrable
       exact h_dv_supp.mul_left
     exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
 
-/-- Decomposition of `B.bilin` as a sum over `(i, j)` plus a zeroth-order
-integral. -/
 private lemma bilin_decomp
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u v : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hv : ContDiff ℝ (⊤ : ℕ∞) v)
@@ -786,8 +728,7 @@ private lemma bilin_decomp
     (fun j _ => h_summand_int i j)]
 
 omit [NeZero d] in
-/-- Symmetry of mixed second partials. For smooth `u`,
-`(fderiv ℝ (∂_i u) x) e_l = (fderiv ℝ (∂_l u) x) e_i`. -/
+
 private lemma mixed_partial_symm
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (x : E) (i l : Fin d) :
     (fderiv ℝ (fun y : E =>
@@ -835,13 +776,6 @@ private lemma mixed_partial_symm
   simp only [ContinuousLinearMap.apply_apply]
   exact h_symm
 
-/-- The bilinear identity: `B.bilin (∂_l u) ψ = ∫_Ω f'_l · ψ` where
-`f'_l = perturbedSource B u f l`. The proof combines:
-* `principal_summand_integral_zero` summed over `(i, j)`,
-* `zeroth_summand_integral_zero`,
-* IBP for `f` against `∂_l ψ` (i.e. `ibp_smooth_against_test`),
-* IBP for `(∂_l a^{ij})(∂_i u)` against `∂_j ψ` (i.e. `ibp_principal_correction`),
-* the original weak-solution identity `B.bilin u (∂_l ψ) = ∫_Ω f · ∂_l ψ`. -/
 private theorem bilin_partial_eq_integral_perturbed
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ} (h_weak : B.IsSmoothWeakSolution u f)
@@ -1254,13 +1188,6 @@ private theorem bilin_partial_eq_integral_perturbed
   rw [hZ₃_explicit]
   linarith
 
-/-- **Differentiated weak-solution identity.** For a smooth weak solution
-`u` of `B(u, ·) = ⟨f, ·⟩` on an open set `Ω`, the partial derivative
-`∂_l u` is itself a smooth weak solution of `B(·, ·) = ⟨f'_l, ·⟩` against
-the SAME bilinear form `B`, where the perturbed source `f'_l` is
-constructed as `perturbedSource B u f l`. This source is smooth and
-involves at most `∂_l f` in the data of `f` and at most second
-derivatives of `u`. -/
 theorem partial_smooth_weak_solution
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ} (h_weak : B.IsSmoothWeakSolution u f)
@@ -1272,13 +1199,6 @@ theorem partial_smooth_weak_solution
   intro ψ hψ hψ_supp hψ_tsub
   exact bilin_partial_eq_integral_perturbed hΩ B h_weak hf hψ hψ_supp hψ_tsub l
 
-/-- For a smooth weak solution `u` of `B(u, ·) = ⟨f, ·⟩` and a direction
-`l : Fin d`, the partial `∂_l u` lies in `H²_loc` with a quantitative
-bound: there exist a smooth source `f'_l` (the `perturbedSource`) such
-that `∂_l u` is itself a smooth weak solution of `B(·, ·) = ⟨f'_l, ·⟩`
-and, via the standard interior `H²` regularity of smooth weak solutions
-(`loc_smooth_solution`), `∂_l u` admits weak second partial
-derivatives in `L²` on a compactly contained subdomain. -/
 theorem partial_u_in_h2_loc
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ} (h_weak : B.IsSmoothWeakSolution u f)

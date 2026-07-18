@@ -7,51 +7,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Green's identities on a Riemannian manifold (with boundary)
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` whose local model
-`I : ModelWithCorners ℝ E H` may carry a non-trivial boundary, this file
-establishes Green's first and second identities for smooth scalar functions
-whose topological supports are contained in the manifold interior
-`I.interior M`.
-
-The interior-support hypothesis is the natural with-boundary analogue of the
-boundaryless `HasCompactSupport` requirement: the with-boundary divergence
-theorem itself requires the test section to be supported in the interior, so
-the gradient sections involved in Green's identities must inherit interior
-support from their underlying scalar functions.
-
-## Strategy
-
-The proofs mirror the boundaryless variants in
-`DifferentialGeometry/Analysis/Integration/DivergenceTheorem/Green.lean`. The key
-differences are:
-
-* the gradient is packaged as a smooth tangent section via
-  `grad_g_with_boundary_section` (defined in `Laplacian.lean`), which
-  inherits compact support and interior support from the underlying scalar
-  function;
-* the integration-by-parts identity is the with-boundary variant
-  `integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary`
-  from `IntegrationByParts.lean`, which carries explicit interior-support
-  hypotheses on both the test scalar and the test section.
-
-## Main results
-
-* `integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary`
-  (**Green's first identity, with boundary**): for smooth `f, h : M → ℝ` with
-  `tsupport f, tsupport h ⊆ I.interior M` and `h` compactly supported,
-  $$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g
-       = -\int_M f \cdot \Delta_g^{(\partial)} h\,d\mu_g.$$
-
-* `integral_smul_laplacian_sub_eq_zero_with_boundary`
-  (**Green's second identity, closed manifold with boundary**): on a closed
-  manifold (compact + boundary allowed), for any smooth `f, h : M → ℝ` with
-  `tsupport f, tsupport h ⊆ I.interior M`,
-  $$\int_M (f \cdot \Delta_g^{(\partial)} h - h \cdot \Delta_g^{(\partial)} f)
-       \,d\mu_g = 0.$$
--/
 
 noncomputable section
 
@@ -64,7 +19,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -75,12 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Green's first identity on a Riemannian manifold with boundary.** For
-smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆ I.interior M` and `h`
-having compact support on a σ-compact Hausdorff smooth Riemannian manifold
-`(M, g)` whose model `I` may carry a boundary,
-$$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g
-     = -\int_M f \cdot \Delta_g^{(\partial)} h\,d\mu_g.$$ -/
 theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -105,7 +54,7 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       tangentSectionAction (I := I) X f x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g X x]
     change g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
     exact g.symm x _ _
@@ -125,9 +74,6 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- A symmetric variant of Green's first identity, with the integration-by-parts
-test section built from `f` instead of `h`. The compactness of `tsupport f` is
-recorded via `hf_supp`. -/
 private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary'
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -152,7 +98,7 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       tangentSectionAction (I := I) X h x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hh X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g X x]
     rfl
   have hRHS_eq : ∀ x : M,
       h x * divergence_g_with_boundary (I := I) g X x =
@@ -170,12 +116,6 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- **Green's second identity on a closed Riemannian manifold with boundary.**
-For smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆ I.interior M` on a
-compact σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose model
-`I` may carry a boundary,
-$$\int_M (f \cdot \Delta_g^{(\partial)} h - h \cdot \Delta_g^{(\partial)} f)
-     \,d\mu_g = 0.$$ -/
 theorem integral_smul_laplacian_sub_eq_zero_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

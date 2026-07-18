@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ChartGlue
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-!
-# Spatial smoothness of the time-dependent flow on a closed manifold
-
-Folder headline: from the chart-local smooth-flow data assembled in the
-`SmoothInSpace/` subtree (Euclidean Picard regularity, chart-glue), the global
-time-dependent flow `Φ t : M → M` is, at every fixed interior time, a smooth
-self-map of the closed manifold `M`.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -23,23 +14,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/--
-For a time-dependent vector field `X` on a closed manifold, the global flow
-`Φ : ℝ → M → M` is, at every fixed time `t ∈ (0, T)`, a smooth self-map
-of `M`.
-
-The hypotheses supply, at each point `x : M`, chart-local flow data:
-a positive radius `ρ`, a chart-coord flow `flow : E → ℝ → E` that is
-jointly `C^∞` on `ball(center, ρ) × Ioo 0 T`, agreement of the
-candidate global flow `Φ` with the chart-conjugated formula for all
-chart-source points whose chart-coord image is in the ball, and a
-flow-in-target condition.
-
-The proof reduces global `ContMDiff I I ∞ (Φ t)` to pointwise
-`ContMDiffAt I I ∞ (Φ t) x` (which is the Mathlib definition of
-`ContMDiff`), then discharges each point via the chart-coord-to-manifold
-lift `manifold_contMDiffAt_of_chart_smooth_flow`.
--/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_flow_smooth_in_space
     (_X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)

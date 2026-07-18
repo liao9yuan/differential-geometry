@@ -1,16 +1,16 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import Mathlib.Analysis.ODE.PicardLindelof
 
-/-!
-# Local Picard–Lindelöf flow of the corrected chart ODE from `t = 0`
 
-In a base chart `α`, the corrected chart ODE `u' = chartTrivRepr α (X t) u` admits a
-Picard–Lindelöf solution flow on `[0, T]` anchored at `t = 0` (`flow y 0 = y`), on a closed
-ball of radius `r'`, built from the continuity-in-time and uniform chart-Lipschitz data of
-the corrected field.  The chart velocity in the conclusion is the trivialised
-`chartTrivRepr` value — the geometrically correct, convention-transported velocity — and the
-anchor is at the left endpoint `t = 0`, a genuine forward/one-sided solution.
--/
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -24,14 +24,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] in
-/-- The corrected chart ODE `u' = chartTrivRepr α (X t) u` has a Picard–Lindelöf solution
-flow on `[0, T]` anchored at `t = 0` (`flow y 0 = y`) on a closed ball of radius `r'`, from
-continuity-in-time + uniform chart-Lipschitz data on the closed ball of radius `r`.  The
-solution is **confined** to the ball of radius `r` throughout `[0, T]`: starting inside the
-smaller ball of radius `r'` it can drift only by the bounded velocity, and the horizon `T` is
-chosen short enough that it never leaves the closed `r`-ball on which the field data hold.
-This confinement is exactly the membership consumed downstream (via the chart target, which
-contains that ball) to read the chart velocity as the trivialised `chartTrivRepr`. -/
+
+
+
+
+
+
+
+
 theorem corrected_chart_local_picard_from_zero
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (r : ℝ) (hr : 0 < r)
     (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))

@@ -3,49 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Linearity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 
-/-!
-# Chart-target `W^{2,2}`-Cauchy property of `smoothFChartResidual` along a
-chart-`W^{3,2}` approximator sequence
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and any
-`u_h ∈ laplacianDomainPow g 2`, we construct a chart-`W^{3,2}`-converging
-smooth-density approximator sequence
-`smoothApproxSeqWkpThree g hu_h : ℕ → SmoothScalar g`
-and show that its image under `smoothFChartResidual g α` is chart-target
-`W^{2,2}`-Cauchy.
-
-The proof composes three ingredients:
-
-1. The a.e. linearity of `smoothFChartResidual` in the smooth scalar
-   argument (`smoothFChartResidual_ae_sub`).
-2. The chart-target `W^{2,2}` bilinear continuity bound of
-   `smoothFChartResidual` in the chart-`W^{3,2}` norm of the underlying
-   smooth scalar
-   (`wkpNorm_smoothFChartResidual_le_wkpNormChart_w22`).
-3. The chart-`W^{3,2}`-Cauchy property of the new approximator sequence
-   (`smoothApproxSeqWkpThree_wkpNormChart_diff_le`).
-
-## Construction of the chart-`W^{3,2}` approximator
-
-For `u_h ∈ laplacianDomainPow g 2`, the canonical function representative
-`u := H1ComplToLp u_h` lies in `MemWkpChart g 3 2` by
-`chartPushed_memWkp_three_two_of_laplacianDomainPow_two` ranged over every
-chart `α`. The smooth-density theorem `contMDiff_dense_in_WkpChart_k` at
-order `k = 3` then yields, for any `ε > 0`, a smooth scalar `v` with
-`wkpNormChart g 3 2 (u - v) ≤ ε`. Picking `ε := 1 / (n + 1)` defines the
-sequence.
-
-## Main results
-
-* `exists_smoothApprox_chartW32` — existence of a smooth scalar
-  approximating `u_h.coeFn` at any chart-`W^{3,2}` rate.
-* `smoothApproxSeqWkpThree` — chosen sequence at rate `1 / (n + 1)`.
-* `smoothApproxSeqWkpThree_wkpNormChart_le` — per-`n` approximation bound.
-* `smoothApproxSeqWkpThree_wkpNormChart_diff_le` — chart-`W^{3,2}`-Cauchy.
-* `smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22` —
-  chart-target `W^{2,2}`-Cauchy property of the smooth residuals along
-  `smoothApproxSeqWkpThree`.
--/
 
 noncomputable section
 
@@ -84,23 +41,18 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For two smooth scalars `v₁ v₂ : SmoothScalar g`, their pointwise
-difference packaged as a `SmoothScalar g`. On a closed manifold, the
-difference of two smooth functions is smooth. -/
 private noncomputable def smoothScalarSub
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) : SmoothScalar g :=
   { toFun := fun x => v₁.toFun x - v₂.toFun x
     smooth := v₁.smooth.sub v₂.smooth }
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :
     (smoothScalarSub v₁ v₂).toFun = fun x => v₁.toFun x - v₂.toFun x := rfl
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the canonical function representative
-`H1ComplToLp u_h` lies in `MemWkpChart g 3 2`. This is the chart-`H³`
-regularity of `u_h.coeFn`, viewed at every chart base point `α : M`. -/
 theorem H1ComplToLp_memWkpChart_three_two
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -112,8 +64,6 @@ theorem H1ComplToLp_memWkpChart_three_two
   exact chartPushed_memWkp_three_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, a smooth approximator at any `ε > 0`
-in chart-`W^{3,2}` norm. -/
 theorem exists_smoothApprox_chartW32
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -135,8 +85,6 @@ theorem exists_smoothApprox_chartW32
   refine ⟨⟨w, hw_smooth⟩, ?_⟩
   exact hw_le
 
-/-- For each `n : ℕ`, choose a smooth approximator at level `1/(n+1)` in
-chart-`W^{3,2}` norm. -/
 noncomputable def smoothApproxSeqWkpThree
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -145,8 +93,6 @@ noncomputable def smoothApproxSeqWkpThree
   (exists_smoothApprox_chartW32 (I := I) (M := M) g hu_h
     (by positivity : (0 : ℝ) < 1 / ((n : ℝ) + 1))).choose
 
-/-- The chart-`W^{3,2}`-norm approximation bound for the approximator
-sequence. -/
 theorem smoothApproxSeqWkpThree_wkpNormChart_le
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -160,7 +106,6 @@ theorem smoothApproxSeqWkpThree_wkpNormChart_le
   (exists_smoothApprox_chartW32 (I := I) (M := M) g hu_h
     (by positivity : (0 : ℝ) < 1 / ((n : ℝ) + 1))).choose_spec
 
-/-- The chart-`W^{3,2}`-Cauchy property of the approximating sequence. -/
 theorem smoothApproxSeqWkpThree_wkpNormChart_diff_le
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -229,22 +174,12 @@ theorem smoothApproxSeqWkpThree_wkpNormChart_diff_le
     rw [add_comm]
   exact le_trans h_add (le_of_le_of_eq h_bound1 h_comm)
 
-/-- **Chart-target `W^{2,2}`-Cauchy property of `smoothFChartResidual` along
-the chart-`W^{3,2}` smooth approximator sequence `smoothApproxSeqWkpThree`**.
-
-For `u_h ∈ laplacianDomainPow g 2`, the smooth approximator sequence
-`smoothApproxSeqWkpThree g hu_h` chart-`W^{3,2}`-approximates the canonical
-function representative of `u_h` at rate `1/(n+1)`, and is therefore
-chart-`W^{3,2}`-Cauchy. Pushing through the chart-target `W^{2,2}` bilinear
-continuity bound of `smoothFChartResidual` (a.e. linearity + quantitative
-bilinear bound) yields the chart-target `W^{2,2}`-Cauchy property of
-`smoothFChartResidual g α (smoothApproxSeqWkpThree g hu_h n)` in `n`. -/
 theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (fun y =>
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -283,7 +218,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
   have h_ae_sub :=
     smoothFChartResidual_ae_sub (I := I) (M := M) g α vm vn vdiff hvdiff_toFun
   have h_wkp_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (fun y =>
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -291,7 +226,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α vn y)
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)
@@ -309,7 +244,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
     rw [hvdiff_toFun]
     exact smoothApproxSeqWkpThree_wkpNormChart_diff_le (I := I) (M := M) g hu_h m n
   have h_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)

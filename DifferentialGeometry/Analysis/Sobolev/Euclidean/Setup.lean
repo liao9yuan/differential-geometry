@@ -8,14 +8,6 @@ import DifferentialGeometry.External.DeGiorgi.EllipticCoefficients
 import DifferentialGeometry.External.DeGiorgi.WeakFormulation
 import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
 
-/-!
-# Euclidean Sobolev API facade
-
-Project-internal facade re-exporting the Euclidean Sobolev / elliptic-regularity
-API consumed by the rest of the project. Downstream code should import this
-file rather than reaching directly into the vendored library tree.
--/
-
 namespace DifferentialGeometry.Sobolev.Euclidean
 
 export DeGiorgi (HasWeakPartialDeriv HasWeakGrad HasWeakDiv)

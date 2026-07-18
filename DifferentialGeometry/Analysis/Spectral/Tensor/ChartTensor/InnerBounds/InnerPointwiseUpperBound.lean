@@ -3,59 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.Inn
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 
-/-!
-# Bundle-fibre upper bound for the `(r, s)` pointwise inner product
-
-This file bridges the chart-frame quadratic upper bound established in
-`InnerBounds/InnerUpperBound.lean` to the bundle-fibre `(r, s)` pointwise
-inner product `tensorInnerPointwise`. The bridge identity
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` from
-`Inner/InnerBridge.lean` identifies the chart-frame diagonal value
-at a model tensor `T` with the bundle-fibre diagonal value at the
-chart-`(α, b)`-twisted tensor `chartRSTwist α b r s T`.
-
-Composing the upper bound with the bridge produces, on the closed support
-of the chart-atlas partition-of-unity weight at `α`, a uniform-in-`b`
-inequality of the form
-
-`tensorInnerPointwise g r s b (chartRSTwist α b r s T) (chartRSTwist α b r s T) ≤
-  C * ‖T‖^2`
-
-for every model `(r, s)`-tensor `T`. Substituting `T = chartRSTwistInv α b r s S`
-and using the round-trip identity
-`chartRSTwist α b r s (chartRSTwistInv α b r s S) = S` (valid on the chart
-base set) yields the directly usable bundle-fibre form
-
-`tensorInnerPointwise g r s b S S ≤ C * ‖chartRSTwistInv α b r s S‖^2`.
-
-Specialising further to `S = S.toFun b` for a smooth compactly-supported
-`(r, s)`-tensor section `S`, and identifying
-`chartRSTwistInv α b r s (S.toFun b) = tensorTrivProj g r s S α b` via
-`tensorTrivProj_eq_chartRSTwistInv_toFun`, gives the trivialisation-based
-form
-
-`tensorInnerPointwise g r s b (S.toFun b) (S.toFun b) ≤ C * ‖tensorTrivProj g r s S α b‖^2`.
-
-## Main results
-
-* `exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport`
-  — the chart-frame composed bound: a uniform `C` controls the bundle-
-  fibre diagonal value on the chart-`(α, b)`-twisted tensor by the
-  squared norm of the untwisted model tensor.
-* `exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_pouTsupport`
-  — equivalent form by the chart-`(α, b)`-twist round-trip: the bundle-
-  fibre diagonal value at a model tensor is controlled by the squared
-  norm of its `chartRSTwistInv`-image.
-* `exists_tensorInnerPointwise_upper_bound_via_trivProj_norm_sq_on_pouTsupport`
-  — bundle-fibre flavour at a smooth compactly-supported section: the
-  diagonal value at `S.toFun b` is controlled by the squared norm of the
-  trivialisation projection `tensorTrivProj g r s S α b`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -81,23 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section UpperBoundViaTwist
 
-/-- **Chart-twist composed upper bound for the bundle-fibre `(r, s)`-inner
-product diagonal**.
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
-`(r, s)`, there is a non-negative constant `C` such that, for every `b` in
-the closed support of the chart-atlas partition-of-unity weight at `α` and
-every model `(r, s)`-tensor `T`,
-`tensorInnerPointwise g r s b (chartRSTwist α b r s T) (chartRSTwist α b r s T)
-  ≤ C * ‖T‖^2`.
-
-Proof: the bridge identity
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` rewrites the
-chart-frame diagonal quadratic value as the bundle-fibre diagonal value on
-the chart-`(α, b)`-twisted tensor. The chart-frame upper bound
-`exists_chartTensorInnerPointwise_rs_model_upper_bound_on_pouTsupport`
-provides the desired inequality on the chart-frame side, and the bridge
-transfers it to the bundle-fibre side. -/
 theorem exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -122,17 +55,6 @@ theorem exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
       (I := I) (M := M) g r s α hb_base T T] at h
   exact h
 
-/-- **Round-tripped bundle-fibre upper bound (chartRSTwistInv form)**.
-
-Substituting `T = chartRSTwistInv α b r s S` into the chart-twist composed
-upper bound and using the round-trip identity
-`chartRSTwist α b r s (chartRSTwistInv α b r s S) = S` (valid on the chart
-base set) yields the bundle-fibre diagonal value at `S` controlled by the
-squared norm of its `chartRSTwistInv`-image.
-
-This is the form most directly comparable to the lower-bound headline
-`chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport`
-in `NormComparison.lean`. -/
 theorem exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -163,20 +85,6 @@ end UpperBoundViaTwist
 
 section UpperBoundViaTrivProj
 
-/-- **Bundle-fibre upper bound via the trivialisation projection of a smooth
-compactly-supported `(r, s)`-tensor section.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, ranks
-`(r, s)`, and any smooth compactly-supported `(r, s)`-tensor section `S`,
-there is a non-negative constant `C` (independent of `S`) such that, for
-every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α`,
-`tensorInnerPointwise g r s b (S.toFun b) (S.toFun b) ≤
-  C * ‖tensorTrivProj g r s S α b‖^2`.
-
-Proof: instantiate the chartRSTwistInv-form bound at `S = S.toFun b` and
-rewrite the RHS using `tensorTrivProj_eq_chartRSTwistInv_toFun` to
-`tensorTrivProj g r s S α b = chartRSTwistInv α b r s (S.toFun b)`. -/
 theorem exists_tensorInnerPointwise_upper_bound_via_trivProj_norm_sq_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

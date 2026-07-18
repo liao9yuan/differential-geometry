@@ -1,19 +1,6 @@
 import DifferentialGeometry.Analysis.Time
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
-
-/-!
-# DifferentialGeometry Christoffel Symbols in a Local Frame
-
-Mathlib's bundled covariant derivative has argument order
-`cov sigma x v = (nabla_v sigma)(x)`. Given a local frame `frame i`, the
-Christoffel coefficient is the `k`-th frame coefficient of
-`nabla_{frame i} frame j`.
--/
 
 namespace DifferentialGeometry
 namespace Coordinates
@@ -31,8 +18,6 @@ variable
   {Idx : Type*}
   {u : Set M}
 
-/-- Christoffel coefficients in a local frame:
-`Gamma^k_ij(x) = coeff_k(nabla_{frame_i} frame_j)`. -/
 def christoffelSymbolInFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -40,7 +25,6 @@ def christoffelSymbolInFrame
     (x : M) (i j k : Idx) : Real :=
   hframe.coeff k x ((cov (frame j) x) (frame i x))
 
-/-- Christoffel coefficient with an arbitrary tangent direction in the first slot. -/
 def christoffelAlongInFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -66,8 +50,6 @@ def christoffelAlongInFrame
       hframe.coeff k x ((cov (frame j) x) X) := by
   rfl
 
-/-- `christoffelAlongInFrame` recovers ordinary Christoffel symbols when the
-direction is a frame vector. -/
 theorem christoffelAlongInFrame_frame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -77,7 +59,6 @@ theorem christoffelAlongInFrame_frame
       christoffelSymbolInFrame cov frame hframe x i j k := by
   rfl
 
-/-- Expansion of `nabla_{frame i} frame j` in the local frame. -/
 theorem covariantDerivative_eq_sum_christoffel
     [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -88,10 +69,6 @@ theorem covariantDerivative_eq_sum_christoffel
       ∑ k, christoffelSymbolInFrame cov frame hframe x i j k • frame k x := by
   exact hframe.coeff_sum_eq (fun y => (cov (frame j) y) (frame i y)) hx
 
-/-- Predicate saying a chosen local frame is normal for `cov` at `x`.
-
-This is not a theorem asserting existence or automatic vanishing; it is the
-named condition `Gamma^k_ij(x) = 0` for later normal-frame arguments. -/
 def IsNormalFrameForConnectionAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -105,7 +82,6 @@ variable [FiniteDimensional Real E]
   [VectorBundle Real E (TangentSpace I : M -> Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-/-- Components of the tensorial connection difference `cov - cov'` in a local frame. -/
 def christoffelSymbolDifferenceInFrame
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -113,7 +89,6 @@ def christoffelSymbolDifferenceInFrame
     (x : M) (i j k : Idx) : Real :=
   hframe.coeff k x (((CovariantDerivative.difference cov cov' x) (frame j x)) (frame i x))
 
-/-- Expansion of the connection-difference tensor in the local frame. -/
 theorem christoffelSymbolDifference_expansion
     [Fintype Idx]
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -125,9 +100,6 @@ theorem christoffelSymbolDifference_expansion
   exact hframe.coeff_sum_eq
     (fun y => ((CovariantDerivative.difference cov cov' y) (frame j y)) (frame i y)) hx
 
-/-- If the frame vector `frame j` is differentiable at `x`, the tensorial
-connection-difference coefficient is the pointwise subtraction of Christoffel
-coefficients. -/
 theorem christoffelSymbolDifferenceInFrame_eq_sub
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -155,7 +127,6 @@ section TimeDerivative
 
 variable {A Time : Type*} [CommRing A] [Algebra Real A]
 
-/-- The coordinate-facing time derivative `partial_t Gamma^k_ij` in a fixed local frame. -/
 def christoffelSymbolTimeDerivativeInFrame
     (td : TimeDerivativeData Real A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -174,7 +145,6 @@ def christoffelSymbolTimeDerivativeInFrame
       td.dt_apply (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) t := by
   rfl
 
-/-- A named coordinate evolution equation for Christoffel coefficients. -/
 def ChristoffelSymbolEvolutionEquationInFrame
     (td : TimeDerivativeData Real A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -197,10 +167,6 @@ theorem christoffelSymbolEvolution_from_equation
       rhs t x i j k :=
   h_evol t x i j k
 
-/-- Ricci-flow right hand side for Christoffel evolution in a local frame.
-
-`nablaRicLastRaised t x i j k` represents `g^{kl} (nabla_i Ric)_{jl}`.
-`nablaRicDirectionRaised t x i j k` represents `g^{kl} (nabla_l Ric)_{ij}`. -/
 def ricciFlowChristoffelEvolutionRHSInFrame
     (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> Idx -> Idx -> Idx -> Real)
     (t : Time) (x : M) (i j k : Idx) : Real :=
@@ -208,8 +174,6 @@ def ricciFlowChristoffelEvolutionRHSInFrame
     nablaRicLastRaised t x j i k +
     nablaRicDirectionRaised t x i j k
 
-/-- Coordinate statement of the Ricci-flow Christoffel evolution equation,
-parameterized by the raised Ricci-derivative components. -/
 def RicciFlowChristoffelSymbolEvolutionEquationInFrame
     (td : TimeDerivativeData Real A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))

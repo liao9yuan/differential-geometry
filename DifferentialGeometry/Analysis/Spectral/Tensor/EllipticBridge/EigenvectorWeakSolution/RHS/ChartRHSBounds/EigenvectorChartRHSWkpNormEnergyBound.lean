@@ -1,58 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSEnergyBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSWkpNorm
 
-/-!
-# An order-`K` uniform energy bound for the eigenvector chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P₀`, and an iteration order `K`, the
-chart-Euclidean right-hand side `eigenvectorChartRHS g r s h_atlas i α P₀` of the
-connection-Laplacian eigenvector weak-solution assembly has, by
-`eigenvectorChartRHS_wkpNorm_le_uniform`, an order-`K` iterated Sobolev
-(`wkpNorm`) bound whose right-hand side is `ENNReal.ofReal (μ⁻¹ · C)` times a
-seven-summand aggregate, where `μ := i.fst.val ∈ (0, 1]` is the resolvent
-eigenvalue attached to the eigenbasis index `i`.
-
-This file collapses the seven-summand aggregate to the abstract `L²` norm of the
-eigenbasis vector `tensorResolventEigenbasisVec h_atlas i`, *given* uniform
-order-`K` (and order-`(K + 1)`) `wkpNorm`-graded chart-component energy
-hypotheses that the campaign's downstream coupled-induction supplies. The
-headline is
-
-```
-∃ C ≥ 0, ∀ i,
-  wkpNorm K 2 (eigenvectorChartRHS g r s h_atlas i α P₀) (chartTargetEuclid α)
-    ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖.
-```
-
-The constant `C` is geometric — it depends only on `g r s h_atlas α P₀ K` and on
-the (geometric) constants supplied by the input hypotheses; in particular it is
-independent of the eigenbasis index `i`. The universal quantifier `∀ i` lies
-*inside* the existential `∃ C`, so a single geometric constant controls the
-chart right-hand side of *every* eigenvector simultaneously; the `i`-dependence
-of the right-hand side is confined to the explicit `μ⁻¹` factor.
-
-## Genuine input hypotheses
-
-Bounding higher-order Sobolev norms of the eigenvector chart right-hand side by
-its `L²` energy is not a free consequence of the `L²` eigen-equation — it relies
-on a chart-component arbitrary-order Sobolev regularity statement that is
-established by the downstream coupled-induction argument. The headline therefore
-takes that regularity as a *genuine* input: uniform `wkpNorm`-graded bounds
-covering every `wkpNorm` term that appears in the aggregate of
-`eigenvectorChartRHS_wkpNorm_le_uniform`.
-
-These are not vacuous defers nor fabricated predicates: they are the same
-chart-component energy bounds that the coupled-induction supplies, phrased as
-the campaign's `_uniform` convention dictates (a single nonnegative geometric
-constant followed by `∀ i …`).
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -107,7 +55,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `vec_norm_eq_one`. -/
 private lemma vec_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -119,7 +66,6 @@ private lemma vec_norm_eq_one
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-- Chart-locality-free twin of `eigenvalue_pos`. -/
 private lemma eigenvalue_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -135,7 +81,7 @@ private lemma eigenvalue_pos
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `eigenvectorChartRHS_wkpNorm_le_energy_uniform`. -/
+
 theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
@@ -149,7 +95,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
         (chartTargetEuclid (I := I) (M := M) β))
     (h_eig : ∃ Ceig : ℝ, 0 ≤ Ceig ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (tensorResolventEigenbasisVec (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator (I := I)
@@ -164,7 +110,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_resHigh : ∃ CresH : ℝ, 0 ≤ CresH ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (β : M) (Q : TensorCompIdx (E := E) r s),
-        wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -179,7 +125,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_resLow : ∃ CresL : ℝ, 0 ≤ CresL ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (β : M) (Q : TensorCompIdx (E := E) r s),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -194,7 +140,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_partial : ∃ Cpar : ℝ, 0 ≤ Cpar ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (P : TensorCompIdx (E := E) r s) (k : Fin (Module.finrank ℝ E)),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((partialLpLimit (I := I) (M := M)
                 g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -208,7 +154,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_component : ∃ Ccom : ℝ, 0 ≤ Ccom ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (p : TensorCompIdx (E := E) r s),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -222,7 +168,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_crossRight : ∃ CcR : ℝ, 0 ≤ CcR ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (P : TensorCompIdx (E := E) r s),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((crossRightLimitComponent (I := I) (M := M)
                 g r s i α P :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -236,7 +182,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (h_cutoff : ∃ Ccut : ℝ, 0 ≤ Ccut ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (P : TensorCompIdx (E := E) r s) (l : Fin (Module.finrank ℝ E)),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                 g r s i α P l :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -249,7 +195,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                   g r s) i‖) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal (C * (i.fst.val)⁻¹) *
@@ -332,7 +278,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i‖ with hRhs_def
   have hS1 :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (tensorResolventEigenbasisVec (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I)
@@ -342,7 +288,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
         ≤ ENNReal.ofReal Ceig * Rhs := hCeig_bd i
   have hS2_inner : ∀ β ∈ transportChartCenters (I := I) (M := M) α,
       ((∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -352,7 +298,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               (chartTargetEuclid (I := I) (M := M) β))
         + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
             ∑ Q : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -365,7 +311,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               Cqtot) * Rhs := by
     intro β _hβ
     have h_inner_β : (∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -374,7 +320,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             (chartTargetEuclid (I := I) (M := M) β))
         ≤ ENNReal.ofReal Cqtot * Rhs := by
       have h_each : ∀ Q ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
-          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -385,7 +331,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             ≤ ENNReal.ofReal CresH * Rhs := fun Q _hQ => hCresH_bd i β Q
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
-        (fun Q => wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+        (fun Q => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M)
@@ -398,7 +344,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       exact h_sum.trans_eq (by rw [hCqtot_def])
     have h_inner_β' : (∑ β' ∈ transportChartCenters (I := I) (M := M) β,
           ∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -411,7 +357,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             Rhs := by
       have h_perβ' : ∀ β' ∈ transportChartCenters (I := I) (M := M) β,
           (∑ Q : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -422,7 +368,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             ≤ ENNReal.ofReal Cqtot * Rhs := by
         intro β' _hβ'
         have h_each : ∀ Q ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -433,7 +379,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               ≤ ENNReal.ofReal CresH * Rhs := fun Q _hQ => hCresH_bd i β' Q
         have h_sum := finsetSum_eNNReal_ofReal_mul_le
           (Finset.univ : Finset (TensorCompIdx (E := E) r s))
-          (fun Q => wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+          (fun Q => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -447,7 +393,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (transportChartCenters (I := I) (M := M) β)
         (fun β' => ∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -460,7 +406,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       exact h_sum
     have h_total :
         (∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -470,7 +416,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               (chartTargetEuclid (I := I) (M := M) β))
           + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
               ∑ Q : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                   (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                         (eigenvectorResolvent (I := I) (M := M)
@@ -490,7 +436,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     rw [ENNReal.ofReal_add hCqtot_nn (mul_nonneg hN hCqtot_nn), add_mul]
   have hS2 : (∑ β ∈ transportChartCenters (I := I) (M := M) α,
         ((∑ Q : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -500,7 +446,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                 (chartTargetEuclid (I := I) (M := M) β))
           + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
               ∑ Q : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                   (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                         (eigenvectorResolvent (I := I) (M := M)
@@ -522,7 +468,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (transportChartCenters (I := I) (M := M) α)
       (fun β => (∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -532,7 +478,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               (chartTargetEuclid (I := I) (M := M) β))
         + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
             ∑ Q : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                 (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                       (eigenvectorResolvent (I := I) (M := M)
@@ -547,7 +493,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     exact h_sum.trans_eq (by rw [hCmid_def])
   have hS3 : (∑ β ∈ transportChartCenters (I := I) (M := M) α,
         ∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M)
@@ -558,7 +504,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       ≤ ENNReal.ofReal Clow * Rhs := by
     have h_perβ : ∀ β ∈ transportChartCenters (I := I) (M := M) α,
         (∑ Q : TensorCompIdx (E := E) r s,
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -570,7 +516,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) * CresL) * Rhs := by
       intro β _hβ
       have h_each : ∀ Q ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                     (eigenvectorResolvent (I := I) (M := M)
@@ -581,7 +527,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             ≤ ENNReal.ofReal CresL * Rhs := fun Q _hQ => hCresL_bd i β Q
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
-        (fun Q => wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun Q => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M)
@@ -600,7 +546,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (transportChartCenters (I := I) (M := M) α)
       (fun β => ∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M)
@@ -614,7 +560,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     exact h_sum.trans_eq (by rw [hClow_def, hTCard_def])
   have hS4 : (∑ P : TensorCompIdx (E := E) r s,
         ∑ k : Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((partialLpLimit (I := I) (M := M)
                 g r s i α P k :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -623,7 +569,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       ≤ ENNReal.ofReal Cpar' * Rhs := by
     have h_perP : ∀ P ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
         (∑ k : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -633,7 +579,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               ((Fintype.card (Fin (Module.finrank ℝ E)) : ℝ) * Cpar) * Rhs := by
       intro P _hP
       have h_each : ∀ k ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((partialLpLimit (I := I) (M := M)
                   g r s i α P k :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -642,7 +588,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             ≤ ENNReal.ofReal Cpar * Rhs := fun k _hk => hCpar_bd i P k
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
-        (fun k => wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun k => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((partialLpLimit (I := I) (M := M)
                 g r s i α P k :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -659,7 +605,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
       (fun P => ∑ k : Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((partialLpLimit (I := I) (M := M)
                 g r s i α P k :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -670,7 +616,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCpar'_def])
   have hS5 : (∑ p : TensorCompIdx (E := E) r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((componentLpLimit (I := I) (M := M)
               g r s i α p :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -678,7 +624,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
           (chartTargetEuclid (I := I) (M := M) α))
       ≤ ENNReal.ofReal Ccom' * Rhs := by
     have h_each : ∀ p ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((componentLpLimit (I := I) (M := M)
                 g r s i α p :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -687,7 +633,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
           ≤ ENNReal.ofReal Ccom * Rhs := fun p _hp => hCcom_bd i p
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
-      (fun p => wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun p => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((componentLpLimit (I := I) (M := M)
               g r s i α p :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -697,7 +643,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcom'_def])
   have hS6 : (∑ P : TensorCompIdx (E := E) r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((crossRightLimitComponent (I := I) (M := M)
               g r s i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -705,7 +651,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
           (chartTargetEuclid (I := I) (M := M) α))
       ≤ ENNReal.ofReal CcR' * Rhs := by
     have h_each : ∀ P ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((crossRightLimitComponent (I := I) (M := M)
                 g r s i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -714,7 +660,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
           ≤ ENNReal.ofReal CcR * Rhs := fun P _hP => hCcR_bd i P
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
-      (fun P => wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun P => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((crossRightLimitComponent (I := I) (M := M)
               g r s i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -725,7 +671,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     exact h_sum.trans_eq (by rw [hCcR'_def])
   have hS7 : (∑ P : TensorCompIdx (E := E) r s,
         ∑ l : Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                 g r s i α P l :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -734,7 +680,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       ≤ ENNReal.ofReal Ccut' * Rhs := by
     have h_perP : ∀ P ∈ (Finset.univ : Finset (TensorCompIdx (E := E) r s)),
         (∑ l : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                   g r s i α P l :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -744,7 +690,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
               ((Fintype.card (Fin (Module.finrank ℝ E)) : ℝ) * Ccut) * Rhs := by
       intro P _hP
       have h_each : ∀ l ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                   g r s i α P l :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -753,7 +699,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             ≤ ENNReal.ofReal Ccut * Rhs := fun l _hl => hCcut_bd i P l
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
-        (fun l => wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun l => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                 g r s i α P l :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -770,7 +716,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     have h_sum := finsetSum_eNNReal_ofReal_mul_le
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
       (fun P => ∑ l : Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
                 g r s i α P l :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -781,7 +727,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcut'_def])
   have h_aggr_total :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (tensorResolventEigenbasisVec (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator (I := I)
@@ -790,7 +736,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             (chartTargetEuclid (I := I) (M := M) α)
           + (∑ β ∈ transportChartCenters (I := I) (M := M) α,
               ((∑ Q : TensorCompIdx (E := E) r s,
-                  wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                     (fun y => ((tensorL2ChartComponent (I := I) (M := M)
                         g r s
                         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -802,7 +748,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                     (chartTargetEuclid (I := I) (M := M) β))
                 + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
                     ∑ Q : TensorCompIdx (E := E) r s,
-                      wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
                         (fun y => ((tensorL2ChartComponent (I := I) (M := M)
                             g r s
                             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -814,7 +760,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                         (chartTargetEuclid (I := I) (M := M) β')))
           + (∑ β ∈ transportChartCenters (I := I) (M := M) α,
               ∑ Q : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                   (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                         (eigenvectorResolvent (I := I) (M := M)
@@ -824,21 +770,21 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                   (chartTargetEuclid (I := I) (M := M) β))
           + (∑ P : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                   (fun y => ((partialLpLimit (I := I) (M := M)
                       g r s i α P k :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                     EuclN → ℝ) y)
                   (chartTargetEuclid (I := I) (M := M) α))
           + (∑ p : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 (fun y => ((componentLpLimit (I := I) (M := M)
                     g r s i α p :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
                   EuclN → ℝ) y)
                 (chartTargetEuclid (I := I) (M := M) α))
           + (∑ P : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 (fun y => ((crossRightLimitComponent (I := I)
                     (M := M) g r s i α P :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -846,7 +792,7 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                 (chartTargetEuclid (I := I) (M := M) α))
           + (∑ P : TensorCompIdx (E := E) r s,
               ∑ l : Fin (Module.finrank ℝ E),
-                wkpNorm (d := Module.finrank ℝ E) K 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                   (fun y => ((cutoffPartialLpLimit (I := I)
                       (M := M) g r s i α P l :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :

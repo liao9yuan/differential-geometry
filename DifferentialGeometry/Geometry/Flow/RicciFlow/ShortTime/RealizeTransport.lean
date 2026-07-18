@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.WeylEigenvalueCountingBound
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.BareLaplacianSpectralMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
@@ -37,47 +37,47 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The carrier-scale realize-evaluate functional `ℓ_a`
 
-We realize the pointwise symmetric-bilinear evaluation
-`T ↦ ccTensorBilinSymm g_bg T x v w` (a *fixed* base point `x` and tangent
-vectors `v, w`) as a continuous-linear functional on the supercritical
-spectral Sobolev scale `Hᵃ = tensorHs g_bg 0 2 a`, in the eigenbasis
-coordinate model.
 
-The fixed real `eigenRealizeEval g_bg i x v w` is the realize-evaluation of the
-`i`-th smooth eigenvector representative `eigenSmooth g_bg i`. The genuine
-spectral *expansion* of the realize is
-`ccTensorBilinSymm g_bg T x v w = ∑ᵢ (L²-coordinate of T at i) · eᵢ(x,v,w)`,
-and the functional is its Riesz representative against the `Hᵃ` inner product
-(coordinate `eᵢ(x,v,w) · (1+λᵢ)^{-a}`). Both the well-definedness of that
-representative and the expansion rest on the single supercritical
-pointwise on-diagonal local-Weyl reproducing-kernel input recorded below;
-everything else (the Riesz construction, the coordinate `tsum` identity, the
-pinning algebra) is proved outright. -/
 
-/-- The realize-evaluation of the `i`-th smooth eigenvector representative at the
-fixed base point `x` and tangent vectors `v, w`: the symmetric bilinear value
-`ccTensorBilinSymm g_bg (eigenSmooth g_bg i) x v w`. These are the fixed
-spectral coefficients of the carrier-scale realize functional. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 private noncomputable def eigenRealizeEval (g_bg : SmoothRiemannianMetric I M)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2)
     (x : M) (v w : TangentSpace I x) : ℝ :=
   ccTensorBilinSymm (I := I) g_bg (eigenSmooth (I := I) (M := M) g_bg i) x v w
 
-/-- **The supercritical pointwise on-diagonal kernel summability (the single open
-local-Weyl input, part 1).**
 
-At supercritical Sobolev order `2a > dim M + 4` the per-eigenmode realize
-values `eᵢ(x,v,w) = ccTensorBilinSymm g_bg (eigenSmooth g_bg i) x v w` decay
-fast enough that the `Hᵃ`-Riesz weight `eᵢ(x,v,w)² · (1+λᵢ)^{-a}` is summable
-over the eigen-index set. This is exactly the **on-diagonal reproducing-kernel
-estimate** `∑ᵢ ‖bᵢ(x)‖²_g · (1+λᵢ)^{-a} < ∞`, the pointwise (per-point) form of
-the local Weyl law; it is *strictly stronger* than the integrated counting
-bound `EigenvalueCountingBound` (which is its integral over `M`, see
-`SpectralDiagonalCounting.eigenvalueCountingBound_of_pointwiseDiagonalKernelBound`)
-and is the genuine remaining analytic input that the project isolates rather
-than fakes. -/
+
+
+
+
+
+
+
+
+
+
+
+
 private theorem eigenRealizeEval_weight_summable
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -89,20 +89,20 @@ private theorem eigenRealizeEval_weight_summable
           (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) :=
   ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).1 x v w
 
-/-- **The supercritical pointwise realize eigen-expansion (the single open
-local-Weyl input, part 2).**
 
-At supercritical Sobolev order `2a > dim M + 4` the realize-evaluation of a
-smooth compactly-supported `(0,2)`-tensor `T` at the fixed base point `x` and
-tangent vectors `v, w` is the absolutely convergent eigen-series of its
-`L²`-coordinates weighted by the per-eigenmode realize values:
-`ccTensorBilinSymm g_bg T x v w = ∑ᵢ (L²-coeff of T at i) · eᵢ(x,v,w)`.
 
-This is the `C⁰`-convergence of the eigenbasis expansion of `T`'s realize, which
-again rests on the same pointwise on-diagonal local-Weyl kernel control
-(via Cauchy–Schwarz against the `Hᵃ` decay of a smooth tensor's coordinates and
-the `(1+λᵢ)^{-a}` kernel tail). It is isolated as the second half of the single
-open Weyl pointwise input. -/
+
+
+
+
+
+
+
+
+
+
+
+
 private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -197,33 +197,33 @@ theorem pointwise_deriv_through_realize
   · exact hval t
 
 set_option linter.unusedVariables false in
-/-- **Spectral→geometric reconciliation at the solution (fully ungated).**
 
-Re-anchored off the finite-support-gated objects. The carrier-scale realize
-functional `ℓ_a` now reconciles, at every interior time, the carrier-scale
-spectral right-hand side against the geometric DeTurck–Ricci right-hand side
-evaluated at the **linear** realized metric `g_DT t`
-(`hreal : (g_DT s).inner = g_bg.inner + ccTensorBilinSymm (T_s s)`), NOT the
-finite-support-gated piecewise `realizeMetricMap`. The nonlinear forcing is the
-*continuous* realize-based nonlinearity `N_cont` (the SAME data as in
-`deturckN_hscale_lipschitz` / `forcing_continuous_interior` /
-`deturck_mildsolution_timeh1`), replacing the gated `deTurckGeometricN`, so the
-identity holds for the genuine infinite-support solution carrier.
 
-The construction data `N_cont`, `repr`, `Nsec` and the construction/realize
-hypotheses `hN_coeff`, `hNsec_realize`, `hrepr_small` are IDENTICAL in shape to
-A4/A5/parent (coordinate/realize identities about `N_cont`'s coordinates and
-`Nsec`'s bilinear extraction, NOT the reconciliation conclusion). `hℓ` is the
-carrier-wide pinning of `ℓ_a` against the linear realize `ccTensorBilinSymm`.
 
-Non-packaging: every hypothesis is a coordinate/realize identity; none is the
-`ℓ_a (…) = deTurckRicciRHS …` conclusion. Non-leaking: all data constrains the
-internal carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline.
 
-(`hreal` and `hrepr_small` are blueprint-mandated signature hypotheses consumed
-by the parent assembly; this reconciliation step routes the value identity
-through `hℓ`/`hNsec_geom` and the spectral-coordinate identities, so the linter
-flags them as unused here — narrowly disabled above the docstring.) -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem rhs_matches_deturck_at_solution
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -253,7 +253,7 @@ theorem rhs_matches_deturck_at_solution
         ccTensorBilinSymm (I := I) g_bg (repr u) x' v' w')
     (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
+        metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hsmoothrepr : ∀ (s : ℝ)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2),

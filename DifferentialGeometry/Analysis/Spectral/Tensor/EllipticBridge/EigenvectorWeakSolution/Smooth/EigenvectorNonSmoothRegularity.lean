@@ -3,68 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorNonSmo
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Interior `H²`/`W^{2,2}_loc` regularity of the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the chart
-`P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇` —
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec … i) α P₀` —
-satisfies a *scalar* divergence-form weak-elliptic identity with principal
-symbol `weightedInvGramOnEuclid g α` (`= √(det g) · gⁱʲ`), the same principal
-symbol as the scalar Laplace–Beltrami operator. That per-component data is
-packaged in `eigenvectorTensorChartBilinearData`, a value of
-`TensorChartBilinearH1ComplData g r s α P₀`.
-
-This module ships the **interior second-order regularity** of that chart
-component: on any interior subdomain `Ω''` (open, relatively compact closure,
-with a difference-quotient room neighbourhood inside the chart target) the
-explicit weak chart partials `eigenvectorChartWeakPartial` of the chart
-component *themselves* admit interior weak partial derivatives in `L²(Ω'')`.
-Equivalently, the chart component lies in `MemWkp 2 2 … Ω''` — it is `W^{2,2}`
-on the interior set `Ω''`.
-
-## Strategy
-
-The argument is a thin assembly over two existing engines:
-
-* the **tensor** non-smooth interior-regularity engine
-  `tensor_h2_chart_loc_of_uniform_bound` (a delegate to the scalar Nirenberg
-  difference-quotient engine `chart_loc_of_uniform_bound`), which extracts a
-  weak `H¹` partial of each `weak_partial` on `Ω''` *given* a uniform-in-`h`
-  difference-quotient bound on those `weak_partial`s;
-* the **scalar** unconditional uniform difference-quotient bound
-  `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`, which — for any scalar
-  `ChartBilinearH1ComplData`, a Nirenberg cutoff `η`, and the precompact
-  geometric setup — produces exactly that uniform-in-`h` bound, discharging the
-  Caccioppoli / energy-estimate ingredients internally.
-
-The crux of the present file is **discharging** the uniform difference-quotient
-bound that `tensor_h2_chart_loc_of_uniform_bound` takes as a hypothesis. Since
-`TensorChartBilinearH1ComplData` is a thin wrapper whose single field
-`toChartData : ChartBilinearH1ComplData g α` is the scalar divergence-form data
-structure, and the projections `D.weak_partial`, `D.u_chart`, `D.f_chart` are
-definitionally the corresponding fields of `D.toChartData`, the scalar
-unconditional uniform bound `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`
-applies verbatim to `D.toChartData` and yields the bound on each tensor
-`D.weak_partial i`. The engine is therefore invoked with the bound **proved**,
-not assumed. The Nirenberg cutoff `η` and the precompact `Ω'` consumed by the
-scalar bound are constructed internally from the genuine interior-subdomain
-hypotheses `Ω''` and the difference-quotient room radius `R₀`.
-
-## Main result
-
-* `eigenvector_chartComponent_memWkp` — for the eigenvector
-  chart-bilinear data parameters `(g, r, s, i, α, P₀)`, an interior subdomain
-  `Ω''` (open, relatively compact closure) and a difference-quotient room radius
-  `R₀ > 0` with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`,
-  the eigenvector chart component lies in `MemWkp 2 2 … Ω''`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -99,7 +37,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The thickening of a set is monotone in the radius. -/
 private lemma thickening_mono_of_lt
     {β : Type*} [PseudoEMetricSpace β]
     {r r' : ℝ} (hr_lt : r < r') (K : Set β) :
@@ -109,32 +46,12 @@ private lemma thickening_mono_of_lt
   have h := Metric.mem_thickening_iff_infEDist_lt.mp hy
   exact lt_of_lt_of_le h (ENNReal.ofReal_le_ofReal hr_lt.le)
 
-/-- A set is contained in any positive thickening of itself. -/
 private lemma self_subset_thickening_of_pos
     {β : Type*} [PseudoEMetricSpace β]
     {r : ℝ} (hr_pos : 0 < r) (K : Set β) :
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-/-- **Uniform-in-`h` difference-quotient bound for the eigenvector chart
-component (chart-locality-free).** Keyed onto the chart-locality-free eigenvector
-chart-bilinear data `eigenvectorTensorChartBilinearData g r s i α P₀` (built over
-the intrinsic eigenbasis vector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i`). For an interior
-subdomain `Ω''` (open, relatively compact closure) and a room radius `R₀ > 0`
-with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, there is a
-nonnegative bound `M_bound i k` such that, at the difference-quotient
-sub-radius `R₀ / 16`, for every `0 < |h| ≤ R₀ / 16` and every pair `(i, k)`:
-
-```
-‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k).
-```
-
-The bound delegates through `D.toChartData` to the scalar unconditional uniform
-difference-quotient bound `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`;
-the Nirenberg cutoff `η`, the precompact `Ω'`, and the geometric scales are
-constructed internally from `Ω''` and `R₀`. No chart-locality hypothesis on the
-atlas appears. -/
 private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -243,36 +160,7 @@ private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
-set_option linter.unusedVariables false in
-/-- **Interior `H²`/`W^{2,2}_loc` regularity of the eigenvector chart component
-(chart-locality-free).**
 
-Keyed onto the intrinsic eigenbasis vector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i` and the chart-locality-free
-eigenvector chart-bilinear data `eigenvectorTensorChartBilinearData`.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, a component multi-index `P₀`, an interior subdomain
-`Ω''` (open, with relatively compact closure) and a difference-quotient room
-radius `R₀ > 0` with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`,
-the chart `P₀`-component
-
-```
-tensorL2ChartComponent g r s
-  (tensorResolventEigenbasisVec
-    (tensorResolventL2_isCompactOperator g r s) i) α P₀
-```
-
-of the resolvent eigenvector lies in `MemWkp 2 2 … Ω''` — it has interior
-`W^{2,2}` regularity on `Ω''`, with no chart-locality hypothesis on the atlas.
-
-The uniform difference-quotient bound consumed by the interior-regularity engine
-is **discharged** (proved, not assumed): via the thin wrapper
-`TensorChartBilinearH1ComplData.toChartData`, the
-scalar unconditional uniform bound
-`chartBilinearH1Compl_uniform_diffQuot_bound_of_data` delivers it, and the
-interior `H²` extraction is the tensor non-smooth Nirenberg engine
-`tensor_h2_chart_loc_of_uniform_bound`. -/
 theorem eigenvector_chartComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -377,9 +265,6 @@ section ElaborationTests
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-/-- The chart-locality-free headline produces interior `MemWkp 2 2` regularity
-of the eigenvector chart component on any interior subdomain with a
-difference-quotient room, with no chart-locality hypothesis. -/
 example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))

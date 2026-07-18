@@ -2,43 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 
-/-!
-# Chart-Sobolev to `C^∞` embedding on closed Riemannian manifolds
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
-on a finite-dimensional real inner-product space `E`, the assumption
-`MemWkpChart g (2k) 2 u` for every `k : ℕ` (together with measurability of `u`)
-yields a.e.-equal continuous and `C^m` (for arbitrary `m : ℕ`) representatives
-of `u`.
-
-## Main results
-
-* `memWkpChart_forall_implies_continuous_representative` — the continuous version.
-  From `∀ k, MemWkpChart g (2k) 2 u` and `Measurable u`, obtain a continuous
-  representative `ũ : M → ℝ` with `ũ = u` a.e. with respect to the canonical
-  Riemannian volume measure.
-
-* `memWkpChart_forall_implies_contMDiff_zero_representative` — the
-  `ContMDiff I 𝓘(ℝ, ℝ) 0` packaging of the continuous representative.
-
-* `ChartSobolevSuperCriticalWitness` — a clean existential predicate
-  packaging "`u` lies in `MemWkpChart g (m+1) p` for some `p > n`". This
-  witness is unconditionally derivable from
-  `∀ k, MemWkpChart g (2k) 2 u` via a finite chain of manifold-level
-  sub-critical Sobolev tower steps; we deliver it separately at `m = 0`
-  via `chartSobolevSuperCriticalWitness_zero_of_h_all`.
-
-* `memWkpChart_forall_implies_contMDiff_m_representative` — the parametric
-  theorem at arbitrary `m : ℕ`, hypothesis-bearing in a single bridge lemma
-  `h_bridge`. The bridge has exactly the same shape as the existing
-  `morrey_C0_embedding_of_compact` (just at order `m`): it takes a chart-Sobolev
-  membership at order `(m+1)` and a super-critical real exponent `p > n`,
-  and produces a `ContMDiff I 𝓘(ℝ, ℝ) m` a.e.-representative.
-
-* Per-chart `C^m` smoothness for chart-pullback: `chartPullback_contMDiff_of_contDiff_finite`
-  exposes a finite-order `C^m` version of the `C^∞` chart-pullback smoothness lemma,
-  required for higher-order chart-Sobolev to `C^m` constructions.
--/
 
 noncomputable section
 
@@ -60,7 +23,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Pick the smallest `k₀ ≥ 1` such that `2 * k₀ > n`. -/
 private noncomputable def witnessOrderC0 (E : Type*) [NormedAddCommGroup E]
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] : ℕ :=
   Module.finrank ℝ E + 1
@@ -79,9 +41,6 @@ private lemma witnessOrderC0_two_gt_dim {E : Type*} [NormedAddCommGroup E]
   push_cast
   linarith [show (0 : ℝ) ≤ Module.finrank ℝ E from Nat.cast_nonneg _]
 
-/-- **Continuous representative**: From `MemWkpChart g (2k) 2 u` for every `k`
-and `Measurable u`, on a closed Riemannian manifold modelled on an
-inner-product space `E`, there is a continuous representative `ũ : M → ℝ`. -/
 theorem memWkpChart_forall_implies_continuous_representative
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -123,7 +82,6 @@ theorem memWkpChart_forall_implies_continuous_representative
   rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
   exact hũ_ae
 
-/-- `C^0` smoothness via `ContMDiff` of the continuous representative. -/
 theorem memWkpChart_forall_implies_contMDiff_zero_representative
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -143,11 +101,6 @@ theorem memWkpChart_forall_implies_contMDiff_zero_representative
   refine ⟨ũ, ?_, hũ_ae⟩
   exact contMDiff_zero_iff.mpr hũ_cont
 
-/-- The "super-critical Sobolev witness at order `m + 1`" predicate.
-
-A pure existential about the function `u`: it asserts the existence of a
-real exponent `p ≥ 1` with `p > n = Module.finrank ℝ E` such that `u` lies
-in `MemWkpChart g (m + 1) (ENNReal.ofReal p)`. -/
 def ChartSobolevSuperCriticalWitness
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E]
@@ -160,17 +113,6 @@ def ChartSobolevSuperCriticalWitness
   ∃ p : ℝ, 1 ≤ p ∧ (Module.finrank ℝ E : ℝ) < p ∧
     MemWkpChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u
 
-/-- **`ContMDiff m` representative (bridge-parametric form).**
-
-For a closed Riemannian manifold, the super-critical Sobolev witness
-`h_witness` together with the order-`m` chart-Sobolev-to-`C^m` bridge
-`h_bridge` upgrades the `MemWkpChart g (m+1) p` membership to a
-`ContMDiff I 𝓘(ℝ, ℝ) m` a.e.-representative.
-
-At `m = 0`, both hypotheses are unconditionally available; see
-`memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge` for
-the consistency wrapper that reduces to
-`memWkpChart_forall_implies_contMDiff_zero_representative`. -/
 theorem memWkpChart_forall_implies_contMDiff_m_representative
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -196,9 +138,6 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative
   obtain ⟨p, _hp_one, hp_dim, hu_super⟩ := h_witness
   exact h_bridge hp_dim hu_meas hu_super
 
-/-- **Sanity check.** At `m = 0`, supplying the bridge from
-`morrey_C0_embedding_of_compact` to the parametric theorem yields the same
-`ContMDiff 0` representative as `memWkpChart_forall_implies_contMDiff_zero_representative`. -/
 theorem memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -236,9 +175,7 @@ variable [NeZero (Module.finrank ℝ E)]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- A C^m version of `chartPullback_contMDiff` for finite-order `m : ℕ`.
-The chart-pullback of a `ContDiff ℝ m` compactly-supported function with
-`tsupport ⊆ chartTargetEuclid α` is `ContMDiff I 𝓘(ℝ, ℝ) m` on `M`. -/
+omit [CompactSpace M] [SigmaCompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 lemma chartPullback_contMDiff_of_contDiff_finite
     (α : M) (m : ℕ)
     {ψ : EuclN → ℝ}
@@ -383,10 +320,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 variable [NeZero (Module.finrank ℝ E)]
 
-/-- The inductive driver: from `MemWkpChart g (m + 1 + s) (ofReal p) u` with `p`
-regular at depth `s + 1` and `(s + 1) * p > n = finrank ℝ E`, produce a
-super-critical exponent `q > n` with `1 ≤ q` and
-`MemWkpChart g (m + 1) (ofReal q) u`. -/
 private theorem chain_to_supercritical
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (m : ℕ) :
@@ -459,11 +392,6 @@ private theorem chain_to_supercritical
 
 end SuperCriticalWitness
 
-/-- **Unconditional super-critical witness builder.**
-
-For a closed Riemannian manifold and any `m : ℕ`, given the chart-Sobolev
-hypothesis `∀ k : ℕ, MemWkpChart g (2k) 2 u`, the super-critical witness
-`ChartSobolevSuperCriticalWitness g m u` holds unconditionally. -/
 theorem chartSobolevSuperCriticalWitness_of_h_all
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -525,8 +453,7 @@ variable [NeZero (Module.finrank ℝ E)]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For `x ∈ (chartAt H α).source`, `chartPushed ρ α u (toEuclidean (extChartAt I α x))`
-equals `ρ α x * u x`. -/
+omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_apply_toE_extChartAt
     (α : M) (u : M → ℝ) {x : M} (hx : x ∈ (chartAt H α).source) :
     chartPushed (I := I) (M := M)
@@ -545,9 +472,7 @@ private lemma chartPushed_apply_toE_extChartAt
     exact (extChartAt I α).left_inv h_x_src
   rw [h_inv]
 
-/-- For `y ∈ chartTargetEuclid α`, `chartPushed ρ α ũ y` equals
-`ρ α (symm (toE.symm y)) * ũ (symm (toE.symm y))`. The composition is continuous
-on `chartTargetEuclid α` whenever `ũ : M → ℝ` is continuous. -/
+omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_chartPushed_of_continuous
     (α : M) {ũ : M → ℝ} (hũ_cont : Continuous ũ) :
     ContinuousOn (chartPushed (I := I) (M := M)
@@ -566,8 +491,7 @@ private lemma continuousOn_chartPushed_of_continuous
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α).contMDiff.continuous
   exact (hρ_cont.comp_continuousOn h_inv_cont).mul (hũ_cont.comp_continuousOn h_inv_cont)
 
-/-- Existence of an open ball in `EuclN` around `y₀ ∈ chartTargetEuclid α`
-contained entirely in `chartTargetEuclid α`. -/
+omit [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_ball_subset_chartTargetEuclid
     (α : M) {y₀ : EuclN} (hy₀ : y₀ ∈ chartTargetEuclid (I := I) (M := M) α) :
     ∃ R : ℝ, 0 < R ∧ Metric.ball y₀ R ⊆ chartTargetEuclid (I := I) (M := M) α := by
@@ -575,13 +499,6 @@ private lemma exists_ball_subset_chartTargetEuclid
     chartTargetEuclid_isOpen (I := I) (M := M) α
   exact Metric.isOpen_iff.mp hopen y₀ hy₀
 
-/-- **Unconditional `ContMDiff m` representative for the super-critical case.**
-
-On a closed Riemannian manifold modelled on an inner-product space `E` of
-dimension `n = Module.finrank ℝ E ≥ 1`, for every real exponent `p > n` and
-every measurable `u : M → ℝ` lying in `MemWkpChart g (m+1) (ofReal p)`, there
-is a `ContMDiff I 𝓘(ℝ, ℝ) m` representative `u_smooth` with
-`u_smooth =ᵐ[riemannianVolumeMeasure g] u`. -/
 theorem memWkpChart_super_critical_implies_contMDiff_m_representative
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (m : ℕ)
@@ -877,12 +794,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
 
 end SuperCriticalBridge
 
-/-- **Unconditional `ContMDiff m` representative.**
-
-For a closed Riemannian manifold modelled on an inner-product space of
-dimension `n ≥ 1`, the hypothesis `∀ k, MemWkpChart g (2k) 2 u` together
-with measurability of `u` yields a `ContMDiff I 𝓘(ℝ, ℝ) m` a.e.-representative
-for every `m : ℕ`. -/
 theorem memWkpChart_forall_implies_contMDiff_m_representative_uncond
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -904,26 +815,6 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative_uncond
   exact SuperCriticalBridge.memWkpChart_super_critical_implies_contMDiff_m_representative
     (I := I) (M := M) g m hp_dim hv_meas hv
 
-/-- **Sobolev-to-smooth representative.**
-
-For a closed Riemannian manifold modelled on an inner-product space of
-dimension `n ≥ 1`, a measurable `u` lying in `W^{2k,2}` for every `k`
-(`∀ k, MemWkpChart g (2k) 2 u`) admits a single smooth
-(`ContMDiff I 𝓘(ℝ, ℝ) ∞`) representative `u_smooth` equal to `u`
-almost everywhere for the canonical Riemannian volume measure.
-
-Here "closed" is encoded by `CompactSpace M`, `T2Space M`,
-`SigmaCompactSpace M`, and `I.Boundaryless`, and `n ≥ 1` by
-`NeZero (Module.finrank ℝ E)`.
-
-The proof picks the order-`0` representative `u_smooth` from
-`memWkpChart_forall_implies_contMDiff_m_representative_uncond`. For each
-`m : ℕ`, the order-`m` representative produced by that theorem is
-continuous and a.e. equal to `u_smooth`; the `IsOpenPosMeasure` property
-of the canonical Riemannian volume measure (via `Continuous.ae_eq_iff_eq`)
-upgrades a.e. equality of continuous functions to pointwise equality.
-Hence `u_smooth` itself is `ContMDiff m` for every `m : ℕ`, which gives
-`ContMDiff ∞` via Mathlib's `contMDiff_infty`. -/
 theorem sobolev_smooth_representative_of_memWkpChart_forall
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

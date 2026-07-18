@@ -2,89 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-/-!
-# Bridge between the chart Ricci carrier and the abstract Ricci tensor
-
-The chart Ricci carrier `ricciFun g : pointwiseBilin I` (defined in
-`Geometry.Curvature.Riemann.Defs`) is the bilinear form on the tangent bundle
-whose matrix in the canonical model basis is the chart-coordinate Ricci tensor
-$$
-  \operatorname{Rc}_{ik}(x, \varphi_x x) = \sum_j R^j{}_{ijk}(g, x)(\varphi_x x).
-$$
-
-The abstract Ricci tensor `ricciTensor g x : T_x M →L T_x M →L ℝ` (defined in
-`Geometry.Curvature.CurvatureOperator.RicciConnection`) is the trace of the curvature endomorphism
-$$
-  \operatorname{Ric}^{\nabla}(v, w)
-    := \operatorname{tr}_{\mathbb{R}}\bigl(Z \mapsto R^{\nabla}(Z, v) w\bigr).
-$$
-
-Both objects describe the Ricci curvature of the Levi-Civita connection. This bridge file
-identifies the two on the canonical model basis. The identification reduces, by the
-basis-coordinate trace formula `ricciTensor_apply_basisSum` and trilinearity of
-`riemannOp` and `chartRiemannCLM`, to the *deep* basis identification
-`riemannOp (LeviCivita g) x e_j e_k e_i = chartRiemannCLM g x e_j e_k e_i` of the abstract
-and chart Riemann CLMs (the iterated chart-Christoffel expansion of `riemannOp`, which is
-the standard deep identification deferred to a downstream development; see
-`ChartBridge.Riemann` for the structural reduction).
-
-This file therefore exposes the bridge in **hypothesis-bearing** form: a downstream client
-that supplies the deep basis identity at the point obtains the pointwise equality
-`ricciFun g x = ricciTensor g x` as bilinear forms. The hypothesis is recorded as a
-predicate `chartRiemannBasisIdentity g x` on the four indices, mirroring the
-`chartHessianMatrixIdentity` pattern in `ChartBridge.Hessian`.
-
-## Main definitions
-
-* `chartRiemannBasisIdentity g x` — the basis-coordinate identification at `x`:
-  for every quadruple `(i, j, k, l)`, the `l`-th coordinate of
-  `riemannOp (LeviCivita g) x e_j e_k e_i` equals
-  `chartRiemannTensor g x i j k l (extChartAt I x x)`. Equivalently, the basis-evaluated
-  abstract Riemann CLM agrees with the chart-Riemann CLM at `x`.
-
-## Main theorems
-
-* `chartRiemannBasisIdentity_iff` — the predicate `chartRiemannBasisIdentity g x` is
-  equivalent to the basis identity
-  `riemannOp (LeviCivita g) x e_j e_k e_i = chartRiemannCLM g x e_j e_k e_i`
-  for every `(i, j, k)`.
-* `riemannOp_eq_chartRiemannCLM_apply_of_basis_identity` — under
-  `chartRiemannBasisIdentity g x`, the trilinear value
-  `riemannOp (LeviCivita g) x v w u` equals `chartRiemannCLM g x v w u` for all
-  tangent vectors `(v, w, u)`. The proof expands each input in the canonical model basis
-  and uses trilinearity of both sides.
-* `ricciTensor_eq_chartRicciSwap_of_basis_identity` — the **swap form** of the bridge:
-  under `chartRiemannBasisIdentity g x`, the abstract Ricci tensor admits the
-  basis-coordinate sum
-  `ricciTensor g x v w = ∑ i k, v^k * w^i * Rc_{i, k}(x, ϕ_x x)`,
-  with `(v, w)` paired against the chart Ricci entries in the *swapped* index order. This
-  is the convention difference between the trace `tr_Z R(Z, v) w` (which has v at the
-  second differentiation slot of R, w at the vector slot) and the chart `Rc_{ik}` (which
-  takes the vector index first, the second differentiation index second). No symmetry
-  assumption is required for this form.
-* `ricciFun_eq_ricciTensor_swap_of_basis_identity` — the swap-form bridge to the chart
-  Ricci carrier: `ricciFun g x v w = ricciTensor g x w v` under
-  `chartRiemannBasisIdentity g x`.
-* `ricciFun_eq_ricciTensor_of_basis_identity` — the **direct identification** under
-  `[I.Boundaryless]`: under `chartRiemannBasisIdentity g x` and the closed-manifold
-  hypothesis (which discharges the chart-level Ricci symmetry via
-  `chartRicciTensor_symm_of_boundaryless`), we have
-  `ricciFun g x v w = ricciTensor g x v w` as bilinear forms on `T_x M`.
-
-## Sign convention
-
-The chart Riemann tensor `chartRiemannTensor g α i j k l` follows the convention
-`R^l{}_{ijk}` with `i` the "vector" index, `(j, k)` the differentiation indices, and `l`
-the upper index. The chart Ricci tensor is `Rc_{ik} = ∑_j R^j{}_{ijk}` (contracting the
-upper `l` against the first differentiation index `j`). The abstract Ricci tensor is the
-trace `tr_Z R(Z, v) w` of the endomorphism `Z ↦ riemannOp x Z v w` on `T_x M`, where
-`riemannOp x Z v w` corresponds to `R(Z, v) w` with slot-1 = `Z` (first diff), slot-2 =
-`v` (second diff), slot-3 = `w` (vector). The two conventions differ in the assignment of
-`(v, w)` to the slots `(diff2, vector)` (abstract) versus `(vector, diff2)` (chart),
-producing the swap form recorded in this file. Ricci symmetry then matches the two as
-bilinear forms.
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle
@@ -104,13 +21,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The basis-coordinate identification of the abstract Riemann operator and the chart
-Riemann tensor at `x`: for every four-tuple `(i, j, k, l)`, the `l`-th coordinate of
-`riemannOp (LeviCivita g) x e_j e_k e_i` equals the chart-coordinate Riemann entry
-`R^l{}_{ijk}(g, x)(ϕ_x x)`. This is the deep identification produced by iterating the
-chart-Christoffel formula for `LeviCivita g` twice; we expose it here as a predicate so
-that downstream clients can supply it without forcing this file to depend on the
-deferred deep computation. -/
 def chartRiemannBasisIdentity (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
   ∀ i j k l : Fin (Module.finrank ℝ E),
     ((chartModelBasis E).repr
@@ -119,8 +29,6 @@ def chartRiemannBasisIdentity (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
           ((chartModelBasis E) i))) l =
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)
 
-/-- The basis-coordinate identification is equivalent to pointwise equality of
-`riemannOp (LeviCivita g) x` and `chartRiemannCLM g x` on every basis triple. -/
 theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x ↔
       ∀ i j k : Fin (Module.finrank ℝ E),
@@ -141,10 +49,6 @@ theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
     rw [h i j k]
     rw [chartRiemannCLM_repr_basis (I := I) g x i j k l]
 
-/-- **Trilinear bridge.** Under the basis-coordinate identification, the abstract Riemann
-operator `riemannOp (LeviCivita g) x` and the chart Riemann CLM `chartRiemannCLM g x`
-agree as trilinear maps: `riemannOp x v w u = chartRiemannCLM x v w u` for all
-`v, w, u : TangentSpace I x`. -/
 theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -291,13 +195,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [hbasis i j k]
 
-/-- **Basis expansion of the abstract Ricci tensor via the chart Ricci entries (swap
-form).** Under the basis-coordinate identification, the abstract Ricci tensor admits the
-explicit chart-coordinate sum
-`ricciTensor g x v w = ∑ i k, v^k * w^i * Rc_{i, k}(x, ϕ_x x)`,
-where `(v^k, w^i) := ((b.repr v) k, (b.repr w) i)`. The pairing is `v` with the second
-chart-Ricci index and `w` with the first chart-Ricci index — opposite to `ricciFun`'s
-pairing. -/
 theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -378,10 +275,6 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
   refine Finset.sum_congr rfl fun t _ => ?_
   ring
 
-/-- **Swap-form Ricci bridge.** Under the basis-coordinate identification, the chart
-Ricci carrier `ricciFun g x v w` equals the abstract Ricci tensor `ricciTensor g x w v`
-with arguments swapped. This identity holds without any symmetry hypothesis: the
-swap absorbs the abstract / chart convention difference. -/
 theorem ricciFun_eq_ricciTensor_swap_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -393,12 +286,6 @@ theorem ricciFun_eq_ricciTensor_swap_of_basis_identity
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
-/-- **Direct Ricci bridge under closed-manifold hypothesis.** Under the basis-coordinate
-identification together with `[I.Boundaryless]`, the chart Ricci carrier `ricciFun g x`
-equals the abstract Ricci tensor `ricciTensor g x` as bilinear forms on `T_x M`. The
-boundaryless hypothesis discharges the chart-level Ricci symmetry
-`Rc_{i, k} = Rc_{k, i}` (via `chartRicciTensor_symm_of_boundaryless`), which absorbs the
-swap arising from the abstract / chart convention difference. -/
 theorem ricciFun_eq_ricciTensor_of_basis_identity [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)

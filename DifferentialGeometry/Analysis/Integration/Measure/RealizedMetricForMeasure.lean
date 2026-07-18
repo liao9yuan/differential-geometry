@@ -38,8 +38,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Compatibility spelling for the metric type used by the local volume layer.
-This is now the identity on analytic metrics, not a forgetful map. -/
+
+
 abbrev metricForMeasure (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I M :=
   g
@@ -48,7 +48,7 @@ abbrev metricForMeasure (g : SmoothRiemannianMetric I M) :
 theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
     (metricForMeasure (I := I) (M := M) g).inner x = g.inner x := rfl
 
-/-- The Riemannian volume measure attached to a realized metric family at a time. -/
+
 abbrev volumeMeasureAt [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     MeasureTheory.Measure M :=
@@ -60,7 +60,7 @@ theorem volumeMeasureAt_eq [T2Space M] [SigmaCompactSpace M]
     volumeMeasureAt (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M) (G.metric t) := rfl
 
-/-- The Riemannian volume measure attached to an interval-indexed realized family. -/
+
 abbrev volumeMeasureOn [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D)

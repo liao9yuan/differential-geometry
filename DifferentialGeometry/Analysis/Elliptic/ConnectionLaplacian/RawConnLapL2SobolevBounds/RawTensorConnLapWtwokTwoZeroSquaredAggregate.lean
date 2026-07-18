@@ -6,37 +6,11 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorCh
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 
-/-!
-# Squared chart-Sobolev-zero aggregate for the raw tensor connection Laplacian
-
-For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, and a smooth
-compactly-supported `(r, s)`-tensor section `T`, this file bounds the **square
-of the chart-component aggregate** of `rawTensorConnLapSmooth g r s T`, taken
-over the canonical finite cover and the finite component-index set, by a
-constant times `(wtwokTwoNorm g 1 T) ^ 2`. Concretely:
-
-```
-(∑_α ∈ chartAtlasPOU_finset, ∑_Idx, ∑_Jdx,
-    eLpNorm (tensorChartComp g r s (rawTensorConnLapSmooth g r s T) α Idx Jdx)
-      2 (volume.restrict (chartTargetEuclid α))) ^ 2
-  ≤ ENNReal.ofReal C · (wtwokTwoNorm g 1 T) ^ 2
-```
-
-The bound composes the existing chart-Sobolev raw-norm POU aggregate bound
-`chartSobolevRawNormPou_le_wtwokTwoNorm_sq` with a per-chart, per-multi-index
-pointwise op-norm comparison driven by
-`chartRSTwistInv_pointwise_opNorm_isBounded_on_compact` on the
-partition-of-unity tsupport, plus an `ENNReal` Cauchy–Schwarz step to pass from
-the finset sum of `eLpNorm`s to its square.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open MeasureTheory
@@ -64,12 +38,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For a real-valued function `f` (Borel-measurable square) and a measure `μ`,
-the square of `eLpNorm f 2 μ` equals the lintegral of `ENNReal.ofReal (f x ^ 2)`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ENNReal.ofReal ((f x) ^ 2) ∂μ := by
@@ -96,11 +67,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
-/-- Cauchy–Schwarz in `ℝ≥0∞` for a finset sum:
-`(∑ i ∈ s, f i) ^ 2 ≤ s.card · ∑ i ∈ s, (f i) ^ 2`.
-
-Proof: split into the case where some summand is `⊤` (LHS and RHS both `⊤`)
-and the case where all summands are finite (lift to `ℝ` via `toReal`). -/
 private lemma ennreal_sq_finset_sum_le_card_mul_finset_sum_sq
     {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0∞) :
     (∑ i ∈ s, f i) ^ 2 ≤ (s.card : ℝ≥0∞) * ∑ i ∈ s, (f i) ^ 2 := by

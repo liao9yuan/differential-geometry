@@ -2,63 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorMemWtwokTwo
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 
-/-!
-# Manifold-aggregated `W^{2k, 2}` bound for the connection-Laplacian eigenvector
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and an order `k : ℕ`,
-this file ships the **manifold-wide Sobolev bound** for the smooth representative
-of the resolvent eigenvector, re-keyed onto the intrinsic compact-operator
-eigenbasis `tensorResolventEigenbasisVec`. With resolvent eigenvalue
-`μ := i.fst.val ∈ (0, 1]`, the global tensor Sobolev norm
-`wtwokTwoNorm g k (eigenvectorSmooth g r s i)` is bounded by
-`ENNReal.ofReal (C · μ⁻¹^(2k + 1))` times the `ℝ≥0∞`-valued `L²` norm of the
-intrinsic eigenbasis vector, with a single geometric constant `C ≥ 0` uniform
-over every eigenbasis index `i`.
-
-## The mechanism
-
-The tensor Sobolev norm `wtwokTwoNorm g k T` decomposes, via the canonical
-finite cover `chartAtlasPOU_finset I M`, as a finite double sum of the
-chart-component Euclidean Sobolev norms `wkpNorm (2 * k) 2` of the scalar chart
-components `tensorChartComp g r s T α Idx Jdx` over their chart targets
-(`wtwokTwoNorm_eq_finset_sum`). On the smooth representative
-`eigenvectorSmooth g r s i`, each scalar chart component agrees
-almost-everywhere with the eigenvector chart component
-`eigenvectorChartComponentFun_unconditional`
-(`eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun`).
-
-`wkpNorm` is invariant under a.e. equality (`wkpNorm_congr_ae`), and the
-arbitrary-order chart-base-uniform Sobolev bound
-`eigenvector_chartComponent_wkpNorm_arbitrary` (with order
-`K := 2 * k`) yields, for each `α ∈ chartAtlasPOU_finset I M` and component
-multi-index pair, a geometric constant `C(α, Idx, Jdx) ≥ 0`, uniform over `i`,
-such that
-`wkpNorm (2 * k) 2 (eigenvectorChartComponentFun_unconditional α (Idx, Jdx)) ≤
-  ENNReal.ofReal (C(α, Idx, Jdx) · μ⁻¹^(2 * k + 1)) · ENNReal.ofReal ‖vec‖`.
-Summing those constants over the finite cover and the finite component-index
-set produces a single global geometric constant.
-
-## Main result
-
-* `eigenvectorSmooth_wtwokTwoNorm_le_uniform` — the global
-  manifold-aggregated `W^{2k, 2}` bound: with a single uniform geometric
-  constant `C ≥ 0`,
-  `wtwokTwoNorm g k (eigenvectorSmooth g r s i) ≤
-    ENNReal.ofReal (C · μ⁻¹^(2k + 1)) · ENNReal.ofReal ‖vec‖`
-  for every eigenbasis index `i`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -95,7 +42,6 @@ namespace EigenvectorManifoldAggregateUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
 
-/-- Chart-locality-free twin of `perChartCompConstant`. -/
 private noncomputable def perChartCompConstant
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -104,7 +50,6 @@ private noncomputable def perChartCompConstant
     (eigenvector_chartComponent_wkpNorm_arbitrary (I := I) (M := M)
       g r s (2 * k) α (Idx, Jdx))
 
-/-- Chart-locality-free twin of `perChartCompConstant_nonneg`. -/
 private lemma perChartCompConstant_nonneg
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -114,13 +59,12 @@ private lemma perChartCompConstant_nonneg
     (eigenvector_chartComponent_wkpNorm_arbitrary (I := I) (M := M)
       g r s (2 * k) α (Idx, Jdx))).1
 
-/-- Chart-locality-free twin of `perChartCompConstant_bound`. -/
 private lemma perChartCompConstant_bound
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α (Idx, Jdx))
         (chartTargetEuclid (I := I) (M := M) α)
@@ -137,14 +81,12 @@ private lemma perChartCompConstant_bound
     (eigenvector_chartComponent_wkpNorm_arbitrary (I := I) (M := M)
       g r s (2 * k) α (Idx, Jdx))).2 i
 
-/-- Chart-locality-free twin of `aggregateConstant`. -/
 private noncomputable def aggregateConstant : ℝ :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         perChartCompConstant (I := I) (M := M) g r s k α Idx Jdx
 
-/-- Chart-locality-free twin of `aggregateConstant_nonneg`. -/
 private lemma aggregateConstant_nonneg :
     0 ≤ aggregateConstant (I := I) (M := M) g r s k := by
   classical
@@ -159,14 +101,13 @@ end EigenvectorManifoldAggregateUnconditional
 
 open EigenvectorManifoldAggregateUnconditional
 
-/-- Chart-locality-free twin of `tensorChartComp_eigenvectorSmooth_wkpNorm_le`. -/
 private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s
           (eigenvectorSmooth (I := I) (M := M) g r s i) α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -189,12 +130,12 @@ private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
     eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
       (I := I) (M := M) g r s i α Idx Jdx
   have h_eq :
-      wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s
             (eigenvectorSmooth (I := I) (M := M) g r s i)
             α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) =
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
             g r s i α (Idx, Jdx))
           (chartTargetEuclid (I := I) (M := M) α) :=
@@ -205,14 +146,13 @@ private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
   exact perChartCompConstant_bound
     (I := I) (M := M) g r s k α Idx Jdx i
 
-/-- Chart-locality-free twin of `chartTerm_eigenvectorSmooth_le`. -/
 private lemma chartTerm_eigenvectorSmooth_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s
               (eigenvectorSmooth (I := I) (M := M) g r s i)
               α Idx Jdx)
@@ -238,7 +178,7 @@ private lemma chartTerm_eigenvectorSmooth_le
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∀ _hIdx : Idx ∈ (Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))),
         (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (tensorChartComp (I := I) (M := M) g r s
                 (eigenvectorSmooth (I := I) (M := M) g r s i)
                 α Idx Jdx)
@@ -299,7 +239,6 @@ private lemma chartTerm_eigenvectorSmooth_le
     rw [Finset.sum_mul]
   rw [h_eq]
 
-/-- Chart-locality-free twin of `eigenvectorSmooth_wtwokTwoNorm_le_uniform`. -/
 theorem eigenvectorSmooth_wtwokTwoNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) :

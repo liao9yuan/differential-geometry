@@ -2,36 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-/-!
-# Chart-level metric / Christoffel identities
-
-This file collects a small set of additive identities relating the chart Gram
-matrix `chartGramMatrix g α`, its pull-back `chartGramOnE g α`, the chart
-Christoffel symbol `chartChristoffel g α`, and the underlying Riemannian inner
-product `g.inner`.
-
-Three groups of results:
-
-* Chart pull-back of the inner product. The inner product `g.inner x` reads off
-  in the chart-local frame as the chart Gram matrix; with `v, w` decomposed in
-  the chart-basis frame, `g.inner x v w = ∑_{ij} v^i w^j G_{ij}(α, x)`.
-
-* Chart metric identity. The defining metric-compatibility property of the
-  Christoffel symbol of the second kind in chart coordinates,
-  $$\partial_k G_{ij} = \sum_l \Gamma^l{}_{ki}\, G_{lj}
-    + \sum_l \Gamma^l{}_{kj}\, G_{li},$$
-  derived purely algebraically from the explicit definition
-  `chartChristoffel = (1/2) G^{-1}(\partial G + \partial G - \partial G)` and
-  the pairing `G^{-1} G = I`.
-
-* Smoothness of the chart Christoffel symbol. The Christoffel symbol
-  `chartChristoffel g α i j k` is `C^∞` on the interior of the chart target,
-  derived from the smoothness of `chartGramOnE`, `chartInvGramOnE` and their
-  partial derivatives.
-
-These identities form the chart-level scaffolding for downstream covariant-
-derivative formulas and curvature computations.
--/
 
 noncomputable section
 
@@ -43,15 +13,13 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- Evaluation of `g.inner x` on two chart-basis frame vectors recovers the
-chart Gram matrix entry. -/
 lemma g_inner_eq_chartGramMatrix_basis
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -61,10 +29,6 @@ lemma g_inner_eq_chartGramMatrix_basis
       chartGramMatrix (I := I) g α x i j :=
   (chartGramMatrix_apply (I := I) g α x i j).symm
 
-/-- Decomposition of a tangent vector in the chart-basis frame: at any point of
-the trivialization base set, `v` is the sum over `i` of the trivialization
-coordinates of `v` (with respect to the model-space basis) scaled by the
-chart-basis frame vectors. -/
 lemma chartBasisVecFiber_recompose
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -93,11 +57,6 @@ lemma chartBasisVecFiber_recompose
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_smul, hbasis i]
 
-/-- **Chart pull-back of `g.inner`.** For tangent vectors `v, w` at `x` in the
-trivialization base set at `α`, the inner product `g.inner x v w` decomposes in
-the chart-basis frame as the bilinear sum over the trivialization-extracted
-components, weighted by `chartGramOnE g α i j (extChartAt I α x)` (i.e. the
-chart Gram matrix at `x`). -/
 theorem g_inner_eq_chart_sum
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -147,9 +106,6 @@ theorem g_inner_eq_chart_sum
   rw [hchart i j, g_inner_eq_chartGramMatrix_basis (I := I) g α x i j]
   ring
 
-/-- The Gram-inverse pairing identity at a chart-target point: for any
-`y ∈ (extChartAt I α).target` and indices `m, j`,
-$\sum_l G^{ml}(α, y)\, G_{lj}(α, y) = \delta^m_j$. -/
 private lemma sum_chartInvGramOnE_chartGramOnE_left
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -180,8 +136,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_left
   · rw [if_neg hmj]
     exact Matrix.one_apply_ne hmj
 
-/-- Symmetric form: `∑ l, G^{lm}(y) * G_{lj}(y) = δ^m_j` (using symmetry of
-`G^{-1}` in its two indices). -/
 private lemma sum_chartInvGramOnE_chartGramOnE_right
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -201,9 +155,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_right
         rw [chartInvGramOnE_symm (I := I) g α l m y])]
   exact sum_chartInvGramOnE_chartGramOnE_left (I := I) g α hy m j
 
-/-- Equality of `partialDeriv` on the symmetric pair of Gram entries:
-`∂_k G_{ab} = ∂_k G_{ba}` (since `chartGramOnE g α a b = chartGramOnE g α b a`
-as functions of `y`). -/
 private lemma partialDeriv_chartGramOnE_swap_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (k a b : Fin (Module.finrank ℝ E)) (y : E) :
@@ -213,11 +164,6 @@ private lemma partialDeriv_chartGramOnE_swap_indices
   funext y'
   exact chartGramOnE_symm (I := I) g α a b y'
 
-/-- **Chart metric identity (∂g = Γ·g + g·Γ).**
-The defining property of the Levi-Civita Christoffel symbol of the second kind
-in chart coordinates: for `y ∈ interior (extChartAt I α).target`,
-$$\partial_k G_{ij}(α, y) = \sum_l \Gamma^l{}_{ki}(α, y)\, G_{lj}(α, y)
-  + \sum_l \Gamma^l{}_{kj}(α, y)\, G_{li}(α, y).$$ -/
 theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}

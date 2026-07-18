@@ -1,59 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledCovDerivChartCompBound
 
-/-!
-# Pointwise bound on the chart-trivialised representation of a tensor section
-by the chart-frame scalar components and their chart-coordinate Fréchet
-derivative
-
-This file ships the analogue of
-`chart_pulled_covApply_cov_repr_norm_le_chartComp_data` for the tensor `T`
-itself, rather than for the first covariant derivative `covApply cov_RS B T`.
-
-For a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model
-`I`, a chart-centre `α : M`, and a smooth compactly-supported
-`(r, s)`-tensor section `T`, the bound takes the form
-
-  `‖tensorRSChartE_section_repr r s α T.toFun b‖
-      ≤ K * Σ_{Idx, Jdx} |tensorChartComponentRaw g r s T α Idx Jdx b|`
-  `‖fderiv ℝ (tensorRSChartE_section_repr r s α T.toFun ∘ symm)
-        (extChartAt I α b)‖
-      ≤ K * Σ_{Idx, Jdx}
-          ‖fderiv ℝ (tensorChartComponentRaw g r s T α Idx Jdx ∘ symm)
-              (extChartAt I α b)‖`
-
-with `K` depending only on `r`, `s`, and `E` (the ambient model space); in
-particular `K` is independent of `T`, `α`, `b`, and the metric `g`.
-
-The two estimates are packaged into a single headline statement on the
-partition-of-unity tsupport, mirroring the
-`chart_pulled_covApply_cov_repr_norm_le_chartComp_data` interface.
-
-## Strategy
-
-The chart-pulled representation `tensorRSChartE_section_repr r s α T.toFun`
-decomposes via the chart-frame basis recovery
-`tensorRSModel_eq_sum_basis` into
-
-    `Σ_{Idx, Jdx} (component Idx Jdx) • (basisElement Idx Jdx)`,
-
-and each chart-frame component coincides with
-`tensorChartComponentRaw g r s T α Idx Jdx` by definition. The bound on
-`‖T(b)‖` follows from `norm_sum_le` applied twice plus
-`tensorChartBasisElement_norm_le`. The bound on the Fréchet derivative
-follows from `fderiv_fun_sum`, `fderiv_smul_const`,
-`ContinuousLinearMap.norm_smulRight_apply`, and again
-`tensorChartBasisElement_norm_le`.
-
-Both estimates are isolated as public lemmas
-`tensorRepr_norm_le_sum_components` and
-`fderiv_tensorRepr_opNorm_le_sum_fderiv_components`, and combined into the
-headline `chart_pulled_tensor_repr_norm_le_chartComp_data`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -78,10 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The model-fiber norm of the chart-α-trivialised representation of a smooth
-compactly-supported `(r, s)`-tensor section `T` at `b` is bounded by the sum
-of the absolute values of its chart-frame `(Idx, Jdx)`-components at `b`,
-times the basis-element norm constant. -/
 lemma tensorRepr_norm_le_sum_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -120,8 +65,7 @@ lemma tensorRepr_norm_le_sum_components
     (tensorChartBasisElement_norm_le (E := E) r s Idx Jdx)
     (abs_nonneg _)
 
-/-- Each chart-frame scalar component pulled by `(extChartAt I α).symm` is
-Fréchet-differentiable at the chart-coord image of any chart-source point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRepr_chart_pulled_component_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -168,12 +112,7 @@ lemma tensorRepr_chart_pulled_component_differentiableAt
     hcdAt.differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open_target.mem_nhds hb_target)
 
-/-- The chart-coordinate Fréchet derivative of the chart-pulled
-chart-α-trivialised representation of `T.toSection` at the chart-coord point
-`extChartAt I α b` has operator norm bounded by
-
-  `Σ_{Idx, Jdx} ‖fderiv ℝ (component_Idx_Jdx ∘ symm) (extChartAt b)‖
-                  * ‖basis-elt(Idx, Jdx)‖`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}
@@ -273,20 +212,6 @@ lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
   rw [fderiv_smul_const (hdiff_each Idx Jdx)]
   rw [ContinuousLinearMap.norm_smulRight_apply]
 
-/-- **Headline bound.** For a smooth Riemannian manifold `(M, g)`, a chart-
-centre `α : M`, and a smooth compactly-supported `(r, s)`-tensor section
-`T`, the model-fiber norm of the chart-α-trivialised representation of
-`T` at every point `b` of the chart-α partition-of-unity tsupport is
-bounded by a constant times the sum, over the multi-index pairs
-`(Idx, Jdx) : (Fin r → Fin n) × (Fin s → Fin n)`, of the absolute value
-of the chart-frame `(Idx, Jdx)`-component of `T` at `b`. Likewise, the
-operator norm of the chart-coordinate Fréchet derivative of the same
-chart-pulled representation at `extChartAt I α b` is bounded by the same
-constant times the sum of the operator norms of the chart-coordinate
-Fréchet derivatives of each chart-pulled scalar component.
-
-The constant `K` depends only on the ranks `r`, `s`, and the ambient
-model space `E`; it is independent of `T`, `α`, `b`, and `g`. -/
 theorem chart_pulled_tensor_repr_norm_le_chartComp_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

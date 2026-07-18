@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle
@@ -17,28 +18,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Chart-Euclidean pull-back of the tensor-component transition coefficient
-
-For two chart base points `α, β : M`, the scalar transition coefficient
-`transitionCoeff r s α β P₀ Q : M → ℝ` of the `(r, s)`-tensor bundle is
-`C^∞` on the chart overlap `(chartAt H α).source ∩ (chartAt H β).source`
-(see `contMDiffOn_transitionCoeff`). Pulling back through the chart at `α`
-and the linear identification `toEuclidean`, we obtain a function defined
-on `chartTargetEuclid α ⊆ EuclideanSpace ℝ (Fin n)` that is `ContDiffOn ℝ ∞`
-on the open subset where the chart-α point also lies in the chart at `β`.
-
-The pull-back is the natural object that downstream chart-Sobolev consumers
-estimate, since their Sobolev norms are formulated on `EuclideanSpace`.
--/
-
-/-- The chart-α Euclidean pull-back of the tensor-component transition
-coefficient `transitionCoeff r s α β P₀ Q`. -/
 noncomputable def transitionCoeffOnEuclid
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (y : EuclN) : ℝ :=
   transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma transitionCoeffOnEuclid_def
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (y : EuclN) :
@@ -46,16 +32,11 @@ noncomputable def transitionCoeffOnEuclid
       transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- The set of `y ∈ EuclN` such that the corresponding manifold point
-`(extChartAt I α).symm ((toEuclidean).symm y)` lies in
-`(chartAt H α).source ∩ (chartAt H β).source`. This is the natural
-chart-α Euclidean domain on which `transitionCoeffOnEuclid r s α β P₀ Q`
-is `ContDiffOn ℝ ∞`. -/
 noncomputable def chartTransitionEuclidOverlap (α β : M) : Set EuclN :=
   {y | y ∈ chartTargetEuclid (I := I) (M := M) α ∧
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source}
 
-/-- Membership in `chartTransitionEuclidOverlap α β` unfolded. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma mem_chartTransitionEuclidOverlap {α β : M} {y : EuclN} :
     y ∈ chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β ↔
       y ∈ chartTargetEuclid (I := I) (M := M) α ∧
@@ -101,8 +82,7 @@ private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
   rw [h_eq]
   exact h_pre_open
 
-/-- `transitionCoeffOnEuclid r s α β P₀ Q` is `ContDiffOn ℝ ∞` on the
-chart-α Euclidean overlap set. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma transitionCoeffOnEuclid_contDiffOn
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -247,16 +227,7 @@ theorem tensorChartTransition_Ck_bound_on_compact
     exact (hCj_bd j P₀ Q y hy).trans (hC_ge j P₀ Q hmem)
 
 set_option maxHeartbeats 800000 in
-/-- **Tensor-component chart-transition `C^k` operator-norm bound, manifold form.**
 
-For two chart base points `α, β : M` and a compact subset
-`K_M ⊆ (chartAt H α).source ∩ (chartAt H β).source` of the chart overlap,
-there is a non-negative constant
-`C(g, r, s, k, α, β, K_M) ≥ 0` such that for every order
-`j ∈ Finset.range k`, every component multi-index pair `(P₀, Q)`,
-and every chart-α Euclidean image point of `K_M`, the iterated Fréchet
-derivative operator norm of `transitionCoeffOnEuclid r s α β P₀ Q` is
-bounded by `C`. -/
 theorem tensorChartTransition_Ck_bound_on_compact_manifold
     (r s k : ℕ) (α β : M)
     {K_M : Set M} (hK_compact : IsCompact K_M)

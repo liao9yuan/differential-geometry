@@ -1,61 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplViaH3
 
-/-!
-# Chart-side `W^{2,2}` regularity for the once-differentiated chart-bilinear data
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)`,
-the once-differentiated chart-bilinear data
-`D₁ := diffChartBilinearH1ComplData_of_laplacianDomainPow_two g α l₁ hu_h …`
-exposes a chart-side field
-
-* `D₁.u_chart_deriv`  — the chart-pushed weak `l₁`-partial of `u_h.coeFn`.
-
-The companion module `DiffChartBilinearH1ComplH3` discharges the **first**
-chart Sobolev order witness `MemW1p 2 D₁.u_chart_deriv (chartTargetEuclid α)`
-unconditionally from `u_h ∈ laplacianDomainPow g 2`.
-
-This module discharges the **second** chart Sobolev order witness
-
-```
-MemWkp 2 2 D₁.u_chart_deriv (chartTargetEuclid α)
-```
-
-i.e. chart-`W^{2,2}` of the differentiated field. Mathematically, this is
-equivalent to chart-`H³` regularity of the underlying chart-pull
-`chartPushed (chartAtlasPOU I M) α u_h.coeFn`. It is *not* a consequence of
-`u_h ∈ laplacianDomainPow g 2` alone: the two-sided `H²` regularity of
-`u_h.coeFn` and `(1 - Δ_g) u_h` (which is unconditional for that class)
-provides only chart-`H²` of the chart-pull.
-
-The natural one-extra-order hypothesis is
-
-```
-h_chartPushed_memWkp32 :
-  DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp 3 2
-    (chartPushed (chartAtlasPOU I M) α
-      ((H1ComplToLp g u_h) : M → ℝ))
-    (chartTargetEuclid α)
-```
-
-— chart-`H³` of the chart-pull. From this, the chosen first weak partial in
-direction `l₁` lies in `MemWkp 2 2 (chartTargetEuclid α)` by
-`MemWkp.chosenWeakPartial_mem`. The chart-pushed weak-partial coercion
-`D₁.u_chart_deriv` is almost-everywhere equal to this chosen first weak
-partial on `volume.restrict (chartTargetEuclid α)`, by the σ-compact
-exhaustion bridge `chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget`
-already proved in the companion module. The conclusion follows by
-`MemWkp_congr_ae`.
-
-## Main result
-
-* `diffChartBilinearH1Compl_u_chart_deriv_memWkp_two` — the chart-`W^{2,2}`
-  membership witness of `D₁.u_chart_deriv` on `chartTargetEuclid α`, taking
-  the chart-`H³` regularity of `chartPushed POU α u_h.coeFn` as the natural
-  one-extra-order hypothesis. The existing constructor input hypotheses
-  `h_base_f_chart_memW1p` and `h_once_identity` flow through without playing
-  a substantive role in this discharge — the conclusion depends only on
-  `u_h ∈ laplacianDomainPow g 2` and the chart-`H³` hypothesis.
--/
 
 noncomputable section
 
@@ -96,12 +40,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- From chart-`H³` of the chart-pull `chartPushed POU α u_h.coeFn`, the
-canonical chosen first weak partial `chartPushedChosenFirstPartial g α u_h l₁`
-lies in `MemWkp 2 2 (chartTargetEuclid α)`.
-
-This follows directly from `MemWkp.chosenWeakPartial_mem`: an element of
-`MemWkp (k+1) p` has its chosen weak partials in `MemWkp k p`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedChosenFirstPartial_memWkp_two_of_memWkp_three
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -120,21 +59,6 @@ theorem chartPushedChosenFirstPartial_memWkp_two_of_memWkp_three
       (chartTargetEuclid (I := I) (M := M) α) := by
   exact h_chartPushed_memWkp32.chosenWeakPartial_mem l₁
 
-/-- **`MemWkp 2 2 D₁.u_chart_deriv (chartTargetEuclid α)` discharge from
-chart-`H³` regularity of the chart-pull of `u_h.coeFn`.**
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, direction
-`l₁`, and `u_h ∈ laplacianDomainPow g 2`, the chart-side first weak partial
-`(diffChartBilinearH1ComplData_of_laplacianDomainPow_two g α l₁ hu_h
-  h_base_f_chart_memW1p h_once_identity).u_chart_deriv` lies in
-`MemWkp 2 2 (chartTargetEuclid α)`, provided the chart-pull
-`chartPushed POU α u_h.coeFn` lies in `MemWkp 3 2 (chartTargetEuclid α)`
-(equivalent to chart-`H³` of `u_h.coeFn`).
-
-The existing constructor input hypotheses `h_base_f_chart_memW1p` and
-`h_once_identity` flow through without playing a substantive role in this
-discharge — the conclusion depends only on `u_h ∈ laplacianDomainPow g 2`
-and the chart-`H³` hypothesis. -/
 theorem diffChartBilinearH1Compl_u_chart_deriv_memWkp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ : Fin (Module.finrank ℝ E))

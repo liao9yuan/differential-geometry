@@ -1,10 +1,10 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Basic
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -68,34 +68,22 @@ theorem oneForm_pair_coordFrame_eventually
           fin_cases q
           exact hZ
     _ = ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
-          α y (Function.update (fun _ : Fin 1 => Z y) (0 : Fin 1)
-            (hframe.coeff j y (Z y) • coordinateFrameAt (I := I) x₀ j y)) := by
+          hframe.coeff j y (Z y) *
+            α y (Function.update (fun _ : Fin 1 => Z y) (0 : Fin 1)
+              (coordinateFrameAt (I := I) x₀ j y)) := by
           simpa using hmap
     _ = ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
           hframe.coeff j y (Z y) *
             α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y) := by
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [hupdate]
-          have hconst :
-              (fun _ : Fin 1 =>
-                  hframe.coeff j y (Z y) • coordinateFrameAt (I := I) x₀ j y) =
-                Function.update
-                  (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)
-                  (0 : Fin 1)
-                  (hframe.coeff j y (Z y) • coordinateFrameAt (I := I) x₀ j y) := by
-            funext q
-            fin_cases q
-            simp
-          rw [hconst]
-          rw [(α y).map_update_smul]
-          simp [smul_eq_mul]
 
-/-- Product rule for the scalar pairing `p ↦ α_p (Z_p)` in the coordinate
-frame.  This is the previously external `hpair` input for the moving-slot
-one-form formula.  The remaining hypotheses only say that the coordinate
-coefficient functions and fixed-slot tensor components are differentiable at
-the base point, and identify `dz` with the directional derivatives of the
-coefficients of `Z`. -/
+
+
+
+
+
+
 theorem oneForm_pair_coordFrame_product_rule
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)

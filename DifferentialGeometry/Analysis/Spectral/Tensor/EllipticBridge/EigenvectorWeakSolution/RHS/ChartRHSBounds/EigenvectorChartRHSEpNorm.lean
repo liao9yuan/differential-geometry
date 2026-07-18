@@ -3,84 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartLowerOrderENormBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDivENormBound
 
-/-!
-# The explicit-norm `eLpNorm` bound for the eigenvector chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
-component multi-index `P₀`, the chart-Euclidean right-hand side
-`eigenvectorChartRHS g r s i α P₀` of the eigenvector
-weak-solution assembly is the explicit `densityOnEuclid`-and-`C^∞`-coefficient-weighted
-seven-term bracket combination scaled overall by `μ⁻¹`.
-
-This file records the quantitative twin of the qualitative weighted-`L²`
-membership `eigenvectorChartRHS_memLp_weighted`: there is a nonnegative constant
-`C` with
-
-```
-eLpNorm (eigenvectorChartRHS g r s i α P₀) 2 μw
-  ≤ ENNReal.ofReal (μ⁻¹ * C) * <AGGREGATE>,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)` and
-`<AGGREGATE>` is the honest finite sum of the weighted `eLpNorm`s of the source
-quantities of the bracket:
-
-* the canonical eigenvector chart component `eigenvectorChartComponentFun`;
-* the cross-left limit objects `crossLeftLimitComponent` (summed over the
-  rank-`(r, s + 1)` component multi-indices);
-* the cross-right limit objects `crossRightLimitComponent` (summed over the
-  rank-`(r, s)` component multi-indices);
-* the chart-partial atoms `partialLpLimit` (summed over component multi-index
-  and chart direction);
-* the chart-component atoms `componentLpLimit` (summed over the component
-  multi-indices);
-* the cutoff chart-partial atoms `cutoffPartialLpLimit` (summed over component
-  multi-index and chart direction).
-
-## Strategy
-
-The bracket is the `μ⁻¹`-scalar multiple of a seven-term `+`/`-` combination of
-functions `EuclN → ℝ`. By the homogeneity `eLpNorm (c • f) = ‖c‖ₑ · eLpNorm f`
-the overall `eLpNorm` is `‖μ⁻¹‖ₑ` times the `eLpNorm` of the bracket, and
-`‖μ⁻¹‖ₑ = ENNReal.ofReal μ⁻¹` since the resolvent eigenvalue lies in `(0, 1]`.
-
-Iterated Minkowski (`eLpNorm_add_le` / `eLpNorm_sub_le`) bounds the `eLpNorm` of
-the seven-term bracket by the sum of the `eLpNorm`s of the seven terms. Each
-term is then bounded by a constant times a sub-aggregate of the source
-quantities:
-
-* the canonical eigenvector chart-component term is the source quantity itself;
-* the two cross-Leibniz double-sum terms have, per summand, a `C^∞` coefficient
-  product (`covChartMetricGram · crossLeftTestCoeff`, respectively
-  `covChartMetricGram · crossRightTestValueCoeff`) and an `L²` cross-limit atom
-  that vanishes almost everywhere off the compact cutoff chart kernel; the
-  explicit-norm coefficient bound `eLpNorm_weighted_contDiffOn_mul_le` and the
-  triangle inequality control them;
-* the two lower-order coefficient-limit terms are bounded directly by the
-  companion lemmas `eLpNorm_covPrincipalRotationCoeffLimit_le` and
-  `eLpNorm_covLowerOrderRotationValueCoeffLimit_le`;
-* the two divergence-limit terms are products of the `C^∞` reciprocal chart
-  density `1 / densityOnEuclid g α` with a divergence limit; the explicit-norm
-  coefficient bound and the companion lemmas
-  `eLpNorm_weightedGradCoeffDivLimit_le` and
-  `eLpNorm_crossRightGradCoeffDivLimit_le` control them.
-
-Every sub-aggregate is dominated by the full aggregate (the weighted `eLpNorm`s
-are nonnegative `ℝ≥0∞` quantities), so the seven per-term constants and the
-finite-sum multiplicities fold into a single nonnegative constant `C`.
-
-## Main result
-
-* `eigenvectorChartRHS_eLpNorm_le_uniform_unconditional` — the uniform-constant
-  explicit-norm `eLpNorm` bound for the eigenvector chart right-hand side.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -119,10 +41,7 @@ section Aggregation
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A finite indexed family of weighted-`MemLp` summands, each `eLpNorm`-bounded
-by `ENNReal.ofReal Cⱼ` times a fixed aggregate quantity `A`, has its summed
-`eLpNorm` bounded by `ENNReal.ofReal` of an explicit nonnegative constant times
-`A`. -/
+
 private lemma eLpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {μ : Measure EuclN} (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -167,8 +86,6 @@ private lemma eLpNorm_sum_le_const_mul_aggregate
 
 end Aggregation
 
-/-- The conversion `ENNReal.ofReal 2 = (2 : ℝ≥0∞)`, recorded once for reuse in
-the constant-folding of the two-piece aggregate bounds. -/
 private lemma ofReal_two : ENNReal.ofReal 2 = (2 : ℝ≥0∞) := by
   rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.ofReal_natCast]
   norm_num
@@ -179,8 +96,7 @@ variable (g : SmoothRiemannianMetric I M) (α : M)
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
-open Euclidean chart target. -/
+
 private lemma one_div_densityOnEuclid_contDiffOn :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -191,9 +107,6 @@ end TermMemLp
 
 section Aggregate
 
-/-- Each of the six summands of a six-fold `ℝ≥0∞` sum is dominated by the sum.
-This pure-arithmetic lemma over abstract `ℝ≥0∞` atoms keeps the six aggregate
-domination lemmas free of any unification over the (large) `aggr*` terms. -/
 private lemma le_sixSum (a₁ a₂ a₃ a₄ a₅ a₆ : ℝ≥0∞) :
     a₁ ≤ a₁ + a₂ + a₃ + a₄ + a₅ + a₆ ∧
       a₂ ≤ a₁ + a₂ + a₃ + a₄ + a₅ + a₆ ∧
@@ -228,9 +141,7 @@ end Aggregate
 section MainBound
 
 omit [CompleteSpace E] in
-/-- The resolvent eigenvalue `μ := i.fst.val` is strictly positive: the
-eigenspace at `μ` is non-trivial, so it contains a non-zero eigenvector, and the
-resolvent eigenvalues lie in the unit interval `(0, 1]`. -/
+
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -244,14 +155,7 @@ private lemma eigenIdx_val_pos
 end MainBound
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-/-- **Uniform-constant finite-sum aggregation.** The constant-uniform form of
-`eLpNorm_sum_le_const_mul_aggregate`: a finite indexed family of summands
-`F j i`, each weighted-`MemLp` and each — *with an `i`-uniform constant* — having
-its `eLpNorm` bounded by `ENNReal.ofReal Cⱼ` times an aggregate `A i`, has its
-summed `eLpNorm` bounded by `ENNReal.ofReal` of a single nonnegative constant —
-*the same for every `i`* — times `A i`. The per-summand constants are themselves
-`i`-uniform, so their sum (times the index cardinality) is an `i`-uniform
-headline constant. -/
+
 private lemma eLpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {ν : Type*} {μ : Measure EuclN}
     (F : ι → ν → EuclN → ℝ) (A : ν → ℝ≥0∞)
@@ -304,10 +208,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The canonical eigenvector chart `P₀`-component, chart-locality-free: the
-coercion-to-function of the `Lp` element
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec …) α P₀`,
-the term-1 component of `eigenvectorChartRHS`. -/
+
 def eigenvectorChartComponentFun_unconditional : EuclN → ℝ :=
   fun y =>
     ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -316,13 +217,9 @@ def eigenvectorChartComponentFun_unconditional : EuclN → ℝ :=
             g r s) i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Bracket term 1 (chart-locality-free): the canonical eigenvector chart
-`P₀`-component. -/
 private def rhsTerm1 : EuclN → ℝ :=
   eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀
 
-/-- Bracket term 2 (chart-locality-free): the cross-left limit double-sum
-contribution. -/
 private def rhsTerm2 : EuclN → ℝ :=
   fun y => ∑ P : TensorCompIdx (E := E) r (s + 1),
     ∑ Q : TensorCompIdx (E := E) r (s + 1),
@@ -331,8 +228,6 @@ private def rhsTerm2 : EuclN → ℝ :=
         ((crossLeftLimitComponent (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Bracket term 3 (chart-locality-free): the cross-right value-coefficient
-double-sum contribution. -/
 private def rhsTerm3 : EuclN → ℝ :=
   fun y => ∑ P : TensorCompIdx (E := E) r s,
     ∑ Q : TensorCompIdx (E := E) r s,
@@ -341,33 +236,22 @@ private def rhsTerm3 : EuclN → ℝ :=
         ((crossRightLimitComponent (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Bracket term 4 (chart-locality-free): the principal rotation coefficient
-limit. -/
 private def rhsTerm4 : EuclN → ℝ :=
   covPrincipalRotationCoeffLimit (I := I) (M := M) g r s i α P₀
 
-/-- Bracket term 5 (chart-locality-free): the lower-order rotation value
-coefficient limit. -/
 private def rhsTerm5 : EuclN → ℝ :=
   covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
     g r s i α P₀
 
-/-- Bracket term 6 (chart-locality-free): the chart-density-weighted lower-order
-gradient divergence limit. -/
 private def rhsTerm6 : EuclN → ℝ :=
   fun y => (1 / densityOnEuclid (I := I) g α y) *
     (∑ l : Fin (Module.finrank ℝ E),
       weightedGradCoeffDivLimit (I := I) (M := M) g r s i α P₀ l y)
 
-/-- Bracket term 7 (chart-locality-free): the chart-density-weighted cross-right
-gradient divergence limit. -/
 private def rhsTerm7 : EuclN → ℝ :=
   fun y => (1 / densityOnEuclid (I := I) g α y) *
     crossRightGradCoeffDivLimit (I := I) (M := M) g r s i α P₀ y
 
-/-- The seven-term bracket of `eigenvectorChartRHS`, as a function
-`EuclN → ℝ` built from `Pi`-algebra operations on the seven `_unconditional`
-terms. -/
 private def rhsBracket : EuclN → ℝ :=
   rhsTerm1 (I := I) (M := M) g r s i α P₀ -
       rhsTerm2 (I := I) (M := M) g r s i α P₀ +
@@ -377,8 +261,6 @@ private def rhsBracket : EuclN → ℝ :=
       rhsTerm6 (I := I) (M := M) g r s i α P₀ -
       rhsTerm7 (I := I) (M := M) g r s i α P₀
 
-/-- `eigenvectorChartRHS` is the `μ⁻¹`-scalar multiple of the
-seven-term bracket `rhsBracket`. -/
 private lemma eigenvectorChartRHS_eq_smul_bracket :
     eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
       = (i.fst.val)⁻¹ •
@@ -399,7 +281,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Weighted-`L²` membership of bracket term 1 (chart-locality-free). -/
+
 private lemma rhsTerm1_memLp_unconditional :
     MemLp (rhsTerm1 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -410,8 +292,6 @@ private lemma rhsTerm1_memLp_unconditional :
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)
     α P₀
 
-/-- Weighted-`L²` membership of each cross-left double-sum summand
-(chart-locality-free). -/
 private lemma rhsTerm2_summand_memLp_unconditional
     (P Q : TensorCompIdx (E := E) r (s + 1)) :
     MemLp
@@ -444,7 +324,6 @@ private lemma rhsTerm2_summand_memLp_unconditional
       g r s i α P)
     h_aezero
 
-/-- Weighted-`L²` membership of bracket term 2 (chart-locality-free). -/
 private lemma rhsTerm2_memLp_unconditional :
     MemLp (rhsTerm2 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -456,8 +335,6 @@ private lemma rhsTerm2_memLp_unconditional :
       (fun Q _ => rhsTerm2_summand_memLp_unconditional (I := I) (M := M)
         g r s i α P₀ P Q))
 
-/-- Weighted-`L²` membership of each cross-right double-sum summand
-(chart-locality-free). -/
 private lemma rhsTerm3_summand_memLp_unconditional
     (P Q : TensorCompIdx (E := E) r s) :
     MemLp
@@ -490,7 +367,6 @@ private lemma rhsTerm3_summand_memLp_unconditional
       g r s i α P)
     h_aezero
 
-/-- Weighted-`L²` membership of bracket term 3 (chart-locality-free). -/
 private lemma rhsTerm3_memLp_unconditional :
     MemLp (rhsTerm3 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -502,7 +378,6 @@ private lemma rhsTerm3_memLp_unconditional :
       (fun Q _ => rhsTerm3_summand_memLp_unconditional (I := I) (M := M)
         g r s i α P₀ P Q))
 
-/-- Weighted-`L²` membership of bracket term 4 (chart-locality-free). -/
 private lemma rhsTerm4_memLp_unconditional :
     MemLp (rhsTerm4 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -511,7 +386,6 @@ private lemma rhsTerm4_memLp_unconditional :
   exact covPrincipalRotationCoeffLimit_memLp_weighted_unconditional
     (I := I) (M := M) g r s i α P₀
 
-/-- Weighted-`L²` membership of bracket term 5 (chart-locality-free). -/
 private lemma rhsTerm5_memLp_unconditional :
     MemLp (rhsTerm5 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -520,8 +394,6 @@ private lemma rhsTerm5_memLp_unconditional :
   exact covLowerOrderRotationValueCoeffLimit_memLp_weighted_unconditional
     (I := I) (M := M) g r s i α P₀
 
-/-- The finite sum over chart directions of the lower-order gradient-divergence
-limit is weighted-`MemLp` (chart-locality-free). -/
 private lemma weightedGradCoeffDivLimit_sum_memLp_unconditional :
     MemLp
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
@@ -534,9 +406,6 @@ private lemma weightedGradCoeffDivLimit_sum_memLp_unconditional :
     (fun l _ => weightedGradCoeffDivLimit_memLp_weighted_unconditional
       (I := I) (M := M) g r s i α P₀ l)
 
-/-- The finite sum over chart directions of the lower-order gradient-divergence
-limit vanishes almost everywhere off the compact partition-of-unity kernel
-(chart-locality-free). -/
 private lemma weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditional :
     ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -549,9 +418,6 @@ private lemma weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditi
       weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
         (I := I) (M := M) g r s i α P₀ l hy))
 
-/-- The cross-right gradient-divergence limit is weighted-`MemLp`
-(chart-locality-free): it is `MemLp 2` of the plain restricted volume and
-vanishes pointwise off the compact partition-of-unity kernel. -/
 private lemma crossRightGradCoeffDivLimit_memLp_weighted :
     MemLp (crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀) 2
@@ -574,7 +440,6 @@ private lemma crossRightGradCoeffDivLimit_memLp_weighted :
         (I := I) (M := M) g r s i α P₀ hy))
     h_plain
 
-/-- Weighted-`L²` membership of bracket term 6 (chart-locality-free). -/
 private lemma rhsTerm6_memLp_unconditional :
     MemLp (rhsTerm6 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -590,7 +455,6 @@ private lemma rhsTerm6_memLp_unconditional :
     (weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditional
       (I := I) (M := M) g r s i α P₀)
 
-/-- Weighted-`L²` membership of bracket term 7 (chart-locality-free). -/
 private lemma rhsTerm7_memLp_unconditional :
     MemLp (rhsTerm7 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -612,8 +476,7 @@ end TermMemLpUnconditional
 section AggregateUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The weighted `eLpNorm` of the canonical eigenvector chart component
-(chart-locality-free). -/
+
 private def aggrUchart
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -623,8 +486,6 @@ private def aggrUchart
     ((chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The summed weighted `eLpNorm`s of the cross-left limit objects
-(chart-locality-free). -/
 private def aggrCrossLeft
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -636,8 +497,6 @@ private def aggrCrossLeft
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The summed weighted `eLpNorm`s of the cross-right limit objects
-(chart-locality-free). -/
 private def aggrCrossRight
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -649,8 +508,6 @@ private def aggrCrossRight
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The summed weighted `eLpNorm`s of the chart-partial atoms
-(chart-locality-free). -/
 private def aggrPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -662,8 +519,6 @@ private def aggrPartial
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The summed weighted `eLpNorm`s of the chart-component atoms
-(chart-locality-free). -/
 private def aggrComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -674,8 +529,6 @@ private def aggrComponent
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The summed weighted `eLpNorm`s of the cutoff chart-partial atoms
-(chart-locality-free). -/
 private def aggrCutoffPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -688,10 +541,6 @@ private def aggrCutoffPartial
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α))
 
-/-- The full source-quantity aggregate of the chart right-hand side
-(chart-locality-free): the sum of the weighted `eLpNorm`s of the canonical
-eigenvector chart component and the six `_unconditional` source-quantity
-families. -/
 private def rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -703,8 +552,6 @@ private def rhsAggregate_unconditional
     aggrComponent (I := I) (M := M) g r s i α P₀ +
     aggrCutoffPartial (I := I) (M := M) g r s i α P₀
 
-/-- The canonical eigenvector chart-component aggregate piece is dominated by
-the full aggregate (chart-locality-free). -/
 private lemma aggrUchart_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -714,8 +561,6 @@ private lemma aggrUchart_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).1
 
-/-- The cross-left aggregate piece is dominated by the full aggregate
-(chart-locality-free). -/
 private lemma aggrCrossLeft_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -725,8 +570,6 @@ private lemma aggrCrossLeft_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.1
 
-/-- The cross-right aggregate piece is dominated by the full aggregate
-(chart-locality-free). -/
 private lemma aggrCrossRight_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -736,8 +579,6 @@ private lemma aggrCrossRight_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.1
 
-/-- The chart-partial aggregate piece is dominated by the full aggregate
-(chart-locality-free). -/
 private lemma aggrPartial_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -747,8 +588,6 @@ private lemma aggrPartial_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.2.1
 
-/-- The chart-component aggregate piece is dominated by the full aggregate
-(chart-locality-free). -/
 private lemma aggrComponent_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -758,8 +597,6 @@ private lemma aggrComponent_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.2.2.1
 
-/-- The cutoff chart-partial aggregate piece is dominated by the full aggregate
-(chart-locality-free). -/
 private lemma aggrCutoffPartial_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -776,8 +613,6 @@ section TermBoundsUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 1 (chart-locality-free).**
-The constant is the literal `1`. -/
 private lemma rhsTerm1_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -791,12 +626,6 @@ private lemma rhsTerm1_eLpNorm_le_uniform_unconditional :
   exact le_trans (le_of_eq rfl)
     (aggrUchart_le_rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀)
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 2 (chart-locality-free).**
-The atlas-free coefficient lemma `eLpNorm_weighted_contDiffOn_mul_le_uniform`
-exhibits each cross-left double-sum summand's `i`-free constant once, the
-cross-left atom's `eLpNorm` is dominated by the `_unconditional` cross-left
-aggregate piece (`≤ rhsAggregate_unconditional`), and the uniform aggregation
-lemma assembles the double sum. -/
 private lemma rhsTerm2_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -891,8 +720,6 @@ private lemma rhsTerm2_eLpNorm_le_uniform_unconditional :
   rw [← h_eq, hμw_def]
   exact hC_bd i
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 3 (chart-locality-free).**
-The argument mirrors that of term 2 with the cross-right limit objects. -/
 private lemma rhsTerm3_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -986,11 +813,6 @@ private lemma rhsTerm3_eLpNorm_le_uniform_unconditional :
   rw [← h_eq, hμw_def]
   exact hC_bd i
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 4 (chart-locality-free).**
-The chart-locality-free uniform companion lemma
-`eLpNorm_covPrincipalRotationCoeffLimit_le_uniform` bounds it, with
-one constant for every `i`, by a constant times the chart-partial aggregate
-piece, which is dominated by the full chart-locality-free aggregate. -/
 private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1008,12 +830,6 @@ private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
   gcongr
   exact aggrPartial_le_rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 5 (chart-locality-free).**
-The chart-locality-free uniform companion lemma
-`eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional` bounds it,
-with one constant for every `i`, by a constant times the sum of the chart-partial
-and chart-component aggregate pieces; each piece is dominated by the full
-aggregate, so doubling the companion constant absorbs the factor. -/
 private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1071,13 +887,6 @@ private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn,
           mul_comm C 2]
 
-/-- **Uniform-constant `eLpNorm` bound for the lower-order gradient-divergence
-chart-direction sum (chart-locality-free).** The chart-locality-free uniform
-companion lemma `eLpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional`
-bounds each chart-direction summand, with one constant for every `i`, by a
-constant times the sum of the chart-component and chart-partial aggregate pieces
-— `≤ 2 *` the full aggregate; the uniform aggregation lemma assembles the
-chart-direction sum. -/
 private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1169,13 +978,6 @@ private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
   rw [hμw_def] at hC_bd
   exact hC_bd i
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 6 (chart-locality-free).**
-Bracket term 6 is the product of the `i`-free `C^∞` reciprocal chart density with
-the lower-order gradient-divergence chart-direction sum; the uniform coefficient
-bound `eLpNorm_weighted_contDiffOn_mul_le_uniform` and the chart-locality-free
-uniform chart-direction-sum bound
-`weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional` combine into one
-constant for every `i`. -/
 private lemma rhsTerm6_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1225,12 +1027,6 @@ private lemma rhsTerm6_eLpNorm_le_uniform_unconditional :
           rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀ := by
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
-/-- **Uniform-constant `eLpNorm` bound for bracket term 7 (chart-locality-free).**
-Bracket term 7 is the product of the `i`-free `C^∞` reciprocal chart density with
-the cross-right gradient-divergence limit; the uniform coefficient bound
-`eLpNorm_weighted_contDiffOn_mul_le_uniform` and the chart-locality-free uniform
-companion lemma `eLpNorm_crossRightGradCoeffDivLimit_le_uniform`
-combine into one constant for every `i`. -/
 private lemma rhsTerm7_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1309,12 +1105,6 @@ section BracketBoundUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
-/-- **Uniform-constant seven-term bracket `eLpNorm` bound (chart-locality-free).**
-A single nonnegative constant `C` — the sum of the seven `i`-uniform per-term
-constants — serves every eigenbasis index `i`. Each per-term `_uniform`
-chart-locality-free lemma supplies its `i`-free constant; iterated Minkowski over
-the seven-term bracket and the right-distributivity of `*` over `+` in `ℝ≥0∞`
-assemble them. -/
 private lemma rhsBracket_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1422,23 +1212,7 @@ end BracketBoundUnconditional
 section MainBoundUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Uniform-constant explicit-norm `eLpNorm` bound for the eigenvector chart
-right-hand side (chart-locality-free).**
 
-The uniform-constant explicit-norm `eLpNorm` bound, re-keyed onto
-`eigenvectorChartRHS` and its six `_unconditional` source-quantity
-families (all built from `tensorResolventEigenbasisVec` at the
-unconditional compactness witness
-`tensorResolventL2_isCompactOperator g r s`, hence carrying no
-chart-selection hypothesis).
-
-A single nonnegative constant `C` — geometric (chart-transition / density /
-dimension / operator-norm data), independent of the eigenbasis index — serves
-*every* eigenbasis index `i`. For each `i`, with resolvent eigenvalue
-`μ := i.fst.val`, the weighted `eLpNorm` of `eigenvectorChartRHS`
-is bounded by `ENNReal.ofReal (μ⁻¹ * C)` times the finite source-quantity
-aggregate of that `i`. The explicit eigenvalue factor `μ⁻¹` stays *inside* the
-`∀ i`; only the geometric constant `C` is hoisted before the `∀ i`. -/
 theorem eigenvectorChartRHS_eLpNorm_le_uniform_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

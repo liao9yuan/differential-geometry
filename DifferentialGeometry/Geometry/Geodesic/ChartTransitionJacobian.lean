@@ -6,21 +6,7 @@ import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Chart-transition Jacobian entries
-
-The `(i, a)`-entry `chartTransitionJacEntry α β x i a` of the chart-transition
-Fréchet derivative `chartTransitionAt α β x : E →L[ℝ] E` in the canonical
-model-space basis `chartModelBasis E`, together with the index-level
-(Kronecker-delta) consequences of the mutual-inverse CLM identities
-`chartTransitionAt_comp_chartTransitionAt`/`'`.
-
-This middle layer sits between the metric-free map core
-(`ChartTransitionMap`) and the metric (Gram / Christoffel) transformation laws.
-It is itself metric-free, depending only on the model-space basis.
--/
 
 noncomputable section
 
@@ -36,13 +22,10 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `(i, a)`-entry of the chart-transition Fréchet derivative
-`chartTransitionAt α β x : E →L[ℝ] E` in the canonical model-space basis
-`chartModelBasis E`: the `i`-th coordinate of `(chartTransitionAt α β x)(e_a)`. -/
 def chartTransitionJacEntry (α β : M) (x : E)
     (i a : Fin (Module.finrank ℝ E)) : ℝ :=
   (chartModelBasis E).repr
@@ -55,11 +38,6 @@ def chartTransitionJacEntry (α β : M) (x : E)
         (chartTransitionAt (I := I) α β x
           ((chartModelBasis E) a)) i := rfl
 
-/-- **Entry form of the mutual-inverse Jacobian identity.** Summing the forward
-Jacobian entries against the reverse Jacobian entries (evaluated at `T_{αβ} y`)
-yields the Kronecker delta. This is the index-level statement of
-`chartTransitionAt_comp_chartTransitionAt`, in the form directly consumed by the
-inverse-Gram pullback. -/
 theorem chartTransitionJacEntry_mul_sum [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
     (c i : Fin (Module.finrank ℝ E)) :
@@ -112,10 +90,6 @@ theorem chartTransitionJacEntry_mul_sum [I.Boundaryless]
     · rw [if_neg (fun hh : i = c => h hh.symm), if_neg h]
   exact hrepr
 
-/-- **Entry form of the mutual-inverse Jacobian identity, other order.** Summing
-the forward Jacobian entries (at `y`) against the reverse Jacobian entries (at
-`T_{αβ} y`), contracting on the inner index, yields the Kronecker delta. This is
-the index-level statement of `chartTransitionAt_comp_chartTransitionAt'`. -/
 theorem chartTransitionJacEntry_mul_sum' [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
     (b i : Fin (Module.finrank ℝ E)) :
@@ -171,12 +145,6 @@ theorem chartTransitionJacEntry_mul_sum' [I.Boundaryless]
   · subst h; simp
   · rw [if_neg (fun hh : i = b => h hh.symm), if_neg h]
 
-/-- The forward Jacobian at `x = extChartAt I α p` contracted on its lower index
-against the reverse Jacobian at `T x` collapses to a Kronecker delta:
-`∑ l, J^a_l(x) · K^l_d(T x) = δ_{a d}`, where `J = `forward Jacobian at `x`,
-`K = `reverse Jacobian at `T x`. This is `chartTransitionJacEntry_mul_sum'`
-packaged with the source-membership discharged from chart-source membership of
-`p`. -/
 lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
@@ -190,11 +158,6 @@ lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
     extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
   exact chartTransitionJacEntry_mul_sum' (I := I) α β hx_src a d
 
-/-- The reverse Jacobian at `T x` contracted on its upper index against the
-forward Jacobian at `x` collapses to a Kronecker delta:
-`∑ a, J^a_i(x) · K^c_a(T x) = δ_{c i}`. This is `chartTransitionJacEntry_mul_sum`
-packaged with the source-membership discharged from chart-source membership of
-`p`. -/
 lemma chartTransitionJacEntry_reverse_forward_collapse [I.Boundaryless]
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)

@@ -1,39 +1,6 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingSpectralLift
 import DifferentialGeometry.Analysis.Elliptic.LichnerowiczSpectral
 
-/-!
-# Generator identification for the heat semigroup
-
-For a closed Riemannian manifold `(M, g)`, time `t > 0`, and any initial datum
-`u_0 ∈ Lp ℝ 2 μ_g`, the variational Laplacian acting on the explicit spectral
-lift of `heatSemigroup g t u_0` evaluates to `-heatPower g 1 t u_0`. Combined
-with the operator-norm derivative
-`HasDerivAt (fun s => heatSemigroup g s) (-heatPower g 1 t) t`, this gives the
-identification of `-Δ_g` as the infinitesimal generator of the heat semigroup
-on the `L²` of a closed Riemannian manifold.
-
-## Main results
-
-* `laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one` —
-  the operator identity
-  `Δ_g (heatSemigroupExplicitLift g 0 t u_0) = -heatPower g 1 t u_0`.
-* `hasDerivAt_heatSemigroup_eq_laplacianOp` —
-  the time derivative of `s ↦ heatSemigroup g s u_0` at `t` equals the
-  variational Laplacian of the spectral lift.
-
-For the canonical `Classical.choose` lift `heatSemigroupSpectralLift`, the
-analogous identity is recovered via injectivity of `H1ComplToLp` on
-`laplacianDomain g`, packaged as
-`laplacianOp_heatSemigroupSpectralLift_one_eq_neg_heatPower_one`.
-
-## Sign convention
-
-Geometer convention `Δ_g = div_g ∘ grad_g`. The variational operator on
-`laplacianDomain g` is `laplacianOp g`. The corresponding semigroup generator
-on `L²` is `-laplacianOp g` (negative spectrum on a closed manifold),
-identified via `d/dt heatSemigroup g t = laplacianOp ∘ heatSemigroup g t`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -60,8 +27,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- For `k = 1`, the binomial-sum operator `(1 - Δ_g) e^{tΔ_g}` is just
-`e^{tΔ_g} + (-Δ_g) e^{tΔ_g}`, in the geometer sign convention. -/
 lemma oneMinusLapHeat_one_apply
     (g : SmoothRiemannianMetric I M) (t : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -74,7 +39,6 @@ lemma oneMinusLapHeat_one_apply
     Nat.cast_one, one_smul]
   rw [heatPower_zero (I := I) (M := M) g t]
 
-/-- The explicit lift at `k = 0` lies in `laplacianDomain g`. -/
 lemma heatSemigroupExplicitLift_zero_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (t : ℝ)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -86,10 +50,7 @@ lemma heatSemigroupExplicitLift_zero_mem_laplacianDomain
   rw [iteratedResolventL2_zero_apply]
 
 set_option maxHeartbeats 800000 in
-/-- **Headline 1.** For a closed Riemannian manifold `(M, g)`, time `t > 0`,
-and initial datum `u_0 ∈ Lp ℝ 2 μ_g`, the variational Laplacian acting on the
-explicit spectral lift of `heatSemigroup g t u_0` evaluates to
-`-heatPower g 1 t u_0`. -/
+
 theorem laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -125,13 +86,7 @@ theorem laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
     exact h_lift_eq
 
 set_option maxHeartbeats 800000 in
-/-- For `t > 0`, the trajectory `s ↦ heatSemigroup g s u_0` has time derivative
-at `s = t` equal to `laplacianOp g` applied to the explicit spectral lift of
-`heatSemigroup g t u_0` (the witness `heatSemigroupExplicitLift g 0 t u_0`, which
-lies in `laplacianDomain g`). This is the heat-equation identity
-`d/dt (e^{tΔ_g} u_0) = Δ_g (e^{tΔ_g} u_0)` in the `L²` trajectory, obtained from
-the operator-norm derivative `hasDerivAt_heatSemigroup` and the operator identity
-`laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one`. -/
+
 theorem hasDerivAt_heatSemigroup_eq_laplacianOp
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -163,9 +118,7 @@ theorem hasDerivAt_heatSemigroup_eq_laplacianOp
   exact h_apply
 
 set_option maxHeartbeats 800000 in
-/-- Both spectral lifts of `heatSemigroup g t u_0` agree on `H1Compl g`: the
-canonical `Classical.choose` lift at index `1` equals the explicit lift at
-index `0`. -/
+
 lemma heatSemigroupSpectralLift_one_eq_explicit_zero
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -194,8 +147,7 @@ lemma heatSemigroupSpectralLift_one_eq_explicit_zero
     (u := ⟨_, h_can_mem⟩) (v := ⟨_, h_exp_mem⟩) h_proj_eq
 
 set_option maxHeartbeats 800000 in
-/-- Companion to Headline 1 for the canonical `Classical.choose`-based lift:
-`laplacianOp g (heatSemigroupSpectralLift g ht u_0 1) = -heatPower g 1 t u_0`. -/
+
 theorem laplacianOp_heatSemigroupSpectralLift_one_eq_neg_heatPower_one
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

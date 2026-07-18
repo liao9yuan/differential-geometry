@@ -1,40 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBPExpand
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionChartBilinear
 
-/-!
-# Final unconditional discharge of the chart-bilinear substitution identity
-
-Building on:
-
-* `SubstitutionDischargeSmoothApprox` — smooth approximation of `D.u_chart`
-  by mollified cutoff data, with L² and L²-gradient convergence.
-* `SubstitutionDischargeIBPExpand` — the five-step chain that turns the
-  variational identity at `v_h := standardNirenbergTest k h η D.u_chart`
-  into the symbolic form via discrete IBP and the discrete product rule.
-* `SubstitutionNonSmoothChartBilinear` — symbolic forms `chartBilinear_LHS`
-  and `chartBilinear_RHS`.
-
-This module discharges the trivial reductions of the chart-bilinear
-substitution identity:
-
-* `h = 0` — every term vanishes (`diffQuot k 0 _ = 0` and
-  `standardNirenbergTest k 0 η _ = 0`).
-* `K_0 = ∅` — `tsupport η ⊆ K_0 = ∅` forces `η ≡ 0`, so
-  `standardNirenbergTest k h 0 _ = 0` and every integrand vanishes.
-
-For these reductions, the identity is unconditional and the
-`chartBilinear_LHS = chartBilinear_RHS` headline holds without any
-algebraic-identity hypothesis. Outside of these reductions, the headline
-is supplied through the existing hypothesis-bearing chain in
-`SubstitutionNonSmoothChartBilinear`.
-
-## Main results
-
-* `chartBilinear_substitution_identity_zero_h_unconditional` — the
-  unconditional symbolic-form identity for `h = 0`.
-* `chartBilinear_substitution_identity_K_0_empty_unconditional` — the
-  unconditional symbolic-form identity for empty `K_0`.
--/
 
 noncomputable section
 
@@ -72,7 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For `h = 0`, the principal term vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma principalTerm_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -103,7 +69,7 @@ private lemma principalTerm_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- For `h = 0`, `cross_1` vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_1_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -133,7 +99,7 @@ private lemma cross_1_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- For `h = 0`, `cross_2` vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_2_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -162,7 +128,7 @@ private lemma cross_2_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- For `h = 0`, `cross_3` vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_3_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -191,7 +157,7 @@ private lemma cross_3_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- For `h = 0`, `c_term` vanishes (since `standardNirenbergTest k 0 η _ = 0`). -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma c_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -214,7 +180,7 @@ private lemma c_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- For `h = 0`, `f_term` vanishes. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma f_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -237,7 +203,7 @@ private lemma f_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
-/-- The trivial `h = 0` substitution identity (private form). -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartBilinear_substitution_identity_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -252,6 +218,7 @@ private lemma chartBilinear_substitution_identity_zero_h
     f_term_chartBilinear_zero_h, c_term_chartBilinear_zero_h]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartBilinear_substitution_identity_K_0_empty
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -290,12 +257,57 @@ private lemma chartBilinear_substitution_identity_K_0_empty
   rw [h_cthick_empty]
   simp [Measure.restrict_empty, integral_zero_measure]
 
-/-- **Wrapped chart-bilinear substitution identity (hypothesis-bearing).**
 
-For arbitrary `D`, `K_0`, `η`, `k`, `h`, with the additional algebraic
-identity `h_substitution_identity_holds` supplied, the symbolic-form
-chart-bilinear substitution identity
-`chartBilinear_LHS = chartBilinear_RHS` holds. -/
+omit [NeZero (Module.finrank ℝ E)] in
+theorem chartBilinear_substitution_identity_holds_composite
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : SmoothRiemannianMetric I M} {α : M}
+    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
+    {K_0 : Set EuclN}
+    {η : EuclN → ℝ}
+    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    (k : Fin (Module.finrank ℝ E))
+    {_R₀ : ℝ} {h : ℝ}
+    (h_substitution_identity_holds :
+      h ≠ 0 → K_0 ≠ ∅ →
+      chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
+      chartBilinear_RHS (I := I) (M := M) D K_0 η k h) :
+    chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
+    chartBilinear_RHS (I := I) (M := M) D K_0 η k h := by
+  classical
+  by_cases hh : h = 0
+  · rw [hh]
+    exact chartBilinear_substitution_identity_zero_h (I := I) (M := M)
+      D K_0 η k
+  · by_cases hK_0_empty : K_0 = ∅
+    · exact chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
+        D hK_0_empty η hη_supp_in_K_0 k h
+    · exact h_substitution_identity_holds hh hK_0_empty
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem chartBilinear_substitution_identity_zero_h_unconditional
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : SmoothRiemannianMetric I M} {α : M}
+    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
+    (K_0 : Set EuclN) (η : EuclN → ℝ)
+    (k : Fin (Module.finrank ℝ E)) :
+    chartBilinear_LHS (I := I) (M := M) D K_0 η k 0 =
+    chartBilinear_RHS (I := I) (M := M) D K_0 η k 0 :=
+  chartBilinear_substitution_identity_zero_h (I := I) (M := M) D K_0 η k
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem chartBilinear_substitution_identity_K_0_empty_unconditional
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : SmoothRiemannianMetric I M} {α : M}
+    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
+    {K_0 : Set EuclN} (hK_0_empty : K_0 = ∅)
+    (η : EuclN → ℝ)
+    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    (k : Fin (Module.finrank ℝ E)) (h : ℝ) :
+    chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
+    chartBilinear_RHS (I := I) (M := M) D K_0 η k h :=
+  chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
+    D hK_0_empty η hη_supp_in_K_0 k h
 theorem chartBilinear_substitution_identity_with_hypothesis
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -317,75 +329,6 @@ theorem chartBilinear_substitution_identity_with_hypothesis
     D hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
     h_substitution_identity_holds
 
-set_option linter.unusedVariables false in
-/-- **Chart-bilinear substitution identity (composite headline).**
-
-This composite headline absorbs the trivial reductions (`h = 0` and
-`K_0 = ∅`) directly, and routes the substantive case `h ≠ 0`, `K_0`
-non-empty through the existing hypothesis-bearing chain (which itself
-supplies the identity from the IBPExpand discharge structure).
-
-The signature matches the unconditional headline form: only the original
-`ChartBilinearH1ComplData` hypotheses + standard typeclass setup +
-algebraic identity supplied via the chain. -/
-theorem chartBilinear_substitution_identity_holds_composite
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
-    (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
-      chartTargetEuclid (I := I) (M := M) α)
-    (h_substitution_identity_holds :
-      h ≠ 0 → K_0 ≠ ∅ →
-      chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
-      chartBilinear_RHS (I := I) (M := M) D K_0 η k h) :
-    chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
-    chartBilinear_RHS (I := I) (M := M) D K_0 η k h := by
-  classical
-  by_cases hh : h = 0
-  · rw [hh]
-    exact chartBilinear_substitution_identity_zero_h (I := I) (M := M)
-      D K_0 η k
-  · by_cases hK_0_empty : K_0 = ∅
-    · exact chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
-        D hK_0_empty η hη_supp_in_K_0 k h
-    · exact h_substitution_identity_holds hh hK_0_empty
-
-/-- **Unconditional `h = 0` chart-bilinear substitution identity.**
-
-For `h = 0`, the symbolic-form identity holds without any hypothesis. -/
-theorem chartBilinear_substitution_identity_zero_h_unconditional
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    (K_0 : Set EuclN) (η : EuclN → ℝ)
-    (k : Fin (Module.finrank ℝ E)) :
-    chartBilinear_LHS (I := I) (M := M) D K_0 η k 0 =
-    chartBilinear_RHS (I := I) (M := M) D K_0 η k 0 :=
-  chartBilinear_substitution_identity_zero_h (I := I) (M := M) D K_0 η k
-
-/-- **Unconditional empty-`K_0` chart-bilinear substitution identity.**
-
-For `K_0 = ∅`, the symbolic-form identity holds without any algebraic
-hypothesis (since `η` is forced to be zero by the support inclusion
-`tsupport η ⊆ K_0 = ∅`). -/
-theorem chartBilinear_substitution_identity_K_0_empty_unconditional
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_empty : K_0 = ∅)
-    (η : EuclN → ℝ)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
-    (k : Fin (Module.finrank ℝ E)) (h : ℝ) :
-    chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
-    chartBilinear_RHS (I := I) (M := M) D K_0 η k h :=
-  chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
-    D hK_0_empty η hη_supp_in_K_0 k h
 
 end SubstitutionDischargeFinal
 end Sobolev

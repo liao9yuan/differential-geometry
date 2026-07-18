@@ -12,53 +12,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Positivity
 
-/-!
-# Lichnerowicz's eigenvalue inequality on a closed Riemannian manifold
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` of
-dimension `n ≥ 2` with Ricci-curvature lower bound `Ric ≥ (n - 1) K g` for
-some positive `K`, every smooth eigenfunction of the Laplace-Beltrami
-operator with eigenvalue `-λ` (`λ > 0`) satisfies `λ ≥ n K`.
-
-The argument is the classical scalar Bochner-Weitzenböck argument:
-
-1. **Bochner identity**:
-   `Δ |∇f|² = 2 |∇²f|² + 2 Ric(∇f, ∇f) + 2 g(∇f, ∇(Δf))` pointwise.
-2. **Divergence theorem on a closed manifold**: `∫ Δ φ d μ_g = 0` for any
-   smooth scalar `φ`.
-3. **Eigenvalue equation**: `Δ f = -λ f` so `∇(Δf) = -λ ∇f`, hence
-   `g(∇f, ∇(Δf)) = -λ |∇f|²`.
-4. **Cauchy-Schwarz Hessian bound**: `|∇²f|² ≥ (Δf)² / n`.
-5. **Ricci bound**: `Ric(∇f, ∇f) ≥ (n - 1) K |∇f|²`.
-6. **Green's first identity** (integration by parts): `∫ |∇f|² = -∫ f Δf
-    = λ ∫ f²`.
-7. **Strict positivity of the L² self-integral** for the nonzero
-   eigenfunction: `0 < ∫ f²`.
-
-Combining these inputs, the equation `0 = ∫ Δ |∇f|²` forces `λ ≥ n K`.
-
-This file delivers the inequality in two forms:
-
-* `lichnerowicz_inequality` is the abstract foundation: it takes the
-  Bochner identity, the Hessian Cauchy-Schwarz bound, the Ricci bound, and
-  the L² positivity of `f` as scalar hypotheses on `M`.
-* `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` is the headline endpoint: with the
-  abstract scalar witnesses replaced by the concrete `chartHessFrobeniusSq`
-  and the abstract `ricciTensor`, all of the analytic ingredients (Bochner
-  identity, Cauchy-Schwarz Hessian bound, smoothness witnesses, and
-  continuity of the Hessian-Frobenius and Ricci-on-gradient functions) are
-  discharged from the project's existing infrastructure. The user supplies
-  only the eigenvalue equation, the universal Ricci lower bound, and the
-  L²-positivity hypothesis.
-
-## Main results
-
-* `lichnerowicz_inequality` : the eigenvalue lower bound `n K ≤ λ` from the
-  abstract scalar hypotheses.
-* `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` : the same lower bound `n K ≤ λ` with
-  all auxiliary continuity, Bochner, and Hessian-trace hypotheses
-  discharged internally.
--/
 
 noncomputable section
 
@@ -70,7 +23,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -83,7 +36,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Laplacian of a smooth function integrates to zero on a closed manifold. -/
 private theorem integral_Δ_g_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -91,7 +43,6 @@ private theorem integral_Δ_g_eq_zero
     ∫ x, Δ_g (I := I) g hφ x ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   exact integral_divergence_eq_zero_of_compact (I := I) g (grad_g (I := I) g hφ)
 
-/-- Green's first identity, specialised to `f = h`, on a closed manifold. -/
 private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -106,31 +57,6 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hf hf_cs
 
-/-- **Lichnerowicz's eigenvalue inequality.**
-
-Let `(M, g)` be a closed (compact and boundaryless) smooth Riemannian manifold
-of dimension `n := finrank ℝ E ≥ 2`. Suppose:
-
-* `K > 0` is a positive lower curvature parameter.
-* `f : M → ℝ` is a smooth function.
-* `λ > 0` and `Δ_g f = -λ f` pointwise (eigenfunction equation).
-* `gradNormSqSmooth` is a smoothness witness for the function
-  `x ↦ g(∇f, ∇f)(x)`, so that one can apply the Laplacian to it.
-* `hessSqNorm : M → ℝ` is the pointwise Frobenius norm squared of the
-  Hessian; it is required to be continuous.
-* `RicAtGrad : M → ℝ` is the function `x ↦ Ric_x(∇f x, ∇f x)`; required
-  to be continuous.
-* `h_bochner` is the pointwise Bochner-Weitzenböck identity for `f`:
-  `Δ |∇f|² = 2 |∇²f|² + 2 Ric(∇f, ∇f) + 2 g(∇f, ∇(Δf))`.
-* `h_hess_lower_bound` is the Cauchy-Schwarz Hessian bound:
-  `(Δ f)² / n ≤ |∇²f|²`.
-* `h_ricci_lower_bound` is the Ricci lower bound:
-  `(n - 1) K g(∇f, ∇f) ≤ Ric(∇f, ∇f)`.
-* `h_f_sq_pos` records that `0 < ∫ f²` (this is automatic for a nonzero
-  smooth function on a closed manifold; we expose it as an explicit
-  hypothesis to keep the inequality block self-contained).
-
-Then `n K ≤ λ`. -/
 theorem lichnerowicz_inequality
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -398,11 +324,7 @@ theorem lichnerowicz_inequality
   rw [h_rearrange1, h_rearrange2] at h_n_chain
   exact le_of_mul_le_mul_right (by linarith [h_n_chain]) h_factor_pos
 
-/-- **Parseval expansion of `|u|²_g` on a `g_x`-orthonormal basis.**
-For any `g_x`-orthonormal basis `B : Fin n → T_x M` and any tangent vector
-`u ∈ T_x M`, the squared `g_x`-norm of `u` equals the sum of squared inner
-products with the basis vectors:
-`g.inner x u u = ∑ j, (g.inner x u (B j))²`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem g_inner_self_eq_sum_sq_inner_orthonormal
     (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x)
@@ -473,10 +395,6 @@ private theorem g_inner_self_eq_sum_sq_inner_orthonormal
   rw [h_coeff j]
   ring
 
-/-- **Pointwise dimension-Laplacian inequality, unconditional form.**
-For a closed-input smooth scalar `f` on a boundaryless smooth Riemannian
-manifold,
-`(Δ_g g hf x)² ≤ (finrank ℝ E) · chartHessFrobeniusSq g f x`. -/
 private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -584,7 +502,6 @@ private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
   rw [frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x] at hCS
   exact hCS
 
-/-- Smoothness of `b ↦ ricciTensor g b (∇f b) (∇f b)` for smooth `f`. -/
 private theorem ricciTensor_grad_grad_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -608,7 +525,6 @@ private theorem ricciTensor_grad_grad_contMDiff
   rw [Bundle.contMDiffAt_totalSpace] at hpm
   exact hpm.2
 
-/-- Continuity of `b ↦ ricciTensor g b (∇f b) (∇f b)`. -/
 private theorem ricciTensor_grad_grad_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -617,7 +533,6 @@ private theorem ricciTensor_grad_grad_continuous
       (gradFun (I := I) g f b) (gradFun (I := I) g f b)) :=
   (ricciTensor_grad_grad_contMDiff (I := I) g hf).continuous
 
-/-- Continuity of `b ↦ chartHessFrobeniusSq g f b`. -/
 theorem chartHessFrobeniusSq_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -670,32 +585,6 @@ theorem chartHessFrobeniusSq_continuous
   intro x
   exact (h_bochner_isolate x).symm
 
-/-- **Lichnerowicz's eigenvalue inequality on a closed Riemannian manifold.**
-
-If `(M, g)` is a closed (compact and boundaryless) smooth Riemannian
-manifold of dimension `n := finrank ℝ E ≥ 2`, `K > 0`, and `f` is a smooth
-eigenfunction of the Laplace–Beltrami operator with eigenvalue `λ > 0` under
-the universal Ricci lower bound `Ric ≥ (n - 1) K g`, then `n K ≤ λ`.
-
-In detail, suppose:
-
-* `K > 0` is a positive lower curvature parameter.
-* `f : M → ℝ` is smooth with `Δ_g f = -λ f` pointwise for some `λ > 0`
-  (the eigenfunction equation).
-* `Ric ≥ (n - 1) K g`, expressed in the universal form
-  `(n - 1) K g(X, X) ≤ Ric(X, X)` for every tangent vector `X`,
-  using the abstract `ricciTensor` of the Levi-Civita connection.
-* `0 < ∫ f²` (this is automatic for a nonzero smooth function on a closed
-  manifold; we expose it as an explicit hypothesis to keep the inequality
-  block self-contained).
-
-Then `n K ≤ λ`.
-
-The proof discharges the Bochner–Weitzenböck pointwise identity, the
-Cauchy–Schwarz Hessian-trace inequality, the smoothness of `|∇f|²_g`, and the
-continuity of the Hessian-Frobenius and Ricci-on-gradient witnesses from the
-project's existing infrastructure, then reduces the inequality to the abstract
-`lichnerowicz_inequality`. -/
 theorem lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

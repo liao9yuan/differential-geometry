@@ -3,35 +3,35 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 
-/-!
-# The pointwise covariant-gradient jet input for the chart `2`-jet seminorm bound
 
-This file discharges the analytic input `hcovgrad_jet_bound` of
-`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`: on a compact piece
-`K ⊆ interior (extChartAt I α).target`, every chart `∂^j` (`j = 0, 1, 2`) of the chart-frame
-component function `reprDiffChartCompOnE g_bg hu₁ hu₂ α l b` of the **fixed** tensor
-difference `S = realizableRepr hu₁ − realizableRepr hu₂` is bounded by a single constant
-times the iterated covariant-gradient jet sum `iteratedCovGradJetSum g_bg S ((symm) y)`.
 
-## The per-component pointwise bound (leaf-2)
 
-The raw chart-frame scalar component `tensorChartComponentRaw g_bg 0 (2 + i) T α Idx Jdx b`
-is, by definition, the `(Idx, Jdx)`-projection of the chart-`α` trivialisation fibre
-`tensorTrivProj g_bg 0 (2 + i) T α b` of the underlying tensor section `T.toSection b`.
-Hence its absolute value is bounded by `‖projection‖ · ‖tensorTrivProj‖`, with the
-projection operator norm bounded uniformly by `chartComponentProjectionUniformBound` and the
-trivialisation-fibre norm bounded uniformly on the compact `K` by the **unconditional**
-op-norm bound `tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`, against
-the `g_bg`-Riemannian fibre norm `‖T.toSection b‖`.  This produces
 
-  `|tensorChartComponentRaw g_bg 0 (2 + i) T α Idx Jdx b| ≤ C · ‖T.toSection b‖`,
 
-uniformly over the compact base set and over all multi-indices.
 
-## Sign convention
 
-Geometer `Δ_∇ = −∇*∇`; resolvent `(1 − Δ_∇)⁻¹`, weights `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -72,16 +72,16 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Pointwise bound on a single raw chart-frame scalar component.**
 
-For a smooth compactly-supported `(0, s)`-tensor `T`, a chart center `α`, and a compact
-base set `K ⊆ (chartAt H α).source`, there is a single constant `C ≥ 0` such that for every
-base point `b ∈ K` and all frame multi-indices `Jdx`,
 
-  `|tensorChartComponentRaw g_bg 0 s T α (![] : Fin 0 → _) Jdx b| ≤ C · ‖T.toSection b‖`,
 
-where the fibre norm on the right is the `g_bg`-Riemannian bundle norm.  `C` is independent
-of `T`, of `Jdx`, and of `b`. -/
+
+
+
+
+
+
+
 theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
@@ -130,10 +130,10 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
         mul_le_mul_of_nonneg_left h_v_le hCproj_nn
     _ = Cproj * Cop * ‖T.toSection b‖ := by ring
 
-/-- The rank-`0` chart-frame basis element `chartFrameBasisModel α x 0 (![] : Fin 0 → _)`
-is the unit `(0, 0)`-tensor `constOfIsEmpty 1`.  Both are `0`-ary continuous multilinear
-maps, hence determined by their (unique, empty-tuple) value, which is the empty product
-`1` on either side. -/
+
+
+
+
 lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
     chartFrameBasisModel (I := I) (M := M) α x 0
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) =
@@ -143,15 +143,15 @@ lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
   rw [chartFrameBasisModel_apply]
   simp
 
-/-- **The bilinear-form value of a `(0,2)`-tensor section equals its raw chart-frame
-component.**  For a smooth compactly-supported `(0,2)`-tensor `S`, a chart center `α`, a base
-point `x` in the chart source, and frame indices `l b`, the extracted bilinear form
-`ccTensorBilin g_bg S x` evaluated on the chart-`α`-frame vectors `(e_l, e_b)` equals the
-raw chart-frame scalar component `tensorChartComponentRaw g_bg 0 2 S α (![]) ![l, b] x`. -/
+
+
+
+
+
 theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (l b : Fin (Module.finrank ℝ E)) :
-    ccTensorBilin (I := I) g_bg S x
+    smoothCcTensorBilinForm (I := I) g_bg S x
         (chartBasisVecFiber (I := I) α l x) (chartBasisVecFiber (I := I) α b x) =
       tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E)))
@@ -174,15 +174,15 @@ theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
   funext j
   fin_cases j <;> rfl
 
-/-- **The chart-frame component function of the realized tensor difference is the
-symmetrized raw chart-frame component of `S`.**  At every chart point `y` whose chart
-preimage `(extChartAt I α).symm y` lies in the chart source, `reprDiffChartCompOnE` equals
-the symmetrization `½ (raw_{l,b} + raw_{b,l})` of the raw chart-frame components of the
-fixed tensor difference `S = realizableRepr hu₁ − realizableRepr hu₂`. -/
+
+
+
+
+
 theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (l b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : (extChartAt I α).symm y ∈ (chartAt H α).source) :
     reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y =
@@ -202,9 +202,9 @@ theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
   rw [ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy l b,
     ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy b l]
 
-/-- **Chain-rule translation of `partialDeriv` to `euclidPartial`.**  For any scalar
-`f : E → ℝ` and any direction `a`, the `E`-side partial derivative `partialDeriv a f y` equals
-the `EuclideanSpace`-side partial `euclidPartial a (f ∘ toEuclidean.symm) (toEuclidean y)`. -/
+
+
+
 theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
     partialDeriv (E := E) a f y =
@@ -218,9 +218,9 @@ theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     rw [chartModelBasis_apply]; rfl]
   rw [show (toEuclidean (E := E)).symm (toEuclidean (E := E) y) = y from by simp]
 
-/-- The `E`-side partial derivative function `partialDeriv a f`, pulled back through
-`toEuclidean.symm`, equals the `EuclideanSpace`-side partial `euclidPartial a (f ∘
-toEuclidean.symm)` (as functions on the Euclidean model space). -/
+
+
+
 theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) :
     (partialDeriv (E := E) a f) ∘ (toEuclidean (E := E)).symm =
@@ -231,10 +231,10 @@ theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
       ((toEuclidean (E := E)).symm z)]
   rw [show toEuclidean (E := E) ((toEuclidean (E := E)).symm z) = z from by simp]
 
-/-- **Second-order chain-rule translation.**  For any scalar `f : E → ℝ` and directions
-`c a`, the iterated `E`-side partial `partialDeriv c (partialDeriv a f) y` equals the iterated
-`EuclideanSpace`-side partial `euclidPartial c (euclidPartial a (f ∘ toEuclidean.symm))
-(toEuclidean y)`. -/
+
+
+
+
 theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
     (c a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
     partialDeriv (E := E) c (partialDeriv (E := E) a f) y =
@@ -244,14 +244,14 @@ theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
   rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) c (partialDeriv (E := E) a f) y]
   rw [partialDeriv_comp_toEuclidean_symm_eq_euclidPartial (E := E) a f]
 
-/-- On the Euclidean chart target, the `toEuclidean.symm`-pull of the realized-difference
-chart-frame component function `reprDiffChartCompOnE g_bg hu₁ hu₂ α l b` equals the
-symmetrized chart-push of the raw chart components of `S = realizableRepr hu₁ −
-realizableRepr hu₂`. -/
+
+
+
+
 theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (l b : Fin (Module.finrank ℝ E)) :
     Set.EqOn
       (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
@@ -278,11 +278,11 @@ theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
     chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
 
-/-- **First-order covariant-gradient inversion (`s = 2`, `r = 0`).**  For `y' ∈
-chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,2)`-component
-of `S` at indices `![l, b]` in direction `a` equals the raw `(0,3)`-component of `covGrad g_bg
-0 2 S` at indices `![a, l, b]` (read at the chart preimage of `y'`), minus the lower-order
-Christoffel correction. -/
+
+
+
+
+
 theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M)
     (a l b : Fin (Module.finrank ℝ E)) {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -307,8 +307,8 @@ theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
   rw [hform]
   ring
 
-/-- The chart-push of a raw chart component is differentiable at every point of the
-(open) Euclidean chart target. -/
+
+
 theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g_bg 0 s) (α : M)
@@ -325,22 +325,22 @@ theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
     chartTargetEuclid_isOpen (I := I) (M := M) α
   exact (hcd.contDiffAt (hopen.mem_nhds hy')).differentiableAt (by simp)
 
-/-- For `y` in the chart-target interior, `toEuclidean y` lies in the Euclidean chart target. -/
+
 theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α :=
   ⟨y, interior_subset hy, rfl⟩
 
-/-- **The first chart partial of the realized-difference component, as covariant-gradient
-components minus Christoffel corrections.**  For `y` in the chart-target interior, the
-`E`-side partial `partialDeriv a (reprDiffChartCompOnE g_bg hu₁ hu₂ α l b) y` equals the
-symmetrized combination of the raw `(0,3)`-components of `covGrad g_bg 0 2 S` at indices
-`![a, l, b]` and `![a, b, l]` (evaluated at the chart preimage) minus the lower-order
-Christoffel corrections. -/
+
+
+
+
+
+
 theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (a l b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y =
@@ -410,8 +410,8 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
       (by rw [← hys_def]; exact hys_mem)]
   rw [show (toEuclidean (E := E)).symm ys = y from by rw [hys_def]; simp]
 
-/-- The chart preimage map `y' ↦ (extChartAt I α).symm (toEuclidean.symm y')` sends a compact
-subset of the Euclidean chart target to a compact subset of the chart source. -/
+
+
 theorem chartPreimage_image_isCompact_subset_chartSource
     (α : M) {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -442,14 +442,14 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Uniform bound on the lower-order Christoffel correction term (general `s`).**  On a
-compact subset `K_eucl ⊆ chartTargetEuclid α`, there is a single constant `C ≥ 0` such that
-for every `(0,s)`-tensor `T`, direction `m`, target multi-index `Jdx`, and `y' ∈ K_eucl`,
 
-  `|covDerivLowerOrderTerm g_bg 0 s T α m (![]) Jdx y'| ≤ C · ‖T.toSection (chart preimage of y')‖`,
 
-with the fibre norm the `g_bg`-Riemannian bundle norm.  `C` is independent of `T`, `m`, `Jdx`,
-and `y'`. -/
+
+
+
+
+
+
 theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -527,8 +527,8 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
   ring_nf
   rfl
 
-/-- The chart-preimage `(extChartAt I α).symm '' K` of a compact `K ⊆ interior (extChartAt I
-α).target` is compact and contained in the chart source. -/
+
+
 theorem extChartAt_symm_image_isCompact_subset_chartSource
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
@@ -547,7 +547,7 @@ theorem extChartAt_symm_image_isCompact_subset_chartSource
       (extChartAt I α).map_target (hKtgt hy_mem)
     rwa [extChartAt_source] at hsrc
 
-/-- If two functions agree on an open set `U`, their first `euclidPartial`s agree on `U`. -/
+
 theorem euclidPartial_congr_of_eqOn_isOpen
     (a : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -558,10 +558,10 @@ theorem euclidPartial_congr_of_eqOn_isOpen
   rw [euclidPartial_def, euclidPartial_def]
   rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
 
-/-- **First-order covariant-gradient inversion (general `s`, `r = 0`).**  For `y' ∈
-chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,s)`-component
-of `T` at indices `Jdx` in direction `m` equals the raw `(0,s+1)`-component of `covGrad g_bg 0
-s T` at indices `Fin.cons m Jdx`, minus the lower-order Christoffel correction. -/
+
+
+
+
 theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g_bg 0 s) (α : M)
@@ -590,9 +590,9 @@ theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
   rw [hform]
   ring
 
-/-- On the Euclidean chart target, the wrapped covariant-derivative chart-component
-`covDerivComponentEuclid g_bg 0 s T α m Idx Jdx` equals the raw `(0,s+1)`-component of `covGrad
-g_bg 0 s T` at `Fin.cons m Jdx`, evaluated at the chart preimage. -/
+
+
+
 theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g_bg 0 s) (α : M)
@@ -624,9 +624,9 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- The `EuclideanSpace`-side partial `euclidPartial c (covDerivComponentEuclid g_bg 0 2 S α a
-(![]) Jdx)` is bounded on a compact subset of the chart target by `Craw4 · ‖∇²S‖ + CLO3 ·
-‖∇S‖` at the chart preimage. -/
+
+
+
 theorem euclidPartial_covDerivComponentEuclid_abs_le
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -698,10 +698,10 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Second-order chart-push bound (constant-parametrized).**  The iterated `EuclideanSpace`
-partial of the chart-pushed raw `(0,2)`-component of `S` is bounded by the three raw-component
-constants (at arities `4, 3, 2`), the two lower-order constants (arities `3, 2`), and the two
-second-order coefficient sup-bounds, applied to the second/first/zeroth covariant gradients. -/
+
+
+
+
 theorem euclidPartial2_chartPushedRaw_abs_le_aux
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -890,8 +890,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- For `j < 3`, the `g_bg`-Riemannian fibre norm of `(∇^j S)(x)` is bounded by the iterated
-covariant-gradient jet sum at `x` (it is the `j`-th nonnegative summand). -/
+
+
 theorem iteratedCovGrad_norm_le_jetSum
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (x : M)
     (j : ℕ) (hj : j < 3) :
@@ -911,8 +911,8 @@ theorem iteratedCovGrad_norm_le_jetSum
   exact Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr hj)
 
 set_option maxHeartbeats 3200000 in
-/-- Uniform sup-bound for the second-order value coefficient over a compact `K_eucl`,
-uniform in all multi-index parameters. -/
+
+
 theorem secondCovDerivLO_valueCoeff_uniform_bound
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -945,8 +945,8 @@ theorem secondCovDerivLO_valueCoeff_uniform_bound
   exact (hCv_bd (a, c, _, Jdx, p2) z hz).trans (Finset.le_sup' Cv (Finset.mem_univ _))
 
 set_option maxHeartbeats 3200000 in
-/-- Uniform sup-bound for the second-order gradient coefficient over a compact `K_eucl`,
-uniform in all multi-index parameters. -/
+
+
 theorem secondCovDerivLO_gradCoeff_uniform_bound
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -983,10 +983,10 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Second-order chart-push bound by the jet sum.**  On a compact `K_eucl ⊆ chartTargetEuclid
-α`, there is a constant `C ≥ 0` such that the iterated `EuclideanSpace` partial of the
-chart-pushed raw `(0,2)`-component of `S` is bounded by `C` times the iterated covariant-gradient
-jet sum at the chart preimage. -/
+
+
+
+
 theorem euclidPartial2_chartPushedRaw_abs_le_jetSum
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -1073,13 +1073,13 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Conjunct 1 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
-I α).target`, the realized-difference chart-frame component is bounded by a constant times the
-`j = 0` jet term `‖S.toSection (symm y)‖`. -/
+
+
+
 theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
@@ -1133,13 +1133,13 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **Conjunct 2 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
-I α).target`, the first chart partial of the realized-difference chart-frame component is
-bounded by a constant times the iterated covariant-gradient jet sum at the chart preimage. -/
+
+
+
 theorem partialDeriv_reprDiffChartCompOnE_abs_le
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ l b a : Fin (Module.finrank ℝ E),
@@ -1242,13 +1242,13 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
     _ ≤ (Craw1 + CLO) * R := by nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
 
 set_option maxHeartbeats 1600000 in
-/-- **Conjunct 3 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
-I α).target`, the iterated chart partial of the realized-difference chart-frame component is
-bounded by a constant times the iterated covariant-gradient jet sum at the chart preimage. -/
+
+
+
 theorem partialDeriv2_reprDiffChartCompOnE_abs_le
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ l b c a : Fin (Module.finrank ℝ E),
@@ -1367,18 +1367,18 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
-/-- **The pointwise covariant-gradient jet input `hcovgrad_jet_bound`.**
 
-On a compact `K ⊆ interior (extChartAt I α).target`, there is a single constant `C₀ ≥ 0` such
-that, for every chart point `y ∈ K` and all frame indices `l b`, the chart-frame component
-function of the realized tensor difference, together with its first and second chart partials,
-is bounded by `C₀` times the iterated covariant-gradient jet sum at the chart preimage.  This
-is exactly the triple conjunction consumed by
-`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`. -/
+
+
+
+
+
+
+
 theorem hcovgrad_jet_bound_holds
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧ ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
@@ -1436,18 +1436,18 @@ theorem hcovgrad_jet_bound_holds
           mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
 
 set_option maxHeartbeats 1600000 in
-/-- **Unconditional chart `2`-jet seminorm bound by the intrinsic `H^{2k}` norm.**
 
-For two realizable order-`σ` elements `u₁, u₂` with fixed difference `S = T₁ − T₂`, a chart
-base point `α`, and a **compact** piece `K ⊆ interior (extChartAt I α).target`, the chart
-`2`-jet seminorm of the realized-metric difference is bounded, uniformly on `K`, by a constant
-times the intrinsic `H^{2k}` Sobolev norm of `S` (for `2k > dim M + 4`).  No pointwise
-covariant-gradient jet hypothesis is required: it is discharged internally by
-`hcovgrad_jet_bound_holds`. -/
+
+
+
+
+
+
+
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
     (k : ℕ) (h_super : 2 * k > Module.finrank ℝ E + 4) :

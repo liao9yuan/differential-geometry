@@ -5,30 +5,7 @@ import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-!
-# Pointwise metric data on fibers and the tangent flat map
 
-This file provides the finite-dimensional pointwise metric interface used by
-the tensor bundle layer. A `MetricFiberData V` packages a symmetric,
-nonnegative flat isomorphism `V ≃ₗ[ℝ] Module.Dual ℝ V`, modelling a genuine
-pointwise inner product on a finite-dimensional real vector-space fiber, and
-exposes the associated inner product, sharp isomorphism, positive-definiteness,
-inner-product core, and metric adjoint.
-
-It then specializes this interface to the tangent bundle: from a smooth
-Riemannian metric `g` on `TM` we build the tangent flat map
-`tangentFlatLinear`, prove it injective by positive-definiteness, upgrade it to
-the linear equivalence `tangentFlatEquiv`, and assemble the pointwise
-`TangentMetricData` whose inner product realizes `g.inner`.
-
-The interface deliberately takes explicit metric-extension data tied to a given
-Riemannian metric rather than constructing tensor-power metrics by choice; later
-files build on this data.
--/
-
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 
@@ -36,10 +13,6 @@ noncomputable section
 
 open scoped Manifold ContDiff
 
-/-- Metric data on a finite-dimensional real vector-space fiber, packaged by
-its flat isomorphism.  Symmetry and nonnegativity are included because this is
-intended to model a genuine pointwise inner product, not just an arbitrary
-linear equivalence to the dual. -/
 structure MetricFiberData (V : Type*) [AddCommGroup V] [Module Real V]
     [FiniteDimensional Real V] where
   flat : V ≃ₗ[Real] Module.Dual Real V
@@ -50,11 +23,11 @@ namespace MetricFiberData
 
 variable {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
 
+omit [FiniteDimensional ℝ V] in
 private theorem dual_finrank_eq :
     Module.finrank Real V = Module.finrank Real (Module.Dual Real V) :=
   Subspace.dual_finrank_eq.symm
 
-/-- Build metric data from an injective flat map into the dual. -/
 def ofFlat
     (flat : V →ₗ[Real] Module.Dual Real V)
     (hinj : Function.Injective flat)
@@ -65,11 +38,9 @@ def ofFlat
   symm := hsymm
   nonneg := hnonneg
 
-/-- Inner product associated to a metric flat isomorphism. -/
 def inner (D : MetricFiberData V) (v w : V) : Real :=
   D.flat v w
 
-/-- Sharp isomorphism associated to `MetricFiberData`. -/
 def sharp (D : MetricFiberData V) : Module.Dual Real V ≃ₗ[Real] V :=
   D.flat.symm
 
@@ -85,7 +56,6 @@ theorem inner_nonneg (D : MetricFiberData V) (v : V) :
     0 <= D.inner v v := by
   exact D.nonneg v
 
-/-- A metric fiber has no nonzero null vectors. -/
 theorem inner_self_eq_zero_iff (D : MetricFiberData V) (v : V) :
     D.inner v v = 0 ↔ v = 0 := by
   constructor
@@ -121,7 +91,6 @@ theorem inner_self_eq_zero_iff (D : MetricFiberData V) (v : V) :
   · intro hv
     simp [hv, inner]
 
-/-- Positive-definiteness of a metric fiber. -/
 theorem inner_pos_of_ne_zero (D : MetricFiberData V) {v : V} (hv : v ≠ 0) :
     0 < D.inner v v := by
   have hnonneg := D.inner_nonneg v
@@ -130,11 +99,6 @@ theorem inner_pos_of_ne_zero (D : MetricFiberData V) {v : V} (hv : v ≠ 0) :
     exact hv ((D.inner_self_eq_zero_iff v).1 hzero)
   exact lt_of_le_of_ne' hnonneg hne
 
-/-- The inner-product core induced by metric fiber data.
-
-This is used only as a private bridge to Mathlib finite-dimensional
-Hilbert-space trace lemmas; the public tensor metric API remains based on
-`MetricFiberData`. -/
 @[reducible] def toCore (D : MetricFiberData V) : InnerProductSpace.Core Real V where
   inner := fun v w => D.inner v w
   conj_inner_symm := by
@@ -164,13 +128,11 @@ theorem toCore_inner (D : MetricFiberData V) (v w : V) :
 
 variable {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
 
-/-- Metric adjoint of a linear map between metric fibers. -/
 def adjoint (DV : MetricFiberData V) (DW : MetricFiberData W)
     (A : V →ₗ[Real] W) : W →ₗ[Real] V :=
   DV.flat.symm.toLinearMap.comp
     (A.dualMap.comp DW.flat.toLinearMap)
 
-/-- The metric adjoint satisfies the expected defining identity. -/
 theorem adjoint_inner
     (DV : MetricFiberData V) (DW : MetricFiberData W)
     (A : V →ₗ[Real] W) (y : W) (x : V) :
@@ -190,13 +152,11 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Tensor-folder alias for a smooth Riemannian metric on `TM`. -/
 abbrev SmoothMetric
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
 
-/-- The tangent flat map induced by a smooth Riemannian metric. -/
 def tangentFlatLinear (g : SmoothMetric I M) (x : M) :
     TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
   toFun v := (g.inner x v).toLinearMap
@@ -209,13 +169,14 @@ def tangentFlatLinear (g : SmoothMetric I M) (x : M) :
     change g.inner x (c • v) u = c • g.inner x v u
     simp
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tangentFlatLinear_apply
     (g : SmoothMetric I M) (x : M)
     (v w : TangentSpace I x) :
     tangentFlatLinear (I := I) g x v w = g.inner x v w := by
   rfl
 
-/-- The tangent flat map is injective by positive-definiteness. -/
+omit [FiniteDimensional ℝ E] in
 theorem tangentFlatLinear_injective
     (g : SmoothMetric I M) (x : M) :
     Function.Injective (tangentFlatLinear (I := I) g x) := by
@@ -234,7 +195,6 @@ theorem tangentFlatLinear_injective
   have hpos : 0 < g.inner x (v - w) (v - w) := g.pos x (v - w) hvw_ne
   exact (lt_irrefl (0 : Real)) ((hzero (v - w)) ▸ hpos)
 
-/-- The tangent flat equivalence induced by a smooth Riemannian metric. -/
 def tangentFlatEquiv (g : SmoothMetric I M) (x : M) :
     TangentSpace I x ≃ₗ[Real] Module.Dual Real (TangentSpace I x) :=
   LinearMap.linearEquivOfInjective
@@ -248,17 +208,12 @@ def tangentFlatEquiv (g : SmoothMetric I M) (x : M) :
     tangentFlatEquiv (I := I) g x v w = g.inner x v w := by
   rfl
 
-/-- Explicit pointwise metric data on `T_x M` tied to the Riemannian metric `g`.
-
-This is an interface, not an existence theorem.  The eventual construction
-should fill `metric` with the flat map induced by `g.inner`. -/
 structure TangentMetricData
     (g : SmoothMetric I M) (x : M) where
   metric : MetricFiberData (TangentSpace I x)
   realizes_inner : forall X Y : TangentSpace I x,
     metric.inner X Y = g.inner x X Y
 
-/-- The tangent metric data constructed from the Riemannian metric. -/
 def tangentMetricData (g : SmoothMetric I M) (x : M) :
     TangentMetricData (I := I) g x where
   metric :=

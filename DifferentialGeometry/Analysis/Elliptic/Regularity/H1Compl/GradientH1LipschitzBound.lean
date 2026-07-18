@@ -1,54 +1,13 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientLipschitzBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.WeakPartialLimit
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-/-!
-# H¹-Lipschitz bound for the chart-pushed-partial map
-
-For a closed Riemannian manifold `(M, g)`, a chart `α : M`, and a coordinate
-direction `j`, this file establishes the H¹-Lipschitz bound
-
-```
-‖chartPushedPartial g α j v‖_{L²(weighted, chartTarget)} ≤ C · ‖v‖_{H¹}
-```
-
-where `‖v‖_{H¹}` is the H¹ pre-norm on `SmoothScalar g`. The bound packages
-the chain-rule + product-rule + chart-pull analysis (already encapsulated in
-`eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul`) plus a density-bound
-conversion between the chart-pulled weighted measure and the plain volume
-measure on a compact subset.
-
-## Strategy
-
-1. The `chartPushedPartial g α j v` agrees with the classical Fréchet
-   partial of `chartSmoothExt α (ρα · v.toFun)` on the chart target.
-
-2. The L² norm of this partial against `volume.restrict chartTargetEuclid α`
-   is bounded by the L² norms of `v.toFun` and `√g(∇v, ∇v)` on the manifold
-   via the existing per-α gradient L^p bound
-   `eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul`.
-
-3. The chart-pushed partial is supported in `kPouCompact α`, on which the
-   chart density is uniformly bounded above. Hence the L² norm against the
-   weighted measure restricted to chartTargetEuclid is bounded by a multiple
-   of the L² norm against `volume.restrict chartTargetEuclid α`.
-
-4. Combining 2 and 3, and using the inequality `(a + b)² ≤ 2 (a² + b²)`,
-   yields the H¹-Lipschitz bound in the form
-   `eLpNorm chartPushedPartial ≤ C · ‖v‖_{H¹}`.
-
-## Main results
-
-* `chartPushedPartial_h1_lipschitz`: the headline H¹-Lipschitz bound.
-* `chartPushedPartialLipschitz_canonical`: canonical instance of the
-  `ChartPushedPartialLipschitz` packaging structure.
--/
 
 noncomputable section
 
@@ -88,8 +47,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- For `y` in the chart target, `chartPushedPartial g α j v y` agrees with
-the classical Fréchet partial of `chartSmoothExt α (ρα · v.toFun)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) {y : EuclN}
@@ -130,9 +88,7 @@ private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     rw [if_pos h_eq_z]
   rw [h_chartSmoothExt]
 
-/-- The chart-pushed partial agrees a.e. (against the chart-pulled weighted
-measure restricted to the chart target) with the classical Fréchet partial
-of `chartSmoothExt α (ρα · v.toFun)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -147,9 +103,7 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
 
-/-- The chart-pushed partial agrees a.e. (against the plain volume measure
-restricted to the chart target) with the classical Fréchet partial of
-`chartSmoothExt α (ρα · v.toFun)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -163,8 +117,7 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
 
-/-- The chart-pulled weighted measure is dominated by a uniform constant
-times the plain volume measure on the compact `kPouCompact α`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedMeasure_le_smul_volume_on_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_d : ℝ, 0 ≤ M_d ∧
@@ -196,21 +149,16 @@ private lemma chartPulledWeightedMeasure_le_smul_volume_on_kPouCompact
     _ = ENNReal.ofReal M_d • (volume : Measure EuclN)
           (A ∩ kPouCompact (I := I) (M := M) α) := by rw [smul_eq_mul]
 
-/-- An `f`-independent constant `M_d ≥ 0` derived from the chart-pulled
-weighted measure such that the L² norm bound below holds for any function
-supported in `kPouCompact α`. -/
 private noncomputable def chartPulledWeightedConst
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
   Real.sqrt (chartPulledWeightedMeasure_le_smul_volume_on_kPouCompact (I := I) (M := M) g α).choose
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedConst_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) :
     0 ≤ chartPulledWeightedConst (I := I) (M := M) g α := Real.sqrt_nonneg _
 
-/-- For a function with support in `kPouCompact α`, the L² norm against the
-chart-pulled weighted measure restricted to `chartTargetEuclid α` is bounded
-by `chartPulledWeightedConst` times the L² norm against
-`vol.restrict (chartTargetEuclid α)`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ} (hf_supp : Function.support f ⊆ kPouCompact (I := I) (M := M) α) :
@@ -298,8 +246,7 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
     rw [← ENNReal.ofReal_rpow_of_nonneg hM_d_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
 
-/-- The lintegral of `‖v.toFun‖ₑ²` against `μ_g` equals `ENNReal.ofReal` of
-the corresponding real integral `∫ v² dμ_g`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lintegral_enorm_v_toFun_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     ∫⁻ x, ‖v.toFun x‖ₑ ^ (2 : ℝ)
@@ -325,7 +272,7 @@ private lemma lintegral_enorm_v_toFun_sq_eq
     rw [← abs_mul, abs_mul_self]
   · exact (v.integrable_mul v).lintegral_lt_top.ne
 
-/-- The L²-norm of `v.toFun` against `μ_g` is bounded by the H¹ pre-norm. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_v_toFun_le_norm
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     eLpNorm v.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -359,8 +306,7 @@ private lemma eLpNorm_v_toFun_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq h_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sqrt_sq_le
 
-/-- The lintegral of `‖√g(grad v, grad v)‖ₑ²` against `μ_g` equals `ENNReal.ofReal`
-of the corresponding real integral `∫ g(grad v, grad v) dμ_g`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lintegral_enorm_sqrt_grad_v_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     ∫⁻ x, ‖Real.sqrt (g.inner x (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x))‖ₑ
@@ -412,7 +358,7 @@ private lemma lintegral_enorm_sqrt_grad_v_sq_eq
     rw [Real.mul_self_sqrt (h_inner_nn x)]
   · exact (v.integrable_inner_grad v).lintegral_lt_top.ne
 
-/-- The L²-norm of `√g(grad v, grad v)` against `μ_g` is bounded by the H¹ pre-norm. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sqrt_grad_v_le_norm
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     eLpNorm (fun x : M => Real.sqrt (g.inner x
@@ -457,12 +403,7 @@ private lemma eLpNorm_sqrt_grad_v_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq h_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sqrt_sq_le
 
-/-- Headline H¹-Lipschitz bound for the chart-pushed-partial map.
-
-The L²-norm of the chart-pushed partial against the chart-pulled weighted
-measure restricted to the chart target is bounded by a constant times the
-H¹ pre-norm of the smooth scalar `v`. The constant depends only on `α`,
-`g`, and `j`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedPartial_h1_lipschitz
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -571,8 +512,6 @@ theorem chartPushedPartial_h1_lipschitz
           rw [ENNReal.ofReal, Real.toNNReal_of_nonneg h_norm_nn]
           rfl]
 
-/-- Canonical Lipschitz witness for the chart-pushed-partial map, derived
-from the H¹-Lipschitz bound `chartPushedPartial_h1_lipschitz`. -/
 noncomputable def chartPushedPartialLipschitz_canonical
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :

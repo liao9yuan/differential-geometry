@@ -1,15 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.Mollifier
 
-/-!
-# Convolution sup-norm and Lipschitz bounds
-
-This module collects sup-norm and Lipschitz bounds for the convolution
-`f ⋆ η` of an integrable function `f` on `EuclideanSpace ℝ (Fin d)` with
-a continuous compactly-supported (and possibly Lipschitz) kernel `η`.
-These are the key estimates needed for applying Arzelà–Ascoli to a
-mollified family.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -22,8 +12,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- A continuous compactly-supported real-valued function on `E` admits a
-nonneg sup-norm bound. -/
+
 lemma exists_norm_bound_of_continuous_compactSupport
     {η : E → ℝ} (hη_cont : Continuous η) (hη_compact : HasCompactSupport η) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y, ‖η y‖ ≤ C := by
@@ -32,7 +21,7 @@ lemma exists_norm_bound_of_continuous_compactSupport
   exact (hC y).trans (le_max_left _ _)
 
 omit [NeZero d] in
-/-- A `C¹` function with compact support on `E` is Lipschitz. -/
+
 lemma lipschitz_of_contDiff_compactSupport
     {η : E → ℝ} (hη_C1 : ContDiff ℝ 1 η) (hη_compact : HasCompactSupport η) :
     ∃ L : ℝ, 0 ≤ L ∧ ∀ x y, ‖η x - η y‖ ≤ L * ‖x - y‖ := by
@@ -57,7 +46,7 @@ lemma lipschitz_of_contDiff_compactSupport
   exact hdist
 
 omit [NeZero d] in
-/-- Translated kernel is measure-preserving: `t ↦ z - t` preserves `volume`. -/
+
 private lemma measurePreserving_constSub (z : E) :
     MeasurePreserving (fun t : E => z - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -70,9 +59,7 @@ private lemma measurePreserving_constSub (z : E) :
   exact h_addL.comp h_neg
 
 omit [NeZero d] in
-/-- Sup-norm bound for the convolution: `|(f ⋆ η)(x)| ≤ M · ‖f‖_{L¹}`
-when `|η y| ≤ M` everywhere. The convolution uses the bilinear form
-`lsmul ℝ ℝ`. -/
+
 theorem convolution_sup_le_holder
     {f η : E → ℝ}
     (hf_int : Integrable f volume)
@@ -111,8 +98,7 @@ theorem convolution_sup_le_holder
   rw [integral_const_mul]
 
 omit [NeZero d] in
-/-- Continuity of `f ⋆ η` when `f` is locally integrable and `η` is
-continuous and compactly supported. -/
+
 theorem convolution_continuous_of_compact_support
     {f η : E → ℝ}
     (hf_loc : LocallyIntegrable f volume)
@@ -122,10 +108,7 @@ theorem convolution_continuous_of_compact_support
     (L := ContinuousLinearMap.lsmul ℝ ℝ) hf_loc hη_cont
 
 omit [NeZero d] in
-/-- Lipschitz-type bound for the convolution: if `f` is integrable, `η`
-is continuous compactly supported (hence bounded), and `η` is Lipschitz
-with constant `L`, then `(f ⋆ η)` is Lipschitz with constant
-`L · ‖f‖_{L¹}`. -/
+
 theorem convolution_lipschitz_with
     {f η : E → ℝ}
     (hf_int : Integrable f volume)

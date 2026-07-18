@@ -2,46 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 
-/-!
-# Interior `H²` regularity for non-smooth weak solutions, via a uniform
-difference-quotient bound on a smooth approximating sequence.
-
-This module provides a hypothesis-bearing wrapper that converts a uniform
-`L²(Ω'')` bound on the difference quotients of `∂_i u_seq n` (a smooth
-approximation of a weak partial `w_i_func` of a non-smooth `u`) into the
-existence of a weak `k`-partial of `w_i_func` on `Ω''` with the same
-quantitative `L²(Ω'')` bound.
-
-The proof passes the uniform `L²` bound through the smooth approximating
-sequence to the limit `w_i_func` itself: a Fatou argument applied
-per-`n` (limiting `h → 0`) gives `‖∂_k ∂_i u_seq n‖_{L²(Ω'')} ≤ M`, after
-which a strong-`L²(Ω')` convergence of `∂_i u_seq n → w_i_func` plus the
-uniqueness of weak partial derivatives identifies the desired limit `g`
-as the weak `k`-partial of `w_i_func`.
-
-The current build assembles the key Fatou bound as a standalone lemma
-and exposes the pieces needed downstream. The full main wrapper composes
-these with the headline `hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ`
-under a slight enlargement / cutoff hypothesis on the data; the exact
-form of the wrapper is left to a downstream caller that supplies the
-shrunk subdomain.
-
-## Main results
-
-* `eLpNorm_kdi_partial_le_of_uniform_diffQuot` — the per-`n` Fatou bound
-  on `‖∂_k ∂_i u_seq n‖_{L²(Ω'')}` from a uniform `L²(Ω'')` bound on the
-  difference quotients of `∂_i u_seq n`.
-
-* `hasWeakPartialDeriv_kdi_partial_of_smooth` — the smooth function `u`
-  satisfies the weak `k`-partial relation for its smooth `i`-partial,
-  with the second classical partial as the weak partial.
-
-* `hasWeakPartialDeriv_of_strong_L2_limit` — given a smooth approximating
-  sequence whose first partials converge to `w_i_func` in `L²(Ω'')` and
-  whose second partials converge in `L²(Ω'')` to a candidate `g`, the
-  candidate `g` is the weak `k`-partial of `w_i_func` on `Ω''`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -56,7 +16,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- The classical second partial derivative of a smooth function. -/
+
 private lemma contDiff_kdi_partial_aux
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i k : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
@@ -79,7 +39,7 @@ private lemma contDiff_kdi_partial_aux
   exact h_apply_k.comp h_fderiv_partial
 
 omit [NeZero d] in
-/-- The first classical partial of a smooth function is smooth. -/
+
 private lemma contDiff_partial_aux
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -92,7 +52,7 @@ private lemma contDiff_partial_aux
   exact h_apply_i.comp h_fderiv_smooth
 
 omit [NeZero d] in
-/-- A smooth function with compact support has compact-support partial. -/
+
 private lemma hasCompactSupport_partial_aux
     {u : E → ℝ} (hu_supp : HasCompactSupport u) (i : Fin d) :
     HasCompactSupport
@@ -100,8 +60,7 @@ private lemma hasCompactSupport_partial_aux
   hu_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
 
 omit [NeZero d] in
-/-- `gψ` (the second classical partial of a smooth-CS function) has compact
-support. -/
+
 private lemma hasCompactSupport_kdi_partial_aux
     {u : E → ℝ} (hu_supp : HasCompactSupport u) (i k : Fin d) :
     HasCompactSupport (fun y : E =>
@@ -113,8 +72,7 @@ private lemma hasCompactSupport_kdi_partial_aux
   exact h_partial_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single k 1)
 
 omit [NeZero d] in
-/-- A continuous compactly-supported function on a finite-volume restricted
-measure is in `L²`. -/
+
 private lemma memLp_two_continuous_compact_support_restrict
     {f : E → ℝ} (hf_cont : Continuous f) (hf_supp : HasCompactSupport f)
     (S : Set E) :
@@ -122,8 +80,7 @@ private lemma memLp_two_continuous_compact_support_restrict
   (hf_cont.memLp_of_hasCompactSupport hf_supp).restrict S
 
 omit [NeZero d] in
-/-- For a smooth function `u`, the smooth `k`-partial of its smooth
-`i`-partial is also the weak `k`-partial of the latter, on any open `Ω`. -/
+
 theorem hasWeakPartialDeriv_kdi_partial_of_smooth
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω : Set E} (hΩ : IsOpen Ω) (i k : Fin d) :
@@ -145,13 +102,7 @@ theorem hasWeakPartialDeriv_kdi_partial_of_smooth
     h_partial_C1
 
 omit [NeZero d] in
-/-- **Per-`n` Fatou bound.** For a smooth function `u` whose forward
-`k`-difference quotients of the smooth `i`-partial are uniformly bounded by
-`M ≥ 0` in `L²(Ω'')`, the classical second partial `∂_k ∂_i u` itself
-satisfies the same `L²(Ω'')` bound. The argument is Fatou applied to the
-sequence `D_{h_j}^k (∂_i u)` with `h_j = 1/(j+1) → 0` and pointwise limit
-`∂_k ∂_i u` (which exists by `tendsto_diffQuot_of_contDiff` on a smooth
-function). -/
+
 theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω'' : Set E}
@@ -271,14 +222,7 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
   exact (ENNReal.rpow_le_rpow_iff h_2_pos).mp h_eLpNorm_sq_le
 
 omit [NeZero d] in
-/-- **Wrapper: weak partial from a strongly-`L²(Ω'')`-convergent
-sequence of smooth second partials.**
 
-Given a smooth approximating sequence `u_seq n` (each smooth and
-compactly supported) whose classical `i`-partial converges to
-`w_i_func` in `L²(Ω'')` and whose classical second partials
-`∂_k ∂_i u_seq n` converge in `L²(Ω'')` to some candidate function `g`,
-the limit `g` is the weak `k`-partial of `w_i_func` on `Ω''`. -/
 theorem hasWeakPartialDeriv_of_strong_L2_limit
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (i k : Fin d)

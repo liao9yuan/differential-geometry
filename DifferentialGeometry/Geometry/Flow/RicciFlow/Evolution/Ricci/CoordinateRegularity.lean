@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution CoordinateRegularity
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -37,8 +37,8 @@ section CoordinateFrameRicciEvolution
 
 open DifferentialGeometry.Tensor.Coordinates
 
-/-- Fixed-time spatial differentiability of canonical coordinate inverse
-metric components at the coordinate center. -/
+
+
 theorem coordInvMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -49,8 +49,8 @@ theorem coordInvMdiff
   simpa [coordInv] using
     DifferentialGeometry.Tensor.Coordinates.gInvComp_mdiffAt (I := I) (S.family.metric t) x₀ a b
 
-/-- Fixed-time spatial differentiability of canonical coordinate inverse
-metric components throughout the coordinate-frame domain. -/
+
+
 theorem coordInvMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -62,8 +62,8 @@ theorem coordInvMdiffOn
   simpa [coordInv] using
     DifferentialGeometry.Integral.Connection.coordGInvMdiff (I := I) (S.family.metric t) x₀ hx a b
 
-/-- Fixed-time spatial differentiability of coordinate-frame metric
-components at the coordinate center. -/
+
+
 theorem coordMetricMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -80,8 +80,8 @@ theorem coordMetricMdiff
       (coordinateFrameSet_open (I := I) x₀)
       (coordinateFrameAt_mem (I := I) x₀) a b
 
-/-- Fixed-time spatial differentiability of coordinate-frame metric
-components throughout the coordinate-frame domain. -/
+
+
 theorem coordMetricMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -99,8 +99,8 @@ theorem coordMetricMdiffOn
       (coordinateFrameSet_open (I := I) x₀)
       hx a b
 
-/-- The canonical coordinate inverse metric is covariantly constant at the
-coordinate center. -/
+
+
 theorem coordInvCovZero
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -123,8 +123,8 @@ theorem coordInvCovZero
     (fun a b => coordMetricMdiff (I := I) S x₀ (t : Real) a b)
     d k l
 
-/-- The canonical coordinate inverse metric is covariantly constant
-throughout the coordinate-frame domain. -/
+
+
 theorem coordInvCovZeroOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -148,8 +148,8 @@ theorem coordInvCovZeroOn
     (fun a b => coordMetricMdiffOn (I := I) S x₀ (t : Real) x hx a b)
     d k l
 
-/-- Fixed-time spatial differentiability of canonical coordinate-frame Ricci
-components throughout the coordinate-frame domain. -/
+
+
 theorem coordRicciMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -203,8 +203,8 @@ theorem coordRicciMdiff
       (fun q => (hV q).of_le (by simp))
   simpa [hfun] using hEval
 
-/-- Fixed-time spatial differentiability of canonical coordinate components of
-`∇ Ric` at the coordinate center. -/
+
+
 theorem coordNablaReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -269,8 +269,8 @@ theorem coordNablaReg
       frame]
   simpa [hfun] using hmdiff
 
-/-- Fixed-time spatial differentiability of canonical coordinate components of
-`∇ Ric` throughout the coordinate-frame domain. -/
+
+
 theorem coordNablaRegOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -335,8 +335,8 @@ theorem coordNablaRegOn
       frame]
   simpa [hfun] using hmdiff
 
-/-- The canonical coordinate components of `∇ Ric` realize the coordinate
-covariant-derivative formula at the center. -/
+
+
 theorem coordNablaReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -466,8 +466,8 @@ theorem coordNablaReal
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-/-- The canonical coordinate components of `∇ Ric` realize the coordinate
-covariant-derivative formula throughout the coordinate-frame domain. -/
+
+
 theorem coordNablaRealOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -595,12 +595,12 @@ theorem coordNablaRealOn
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-/-- Canonical second Ricci derivative components agree with the coordinate
-formula used by `coordNab2Ric`.
 
-This is the local Section 6 producer that lets the contracted-commutator route
-use the intrinsic `∇² Ric` tensor while keeping the coordinate-frame component
-formula used by Lemma 6.3. -/
+
+
+
+
+
 theorem coordNab2Can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -725,6 +725,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (0 : Fin 3)
       (fun p : Idx => Γ d a p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
+            (∑ p : Idx, Γ d a p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
+              (Γ d a p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
@@ -737,7 +745,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
                 (Γ d a p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d a p * N p i j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -769,6 +778,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (1 : Fin 3)
       (fun p : Idx => Γ d i p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
+            (∑ p : Idx, Γ d i p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
+              (Γ d i p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
@@ -781,7 +798,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
                 (Γ d i p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d i p * N a p j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -813,6 +831,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (2 : Fin 3)
       (fun p : Idx => Γ d j p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
+            (∑ p : Idx, Γ d j p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
+              (Γ d j p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
@@ -825,7 +851,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
                 (Γ d j p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d j p * N a i p := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -865,8 +892,8 @@ theorem coordNab2Can
           rw [hcorr]
           ring
 
-/-- Coordinate-frame fixed-base derivative of metric components, obtained
-directly from the Ricci-flow metric equation at regular times. -/
+
+
 theorem coordMetricDeriv
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -889,7 +916,7 @@ theorem coordMetricDeriv
   · intro t ht x hx
     exact
       (coordMetricSmoothAt (I := I) S hS x₀ ⟨t, ht⟩ x hx a b).of_le
-        (by simp)
+        (WithTop.coe_le_coe.mpr le_top)
   · intro s hs x hx
     exact coordMetricMdiffOn (I := I) S x₀ s x hx a b
   · intro t ht x hx
@@ -901,8 +928,8 @@ theorem coordMetricDeriv
         (I := I) S hS (coordinateFrameAt (I := I) x₀)
         ⟨t, ht⟩ x a b
 
-/-- Coordinate-frame fixed-base metric covariant-derivative variation, once
-the scalar fixed-base mixed derivative of metric components is available. -/
+
+
 theorem coordMetricMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -932,8 +959,8 @@ theorem coordMetricMix
     (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀))
     (coordNablaRealOn (I := I) S x₀)
 
-/-- Canonical coordinate-frame Christoffel evolution once the fixed-base
-metric mixed derivative has been produced. -/
+
+
 theorem coordGammaEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -968,8 +995,8 @@ theorem coordGammaEvol
       (M := M)
       (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀)))
 
-/-- Coordinate Christoffel coefficients are the fixed-chart Christoffel formula
-for the metric at that time. -/
+
+
 theorem coordGammaForm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -986,8 +1013,8 @@ theorem coordGammaForm
     (DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
       (I := I) (g := S.family.metric s) x₀ hx i j k).symm
 
-/-- Fixed-time spatial differentiability of canonical coordinate Christoffel
-components. -/
+
+
 theorem coordGammaMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1055,8 +1082,8 @@ theorem coordGammaMdiff
     rw [hbasis]
   exact hmdiff.congr_of_eventuallyEq heq.symm
 
-/-- Spatial differentiability of the canonical raised Ricci-flow Christoffel
-RHS. -/
+
+
 theorem coordGammaRhsMd
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1115,8 +1142,8 @@ theorem coordGammaRhsMd
     filter_upwards with y
     simp [Finset.sum_apply])
 
-/-- Spacetime smoothness of fixed-chart coordinate derivatives of metric
-components for the canonical metric family. -/
+
+
 private theorem coordDgSmAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1125,7 +1152,7 @@ private theorem coordDgSmAt
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         fderivWithin Real
           (DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component
@@ -1139,8 +1166,8 @@ private theorem coordDgSmAt
   let X : (y : M) -> TangentSpace I y := frame a
   have hF :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
-        (3 : WithTop ℕ∞) F ((t : Real), x) :=
-    (coordMetricSmoothAt (I := I) S hS x₀ t x hx i j).of_le (by simp)
+        (∞ : WithTop ℕ∞) F ((t : Real), x) :=
+    coordMetricSmoothAt (I := I) S hS x₀ t x hx i j
   have hX :
       ContMDiffAt I (I.prod 𝓘(Real, E))
         (∞ : WithTop ℕ∞) (T% X) x :=
@@ -1148,11 +1175,11 @@ private theorem coordDgSmAt
       (coordinateFrameSet_open (I := I) x₀) hx a
   have hD :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
-        (2 : WithTop ℕ∞)
+        (∞ : WithTop ℕ∞)
         (fun p : Real × M =>
           extDerivFun (I := I) (fun y : M => F (p.1, y)) p.2 (X p.2))
         ((t : Real), x) :=
-    prodExtDerivAt (I := I) (F := F) (X := X) hF hX
+    prodExtDerivAt_inf (I := I) (F := F) (X := X) hF hX
   have heq :
       (fun p : Real × M =>
         fderivWithin Real
@@ -1173,8 +1200,8 @@ private theorem coordDgSmAt
     simpa [F, X, frame, metricCompInFrame, DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
   exact hD.congr_of_eventuallyEq heq
 
-/-- Spacetime smoothness of the fixed-chart Christoffel formula for the
-canonical metric family. -/
+
+
 private theorem gammaRhsSm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1183,7 +1210,7 @@ private theorem gammaRhsSm
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
           (I := I) (S.family.metric p.1) x₀ i j k (extChartAt I x₀ p.2))
@@ -1193,12 +1220,12 @@ private theorem gammaRhsSm
   refine contMDiffAt_const.mul ?_
   refine ContMDiffAt.sum fun l _ => ?_
   have hInv :
-      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           coordInv (I := I) S x₀ p.1 p.2 k l) ((t : Real), x) :=
-    (coordInvSmoothAt (I := I) S hS x₀ t x hx k l).of_le (by simp)
+    coordInvSmoothAt (I := I) S hS x₀ t x hx k l
   have hInv' :
-      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           (Module.finBasis Real E).coord k
             ((ContinuousLinearMap.inverse
@@ -1213,13 +1240,13 @@ private theorem gammaRhsSm
   have h₃ := coordDgSmAt (I := I) S hS x₀ t x hx l i j
   exact hInv'.mul ((h₁.add h₂).sub h₃)
 
-/-- Spacetime smoothness of canonical coordinate Christoffel components.
 
-This is the family version of the Levi-Civita Christoffel formula:
-`Γ = 1/2 g^{-1} * (∂g + ∂g - ∂g)`, with `g = S.family.metric t`.
-It should be proved from `coordMetricSmoothAt`, smooth inversion of the
-coordinate Gram matrix, and the fixed-chart Christoffel formula. -/
-theorem coordGammaSmoothAt
+
+
+
+
+
+theorem coordGammaSmoothInf
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1227,7 +1254,7 @@ theorem coordGammaSmoothAt
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         christoffelSymbolInFrame
           (S.family.connection p.1) (coordinateFrameAt (I := I) x₀)
@@ -1250,8 +1277,26 @@ theorem coordGammaSmoothAt
     exact coordGammaForm (I := I) S x₀ p.1 hp i j k
   exact hmodel.congr_of_eventuallyEq heq
 
-/-- Regular-time fixed-base mixed derivative for canonical coordinate
-Christoffel components. -/
+
+theorem coordGammaSmoothAt
+    [I.Boundaryless]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (i j k : CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      (fun p : Real × M =>
+        christoffelSymbolInFrame
+          (S.family.connection p.1) (coordinateFrameAt (I := I) x₀)
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀) p.2 i j k)
+      ((t : Real), x) := by
+  exact (coordGammaSmoothInf (I := I) S hS x₀ t x hx i j k).of_le
+    (WithTop.coe_le_coe.mpr le_top)
+
+
+
 theorem coordGammaMix
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1294,8 +1339,8 @@ theorem coordGammaMix
   · intro t ht x hx
     exact hGamma ⟨t, ht⟩ x hx i j k
 
-/-- The canonical coordinate second Ricci derivative is the coordinate-frame
-connection formula used by Lemma 6.3. -/
+
+
 theorem coordNab2At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1309,8 +1354,8 @@ theorem coordNab2At
         t x₀ d a i j := by
   rfl
 
-/-- The canonical coordinate second Ricci derivative is the local-frame
-connection formula throughout the coordinate-frame domain. -/
+
+
 theorem coordNab2On
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -1,57 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-/-!
-# The Euclidean variational (linearized-flow) ODE from a jointly `C^∞` flow
-
-For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional Banach
-space `E`, jointly `C^∞` in `(t, x)`, `exists_isLocalFlow_contDiffOn_top`
-(`VariationalODE/BanachIC.lean`) produces a local Picard–Lindelöf flow `Φ : E × ℝ → E`
-together with a strictly interior open neighbourhood
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` on which `Φ` is jointly `C^∞`.
-
-This file extracts from that flow the **variational / linearized-flow ODE** for the
-spatial Fréchet derivative `s ↦ D_x Φ(·, s)`.  Writing
-`Dx s := fderiv ℝ (fun y => Φ (y, s)) x` and `A s := fderiv ℝ (f s) (Φ (x, s))`, the
-result is
-
-  `HasDerivAt (fun s => Dx s) ((A s).comp (Dx s)) s`
-
-at every strictly interior `(x, s)`, i.e. `∂_s (D_x Φ) = (D_y f)(s, Φ) · (D_x Φ)`.
-
-## Proof idea
-
-The flow ODE clause of `IsLocalFlow` gives `∂_s Φ(x, s) = f(s, Φ(x, s))`.  Since `Φ`
-is jointly `C^∞` (hence `C^2`), its second Fréchet derivative is symmetric (Clairaut,
-`ContDiffAt.isSymmSndFDerivAt`).  Symmetry swaps a spatial derivative past a temporal
-one:
-
-* `∂_s (D_x Φ · δ) = fderiv (fderiv Φ) (x,s) (inl δ) (inr 1)` (differentiate the
-  spatial slice in time);
-* `fderiv (fderiv Φ) (x,s) (inr 1) (inl δ) = D_x (∂_s Φ) · δ
-    = D_x (f(s, Φ)) · δ = (A s) (Dx s δ)` (differentiate the flow ODE in space, chain
-  rule on the moving point `Φ`).
-
-Clairaut equates the two, giving the per-direction variational ODE; a
-`ContinuousLinearMap.ext` over `δ` repackages it as the operator-valued statement.
-
-The only joint-`C^∞` hypothesis is `ContDiff ℝ ∞ (uncurry f)` on the **model space**
-`E`; this is exactly the input consumed by `exists_isLocalFlow_contDiffOn_top`.
-
-## Main results
-
-* `IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply`: the per-direction (`δ`)
-  variational ODE.
-* `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`: the operator-valued variational ODE
-  (the headline).
-
-## Status of the manifold lift
-
-The manifold-level identity `RawVariationalIdentity` (in
-`VariationalEquation/VariationalFlow.lean`) is *not* derived here; the precise chart-lift
-and connection-reconciliation that would close that gap are documented at the end of
-this file.
--/
 
 noncomputable section
 
@@ -64,7 +13,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The affine line `r ↦ x + r • δ` has derivative `δ` at `0`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem hasDerivAt_line (x δ : E) :
     HasDerivAt (fun rr : ℝ => x + rr • δ) δ 0 := by
   have h1 : HasDerivAt (fun rr : ℝ => rr • δ) δ 0 := by
@@ -73,10 +22,7 @@ private theorem hasDerivAt_line (x δ : E) :
     (hasDerivAt_const (0 : ℝ) x).add h1
   simpa using h2
 
-/-- **Spatial partial derivative as the joint derivative precomposed with `inl`.**
-
-Wherever `Φ` is differentiable at `(x, s)`, the Fréchet derivative of the spatial slice
-`fun y => Φ (y, s)` at `x` is `(fderiv ℝ Φ (x, s)).comp (inl ℝ E ℝ)`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem partial_spatial_fderiv_eq_comp_inl
     {x : E} {s : ℝ} (hΦdiff : DifferentiableAt ℝ Φ (x, s)) :
     fderiv ℝ (fun y => Φ (y, s)) x
@@ -86,11 +32,7 @@ theorem partial_spatial_fderiv_eq_comp_inl
     hΦdiff.hasFDerivAt.comp x (hasFDerivAt_prodMk_left x s)
   exact hslice.fderiv
 
-/-- **Joint derivative on the time direction equals the vector field along the orbit.**
-
-At an interior time `s ∈ Ioo tmin tmax` and a spatial point `x ∈ closedBall x₀ r`, the
-joint Fréchet derivative of `Φ` evaluated on the unit time direction `(0, 1) = inr 1`
-equals `f s (Φ (x, s))`, by the flow-ODE clause of `IsLocalFlow`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem flow_joint_fderiv_inr_eq
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x : E} {s : ℝ} (hx : x ∈ closedBall x₀ r) (hs : s ∈ Ioo tmin tmax)
@@ -108,7 +50,7 @@ theorem flow_joint_fderiv_inr_eq
     exact hwithin.hasDerivAt (Icc_mem_nhds hs.1 hs.2)
   exact hcurve.unique hflow
 
-/-- Joint `C^∞` of `Φ` at every point of an open set `U` on which `Φ` is `C^∞`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem contDiffAt_of_mem {U : Set (E × ℝ)} (hUopen : IsOpen U)
     (hΦsmooth : ContDiffOn ℝ ∞ Φ U) {q : E × ℝ} (hq : q ∈ U) :
     ContDiffAt ℝ ∞ Φ q :=
@@ -122,13 +64,8 @@ variable (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
   (hΦsmooth : ContDiffOn ℝ ∞ Φ U)
 
 include hΦ hf hUopen hΦsmooth in
-/-- **Per-direction variational ODE.**
 
-Let `Φ` be a local flow of `f`, jointly `C^∞` on an open set `U`, with `(x, s) ∈ U`
-strictly interior to the flow domain (`x ∈ ball x₀ r`, `s ∈ Ioo tmin tmax`).  Then for
-every fixed direction `δ : E`, the path `u ↦ fderiv ℝ (fun y => Φ (y, u)) x δ` has
-time-derivative
-`fderiv ℝ (f s) (Φ (x, s)) (fderiv ℝ (fun y => Φ (y, s)) x δ)` at `s`. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply
     {x : E} {s : ℝ} (hxsU : (x, s) ∈ U)
     (hx : x ∈ ball x₀ r) (hs : s ∈ Ioo tmin tmax) (δ : E) :
@@ -222,19 +159,7 @@ theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply
 
 end PerDirection
 
-/-- **Operator-valued variational / linearized-flow ODE (Euclidean core).**
-
-For the jointly-`C^∞` local flow `Φ` of `f` on an open set `U`, at a strictly interior
-point `(x, s)` (`x ∈ ball x₀ r`, `s ∈ Ioo tmin tmax`), the spatial Fréchet derivative
-`u ↦ fderiv ℝ (fun y => Φ (y, u)) x` satisfies the linearized-flow ODE
-
-  `HasDerivAt (fun u => fderiv ℝ (fun y => Φ (y, u)) x)
-      ((fderiv ℝ (f s) (Φ (x, s))).comp (fderiv ℝ (fun y => Φ (y, s)) x)) s`,
-
-i.e. `∂_s (D_x Φ) = (D_y f)(s, Φ) · (D_x Φ)`.
-
-This is derived entirely from the existing `C^∞`-flow theorem and the flow-ODE clause of
-`IsLocalFlow`; no variational identity is assumed. -/
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiff ℝ ∞ (uncurry f))

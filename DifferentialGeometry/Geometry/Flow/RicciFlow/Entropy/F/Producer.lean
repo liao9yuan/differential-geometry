@@ -17,18 +17,18 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F producer
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
 
-These are the formula-5.10 producer wrappers: the constructed metric-trace field
-`tr_g A` supplies both the raw divergence and the tangent action, the
-connection-trace component geometry (through the basis-invariance bridge)
-supplies the weighted-divergence cancellation, and the moving-volume
-per-time IBP comparison closes the book-facing endpoint `formula510_producer`.
--/
+
+
+
+
+
+
+
+
+
+
 
 section GeometryFormula510
 
@@ -41,9 +41,9 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Formula 5.10 using the intrinsic metric trace field `tr_g A` of a smooth
-connection-variation tensor.  This specializes `formula510_of_connTrace` with
-the smooth section constructed in `Tensor.RSTensor.MetricTrace.Connection`. -/
+
+
+
 theorem formula510_of_connTraceField
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -136,10 +136,10 @@ theorem formula510_of_connTraceField
     hmeas hfirst hfinal_int hdiv_int hshift_int hcorr_int
     hdivTrace hactionTrace hweighted hlap hgradSq hshift hqeq
 
-/-- Formula 5.10 assembly with the raw divergence and action trace supplied by
-the constructed field `tr_g A` itself.  The remaining geometric bridge is the
-single pointwise identity saying the weighted-divergence component produced by
-the `δ(Ric + Hess f)` calculation is `div(tr_g A) - (tr_g A)(f)`. -/
+
+
+
+
 theorem formula510_of_trace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -227,13 +227,13 @@ theorem formula510_of_trace
     (connTraceAction_eq (I := I) g A potential)
     hweighted hlap hgradSq hshift hqeq
 
-/-- Formula 5.10 with the weighted-divergence trace supplied by the coordinate
-components of a global connection-variation tensor `A`.
 
-This is the formula-5.10-facing assembly point after the raw divergence bridge:
-the `∇ g^{-1}=0` cancellation and the coordinate `∇A` formula are consumed here
-to provide the weighted-divergence cancellation.  The Levi–Civita connection is
-fixed as `LeviCivita g`. -/
+
+
+
+
+
+
 theorem formula510_of_components
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -401,13 +401,13 @@ theorem formula510_of_components
     hpotential hq hmeas hfirst hfinal_int hdiv_int hshift_int hcorr_int
     hweighted hlap hgradSq hshift hqeq
 
-/-- Formula 5.10 endpoint producer.
 
-The input first variation is the moving-volume derivative of the original
-`R + |∇f|^2` bracket, and the theorem uses the per-time weighted IBP comparison
-with the closed `R + Δf` bracket plus the connection-trace component geometry
-(through the basis-invariance bridge) to produce `FFunctionalFormula510`.  The
-Levi–Civita connection is fixed as `LeviCivita (G.metric s0)`. -/
+
+
+
+
+
+
 theorem formula510_producer
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

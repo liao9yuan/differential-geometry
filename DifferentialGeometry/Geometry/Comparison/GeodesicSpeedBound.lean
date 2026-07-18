@@ -18,19 +18,7 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Constant speed, length bounds, and metric limits along a geodesic
-
-Upstream Hopf-Rinow machinery: the chart-coordinate velocity identities, the
-constant-`g`-speed property of an (intrinsic moving-foot) geodesic, the
-Riemannian-distance length bounds it forces, the resulting Cauchy / position /
-velocity limits at a finite escape time, and the metric-to-manifold topology
-bridges used to consume those limits downstream.
-
-The headline assembly lives in `Comparison.HopfRinow`, which imports this file.
--/
 
 noncomputable section
 
@@ -50,7 +38,7 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -58,9 +46,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-/-- Single-point chart-coordinate identity: for `s` with `γ s` in the chart
-source at `α` and `γ` mdifferentiable at `s`, the trivialisation-`α`
-coordinate of `mfderiv γ s 1` equals `fderiv (extChartAt I α ∘ γ) s 1`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem chartCoord_mfderiv_eq_fderiv_at
     {γ : ℝ → M} {α : M} {s : ℝ}
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
@@ -88,8 +76,9 @@ theorem chartCoord_mfderiv_eq_fderiv_at
     rw [← hmf_eq_f, hchain]; rfl
   rw [hRHS]; rfl
 
-/-- Single-point raw-form identity: the raw `mfderiv γ s 1 : E` equals the
-inverse trivialisation `symmL` of `fderiv (extChartAt I α ∘ γ) s 1`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem raw_mfderiv_eq_symmL_fderiv_at
     {γ : ℝ → M} {α : M} {s : ℝ}
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
@@ -115,16 +104,9 @@ theorem raw_mfderiv_eq_symmL_fderiv_at
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
-/-- **Constant speed of a geodesic.** From `\nabla_{\gamma'} \gamma' = 0`
-and metric compatibility of Levi-Civita, the function
-`t \mapsto \langle \gamma'(t), \gamma'(t)\rangle_g` is constant.
-
-The intrinsic geodesic predicate `IsGeodesic g γ` is the pointwise
-moving-foot equation; differentiating the speed integrand additionally
-requires `γ` to be `C^1`, exposed here as the minimal separable
-regularity hypothesis `hγ_C1` (in the canonical use case the geodesic is
-the smooth ODE flow, which is `C^1` a fortiori). -/
-theorem gc_constant_speed
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+theorem geodesic_speed_constant
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_C1 : ContMDiff 𝓘(ℝ, ℝ) I 1 γ) :
     ∀ s t : ℝ,
@@ -226,16 +208,8 @@ theorem gc_constant_speed
     fun s t => is_const_of_deriv_eq_zero hF_diff hF_deriv_eq s t
   exact hF_const
 
-/-- **Pointwise vanishing of the speed derivative on an open set.**  If `γ`
-satisfies the moving-foot geodesic equation at every point of an open set `s`
-and is `ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`, then the speed-squared function
-`F t = g.inner (γ t) (γ'(t)) (γ'(t))` has derivative `0` at every `t ∈ s`.
-
-This is the open-set generalisation of the pointwise `hF_deriv` step inside
-`gc_constant_speed`: the differentiation of the speed integrand is purely
-local at `t`, requiring only the moving-foot geodesic equation at `t` and the
-mdifferentiability of `γ` on a neighbourhood of `t` (supplied here by the
-`ContMDiffOn` hypothesis on the open set `s`). -/
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem isGeodesicOn_speedSq_hasDerivAt_zero
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -332,18 +306,8 @@ theorem isGeodesicOn_speedSq_hasDerivAt_zero
     rw [chartGramOnE_def, hinv]
   exact hcov0.congr_of_eventuallyEq hF_eq
 
-/-- **Constant speed of a geodesic on an open interval.**  If `γ` satisfies the
-moving-foot geodesic equation at every point of an open set `s` and is
-`ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`, then for any two times `t₀, t₁ ∈ s` whose
-spanning closed interval `Icc (min t₀ t₁) (max t₀ t₁)` lies inside `s`, the
-`g`-speed-squared agrees:
-`g.inner (γ t₀) (γ'(t₀)) (γ'(t₀)) = g.inner (γ t₁) (γ'(t₁)) (γ'(t₁))`.
-
-The closed-interval hypothesis is automatic when `s` is an interval (in
-particular `Ioo a₀ b`), which is the use case for the `Ioo`-seeded
-forward-completeness engine.  The proof feeds the pointwise speed-derivative
-vanishing `isGeodesicOn_speedSq_hasDerivAt_zero` to the convex-set constancy
-lemma `Convex.is_const_of_fderivWithin_eq_zero`. -/
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem isGeodesicOn_speedSq_const
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t₀ t₁ : ℝ}
     (hs : IsOpen s)
@@ -383,29 +347,11 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Length-distance bound along a geodesic.** With constant `g`-speed
-`c := (g.inner p v v)^{1/2}` along the maximal geodesic at `(p, v)`,
-for any `s \le t` in the maximal interval the Riemannian extended
-distance between `\gamma(s)` and `\gamma(t)` is bounded by
-`c \cdot (t - s)`.
 
-The two analytic facts this depends on are exposed as explicit
-hypotheses, both stated purely in terms of the bundle objects so they
-match whatever fibre norm is active at the call site (the
-`RiemannianBundle`-derived norm, with the project's `Tensor0SBundle`
-fibre instances locally suppressed):
-
-* `hγ_smooth` — the `C¹` (time-)smoothness of the maximal geodesic on
-  the compact parameter subinterval `Icc s t`.  This is the
-  ODE-regularity content of an integral curve of the (smooth)
-  geodesic spray; it is consumed by Mathlib's
-  `riemannianEDist_le_pathELength`.
-* `hSpeedBound` — the per-parameter bound of the bundle enorm of the
-  velocity by the constant `√(g.inner p v v)`.  This single inequality
-  packages both the bundle-norm ↔ `√(g.inner …)` compatibility and the
-  constant-speed property of a geodesic in the exact form the
-  `pathELength` estimate needs. -/
-theorem gc_length_distance_bound
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [PseudoEMetricSpace M]
+  [IsRiemannianManifold I M] in
+theorem maximalGeodesic_edist_le_speed_mul_time
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {s t : ℝ}
     (_hs : s ∈ maximalGeodesicInterval (I := I) g p v)
@@ -460,12 +406,10 @@ variable [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Escape sequences along a maximal geodesic are Cauchy.** If the
-maximal interval of the geodesic at `(p, v)` is bounded above by
-`T < \infty`, then for every monotone real sequence `t_n \to T` inside
-the maximal interval the image sequence `\gamma(t_n)` is Cauchy in
-`riemannianEDist`. -/
-theorem gc_escape_cauchy
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompleteSpace M] in
+theorem maximalGeodesic_cauchySeq_of_tendsto_sup
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -505,7 +449,7 @@ theorem gc_escape_cauchy
   have h_bound :
       riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
     have :=
-      gc_length_distance_bound (I := I) g p v (s := s) (t := t)
+      maximalGeodesic_edist_le_speed_mul_time (I := I) g p v (s := s) (t := t)
         hs_mem ht_mem hst (hγ_smooth.contMDiffOn) hSpeedBound
     simpa [hγ_def, hc_def] using this
   have h_edist_bound :
@@ -552,17 +496,10 @@ theorem gc_escape_cauchy
           exact h_cdelta_lt_real
     _ < ε := hδ₀_ofReal_lt
 
-/-- **Velocity limit at the finite escape time.** If the maximal
-interval of the geodesic at `(p, v)` is bounded above by `T < \infty`
-and the metric limit `y := \lim \gamma(t_n)` exists by completeness,
-then there exists a tangent vector `w \in T_y M` with
-`(g.inner y) w w = (g.inner p) v v`. (The existential statement encodes
-the geometric content: the squared speed is preserved by the limit. A
-witness is produced by scaling any nonzero tangent vector at `y` by the
-appropriate factor `\sqrt{(g.inner p) v v / (g.inner y) u u}`; the
-limit hypotheses, while motivating the precise value, are not needed
-to discharge the existential.) -/
-theorem gc_velocity_limit
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+  [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+theorem maximalGeodesic_limit_exists_tangent_speed_eq
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -600,24 +537,9 @@ theorem gc_velocity_limit
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Length-distance bound for a general `C¹` curve with bounded speed.**
-For a curve `γ` that is `C¹` on `Icc s t` with `s ≤ t`, whose velocity
-enorm is bounded by `ENNReal.ofReal c` throughout, the Riemannian extended
-distance between the endpoints is at most `ENNReal.ofReal (c * (t - s))`.
 
-This is the moving-foot / general-curve analogue of
-`gc_length_distance_bound` (which is specialised to the fixed
-basepoint spray `maximalGeodesic`): the proof is the identical
-`pathELength`-integral computation, dominating the velocity-enorm
-integrand by the constant `ofReal c`, evaluating the constant
-set-lintegral over `Icc s t`, and chaining through Mathlib's
-`riemannianEDist_le_pathELength`.
-
-The local `attribute [-instance]` suppresses the project's `Tensor0SBundle`
-fibre norms, so the velocity-enorm hypothesis and the `riemannianEDist`
-conclusion both resolve to the `RiemannianBundle`-derived norm — the same
-norm against which `IsRiemannianManifold.out` is stated downstream. -/
-theorem gc_length_distance_bound_curve
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+theorem curve_edist_le_speed_mul_time
     {γ : ℝ → M} {s t c : ℝ}
     (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t))
@@ -654,30 +576,11 @@ theorem gc_length_distance_bound_curve
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Full position limit at a finite endpoint.** Let `γ` be a curve that
-is `C¹` on `Iio b` with velocity enorm bounded by `ENNReal.ofReal c`
-throughout `Iio b` (the constant-speed bound a unit-speed geodesic
-supplies a fortiori).  Then `γ` converges, as `t → b⁻`, to a single limit
-point `y : M` — not merely subsequentially: the whole filter
-`Filter.map γ (𝓝[<] b)` converges.
 
-The proof shows `Filter.map γ (𝓝[<] b)` is Cauchy in the
-`PseudoEMetricSpace` uniformity via the `EMetric.cauchy_iff`
-ε-characterisation: for a target tolerance `ε`, choosing a real
-`δ₀ ∈ (0, ε)` and the left interval `Ioo (b - δ₀/(c+1)) b` makes any two
-of its `γ`-images closer than `ε`, by the constant-speed length-distance
-bound `gc_length_distance_bound_curve` (converted from
-`riemannianEDist` to `edist` through `IsRiemannianManifold.out`).
-Completeness then yields the limit `y` via
-`cauchy_map_iff_exists_tendsto`.
-
-The limit is taken in the `PseudoEMetricSpace`-derived topology of `M`
-(written explicitly with `PseudoEMetricSpace.toUniformSpace.toTopologicalSpace`),
-which is the natural topology for the metric-completeness argument; on a
-Riemannian manifold this coincides with the underlying manifold topology,
-but that identification is a separate compatibility statement and is not
-needed for the convergence content here. -/
-theorem gc_position_limit
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [ConnectedSpace M] in
+theorem curve_exists_limit_of_bounded_speed
     {γ : ℝ → M} {a b c : ℝ} (hab : a < b) (hc_nonneg : 0 ≤ c)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a b))
     (hSpeedBound : ∀ τ ∈ Set.Ioo a b,
@@ -728,7 +631,7 @@ theorem gc_position_limit
       hγ_smooth.mono hIcc_sub
     have h_bound :
         riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) :=
-      gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
+      curve_edist_le_speed_mul_time (I := I) (γ := γ) (s := s) (t := t)
         (c := c) hc_nonneg hst hγ_Icc
         (fun τ hτ => hSpeedBound τ (hIcc_sub hτ))
     have h_edist_bound :
@@ -762,11 +665,10 @@ theorem gc_position_limit
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Manifold-neighbourhood membership from a vanishing Riemannian distance.**
-If `f a` approaches `p` in the sense that `riemannianEDist I p (f a) → 0` along a
-filter `l`, then `f a` eventually lies in any manifold-topology neighbourhood `s`
-of `p`.  Purely intrinsic (no `edist`); the engine for the metric-to-manifold
-topology transfer. -/
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+  [CompleteSpace M] in
 theorem eventually_mem_nhds_of_tendsto_riemannianEDist
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     {α : Type*} {l : Filter α} {f : α → M} {p : M} {s : Set M} (hs : s ∈ 𝓝 p)
@@ -783,10 +685,8 @@ theorem eventually_mem_nhds_of_tendsto_riemannianEDist
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Riemannian distance vanishes along a metric-topology limit.**
-If `f a → p` in the ambient `PseudoEMetricSpace` (`edist`) topology, then the
-intrinsic `riemannianEDist I p (f a) → 0`.  Uses `IsRiemannianManifold.out`
-(`edist = riemannianEDist I`) to read the metric convergence intrinsically. -/
+
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompleteSpace M] in
 theorem tendsto_riemannianEDist_of_tendsto_metric_nhds
     {α : Type*} {l : Filter α} {f : α → M} {p : M}
     (h : Tendsto f l (@nhds M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace p)) :
@@ -800,11 +700,9 @@ theorem tendsto_riemannianEDist_of_tendsto_metric_nhds
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Topology-compatibility bridge (membership form).**
-A metric-topology limit `f a → p` eventually lands in any manifold-topology
-neighbourhood of `p`.  Composition of
-`tendsto_riemannianEDist_of_tendsto_metric_nhds` with
-`eventually_mem_nhds_of_tendsto_riemannianEDist`. -/
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [ConnectedSpace M] [CompleteSpace M] in
 theorem eventually_mem_nhds_of_tendsto_metric_nhds
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     {α : Type*} {l : Filter α} {f : α → M} {p : M} {s : Set M} (hs : s ∈ 𝓝 p)
@@ -815,12 +713,9 @@ theorem eventually_mem_nhds_of_tendsto_metric_nhds
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Topology-compatibility bridge (tendsto form).**
-A metric-topology limit `f a → p` is also a manifold-topology limit.  This is the
-clean transfer lemma: it lets the endpoint limit produced by
-`gc_position_limit` (in the `PseudoEMetricSpace` topology) be consumed by the
-chart-coordinate / velocity-bound machinery (in the manifold `ChartedSpace`
-topology). -/
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [ConnectedSpace M] [CompleteSpace M] in
 theorem tendsto_nhds_of_tendsto_metric_nhds
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     {α : Type*} {l : Filter α} {f : α → M} {p : M}

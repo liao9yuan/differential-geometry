@@ -3,70 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-/-!
-# Analytic-semigroup smoothing estimates for the tensor heat semigroup
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the heat
-semigroup `e^{t Δ_∇}` of the rough Laplacian acts diagonally on the
-eigenbasis `tensorResolventHilbertEigenbasisSigma`: it multiplies the
-`i`-th coordinate by `exp(-λᵢ t)`, with `λᵢ ≥ 0` the connection-Laplacian
-eigenvalue.
-
-On the spectral Sobolev scale this diagonal action is the
-**parabolic-smoothing** operator: for `t > 0` it maps `Hᵃ` into `Hᵇ` for
-*every* `b` — even `b > a` — gaining arbitrarily many Sobolev
-derivatives. The quantitative statement is the analytic-semigroup bound
-
-  `‖e^{t Δ_∇}‖_{Hᵃ → Hᵇ} ≤ C · t^{-(b-a)/2}`   for `b ≥ a`, `0 < t ≤ 1`,
-
-with `C` depending only on `b - a`. Spectrally this reduces to the
-one-variable estimate
-
-  `(1 + λ)^μ · exp(-2λt) ≤ C(μ) · t^{-μ}`   for `μ ≥ 0`, `0 < t ≤ 1`,
-
-the sup over `λ ≥ 0` being attained near `λ ≈ μ/(2t)`.
-
-## Range of the smoothing exponent
-
-The eigenvalue `λ = 0` occurs (parallel tensors lie in the kernel of the
-rough Laplacian), and the `Hᵇ` weight `(1 + λ)^b` does not vanish there.
-At `λ = 0` the bound reads `1 ≤ C(μ) · t^{-μ}`, which fails for large
-`t`. The genuine smoothing estimate is therefore a **short-time**
-statement: `0 < t ≤ 1` (any fixed finite horizon works, with a constant
-depending on the horizon). For the long-time direction the operator is
-merely a contraction `Hᵃ → Hᵃ`. Both facts are exactly what the
-downstream short-time existence theory consumes.
-
-## Main definitions
-
-* `tensorSmoothingConst μ` — the explicit smoothing constant
-  `max 1 ((μ/2)^μ · exp(-μ) · exp 2)`.
-* `tensorHeatSemigroupHs t ht` — the heat semigroup as a
-  continuous linear map `Hᵃ →L[ℝ] Hᵇ` for `0 < t`, multiplying
-  coordinate `i` by `exp(-λᵢ t)`, with the target exponent `b` free.
-
-## Main results
-
-* `tensorSmoothingScalarBound` — the scalar smoothing estimate
-  `(1+λ)^μ · exp(-2λt) ≤ tensorSmoothingConst μ · t^{-μ}` for `μ ≥ 0`,
-  `0 < t ≤ 1`, `λ ≥ 0`.
-* `tensorHeatSemigroupHs_coeff` — the coordinate formula
-  `(e^{tΔ} T).coeff i = exp(-λᵢ t) · T.coeff i`.
-* `tensorHeatSemigroupHs_opNorm_le` — the smoothing estimate
-  `‖e^{tΔ}‖_{Hᵃ → Hᵇ} ≤ √(tensorSmoothingConst (b-a)) · t^{-(b-a)/2}`
-  for `b ≥ a`, `0 < t ≤ 1`.
-* `tensorHeatSemigroupHs_opNorm_le_one` — the contraction
-  `‖e^{tΔ}‖_{Hᵃ → Hᵃ} ≤ 1`.
-* `tensorHeatSemigroupHs_add` — the semigroup law
-  `e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}` on the scale.
-
-## Sign convention
-
-Geometer convention `Δ_∇ = -∇*∇`, spectrum `⊆ (-∞, 0]`; the resolvent is
-`(1 - Δ_∇)⁻¹`. The eigenvalues `λᵢ ≥ 0` are non-negative, so the heat
-coefficient `exp(-λᵢ t) ∈ (0, 1]` for `t ≥ 0`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -93,27 +29,18 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The explicit smoothing constant `C(μ) = max 1 ((μ/2)^μ · e^{-μ} · e²)`,
-depending only on `μ ≥ 0`. The `max 1` term absorbs the `λ = 0` value of
-`(1+λ)^μ exp(-2λt)`; the second term controls the regime where the
-polynomial growth dominates the exponential decay. -/
 def tensorSmoothingConst (μ : ℝ) : ℝ :=
   max 1 ((μ / 2) ^ μ * Real.exp (-μ) * Real.exp 2)
 
-/-- The smoothing constant is at least `1`. -/
 lemma one_le_tensorSmoothingConst (μ : ℝ) : 1 ≤ tensorSmoothingConst μ :=
   le_max_left _ _
 
-/-- The smoothing constant is positive. -/
 lemma tensorSmoothingConst_pos (μ : ℝ) : 0 < tensorSmoothingConst μ :=
   lt_of_lt_of_le one_pos (one_le_tensorSmoothingConst μ)
 
-/-- The smoothing constant is non-negative. -/
 lemma tensorSmoothingConst_nonneg (μ : ℝ) : 0 ≤ tensorSmoothingConst μ :=
   (tensorSmoothingConst_pos μ).le
 
-/-- The elementary single-variable bound `z · exp(-z) ≤ exp(-1)`, the
-maximum of `z ↦ z e^{-z}` (attained at `z = 1`). -/
 private lemma mul_exp_neg_le_exp_neg_one (z : ℝ) :
     z * Real.exp (-z) ≤ Real.exp (-1) := by
   have h1 : z ≤ Real.exp (z - 1) := by
@@ -126,9 +53,6 @@ private lemma mul_exp_neg_le_exp_neg_one (z : ℝ) :
   have h_sum : z - 1 + -z = -1 := by ring
   rwa [h_sum] at h_mul
 
-/-- The polynomial-times-exponential bound `y^μ · exp(-c y) ≤ (μ/c)^μ ·
-exp(-μ)` for `μ ≥ 0`, `c > 0`, `y > 0` — the global maximum of
-`y ↦ y^μ e^{-cy}` over `y > 0`, with the `Real.rpow` exponent `μ`. -/
 private lemma rpow_mul_exp_neg_le (μ : ℝ) (hμ : 0 ≤ μ) {c y : ℝ}
     (hc : 0 < c) (hy : 0 < y) :
     y ^ μ * Real.exp (-(c * y)) ≤ (μ / c) ^ μ * Real.exp (-μ) := by
@@ -184,12 +108,6 @@ private lemma rpow_mul_exp_neg_le (μ : ℝ) (hμ : 0 ≤ μ) {c y : ℝ}
             mul_le_mul_of_nonneg_left h_pow (Real.rpow_nonneg hμc_nn μ)
       _ = (μ / c) ^ μ * Real.exp (-μ) := by rw [h_exp_m1]
 
-/-- **Scalar smoothing bound.** For `μ ≥ 0`, `0 < t ≤ 1`, and `λ ≥ 0`,
-
-  `(1 + λ)^μ · exp(-2λt) ≤ tensorSmoothingConst μ · t^{-μ}`.
-
-This is the one-variable estimate underlying the analytic-semigroup
-smoothing of the tensor heat semigroup. -/
 theorem tensorSmoothingScalarBound {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
     (ht : 0 < t) (ht1 : t ≤ 1) {lam : ℝ} (hlam : 0 ≤ lam) :
     (1 + lam) ^ μ * Real.exp (-(2 * lam * t)) ≤
@@ -274,15 +192,6 @@ theorem tensorSmoothingScalarBound {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
     refine le_trans h_le_C2 ?_
     exact mul_le_mul_of_nonneg_right (le_max_right _ _) ht_pow_pos.le
 
-/-- **Scalar smoothing bound, general positive time.** For `μ ≥ 0`,
-`0 < t`, and `λ ≥ 0`,
-
-  `(1 + λ)^μ · exp(-2λt) ≤ tensorSmoothingConst μ · (min t 1)^{-μ}`.
-
-Obtained from `tensorSmoothingScalarBound` at the truncated time
-`min t 1 ∈ (0, 1]`, using that the heat coefficient decreases in `t`.
-This `λ`-uniform finite bound is what makes the `Hᵃ → Hᵇ` heat operator
-well-defined for *every* positive time and *every* target exponent. -/
 theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
     (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     (1 + lam) ^ μ * Real.exp (-(2 * lam * t)) ≤
@@ -306,15 +215,6 @@ theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
     _ ≤ tensorSmoothingConst μ * t' ^ (-μ) :=
           tensorSmoothingScalarBound hμ ht'_pos ht'_le_one hlam
 
-/-- For `0 < t` and any pair of exponents `a`, `b`, the squared `Hᵇ`-weight
-of the heat-rescaled coordinate is bounded by a `λ`-uniform multiple of
-the `Hᵃ`-weight of the original coordinate:
-
-  `(1+λᵢ)^b (exp(-λᵢ t) c)² ≤ K · (1+λᵢ)^a c²`,
-
-with `K := max 1 (tensorSmoothingConst (b-a) · (min t 1)^{-(b-a)})`. The
-constant absorbs both the `b ≤ a` regime (`exp(-λt) ≤ 1`, weight
-monotone) and the `b > a` regime (scalar smoothing bound). -/
 private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (i : TensorEigenIdx (I := I) (M := M) g r s)
     (a b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ) :
@@ -384,9 +284,6 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-/-- For `T ∈ Hᵃ` and `0 < t`, the heat-rescaled coordinate family
-`i ↦ exp(-λᵢ t) · T.coeff i` is weighted-square-summable at the target
-exponent `b`, for any `b`. -/
 lemma heatHs_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -403,9 +300,6 @@ lemma heatHs_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
   · intro i
     exact tensorHeat_weight_term_le (I := I) (M := M) i a b ht (T.coeff i)
 
-/-- The heat-rescaled element of `Hᵇ`: it sends `T ∈ Hᵃ` to the element
-whose `i`-th coordinate is `exp(-λᵢ t) · T.coeff i`. Defined for `0 < t`
-and any target exponent `b`. -/
 def heatHsFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     tensorHs (I := I) (M := M) g r s b where
@@ -420,7 +314,6 @@ def heatHsFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
-/-- The heat-rescaled map is additive. -/
 lemma heatHsFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (S T : tensorHs (I := I) (M := M) g r s a) :
     heatHsFun (I := I) (M := M) b ht (S + T) =
@@ -430,7 +323,6 @@ lemma heatHsFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
   simp only [heatHsFun_coeff, add_coeff]
   ring
 
-/-- The heat-rescaled map is `ℝ`-homogeneous. -/
 lemma heatHsFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s a) :
     heatHsFun (I := I) (M := M) b ht (c • T) =
@@ -439,9 +331,6 @@ lemma heatHsFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
   simp only [heatHsFun_coeff, smul_coeff]
   ring
 
-/-- **Smoothing norm bound for `heatHsFun`.** For `b ≥ a` and `0 < t ≤ 1`,
-the `Hᵇ` norm of the heat-rescaled element is bounded by
-`√(tensorSmoothingConst (b-a)) · t^{-(b-a)/2} · ‖T‖_{Hᵃ}`. -/
 lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     (ht : 0 < t) (ht1 : t ≤ 1)
     (T : tensorHs (I := I) (M := M) g r s a) :
@@ -590,8 +479,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     positivity
   nlinarith [h_final_sq, h_lhs_nn, h_rhs_nn]
 
-/-- **Contraction norm bound for `heatHsFun`.** For `0 < t`, the heat
-semigroup is a contraction `Hᵃ → Hᵃ`: `‖heatHsFun a ht T‖ ≤ ‖T‖`. -/
 lemma norm_heatHsFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     ‖heatHsFun (I := I) (M := M) a ht T‖ ≤ ‖T‖ := by
@@ -653,15 +540,6 @@ lemma norm_heatHsFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
 
 end tensorHs
 
-/-- The tensor heat semigroup `e^{t Δ_∇}` as a continuous linear map on
-the spectral Sobolev scale, for `0 < t`.
-
-It multiplies the `i`-th eigenbasis coordinate by `exp(-λᵢ t)`, with
-`λᵢ ≥ 0` the connection-Laplacian eigenvalue. Because positive time
-provides arbitrarily strong spectral decay, the *target* exponent `b` is
-**free**: for every `b`, even `b > a`, this is a bounded operator
-`Hᵃ →L[ℝ] Hᵇ`. The quantitative gain is
-`tensorHeatSemigroupHs_opNorm_le`. -/
 def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {t : ℝ} (ht : 0 < t)
     {a b : ℝ} :
@@ -759,8 +637,6 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
           h_norm_le_sqrt
         _ ≤ K * ‖T‖ := mul_le_mul_of_nonneg_right h_sqrtK_le_K h2)
 
-/-- `tensorHeatSemigroupHs` applied to `T` is the underlying
-`heatHsFun T`. -/
 @[simp] lemma tensorHeatSemigroupHs_apply {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {t : ℝ}
     (ht : 0 < t) {a b : ℝ}
@@ -768,8 +644,6 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht (a := a) (b := b) T =
       tensorHs.heatHsFun (I := I) (M := M) b ht T := rfl
 
-/-- **Coordinate formula.** The heat semigroup multiplies the `i`-th
-eigenbasis coordinate by `exp(-λᵢ t)`. -/
 @[simp] theorem tensorHeatSemigroupHs_coeff {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {t : ℝ}
     (ht : 0 < t) {a b : ℝ}
@@ -780,14 +654,6 @@ eigenbasis coordinate by `exp(-λᵢ t)`. -/
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
-/-- **Analytic-semigroup smoothing estimate.** For `b ≥ a` and
-`0 < t ≤ 1`, the heat semigroup maps `Hᵃ` into `Hᵇ` with operator norm
-
-  `‖e^{t Δ_∇}‖_{Hᵃ → Hᵇ} ≤ √(tensorSmoothingConst (b-a)) · t^{-(b-a)/2}`,
-
-the constant depending only on `b - a`. Positive time gains `b - a`
-Sobolev derivatives, at the cost of the parabolic factor
-`t^{-(b-a)/2}`. -/
 theorem tensorHeatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {a b : ℝ} (hab : a ≤ b) {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
@@ -805,9 +671,6 @@ theorem tensorHeatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
   rw [tensorHeatSemigroupHs_apply]
   exact tensorHs.norm_heatHsFun_le_smoothing (I := I) (M := M) hab ht ht1 T
 
-/-- **Contraction on a fixed scale.** For `0 < t`, the heat semigroup is
-a contraction `Hᵃ → Hᵃ`: `‖e^{t Δ_∇}‖_{Hᵃ → Hᵃ} ≤ 1`. (At `t = 0` the
-operator is the identity, also of norm `≤ 1`.) -/
 theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {a : ℝ}
     {t : ℝ} (ht : 0 < t) :
@@ -817,10 +680,6 @@ theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   rw [tensorHeatSemigroupHs_apply, one_mul]
   exact tensorHs.norm_heatHsFun_le_self (I := I) (M := M) ht T
 
-/-- **Semigroup law on the spectral Sobolev scale.** For `t, s > 0` and
-any exponents `a`, `c`, `b`, composing the heat semigroup `Hᵃ → Hᶜ` after
-`Hᶜ → Hᵇ`... — concretely, `e^{(t+s)Δ}` as a map `Hᵃ → Hᵇ` equals
-`e^{tΔ} ∘ e^{sΔ}` with intermediate scale `Hᶜ`. -/
 theorem tensorHeatSemigroupHs_add {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {t u : ℝ} (ht : 0 < t) (hu : 0 < u) {a b c : ℝ}
@@ -844,9 +703,6 @@ theorem tensorHeatSemigroupHs_add {g : SmoothRiemannianMetric I M}
   rw [h_exp_add]
   ring
 
-/-- The semigroup law in operator form, on a fixed scale `Hᵃ`: for
-`t, u > 0`, `e^{(t+u)Δ} = e^{tΔ} ∘ e^{uΔ}` as continuous linear
-endomorphisms of `Hᵃ`. -/
 theorem tensorHeatSemigroupHs_add_comp {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {t u : ℝ} (ht : 0 < t) (hu : 0 < u) {a : ℝ} :

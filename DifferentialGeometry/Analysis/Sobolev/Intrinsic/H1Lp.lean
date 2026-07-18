@@ -5,77 +5,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 
-/-!
-# `Lp`-witnessed intrinsic `H¹` space on a closed Riemannian manifold
-
-This file defines an `Lp`-witnessed variant of the intrinsic `H¹` predicate on a
-closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`. The key
-deviation from the function-based predicate of `Intrinsic/Lp.lean` is that the
-weak Riemannian gradient witness here is required to live in the
-*Banach-space quotient* `MeasureTheory.Lp E 2 μ_g`, rather than being an
-arbitrary measurable map `M → E`.
-
-This sidesteps part of the closure-under-addition obstruction that arises
-when one only has `AEStronglyMeasurable` witnesses, because the `Lp` carrier
-is an honest Banach space (in particular it is closed under addition and
-scalar multiplication), and the integration-by-parts identity is invariant
-under a.e.-modification of either the function or the witness.
-
-In addition, the predicate carries a *joint measurability clause*
-`PairAEMeasurable g G` against arbitrary almost-everywhere strongly
-measurable tangent test fields. This strengthening makes closure under
-addition unconditional, while remaining provable for the gradients of smooth
-functions (where the Riemannian gradient is a smooth tangent section). The
-latter case is delivered when needed by chart-localized arguments at the
-point of use; the predicate definition leaves the clause as an existence
-witness inside each `MemH1Lp` element.
-
-## Main definitions
-
-* `PairAEMeasurable g G` : the pairing `x ↦ g.inner x (G x) (V x)` is AESM
-  for every AESM `V`. Closed under addition, scalar, negation, and a.e.
-  modification of `G`.
-* `MemH1Lp g u` : the `Lp ℝ 2 μ_g` class `u` is in the `Lp`-witnessed `H¹`
-  space, i.e., there is a witness `G : Lp E 2 μ_g` whose representative
-  satisfies the standard integration-by-parts identity against every smooth
-  compactly-supported tangent test field, the metric `g`-norm of `G` is
-  in `L^2`, and `G` satisfies the joint AESM pairing clause.
-
-## Main results
-
-* `MemH1Lp.zero`, `MemH1Lp.const_smul`, `MemH1Lp.neg`, `MemH1Lp.add`,
-  `MemH1Lp.sub` : closure under the `ℝ`-vector-space operations on the `Lp`
-  quotient. Closure under addition is unconditional.
-
-The predicate uses the Riemannian volume measure and works in the natural
-"closed manifold" hypotheses `[CompactSpace M] [I.Boundaryless]
-[T2Space M] [SigmaCompactSpace M]`, in line with the project's hypothesis
-discipline. The model space `E` is required to be a real inner-product
-space.
-
-## Implementation notes
-
-The `Lp` quotient is constructed at the abstract level of "almost-everywhere
-classes" of measurable functions. Since the IBP identity is bilinear in
-`(u, G)` and is invariant under a.e.-modification, well-definedness of the
-predicate on classes (rather than representatives) follows automatically,
-provided one phrases the integrand correctly via `Lp.coeFn`. We do this here
-by reducing to the `HasWeakRiemannianGradLp` predicate of `Intrinsic/Lp.lean`
-applied to the canonical representatives.
-
-The metric `g`-norm `√(g(G,G))` is included as a separate `MemLp 2`
-hypothesis on the witness. On a closed (compact) manifold the Euclidean norm
-on `E` and the metric `g`-norm are equivalent, so the two formulations
-coincide in spirit; the explicit hypothesis gives a clean reduction to the
-existing `HasWeakRiemannianGradLp.add` infrastructure when paired with
-appropriate measurability witnesses for the cross pairings.
-
-The joint-AESM clause `PairAEMeasurable` is preserved under bilinear
-operations on `G`: addition, scalar multiplication, negation, and a.e.
-modification. Verification of the clause for a specific witness — for
-example the gradient of a smooth function — is delivered through
-chart-localized arguments at the point of construction.
--/
 
 noncomputable section
 
@@ -87,7 +16,7 @@ namespace Analysis
 namespace Sobolev
 namespace IntrinsicH1Lp
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -101,32 +30,37 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x v (w + y) = g.inner x v w + g.inner x v y := by
   rw [map_add (g.inner x v)]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_neg_left
     (g : SmoothRiemannianMetric I M) (x : M) (v y : TangentSpace I x) :
     g.inner x (-v) y = - g.inner x v y := by
   rw [map_neg, ContinuousLinearMap.neg_apply]
 
-/-- Scalar homogeneity for the metric `g`-norm. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -137,15 +71,14 @@ private lemma g_norm_const_smul
   rw [Real.sqrt_mul (sq_nonneg c)]
   rw [Real.sqrt_sq_eq_abs]
 
-/-- Negation preserves the metric `g`-norm. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (-v) (-v)) = Real.sqrt (g.inner x v v) := by
   rw [g_inner_neg_left g x v (-v), map_neg]
   simp
 
-/-- Triangle inequality for the metric `g`-norm. Reproves the result of
-`Intrinsic/Lp.lean` (where it is `private`) for use in this file. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -231,8 +164,7 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-- Congruence of `HasWeakRiemannianGradLp` along a.e. modifications of
-both `u` and `G`. -/
+omit [InnerProductSpace ℝ E] in
 theorem hasWeakRiemannianGradLp_congr_ae
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u u' : M → ℝ} {G G' : M → E}
@@ -265,8 +197,7 @@ theorem hasWeakRiemannianGradLp_congr_ae
     rw [integral_congr_ae hLHS, integral_congr_ae hRHS]
     exact h.2 X hX
 
-/-- The metric `g`-norm `MemLp` hypothesis is invariant under a.e. modification
-of the witness. -/
+omit [InnerProductSpace ℝ E] in
 theorem memLp_g_norm_congr_ae
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {G G' : M → E} {p : ℝ≥0∞}
@@ -279,7 +210,6 @@ theorem memLp_g_norm_congr_ae
   filter_upwards [hG] with x hx
   rw [hx]
 
-/-- The joint AESM pairing clause: `G` pairs AESM-ly against any AESM `V`. -/
 def PairAEMeasurable
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (G : M → E) : Prop :=
@@ -291,7 +221,7 @@ namespace PairAEMeasurable
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- The zero witness pairs AESM-ly against everything. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     PairAEMeasurable (I := I) (M := M) g (fun _ : M => (0 : E)) := by
   intro V _
@@ -304,7 +234,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
   rw [hcongr]
   exact aestronglyMeasurable_const
 
-/-- Sum of two PairAEMeasurable witnesses. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G)
     (hG' : PairAEMeasurable (I := I) (M := M) g G') :
@@ -318,7 +248,7 @@ theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
   rw [hcongr]
   exact (hG V hV).add (hG' V hV)
 
-/-- Constant scalar multiple of a PairAEMeasurable witness. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => c • G x) := by
@@ -331,7 +261,7 @@ theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
   rw [hcongr]
   exact (hG V hV).const_mul c
 
-/-- Negation of a PairAEMeasurable witness. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => -G x) := by
@@ -341,7 +271,7 @@ theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
   rw [heq] at h
   exact h
 
-/-- The PairAEMeasurable property is invariant under a.e. modification of `G`. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : G =ᵐ[riemannianVolumeMeasure I M g] G')
     (h : PairAEMeasurable (I := I) (M := M) g G) :
@@ -356,23 +286,6 @@ theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
 
 end PairAEMeasurable
 
-/-- `MemH1Lp g u` asserts that `u : Lp ℝ 2 μ_g` lies in the `Lp`-witnessed
-intrinsic `H¹` space. Concretely, there exists a witness
-`G : Lp E 2 μ_g` such that, working with the canonical representatives
-`(u : M → ℝ)` and `(G : M → E)`:
-
-* the pair satisfies the integration-by-parts identity against every
-  smooth compactly-supported tangent test field;
-* the metric `g`-norm `x ↦ √(g(G x, G x))` is in `L²`;
-* the witness `G` pairs `AEStronglyMeasurable`-ly against any AESM test
-  tangent field `V` — i.e., `x ↦ g.inner x (G x) (V x)` is AESM whenever
-  `V` is.
-
-The third clause is preserved under bilinear operations and a.e.
-modification, making the predicate unconditionally closed under addition
-and scalar multiplication. Verification of the clause for a specific
-concrete witness — for example the gradient of a smooth function — is
-performed at the point of construction via chart-localized arguments. -/
 def MemH1Lp [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (u : Lp ℝ 2 (riemannianVolumeMeasure I M g)) :
     Prop :=
@@ -387,7 +300,7 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- The zero class lies in `MemH1Lp` with the zero witness. -/
+omit [InnerProductSpace ℝ E] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     MemH1Lp (I := I) (M := M) g (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) := by
   refine ⟨(0 : Lp E 2 (riemannianVolumeMeasure I M g)), ?_, ?_, ?_⟩
@@ -430,7 +343,6 @@ theorem zero (g : SmoothRiemannianMetric I M) :
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
 
-/-- Scalar multiplication closure of `MemH1Lp`. -/
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -478,7 +390,6 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_smul_G.symm
       (PairAEMeasurable.const_smul (I := I) (M := M) c hG_pair)
 
-/-- Negation closure of `MemH1Lp`. -/
 theorem neg (g : SmoothRiemannianMetric I M)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -495,8 +406,6 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- Addition closure of `MemH1Lp`. Unconditional thanks to the joint-AESM
-clause baked into the predicate. -/
 theorem add (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)
@@ -626,7 +535,6 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
-/-- Subtraction closure of `MemH1Lp`. -/
 theorem sub (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)

@@ -1,30 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-/-!
-# Construction of the parametric linear ODE solution operator
-
-This file builds the solution operator of the linear ODE `Z'(t) = A(x, t) Z(t)` from its
-two analytic primitives — short-interval Picard existence and ODE uniqueness — and packages
-the unconditional parametric solution `linearODESolution`.
-
-## Main definitions
-
-* `HasLinearODESolution A a b h₀ Z₀ x` — per-parameter existence predicate on `Ioo a b`.
-* `linearODESolution A a b h₀ Z₀ : F → ℝ → G` — the parametric solution on `Ioo a b`,
-  defined unconditionally via `Classical.choose` with a constant fallback.
-
-## Main results
-
-* `exists_linearODE_solution_of_short` — short-interval existence on `Icc (h₀ - T) (h₀ + T)`
-  via Mathlib `IsPicardLindelof`, assuming `M · T < 1`.
-* `linearODE_unique_on_Ioo` — uniqueness on `Ioo a b` via Mathlib `ODE_solution_unique_of_mem_Ioo`.
-* `linearODESolution_init` — unconditional initial condition `linearODESolution … x h₀ = Z₀ x`.
-* `linearODESolution_hasDerivAt_of_hasSolution` — ODE clause under `HasLinearODESolution`.
-
-All results are formulated on generic Banach spaces `F` and `G`; `[CompleteSpace G]` is
-required for Picard–Lindelöf to apply to the state space.
--/
 
 noncomputable section
 
@@ -40,14 +16,6 @@ section ShortIntervalExistence
 
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/--
-**Short-interval existence** for the linear ODE `Z'(t) = A(t) Z(t)` on
-`Icc (h₀ - T) (h₀ + T)`, assuming `‖A t‖ ≤ M` on this interval and `M · T < 1`.
-The solution exists for **every** initial value `Z₀ ∈ G`.
-
-This is the elementary Picard step on which the global existence theory
-(forthcoming in the follow-up substep) is built.
--/
 theorem exists_linearODE_solution_of_short
     {A : ℝ → (G →L[ℝ] G)} {h₀ : ℝ} {T M : ℝ}
     (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
@@ -122,7 +90,6 @@ section Uniqueness
 
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-/-- **Uniqueness** of solutions to a linear ODE on an open interval `Ioo a b`. -/
 theorem linearODE_unique_on_Ioo
     {A : ℝ → (G →L[ℝ] G)} {a b h₀ : ℝ}
     (ht₀ : h₀ ∈ Ioo a b)
@@ -184,34 +151,10 @@ section SolutionOperator
 variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/--
-**Per-parameter existence predicate.**  `HasLinearODESolution A a b h₀ Z₀ x`
-asserts that for the fixed parameter `x : F`, there exists a curve `Z : ℝ → G`
-with `Z h₀ = Z₀ x` and `HasDerivAt Z (A x t (Z t)) t` for every `t ∈ Ioo a b`.
-
-This predicate is used internally by `linearODESolution` to decide whether to
-return the chosen solution on `Ioo a b` or the constant fallback.
--/
 def HasLinearODESolution
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G) (x : F) : Prop :=
   ∃ Z : ℝ → G, Z h₀ = Z₀ x ∧ ∀ t ∈ Ioo a b, HasDerivAt Z (A x t (Z t)) t
 
-/--
-**Parametric solution of the linear ODE** `Z'(t) = A(x, t) Z(t)` with initial
-condition `Z(x, h₀) = Z₀ x` on the open interval `Ioo a b`.
-
-Defined unconditionally:
-
-* If a solution on `Ioo a b` exists for the parameter `x` (predicate
-  `HasLinearODESolution`), `linearODESolution A a b h₀ Z₀ x` is *the* chosen
-  solution, via `Classical.choose`.
-* Otherwise, it is the constant curve `fun _ => Z₀ x`.
-
-The unconditional choice makes `linearODESolution` total; the headline
-theorems `linearODESolution_init` and
-`linearODESolution_hasDerivAt_of_hasSolution` extract the meaningful clauses
-under the appropriate hypotheses.
--/
 noncomputable def linearODESolution
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G) :
     F → ℝ → G := by
@@ -222,13 +165,8 @@ noncomputable def linearODESolution
     else
       fun _ => Z₀ x
 
-/--
-**Initial condition** for `linearODESolution`.  At `t = h₀`, the parametric
-solution equals the initial datum `Z₀ x`.
-
-This identity is unconditional: it holds regardless of whether the
-per-parameter existence predicate `HasLinearODESolution` holds.
--/
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
+@[simp]
 theorem linearODESolution_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G) (x : F) :
     linearODESolution A a b h₀ Z₀ x h₀ = Z₀ x := by
@@ -238,13 +176,7 @@ theorem linearODESolution_init
     exact (Classical.choose_spec h).1
   · simp only [dif_neg h]
 
-/--
-**ODE clause** for `linearODESolution` under the per-parameter existence
-hypothesis.
-
-When `HasLinearODESolution A a b h₀ Z₀ x` holds, the parametric solution at
-`x` satisfies the linear ODE pointwise on `Ioo a b`.
--/
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
 theorem linearODESolution_hasDerivAt_of_hasSolution
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G)
     {x : F} (hx : HasLinearODESolution A a b h₀ Z₀ x) {t : ℝ} (ht : t ∈ Ioo a b) :

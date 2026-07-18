@@ -4,46 +4,11 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
-/-!
-# T₀-linear expansion of the chart-frame trace Γ-correction at the chart-α
-`(Idx, Jdx)`-projection
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file ships
-the identity expressing the chart-α `(Idx, Jdx)` projection of the
-chart-frame trace Γ-correction
-`chartFrameTraceΓCorrection g r s α T₀ Idx Jdx b` as a `T₀`-linear formula on
-the Euclidean chart target `chartTargetEuclid α`, decomposing it into:
-
-* a *principal* sum, T₀-linear in the chart-Euclidean partial derivatives of
-  the raw chart-pushed components of `T₀`, indexed by `(I', J', m)` with
-  `C^∞ ℝ ∞` coefficients on `chartTargetEuclid α` independent of `T₀`;
-
-* a *zeroth-order* sum, T₀-linear in the undifferentiated raw chart-pushed
-  components of `T₀`, indexed by `(I', J')` with `C^∞ ℝ ∞` coefficients on
-  `chartTargetEuclid α` independent of `T₀`.
-
-The expansion is the natural composition of:
-
-* the chart-α coordinate-basis expansion of the tangent vector
-  `(LC g) B^α_i b (B^α_i b)`, with chart-α `m`-th coefficient
-  `W^α_{i,m}(b)`;
-* the `C^∞ ℝ` smoothness of the pull-back `W^α_{i,m}` to the Euclidean chart
-  target (sub.4);
-* the chart-coordinate covariant-derivative component formula (B.1) for the
-  chart-α `(Idx, Jdx)`-projection of `cov_RS T₀ b (∂_m b)`.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -71,14 +36,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The linear functional `v ↦ ((chartModelBasis E).repr v) m`, packaged as a
-continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) :
     E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
     (((LinearMap.proj m).comp ((chartModelBasis E).equivFun.toLinearMap)) :
       E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartModelBasisProjE_apply (m : Fin (Module.finrank ℝ E))
     (v : E) :
     chartModelBasisProjE (E := E) m v =
@@ -89,10 +53,7 @@ private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) 
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-- The chart-α `m`-th coordinate scalar function of `(LC g) B^α_i b (B^α_i b)`,
-defined on the chart-α trivialization base set via the chart-α basis family,
-and zero off that set (junk value). -/
-private noncomputable def lcFrameSelfCoord
+private noncomputable def leviCivitaFrameSelfCoord
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) (b : M) : ℝ := by
   classical
@@ -104,29 +65,26 @@ private noncomputable def lcFrameSelfCoord
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) m
     else 0
 
-/-- On the chart-α base set, `lcFrameSelfCoord` unfolds via the chart-α basis
-family. -/
+omit [I.Boundaryless] in
 private lemma lcFrameSelfCoord_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    lcFrameSelfCoord (I := I) (M := M) g α i m b =
+    leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
       (chartBasisFamily (I := I) α hb).repr
         ((LeviCivita (I := I) g).toFun
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) m := by
   classical
-  unfold lcFrameSelfCoord
+  unfold leviCivitaFrameSelfCoord
   rw [dif_pos hb]
 
-/-- On the chart-α base set, `lcFrameSelfCoord g α i m b` equals the chart-α
-`m`-th coordinate of the trivialized tangent vector image of
-`(LC g) B^α_i b (B^α_i b)`. -/
+omit [I.Boundaryless] in
 private lemma lcFrameSelfCoord_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    lcFrameSelfCoord (I := I) (M := M) g α i m b =
+    leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
       chartModelBasisProjE (E := E) m
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
           ((LeviCivita (I := I) g).toFun
@@ -146,8 +104,7 @@ private lemma lcFrameSelfCoord_eq_clmAt_proj
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))) h
 
-/-- **Expansion of `(LC g) B^α_i b (B^α_i b)` in the chart-α coordinate basis at
-a chart-α Levi-Civita good-set point.** -/
+omit [I.Boundaryless] in
 private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -156,7 +113,7 @@ private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) =
       ∑ m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b •
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
           chartBasisVecFiber (I := I) α m b := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -171,8 +128,6 @@ private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
   rw [lcFrameSelfCoord_of_mem (I := I) (M := M) g α i m hb_base]
   rw [chartBasisFamily_apply (I := I) α hb_base m]
 
-/-- The pullback of the chart-α `m`-coord scalar `lcFrameSelfCoord g α i m` to
-the Euclidean chart target, via `b ↦ (extChartAt I α).symm (toEuclidean.symm y)`. -/
 private noncomputable def lcFrameSelfCoordPullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) :
@@ -187,8 +142,6 @@ private noncomputable def lcFrameSelfCoordPullback
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))))
 
-/-- The pullback `lcFrameSelfCoordPullback g α i m` is `ContDiffOn ℝ ∞` on
-`chartTargetEuclid α`. -/
 private lemma lcFrameSelfCoordPullback_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) :
@@ -201,8 +154,6 @@ private lemma lcFrameSelfCoordPullback_contDiffOn
   refine h_sub4.congr (fun y _ => ?_)
   rfl
 
-/-- The principal coefficient of the T₀-linear expansion: indexed by
-`(I', J', m)`, supported on `(I', J') = (Idx, Jdx)` only. -/
 private noncomputable def chartFrameTraceΓPrincipalCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -216,7 +167,6 @@ private noncomputable def chartFrameTraceΓPrincipalCoeff
       ∑ i : Fin (Module.finrank ℝ E),
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y
 
-/-- Smoothness of the principal coefficient on `chartTargetEuclid α`. -/
 private lemma chartFrameTraceΓPrincipalCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -233,8 +183,6 @@ private lemma chartFrameTraceΓPrincipalCoeff_contDiffOn
   refine ContDiffOn.sum (fun i _ => ?_)
   exact lcFrameSelfCoordPullback_contDiffOn (I := I) (M := M) g α i m
 
-/-- The zeroth-order coefficient of the T₀-linear expansion: indexed by
-`(I', J')`. -/
 private noncomputable def chartFrameTraceΓZerothCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -248,7 +196,6 @@ private noncomputable def chartFrameTraceΓZerothCoeff
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y *
           covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx I' Jdx J' y
 
-/-- Smoothness of the zeroth-order coefficient on `chartTargetEuclid α`. -/
 private lemma chartFrameTraceΓZerothCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -265,11 +212,7 @@ private lemma chartFrameTraceΓZerothCoeff_contDiffOn
   exact (lcFrameSelfCoordPullback_contDiffOn (I := I) (M := M) g α i m).mul
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx I' Jdx J')
 
-/-- For a chart-α Levi-Civita good-set point `b` and `i : Fin n`, the chart-α
-`(Idx, Jdx)` raw scalar of one chart-frame trace summand
-`cov_RS T₀ b ((LC g) B^α_i b (B^α_i b))` equals the finite sum over `m` of
-`lcFrameSelfCoord g α i m b · (chart-α (Idx, Jdx) raw scalar of
-cov_RS T₀ b (∂_m b))`. -/
+omit [I.Boundaryless] in
 private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -287,7 +230,7 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
               (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
               ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) =
       ∑ m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b *
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
           tensorChartComponentProjection (E := E) r s Idx Jdx
             ((trivializationAt (TensorRSModel r s ℝ E)
                 (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -309,10 +252,10 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
     with hLcov_def
   have hApply :
       L (Lcov (∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b •
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
               chartBasisVecFiber (I := I) α m b)) =
         ∑ m : Fin (Module.finrank ℝ E),
-          lcFrameSelfCoord (I := I) (M := M) g α i m b •
+          leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
             L (Lcov (chartBasisVecFiber (I := I) α m b)) := by
     rw [map_sum]
     rw [map_sum]
@@ -323,10 +266,6 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
   simp only [hL_def, hLcov_def, ContinuousLinearMap.comp_apply] at hApply
   exact hApply
 
-/-- For a chart-α Levi-Civita good-set point `b`, the chart-α `(Idx, Jdx)` raw
-scalar of `cov_RS T₀ b (∂_m b)` equals the chart-α partial
-`euclidPartial m (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α Idx Jdx))`
-at `y := toEuclidean ((extChartAt I α) b)`, plus the lower-order term. -/
 private lemma chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lower
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -385,10 +324,6 @@ private lemma chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lo
   rw [hb_eq] at hB1
   exact hB1
 
-/-- **Headline.** The chart-α `(Idx, Jdx)` raw scalar component of the
-chart-frame trace Γ-correction `chartFrameTraceΓCorrection g r s α T₀ Idx Jdx b`
-decomposes, at a chart-α Levi-Civita good-set point `b`, as a `T₀`-linear
-formula on the Euclidean chart target. -/
 theorem chartFrameTraceΓCorrection_eq_T₀_linear
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -461,7 +396,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                   ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               tensorChartComponentProjection (E := E) r s Idx Jdx
                 ((trivializationAt (TensorRSModel r s ℝ E)
                     (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -476,7 +411,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
     have hStep2 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               tensorChartComponentProjection (E := E) r s Idx Jdx
                 ((trivializationAt (TensorRSModel r s ℝ E)
                     (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -486,7 +421,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                     (chartBasisVecFiber (I := I) α m b)))) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               (euclidPartial (E := E) m
                 (chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y +
@@ -497,7 +432,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
         (I := I) (M := M) g r s α T₀ m Idx Jdx hb]
     rw [hStep2]
     have hcoord_eq : ∀ i m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b =
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y := by
       intro i m
       have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -508,7 +443,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
     have hStep3 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               (euclidPartial (E := E) m
                 (chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y +

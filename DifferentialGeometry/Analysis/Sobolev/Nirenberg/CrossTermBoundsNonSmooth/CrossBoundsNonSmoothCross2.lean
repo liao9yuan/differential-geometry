@@ -2,49 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-/-!
-# Non-smooth analogue of `cross_2_bound`
-
-This module establishes a non-smooth analogue of
-`NirenbergCrossBounds.cross_2_bound`. The smooth case carries the
-hypothesis `u : E → ℝ` smooth, and the bound features the partial
-derivatives `(fderiv ℝ u y) (EuclideanSpace.single i 1)` together with
-`diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single j 1))`.
-Here we replace the partials with explicit weak partial derivatives
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`); the second cross
-term then features `diffQuot k h (g j)` rather than the smooth-case
-`diffQuot k h ∂_j u`.
-
-## Strategy
-
-The pointwise bound `cross_2_pointwise_bound` and the integration step
-both transcribe verbatim with `(fderiv ℝ u y) (single i 1)` replaced by
-`g i y` and the smooth difference quotient
-`diffQuot k h (fun y => (fderiv ℝ u y) (single j 1))` replaced by
-`diffQuot k h (g j)`. The only essential use of smoothness in the
-smooth case is the localised L² bound
-
-  `∫_{tsupport η} (D_h^k ∂_j u)² ≤ ∫_{Ω'} ∑_i (∂_i u)²`
-
-which appears here as the localised L² bound
-
-  `∫_{tsupport η} (D_h^k g_j)² ≤ ∫_{Ω'} ∑_i (g i)²`,
-
-i.e. the Fréchet–Kolmogorov estimate for the weak partials. The
-pointwise bound `cross_2_pointwise_bound_nonsmooth` does not actually
-consume this localised estimate; the smooth-case proof of
-`cross_2_bound` likewise discharges the second cross term using only
-the pointwise bound and integration over `tsupport η`. Consequently the
-non-smooth statement does not need a separate FK hypothesis on the weak
-partials.
-
-## Main result
-
-* `cross_2_bound_nonsmooth` — the headline bound transcribed for the
-  non-smooth case.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -59,9 +16,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Young's inequality for nonnegative absolute values, written in the
-form used by `cross_2_pointwise_bound`. Re-derivation since the upstream
-version is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add_cross2 (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
@@ -82,16 +36,11 @@ private lemma two_abs_mul_le_eps_sq_add_cross2 (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-set_option linter.unusedVariables false in
-/-- Pointwise bound for one summand of the non-smooth Cross_2 sum.
-Mechanical substitution `(fderiv ℝ u y) (single i 1) → g i y` and
-`(fderiv ℝ u y) (single j 1) → g j y` in `cross_2_pointwise_bound`.
-The bound itself follows from Young's inequality together with the
-mean-value bound on `|D_h^k a^{ij}|`. -/
+
 private theorem cross_2_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (g : Fin d → E → ℝ)
-    {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    {η : E → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     (i j k : Fin d)
     {Ω' : Set E} {M : ℝ} (hM_nn : 0 ≤ M)
@@ -211,10 +160,6 @@ private theorem cross_2_pointwise_bound_nonsmooth
         ((g i) x)^2 = 0 := by ring
     linarith
 
-/-- Continuity of `D_h^k a^{ij} · η²`: smooth `a^{ij}` gives a continuous
-difference quotient and `η²` is smooth, so the product is continuous.
-Compact support of `η²` gives compact support of the product, hence the
-product is bounded. -/
 private lemma exists_bound_cross_2_coefficient
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -240,12 +185,6 @@ private lemma exists_bound_cross_2_coefficient
     hη_sq_supp.mul_left
   exact exists_bound_of_continuous_compactSupport h_prod_cont h_prod_supp
 
-/-- Integrability of the (i, j) summand of the non-smooth Cross_2 sum.
-The integrand factorises as `f₂ · g_i · D_h^k g_j`, where
-`f₂ = D_h^k a · η²` is continuous compactly supported (hence bounded),
-`g_i ∈ L²`, and `D_h^k g_j ∈ L²` (for any fixed `h`). By Hölder
-L² × L² = L¹ for the product `g_i · D_h^k g_j`, multiplied by the
-bounded `f₂`. -/
 private lemma integrable_cross_2_summand_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {g : Fin d → E → ℝ}
@@ -297,12 +236,7 @@ private lemma integrable_cross_2_summand_nonsmooth
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₂_gi_l2 h_dq_g_l2
 
 omit [NeZero d] in
-/-- Integrability of `c · η² · 1[supp η] · (g_i)²` (non-smooth analogue of
-`integrable_const_eta_sq_indicator_partial_sq`). The smooth case used
-continuous compact support of the integrand; in the non-smooth case
-`g_i` is only L², so we instead bound the integrand pointwise by
-`|c| · M_η² · (g_i)²` (where `M_η²` bounds `η²`) and use that `(g_i)²`
-is L¹ since `g_i ∈ L²`. -/
+
 private lemma integrable_const_eta_sq_indicator_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -392,8 +326,7 @@ private lemma integrable_const_eta_sq_indicator_g_sq
     refine mul_nonneg (mul_nonneg (abs_nonneg _) hM_nn) h_g_sq_nn
 
 omit [NeZero d] in
-/-- Integrability of `c · η² · (D_h^k g_j)²` (re-export the helper from
-`CrossBoundsNonSmooth.lean` under a name local to this file). -/
+
 private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -473,7 +406,7 @@ private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
   exact mul_le_mul_of_nonneg_right h_ic_eta_sq h_dq_sq_nn
 
 omit [NeZero d] in
-/-- Integrability of `(η x)² · (D_h^k g_j x)²`. -/
+
 private lemma integrable_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -490,23 +423,17 @@ private lemma integrable_eta_sq_diffQuot_g_sq_cross2
   rw [h_eq]
   exact hint
 
-set_option linter.unusedVariables false in
-/-- **Quantitative non-smooth Cross_2 bound.**
 
-The explicit-constant form of `cross_2_bound_nonsmooth`: the same
-absorbing inequality with the constant exposed as the closed formula
-`(M² / (4 · (ε / d))) · d²`, where `d = Fintype.card (Fin d)` and
-`M` is the supremum of `|∂_k a^{ij}|` on `closure Ω'`. -/
 theorem cross_2_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
-    (hu_l2 : MemLp u 2 (volume : Measure E))
+    (_hu_l2 : MemLp u 2 (volume : Measure E))
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
-    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    (_h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -998,28 +925,7 @@ theorem cross_2_bound_nonsmooth_quantitative
     rw [← h_C_eq]
   linarith
 
-set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `cross_2_bound`.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the second cross
-term
-
-  `S_2 := ∑_{i, j} ∫ (D_h^k a^{ij}) · η² · g_i · (D_h^k g_j)`
-
-is bounded by
-
-  `ε · ∫ η² ∑_j (D_h^k g_j)² + C · ∫_{Ω'} ∑_i g_i²`,
-
-with `C` independent of `h` (for `|h| ≤ 1`). The proof transcribes the
-smooth-case argument verbatim, using the pointwise bound
-`cross_2_pointwise_bound_nonsmooth` (purely algebraic) and integration
-over `tsupport η`. No auxiliary Fréchet–Kolmogorov hypothesis on the
-weak partials is required.
-
-This is the existential packaging of `cross_2_bound_nonsmooth_quantitative`,
-which exposes `C` as an explicit formula. -/
 theorem cross_2_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}

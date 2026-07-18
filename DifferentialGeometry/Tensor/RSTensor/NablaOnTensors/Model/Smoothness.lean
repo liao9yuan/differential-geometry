@@ -1,9 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.TensorRS
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Smoothness of model-space tensor covariant derivative formulas
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -26,19 +26,19 @@ variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
 
-/-!
-## Implementation layer: model-space tensor formula
 
-These definitions are the fixed-vector-space formulas used after trivializing
-the tensor bundle in a chart.  They are deliberately lower-level than
-`nabla0SFun` / `nablaRSFun`.
--/
 
-/-- Pointwise model formula for the covariant derivative of a covariant tensor.
 
-The input `dα_X` is the first-order derivative of the tensor components in the
-direction `X`, while `ΓX` is the connection endomorphism acting on each input
-slot. -/
+
+
+
+
+
+
+
+
+
+
 theorem contDiffWithinAt_covariantDeriv_tensor0SModelWithin (s : ℕ)
     {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}
     {α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s}
@@ -69,12 +69,12 @@ theorem contDiffWithinAt_covariantDeriv_tensor0SModelWithin (s : ℕ)
   simpa [covariantDeriv_tensor0SModelWithin, covariantDeriv_tensor0SModelAt] using
     hprincipal.sub hCorr
 
-/-- Smoothness of the fixed-set model covariant derivative of a mixed tensor.
 
-This is the mixed-tensor analogue of
-`contDiffWithinAt_covariantDeriv_tensor0SModelWithin`: the principal term is
-`DT(X)`, the output covariant slots are corrected by precomposition with
-`C_s(ΓX)`, and the input covariant slots by postcomposition with `C_r(ΓX)`. -/
+
+
+
+
+
 theorem contDiffWithinAt_covariantDeriv_tensorRSModelWithin (r s : ℕ)
     {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}
     {T : E → TensorRSModel r s 𝕜 E}

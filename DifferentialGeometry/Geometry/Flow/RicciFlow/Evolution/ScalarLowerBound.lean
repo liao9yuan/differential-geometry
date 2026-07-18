@@ -8,17 +8,17 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Scalar Curvature Lower Bound
 
-This file records the native ODE-comparison layer for MSM110 Corollary 7.3.
-The main comparison theorem consumes the parabolic scalar inequality
-`(2 / n) R^2 <= (partial_t - Delta_g - X) R`, then applies the compact
-value-set version of the scalar weak maximum principle.  The Ricci-flow
-producer bridge is kept explicit: scalar evolution plus a heat-operator
-realization and the trace/norm Cauchy-Schwarz inequality produce the parabolic
-inequality.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,9 +35,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-! ## The scalar lower-bound ODE -/
 
-/-- The explicit solution to `c' = (2 / n) c^2`, `c(0) = c0`. -/
+
+
 def scalarLowerBarrier (n c0 : Real) (t : Real) : Real :=
   c0 / (1 - (2 / n) * c0 * t)
 
@@ -45,7 +45,7 @@ def scalarLowerBarrier (n c0 : Real) (t : Real) : Real :=
     scalarLowerBarrier n c0 0 = c0 := by
   simp [scalarLowerBarrier]
 
-/-- The lower-bound reaction term `F(a,t) = (2 / n) a^2`. -/
+
 def scalarLowerReaction (n : Real) (a _t : Real) : Real :=
   (2 / n) * a ^ 2
 
@@ -53,7 +53,7 @@ theorem scalarLowerReaction_apply (n a t : Real) :
     scalarLowerReaction n a t = (2 / n) * a ^ 2 := by
   rfl
 
-/-- The barrier solves the ODE as a within-derivative, away from its pole. -/
+
 theorem scalarLowerBarrier_hasDerivWithinAt
     (s : Set Real) (n c0 t : Real)
     (hn : n ≠ 0)
@@ -104,8 +104,8 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
     fun_prop
   exact hcd.locallyLipschitz
 
-/-- The square reaction has a uniform Lipschitz constant on the compact
-spacetime value set used by the scalar WMP. -/
+
+
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u c)) :
@@ -123,14 +123,14 @@ theorem exists_scalarLowerReaction_lipschitzOn_valueSet
   intro t _ht
   simpa [scalarLowerReaction] using hK
 
-/-! ## Analytic comparison endpoint -/
 
-/-- Corollary 7.3's ODE-comparison core.
 
-This theorem deliberately consumes the parabolic scalar inequality directly.
-The Ricci-flow production of that inequality is a separate bridge below, since
-it depends on how the scalar Laplacian and the metric trace/norm inequality are
-realized. -/
+
+
+
+
+
+
 theorem scalar_curvature_lower_bound_of_parabolic_inequality
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -193,7 +193,7 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
   · intro x
     simpa using hinit x
 
-/-- Positivity consequence of the lower barrier. -/
+
 theorem scalar_curvature_positive_of_lower_barrier
     {n c0 t Rtx : Real}
     (hbound : scalarLowerBarrier n c0 t <= Rtx)
@@ -204,13 +204,13 @@ theorem scalar_curvature_positive_of_lower_barrier
     exact div_pos hc0 hden
   exact lt_of_lt_of_le hbar hbound
 
-/-! ## Initial minimum wrappers -/
 
-/-- Initial lower bound hypothesis used by the ODE comparison theorem. -/
+
+
 def InitialScalarLowerBound (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   forall x : M, c0 <= scalar 0 x
 
-/-- Book-facing minimum package for `c0 = min_M scalar(0, ·)`. -/
+
 def InitialScalarMinimum (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   exists x0 : M, scalar 0 x0 = c0 /\ InitialScalarLowerBound (M := M) scalar c0
 
@@ -247,14 +247,14 @@ theorem exists_initialScalarMinimum_of_continuous
   exact ⟨scalar 0 x0,
     initialScalarMinimum_of_isMinOn (M := M) scalar rfl hmin⟩
 
-/-! ## WMP regularity package -/
 
-/-- The analytic regularity hypotheses needed by the scalar WMP comparison
-step for Corollary 7.3.
 
-This is an honest producer interface: it only bundles the smoothness inputs
-already consumed by the WMP theorem.  Producing this package from geometric
-smoothness is a separate regularity frontier. -/
+
+
+
+
+
+
 structure ScalarLowerBoundWMPRegularity
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (scalar : Real -> M -> Real) (K : NNReal) : Prop where
@@ -286,15 +286,15 @@ structure ScalarLowerBoundWMPRegularity
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x
 
-/-- Smooth Ricci-flow solutions provide the scalar regularity package needed
-by the lower-bound WMP, after restricting to a compact time slab and using any
-all-real metric family that agrees with the solution metric on that slab.
 
-This is the precise smooth-regularity producer frontier for the scalar
-lower-bound argument: it expands smoothness of the canonical scalar curvature
-into the weighted continuity, spatial differentiability, time
-within-differentiability, and gradient regularity assumptions consumed by the
-maximum principle. -/
+
+
+
+
+
+
+
+
 theorem scalarRegOfSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -312,8 +312,9 @@ theorem scalarRegOfSmooth
   have hscalar_cont : ContinuousOn
       (fun p : Real × M => S.scalar p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-    exact
-      (continuous_iff_continuousAt.mpr hreg.scalar_continuousAt).continuousOn
+    refine hreg.scalar_continuousOn.mono ?_
+    intro p hp
+    exact ⟨hsubset p.1 hp.1, trivial⟩
   have hbar_cont : ContinuousOn
       (fun p : Real × M => scalarLowerBarrier n c0 p.1)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
@@ -374,11 +375,11 @@ theorem scalarRegOfSmooth
     exact hreg.scalar_grad_sub_const t (hsubset t ht)
       (scalarLowerBarrier n c0 t) x
 
-/-! ## Ricci-flow producer bridge for the WMP hypothesis -/
 
-/-- Closed-slab scalar evolution interface kept for compatibility.  The
-book-facing Corollary 7.3 route uses `ScalarEvolutionEquationOn` on positive
-regular times instead. -/
+
+
+
+
 def ScalarEvolutionAllTimesOn
     (T : Real) (scalar scalarLap ricciNormSq : Real -> M -> Real) : Prop :=
   forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
@@ -387,12 +388,12 @@ def ScalarEvolutionAllTimesOn
       (scalarLap t x + 2 * ricciNormSq t x)
       (Set.Icc 0 T) t
 
-/-- All-times scalar evolution plus the Ricci trace/norm lower bound produces
-the parabolic inequality consumed by the comparison theorem.
 
-This is intentionally stated with an all-times derivative hypothesis on
-`[0,T]` and is retained as a compatibility wrapper.  It is not the preferred
-book-facing Corollary 7.3 producer. -/
+
+
+
+
+
 theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -438,13 +439,13 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
     _ = DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := hparabolic.symm
 
-/-- Regular-time scalar evolution plus the Ricci trace/norm lower bound
-produces the positive-time parabolic inequality consumed by Corollary 7.3.
 
-The interval hypothesis says that the closed test slab `[0,T]` lies in the
-solution carrier, and every positive time in that slab is a regular time of
-the solution.  For a solution on `[0,omega)`, this is the usual `T < omega`
-restriction. -/
+
+
+
+
+
+
 theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -515,9 +516,9 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
     (I := I) G T n hT scalar scalarLap ricciNormSq
     hscalar hlap hricci
 
-/-- In-frame geometric producer for the WMP parabolic inequality.  The raw
-trace/norm Cauchy-Schwarz hypothesis is produced from the inverse-metric frame
-data. -/
+
+
+
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     [I.Boundaryless]
@@ -563,7 +564,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     (ricciNormSqInFrame (I := I) S gInv frame)
     hscalar hlap hricci
 
-/-- Corollary 7.3 assembly theorem from regular-time scalar evolution. -/
+
 theorem scalar_curvature_lower_bound_of_scalarEvolution
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -628,7 +629,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hparabolic hinit hF_lip
 
-/-- Corollary 7.3 assembly theorem using the named WMP regularity package. -/
+
 theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -660,10 +661,10 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     hreg.scalar_time hreg.scalar_space hreg.diff_space hreg.diff_grad
     hevol hlap hricci hinit hF_lip
 
-/-- Closed-open interval convenience wrapper for Corollary 7.3.
 
-For a solution defined on `[0, omega)`, a finite comparison slab with
-`T < omega` lies in the carrier and has positive times in the regular set. -/
+
+
+
 theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -705,8 +706,8 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     G T n c0 hT hn scalar scalarLap ricciNormSq K
     hslab hregular hden hreg hevol hlap hricci hinit hF_lip
 
-/-- Book-facing variant of the scalar lower-bound theorem using a realized
-initial minimum instead of a raw lower-bound hypothesis. -/
+
+
 theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -764,9 +765,9 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     hdiff_grad hevol hlap hricci
     (InitialScalarMinimum.lowerBound (M := M) hinit) hF_lip
 
-/-- Book-facing in-frame variant of the scalar lower-bound theorem.  The
-trace/norm inequality is supplied by the frame inverse-metric producer rather
-than exposed as a raw hypothesis. -/
+
+
+
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     [I.Boundaryless] [CompactSpace M]
@@ -861,8 +862,8 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hevol hlap hricci hinit hF_lip
 
-/-- Closed-open in-frame variant of the scalar lower-bound theorem.  This is
-the finite-slab wrapper for a solution defined on `[0, omega)`. -/
+
+
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     [I.Boundaryless] [CompactSpace M]
@@ -935,4 +936,3 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     hslab hregular hden hreg hevol hlap hricci hinit hF_lip
 
 end DifferentialGeometry.PDE.RicciFlow
-

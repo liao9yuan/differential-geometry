@@ -10,13 +10,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Ricci Identity Bridge for Realized Connections
 
-This file exposes the one-form Ricci identity through the
-project's realized tensor predicates.  The proof route stays inside the
-project's own algebraic layer; do not import the external geometry namespace here.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,28 +34,28 @@ variable {M : Type*} [TopologicalSpace M] [T2Space M] [ChartedSpace H M] [IsMani
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Raw dual-connection evaluation used by the algebraic one-form Ricci
-identity.
 
-This is the local algebraic replacement for the external
-`nabla_dual` calculation: no smooth-section or synthetic realization API is
-involved here. -/
+
+
+
+
+
 def nablaDualEval {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
     (act : V -> R -> R) (conn : V -> V -> V)
     (X : V) (alpha : V -> R) (Y : V) : R :=
   act X (alpha Y) - alpha (conn X Y)
 
-/-- Raw curvature expression for a connection and bracket. -/
+
 def connectionRmRaw {V : Type*} [Sub V]
     (bracket : V -> V -> V) (conn : V -> V -> V)
     (X Y Z : V) : V :=
   conn X (conn Y Z) - conn Y (conn X Z) - conn (bracket X Y) Z
 
-/-- Algebraic one-form Ricci identity in bracket form.
 
-This is the small calculation previously borrowed from the external
-external geometry namespace.  It only uses the commutator rule for the
-action and linearity of the one-form. -/
+
+
+
+
 theorem oneFormRicciIdentity_algebra
     {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
     (act : V -> R -> R) (bracket : V -> V -> V) (conn : V -> V -> V)
@@ -76,14 +76,14 @@ theorem oneFormRicciIdentity_algebra
   simp only [map_sub]
   abel
 
-/-- Connection-generic one-form Ricci identity in the project's public tensor
-interface.
 
-The proof currently routes through the coordinate Christoffel curvature layer:
-`hcoord` is the local coordinate calculation for the one-form commutator, while
-`hcurv` identifies the coordinate curvature coefficients with the realized
-connection curvature.  This theorem is deliberately independent of any
-primitive metric-Christoffel or upstream `LeviCivita g` definition. -/
+
+
+
+
+
+
+
 theorem oneFormRicciIdentity_of_connection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -101,11 +101,11 @@ theorem oneFormRicciIdentity_of_connection
   one_form_third_comm_coord_of_christoffelCurv (I := I) cov hcov Rm13 x alpha
     nabla2Alpha hRm hcurv hcoord
 
-/-- Smooth-connection version of `oneFormRicciIdentity_of_connection`.
 
-The coordinate curvature hypothesis is now produced in the general
-connection-curvature layer.  The one-form coordinate commutator is intentionally
-left explicit until the higher-order covariant-derivative API is settled. -/
+
+
+
+
 theorem oneFormRicciIdentity_of_smooth_connection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -124,7 +124,7 @@ theorem oneFormRicciIdentity_of_smooth_connection
   oneFormRicciIdentity_of_connection (I := I) cov Rm13 x alpha nabla2Alpha
     hRm hcov_one (connection_curvature_coord_of_christoffel (I := I) cov hcov x) hcoord
 
-/-- Evaluation form of `oneFormRicciIdentity_of_connection`. -/
+
 theorem oneFormRicciIdentity_of_connection_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -145,7 +145,7 @@ theorem oneFormRicciIdentity_of_connection_apply
     (oneFormRicciIdentity_of_connection (I := I) cov Rm13 x alpha nabla2Alpha
       hRm hcov hcurv hcoord) X Y Z
 
-/-- Evaluation form of `oneFormRicciIdentity_of_smooth_connection`. -/
+
 theorem oneFormRicciIdentity_of_smooth_connection_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))

@@ -1,36 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.Operator.DirichletForm
-import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
 
-/-!
-# Smooth-function inclusion into the intrinsic `H¹` space
-
-For a smooth function `f : M → ℝ` on a closed Riemannian manifold `(M, g)`,
-the gradient `gradFun g f` is a smooth tangent section. This file packages
-the L² class of `f` together with the L² class of `gradFun g f` as an
-element of the intrinsic `H¹` space `H1Intrinsic g`.
-
-The construction is delivered via `smoothInclude`: given `f` and a smoothness
-hypothesis, it produces an `H¹` element whose `toLp` equals the L² class of
-`f` and whose `gradL2` equals the L² class of `gradFun g f`.
-
-The verification of the joint AESM pairing clause `PairAEMeasurable` for the
-smooth witness is performed at this point. We use the fact that for smooth
-functions, the gradient is continuous and so the pairing
-`x ↦ g.inner x (gradFun g f x) (V x)` against any AESM `V` reduces — via a
-chart-by-chart bilinear-form decomposition — to AESM operations on AESM
-inputs.
-
-## Main definitions
-
-* (forthcoming) `smoothInclude g f hf` : the `H¹` element associated to a
-  smooth function.
-
-This file lays the groundwork for the smooth bridge; the full construction
-including the joint AESM verification depends on chart-localized
-infrastructure that is beyond the immediate scope.
--/
 
 noncomputable section
 
@@ -43,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -58,20 +30,17 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- For a smooth scalar `u`, the classical `(1 - Δ_g) u := u - Δ_g u` is again
-a smooth scalar. -/
 noncomputable def SmoothScalar.oneSubLapClassical {g : SmoothRiemannianMetric I M}
     (u : SmoothScalar g) : SmoothScalar g where
   toFun := u.toFun - Δ_g (I := I) g u.smooth
   smooth := u.smooth.sub (Δ_g_contMDiff (I := I) g u.smooth)
 
+omit [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.oneSubLapClassical_toFun
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     (u.oneSubLapClassical).toFun =
       u.toFun - Δ_g (I := I) g u.smooth := rfl
 
-/-- The Green-identity computation: the H¹ inner product equals an L²
-inner product against `(u - Δ_g u)`. -/
 theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
     {g : SmoothRiemannianMetric I M}
     (u v : SmoothScalar g) :
@@ -131,8 +100,6 @@ theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
   rw [integral_sub h_uv h_vΔu]
   ring
 
-/-- Reformulation of the H¹ inner product on smooth scalars as a Riemannian
-L² inner product against `(u - Δ_g u)`. -/
 theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) u v =
@@ -164,8 +131,6 @@ theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
       RCLike.inner_apply _ _]
   ring
 
-/-- Inner product on `H1Compl g` of two smooth lifts equals the smooth
-H¹-inner-product. -/
 @[simp] lemma inner_smoothToH1Compl_smoothToH1Compl
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     ⟪smoothToH1Compl (I := I) (M := M) g u,
@@ -178,9 +143,6 @@ H¹-inner-product. -/
   rw [UniformSpace.Completion.inner_coe (𝕜 := ℝ) u v]
   rfl
 
-/-- For smooth lifts `u, v ∈ SmoothScalar g`, the bilinear form on the H¹
-completion at `(smooth-lift u, smooth-lift v)` agrees with the smooth-scalar
-H¹ inner product. -/
 @[simp] lemma H1ComplBilin_smoothToH1Compl_smoothToH1Compl
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     H1ComplBilin (I := I) (M := M) g
@@ -190,7 +152,6 @@ H¹ inner product. -/
   rw [H1ComplBilin_apply]
   exact inner_smoothToH1Compl_smoothToH1Compl u v
 
-/-- The variational identity at smooth test functions. -/
 theorem smoothScalar_bilin_eq_lpFunctional_smooth
     {g : SmoothRiemannianMetric I M}
     (u v : SmoothScalar g) :
@@ -205,7 +166,6 @@ theorem smoothScalar_bilin_eq_lpFunctional_smooth
   rw [lpFunctionalCLM_apply, H1ComplToLp_smoothToH1Compl]
   exact real_inner_comm _ _
 
-/-- The image of `smoothToH1Compl` in `H1Compl g` is dense. -/
 theorem denseRange_smoothToH1Compl (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
   unfold smoothToH1Compl
@@ -214,9 +174,6 @@ theorem denseRange_smoothToH1Compl (g : SmoothRiemannianMetric I M) :
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- For any smooth scalar `u`, its lift into `H1Compl g` solves the variational
-equation `B(u, v) = ⟨smoothToLp (u - Δ_g u), H1ComplToLp v⟩` for every test
-`v ∈ H1Compl g`. -/
 theorem smoothToH1Compl_bilin_eq_lpFunctional
     {g : SmoothRiemannianMetric I M}
     (u : SmoothScalar g) (w : H1Compl g) :
@@ -245,8 +202,6 @@ theorem smoothToH1Compl_bilin_eq_lpFunctional
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
-/-- **Smooth bridge.** The lift of a smooth scalar `u` to `H1Compl g` is the
-resolvent of `(1 - Δ_g)` applied to the L² class of `(u - Δ_g u)`. -/
 theorem smoothToH1Compl_eq_resolvent_oneSubLap
     {g : SmoothRiemannianMetric I M}
     (u : SmoothScalar g) :
@@ -262,10 +217,6 @@ theorem smoothToH1Compl_eq_resolvent_oneSubLap
   rw [resolvent_inner_eq_lpFunctional]
   rw [lpFunctionalCLM_apply]
 
-/-- **Smooth bridge, function-level form.** For a smooth real-valued function
-`u : M → ℝ` on a closed Riemannian manifold `(M, g)` (with smoothness witness
-`hu`), wrap into `SmoothScalar g`. Then `smoothToH1Compl u` is the resolvent
-of `(1 - Δ_g)` applied to the L² class of `(u - Δ_g u)`. -/
 theorem smoothToH1Compl_eq_resolvent_oneSubLap_of_function
     (g : SmoothRiemannianMetric I M)
     (u : M → ℝ) (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -276,9 +227,6 @@ theorem smoothToH1Compl_eq_resolvent_oneSubLap_of_function
           (⟨u, hu⟩ : SmoothScalar g).oneSubLapClassical) :=
   smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) ⟨u, hu⟩
 
-/-- Classical-Laplacian compatibility: for a smooth scalar `u`, the smooth
-`H1Compl`-lift of `u` solves the variational equation `(1 - Δ_g) u = (u - Δu)`
-in the L²-distributional sense. -/
 theorem resolvent_smoothToLp_oneSubLapClassical
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     resolvent (I := I) (M := M) g

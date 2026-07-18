@@ -7,35 +7,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Integration.DivergenceTheorem.Gradient
 
-/-!
-# Green's identities on a Riemannian manifold
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` (without boundary),
-the integration-by-parts machinery established in `IntegrationByParts.lean`
-combines with the gradient and Laplacian to yield Green's identities.
-
-## Main results
-
-* `green_first_integral_inner_grad_eq_neg_integral_smul_laplacian` (**Green's first identity**):
-  for smooth `f, h : M → ℝ` with `h` having compact support,
-  $$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g.$$
-
-* `green_second_integral_smul_laplacian_sub_eq_zero` (**Green's second identity**):
-  on a closed manifold, for any smooth `f, h : M → ℝ`,
-  $$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0.$$
-
-## Exponential-weight identities
-
-Specializing the second identity to the weight `e^{-f}` produces the weighted
-identities used along Perelman's `F`-functional first-variation (formula 5.10)
-route:
-
-* `expNegLap` (pointwise): `Δ_g(e^{-f}) = e^{-f}(-Δ_g f + |∇_g f|²)`.
-* `expNegWeightedGreen` / `expNegGreen`: the closed weighted Green identity
-  `∫ e^{-f} Δ_g q = ∫ q Δ_g(e^{-f})`, with the right-hand side expanded.
-* `expNegLap_eq_gradSq`: `∫ e^{-f} Δ_g f = ∫ e^{-f} |∇_g f|²`.
-* `expNegIBP`: `∫ e^{-f}(Δ_g f - |∇_g f|²) = 0`.
--/
 
 noncomputable section
 
@@ -47,7 +18,7 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -58,13 +29,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Green's first identity.** For smooth `f, h : M → ℝ` on a σ-compact
-Hausdorff smooth Riemannian manifold `(M, g)` without boundary, with `h`
-compactly supported,
-$$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g,$$
-where the integrals are taken against the Riemannian volume measure `μ_g`.
-Only `h` is required to have compact support; `f` is an arbitrary smooth
-function. -/
 theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -114,8 +78,6 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- A symmetric variant of Green's first identity, with the compact-support
-hypothesis on `f` instead of `h`. -/
 private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -159,12 +121,6 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- **Green's second identity.** For smooth `f, h : M → ℝ` on a closed (compact,
-Hausdorff and boundaryless) smooth Riemannian manifold `(M, g)`,
-$$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0,$$
-where the integral is taken against the Riemannian volume measure `μ_g`. On a
-compact manifold every smooth function is compactly supported, so this follows
-by applying Green's first identity once in each argument. -/
 theorem green_second_integral_smul_laplacian_sub_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -207,15 +163,15 @@ theorem green_second_integral_smul_laplacian_sub_eq_zero
   rw [integral_sub h_int_fΔh h_int_hΔf]
   rw [h_eq, sub_self]
 
-/-! ## Exponential weight identity -/
 
-/-- General closed weighted Green identity in the form used before expanding
-`Delta(exp(-f))`:
-`∫ e^{-f} Delta q dmu = ∫ q Delta(e^{-f}) dmu`.
 
-With the current convention in `green_second_integral_smul_laplacian_sub_eq_zero`,
-expanding the right-hand side later gives
-`q * e^{-f} * (-Delta f + |grad f|^2)`. -/
+
+
+
+
+
+
+
 theorem expNegWeightedGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -269,8 +225,8 @@ theorem expNegWeightedGreen
     linarith
   simpa [expNeg] using h_eq
 
-/-- Pointwise scalar expansion
-`Delta(e^{-f}) = e^{-f} * (-Delta f + |grad f|^2)`. -/
+
+
 theorem expNegLap
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -340,8 +296,8 @@ theorem expNegLap
   simp [Δ_g, phi, expNeg]
   ring
 
-/-- Expanded arbitrary-test weighted Green identity:
-`∫ e^{-f} Delta q = ∫ q e^{-f}(-Delta f + |grad f|^2)`. -/
+
+
 theorem expNegGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -375,8 +331,8 @@ theorem expNegGreen
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)))
   rw [expNegLap (I := I) g hf x]
 
-/-- Closed weighted identity used in Perelman's formula 5.10 route:
-`∫ e^{-f} Δ f dμ_g = ∫ e^{-f} |∇ f|² dμ_g`. -/
+
+
 theorem expNegLap_eq_gradSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -449,9 +405,9 @@ theorem expNegLap_eq_gradSq
     simpa [integral_neg, expNeg] using hleft.symm.trans hgreen
   exact (neg_injective hneg).symm
 
-/-- Integral form of `∫ e^{-f}(Δf - |∇f|²)dμ_g = 0`.  The explicit
-integrability hypotheses are separated because the geometric smoothness bridge
-for `|∇f|²` is useful elsewhere and should live in the gradient layer. -/
+
+
+
 theorem expNegIBP
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

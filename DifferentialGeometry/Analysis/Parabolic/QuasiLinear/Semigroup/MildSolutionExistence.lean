@@ -2,46 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.Contraction
 import Mathlib.Topology.MetricSpace.Contracting
 import Mathlib.Topology.ContinuousMap.Compact
 
-/-!
-# Short-time existence and uniqueness of the mild solution
-
-For a real Banach space `X`, a `BoundedC0Semigroup S` with generator `A`,
-an initial datum `u₀ : X`, and a globally Lipschitz lower-order
-nonlinearity `N : X → X`, this file proves **short-time existence and
-uniqueness** of a mild solution of the semilinear evolution equation
-
-  `∂_t u = A u + N(u)`,  `u(0) = u₀`,
-
-i.e. a continuous path `u : [0, T] → X` solving the Duhamel integral
-equation
-
-  `u(t) = S t u₀ + ∫₀ᵗ S (t - τ) (N (u τ)) dτ`.
-
-The construction is the classical Banach fixed-point argument. On the
-complete metric space `C(↑(Set.Icc 0 T), X)` of continuous maps from the
-compact time interval, the nonlinear Duhamel map `duhamelCM` is a
-self-map; the contraction estimate `nlDuhamel_dist_le` shows that for `T`
-small enough that `(L : ℝ) * T < 1` it is a contraction with constant
-`(L : ℝ) * T`. Mathlib's `ContractingWith.fixedPoint` then supplies a
-unique fixed point, which is the mild solution.
-
-Choosing `T := 1 / (L + 1)` makes `(L : ℝ) * T = L / (L + 1) < 1`
-unconditionally, so a positive existence time always exists.
-
-## Main definitions
-
-* `duhamelCM S u₀ hN hT0` — the nonlinear Duhamel map realised as a
-  self-map of `C(↑(Set.Icc 0 T), X)`.
-
-## Main results
-
-* `duhamelCM_contractingWith` — `duhamelCM` is a contraction whenever
-  `(L : ℝ) * T < 1`.
-* `semilinear_mild_solution_existence` — existence of a positive time `T` and
-  a continuous mild solution on `[0, T]`.
-* `semilinear_mild_solution_unique` — two continuous mild solutions on the
-  same interval `[0, T]` (with `(L : ℝ) * T < 1`) coincide.
--/
 
 noncomputable section
 
@@ -56,40 +16,27 @@ namespace QuasiLinear
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   [CompleteSpace X]
 
-/-- The space of continuous maps from the compact interval
-`↑(Set.Icc 0 T)` to a Banach space `X` is complete. -/
 instance instCompleteSpaceContinuousMapIcc {T : ℝ} :
     CompleteSpace C(↑(Set.Icc (0 : ℝ) T), X) :=
   (ContinuousMap.isometryEquivBoundedOfCompact
     (↑(Set.Icc (0 : ℝ) T)) X).completeSpace
 
-/-- The forcing path obtained from a continuous map on the time interval
-by clamping the argument into `[0, T]`. -/
 private def pathOfCM {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) : ℝ → X :=
   Set.IccExtend hT0 u
 
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 private theorem continuous_pathOfCM {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) : Continuous (pathOfCM hT0 u) :=
   Continuous.Icc_extend' u.continuous
 
-/-- On the time interval `[0, T]` the clamped forcing path agrees with
-the original continuous map. -/
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 private theorem pathOfCM_apply_mem {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) {τ : ℝ}
     (hτ : τ ∈ Set.Icc (0 : ℝ) T) :
     pathOfCM hT0 u τ = u ⟨τ, hτ⟩ :=
   Set.IccExtend_of_mem hT0 u hτ
 
-/-- The nonlinear Duhamel map realised as a self-map of the space of
-continuous paths `C(↑(Set.Icc 0 T), X)`.
-
-A continuous path `u` is first clamped to a forcing function on all of
-`ℝ` via `pathOfCM`, then mapped through the nonlinear Duhamel map
-`nlDuhamel`; the result, restricted to the compact interval, is again a
-continuous map. Continuity on `[0, T]` follows from
-`nlDuhamel_continuousOn` (which needs the nonlinearity `N` to be
-Lipschitz) since `Set.Icc 0 T ⊆ Set.Ici 0`. -/
 def duhamelCM (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X} {L : ℝ≥0}
     (hN : LipschitzWith L N) {T : ℝ} (hT0 : (0 : ℝ) ≤ T) :
     C(↑(Set.Icc (0 : ℝ) T), X) → C(↑(Set.Icc (0 : ℝ) T), X) :=
@@ -103,6 +50,7 @@ def duhamelCM (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X} {L : ℝ≥0}
           Set.Icc_subset_Ici_self
         exact (h_on.mono h_sub).restrict⟩
 
+omit [CompleteSpace X] in
 @[simp]
 theorem duhamelCM_apply (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X}
     {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
@@ -111,9 +59,7 @@ theorem duhamelCM_apply (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X}
       nlDuhamel S u₀ N (pathOfCM hT0 u) (t : ℝ) :=
   rfl
 
-/-- Pointwise `dist` bound for the Duhamel self-map: for any two
-continuous paths the distance of the Duhamel images at a time
-`t ∈ [0, T]` is bounded by `(L : ℝ) * T * dist u v`. -/
+omit [CompleteSpace X] in
 private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (u v : C(↑(Set.Icc (0 : ℝ) T), X))
@@ -150,8 +96,7 @@ private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
     _ ≤ (L : ℝ) * t * dist u v := h_t_le
     _ ≤ (L : ℝ) * T * dist u v := h_mono
 
-/-- Global `dist` bound for the Duhamel self-map:
-`dist (duhamelCM … u) (duhamelCM … v) ≤ ((L : ℝ) * T) * dist u v`. -/
+omit [CompleteSpace X] in
 private theorem duhamelCM_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (hTL_nn : (0 : ℝ) ≤ (L : ℝ) * T)
@@ -163,11 +108,7 @@ private theorem duhamelCM_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
   · intro t
     exact duhamelCM_dist_apply_le S u₀ hN hT0 u v t
 
-/-- The Duhamel self-map is a contraction whenever `(L : ℝ) * T < 1`.
-
-The contraction constant is `(L : ℝ) * T`, packaged as an element of
-`ℝ≥0` via the non-negativity of `(L : ℝ) * T`; the `LipschitzWith`
-property follows from the global `dist` bound `duhamelCM_dist_le`. -/
+omit [CompleteSpace X] in
 theorem duhamelCM_contractingWith (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (hTL : (L : ℝ) * T < 1) :
@@ -182,18 +123,6 @@ theorem duhamelCM_contractingWith (S : BoundedC0Semigroup X) (u₀ : X)
     have h := duhamelCM_dist_le S u₀ hN hT0 hTL_nn u v
     simpa using h
 
-/-- **Short-time existence of a mild solution.**
-
-For a bounded `C₀`-semigroup `S` on a Banach space `X`, any initial
-datum `u₀`, and a globally Lipschitz nonlinearity `N`, there is a
-positive existence time `T` and a continuous path `u : [0, T] → X`
-solving the semilinear Duhamel integral equation
-`u(t) = S t u₀ + ∫₀ᵗ S (t - τ) (N (u τ)) dτ` with `u(0) = u₀`.
-
-The existence time `T := 1 / (L + 1)` is positive and makes the
-nonlinear Duhamel map a contraction on the path space; its unique fixed
-point, extended off `[0, T]` by `Set.IccExtend`, is the mild
-solution. -/
 theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) :
     ∃ T : ℝ, 0 < T ∧ ∃ u : ℝ → X,
@@ -239,12 +168,7 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
     unfold nlDuhamel duhamel
     rfl
 
-/-- The linear Duhamel value at time `t` depends on the forcing term `F`
-only through its values on `[0, t]`: if `F₁` and `F₂` agree on
-`Set.Icc 0 t` and `0 ≤ t`, then `duhamel S u₀ F₁ t = duhamel S u₀ F₂ t`.
-
-Only the interval integral `∫ τ in 0..t` is forcing-dependent, and it
-sees `F` only on `uIcc 0 t = Icc 0 t`. -/
+omit [CompleteSpace X] in
 private theorem duhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
     {F₁ F₂ : ℝ → X} {t : ℝ} (ht : 0 ≤ t)
     (hF : Set.EqOn F₁ F₂ (Set.Icc 0 t)) :
@@ -257,8 +181,7 @@ private theorem duhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
   change S (t - τ) (F₁ τ) = S (t - τ) (F₂ τ)
   rw [hF hτ]
 
-/-- The nonlinear Duhamel value at time `t` depends on the forcing path
-`u` only through its values on `[0, t]`. -/
+omit [CompleteSpace X] in
 private theorem nlDuhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
     (N : X → X) {u₁ u₂ : ℝ → X} {t : ℝ} (ht : 0 ≤ t)
     (hu : Set.EqOn u₁ u₂ (Set.Icc 0 t)) :
@@ -269,13 +192,7 @@ private theorem nlDuhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
   change N (u₁ τ) = N (u₂ τ)
   rw [hu hτ]
 
-/-- A continuous path `u` on `[0, T]` solving the Duhamel integral
-equation restricts to a fixed point of the Duhamel self-map `duhamelCM`.
-
-The clamped forcing `pathOfCM hT0 u_restricted` agrees with `u` on
-`[0, T]`, so by `nlDuhamel_congr` the nonlinear Duhamel value at any
-`t ∈ [0, T]` is unchanged when the forcing is replaced by `u` itself;
-the Duhamel equation then identifies it with `u t`. -/
+omit [CompleteSpace X] in
 private theorem isFixedPt_of_duhamel_solution (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) {u : ℝ → X}
@@ -305,15 +222,6 @@ private theorem isFixedPt_of_duhamel_solution (S : BoundedC0Semigroup X)
   unfold nlDuhamel duhamel
   rw [hu_eq t ht]
 
-/-- **Uniqueness of the mild solution.**
-
-Any two continuous paths `u, v : [0, T] → X` solving the same semilinear
-Duhamel integral equation with the same initial datum `u₀` coincide on
-`[0, T]`, provided `(L : ℝ) * T < 1`.
-
-Each solution restricts to a fixed point of the contracting Duhamel
-self-map `duhamelCM`; uniqueness of the Banach fixed point forces the
-two restrictions — hence the two paths on `[0, T]` — to be equal. -/
 theorem semilinear_mild_solution_unique (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ} (hT : 0 < T)
     (hTL : (L : ℝ) * T < 1) {u v : ℝ → X}

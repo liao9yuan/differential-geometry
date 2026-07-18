@@ -21,11 +21,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Coordinate Ricci identity projections
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
+
+
+
+
 
 section CoordinateChristoffelCurvature
 
@@ -35,18 +35,18 @@ variable [Module.Finite Real E] [CompleteSpace Real]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Coordinate inputs for the textbook `(0,s)` Ricci-identity component
-commutator. The first two slots are the derivative slots. -/
+
+
 def tensor0SRicciIdentityCoordInput {s : ℕ}
     (i j : CoordinateIdx (𝕜 := Real) E)
     (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
     Fin (s + 2) -> CoordinateIdx (𝕜 := Real) E :=
   Fin.cases i (Fin.cases j ks)
 
-/-- Coordinate projection of the invariant `(0,s)` curvature action.
 
-This is the coordinate layer's only expansion of the slotwise curvature action
-into Christoffel curvature components. -/
+
+
+
 theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -99,11 +99,11 @@ theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [hslot q m]
 
-/-- Coordinate-frame component form of the invariant `(0,s)` Ricci identity.
 
-This is the book-facing specialization: evaluate the invariant identity on
-coordinate vector fields and expand each curvature action in the replaced
-slot through the coordinate curvature coefficients. -/
+
+
+
+
 theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -186,11 +186,11 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
             curvatureAction0SAt_coordFrame_of_christoffelCurv
               (I := I) cov hcov Rm13 x0 alpha hRm hcurv i j ks
 
-/-- Coordinate Christoffel-form one-form Ricci identity.
 
-This is the scalar-coordinate producer that should be discharged by expanding
-`nabla0SFun` with the coordinate Christoffel formulas and commuting the scalar
-second derivatives. -/
+
+
+
+
 def OneFormThirdCommChristoffelCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -212,9 +212,9 @@ def OneFormThirdCommChristoffelCoordAt
           christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
             alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)
 
-/-- The Christoffel-coordinate commutator implies the tensor one-form Ricci
-identity once the supplied `Rm13` tensor is known to realize connection
-curvature and the connection curvature has the Christoffel-coordinate expansion. -/
+
+
+
 theorem one_form_third_comm_coord_of_christoffelCurv
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

@@ -24,11 +24,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Compactness And Scalar Signs
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 structure TensorFirstNullCompactnessOn
     (G : Real -> SmoothRiemannianMetric I M)
@@ -44,8 +44,8 @@ structure TensorFirstNullCompactnessOn
 
 namespace TensorFirstNullCompactnessOn
 
-/-- Section-backed first-null compactness.  This is the geometric bridge from
-smooth tensor sections to the raw first-null package used by the WMP kernel. -/
+
+
 theorem of_section
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -175,9 +175,9 @@ end TensorFirstNullCompactnessOn
 
 namespace TensorFirstNullCompactnessOn
 
-/-- Section-backed first-null compactness using the geometric time-slab
-subtype of `{t // t ∈ K} × TangentBundle`, rather than the dependent sigma
-slab with coproduct topology. -/
+
+
+
 theorem of_section_timeSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -307,13 +307,13 @@ theorem of_section_timeSlab
 
 end TensorFirstNullCompactnessOn
 
-/--
-The strict barrier supersolution inequality produced after adding
-`epsilon * (delta + t - t0) * g`.
 
-This is the named target for the estimate that absorbs metric variation and
-the local Lipschitz error in `N`.
--/
+
+
+
+
+
+
 def TensorBarrierStrictSupersolutionOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -354,12 +354,12 @@ theorem strictBarrier_of_est
     (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
     (U := Set.Ioc t0 (t0 + delta)) hsub hbase hest
 
-/--
-Uniform strict barrier supersolution on a fixed short slab for small barriers.
 
-The time slab is fixed before `epsilon` varies over `0 < epsilon ≤ 1`.  This is
-the mathematically usable local estimate for the final `epsilon -> 0` argument.
--/
+
+
+
+
+
 def TensorBarrierUniformStrictOnSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -372,14 +372,14 @@ def TensorBarrierUniformStrictOnSlab
       TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
         nabla2Barrier nablaBarrier epsilon delta t0
 
-/--
-Scalar signs obtained by testing the tensor barrier on a locally parallel
-extension of the first-null vector.
 
-This is an existential `Prop`, rather than a `Prop` structure with `Real`
-fields, because Lean does not generate projections for data fields in
-proof-irrelevant structures.
--/
+
+
+
+
+
+
+
 def TensorFirstNullScalarSigns
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -394,8 +394,8 @@ def TensorFirstNullScalarSigns
     0 ≤ reaction ∧
     drift + reaction < timeDeriv - laplacian
 
-/-- A strict barrier witness together with the first-null scalar signs proved
-for the same first and second spatial derivative witnesses. -/
+
+
 structure TensorStrictCert
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -413,7 +413,7 @@ structure TensorStrictCert
     ∀ d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0,
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
 
-/-- Uniform strict barrier certificates on a fixed short slab. -/
+
 def TensorStrictCertSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -424,16 +424,16 @@ def TensorStrictCertSlab
     Nonempty (TensorStrictCert (I := I) (M := M) G S X N
       epsilon delta t0)
 
-/--
-Build the first-null scalar-sign package from the transparent local scalar
-test-function inputs.
 
-The remaining geometric work for future producers is exactly the hypotheses
-here: the scalar test has nonpositive time derivative at the first null point,
-nonnegative Laplacian, zero drift, and its heat-with-drift value agrees with
-the tensor heat-with-drift quadratic evaluation.  The strict inequality and
-reaction nonnegativity are then obtained from the already proved WMP inputs.
--/
+
+
+
+
+
+
+
+
+
 theorem scalarSigns_of_eval
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -517,12 +517,12 @@ theorem scalarSigns_of_eval
     hreaction_nonneg, ?_⟩
   linarith
 
-/--
-Version of `scalarSigns_of_eval` for separately identified Laplacian and
-drift terms.  This is the form expected from the corrected local test-section
-calculation: prove the rough-Laplacian trace identity and the drift
-cancellation separately, then assemble the tensor heat-with-drift value.
--/
+
+
+
+
+
+
 theorem scalarSigns_of_parts
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -570,12 +570,12 @@ theorem scalarSigns_of_parts
       (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v
       laplacian drift hlap hdrift)
 
-/--
-Zero-drift specialization of `scalarSigns_of_parts`.  This is the expected
-shape at a first-null point after extending the null vector locally with
-vanishing covariant derivative and using that the scalar test function has zero
-spatial derivative.
--/
+
+
+
+
+
+
 theorem scalarSigns_of_lap
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -619,12 +619,12 @@ theorem scalarSigns_of_lap
     hstrict hnull hsym hbilin d laplacian 0 htime_nonpos
     hlaplacian_nonneg rfl hlap hdrift
 
-/--
-First-null specialization of `scalarSigns_of_lap`.  The nonpositive time
-derivative is supplied directly by `TensorFirstNullData`, so future local
-test-section producers only have to prove the spatial Laplacian and drift
-facts.
--/
+
+
+
+
+
+
 theorem scalarSigns_of_lap_firstNull
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -660,11 +660,11 @@ theorem scalarSigns_of_lap_firstNull
       d timeDeriv hderiv)
     hlaplacian_nonneg hlap hdrift
 
-/--
-First-null scalar signs from a local smooth test section.  The drift
-cancellation is supplied by the first-derivative tensor product rule
-`nablaEval_zero`; callers still provide the spatial Laplacian comparison.
--/
+
+
+
+
+
 theorem scalarSigns_of_local
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -716,12 +716,12 @@ theorem scalarSigns_of_local
   rw [hnabla, hX]
   exact nablaEval_zero (I := I) (M := M) hreal Xsec V hV hphi hcovV
 
-/--
-First-null scalar signs from a local test section and the scalar
-minimum-principle Laplacian producer.  This closes the Laplacian sign part of
-the first-null scalarization; callers still supply the bridge identifying the
-tensor rough-Laplacian trace with the scalar Laplacian of `phi = B(V,V)`.
--/
+
+
+
+
+
+
 theorem scalarSigns_of_local_min
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -803,10 +803,10 @@ theorem scalarSigns_of_local_min
     hstrict hnull hsym hbilin d (laplacian (I := I) cov (G d.t1) phi d.x1)
     hlap_nonneg hlap hreal Xsec V hX hnabla hV hphi hcovV
 
-/-- Single-section version of `scalarSigns_of_local_min`.
 
-This is the shape needed by the geometric first-null proof: one local test
-section is evaluated in both tensor slots. -/
+
+
+
 theorem scalarSigns_oneSec
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -923,11 +923,11 @@ theorem scalarSigns_oneSec
     hstrict hnull hsym hbilin d hreal Xsec V hlapMin hlap' hX hnabla hV' hB'
     hcovV' hmdiff' hmdiff_near' hgrad'
 
-/-- One-section scalar signs using a realized scalar Hessian for
-`phi = B(V,V)`.
 
-This is the real bridge that discharges the raw `hslots` input of
-`scalarSigns_oneSec` from the checked second-derivative product rule. -/
+
+
+
+
 theorem scalarSigns_hess
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1027,14 +1027,14 @@ theorem scalarSigns_hess
     hstrict hnull hsym hbilin d hreal1 Xsec Vsec hlapMin (Hess d.x1) hlap hslots
     hX hnabla hV hB (hcovV Xsec) hmdiff hmdiff_near hgrad
 
-/-- One-jet scalar signs with canonical scalar `du`, Hessian, and Laplacian
-trace producers.
 
-This section-backed producer removes the explicit `du`/Hessian/Laplacian
-realization inputs from `scalarSigns_hess`.  The correction field
-`p ↦ (cov V p) (Y p)` is produced as a local `C1` slot from connection
-regularity; scalar gradient regularity is derived from smoothness of
-`phi = B(V,V)`. -/
+
+
+
+
+
+
+
 theorem scalarSigns_covHess
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1173,11 +1173,11 @@ theorem scalarSigns_covHess
     hX hnabla hV (hB Vsec hV) hcovVall hmdiff hmdiff_near
     (by simpa [phi] using hgrad)
 
-/-- Section-backed version of `scalarSigns_covHess`.
 
-This instantiates the frozen barrier tensor and its first two spatial
-covariant derivatives from `barrierDerivs`; no separate `B`, `∇B`, or `∇²B`
-producer is exposed. -/
+
+
+
+
 theorem scalarSigns_secHess
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1267,17 +1267,17 @@ theorem scalarSigns_secHess
     (hbarDerivs.first d.t1) (hbarDerivs.second d.t1) Xsec hlapMin
     rfl hkerB_left hkerB_right hX rfl hB
 
-/--
-First-null scalar signs with the local zero-covariant-derivative test section
-constructed internally.
 
-This is the `OneJet` consumer: callers no longer supply the local test section
-or the proof `∇V = 0` at the first-null point.  The remaining hypotheses are
-the genuine scalar-test-function producers for the section selected by the
-one-jet theorem: the Laplacian bridge, the equality with the barrier scalar
-test, and the differentiability/gradient inputs used by
-`LaplacianNonnegativeAtSpatialMin`.
--/
+
+
+
+
+
+
+
+
+
+
 theorem scalarSigns_covZero
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

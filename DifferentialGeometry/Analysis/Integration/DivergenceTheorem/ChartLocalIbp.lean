@@ -10,30 +10,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Chart-local integration-by-parts identity for the chart Voss–Weyl divergence
-
-For a smooth tangent section `X` and a smooth function `φ : M → ℝ` with
-compact support contained in `(chartAt H α).source`, the chart-local Voss–Weyl
-divergence at `α` satisfies:
-$$
-\int_M (\text{localDivergence}_g\, \alpha\, X)(x) \cdot \phi(x)
-    \,\mathrm{d}(\text{chartLocalMeasure}_g\,\alpha)(x)
-  = -\int_M (\text{tangentSectionAction}\, X\, \phi)(x)
-    \,\mathrm{d}(\text{chartLocalMeasure}_g\,\alpha)(x).
-$$
-This is the chart-local integration-by-parts formula. Together with the
-intrinsic nature of `tangentSectionAction` and the chart-invariance of
-`chartLocalMeasure` on overlaps (proved in
-`DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean`), it yields the
-chart-invariance of the chart-local Voss–Weyl divergence.
-
-The proof proceeds by pulling both integrals back to the chart target via the
-extended chart, applying Mathlib's Euclidean integration by parts
-(`integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable`) to each summand of the
-chart formula, and pushing the result back to the manifold via the chart-local
-representation of `tangentSectionAction`.
--/
 
 noncomputable section
 
@@ -45,7 +21,7 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -56,12 +32,10 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The image of `tsupport φ` under the chart map. We will use this set as a
-compact "barrier" that contains the supports of all the chart-pulled-back
-integrands. -/
 private def chartImageOfTsupport (α : M) (φ : M → ℝ) : Set E :=
   (extChartAt I α) '' tsupport φ
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isCompact
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -75,6 +49,7 @@ private lemma chartImageOfTsupport_isCompact
     exact hφ_supp hx
   exact (hφ_compactSupp : IsCompact (tsupport φ)).image_of_continuousOn hcontOn
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_subset_target
     (α : M) {φ : M → ℝ}
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
@@ -88,6 +63,7 @@ private lemma chartImageOfTsupport_subset_target
     (extChartAt I α).map_source hxsrc
   rwa [hxy] at this
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isClosed
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -95,8 +71,6 @@ private lemma chartImageOfTsupport_isClosed
     IsClosed (chartImageOfTsupport (I := I) α φ) :=
   (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp).isClosed
 
-/-- The chart-pulled-back integrand `X^i_α · ρ_α`, extended by zero outside
-the chart target, viewed as a function `E → ℝ`. -/
 private def vwIntegrandOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -104,6 +78,7 @@ private def vwIntegrandOnE
   fun y => (extChartAt I α).target.indicator
     (fun z => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -113,6 +88,7 @@ private lemma vwIntegrandOnE_apply_of_mem
       chartCoeffOnE (I := I) α X i y * chartDensityOnE (I := I) g α y :=
   Set.indicator_of_mem hy _
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -121,10 +97,6 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-- Under `[I.Boundaryless]`, the chart target is open, so on the open
-neighborhood `target` of any point in `target`, `vwIntegrandOnE` agrees with
-the smooth function `chartCoeffOnE * chartDensityOnE`. Hence
-`vwIntegrandOnE` is `C^∞` on the chart target. -/
 private lemma vwIntegrandOnE_contDiffOn_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -138,23 +110,23 @@ private lemma vwIntegrandOnE_contDiffOn_target [I.Boundaryless]
   intro y hy
   rw [vwIntegrandOnE_apply_of_mem (I := I) g α X i hy]
 
-/-- The chart-pullback of `φ : M → ℝ`, extended by zero outside the chart
-target. -/
 private def phiOnE (α : M) (φ : M → ℝ) : E → ℝ :=
   fun y => (extChartAt I α).target.indicator
     (fun z => φ ((extChartAt I α).symm z)) y
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_mem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = φ ((extChartAt I α).symm y) :=
   Set.indicator_of_mem hy _
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_notMem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-- On the chart target, `phiOnE α φ` agrees with `scalarOnE α φ`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_eq_scalarOnE_on_target
     (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -162,7 +134,7 @@ private lemma phiOnE_eq_scalarOnE_on_target
   rw [phiOnE_apply_of_mem (I := I) α φ hy]
   rfl
 
-/-- Under `[I.Boundaryless]`, `phiOnE α φ` is `C^∞` on the chart target. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma phiOnE_contDiffOn_target [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ) :
     ContDiffOn ℝ ∞ (phiOnE (I := I) α φ) (extChartAt I α).target := by
@@ -173,10 +145,7 @@ private lemma phiOnE_contDiffOn_target [I.Boundaryless]
   intro y hy
   exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hy
 
-/-- If the function `f : E → ℝ` is `C^∞` on the open set `U` and identically
-zero outside a closed set `K ⊆ U`, then `f` is `C^∞` on all of `E`. We split
-`E = U ∪ (Kᶜ)` where the cover is open: on `U`, `f` is `C^∞`; on `Kᶜ`, `f` is
-identically zero (hence `C^∞`). -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma contDiff_of_smooth_on_open_zero_outside
     {U : Set E} (hU : IsOpen U) {K : Set E} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : E → ℝ}
@@ -196,8 +165,7 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-/-- Support of `phiOnE α φ` is contained in the chart image of the tsupport
-of `φ`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_support_subset_chartImage
     (α : M) (φ : M → ℝ) :
     Function.support (phiOnE (I := I) α φ) ⊆ chartImageOfTsupport (I := I) α φ := by
@@ -211,7 +179,7 @@ private lemma phiOnE_support_subset_chartImage
   · rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
     exact (hy rfl).elim
 
-/-- `tsupport (phiOnE α φ)` ⊆ `chartImageOfTsupport α φ` (a closed bound). -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_tsupport_subset_chartImage
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -220,9 +188,7 @@ private lemma phiOnE_tsupport_subset_chartImage
   refine closure_minimal (phiOnE_support_subset_chartImage (I := I) α φ) ?_
   exact chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp
 
-/-- Under `[I.Boundaryless]`, with `tsupport φ ⊆ source` and `φ` continuous
-with compact support, `phiOnE α φ` has compact tsupport in `E`, contained in
-the chart target. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -240,8 +206,7 @@ private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     exact hy this
   · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
-/-- Under `[I.Boundaryless]`, `phiOnE α φ` is `C^∞` on all of `E`, provided
-`φ` is `C^∞` and has compact tsupport contained in the chart source. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma phiOnE_contDiff [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (hφ_compactSupp : HasCompactSupport φ)
@@ -263,7 +228,6 @@ private lemma phiOnE_contDiff [I.Boundaryless]
       exact hy this
     · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
-/-- `vwIntegrandOnE` is differentiable at every point of the chart target. -/
 private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -277,9 +241,7 @@ private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     vwIntegrandOnE_contDiffOn_target (I := I) g α X i y hy
   exact ((h_at.contDiffAt (hOpen.mem_nhds hy)).differentiableAt (by simp))
 
-/-- The pointwise `fderiv` of `phiOnE α φ` agrees with the pointwise `fderiv`
-of `scalarOnE α φ` on the open chart target. (This is `EventuallyEq.fderiv_eq`
-after restricting to the target.) -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     (α : M) (φ : M → ℝ)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -291,9 +253,6 @@ private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hz
   exact Filter.EventuallyEq.fderiv_eq h_eq
 
-/-- The chart-local IBP per index, expressed on the chart target via
-extension by zero outside. The integration is over all of `E` against
-`modelHaar`. -/
 private theorem ibp_per_index [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -472,9 +431,7 @@ private theorem ibp_per_index [I.Boundaryless]
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
 
-/-- On the chart target, `partialDeriv i (vwIntegrandOnE g α X i) y` equals
-`partialDeriv i (chartCoeffOnE α X i · chartDensityOnE g α) y` (since the
-two functions agree on the open neighborhood `target`). -/
+omit [InnerProductSpace ℝ E] in
 private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -491,8 +448,7 @@ private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     exact vwIntegrandOnE_apply_of_mem (I := I) g α X i hz
   rw [h_eq.fderiv_eq]
 
-/-- On the chart target, `partialDeriv i (phiOnE α φ) y` equals
-`partialDeriv i (scalarOnE α φ) y`. -/
+omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
     (α : M) (φ : M → ℝ) (i : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -501,7 +457,6 @@ private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
   unfold partialDeriv
   rw [fderiv_phiOnE_eq_fderiv_scalarOnE (I := I) α φ hy]
 
-/-- The pointwise identity: `localDivergence g α X (symm y) · ρ_α(symm y) = ∑_i partialDeriv i (vwIntegrandOnE) y` for `y ∈ target`. -/
 private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {y : E}
@@ -529,9 +484,6 @@ private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryles
   intro i _
   exact (partialDeriv_vwIntegrandOnE_eq_on_target (I := I) g α X i hy).symm
 
-/-- The pointwise identity at `symm y`: `tangentSectionAction X φ (symm y) =
-∑_i chartCoeff α X i (symm y) · partialDeriv i (scalarOnE α φ) y`, for `y ∈ target`
-under `[I.Boundaryless]`. -/
 private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
     (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -552,8 +504,6 @@ private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
   intro i _
   rw [(extChartAt I α).right_inv hy]
 
-/-- Continuity of `localDivergence g α X` on the chart base set under
-`[I.Boundaryless]`. -/
 lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -580,9 +530,6 @@ lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
   rw [← hdomain_eq]
   exact hsmooth.continuousOn
 
-/-- Measurability of the product `localDivergence g α X · φ` when `φ` has
-tsupport contained in the chart source. The integrand vanishes outside the
-chart source, where `localDivergence` may take junk values. -/
 lemma localDivergence_mul_phi_measurable [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -621,8 +568,6 @@ lemma localDivergence_mul_phi_measurable [I.Boundaryless]
   rw [h_eq]
   exact hpiecewise_meas
 
-/-- Pull the LHS of the IBP back to the chart target. The integrand on the
-target is `(∑_i partialDeriv i (vwIntegrandOnE)) · phiOnE α φ`. -/
 private lemma lhs_chart_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -655,8 +600,6 @@ private lemma lhs_chart_target [I.Boundaryless]
   rw [hρ_localDiv]
   rw [← phiOnE_apply_of_mem (I := I) α φ hy]
 
-/-- Pull the RHS of the IBP back to the chart target. The integrand on the
-target is `ρ_α(symm y) · ∑_i (X^i_α(symm y)) · partialDeriv i (φ ∘ symm) y`. -/
 private lemma rhs_chart_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -681,8 +624,6 @@ private lemma rhs_chart_target [I.Boundaryless]
   rw [htsa_eq]
   rfl
 
-/-- Each summand `∂_i (vwIntegrandOnE) · phiOnE α φ` is `C^∞` on `E` and has
-compact support. -/
 private lemma summand_int [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -731,7 +672,6 @@ private lemma summand_int [I.Boundaryless]
     hphi_compactSupp.mul_left
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
-/-- Each summand `vwIntegrandOnE · ∂_i (phiOnE α φ)` is integrable. -/
 private lemma summand_int' [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -808,7 +748,6 @@ private lemma summand_int' [I.Boundaryless]
     rw [hpartial_zero, mul_zero]
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
-/-- The chart-local IBP. -/
 theorem chart_local_ibp [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

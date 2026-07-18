@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching Quotient
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,18 +25,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-! ## Lemma 10.5: scalar quotient evolution -/
 
-/-- The scalar quotient field in Lemma 10.5, written as
-`phi^alpha * psi^(-beta)`.  On the positive `psi` region this is the book's
-`phi^alpha / psi^beta`, but the negative-power form is the stable calculus
-normal form. -/
+
+
+
+
+
 def quotField
     (phi psi : Real -> M -> Real) (alpha beta : Real) :
     Real -> M -> Real :=
   fun t x => phi t x ^ alpha * psi t x ^ (-beta)
 
-/-- Canonical spatial Laplacian of the quotient field. -/
+
 def quotLap
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (phi psi : Real -> M -> Real) (alpha beta : Real) :
@@ -45,11 +45,11 @@ def quotLap
     DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
       (quotField (M := M) phi psi alpha beta t) x
 
-/-- Right-hand side of Lemma 10.5 for
-`(partial_t - Delta) (phi^alpha psi^(-beta))`.
 
-The `phiHeat` and `psiHeat` inputs are the already-subtracted heat operator
-values `(partial_t - Delta) phi` and `(partial_t - Delta) psi`. -/
+
+
+
+
 def quotHeatRHS
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
@@ -75,10 +75,10 @@ def quotHeatRHS
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (phi t) x)
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (psi t) x)
 
-/-- Display-form right-hand side of Lemma 10.5, using `/ psi^...` notation.
 
-The stable theorem uses negative powers.  This definition is only a
-book-facing display layer on the positive `psi` region. -/
+
+
+
 def quotHeatRHSDiv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
@@ -104,8 +104,8 @@ def quotHeatRHSDiv
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (phi t) x)
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (psi t) x)
 
-/-- The display-form quotient RHS agrees with the stable negative-power RHS on
-the positive-denominator region. -/
+
+
 theorem quotHeatRHSDiv_eq
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
@@ -129,7 +129,7 @@ theorem quotHeatRHSDiv_eq
   simp [div_eq_mul_inv]
   ring_nf
 
-/-- Predicate form of Lemma 10.5 for a fixed realized metric family. -/
+
 def QuotientEvolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -144,8 +144,8 @@ def QuotientEvolutionOn
       D.carrier
       (t : Real)
 
-/-- Display-form predicate for Lemma 10.5, using `/ psi^...` notation in the
-RHS.  The authoritative computational form is `QuotientEvolutionOn`. -/
+
+
 def QuotEvolDivOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -160,12 +160,12 @@ def QuotEvolDivOn
       D.carrier
       (t : Real)
 
-/-- Lemma 10.5, pointwise quotient evolution identity.
 
-The general real-exponent statement is intentionally stated on the positive
-`phi`, positive `psi` region.  The extra gradient regularity hypotheses are
-regularity inputs for the spatial product rule; they do not encode the
-quotient identity itself. -/
+
+
+
+
+
 theorem quotHeat_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -255,7 +255,7 @@ theorem quotHeat_at
     simp [A, B, tt, smul_eq_mul]
     ring_nf
 
-/-- Lemma 10.5 as a reusable scalar quotient evolution producer. -/
+
 theorem quotHeat
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -309,10 +309,10 @@ theorem quotHeat
     (hphiDiff t) (hpsiDiff t) (hphiPos t) (hpsiPos t)
     (hgradPhi t x) (hgradPsi t x) (hgradPhiPow t) (hgradPsiPow t)
 
-/-- Lemma 10.5 specialized to the Hamilton-ready numerator exponent
-`alpha = 1`.  This keeps the same positivity assumptions as the general
-producer; weakening the numerator positivity at zero is a separate local
-frontier. -/
+
+
+
+
 theorem quotHeat_one
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -364,13 +364,13 @@ theorem quotHeat_one
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiPos hpsiPos hgradPhi hgradPsi hgradPhiPow hgradPsiPow
 
-/-- Side form of Lemma 10.5 for the Hamilton-ready numerator exponent
-`alpha = 1`.
 
-Unlike `quotHeat_one`, this does not derive the result from the arbitrary
-real-exponent theorem, so it only assumes `0 <= phi`.  The proof differentiates
-`phi * psi^(-beta)` directly and uses the real-power chain rule only for the
-positive denominator. -/
+
+
+
+
+
+
 theorem quotHeat1_of_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -451,12 +451,12 @@ theorem quotHeat1_of_nonneg
     simp [B, tt, smul_eq_mul]
     ring_nf
 
-/-! ### Book-facing Lemma 10.5 wrappers -/
 
-/-- Book-facing positive-region form of Lemma 10.5.
 
-This is a named wrapper around the stable negative-power theorem.  For
-arbitrary real `alpha`, the numerator is required to be positive. -/
+
+
+
+
 theorem quotHeat_book
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -508,10 +508,10 @@ theorem quotHeat_book
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiPos hpsiPos hgradPhi hgradPsi hgradPhiPow hgradPsiPow
 
-/-- Book-facing Hamilton-ready side form of Lemma 10.5.
 
-This is the `alpha = 1` wrapper with only `0 <= phi`; the proof route does not
-use a numerator real-power chain rule. -/
+
+
+
 theorem quotHeat1_book
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -559,7 +559,7 @@ theorem quotHeat1_book
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiNonneg hpsiPos hgradPhi hgradPsi hgradPsiPow
 
-/-- Display-form corollary of the positive-region quotient evolution. -/
+
 theorem quotHeatDiv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

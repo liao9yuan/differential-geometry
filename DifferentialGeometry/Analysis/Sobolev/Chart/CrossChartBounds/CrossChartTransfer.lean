@@ -1,51 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.IteratedCompBound
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Calculus.IteratedCompBound
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
-/-!
-# Cross-chart order-`k` iterated-derivative transfer
-
-For two chart base points `β α : M` (with overlapping partition-of-unity
-supports), the order-`j` (`j ≤ k`) iterated Euclidean Fréchet derivatives of the
-β-chart-pushed, partition-of-unity-weighted scalar `chartPushed ρ β u` are
-bounded, on the chart-Euclidean overlap, by the order-`≤ j` iterated derivatives
-of the α-chart **raw** pushed scalar `chartPushedRaw I α u`, composed through the
-smooth chart-transition map `chartTransitionEuclid β α`.
-
-The mathematical content is the chain rule (Faà di Bruno) applied to the
-composition `chartPushedRaw I α u ∘ chartTransitionEuclid β α`, combined with the
-Leibniz rule for the smooth partition-of-unity factor, with all
-transition/partition-of-unity derivative factors uniformly bounded on the compact
-overlap.
-
-## Key pointwise identity
-
-On `chartOverlapEuclid β α`, the β-pushed weighted scalar factors as a product
-of the β-pushed partition-of-unity coefficient and the transition-composed α-raw
-scalar:
-```
-chartPushed ρ β u y
-  = chartPushedRaw I β (fun x => ρ_β x) y
-      * chartPushedRaw I α u (chartTransitionEuclid β α y).
-```
-(`crossChart_pushed_eq_pou_mul_comp_on_overlap`).
-
-## Main results
-
-* `norm_iteratedFDerivWithin_comp_le_sumDeriv`: a Faà di Bruno bound for a
-  composition `f ∘ g` whose **outer** derivatives stay on the right-hand side
-  (`∑_{i ≤ n} ‖∂ⁱ f (g x)‖`) while the **inner** (transition) derivatives are
-  absorbed into the scalar constant `n! · D ^ n`.
-* `crossChart_transfer_bound`: the headline pointwise transfer bound. For `y` in
-  the chart-Euclidean overlap, `‖∂ʲ (chartPushed ρ β u) y‖` is bounded by a
-  uniform constant `C` (depending on `k`, the charts, and the compact overlap)
-  times the sum `∑_{i ≤ j} ‖∂ⁱ (chartPushedRaw I α u) (chartTransitionEuclid β α y)‖`,
-  for every `j ≤ k`.
-* `crossChart_transfer_bound_const`: the existence form, packaging the uniform
-  constant.
--/
 
 noncomputable section
 
@@ -64,8 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- `(extChartAt I α).symm ∘ toEuclidean.symm` is `ContMDiffOn` on
-`chartTargetEuclid α`. -/
 private lemma contMDiffOn_extChartSymm_toEuclideanSymm (α : M) :
     ContMDiffOn 𝓘(ℝ, EuclN) I ∞
       (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -86,14 +42,7 @@ private lemma contMDiffOn_extChartSymm_toEuclideanSymm (α : M) :
     exact hy
   exact h_outer.comp h_inner.contMDiffOn h_maps
 
-/-- **Faà di Bruno bound with the outer derivatives retained.**
-
-For `f : F → ℝ` smooth on a set `t`, `g : E → F` smooth on a set `s` with
-`g '' s ⊆ t`, and a single inner-derivative bound `‖∂ⁱ_s g x‖ ≤ D ^ i` (for
-`1 ≤ i ≤ n`), the `n`-th iterated derivative within `s` of `f ∘ g` is bounded by
-`n! · (∑_{i ≤ n} ‖∂ⁱ_t f (g x)‖) · D ^ n`. The outer derivatives of `f` (the
-data) remain on the right; only the inner-transition derivative bound `D` and the
-combinatorial factor `n!` enter the constant. -/
+omit [FiniteDimensional ℝ E] in
 private theorem norm_iteratedFDerivWithin_comp_le_sumDeriv
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : F → ℝ} {f : E → F} {n : ℕ} {N : WithTop ℕ∞}
@@ -116,15 +65,11 @@ private theorem norm_iteratedFDerivWithin_comp_le_sumDeriv
     exact Finset.mem_range_succ_iff.mpr hi
   exact norm_iteratedFDerivWithin_comp_le hg hf hn ht hs hst hx hC_ge hD
 
-/-- The β-chart-pushed partition-of-unity coefficient, viewed as a scalar
-function on chart-β Euclidean coordinates: `chartPushedRaw I β (ρ_β)`. -/
 def pouCoeffPushed
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (β : M) : EuclN → ℝ :=
   chartPushedRaw I β (fun x => (ρ β : C^∞⟮I, M; ℝ⟯) x)
 
-/-- **Cross-chart factorisation on the overlap.** On `chartOverlapEuclid β α`,
-the β-pushed weighted scalar equals the β-pushed partition-of-unity coefficient
-times the α-raw pushed scalar composed with the chart transition. -/
+omit [IsManifold I ∞ M] in
 theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
     [I.Boundaryless]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (β α : M) (u : M → ℝ)
@@ -171,7 +116,6 @@ theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
     rw [(extChartAt I α).left_inv hx_α_ext]
   rw [h_lhs, h_pou, h_comp]
 
-/-- `pouCoeffPushed ρ β` is `C^∞` on `chartTargetEuclid β`. -/
 lemma pouCoeffPushed_contDiffOn
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (β : M) :
@@ -202,23 +146,7 @@ lemma pouCoeffPushed_contDiffOn
   exact h_contDiffOn.congr hEqOn
 
 set_option maxHeartbeats 1600000 in
-/-- **Cross-chart order-`k` transfer bound, pointwise/uniform form.**
 
-For two chart base points `β α : M` on a closed Riemannian manifold and a compact
-subset `K_M` of the chart overlap, there is a non-negative constant `C` such that
-for every smooth scalar `u : M → ℝ`, every order `j ≤ k`, and every chart-β
-Euclidean image point `y` of a point of `K_M`, the order-`j` iterated Fréchet
-derivative of the β-pushed weighted scalar `chartPushed ρ β u` is bounded by `C`
-times the sum of the order-`≤ j` iterated derivatives of the α-raw pushed scalar
-`chartPushedRaw I α u`, evaluated at the chart-transition image
-`chartTransitionEuclid β α y`:
-```
-‖∂ʲ (chartPushed ρ β u) y‖ ≤
-  C · ∑_{i ≤ j} ‖∂ⁱ (chartPushedRaw I α u) (chartTransitionEuclid β α y)‖.
-```
-The constant `C` depends only on `k`, the charts, and `K_M` (through the uniform
-partition-of-unity and chart-transition derivative bounds on the compact
-overlap); it is independent of the data `u`. -/
 theorem crossChart_transfer_bound
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -534,10 +462,6 @@ theorem crossChart_transfer_bound
           (j.choose i : ℝ) * B * (((j - i)! : ℝ) * S * D ^ (j - i)) := h_sum_bound
     _ ≤ C * S := h_RHS_le
 
-/-- **Cross-chart order-`k` transfer constant (existence form).** Repackages
-`crossChart_transfer_bound` as the existence of a single non-negative constant
-controlling all orders `j ≤ k` and all smooth data `u`, on the chart-β Euclidean
-image of the compact overlap. -/
 theorem crossChart_transfer_bound_const
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

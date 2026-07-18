@@ -1,35 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeChartAlphaSummandSum
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSqSummandChartAlphaBound
 
-/-!
-# Bounding `riemannianFiberNormSq` by raw chart-`α` components on POU tsupport
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and a smooth
-compactly-supported `(r, s)`-tensor section `S : SmoothCcTensor g r s`, this file
-combines the two intermediate bounds
-
-* `riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport` — bounds the
-  intrinsic Riemannian fiber norm-squared by the double sum of chart-`α`-frame
-  fiber-norm-squared summands.
-* `fiberNormSqSummand_chartAlpha_le_raw_components_sq` — bounds each chart-`α`-frame
-  fiber-norm-squared summand by the double sum of squared raw chart-`α` components.
-
-into a single uniform inequality, valid for every `b` in the closed support of the
-chart-atlas partition-of-unity weight at `α`:
-
-```
-riemannianFiberNormSq g r s b (S.toSection b)
-  ≤ C · ∑ Idx Jdx, (tensorChartComponentRaw g r s S α Idx Jdx b)^2
-```
-
-The constant `C` depends only on the metric, chart base point, tensor type, and
-manifold dimension, but not on `S` or `b`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -54,27 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **`riemannianFiberNormSq` is bounded by squared raw chart-`α` components on
-POU tsupport.**
-
-For a closed Riemannian manifold `(M, g)`, smooth tensor `S : SmoothCcTensor g r s`,
-and chart base point `α : M`, the intrinsic Riemannian fiber norm-squared of
-`S.toSection b` at any point `b` in the closed support of the chart-atlas
-partition-of-unity weight at `α` is bounded by a uniform constant times the
-double sum of squared raw chart-`α` components of `S` at `α`:
-
-```
-riemannianFiberNormSq g r s b (S.toSection b)
-  ≤ C · ∑ Idx Jdx, (tensorChartComponentRaw g r s S α Idx Jdx b)^2
-```
-
-The constant `C` is the product of the two intermediate constants and the
-multi-index count `n^{r+s}`; it depends on the metric, chart base point, and
-tensor type but not on `S` or `b`.
-
-Pure transitivity of
-`riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport` and
-`fiberNormSqSummand_chartAlpha_le_raw_components_sq`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

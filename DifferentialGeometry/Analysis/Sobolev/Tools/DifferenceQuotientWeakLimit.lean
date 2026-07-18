@@ -5,21 +5,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.InnerProductSpace.Dual
 import Mathlib.MeasureTheory.Function.L2Space
 
-/-!
-# From a uniform difference-quotient `L²` bound to a weak partial derivative
-
-If `w : E → ℝ` is in `L²(volume)` and the forward difference quotients
-`D_h^k w` are uniformly `L²`-bounded by `M ≥ 0` for all sufficiently small
-nonzero `h`, then `w` admits a weak partial derivative `g ∈ L²(volume)` in
-coordinate direction `k` on `Set.univ` with `‖g‖_{L²} ≤ M`.
-
-The proof packages the test integral `φ ↦ -∫ w · ∂_k φ` as a linear
-functional on the smooth-compactly-supported subspace, bounds it by
-`M · ‖φ‖_{L²}` via the discrete integration-by-parts identity and Cauchy–
-Schwarz, then extends it to a continuous linear functional on `Lp ℝ 2 volume`
-and applies the Riesz representation theorem to obtain the candidate weak
-derivative.
--/
 
 noncomputable section
 
@@ -55,8 +40,6 @@ private lemma smoothCS_smul_mem
     ContDiff ℝ (⊤ : ℕ∞) (c • φ) ∧ HasCompactSupport (c • φ) :=
   ⟨contDiff_const.smul hφ.1, hφ.2.smul_left⟩
 
-/-- The submodule of smooth compactly supported real functions on
-`E = EuclideanSpace ℝ (Fin d)`. -/
 def smoothCSSubmodule : Submodule ℝ (E → ℝ) where
   carrier := {φ | ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ}
   add_mem' := fun hφ hψ => smoothCS_add_mem hφ hψ
@@ -79,15 +62,12 @@ private lemma smoothCSSubmodule_smul_coe
     ((c • φ : (smoothCSSubmodule (d := d))) : E → ℝ) = c • φ.1 := rfl
 
 omit [NeZero d] in
-/-- A smooth, compactly supported real function on Euclidean space has finite
-`L²` norm. -/
+
 private lemma memLp_two_of_smoothCS
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ) :
     MemLp φ 2 (volume : Measure E) :=
   hφ.continuous.memLp_of_hasCompactSupport hφ_supp
 
-/-- The embedding of the smooth-compactly-supported subspace into `Lp ℝ 2 volume`
-as a linear map. -/
 def smoothCSToLp :
     smoothCSSubmodule (d := d) →ₗ[ℝ] Lp ℝ 2 (volume : Measure E) where
   toFun φ :=
@@ -144,12 +124,12 @@ def smoothCSToLp :
     filter_upwards [h2, h3] with x hx2 hx3
     rw [hx2, Pi.smul_apply, Pi.smul_apply, hx3]
 
+omit [NeZero d] in
 @[simp] lemma smoothCSToLp_apply (φ : smoothCSSubmodule (d := d)) :
     smoothCSToLp (d := d) φ =
       (memLp_two_of_smoothCS (d := d) φ.2.1 φ.2.2).toLp φ.1 := rfl
 
-/-- The smooth-compactly-supported embedding has dense range in
-`Lp ℝ 2 volume`. -/
+omit [NeZero d] in
 lemma denseRange_smoothCSToLp :
     DenseRange (smoothCSToLp (d := d)) := by
   intro f
@@ -177,8 +157,7 @@ lemma denseRange_smoothCSToLp :
     exact mem_ball.mp hh_mem
 
 omit [NeZero d] in
-/-- For a smooth compactly supported `φ : E → ℝ` and `w ∈ L²(volume)`, the
-integrand `w · ∂_k φ` is integrable. -/
+
 private lemma integrable_w_partial_phi_univ
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -199,9 +178,6 @@ private lemma integrable_w_partial_phi_univ
     h_partial_cont.memLp_of_hasCompactSupport h_partial_supp
   exact MemLp.integrable_mul hw_l2 h_partial_memLp
 
-/-- The pairing `Λ_w(φ) := -∫ w · ∂_k φ` as a linear map from the
-smooth-compactly-supported subspace to ℝ, for `w ∈ L²(volume)`. The L²
-hypothesis ensures integrability of `w · ∂_k φ`. -/
 def smoothTestFunctional
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E)) (k : Fin d) :
     smoothCSSubmodule (d := d) →ₗ[ℝ] ℝ where
@@ -287,11 +263,7 @@ omit [NeZero d] in
     smoothTestFunctional (d := d) hw_l2 k φ =
       -∫ x, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1) := rfl
 
-omit [NeZero d] in
-omit [NeZero d] in
-/-- For `φ` smooth and compactly supported, and `|h| ≤ h₀`, the
-difference quotient `D_h^k φ` vanishes outside the closed `h₀`-thickening
-of `tsupport φ`. -/
+
 private lemma diffQuot_eq_zero_of_notMem_cthickening
     {φ : E → ℝ} (_hφ_supp : HasCompactSupport φ)
     (k : Fin d) {h₀ : ℝ} (_hh₀ : 0 ≤ h₀) {h : ℝ} (hh_bd : |h| ≤ h₀) :
@@ -324,9 +296,7 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening
     simp
 
 omit [NeZero d] in
-/-- For a smooth compactly supported `φ` and `|h| ≤ h₀`, the difference
-quotient `D_h^k φ` is uniformly bounded by `L`, where `L` is the Lipschitz
-constant of `φ`. -/
+
 private lemma abs_diffQuot_le_lipschitz_bound
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (k : Fin d) :
@@ -361,7 +331,7 @@ private lemma abs_diffQuot_le_lipschitz_bound
     exact hLip_apply
 
 omit [NeZero d] in
-/-- The partial-derivative function is bounded by the Lipschitz constant. -/
+
 private lemma abs_partialDeriv_le_lipschitz_bound
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (k : Fin d) :
@@ -384,8 +354,7 @@ private lemma abs_partialDeriv_le_lipschitz_bound
   rwa [Real.norm_eq_abs] at h_app_le
 
 omit [NeZero d] in
-/-- Hölder / Cauchy–Schwarz: for `f, g ∈ L²(volume)`, the absolute value of
-the integral of their product is bounded by the product of the `L²` norms. -/
+
 private lemma abs_integral_mul_le_eLpNorm_two
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     ENNReal.ofReal |∫ x, f x * g x ∂μ| ≤ eLpNorm f 2 μ * eLpNorm g 2 μ := by
@@ -422,9 +391,7 @@ private lemma abs_integral_mul_le_eLpNorm_two
     _ = eLpNorm f 2 μ * eLpNorm g 2 μ := mul_comm _ _
 
 omit [NeZero d] in
-/-- Cauchy–Schwarz in real form: for `f, g ∈ L²(volume)`, the absolute value
-of the integral of their product is bounded by the product of the `L²` norms,
-expressed via `‖·‖` (toReal). -/
+
 private lemma abs_integral_mul_le_norm_lp_mul_norm_lp
     {f g : E → ℝ} (hf : MemLp f 2 (volume : Measure E))
     (hg : MemLp g 2 (volume : Measure E)) :
@@ -445,19 +412,14 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp
   exact h_toReal
 
 omit [NeZero d] in
-/-- The volume of the closed thickening of a compact set is finite. -/
+
 private lemma volume_cthickening_lt_top
     {K : Set E} (hK : IsCompact K) (r : ℝ) :
     (volume : Measure E) (Metric.cthickening r K) < ∞ := by
   have hK_thick : IsCompact (Metric.cthickening r K) := hK.cthickening
   exact hK_thick.measure_lt_top
 
-omit [NeZero d] in
-/-- Convergence of `∫ w · D_{-h_n}^k φ` to `∫ w · ∂_k φ` along a sequence
-`h_n → 0` of nonzero values, for smooth compactly supported `φ` and
-`w ∈ L²(volume)`. The proof uses dominated convergence with a uniform
-Lipschitz bound for `D_{-h_n}^k φ`, restricted to a compact thickening of
-`tsupport φ`. -/
+
 private lemma tendsto_integral_w_diffQuot_phi
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -570,9 +532,7 @@ private lemma tendsto_integral_w_diffQuot_phi
     bound (Filter.Eventually.of_forall h_aesm_seq)
     h_pointwise_bound h_bound_int h_pointwise_conv
 
-omit [NeZero d] in
-/-- The smooth-test functional is bounded by `M · ‖φ‖_{L²}` whenever the
-difference quotients of `w` are uniformly `L²`-bounded by `M`. -/
+
 private lemma abs_smoothTestFunctional_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -674,9 +634,7 @@ private lemma abs_smoothTestFunctional_le
     h_abs_conv tendsto_const_nhds (fun n => h_dual_bound n)
   exact h_lim_le
 
-omit [NeZero d] in
-/-- The smooth-test functional is bounded by `M · ‖φ_lp‖_{Lp}` (using the
-`Lp` norm). -/
+
 private lemma abs_smoothTestFunctional_le_lpNorm
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -695,16 +653,12 @@ private lemma abs_smoothTestFunctional_le_lpNorm
   rw [h_norm_eq]
   exact h
 
-/-- The continuous linear extension of `smoothTestFunctional` to all of
-`Lp ℝ 2 volume`. The `M`, `h₀`, `h_bdd` data are not used in the definition
-itself but are needed to certify the norm bound for `extendOfNorm`. -/
 def smoothTestFunctional_ext
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E)) (k : Fin d) :
     Lp ℝ 2 (volume : Measure E) →L[ℝ] ℝ :=
   (smoothTestFunctional (d := d) hw_l2 k).extendOfNorm
     (smoothCSToLp (d := d))
 
-/-- The opNorm of the extension is bounded by `M`. -/
 private lemma opNorm_smoothTestFunctional_ext_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -717,8 +671,6 @@ private lemma opNorm_smoothTestFunctional_ext_le
   intro φ
   exact abs_smoothTestFunctional_le_lpNorm (d := d) hw_l2 k hM_nn hh₀ h_bdd φ
 
-/-- The extension agrees with the original functional on the dense
-subspace. -/
 private lemma smoothTestFunctional_ext_apply
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -734,7 +686,6 @@ private lemma smoothTestFunctional_ext_apply
   intro ψ
   exact abs_smoothTestFunctional_le_lpNorm (d := d) hw_l2 k hM_nn hh₀ h_bdd ψ
 
-/-- The Riesz representative of the extended functional. -/
 def smoothTestFunctional_riesz
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) :
@@ -742,7 +693,7 @@ def smoothTestFunctional_riesz
   (InnerProductSpace.toDual ℝ (Lp ℝ 2 (volume : Measure E))).symm
     (smoothTestFunctional_ext (d := d) hw_l2 k)
 
-/-- The Riesz isometry preserves norms; hence `‖g_lp‖ = ‖Λ_ext‖`. -/
+omit [NeZero d] in
 private lemma norm_smoothTestFunctional_riesz
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) :
@@ -752,8 +703,7 @@ private lemma norm_smoothTestFunctional_riesz
   exact (InnerProductSpace.toDual ℝ
     (Lp ℝ 2 (volume : Measure E))).symm.norm_map _
 
-/-- The defining property of the Riesz representative: for each
-`f ∈ Lp ℝ 2 volume`, `Λ_ext(f) = ⟨g_lp, f⟩_{L²} = ∫ g_lp · f`. -/
+omit [NeZero d] in
 private lemma smoothTestFunctional_ext_eq_inner
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d)
@@ -763,13 +713,6 @@ private lemma smoothTestFunctional_ext_eq_inner
   unfold smoothTestFunctional_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
-/-- **From a uniform diffQuot bound to a weak partial derivative.**
-
-If `w : E → ℝ` is in `L²(volume)` (whole space, not restricted), and the
-forward difference quotients `D_h^k w` are uniformly L²-bounded by `M ≥ 0`
-on the whole space for all `0 < |h| ≤ h₀` (`h₀ > 0`), then `w` admits a
-weak partial derivative `g ∈ L²(volume)` in coordinate direction `k` on
-`Set.univ` with `‖g‖_{L²} ≤ M`. -/
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ
     {w : E → ℝ}
     (hw_l2 : MemLp w 2 (volume : Measure E))

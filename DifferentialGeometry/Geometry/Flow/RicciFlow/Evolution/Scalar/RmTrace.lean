@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Scalar curvature trace route
 
-Curvature-trace and Ricci-quadratic reductions in the scalar evolution proof.
--/
+
+
+
+
 
 noncomputable section
 
@@ -29,8 +29,8 @@ section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- The remaining convention-sensitive curvature trace after substituting
-Lemma 6.3 into the derivative of `R = g^{ij} Ric_ij`. -/
+
+
 def ScalarRmRicciTraceInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -44,8 +44,8 @@ def ScalarRmRicciTraceInFrame
           (t : Real) x i j) =
       -ricciNormSqInFrame (I := I) S gInv frame (t : Real) x
 
-/-- Produce the remaining scalar-trace curvature contraction from the
-convention-correct first trace of `Rm04`. -/
+
+
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     [DecidableEq Idx]
@@ -101,9 +101,9 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp, DifferentialGeometry.Integral.Connection.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
-/-- Regular-time version of
-`scalarRmRicciTraceInFrame_of_rm04_first_trace`, using the Ricci symmetry
-producer instead of an all-real-times symmetry assumption. -/
+
+
+
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     [DecidableEq Idx]
@@ -157,8 +157,8 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp, DifferentialGeometry.Integral.Connection.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
-/-- The inverse-metric evolution term in `∂ₜ(g^{ij} Ric_ij)` is
-`2 |Ric|^2`. -/
+
+
 theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -187,8 +187,8 @@ theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
           raisedRicciCompInFrame (I := I) S gInv frame t x i j) := by
           simp [Finset.mul_sum]
 
-/-- The metric trace of the Ricci-quadratic term `Ric_i^k Ric_kj` is
-`|Ric|^2`. -/
+
+
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -265,9 +265,9 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
           refine Finset.sum_congr rfl fun a _ => ?_
           simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
-/-- Pointwise version of
-`scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm`, requiring Ricci
-symmetry only at the time and point being traced. -/
+
+
+
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -344,8 +344,8 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
           refine Finset.sum_congr rfl fun a _ => ?_
           simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
-/-- The trace algebra and scalar-Laplacian trace identify the derivative RHS
-of `g^{ij} Ric_ij` with `Delta R + 2 |Ric|^2`. -/
+
+
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -400,8 +400,8 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
   rw [hsplit, hdt, hrm, hquad]
   ring
 
-/-- Regular-time Ricci-symmetry version of
-`scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS`. -/
+
+
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

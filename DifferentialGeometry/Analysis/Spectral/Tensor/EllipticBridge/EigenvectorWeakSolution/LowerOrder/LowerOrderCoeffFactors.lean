@@ -1,32 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.ChartL2BoundedConvergence
 
-/-!
-# The `T`-independent `C^∞` factors of the lower-order coefficient terms
-
-Evaluated at the partition-of-unity-weighted smooth approximant, each of the
-three lower-order coefficient terms of the connection-Laplacian chart bilinear
-identity is a finite `C^∞`-coefficient-weighted sum of the two chart-component
-atoms (the bare chart component and its chart-Euclidean partial). This file
-introduces the explicit `T`-independent `C^∞` factors that carry those
-coefficients and proves the per-section algebraic identities expanding each
-coefficient over component multi-index pairs:
-
-* `principalRotationFactor`, with `covPrincipalRotationCoeff` expansion via
-  `chartPushedRaw_tensorChartComponentRaw_pouSmul_eq`;
-* `weightedGradFactor` (and `euclidPartial_weightedGradFactor_contDiffOn`), with
-  `weightedGradCoeff_pouSmul_eqOn_section` and its Leibniz-differentiated form
-  `euclidPartial_weightedGradCoeff_pouSmul_eqOn_section`;
-* `valuePartialFactor` and `valueComponentFactor`, with
-  `covLowerOrderRotationValueCoeff_pouSmul_eqOn_section`.
-
-The zeroth-order Christoffel correction is expanded once and for all in
-`covDerivLowerOrderTerm_pouSmul_eqOn_coeffFactors`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -60,8 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart push-forward of the raw chart component of the partition-of-unity-
-weighted section equals the canonical Euclidean chart component. -/
 lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -74,10 +49,6 @@ lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
   rw [tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou
     (I := I) (M := M) g r s α S Idx Jdx, tensorChartComponent_def]
 
-/-- The `T`-independent `C^∞` factor of the `(P, Q, k, l)`-summand of the
-principal rotation coefficient: the chart-frame tensor-metric Gram, the
-unweighted inverse Gram, and the chart-Euclidean partial of the inverse-Gram
-column entry. -/
 def principalRotationFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -88,8 +59,6 @@ def principalRotationFactor
         chartInvGramEuclid (I := I) g α k l y *
       euclidPartial (E := E) l (gramInvEntry (I := I) (M := M) g r s α Q P₀) y
 
-/-- The `T`-independent factor of the principal rotation coefficient is `C^∞` on
-the Euclidean chart target. -/
 lemma principalRotationFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -102,10 +71,6 @@ lemma principalRotationFactor_contDiffOn
     (euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀))
 
-/-- On the Euclidean chart target, the zeroth-order Christoffel correction of the
-partition-of-unity-weighted approximant is the finite linear combination, over
-component multi-index pairs, of the lower-order correction coefficient times the
-canonical Euclidean chart component. -/
 lemma covDerivLowerOrderTerm_pouSmul_eqOn_coeffFactors
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -128,8 +93,6 @@ lemma covDerivLowerOrderTerm_pouSmul_eqOn_coeffFactors
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentPou (I := I) (M := M) g r s S α p.1 p.2) hy]
 
-/-- The `T`-independent `C^∞` factor of the `(P, Q, k, p)`-summand of the
-chart-density-weighted lower-order gradient coefficient. -/
 def weightedGradFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -144,8 +107,6 @@ def weightedGradFactor
         covDerivLowerOrderCoeff (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2 y *
       covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀
 
-/-- The `T`-independent factor of the chart-density-weighted lower-order gradient
-coefficient is `C^∞` on the Euclidean chart target. -/
 lemma weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -162,10 +123,6 @@ lemma weightedGradFactor_contDiffOn
       g r s α k P.1 p.1 P.2 p.2)).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
-/-- On the chart target, the chart-density-weighted lower-order gradient
-coefficient at the partition-of-unity weight of a smooth section `S` equals the
-four-fold finite sum of `weightedGradFactor` times the bare chart-component atom
-of `S`. -/
 private lemma weightedGradCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -195,12 +152,6 @@ private lemma weightedGradCoeff_pouSmul_eqOn_section
   rw [weightedGradFactor]
   ring
 
-/-- On the chart target, the `l`-th chart-Euclidean partial of the
-chart-density-weighted lower-order gradient coefficient at the
-partition-of-unity-weighted approximant equals the four-fold finite sum of the
-Leibniz contributions: the chart-Euclidean partial of `weightedGradFactor` times
-the bare chart-component atom, plus `weightedGradFactor` times the
-chart-Euclidean partial of the bare chart-component atom. -/
 lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -282,8 +233,6 @@ lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     (differentiableAt_tensorChartComponent (I := I) (M := M) g r s wₙ α
       p.1 p.2 y)
 
-/-- The chart-Euclidean partial of the `T`-independent `C^∞` factor
-`weightedGradFactor` is `C^∞` on the Euclidean chart target. -/
 lemma euclidPartial_weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -298,9 +247,6 @@ lemma euclidPartial_weightedGradFactor_contDiffOn
   euclidPartial_contDiffOn_target (I := I) (M := M) α l
     (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p)
 
-/-- The `T`-independent `C^∞` factor of the chart-partial-atom summand of the
-lower-order rotation value coefficient: the chart-frame tensor-metric Gram, the
-unweighted inverse Gram, and the collapsed Christoffel coefficient. -/
 def valuePartialFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -311,8 +257,6 @@ def valuePartialFactor
         chartInvGramEuclid (I := I) g α k l y *
       lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ l Q y
 
-/-- The `T`-independent `C^∞` factor of the chart-partial-atom summand is `C^∞`
-on the Euclidean chart target. -/
 lemma valuePartialFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -323,11 +267,6 @@ lemma valuePartialFactor_contDiffOn
       (chartInvGramEuclid_contDiffOn (I := I) g α k l)).mul
     (lowerOrderRotationLOCoeff_contDiffOn (I := I) (M := M) g r s α P₀ l Q)
 
-/-- The `T`-independent `C^∞` factor of the component-atom summand of the
-lower-order rotation value coefficient: the chart-frame tensor-metric Gram, the
-unweighted inverse Gram, the sum of the chart-Euclidean partial of the
-inverse-Gram entry and the collapsed Christoffel coefficient, and the lower-order
-correction coefficient. -/
 def valueComponentFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -342,8 +281,6 @@ def valueComponentFactor
             lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ l Q y) *
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2 y
 
-/-- The `T`-independent `C^∞` factor of the component-atom summand is `C^∞` on
-the Euclidean chart target. -/
 lemma valueComponentFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -359,11 +296,6 @@ lemma valueComponentFactor_contDiffOn
           g r s α P₀ l Q))).mul
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2)
 
-/-- On the chart target, the lower-order rotation value coefficient at the
-partition-of-unity-weighted approximant equals the four-fold nested
-chart-partial-atom sum (`valuePartialFactor` against the chart-Euclidean partial
-of the bare chart-component atom) plus the five-fold nested component-atom sum
-(`valueComponentFactor` against the bare chart-component atom). -/
 lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (S : SmoothCcTensor g r s)

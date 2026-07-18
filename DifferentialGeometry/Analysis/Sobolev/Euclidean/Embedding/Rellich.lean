@@ -1,11 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
 
-/-!
-# Rellich–Kondrachov compact embedding
-
-Translation-continuity infrastructure and the Rellich–Kondrachov compact
-embedding theorem `W^{1,p}_0(Ω) ↪ L^p(Ω)` for bounded open `Ω ⊆ ℝ^d`.
--/
 
 noncomputable section
 
@@ -19,7 +13,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- For an Euclidean-space-valued vector, each component is bounded by the norm. -/
+
 private lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ ‖v‖ := by
   rw [EuclideanSpace.norm_eq]
   have : ‖v i‖ ^ 2 ≤ ∑ j, ‖v j‖ ^ 2 := by
@@ -35,8 +29,7 @@ private lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ �
     _ ≤ Real.sqrt (∑ j, ‖v j‖ ^ 2) := Real.sqrt_le_sqrt this
 
 omit [NeZero d] in
-/-- Each weak partial derivative of a `MemW1p` function is dominated in the
-`L^p` quasi-norm by the Euclidean norm of the weak gradient. -/
+
 theorem eLpNorm_weakGrad_component_le
     {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
     (hw : DeGiorgi.MemW1pWitness p u Ω) (i : Fin d) :
@@ -47,9 +40,7 @@ theorem eLpNorm_weakGrad_component_le
   exact euclidean_component_norm_le (hw.weakGrad x) i
 
 omit [NeZero d] in
-/-- Pointwise bound: the operator norm of `fderiv ℝ φ x` (a continuous linear
-form `E → ℝ`) is bounded by the sum of absolute values of its components in
-the canonical basis of `EuclideanSpace ℝ (Fin d)`. -/
+
 private lemma fderiv_norm_le_sum_components
     {φ : E → ℝ} (x : E) :
     ‖fderiv ℝ φ x‖ ≤ ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
@@ -90,8 +81,7 @@ private lemma fderiv_norm_le_sum_components
             rw [hcongr]
       _ = (∑ i : Fin d, |L (EuclideanSpace.single i 1)|) * ‖v‖ := by ring
 
-/-- `eLpNorm` of `‖fderiv ℝ φ‖` is bounded by the sum of `eLpNorm`s of the
-components of `fderiv ℝ φ`. -/
+omit [NeZero d] in
 private lemma eLpNorm_fderiv_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
@@ -203,8 +193,7 @@ private lemma eLpNorm_fderiv_le_sum_components
     exact (Real.norm_eq_abs _).symm
   rw [hcongr, eLpNorm_norm]
 
-/-- For a smooth function `φ`, the `L^p` norm of the translation difference is
-bounded by `‖h‖` times the sum of the `L^p` norms of the partial derivatives. -/
+omit [NeZero d] in
 private lemma eLpNorm_translate_sub_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (h : E) :
@@ -238,9 +227,6 @@ private lemma eLpNorm_translate_sub_le_sum_components
     eLpNorm_fderiv_le_sum_components (d := d) hp_one hφ
   gcongr
 
-/-- Each gradient component of a smooth-compactly-supported approximant `φ`
-has the same `L^p` quasi-norm on the whole space and on `Ω`, as long as
-`tsupport φ ⊆ Ω`. -/
 private lemma eLpNorm_grad_eq_restrict
     {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -264,8 +250,7 @@ private lemma eLpNorm_grad_eq_restrict
     (μ := volume) (s := Ω) (p := p)
     (f := fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) hΩ_meas
 
-/-- A pointwise rearrangement: the `L^p`-norm of `φ - Ω.indicator u` over the
-whole space equals the `L^p`-norm of `φ - u` over `Ω`, when `tsupport φ ⊆ Ω`. -/
+omit [NeZero d] in
 private lemma eLpNorm_phi_sub_indicator_eq
     {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
     {φ u : E → ℝ}
@@ -286,18 +271,6 @@ private lemma eLpNorm_phi_sub_indicator_eq
   exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
     (μ := volume) (s := Ω) (p := p) (f := fun x => φ x - u x) hΩ_meas
 
-/-- Translation estimate for `MemW01p` functions.
-
-For a `W^{1,p}_0` function `u` on an open set `Ω`, with `1 ≤ p < ∞`, the
-zero-extension `Ω.indicator u` to all of `ℝ^d` satisfies the translation
-estimate
-
-  `‖τ_h ũ − ũ‖_{L^p(ℝ^d)} ≤ ‖h‖ · Σ_i ‖∂_i u‖_{L^p(Ω)}`
-
-where the right-hand side sums the `L^p`-quasinorms of the components of the
-weak gradient of any `W^{1,p}` witness for `u` (the value is independent of
-the witness, by `MemW1pWitness.ae_eq_p`). The form below uses the canonical
-witness extracted from the `MemW01p` data. -/
 theorem eLpNorm_translate_sub_le_of_memW01p
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -578,14 +551,14 @@ theorem eLpNorm_translate_sub_le_of_memW01p
   exact le_of_tendsto_of_tendsto' tendsto_const_nhds h_sum_tendsto hLHS_le
 
 omit [NeZero d] in
-/-- A bounded set in finite-dim normed space has compact closure. -/
+
 private lemma isCompact_closure_of_bounded
     {Ω : Set E} (hΩ_bdd : Bornology.IsBounded Ω) :
     IsCompact (closure Ω) :=
   hΩ_bdd.isCompact_closure
 
 omit [NeZero d] in
-/-- For an open bounded set `Ω`, `Ω.indicator u` is supported in `closure Ω`. -/
+
 private lemma indicator_supp_subset_closure
     {Ω : Set E} {u : E → ℝ} (x : E) (hx : x ∉ closure Ω) :
     Ω.indicator u x = 0 := by
@@ -593,15 +566,6 @@ private lemma indicator_supp_subset_closure
   intro hxΩ
   exact hx (subset_closure hxΩ)
 
-/-- **Rellich–Kondrachov compact embedding** `W^{1,p}_0(Ω) ↪ L^p(Ω)`, sequential
-form, for a bounded open set `Ω ⊆ ℝ^d` and `1 ≤ p < ∞`. Given a sequence `u`
-whose terms all lie in `W^{1,p}_0(Ω)` and whose `L^p(Ω)` norms and weak-gradient
-component norms are uniformly bounded by `R`, there is a strictly increasing
-subsequence index `φ` and a limit `u_lim ∈ L^p(Ω)` such that `u (φ k) → u_lim`
-in `L^p(Ω)`. Proved by zero-extending each `u n` to `closure Ω` (compact in the
-finite-dimensional ambient space), applying the Fréchet–Kolmogorov criterion
-via the uniform translation estimate for `MemW01p` functions, and transferring
-the resulting `L^p(volume)` convergence back to `L^p(volume.restrict Ω)`. -/
 theorem rellich_kondrachov_W01p_seq
     {Ω : Set E}
     (hΩ_open : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)

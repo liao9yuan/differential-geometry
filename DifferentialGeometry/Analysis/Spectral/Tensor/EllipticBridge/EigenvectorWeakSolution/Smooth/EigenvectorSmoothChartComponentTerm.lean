@@ -1,65 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradLeibniz
 
-/-!
-# The chart-`β` component of the per-chart smooth eigenvector section
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and an eigenbasis
-index `i`, the per-chart smooth section
-`eigenvectorSmoothChart g r s i α` is a genuine smooth
-compactly-supported `(r, s)`-tensor section: it is built from the chosen smooth
-chart-`α` component representatives of the connection-Laplacian resolvent
-eigenvector and is supported inside the chart-`α` source.
-
-This file computes the **canonical Euclidean chart component of that section in
-an arbitrary chart `β`**, as a genuine `L²` function on the Euclidean chart
-target of `β`.
-
-## The mathematical content
-
-`eigenvectorSmoothChart α` is a smooth section, so its canonical
-chart-`β` component
-`tensorL2ChartComponent g r s (eigenvectorSmoothChart α) β P₀` is
-the `L²` class of the concrete partition-of-unity-weighted Euclidean chart
-component
-`tensorChartComponent g r s (eigenvectorSmoothChart α) β P₀`
-(`tensorL2ChartComponent_smoothToTensorL2_coeFn`). On the Euclidean chart target
-that concrete component factors, by
-`tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target`,
-as the chart-pushed partition-of-unity weight times the chart-pushed raw
-chart-`β` frame component.
-
-The raw chart-`β` frame component of `eigenvectorSmoothChart α`:
-
-* vanishes off the chart-`α` source — the section value itself is zero there
-  (`tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source`);
-* on the overlap of the chart-`α` and chart-`β` sources, the `(r, s)`-tensor
-  transformation law `tensorChartComponentRaw_eq_transitionCoeff_sum` writes it
-  as the finite sum, over component multi-indices `Q`, of
-  `transitionCoeff r s α β P₀ Q · (raw chart-α component)`.
-
-A Euclidean chart-target point `y` of `β` corresponds, under the inverse chart
-of `β`, to a point of the chart-`β` source; the chart-`β`-side membership
-condition therefore collapses to membership in the chart-`α` source. Assembling
-the two cases gives the headline.
-
-## Main result
-
-* `eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq` — the
-  canonical Euclidean chart-`β` component of
-  `eigenvectorSmoothChart α`, as a function, equals almost
-  everywhere the chart-pushed partition-of-unity weight of `β` times the
-  chart-`β` push of the function which is, on the chart-`α` source, the
-  transformation-law sum and, off it, zero.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -94,15 +40,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 open Classical in
-/-- For a point `x` of the chart-`β` source, the raw chart-`β` frame component
-of the per-chart section `eigenvectorSmoothChart α` at the
-component multi-index `P₀` equals the transformation-law sum when `x` lies in
-the chart-`α` source, and `0` otherwise.
 
-On the chart overlap this is the `(r, s)`-tensor transformation law
-`tensorChartComponentRaw_eq_transitionCoeff_sum` with transport chart `α`; off
-the chart-`α` source the per-chart section vanishes, so its raw component is
-zero. -/
 private lemma raw_eigenvectorSmoothChart_eq_ite
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -130,18 +68,7 @@ private lemma raw_eigenvectorSmoothChart_eq_ite
       (I := I) (M := M) g r s i α β P₀ hxα
 
 open Classical in
-/-- **The canonical Euclidean chart-`β` component of the per-chart smooth
-eigenvector section.** For a closed Riemannian manifold `(M, g)`, ranks
-`(r, s)`, an eigenbasis index `i`, chart base points `α` and `β`, and a
-component multi-index `P₀`, the canonical Euclidean chart-`β` component of the
-per-chart smooth section `eigenvectorSmoothChart g r s i α`,
-viewed as a function on the Euclidean chart target of `β`, equals almost
-everywhere — for the Euclidean `L²` reference measure `chartL2Measure β` — the
-chart-pushed partition-of-unity weight of `β` times the chart-`β` push of the
-function which is, on the chart-`α` source, the `(r, s)`-tensor
-transformation-law sum
-`∑ Q transitionCoeff r s α β P₀ Q · (raw chart-α component)` and, off the
-chart-`α` source, zero. -/
+
 theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (α β : M)

@@ -4,66 +4,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartPushVFEq
 import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
-/-!
-# `C^1` regularity of the chart-pushed geodesic flow in the initial velocity
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete finite-dimensional inner-product space `E`, the
-chart-pushed phase-space flow
-`Φ : (E × E) × ℝ → E × E` of `Geodesic/SmoothFlow.lean` is jointly `C^1`
-on a strict open neighbourhood of `((extChartAt I p p, 0), 0)`. We
-extract the `v`-slice smoothness at the zero velocity:
-
-* for any time `t* ∈ Ioo(-T, T)` in the flow's time interval, the map
-  `v ↦ Φ((extChartAt I p p, v), t*)` is `C^1` at `v = 0 ∈ E`;
-* the manifold-valued candidate
-  `chartFlowCandidate Φ p 0 v := (extChartAt I p).symm (Φ((extChartAt I p p, v), 0)).1`
-  has its **chart-coordinate form**
-  `v ↦ extChartAt I p (chartFlowCandidate Φ p 0 v)`
-  `C^1` at `v = 0`; this form is the chart-image of the candidate, and
-  the candidate's manifold-side smoothness reads through the base chart.
-
-These two facts are the **substantive analytic content** of the
-smoothness of the geodesic flow in the initial velocity at the zero
-vector. The full headline
-`ContDiffAt ℝ 1 (expMap g p) (0 : T_p M)`
-is a consequence of these together with the bridge identification of
-the chart-flow candidate with `expMap g p` on a neighbourhood of
-`v = 0`. The bridge identification is delivered in
-`ChartPushVFEq.lean` (at the eventually-near-`t = 0` level for each
-individual `v`) and `Definition.lean` (at the pointwise `v = 0` level
-via `expMap_zero`); the full uniform-in-`v` identification requires
-additional ingredients (openness of `expDomain g p` at `v = 0`,
-geodesic rescaling) which are tracked separately.
-
-## Main results
-
-* `contDiffAt_chartFlow_slice_fst_zero` — the first-coordinate `v`-slice
-  of the chart-flow at any time in its time interval is `C^1` at `v = 0`.
-
-* `exists_chartFlow_slice_contDiffAt_zero` — packaged existence of the
-  chart-pushed flow with `C^1` `v`-slice smoothness at every time in
-  its time interval.
-
-* `chartFlowCandidate` — the manifold-valued candidate map
-  `v ↦ (extChartAt I p).symm (Φ((x₀, v), t')).1`.
-
-* `chartFlowCandidate_zero_at_initial` — value of the candidate at
-  `v = 0`, `t' = 0` is `p`.
-
-* `extChartAt_symm_comp_chartFlowCandidate_at_zero` — the candidate's
-  chart-coordinate form agrees with the chart-flow's first coordinate
-  on a neighbourhood of `v = 0` (at `t' = 0`).
-
-* `chartFlowCandidate_chart_contDiffAt_zero_at_origin` — chart-coordinate
-  `C^1` smoothness of the candidate at `v = 0` (for `t' = 0`).
-
-* `exists_chartFlowCandidate_chart_contDiffAt_zero` — packaged
-  existence of a chart-flow making the chart-coord-form candidate
-  `C^1` at `v = 0`, with value `p` at `v = 0`.
--/
 
 noncomputable section
 
@@ -76,7 +17,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -88,9 +29,7 @@ section ChartCoordSlice
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- The `v`-slice of a jointly-`C^1` chart-flow `Φ` at a fixed time `t*`:
-`v ↦ Φ((x₀, v), t*)` is `C^1` at `v = 0`, provided `((x₀, 0), t*)` lies
-in the open ball-times-`Ioo` domain on which `Φ` is `C^1`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma contDiffAt_chartFlow_slice_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -112,8 +51,6 @@ lemma contDiffAt_chartFlow_slice_zero
     exact ⟨Metric.mem_ball_self hρ, ht'⟩
   exact hΦ_cda.comp (0 : E) hpair_cd.contDiffAt
 
-/-- The first-component projection of the chart-flow's `v`-slice is
-`C^1` at `v = 0`. -/
 lemma contDiffAt_chartFlow_slice_fst_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -131,19 +68,17 @@ section ManifoldCandidate
 
 variable [I.Boundaryless]
 
-/-- The manifold-valued candidate map produced from a chart-flow `Φ`:
-`v ↦ (extChartAt I p).symm (Φ((extChartAt I p p, v), t')).1`. -/
 def chartFlowCandidate (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) :
     E → M :=
   fun v => (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
 @[simp] lemma chartFlowCandidate_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) (v : E) :
     chartFlowCandidate (I := I) Φ p t' v =
       (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1 := rfl
 
-/-- At `t' = 0` and `v = 0`, the candidate returns `p` when the chart-flow
-satisfies its base initial-value identity. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
 lemma chartFlowCandidate_zero_at_initial
     {Φ : (E × E) × ℝ → E × E} {p : M}
     (hinit : Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
@@ -159,11 +94,6 @@ section CandidateChartCoord
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Eventually-near-`v = 0` chart-rewrite of the candidate at `t' = 0`.**
-For the chart-pushed flow at base `(x₀, 0)`, the chart-flow at `v = 0`,
-`t' = 0` returns `(x₀, 0)`. By continuity of the slice's first
-coordinate, the value stays in the chart target on a neighbourhood of
-`v = 0`, where the chart-symm-then-chart composition is the identity. -/
 lemma extChartAt_symm_comp_chartFlowCandidate_at_zero
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -204,10 +134,6 @@ lemma extChartAt_symm_comp_chartFlowCandidate_at_zero
   simp only [chartFlowCandidate_apply]
   exact (extChartAt I p).right_inv hv
 
-/-- **Chart-coordinate `C^1` smoothness of the candidate at `t' = 0`.**
-The chart-coordinate form of the manifold-valued candidate at the time
-`t' = 0`, viewed as a function of the initial velocity, is `C^1` at
-`v = 0`. -/
 lemma chartFlowCandidate_chart_contDiffAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -236,10 +162,6 @@ section Headline
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Headline existence: chart-pushed flow with `v`-slice `C^1`
-smoothness.** For any base point `p : M`, the V.4 chart-pushed flow at
-`(extChartAt I p p, 0)` delivers a jointly-`C^1` flow `Φ` whose
-`v`-slice at every time `t' ∈ Ioo(-T, T)` is `C^1` at `v = 0`. -/
 theorem exists_chartFlow_slice_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),
@@ -269,11 +191,6 @@ theorem exists_chartFlow_slice_contDiffAt_zero
   exact contDiffAt_chartFlow_slice_fst_zero (Φ := Φ) (x₀ := x₀)
     (ρ := ρ) (T := T) (t' := t') hρ_pos ht' hcd
 
-/-- **Headline existence: manifold-valued candidate with chart-coordinate
-`C^1` smoothness at `v = 0`.** For any base point `p : M`, there exists a
-chart-pushed flow `Φ` such that the manifold-valued candidate's
-chart-coordinate form is `C^1` at `v = 0`, and the candidate's value at
-`v = 0` is `p`. -/
 theorem exists_chartFlowCandidate_chart_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E),
@@ -289,7 +206,6 @@ theorem exists_chartFlowCandidate_chart_contDiffAt_zero
       (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) hρ_pos hT_pos hinit hcd
   · exact chartFlowCandidate_zero_at_initial (I := I) (Φ := Φ) (p := p) hinit
 
-/-- **Continuity of the manifold-valued candidate at `v = 0`.** -/
 lemma chartFlowCandidate_continuousAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -326,9 +242,6 @@ lemma chartFlowCandidate_continuousAt_zero_at_origin
     exact hsymm_at_x₀
   exact hcomp_step
 
-/-- **Manifold-side `ContMDiffAt 1` smoothness of the candidate at
-`v = 0`.** The manifold-valued candidate `chartFlowCandidate Φ p 0 : E → M`
-is `ContMDiffAt 𝓘(ℝ, E) I 1` at `v = 0`. -/
 lemma chartFlowCandidate_contMDiffAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -371,10 +284,6 @@ lemma chartFlowCandidate_contMDiffAt_zero_at_origin
     rw [hgoal_eq]
     exact hchart_cd.contDiffWithinAt
 
-/-- **Manifold-side existence of a `ContMDiffAt 1` candidate at `v = 0`.**
-For any base point `p : M`, there exists a chart-pushed flow `Φ` such
-that the manifold-valued candidate `chartFlowCandidate Φ p 0 : E → M` is
-`ContMDiffAt 𝓘(ℝ, E) I 1` at `v = 0`, with value `p` at `v = 0`. -/
 theorem exists_chartFlowCandidate_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E),

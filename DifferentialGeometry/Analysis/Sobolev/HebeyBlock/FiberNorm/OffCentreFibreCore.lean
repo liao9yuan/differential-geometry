@@ -3,62 +3,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-/-!
-# Off-centre pointwise tensor-fibre-norm reconstruction on a compact set
-
-For a fixed chart base point `α : M` and a compact subset `K` of the chart-`α`
-source, the bundle-fibre Riemannian norm `‖T.toSection x‖` of a smooth
-compactly-supported `(r, s)`-tensor section is controlled, uniformly over
-`x ∈ K`, by the sum of squares of the **raw chart-`α`-frame scalar components**
-`tensorChartComponentRaw g r s T α Idx Jdx x` — i.e. the components computed in
-the *fixed* chart `α`, evaluated at the *varying* point `x ∈ K`:
-
-```
-‖T.toSection x‖² ≤ C · ∑_{Idx, Jdx} (tensorChartComponentRaw g r s T α Idx Jdx x)²
-```
-
-This generalises the chart-centre special case
-`tensorFiberNorm_sq_le_chartCenterComponents`, in which the components are taken
-in the chart centred at `x` itself (so the trivialisation coincides with
-`TensorRSSpace.toModel`). Off the centre the chart-`α` trivialisation and the
-model fibre differ by a coordinate change whose distortion, as `x` ranges over
-the compact `K`, is exactly the quantity controlled by the unconditional
-operator-norm bound
-`tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional`.
-
-## Proof outline
-
-Fix `x ∈ K`. Write `v := tensorTrivProj g r s T α x = (triv α).clmAt x (T.toSection x)`,
-the chart-`α` trivialisation of the section value, viewed in the model fibre.
-
-* Inverse-trivialisation recovery: since `x ∈ K ⊆ (chartAt H α).source`, the
-  inverse trivialisation recovers the section value,
-  `(triv α).symmL x v = T.toSection x` (`Trivialization.symmL_continuousLinearMapAt`).
-* Uniform op-norm distortion: the unconditional inverse op-norm bound on `K`
-  gives `‖T.toSection x‖ = ‖(triv α).symmL x v‖ ≤ C₀ · ‖v‖`, with `C₀ > 0`
-  uniform over `K` and independent of `T` and `x`. No chart-locality predicate
-  is used.
-* Finite-basis recovery: the algebraic model-fibre recovery
-  `tensorRSModel_norm_sq_le_sum_projection_sq` applied to `v` yields
-  `‖v‖² ≤ midxPairCard · tensorChartBasisNormConstant² · ∑_{IJ} (P_{IJ} v)²`,
-  where `P_{IJ} v = tensorChartComponentRaw g r s T α Idx Jdx x` is exactly the
-  raw chart-`α` component (`tensorChartComponentRaw_def`).
-
-Squaring the op-norm step and substituting the basis-recovery bound gives the
-constant `C = C₀² · midxPairCard · tensorChartBasisNormConstant²`.
-
-The fibre norm here is the metric-induced bundle norm: the `(r, s)`-tensor
-bundle is equipped with its Riemannian bundle structure
-`tensorRS_riemannianBundle g r s`, which is the norm that the unconditional
-op-norm infrastructure controls and the norm used throughout the intrinsic
-Sobolev chain. No `HasLocallyConstantChartAt`, no finite-atlas-on-compact
-predicate, and no partition-of-unity hypothesis appears.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -87,29 +34,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Off-centre pointwise fibre-norm reconstruction on a compact set
-(HLCC-free).**
 
-For a smooth compactly-supported `(r, s)`-tensor section `T`, a fixed chart base
-point `α : M`, and a compact subset `K ⊆ (chartAt H α).source`, there is a
-strictly positive constant `C` (depending only on `K, α, r, s, E, g`, not on `T`
-or `x`) such that for every `x ∈ K`,
-
-```
-‖T.toSection x‖² ≤ C · ∑_{Idx, Jdx} (tensorChartComponentRaw g r s T α Idx Jdx x)²,
-```
-
-where the bundle-fibre norm is the metric-induced Riemannian norm
-(`tensorRS_riemannianBundle g r s`) and the raw components are taken in the
-*fixed* chart `α`, evaluated at the varying `x ∈ K`.
-
-The off-centre distortion between the chart-`α` trivialisation and the model
-fibre is controlled, uniformly on `K`, by the unconditional inverse op-norm
-bound `tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional`;
-the remaining algebra is the finite-basis Cauchy–Schwarz recovery
-`tensorRSModel_norm_sq_le_sum_projection_sq`. No chart-locality predicate
-(`HasLocallyConstantChartAt`), no finite-atlas-on-compact predicate, and no
-partition-of-unity hypothesis is used. -/
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :

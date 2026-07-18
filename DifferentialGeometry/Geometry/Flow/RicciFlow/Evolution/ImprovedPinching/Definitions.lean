@@ -15,14 +15,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved Ricci pinching quantities
 
-This file contains the native definitions for Hamilton Section 10:
-the trace-free Ricci tensor, the improved pinching quotient, and the cubic
-reaction scalar.  The old `LocalPinching` file remains a compatibility/scaffold
-layer for eigenvalue pinching statements.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -39,12 +39,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A time-dependent `(0,2)` tensor family, represented pointwise. -/
+
 abbrev Tensor02Fam : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x
 
-/-- The metric family, viewed as a `(0,2)` tensor family. -/
+
 def metric02
     (G : Real -> SmoothRiemannianMetric I M) :
     Tensor02Fam (E := E) (H := H) (I := I) (M := M) :=
@@ -57,7 +57,7 @@ theorem metric02_apply
     metric02 (I := I) G t x v = (G t).inner x (v 0) (v 1) := by
   simp [metric02]
 
-/-- Definition 10.1: the trace-free Ricci tensor `Ric° = Ric - (1/3) R g`. -/
+
 def tfRic
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : Tensor02Fam (E := E) (H := H) (I := I) (M := M))
@@ -77,48 +77,56 @@ theorem tfRic_apply
     tfRic (I := I) G Ric scalar t x v =
       Ric t x v - (((1 : Real) / 3) * scalar t x) *
         (G t).inner x (v 0) (v 1) := by
-  simp [tfRic, mul_assoc]
+  unfold tfRic
+  calc
+    (Ric t x - (((1 : Real) / 3) * scalar t x) • metric02 (I := I) G t x) v =
+        Ric t x v -
+          ((((1 : Real) / 3) * scalar t x) • metric02 (I := I) G t x) v :=
+      Tensor0SSpace.sub_apply 2 x _ _ v
+    _ = _ := by
+      rw [Tensor0SSpace.smul_apply, metric02_apply]
+      simp only [smul_eq_mul]
 
-/-- Pointwise trace-free Ricci norm square from Definition 10.1:
-`|Ric°|² = |Ric|² - R²/3`. -/
+
+
 abbrev tfRicNormSqAt (scalar ricciNormSq : Real) : Real :=
   tracefreeRicciNormSqAtOf scalar ricciNormSq
 
-/-- Time-space trace-free Ricci norm square.
 
-This is a readability wrapper for the canonical scalar-gradient formula, not a
-separate formula definition. -/
+
+
+
 abbrev tfRicNormSq
     (scalar ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
   tracefreeRicciNormSqOf scalar ricciNormSq
 
-/-- Compatibility with the older scalar-gradient interface. -/
+
 theorem tfRicNormSq_compat
     (scalar ricciNormSq : Real -> M -> Real) (t : Real) (x : M) :
     tfRicNormSq scalar ricciNormSq t x =
       tracefreeRicciNormSqOf scalar ricciNormSq t x := rfl
 
-/-- Definition 10.2: Hamilton's improved pinching quotient
-`P = |Ric°|² / R^(2 - epsilon)`. -/
+
+
 def pinchP
     (scalar ricciNormSq : Real -> M -> Real) (epsilon : Real)
     (t : Real) (x : M) : Real :=
   tfRicNormSq scalar ricciNormSq t x / Real.rpow (scalar t x) (2 - epsilon)
 
-/-- Pointwise form of Definition 10.3.  The first argument is scalar curvature,
-the second is `|Ric|²`, and the third is `tr(Ric³)`. -/
+
+
 def cubicQAt (scalar ricciNormSq ricciTraceCube : Real) : Real :=
   2 * ricciNormSq ^ 2 + scalar ^ 4 -
     5 * scalar ^ 2 * ricciNormSq + 4 * scalar * ricciTraceCube
 
-/-- Definition 10.3 as a scalar field. -/
+
 def cubicQ
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
     (t : Real) (x : M) : Real :=
   cubicQAt (scalar t x) (ricciNormSq t x) (ricciTraceCube t x)
 
-/-- The component/eigenvalue version of `cubicQ` agrees with the existing
-three-dimensional polynomial `hamiltonCubicQ3`. -/
+
+
 theorem cubicQ_eigen (l1 l2 l3 : Real) :
     cubicQAt
         (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3)
@@ -128,8 +136,8 @@ theorem cubicQ_eigen (l1 l2 l3 : Real) :
   unfold cubicQAt DifferentialGeometry.Integral.Connection.hamiltonCubicQ3
   ring
 
-/-- The trace-free Ricci norm used by the flow files matches the eigenvalue-gap
-formula used in the dimension-three algebra layer. -/
+
+
 theorem tfRic_eigen (l1 l2 l3 : Real) :
     tfRicNormSqAt
         (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3)
@@ -142,16 +150,16 @@ theorem tfRic_eigen (l1 l2 l3 : Real) :
     DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
   ring
 
-/-- Fieldwise eigenvalue context for the later Hamilton pinching estimate.
-This is deliberately only an eigenvalue algebra package; producing the
-eigenvalue fields from a concrete Ricci-flow solution belongs to the
-geometric/maximum-principle layer. -/
+
+
+
+
 def EigenPinchCtxOn
     (l1 l2 l3 : Real -> M -> Real) (delta : Real) : Prop :=
   forall t x, DifferentialGeometry.Integral.Connection.PinchEigen3 (l1 t x) (l2 t x) (l3 t x) delta
 
-/-- Hamilton-ready cubic reaction bracket in the `cubicQAt` notation used by
-Lemma 10.6. -/
+
+
 theorem cubicQ_pinch
     {l1 l2 l3 delta epsilon : Real}
     (hctx : DifferentialGeometry.Integral.Connection.PinchEigen3 l1 l2 l3 delta)
@@ -168,8 +176,8 @@ theorem cubicQ_pinch
   simpa [cubicQ_eigen, tfRic_eigen] using
     DifferentialGeometry.Integral.Connection.PinchEigen3.q_sub_nonneg hctx hepsilon
 
-/-- Fieldwise version of `cubicQ_pinch`, ready to be consumed pointwise by the
-post-10.6 pinching estimate setup. -/
+
+
 theorem cubicQ_pinchOn
     (l1 l2 l3 : Real -> M -> Real) {delta epsilon : Real}
     (hctx : EigenPinchCtxOn (M := M) l1 l2 l3 delta)
@@ -187,15 +195,15 @@ theorem cubicQ_pinchOn
   intro t x
   exact cubicQ_pinch (hctx t x) hepsilon
 
-/-- The Ricci-norm curvature reaction in a three-dimensional orthonormal Ricci
-eigenbasis.  This is the scalar `R_ikjl Ric^{ij} Ric^{kl}`. -/
+
+
 def ricciReact3 (l1 l2 l3 : Real) : Real :=
   l1 * l2 * (l1 + l2 - l3) +
     l1 * l3 * (l1 + l3 - l2) +
       l2 * l3 * (l2 + l3 - l1)
 
-/-- The diagonal three-dimensional curvature model contracts with diagonal
-Ricci to the reaction scalar used in Lemma 10.4. -/
+
+
 theorem react3_diag (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3 i k j l *
@@ -207,7 +215,7 @@ theorem react3_diag (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-/-- The same diagonal contraction in the `curvRicciRicciInFrame` slot order. -/
+
 theorem curv3_diag_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3 i k j l *
@@ -219,10 +227,10 @@ theorem curv3_diag_eq (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-/-- The same contraction when the standard Riemann-from-Ricci data is supplied
-with the project trace sign.  The actual geometric bridge uses
-`stdRmDiag3 (-l1) (-l2) (-l3)` when the realized Ricci eigenvalues are
-`l1,l2,l3`. -/
+
+
+
+
 theorem curv3_neg_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Integral.Connection.stdRmDiag3 (-l1) (-l2) (-l3) i k j l *
@@ -234,7 +242,7 @@ theorem curv3_neg_eq (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-/-- Field version of the diagonal reaction contraction in a Ricci eigenframe. -/
+
 def diagReact3
     (l1 l2 l3 : Real -> M -> Real) : Real -> M -> Real :=
   fun t x =>
@@ -259,7 +267,7 @@ theorem diagReact3_eq
       ricciReact3 (l1 t x) (l2 t x) (l3 t x) := by
   exact react3_diag (l1 t x) (l2 t x) (l3 t x)
 
-/-- The pointwise eigenvalue algebra behind Lemma 10.4's reaction term. -/
+
 theorem tfRel_eigen (l1 l2 l3 : Real)
     (hR : DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ≠ 0) :
     4 * ricciReact3 l1 l2 l3 -
@@ -283,16 +291,16 @@ theorem tfRel_eigen (l1 l2 l3 : Real)
   field_simp [hR']
   ring_nf
 
-/-- Reaction relation needed to rewrite Lemma 10.4 into Hamilton's `Q` form. -/
+
 def tfRicReactRel
     (scalar ricciNormSq tfNormSq Q reaction : Real -> M -> Real) : Prop :=
   ∀ t x, scalar t x ≠ 0 ->
     4 * reaction t x - ((4 : Real) / 3) * scalar t x * ricciNormSq t x =
       (4 * ricciNormSq t x * tfNormSq t x - 2 * Q t x) / scalar t x
 
-/-- The field-level reaction relation produced from pointwise Ricci eigenvalue
-data.  The remaining geometric bridge is to realize the eigenvalue inputs from
-an actual Ricci eigenframe. -/
+
+
+
 theorem tfRel_from_eigen
     (scalar ricciNormSq ricciTraceCube reaction : Real -> M -> Real)
     (l1 l2 l3 : Real -> M -> Real)
@@ -319,8 +327,8 @@ theorem tfRel_from_eigen
     hcube t x]
   exact tfRel_eigen (l1 t x) (l2 t x) (l3 t x) hR'
 
-/-- Reaction relation produced when the reaction term is the diagonal
-three-dimensional curvature contraction in a Ricci eigenframe. -/
+
+
 theorem tfRel_from_diag
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
     (l1 l2 l3 : Real -> M -> Real)
@@ -342,8 +350,8 @@ theorem tfRel_from_diag
     l1 l2 l3 hscalar hnorm hcube
     (by intro t x; exact diagReact3_eq (M := M) l1 l2 l3 t x)
 
-/-- The Section 6 curvature contraction in a diagonal three-dimensional
-eigenframe, stated only in terms of the component data it needs. -/
+
+
 theorem curvReact3_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -381,9 +389,9 @@ theorem curvReact3_frame
   simp_rw [hRm]
   exact curv3_diag_eq l1 l2 l3
 
-/-- Formal plus-sign standard-component variant.  This is not the geometric
-Riemann-from-Ricci bridge when `l1,l2,l3` are realized Ricci eigenvalues; for
-that bridge use `canon3_frame_neg` below. -/
+
+
+
 theorem canonReact3_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -405,9 +413,9 @@ theorem canonReact3_frame
   rw [ricciNormCurvatureReactionInFrame_apply,
     curvReact3_frame (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
 
-/-- Section 6 curvature contraction in the actual 3D Riemann-from-Ricci sign
-bridge: standard components are computed from `-Ric`, while the contracted
-Ricci components are `Ric`. -/
+
+
+
 theorem curv3_frame_neg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -445,8 +453,8 @@ theorem curv3_frame_neg
   simp_rw [hRm]
   exact curv3_neg_eq l1 l2 l3
 
-/-- With the actual Section 6/project sign bridge, the canonical Ricci-norm
-reaction matches the book/eigenvalue reaction scalar. -/
+
+
 theorem canon3_frame_neg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -469,7 +477,7 @@ theorem canon3_frame_neg
     curv3_frame_neg (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
   ring
 
-/-- Pointwise Ricci norm square in a `Fin 3` basis. -/
+
 def ricciNormAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
@@ -477,8 +485,8 @@ def ricciNormAt {x : M}
     DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j *
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j
 
-/-- Pointwise curvature-Ricci-Ricci contraction in a `Fin 3` basis, before the
-canonical Section 6 sign. -/
+
+
 def curvRicAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
@@ -488,14 +496,14 @@ def curvRicAt {x : M}
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j *
         DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric k l
 
-/-- Pointwise canonical Ricci-norm reaction scalar in a `Fin 3` basis. -/
+
 def reactAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
   -curvRicAt (I := I) Ric Rm04 basis
 
-/-- Pointwise component trace `tr(Ric^3)` in a `Fin 3` basis. -/
+
 def ricciCubeAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
@@ -571,8 +579,8 @@ theorem ricciEnd_diagVec {x : M}
               DifferentialGeometry.Integral.Connection.delta3, horth 2 0, horth 2 1, horth 2 2]
   exact ⟨h0, h1, h2⟩
 
-/-- Intrinsic pointwise trace `tr(Ric^3)`, using the Ricci endomorphism obtained
-by raising one index with the metric. -/
+
+
 def ricciCubeInvAt {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x) : Real :=
@@ -620,28 +628,12 @@ theorem ricciCubeInv_diag {x : M}
         simpa [LinearMap.comp_apply] using hT2c]
   simp [DifferentialGeometry.Integral.Connection.delta3, horth 0 0, horth 1 1, horth 2 2]
 
-/-- Canonical spacetime scalar `tr((Ric^#)^3)` for a solution. -/
+
 def ricciCube
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=
   fun t x => ricciCubeInvAt (I := I) (S.base.metric t) (S.ricciAt t x)
-
-@[simp]
-theorem ricciPair04_apply {x : M}
-    (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
-    (v : Fin 4 -> TangentSpace I x) :
-    ricciPair04 (I := I) Ric v =
-      Ric (fun a : Fin 2 => if a = 0 then v 0 else v 2) *
-        Ric (fun a : Fin 2 => if a = 0 then v 1 else v 3) := by
-  unfold ricciPair04
-  rw [ContinuousMultilinearMap.domDomCongr_apply]
-  rw [Bundle.continuousMultilinearMap.product_fun_apply]
-  have hswap0 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 0 = 0 := by decide
-  have hswap1 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 1 = 2 := by decide
-  have hswap2 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 2 = 1 := by decide
-  have hswap3 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 3 = 3 := by decide
-  congr 2 <;> funext a <;> fin_cases a <;> simp [hswap0, hswap1, hswap2, hswap3]
 
 private theorem prod_delta4
     (I0 J0 : Fin 4 -> Fin 3) :
@@ -715,8 +707,18 @@ private theorem coordPair04 {x : M}
   unfold coordInner0S curvRicAt
   rw [sum_delta4]
   rw [sum4ikjl]
-  simp [tensor0SComponent, DifferentialGeometry.Integral.Connection.rm04CompAt, DifferentialGeometry.Integral.Connection.ricciCompAt,
-    DifferentialGeometry.Integral.Connection.slots4, DifferentialGeometry.Integral.Connection.slots2, ricciPair04_apply, mul_assoc]
+  have hpair : ∀ (v : Fin 4 → TangentSpace I x),
+      ricciPair04 (I := I) Ric v =
+        Ric (fun q : Fin 2 => if q = 0 then v 0 else v 2) *
+          Ric (fun q : Fin 2 => if q = 0 then v 1 else v 3) := by
+    intro v
+    rw [ricciPair04_apply]
+    congr 2
+  simp [tensor0SComponent, DifferentialGeometry.Integral.Connection.rm04CompAt,
+    DifferentialGeometry.Integral.Connection.ricciCompAt,
+    DifferentialGeometry.Integral.Connection.slots4,
+    DifferentialGeometry.Integral.Connection.slots2,
+    hpair, mul_assoc]
 
 theorem curvRic_inner {x : M}
     (g : SmoothMetric_gen I M)
@@ -729,8 +731,8 @@ theorem curvRic_inner {x : M}
   rw [inner0S_eq_coord (I := I) g x 4 basis DifferentialGeometry.Integral.Connection.delta3 hinv]
   exact (coordPair04 (I := I) Ric Rm04 basis).symm
 
-/-- The basis reaction agrees with the intrinsic reaction in any orthonormal
-`Fin 3` basis. -/
+
+
 theorem reactAt_eq_react
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -749,8 +751,8 @@ theorem reactAt_eq_react
   rw [curvRic_inner (I := I) (S.base.metric t) (S.ricciAt t x)
     (S.base.rm04 t x) basis hinv]
 
-/-- The zero-order Ricci reaction scalar is independent of the orthonormal
-`Fin 3` basis used to compute it. -/
+
+
 theorem react_frame {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -900,9 +902,9 @@ theorem reactAt_diag {x : M}
   rw [curv3_neg_eq]
   ring
 
-/-- Pointwise reaction relation from a convention-correct diagonal Ricci
-eigenbasis.  This is the honest local producer behind the frame-level
-`tfRel_frame` theorem. -/
+
+
+
 theorem tfRel_basis {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x}
@@ -930,8 +932,8 @@ theorem tfRel_basis {x : M}
     hscalar, hcube]
   exact tfRel_eigen l1 l2 l3 hR'
 
-/-- Negating a diagonal Ricci tensor negates the displayed eigenvalues and
-trace. -/
+
+
 theorem diag_neg {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -949,8 +951,8 @@ theorem diag_neg {x : M}
       simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using
         congrArg Neg.neg hij
 
-/-- Reaction relation from the convention-correct 3D Riemann-from-Ricci trace
-data and a diagonal Ricci eigenbasis. -/
+
+
 theorem tfRel_trace {x : M}
     {g : SmoothRiemannianMetric I M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -982,9 +984,9 @@ theorem tfRel_trace {x : M}
   exact tfRel_basis (I := I) (Ric := Ric) (Rm04 := Rm04)
     (basis := basis) hdiag hcube hRm hR
 
-/-- Pointwise trace-free Ricci reaction relation in an arbitrary orthonormal
-heat frame.  The diagonalization happens only in the separate eigenbasis used
-inside the proof. -/
+
+
+
 theorem tfRel_point {x : M}
     {g : SmoothRiemannianMetric I M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -1107,7 +1109,7 @@ theorem sec6_react_at
         DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis (Rm04 t x) i k j l := by
     intro i j k l
     simp [DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04CompAt_apply, DifferentialGeometry.Integral.Connection.vec4,
+      DifferentialGeometry.Integral.Connection.rm04CompAt_apply,
       hbasis i, hbasis k, hbasis j, hbasis l]
   unfold ricciNormCurvatureReactionInFrame reactAt
   congr 1
@@ -1168,9 +1170,9 @@ theorem tfRel_point_sec6
   rw [hnorm]
   exact hpoint
 
-/-- Pointwise relation in an arbitrary heat frame, with the signed trace-data
-package produced from first-trace Ricci and scalar realizations at the separate
-Ricci eigenbasis. -/
+
+
+
 theorem tfRel_pfirst
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1245,8 +1247,8 @@ theorem scalar_eq_diag {x : M}
   simp [DifferentialGeometry.Integral.Connection.delta3, h00, h11, h22,
     DifferentialGeometry.Integral.Connection.ricciEigenScalar3]
 
-/-- In an orthonormal `Fin 3` basis, the intrinsic metric trace realizes the
-scalar trace with `delta3` inverse metric components. -/
+
+
 theorem scalarTrace_delta {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -1264,8 +1266,8 @@ theorem scalarTrace_delta {x : M}
   rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
     (I := I) g basis DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
 
-/-- In an orthonormal `Fin 3` basis, intrinsic `Rm13` trace plus metric
-lowering realizes the convention-correct first trace of `Rm04`. -/
+
+
 theorem firstTrace_delta
     [SigmaCompactSpace M] [T2Space M]
     {x : M} (g : SmoothRiemannianMetric I M)
@@ -1335,8 +1337,8 @@ private theorem vec2_update_one {x : M}
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
 
-/-- A `(0,2)` tensor symmetric on a basis is symmetric on all tangent
-vectors. -/
+
+
 theorem ricciSym_of_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}
@@ -1469,8 +1471,8 @@ theorem ricciSym_of_basis
   rw [hL, hR, hsym j i]
   ring
 
-/-- Ricci symmetry from a first-trace realization and the algebraic symmetries
-of the lowered curvature tensor. -/
+
+
 theorem ricciSym_rm04
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}
@@ -1494,10 +1496,10 @@ theorem ricciSym_rm04
       DifferentialGeometry.Integral.Connection.ricciSymm_of_rm04 (I := I) basis gInv Ric Rm04 hTrace
         hPair hOutput hInput hInv i j)
 
-/-- Reaction relation from a convention-correct diagonal Ricci eigenframe.
 
-This is the Section 10 bridge from the canonical Section 6 reaction term to
-the eigenvalue algebra `tfRel_eigen`. -/
+
+
+
 theorem tfRel_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1561,11 +1563,11 @@ theorem tfRel_frame
       (l1 t x) (l2 t x) (l3 t x)
       (hInv t x) (hRic t x) (hRm t x)
 
-/-- Reaction relation from signed 3D trace data in a diagonal frame.
 
-This removes the raw `Rm04` component hypothesis from `tfRel_frame`; callers
-only need the convention-correct `RiemannFromRicci3DTraceDataAt` package and a
-pointwise basis matching the frame. -/
+
+
+
+
 theorem tfRel_data
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1626,8 +1628,8 @@ theorem tfRel_data
   exact tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
     l1 l2 l3 hscalar hcube hInv hRic hRm
 
-/-- Reaction relation from convention-correct first-trace data in a diagonal
-frame. -/
+
+
 theorem tfRel_first
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]

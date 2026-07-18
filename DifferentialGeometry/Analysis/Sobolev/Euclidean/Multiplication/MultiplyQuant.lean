@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 
-/-!
-# Quantitative `W^{k,p}` bound for multiplication by a smooth bounded function
-
-For a smooth (`C^∞`) function `η : E → ℝ` whose iterated derivatives up to
-order `k` are uniformly bounded by `C` on the open set `Ω`, the operation
-`u ↦ η · u` admits a uniform bound on the `W^{k,p}` norm.
-
-Proved for `k = 0` and `k = 1`. The general case `k ≥ 2` follows by induction
-but is left as future work.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -25,7 +14,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- `‖(∂ᵢ η) x‖ ≤ ‖fderiv ℝ η x‖`. -/
 lemma norm_partial_eta_le_fderiv
     {η : E → ℝ} (i : Fin d) (x : E) :
     ‖(fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ))‖ ≤ ‖fderiv ℝ η x‖ := by
@@ -35,8 +23,6 @@ lemma norm_partial_eta_le_fderiv
   rw [h_one, mul_one] at h
   exact h
 
-/-- For a function `η` with `‖η x‖ ≤ C` on `Ω`, and any function `v : E → ℝ`,
-we have `eLpNorm (η · v) ≤ ENNReal.ofReal C · eLpNorm v`. -/
 lemma eLpNorm_eta_mul_le
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω)
     {η : E → ℝ}
@@ -54,9 +40,6 @@ lemma eLpNorm_eta_mul_le
           gcongr
           exact hη_bound x hx
 
-/-- For a function `η` with `‖fderiv ℝ η x‖ ≤ C` on `Ω`, and any function
-`v : E → ℝ`, the `i`-th partial `(∂ᵢη)` times `v` satisfies
-`eLpNorm ((∂ᵢη) · v) ≤ ENNReal.ofReal C · eLpNorm v`. -/
 lemma eLpNorm_partial_eta_mul_le
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω)
     {η : E → ℝ}
@@ -79,8 +62,6 @@ lemma eLpNorm_partial_eta_mul_le
           gcongr
           exact hη_grad_bound x hx
 
-/-- The chosen weak partial of `η · u`, evaluated in `eLpNorm`, is bounded by
-`C · eLpNorm (∂ᵢu) + C · eLpNorm u`. -/
 lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {η : E → ℝ}
@@ -144,8 +125,6 @@ lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
     eLpNorm_partial_eta_mul_le (d := d) hΩ hη_grad_bound i u
   exact add_le_add hbnd1 hbnd2
 
-/-- `ENNReal.ofReal C = ENNReal.ofReal (max C 0)`: the unsigned-real coercion
-already truncates negative values. -/
 lemma ofReal_eq_ofReal_max_zero (C : ℝ) :
     ENNReal.ofReal C = ENNReal.ofReal (max C 0) := by
   rcases lt_or_ge C 0 with hC | hC
@@ -155,12 +134,10 @@ lemma ofReal_eq_ofReal_max_zero (C : ℝ) :
   · have hmax : max C 0 = C := max_eq_left hC
     rw [hmax]
 
-/-- The natural-number cast `(1 + d : ℝ≥0∞)` equals `ENNReal.ofReal ((d : ℝ) + 1)`. -/
 lemma natCast_one_add_d_eq_ofReal (d : ℕ) :
     ((1 + d : ℕ) : ℝ≥0∞) = ENNReal.ofReal ((1 + d : ℕ) : ℝ) := by
   rw [ENNReal.ofReal_natCast]
 
-/-- `(1 + d : ℝ≥0∞) · ENNReal.ofReal C` equals `ENNReal.ofReal ((1 + d) · max C 0)`. -/
 lemma natCast_one_add_d_mul_ofReal (d : ℕ) (C : ℝ) :
     (((1 + d : ℕ) : ℝ≥0∞) * ENNReal.ofReal C) =
       ENNReal.ofReal (((1 + d : ℕ) : ℝ) * max C 0) := by
@@ -168,13 +145,6 @@ lemma natCast_one_add_d_mul_ofReal (d : ℕ) (C : ℝ) :
   rw [natCast_one_add_d_eq_ofReal d, ofReal_eq_ofReal_max_zero C,
       ← ENNReal.ofReal_mul hnn]
 
-/-- For a smooth function `η : E → ℝ` whose iterated derivatives up to order `k`
-are uniformly bounded by `C` on the open set `Ω`, the operation `u ↦ η · u` is
-uniformly bounded on `W^{k,p}(Ω)` by a constant depending only on `C`, `k`, and
-the dimension `d`.
-
-Currently established for `k ≤ 1`; the iterated Leibniz step for `k ≥ 2`
-will be added when needed. -/
 theorem wkpNorm_smul_smooth_bounded_le_one
     (k : ℕ) (hk : k ≤ 1) {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
@@ -184,7 +154,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     {C : ℝ} (hC_nonneg : 0 ≤ C)
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C) :
     ∃ K : ℝ, 0 < K ∧ ∀ {u : EuclideanSpace ℝ (Fin d) → ℝ} (_hu : MemWkp k p u Ω),
-      wkpNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * wkpNorm k p u Ω := by
+      iteratedWeakSobolevNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * iteratedWeakSobolevNorm k p u Ω := by
   match k, hk with
   | 0, _ =>
     have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
@@ -242,12 +212,12 @@ theorem wkpNorm_smul_smooth_bounded_le_one
           ≤ OC * Bu i + OC * Au := fun i =>
       eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le (d := d) hp_one hΩ_open
         hη_smooth h_eta0 h_eta1 hv_W1p i
-    have hLHS_unfold : wkpNorm (d := d) 1 p (fun x => η x * v x) Ω =
+    have hLHS_unfold : iteratedWeakSobolevNorm (d := d) 1 p (fun x => η x * v x) Ω =
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (iterWeakPartial (d := d) p 1 α (fun x => η x * v x) Ω) p
             (volume.restrict Ω) := by
-      unfold wkpNorm
+      unfold iteratedWeakSobolevNorm
       rw [show (1 : ℕ) + 1 = 1 + 1 from rfl]
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       have h0_unique : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) :=
@@ -260,11 +230,11 @@ theorem wkpNorm_smul_smooth_bounded_le_one
               eLpNorm (iterWeakPartial (d := d) p 0 α (fun x => η x * v x) Ω) p
                 (volume.restrict Ω))]
       simp [iterWeakPartial_zero]
-    have hRHS_unfold : wkpNorm (d := d) 1 p v Ω =
+    have hRHS_unfold : iteratedWeakSobolevNorm (d := d) 1 p v Ω =
         Au +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (iterWeakPartial (d := d) p 1 α v Ω) p (volume.restrict Ω) := by
-      unfold wkpNorm
+      unfold iteratedWeakSobolevNorm
       rw [show (1 : ℕ) + 1 = 1 + 1 from rfl]
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       have h0_unique : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) :=
@@ -284,7 +254,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
         iterWeakPartial (d := d) p 1 α v Ω =
           chosenWeakPartial' (d := d) p (α 0) v Ω := by
       intro α; rw [iterWeakPartial_succ]; rfl
-    have hLHS_unfold' : wkpNorm (d := d) 1 p (fun x => η x * v x) Ω =
+    have hLHS_unfold' : iteratedWeakSobolevNorm (d := d) 1 p (fun x => η x * v x) Ω =
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (chosenWeakPartial' (d := d) p (α 0) (fun x => η x * v x) Ω) p
@@ -293,7 +263,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       refine congrArg (eLpNorm (fun x => η x * v x) p (volume.restrict Ω) + ·) ?_
       refine Finset.sum_congr rfl (fun α _ => ?_)
       rw [hIter1_eta_v α]
-    have hRHS_unfold' : wkpNorm (d := d) 1 p v Ω =
+    have hRHS_unfold' : iteratedWeakSobolevNorm (d := d) 1 p v Ω =
         Au +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (chosenWeakPartial' (d := d) p (α 0) v Ω) p (volume.restrict Ω) := by

@@ -7,14 +7,14 @@ set_option linter.unusedVariables false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Shifted pinching reaction algebra
 
-This file contains the tensor-backed algebra for the shifted pinching tensor
-`S = Ric - δ R g` used in Hamilton's Section 9 tensor WMP application.
-It sits below `RicciPreservation.lean`, so the preservation file can consume
-canonical reaction producers without creating import cycles.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,29 +25,29 @@ open Bundle
 open Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
-/-! ## Pure three-dimensional reaction algebra -/
 
-/-- Matrix square of Ricci components in an orthonormal `Fin 3` basis. -/
+
+
 def ricciSq3 (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   ∑ k : Fin 3, Ric i k * Ric k j
 
-/-- Ricci component trace in an orthonormal `Fin 3` basis. -/
+
 def ricciScal3 (Ric : Fin 3 -> Fin 3 -> Real) : Real :=
   ∑ i : Fin 3, Ric i i
 
-/-- Ricci component norm square in an orthonormal `Fin 3` basis. -/
+
 def ricciNorm3 (Ric : Fin 3 -> Fin 3 -> Real) : Real :=
   ∑ i : Fin 3, ∑ j : Fin 3, Ric i j * Ric i j
 
-/-- Ricci-flow Ricci reaction in dimension three:
-`2 R_ikjl Ric_kl - 2 Ric_i^k Ric_kj`, in an orthonormal basis. -/
+
+
 def ricciPresReact
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   2 * (∑ k : Fin 3, ∑ l : Fin 3, Rm i k j l * Ric k l) -
     2 * ricciSq3 Ric i j
 
-/-- Shifted pinching reaction for `S = Ric - delta R g` in an orthonormal basis. -/
+
 def pinchReact
     (delta : Real)
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
@@ -56,8 +56,8 @@ def pinchReact
     2 * delta * (ricciNorm3 Ric * DifferentialGeometry.Integral.Connection.delta3 i j -
       ricciScal3 Ric * Ric i j)
 
-/-- Standard three-dimensional Riemann-from-Ricci component model for an
-arbitrary Ricci matrix in an orthonormal `Fin 3` basis. -/
+
+
 def stdRmOfRic3
     (Ric : Fin 3 -> Fin 3 -> Real)
     (i j k l : Fin 3) : Real :=
@@ -71,9 +71,9 @@ def stdRmOfRic3
           DifferentialGeometry.Integral.Connection.delta3 i l *
             DifferentialGeometry.Integral.Connection.delta3 j k)
 
-/-- Adding a scalar multiple of the orthonormal metric to Ricci changes the
-shifted reaction only linearly.  The quadratic terms cancel in the shifted
-combination. -/
+
+
+
 theorem pinchReact_add_g00
     (delta a : Real) (Ric : Fin 3 -> Fin 3 -> Real) :
     pinchReact delta
@@ -90,7 +90,7 @@ theorem pinchReact_add_g00
   simp [Fin.sum_univ_three, ricciScal3]
   ring_nf
 
-/-- Lemma 9.1 reaction algebra at a Ricci-null eigenvector. -/
+
 theorem ricciReactNull
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
     ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
@@ -103,7 +103,7 @@ theorem ricciReactNull
   simp [Fin.sum_univ_three]
   ring
 
-/-- Nonnegativity form of `ricciReactNull`. -/
+
 theorem ricciReact_ge
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
     0 <= ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
@@ -111,7 +111,7 @@ theorem ricciReact_ge
   rw [ricciReactNull l1 l2 l3 hnull]
   positivity
 
-/-- Lemma 9.2 shifted reaction algebra at a pinching-null eigenvector. -/
+
 theorem pinchReactNull
     (delta l1 l2 l3 : Real)
     (hnull : l1 = delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) :
@@ -147,7 +147,7 @@ theorem pinchReactNull
     ring
   nlinarith
 
-/-- Nonnegativity form of `pinchReactNull` for `0 <= delta <= 1/3`. -/
+
 theorem pinchReact_ge
     (delta l1 l2 l3 : Real)
     (hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
@@ -168,10 +168,10 @@ theorem pinchReact_ge
     positivity
   exact add_nonneg h1 h2
 
-/-! ## Strict shifted first-null algebra -/
 
-/-- Scalar reconstructed from a diagonal shifted first-null tensor
-`diag(0,a,b) = Ric - delta * R g` in dimension three. -/
+
+
+
 def shiftScal3 (delta a b : Real) : Real :=
   (a + b) / (1 - 3 * delta)
 
@@ -179,7 +179,7 @@ def shiftRic1 (delta a b : Real) : Real := delta * shiftScal3 delta a b
 def shiftRic2 (delta a b : Real) : Real := a + delta * shiftScal3 delta a b
 def shiftRic3 (delta a b : Real) : Real := b + delta * shiftScal3 delta a b
 
-/-- Trace identity for the reconstructed diagonal Ricci tensor. -/
+
 theorem shiftScal3_eq
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
     DifferentialGeometry.Integral.Connection.ricciEigenScalar3
@@ -194,7 +194,7 @@ theorem shiftScal3_eq
   field_simp [hden, hden']
   ring
 
-/-- The reconstructed first Ricci eigenvalue is exactly `delta * R`. -/
+
 theorem shiftNull3
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
     shiftRic1 delta a b =
@@ -203,7 +203,7 @@ theorem shiftNull3
   rw [shiftScal3_eq delta a b hdelta13]
   rfl
 
-/-- Strict-delta shifted pinching null reaction in diagonal form. -/
+
 theorem pinchShiftNull_ge
     (delta a b : Real)
     (hdelta0 : 0 <= delta) (hdelta13 : delta < (1 : Real) / 3) :
@@ -217,8 +217,8 @@ theorem pinchShiftNull_ge
     (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b)
     hdelta0 (le_of_lt hdelta13) (shiftNull3 delta a b hdelta13)
 
-/-- Scalar target for the shifted pinching reaction at a reconstructed
-first-null diagonal tensor. -/
+
+
 def shiftReact3 (delta a b : Real) : Real :=
   pinchReact delta
     (DifferentialGeometry.Integral.Connection.stdRmDiag3
@@ -227,16 +227,16 @@ def shiftReact3 (delta a b : Real) : Real :=
       (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
     0 0
 
-/-- Strict-delta nonnegativity of the compact shifted reaction target. -/
+
 theorem shiftReact3_nonneg
     (delta a b : Real)
     (hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= shiftReact3 delta a b := by
   exact pinchShiftNull_ge delta a b (le_of_lt hdelta0) hdelta13
 
-/-- Components of a shifted first-null block
-`S = Ric - delta * R * g` in an orthonormal basis whose first vector is null:
-`[[0,0,0],[0,a,c],[0,c,b]]`. -/
+
+
+
 def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
   if i = 0 then 0
   else if j = 0 then 0
@@ -245,19 +245,19 @@ def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
   else
     if j = 1 then c else b
 
-/-- Ricci components reconstructed from a shifted first-null block. -/
+
 def shiftRicBlock3 (delta a b c : Real) (i j : Fin 3) : Real :=
   shiftBlockS3 a b c i j +
     delta * shiftScal3 delta a b * DifferentialGeometry.Integral.Connection.delta3 i j
 
-/-- Shifted pinching reaction at a first-null block, using the full
-three-dimensional Riemann-from-Ricci model rather than a diagonal model. -/
+
+
 def shiftReactBlock3 (delta a b c : Real) : Real :=
   pinchReact delta
     (stdRmOfRic3 (shiftRicBlock3 delta a b c))
     (shiftRicBlock3 delta a b c) 0 0
 
-/-- Explicit block expansion of the shifted first-null reaction. -/
+
 theorem shiftReactBlock3_eq
     (delta a b c : Real) (hdelta13 : delta < (1 : Real) / 3) :
     shiftReactBlock3 delta a b c =
@@ -276,8 +276,8 @@ theorem shiftReactBlock3_eq
   field_simp [hden, hden', hden2]
   ring_nf
 
-/-- Nonnegativity of the shifted first-null block reaction for all
-`delta < 1/3`.  This includes the Ricci-preservation case `delta = 0`. -/
+
+
 theorem shiftReactBlock3_nonneg_of_lt
     (delta a b c : Real) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= shiftReactBlock3 delta a b c := by
@@ -298,14 +298,14 @@ theorem shiftReactBlock3_nonneg_of_lt
     positivity
   exact add_nonneg hterm1 hterm2
 
-/-- Strict-delta nonnegativity of the shifted first-null block reaction. -/
+
 theorem shiftReactBlock3_nonneg
     (delta a b c : Real)
     (_hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= shiftReactBlock3 delta a b c := by
   exact shiftReactBlock3_nonneg_of_lt delta a b c hdelta13
 
-/-! ## Tensor-backed shifted reconstruction -/
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E]
@@ -315,10 +315,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A pointwise shifted first-null block in an orthonormal `Fin 3` basis.
 
-This only records the geometric block shape of the raw tensor.  It does not
-assert any reaction formula, and it does not choose the orthonormal basis. -/
+
+
+
 structure ShiftBlockAt
     (g : SmoothRiemannianMetric I M)
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
@@ -329,8 +329,8 @@ structure ShiftBlockAt
     ∀ i j : Fin 3,
       A x (basis i) (basis j) = shiftBlockS3 a b c i j
 
-/-- A nonzero scalar multiple of a raw bilinear null vector is null in the
-reverse direction. -/
+
+
 theorem raw_null_of_smul
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v e : TangentSpace I x} {r : Real}
@@ -346,9 +346,9 @@ theorem raw_null_of_smul
   have hr2 : r * r ≠ 0 := mul_ne_zero hr hr
   exact (mul_eq_zero.mp hmul).resolve_left hr2
 
-/-- A PSD symmetric bilinear first-null tensor has shifted block components in
-any supplied orthonormal basis whose first vector is a normalization of the
-null direction. -/
+
+
+
 theorem shiftBlockOfNull
     {g : SmoothRiemannianMetric I M}
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -384,11 +384,11 @@ theorem shiftBlockOfNull
   · simpa [shiftBlockS3] using hsym (basis 2) (basis 1)
   · simp [shiftBlockS3]
 
-/-- An orthonormal `Fin 3` basis adapted to a nonzero null vector.
 
-The first basis vector is a nonzero scalar multiple of `v`; the scalar is
-recorded in the orientation used by `shiftBlockOfNull`, namely
-`v = r • basis 0`. -/
+
+
+
+
 structure NullOrthonormalBasis3At
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : Type _ where
@@ -396,9 +396,9 @@ structure NullOrthonormalBasis3At
   orthonormal : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis
   scale : ∃ r : Real, r ≠ 0 ∧ v = r • basis 0
 
-/-- A nonzero tangent vector in a three-dimensional tangent fiber can be
-completed to an orthonormal `Fin 3` basis whose first vector is its
-normalization. -/
+
+
+
 theorem exists_nullOrthonormalBasis3At
     (g : SmoothRiemannianMetric I M) {x : M}
     {v : TangentSpace I x}
@@ -469,15 +469,15 @@ theorem exists_nullOrthonormalBasis3At
     simp
   exact ⟨⟨basis, horth_basis, ⟨‖v‖, hvnorm, hscale⟩⟩⟩
 
-/-- The scalar reconstructed from a bundled shifted tensor in dimension three:
-if `A = Ric - δ R g`, then `R = tr_g A / (1 - 3δ)`. -/
+
+
 def shiftScalar3At
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
     (A : Tensor02At (I := I) (M := M) x) : Real :=
   metricTracePair0SAt (I := I) g A / (1 - 3 * δ)
 
-/-- Reconstruct the Ricci tensor from a bundled shifted tensor in dimension
-three. -/
+
+
 def shiftRic3At
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
     (A : Tensor02At (I := I) (M := M) x) :
@@ -485,7 +485,7 @@ def shiftRic3At
   A + (δ * shiftScalar3At (I := I) (M := M) δ g A) •
     metricTensorField (I := I) g x
 
-/-- The metric tensor has trace three in an orthonormal `Fin 3` basis. -/
+
 theorem metricTrace_metric3
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -502,8 +502,8 @@ theorem metricTrace_metric3
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Adding `c g` to a shifted tensor adds `3c / (1 - 3 delta)` to the
-reconstructed scalar. -/
+
+
 theorem shiftScalar_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -526,12 +526,12 @@ theorem shiftScalar_add_g
     DifferentialGeometry.Integral.Connection.delta3 hinv A]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
-    ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
+    Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
   ring
 
-/-- Adding `c g` to a shifted tensor adds `c / (1 - 3 delta)` times the
-metric to the reconstructed Ricci tensor. -/
+
+
 theorem shiftRic_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -544,16 +544,14 @@ theorem shiftRic_add_g
         (c / (1 - 3 * δ)) • metricTensorField (I := I) g x := by
   have hden : 1 - 3 * δ ≠ 0 := by nlinarith
   have hden' : 1 - δ * 3 ≠ 0 := by nlinarith
-  apply ContinuousMultilinearMap.ext
+  apply ext0S_basis (I := I) basis
   intro slots
-  simp [shiftRic3At, shiftScalar_add_g (I := I) (M := M) basis horth A,
-    ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
-    smul_eq_mul]
+  simp [shiftRic3At, shiftScalar_add_g (I := I) (M := M) basis horth A]
   field_simp [hden, hden']
   ring_nf
 
-/-- Reconstructing the scalar from `Ric - δ R g` recovers `R` in dimension
-three, away from the singular value `δ = 1 / 3`. -/
+
+
 theorem shiftScalar3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -588,12 +586,12 @@ theorem shiftScalar3At_pinch
   rw [hR]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
-    ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply,
+    Tensor0SBundle.Tensor0SSpace.sub_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
   field_simp [hden]
 
-/-- Reconstructing Ricci from `Ric - δ R g` recovers the original Ricci tensor
-in dimension three, away from the singular value `δ = 1 / 3`. -/
+
+
 theorem shiftRic3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -610,8 +608,8 @@ theorem shiftRic3At_pinch
     (I := I) (M := M) basis horth hδ Ric]
   simp
 
-/-- The invariant shifted scalar agrees with the block scalar in an
-orthonormal first-null block. -/
+
+
 theorem shiftScalar3At_of_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -631,8 +629,8 @@ theorem shiftScalar3At_of_shiftBlock
     hblock.components 1 1, hblock.components 2 2]
   simp [shiftBlockS3]
 
-/-- The invariant Ricci reconstruction agrees with the finite block model in
-an orthonormal first-null block. -/
+
+
 theorem shiftRic3At_comp_of_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -653,11 +651,11 @@ theorem shiftRic3At_comp_of_shiftBlock
         DifferentialGeometry.Integral.Connection.delta3 i j := by
     simp [metricTensorField_apply, hblock.orthonormal i j,
       vec2, DifferentialGeometry.Integral.Connection.vec2]
-  simp [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
+  simp [Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     hreal (basis i) (basis j), hblock.components i j, hmetric, smul_eq_mul]
 
-/-- Slot permutation sending a product `(0,2) ⊗ (0,2)` to
-`A(0,2) * B(1,3)`. -/
+
+
 def perm0213 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 0
@@ -676,8 +674,8 @@ def perm0213 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-/-- Slot permutation sending a product `(0,2) ⊗ (0,2)` to
-`A(0,3) * B(1,2)`. -/
+
+
 def perm0312 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 0
@@ -696,8 +694,8 @@ def perm0312 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-/-- Slot permutation sending a product `(0,2) ⊗ (0,2)` to
-`A(1,2) * B(0,3)`. -/
+
+
 def perm1203 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 1
@@ -716,8 +714,8 @@ def perm1203 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-/-- Slot permutation sending a product `(0,2) ⊗ (0,2)` to
-`A(1,3) * B(0,2)`. -/
+
+
 def perm1302 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 1
@@ -736,7 +734,7 @@ def perm1302 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-/-- Product of two two-tensors, with a final slot relabeling. -/
+
 def tensor04Pair
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
     (σ : Equiv.Perm (Fin 4)) :
@@ -799,8 +797,8 @@ theorem tensor04Pair_perm1302_vec4
     simp [perm1302, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
       DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
 
-/-- Invariant three-dimensional Riemann-from-Ricci builder in the slot order
-used by the shifted pinching reaction algebra. -/
+
+
 def rm04OfRic3At
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -815,9 +813,9 @@ def rm04OfRic3At
       (tensor04Pair (I := I) (M := M) G G perm0213 -
         tensor04Pair (I := I) (M := M) G G perm0312)
 
-/-- In an orthonormal `Fin 3` basis, `rm04OfRic3At` has the checked finite
-Riemann-from-Ricci component model.  This audits the slot convention used by
-the shifted reaction algebra. -/
+
+
+
 theorem rm04OfRic3At_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -841,14 +839,14 @@ theorem rm04OfRic3At_comp_orthonormal
       ∀ a b : Fin 3, g.inner x (basis a) (basis b) =
         DifferentialGeometry.Integral.Connection.delta3 a b := horth
   simp [rm04OfRic3At, stdRmOfRic3, htrace, metricTensorField_apply, horth',
-    vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-    ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.sub_apply,
-    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    vec2, DifferentialGeometry.Integral.Connection.vec2,
+    Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.sub_apply,
+    Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
 
-/-! ## Canonical shifted reaction tensor -/
 
-/-- Continuous-linear version of the Ricci endomorphism obtained by raising
-the first slot of a `(0,2)` tensor. -/
+
+
+
 def ricciEndCLMAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -865,8 +863,8 @@ theorem ricciEndCLMAt_apply
       DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric X := by
   rfl
 
-/-- The quadratic contraction `Ric_i^k Ric_kj`, defined invariantly by the
-Ricci endomorphism. -/
+
+
 def ricciQuadAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -893,8 +891,8 @@ theorem ricciQuadAt_apply
   funext i
   fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-/-- Freeze a lowered four-tensor to the two slots contracted against Ricci in
-`R_ikjl Ric^kl`. -/
+
+
 def rm04Mid02At
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (X Y : TangentSpace I x) :
@@ -918,7 +916,7 @@ theorem rm04Mid02At_apply
   funext i
   fin_cases i <;> rfl
 
-/-- Curried continuous-linear form of `rm04Mid02At`. -/
+
 def rm04MidCLMAt
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) :
     TangentSpace I x →L[Real]
@@ -937,7 +935,7 @@ theorem rm04MidCLMAt_apply
   unfold rm04MidCLMAt rm04Mid02At
   rfl
 
-/-- Continuous-linear functional `B ↦ <A, B>_g` on `(0,2)` tensors. -/
+
 def inner02RightCLM
     (g : SmoothRiemannianMetric I M) {x : M}
     (A : Tensor02At (I := I) (M := M) x) :
@@ -953,8 +951,8 @@ theorem inner02RightCLM_apply
       inner0S (I := I) g x 2 A B := by
   rfl
 
-/-- Right-slot linear form for the curvature-Ricci contraction after freezing
-the first slot. -/
+
+
 def rm04ContrRightCLM
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -1003,7 +1001,7 @@ theorem rm04ContrRightCLM_apply
         (rm04Mid02At (I := I) (M := M) Rm04 X Y) := by
   rfl
 
-/-- Curried scalar map for the invariant curvature-Ricci contraction. -/
+
 def rm04ContrCurried
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -1055,7 +1053,7 @@ def rm04ContrCurried
               (rm04Mid02At (I := I) (M := M) Rm04 X (m 0))
         rw [map_smul] }
 
-/-- The invariant curvature-Ricci contraction `R_ikjl Ric^kl`. -/
+
 def rm04RicciContrAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -1094,8 +1092,8 @@ theorem rm04RicciContrAt_apply
         (rm04Mid02At (I := I) (M := M) Rm04 X Y)
   rfl
 
-/-- Ricci-flow Ricci reaction tensor
-`2 R_ikjl Ric^kl - 2 Ric_i^k Ric_kj`, defined invariantly. -/
+
+
 def ricciReaction3At
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -1104,8 +1102,8 @@ def ricciReaction3At
       (rm04OfRic3At (I := I) (M := M) g Ric) Ric -
     2 • ricciQuadAt (I := I) (M := M) g Ric
 
-/-- Canonical shifted reaction core for `S = Ric - delta R g` in dimension
-three. -/
+
+
 def shiftNAt (delta : Real) : Tensor02ReactionAt (I := I) (M := M) :=
   fun _t g x A =>
     let Ric := shiftRic3At (I := I) (M := M) delta g A
@@ -1115,7 +1113,7 @@ def shiftNAt (delta : Real) : Tensor02ReactionAt (I := I) (M := M) :=
       (2 * delta) •
         (RicNormSq • metricTensorField (I := I) g x - R • Ric)
 
-/-- Raw WMP adapter for the canonical shifted reaction. -/
+
 def shiftNRaw (delta : Real) : TwoTensorReaction (I := I) (M := M) :=
   Tensor02ReactionAt.toRawSymm (I := I) (M := M)
     (shiftNAt (I := I) (M := M) delta)
@@ -1127,8 +1125,8 @@ theorem shiftNRaw_symmInputOn
   Tensor02ReactionAt.toRawSymm_symmInputOn (I := I) (M := M) G
     (shiftNAt (I := I) (M := M) delta) U
 
-/-- On an honest shifted pinching tensor `Ric - δ R g`, the canonical shifted
-reaction is the Ricci reaction minus the scalar-metric correction term. -/
+
+
 theorem shiftNAt_pinch
     {δ t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1225,8 +1223,9 @@ theorem ricciQuadAt_comp_orthonormal
       ricciSq3
         (fun a b : Fin 3 => Ric (vec2 (I := I) (basis a) (basis b))) i j
   rw [map_sum]
-  simp [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons, finCons1_eq_vec2,
-    smul_eq_mul]
+  simp [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons,
+    finCons1_eq_vec2, Tensor0SBundle.Tensor0SSpace.sum_apply,
+    Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
   simp [ricciEnd_repr_orthonormal (I := I) (M := M) basis horth Ric,
     ricciSq3]
 
@@ -1294,9 +1293,20 @@ theorem ricciReaction3At_comp_orthonormal
             (vec4 (I := I) (basis a) (basis b) (basis c) (basis d)))
         (fun a b : Fin 3 =>
           Ric (vec2 (I := I) (basis a) (basis b))) i j := by
-  simp [ricciReaction3At, ricciPresReact,
-    rm04Contr_comp_orthonormal (I := I) (M := M) basis horth,
+  let slots : Fin 2 → Fin 3 := fun q => if q = 0 then i else j
+  have hslots : (fun q : Fin 2 => basis (slots q)) =
+      vec2 (I := I) (basis i) (basis j) := by
+    funext q
+    fin_cases q <;> simp [slots, vec2]
+  rw [← hslots]
+  change component0S (I := I) basis
+      (ricciReaction3At (I := I) (M := M) g Ric) slots = _
+  unfold ricciReaction3At ricciPresReact
+  rw [component0S_sub_gen, component0S_nsmul, component0S_nsmul]
+  simp only [component0S_apply, hslots]
+  rw [rm04Contr_comp_orthonormal (I := I) (M := M) basis horth,
     ricciQuadAt_comp_orthonormal (I := I) (M := M) basis horth]
+  simp only [nsmul_eq_mul, Nat.cast_ofNat]
 
 theorem shiftNAt_comp_orthonormal
     {delta t : Real} {g : SmoothRiemannianMetric I M} {x : M}
@@ -1324,11 +1334,11 @@ theorem shiftNAt_comp_orthonormal
     ricciReaction3At_comp_orthonormal (I := I) (M := M) basis horth,
     ricciNorm3_comp_orthonormal (I := I) (M := M) basis horth,
     metricTrace_comp_orthonormal (I := I) (M := M) basis horth,
-    hmetric, ContinuousMultilinearMap.sub_apply,
-    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    hmetric, Tensor0SBundle.Tensor0SSpace.sub_apply,
+    Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
 
-/-- Component form of the metric-shift linearity of the canonical shifted
-reaction.  In dimension three the `c^2` terms cancel. -/
+
+
 theorem shiftNAt_add_g_comp
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1388,8 +1398,8 @@ theorem shiftNAt_add_g_comp
   simp [hRicAdd, hRmAdd, hRm, htrace, Ric, a,
     pinchReact_add_g00]
 
-/-- Quadratic evaluation form of the metric-shift linearity of the canonical
-shifted reaction. -/
+
+
 theorem shiftNAt_add_g_quad
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (hdelta : delta < (1 : Real) / 3)
@@ -1469,7 +1479,8 @@ theorem shiftNAt_add_g_quad
                 (vec2 (I := I) (nb.basis 0) (nb.basis 0)) -
             metricTracePair0SAt (I := I) g
               (shiftRic3At (I := I) (M := M) delta g A) := by
-      simp [C, hmetric00, smul_eq_mul]
+      simp [C, hmetric00, Tensor0SBundle.Tensor0SSpace.sub_apply,
+        Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
     rw [hplus, hbase, hC, hC0]
     let P : Real :=
       shiftNAt (I := I) (M := M) delta t g x
@@ -1493,8 +1504,8 @@ theorem shiftNAt_add_g_quad
       _ = r ^ 2 * (k * Q) := by rw [hcomp']
       _ = k * (r ^ 2 * Q) := by ring
 
-/-- The canonical shifted reaction realizes the checked first-null block target
-in any supplied orthonormal first-null block. -/
+
+
 theorem shiftNAt_comp_shiftBlock
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1525,10 +1536,10 @@ theorem shiftNAt_comp_shiftBlock
     hblock.orthonormal A 0 0]
   simp [shiftReactBlock3, hRic, hRm]
 
-/-- The raw symmetric adapter for the canonical shifted reaction realizes the
-first-null block target whenever the supplied raw tensor has that block shape.
-This is still a basis-level realization theorem, not the full WMP null
-condition. -/
+
+
+
+
 theorem shiftNRaw_realizes_block
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1560,8 +1571,8 @@ theorem shiftNRaw_realizes_block
     shiftReactBlock3 delta a b c
   exact shiftNAt_comp_shiftBlock (I := I) (M := M) hreal hblock
 
-/-- The canonical shifted reaction satisfies Hamilton's symmetric-input
-null-eigenvector condition in dimension three for every `delta < 1/3`. -/
+
+
 theorem shiftNRaw_null_symm_of_lt
     {G : Real -> SmoothRiemannianMetric I M} {U : Set Real} {delta : Real}
     (hdelta13 : delta < (1 : Real) / 3)
@@ -1609,8 +1620,8 @@ theorem shiftNRaw_null_symm_of_lt
     exact mul_nonneg (sq_nonneg r)
       (shiftReactBlock3_nonneg_of_lt delta a b c hdelta13)
 
-/-- The canonical shifted reaction satisfies Hamilton's symmetric-input
-null-eigenvector condition in dimension three for `0 < delta < 1/3`. -/
+
+
 theorem shiftNRaw_null_symm
     {G : Real -> SmoothRiemannianMetric I M} {U : Set Real} {delta : Real}
     (_hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3)
@@ -1620,9 +1631,9 @@ theorem shiftNRaw_null_symm
   exact shiftNRaw_null_symm_of_lt (I := I) (M := M)
     (G := G) (U := U) hdelta13 hdim
 
-/-- Reconstruct a bundled `(0,2)` tensor from `Fin 3` components in a supplied
-basis.  This is a local component model, not a canonical basis-independent
-producer. -/
+
+
+
 def tensor02FromBasis
     {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1654,8 +1665,8 @@ theorem tensor02FromBasis_apply
   simpa [component0S_apply, slots2, vec2, DifferentialGeometry.Integral.Connection.vec2] using
     tensor02FromBasis_component (I := I) (M := M) basis C i j
 
-/-- A `(0,2)` tensor is quadratic under scaling both input slots by the same
-scalar. -/
+
+
 theorem tensor02_smul2
     {x : M} (T : Tensor02At (I := I) (M := M) x)
     (r : Real) (X Y : TangentSpace I x) :
@@ -1697,7 +1708,7 @@ theorem tensor02_smul2
   rw [h1eq, h0eq]
   ring
 
-/-- Scaled version of the canonical shifted-reaction block theorem. -/
+
 theorem shiftNScaled
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1715,10 +1726,10 @@ theorem shiftNScaled
     (shiftNAt (I := I) (M := M) delta t g x A) r (basis 0) (basis 0)]
   rw [shiftNAt_comp_shiftBlock (I := I) (M := M) hreal hblock]
 
-/-- Basis-local tensor model for the shifted Ricci-flow reaction.  This bundles
-the finite Hamilton reaction components in the supplied basis.  It is useful as
-a local first-null bridge; a later reusable API should replace it with a
-basis-independent raised-contraction producer. -/
+
+
+
+
 def shiftNAtBasis
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1749,9 +1760,9 @@ theorem shiftNAtBasis_apply_basis
             (vec2 (I := I) (basis a) (basis b))) i j := by
   simp [shiftNAtBasis]
 
-/-- The basis-local shifted reaction realizes the checked first-null block
-target.  This is the local bridge requested for the Section 9 frontier; it is
-not yet the final canonical raw WMP reaction. -/
+
+
+
 theorem shiftNAtBasis_comp_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1780,10 +1791,10 @@ theorem shiftNAtBasis_comp_shiftBlock
     simp [hRic]
   simp [shiftReactBlock3, hRic, hRm]
 
-/-- Scaled version of `shiftNAtBasis_comp_shiftBlock`.
 
-If the WMP null vector is `r` times the first vector of the adapted basis, the
-local tensor reaction evaluates to `r^2` times the checked block reaction. -/
+
+
+
 theorem shiftNBasisScaled
     {delta : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}

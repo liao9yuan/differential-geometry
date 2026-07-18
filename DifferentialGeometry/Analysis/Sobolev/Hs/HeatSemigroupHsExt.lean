@@ -1,36 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHs
 
-/-!
-# The scalar heat semigroup extended to all real times
-
-For a closed Riemannian manifold `(M, g)` and a spectral Sobolev exponent
-`σ`, the scalar heat semigroup `e^{t Δ_g}` was previously defined as a
-continuous linear endomorphism of `scalarHs g σ` only for **strictly
-positive** time. This file packages it as a single
-continuous-linear-endomorphism-valued function defined for **every** real
-time `t`, by setting it to the identity at `t = 0` and (conventionally)
-to the identity for `t < 0`. The resulting family
-`heatSemigroupHsExt g σ t : scalarHs g σ →L[ℝ] scalarHs g σ`
-is the natural object on which to state strong-continuity and the
-semigroup law.
-
-## Main definitions
-
-* `heatSemigroupHsExt g σ t` — the heat semigroup at real time `t`,
-  equal to `heatSemigroupHs` for `t > 0` and to the identity otherwise.
-
-## Main results
-
-* `heatSemigroupHsExt_zero`, `_of_pos`, `_of_neg`, `_of_nonpos` — the
-  defining case-split lemmas.
-* `heatSemigroupHsExt_add` — the semigroup law on `t, s ≥ 0`:
-  `e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}`.
-* `heatSemigroupHsExt_opNorm_le_one` — the contraction estimate on
-  `t ≥ 0`: `‖e^{tΔ}‖ ≤ 1`.
-* `heatSemigroupHsExt_coeff` — the coordinate formula on `t ≥ 0`:
-  `(e^{tΔ} T).coeff i = exp(−λᵢ t) · T.coeff i`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -56,9 +25,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The scalar heat semigroup `e^{t Δ_g}` on the spectral Sobolev space
-`scalarHs g σ`, extended to all real times `t`. For `t > 0` this is the
-heat semigroup `heatSemigroupHs`; for `t ≤ 0` it is the identity. -/
 def heatSemigroupHsExt (g : SmoothRiemannianMetric I M) (σ : ℝ) (t : ℝ) :
     scalarHs (I := I) (M := M) g σ →L[ℝ] scalarHs (I := I) (M := M) g σ :=
   if h : 0 < t then
@@ -66,6 +32,7 @@ def heatSemigroupHsExt (g : SmoothRiemannianMetric I M) (σ : ℝ) (t : ℝ) :
   else
     ContinuousLinearMap.id ℝ (scalarHs (I := I) (M := M) g σ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem heatSemigroupHsExt_zero (g : SmoothRiemannianMetric I M)
     (σ : ℝ) :
     heatSemigroupHsExt (I := I) (M := M) g σ 0 =
@@ -73,6 +40,7 @@ def heatSemigroupHsExt (g : SmoothRiemannianMetric I M) (σ : ℝ) (t : ℝ) :
   unfold heatSemigroupHsExt
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_of_pos {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : 0 < t) :
     heatSemigroupHsExt (I := I) (M := M) g σ t =
@@ -80,6 +48,7 @@ theorem heatSemigroupHsExt_of_pos {g : SmoothRiemannianMetric I M}
   unfold heatSemigroupHsExt
   simp [ht]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_of_neg {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : t < 0) :
     heatSemigroupHsExt (I := I) (M := M) g σ t =
@@ -88,6 +57,7 @@ theorem heatSemigroupHsExt_of_neg {g : SmoothRiemannianMetric I M}
   have : ¬ 0 < t := not_lt.mpr ht.le
   simp [this]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_of_nonpos {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : t ≤ 0) :
     heatSemigroupHsExt (I := I) (M := M) g σ t =
@@ -96,9 +66,6 @@ theorem heatSemigroupHsExt_of_nonpos {g : SmoothRiemannianMetric I M}
   have : ¬ 0 < t := not_lt.mpr ht
   simp [this]
 
-/-- **Semigroup law on the non-negative half-line.** For `t, s ≥ 0`,
-`e^{(t+s) Δ_g} = e^{t Δ_g} ∘ e^{s Δ_g}` on the spectral Sobolev space
-`scalarHs g σ`. -/
 theorem heatSemigroupHsExt_add {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {t s : ℝ} (ht : 0 ≤ t) (hs : 0 ≤ s) :
     heatSemigroupHsExt (I := I) (M := M) g σ (t + s) =
@@ -116,8 +83,6 @@ theorem heatSemigroupHsExt_add {g : SmoothRiemannianMetric I M} {σ : ℝ}
           heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) hs_pos]
       exact heatSemigroupHs_add (I := I) (M := M) (g := g) ht_pos hs_pos (a := σ)
 
-/-- **Contraction on the non-negative half-line.** For `t ≥ 0`,
-`‖e^{t Δ_g}‖_{Hˢ → Hˢ} ≤ 1`. -/
 theorem heatSemigroupHsExt_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : 0 ≤ t) :
     ‖heatSemigroupHsExt (I := I) (M := M) g σ t‖ ≤ 1 := by
@@ -128,8 +93,7 @@ theorem heatSemigroupHsExt_opNorm_le_one {g : SmoothRiemannianMetric I M}
   · rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos]
     exact heatSemigroupHs_opNorm_le_one (I := I) (M := M) (g := g) ht_pos
 
-/-- **Coordinate formula on the non-negative half-line.** For `t ≥ 0`,
-`(e^{t Δ_g} T).coeff i = exp(−λᵢ t) · T.coeff i`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_coeff {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {t : ℝ} (ht : 0 ≤ t) (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :

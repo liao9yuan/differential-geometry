@@ -3,44 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Iteration
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Single-step adapter for the iterated interior elliptic-regularity bootstrap
-
-The interior `H²` regularity engine `loc_smooth_solution` (from
-`Sobolev.Nirenberg.H2Regularity`) raises a smooth weak solution of a uniformly
-elliptic divergence-form equation from `H¹` data to `H²` data on a precompact
-subdomain. Iterating it to arbitrary order requires the *differentiated*
-weak-solution identity `partial_smooth_weak_solution` (from
-`Sobolev.Nirenberg.Iteration`): for each direction `l`, the partial `∂_l u` is
-itself a smooth weak solution of the **same** elliptic bilinear form against the
-explicitly-constructed perturbed source `perturbedSource B u f l`.
-
-This file is the first of a three-file `Bootstrap` sub-phase. It supplies the
-two tensor-side specialisations of the differentiated identity for the chart
-component of an `(r, s)`-tensor weak solution, together with one generic
-`W^{2,2}` adapter that converts the `loc_smooth_solution` engine output into
-iterated-Sobolev (`MemWkp`) form with the quantitative constant retained.
-
-## Main results
-
-* `tensorComponent_perturbedSource_contDiff` — the perturbed source obtained by
-  differentiating the chart-component weak equation once is `C^∞`.
-
-* `tensorComponent_partial_isSmoothWeakSolution` — the directional partial
-  `∂_l (tensorComponentEuclid g r s T α P₀)` is a smooth weak solution of the
-  principal-part elliptic bilinear form `tensorPrincipalForm g α hK hK_target`
-  with right-hand side the perturbed source.
-
-* `smooth_cc_h2_loc_memWkp_two` — generic adapter: for a smooth compactly
-  supported weak solution `u` of any `SmoothEllipticBilinearForm` on
-  `Set.univ` with `C^∞` source `f`, on any precompact open subdomain `Ω''` the
-  function `u` lies in `W^{2,2}(Ω'')`, and there is an explicit constant
-  `C ≥ 0` with `wkpNorm 2 2 u Ω''` bounded by `C` times the square root of the
-  `H¹`-and-`L²` data delivered by `loc_smooth_solution`.
-
-The constant in the `W^{2,2}` bound is preserved so that a later step in the
-bootstrap can iterate it with an explicit budget.
--/
 
 noncomputable section
 
@@ -79,14 +41,6 @@ section ChartPerturbedSource
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The perturbed source obtained by differentiating, in direction `l`, the
-chart-component weak equation for `tensorComponentEuclid g r s T α P₀` against
-`tensorPrincipalForm g α hK hK_target` with right-hand side
-`tensorComponentWeakRHS g r s T F α hK hK_target P₀` is `C^∞`.
-
-The result is unconditional modulo the genuine support hypotheses on `T` and
-`F` that are required for the right-hand side `tensorComponentWeakRHS` to be
-smooth. -/
 theorem tensorComponent_perturbedSource_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -159,17 +113,6 @@ theorem tensorComponent_perturbedSource_contDiff
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single j (1 : ℝ))).contDiff.comp h_fderiv_prod
 
-/-- The directional partial `∂_l (tensorComponentEuclid g r s T α P₀)` is itself
-a smooth weak solution of the principal-part elliptic bilinear form
-`tensorPrincipalForm g α hK hK_target`, with right-hand side the perturbed
-source `perturbedSource (tensorPrincipalForm …) (tensorComponentEuclid …)
-(tensorComponentWeakRHS …) l`.
-
-This is the differentiated weak-solution identity `partial_smooth_weak_solution`
-applied to the chart-component weak equation `tensorComponent_isSmoothWeakSolution`.
-Because the principal-part form is the **same** at every differentiation step,
-this is the inductive step that bootstraps the chart component's interior
-regularity to arbitrary order. -/
 theorem tensorComponent_partial_isSmoothWeakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -217,8 +160,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-/-- For smooth, compactly supported `ψ` and **any** open `Ω`, `ψ ∈ W^{1,p}(Ω)`:
-no `tsupport ψ ⊆ Ω` hypothesis is needed. -/
+omit [NeZero d] in
 private theorem memW1p_of_smooth_compactSupport_anyOpen
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -240,8 +182,7 @@ private theorem memW1p_of_smooth_compactSupport_anyOpen
   · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open
       (hψ_smooth.of_le (by norm_cast))
 
-/-- For smooth, compactly supported `ψ` and **any** open `Ω`, `ψ ∈ W^{k,p}(Ω)`
-for `1 ≤ p`: no `tsupport ψ ⊆ Ω` hypothesis is needed. -/
+omit [NeZero d] in
 theorem memWkp_of_smooth_compactSupport_anyOpen
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -272,9 +213,7 @@ theorem memWkp_of_smooth_compactSupport_anyOpen
       have h_ih_classical := ih h_classical_smooth h_classical_cpt
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
-/-- For smooth, compactly supported `ψ` and **any** open `Ω`, the iterated weak
-partial of order `j` agrees almost everywhere on `Ω` with the iterated
-classical partial. No `tsupport ψ ⊆ Ω` hypothesis is needed. -/
+omit [NeZero d] in
 private theorem iterWeakPartial_smooth_ae_eq_iterClassical_anyOpen
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set EE} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : EE → ℝ},
@@ -307,15 +246,13 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassical_anyOpen
       exact h_iter_congr.trans h_ih
 
 omit [NeZero d] in
-/-- The pointwise square of a compactly supported real function is compactly
-supported. -/
+
 lemma hasCompactSupport_sq {h : EE → ℝ} (hh : HasCompactSupport h) :
     HasCompactSupport (fun x => h x ^ 2) := by
   have h_eq : (fun x => h x ^ 2) = h * h := by funext x; rw [Pi.mul_apply, sq]
   rw [h_eq]
   exact hh.mul_right
 
-/-- If `x ^ 2 ≤ y` in `ℝ≥0∞`, then `x ≤ y ^ (1/2)`. -/
 private lemma le_rpow_half_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
     x ≤ y ^ ((1 : ℝ) / 2) := by
   have h_xpow : x = (x ^ 2) ^ ((1 : ℝ) / 2) := by
@@ -324,7 +261,6 @@ private lemma le_rpow_half_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
   conv_lhs => rw [h_xpow]
   exact ENNReal.rpow_le_rpow h (by norm_num)
 
-/-- For `S ≥ 0`, `(ENNReal.ofReal S) ^ (1/2) = ENNReal.ofReal (Real.sqrt S)`. -/
 lemma rpow_half_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
     (ENNReal.ofReal S) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (Real.sqrt S) := by
   rw [show S = Real.sqrt S * Real.sqrt S from (Real.mul_self_sqrt hS).symm,
@@ -335,8 +271,7 @@ lemma rpow_half_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
   norm_num
 
 omit [NeZero d] in
-/-- The squared `L²`-seminorm of a continuous function on a finite-measure
-restriction equals `ENNReal.ofReal` of the integral of the square. -/
+
 private lemma eLpNorm_two_sq_eq_ofReal_integral_sq
     {Ω : Set EE} {h : EE → ℝ}
     (hh_l2 : MemLp h 2 (volume.restrict Ω)) :
@@ -371,27 +306,6 @@ private lemma eLpNorm_two_sq_eq_ofReal_integral_sq
     Filter.Eventually.of_forall (fun x => sq_nonneg _)
   exact (ofReal_integral_eq_lintegral_ofReal h_sq_int h_sq_nn).symm
 
-/-- **Single-step `W^{2,2}` adapter for the interior-`H²` engine.**
-
-Let `B` be a `SmoothEllipticBilinearForm` on `Set.univ : Set EE` and let `u` be
-a smooth, compactly supported weak solution of `B(u, ·) = ⟨f, ·⟩` with `C^∞`
-source `f`. Then, on any precompact open subdomain `Ω'' ⊆ EE`:
-
-* `u` lies in `W^{2,2}(Ω'')` (`MemWkp 2 2`);
-* there is an explicit constant `C ≥ 0` with
-
-  `wkpNorm 2 2 u Ω'' ≤ ENNReal.ofReal (C · √D)`,
-
-  where `D` is the `H¹`-and-`L²` data delivered by `loc_smooth_solution`:
-  `D = (∫ ∑_j (∂_j u)²) + (∫ u²) + (∫ f²)`, the integrals taken over the whole
-  space. (The engine produces this data on a slightly enlarged neighbourhood
-  `Ω'`; since `u` and `f` are smooth and compactly supported, every integrand
-  is a nonnegative integrable function, so the data over `Ω'` is dominated by
-  the data over the whole space — globalising it gives a single constant valid
-  for every direction pair.)
-
-The constant `C` is retained so that a later bootstrap step can iterate the
-estimate with an explicit budget. -/
 theorem smooth_cc_h2_loc_memWkp_two
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     {Ω'' : Set EE} (hΩ'' : IsOpen Ω'')
@@ -400,7 +314,7 @@ theorem smooth_cc_h2_loc_memWkp_two
       ∀ {u f : EE → ℝ}, B.IsSmoothWeakSolution u f →
         HasCompactSupport u → ContDiff ℝ (⊤ : ℕ∞) f → HasCompactSupport f →
       MemWkp (d := d) 2 2 u Ω'' ∧
-        wkpNorm (d := d) 2 2 u Ω'' ≤
+        iteratedWeakSobolevNorm (d := d) 2 2 u Ω'' ≤
           ENNReal.ofReal
             (C * Real.sqrt
               ((∫ x, ∑ j : Fin d,
@@ -730,7 +644,7 @@ theorem smooth_cc_h2_loc_memWkp_two
     have h_le_rpow := le_rpow_half_of_sq_le h_sq_le
     rwa [rpow_half_ofReal_eq_ofReal_sqrt (by positivity)] at h_le_rpow
   have h_wkp_le :
-      wkpNorm (d := d) 2 2 u Ω'' ≤
+      iteratedWeakSobolevNorm (d := d) 2 2 u Ω'' ≤
         ∑ j ∈ Finset.range 3, ∑ _β : Fin j → Fin d,
           ENNReal.ofReal (Real.sqrt (C₀ * D)) := by
     rw [wkpNorm_eq_sum]

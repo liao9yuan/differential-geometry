@@ -2,10 +2,10 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ReversedFlo
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-/-! # The reversed flow composes to the identity
 
-Grönwall uniqueness identifies the composition of the forward flow with the
-reversed flow of `-X` with the identity map, giving the inverse of the flow. -/
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -18,21 +18,21 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-On the existence interval `[0, T)`, composing the forward flow `Φ` of a
-time-dependent vector field with the time-reversed flow `Φ_rev` gives the
-identity (Grönwall uniqueness of ODE solutions).
 
-Signature shape: there exist a positive horizon `T`, a forward flow `Φ`
-satisfying the right-handed flow equation
-`∂_t (Φ s x) = X t (Φ t x)` on `Set.Ici 0` with initial condition
-`Φ 0 = id`, and a reversed flow `Φ_rev` such that for every
-`t ∈ [0, T)` and every `x : M`, `Φ_rev t (Φ t x) = x`.
 
-The flow-equation clause anchors `Φ` to the vector field `X`, so the
-composition identity is a genuine statement about the geometric flow,
-not a tautology about arbitrary functions.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem compose_flow_with_reversed_flow_is_id
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (h : ∃ T : ℝ, 0 < T ∧

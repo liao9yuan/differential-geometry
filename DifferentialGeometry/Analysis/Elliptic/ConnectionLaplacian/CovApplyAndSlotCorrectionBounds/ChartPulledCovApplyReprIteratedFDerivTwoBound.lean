@@ -4,64 +4,10 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartPulledCovApplyReprFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivFourTensorReprChartCompBound
 
-/-!
-# Squared order-2 iterated Fréchet derivative bound for the chart-pulled
-representation of `covApply ∇ B T`
-
-Combining the intrinsic-piece order-2 iteratedFDeriv bound with the input /
-output Christoffel slot-correction order-2 iteratedFDeriv bounds yields a
-uniform bound on the squared norm of the order-2 iterated Fréchet derivative
-of the chart-pulled representation of `covApply ∇ B T` at chart-coordinate
-points whose preimage lies in the partition-of-unity tsupport intersected
-with the chart-`α` Levi-Civita good set.
-
-Concretely, for a smooth Riemannian manifold `(M, g)`, a chart-centre
-`α : M`, ranks `r, s : ℕ`, a smooth tangent vector field `B`, and a smooth
-compactly supported `(r, s)`-tensor section `T`, there is a constant
-`K ≥ 0` (depending on `g`, the chart at `α`, the ranks `r`, `s`,
-and `B`, but independent of `T` and `b`) such that for any `b ∈ tsupport
-(POU α) ∩ chartLeviCivitaGoodSet α`, the squared norm of the order-2 iterated
-Fréchet derivative of the chart-pulled representation of `covApply ∇ B T` at
-`extChartAt I α b` is bounded by
-
-```
-K * Σ_{j ∈ Fin 4} ‖iteratedFDeriv ℝ j.val (repr T ∘ symm) (extChartAt I α b)‖²
-```
-
-where `repr T = tensorRSChartE_section_repr r s α T.toSection`.
-
-## Strategy
-
-1. By `chart_pulled_covApply_repr_eventuallyEq`, the chart-pulled
-   representation of `covApply ∇ B T` equals an explicit three-piece sum
-   (intrinsic piece + input-slot Christoffel correction sum − output-slot
-   Christoffel correction sum) on a neighbourhood of `extChartAt I α b`.
-
-2. `Filter.EventuallyEq.iteratedFDeriv` then identifies the order-2 iterated
-   Fréchet derivative of the LHS with that of the three-piece sum at the
-   chart point.
-
-3. Each individual piece is `ContDiffAt 2`, so the order-2 iterated Fréchet
-   derivative distributes across the sums and the subtraction via
-   `iteratedFDeriv_fun_sum_apply`, `iteratedFDeriv_add_apply`, and
-   `iteratedFDeriv_sub_apply`.
-
-4. The triangle inequality and the three per-piece bounds
-   (`intrinsic_piece_iteratedFDeriv_two_bound`,
-   `inputSlot_correction_iteratedFDeriv_two_bound`,
-   `outputSlot_correction_iteratedFDeriv_two_bound`) bound the order-2
-   iteratedFDeriv norm by `K' · (‖iter 3 F‖ + ‖iter 2 F‖ + ‖fderiv F‖ + ‖F‖)`
-   where `F = repr T ∘ symm`.
-
-5. Squaring and using `(a+b+c+d)² ≤ 4(a² + b² + c² + d²)` together with
-   `norm_iteratedFDeriv_zero` and `norm_iteratedFDeriv_one` then expresses
-   the bound as `K · Σ_{j ∈ Fin 4} ‖iter j F‖²`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -86,8 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The intrinsic piece is `ContDiffAt ∞` at `extChartAt I α b` whenever `b`
-lies in the chart-`α` Levi-Civita good set. -/
 private lemma intrinsicPiece_contDiffAt_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -155,8 +99,6 @@ private lemma intrinsicPiece_contDiffAt_two
     exact h_at_top.of_le h2_le
   exact hc_at.clm_apply hu_at
 
-/-- The chart-pulled input-slot correction is `ContDiffAt 2` at the chart
-point. -/
 private lemma inputSlotPiece_contDiffAt_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -249,8 +191,6 @@ private lemma inputSlotPiece_contDiffAt_two
       (by rw [hx'_inv]; exact hx'_src) k
   exact h_kernel_F_at.congr_of_eventuallyEq h_evt
 
-/-- The chart-pulled output-slot correction is `ContDiffAt 2` at the chart
-point. -/
 private lemma outputSlotPiece_contDiffAt_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -343,11 +283,7 @@ private lemma outputSlotPiece_contDiffAt_two
       (by rw [hx'_inv]; exact hx'_src) l
   exact h_kernel_F_at.congr_of_eventuallyEq h_evt
 
-/-- The chart-pulled representation of `covApply ∇ B T` is, on an open
-neighbourhood of `extChartAt I α b`, equal to the intrinsic piece plus
-input-slot Christoffel corrections minus output-slot Christoffel
-corrections. Re-derived here (mirrors the helper in
-`ChartPulledCovApplyReprFderivBound`) to avoid relying on a private lemma. -/
+omit [CompactSpace M] in
 private lemma chart_pulled_covApply_repr_eventuallyEq'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

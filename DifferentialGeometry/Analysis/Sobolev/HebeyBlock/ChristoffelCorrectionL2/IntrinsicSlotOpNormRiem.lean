@@ -2,53 +2,10 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartKernel
 
-/-!
-# Riemannian-norm uniform op-norm bound for the chart-frame slot corrections
-
-For a closed Riemannian manifold `(M, g)`, chart base point `α : M`, and an
-`(r, s)`-tensor section `T`, this file bounds the **Riemannian fibre norm** of
-the chart-frame input/output slot Christoffel corrections
-
-* `chartTensorRSInputSlotCorrection r s g α T (chartBasisVecFiber α k) b i`,
-* `chartTensorRSOutputSlotCorrection r s g α T (chartBasisVecFiber α k) b l`,
-
-uniformly on the closed support of the chart-atlas partition-of-unity weight
-at `α`, by a single constant times the Riemannian fibre norm `‖T b‖`.
-
-The Riemannian fibre norm on `TensorRSSpace r s I b` is the metric (index-
-contraction / Hilbert–Schmidt-type) norm coming from the
-`Bundle.RiemannianBundle` instance `tensorRS_riemannianBundle g r s`, *not* the
-canonical bundle-trivialisation norm. Uniform operator-norm bounds in the
-canonical norm are genuinely false on closed manifolds (the trivialisation
-operator norm blows up), so the entire argument is routed through the honest
-model space `TensorRSModel r s ℝ E`:
-
-* the inverse-trivialisation uniform op-norm bound (Riemannian ← model),
-  `tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional`;
-* the kernel factorisation of the trivialised slot correction,
-  `chartTensorRSInputSlotCorrection_chart_kernel_factorization` (and its
-  output twin), which expresses the trivialised slot correction as an honest
-  model-space CLM (`inputSlotChartKernel`) applied to the trivialised section
-  value;
-* a model-space op-norm bound on that kernel, whose only non-identity factor
-  is the chart-`α`-conjugation `chartJ ∘ Φ ∘ chartJinv` of the Levi-Civita
-  parallel CLM, bounded uniformly via the honest model-space Christoffel
-  bound `christoffelCorrection_norm_le_on_pouTsupport`;
-* the forward-trivialisation uniform op-norm bound (model ← Riemannian),
-  `tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`.
-
-No `HasLocallyConstantChartAt` (or any chart-locality predicate) is required.
-
-## Public theorems
-
-* `chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport`
-* `chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport`
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 4000000
 
@@ -68,15 +25,13 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The base set of the chart-`α` `(r, s)`-tensor fibre trivialisation equals
-the chart-`α` source. -/
 private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -95,26 +50,24 @@ private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
   rw [h_r, h_s, Set.inter_self,
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
 
-/-- Pointwise apply-formula for the conjugation slot factor at the substituted
-slot, on the chart source. -/
 private lemma slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
     (hb : b ∈ (chartAt H α).source) (w : E) :
-    (chartJ (I := I) (M := M) α b).comp
+    (chartTrivializationLinearMap (I := I) (M := M) α b).comp
         ((chartLeviCivitaParallelCLM (I := I) g α b X).comp
-          (chartJinv (I := I) (M := M) α b)) w =
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w =
       christoffelCorrection (I := I) g α b
         (trivToE (I := I) α b (X b))
         (trivFromE (I := I) α b w) := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   rw [ContinuousLinearMap.comp_apply]
-  change chartJ (I := I) (M := M) α b
+  change chartTrivializationLinearMap (I := I) (M := M) α b
       ((chartLeviCivitaParallelCLM (I := I) g α b X)
-        (chartJinv (I := I) (M := M) α b w)) = _
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)) = _
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
-    (chartJinv (I := I) (M := M) α b w)]
+    (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)]
   change trivToE (I := I) α b
       (trivFromE (I := I) α b
         (christoffelCorrection (I := I) g α b
@@ -122,18 +75,16 @@ private lemma slotConjFactor_self_apply
           (trivFromE (I := I) α b w))) = _
   rw [trivToE_trivFromE (I := I) α hb_base]
 
-/-- Uniform model-norm bound on the chart-`α`-conjugation slot factor for the
-chart-frame basis vector field, valid on the partition-of-unity `tsupport`. -/
 private lemma slotConjFactor_basis_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {b : M}, b ∈ tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         ∀ (k : Fin (Module.finrank ℝ E)),
-          ‖(chartJ (I := I) (M := M) α b).comp
+          ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
               ((chartLeviCivitaParallelCLM (I := I) g α b
                   (chartBasisVecFiber (I := I) α k)).comp
-                (chartJinv (I := I) (M := M) α b))‖ ≤ C := by
+                (chartTrivializationLinearMapSymm (I := I) (M := M) α b))‖ ≤ C := by
   classical
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     christoffelCorrection_norm_le_on_pouTsupport (I := I) (M := M) g α
@@ -164,10 +115,10 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
     rw [hCvec_def]
     exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ k)
   have hpt : ∀ w : E,
-      ‖(chartJ (I := I) (M := M) α b).comp
+      ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
           ((chartLeviCivitaParallelCLM (I := I) g α b
               (chartBasisVecFiber (I := I) α k)).comp
-            (chartJinv (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
+            (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
     intro w
     rw [slotConjFactor_self_apply (I := I) (M := M) g α
       (chartBasisVecFiber (I := I) α k) hb_src w, hX_triv]
@@ -186,7 +137,6 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
 
-/-- Uniform bound on the per-slot conjugation family product (input). -/
 private lemma slotInputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -220,7 +170,6 @@ private lemma slotInputConjCLM_prod_norm_le_on_pouTsupport
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ r := by rw [Finset.prod_const]; simp
 
-/-- Uniform bound on the per-slot conjugation family product (output). -/
 private lemma slotOutputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -254,7 +203,6 @@ private lemma slotOutputConjCLM_prod_norm_le_on_pouTsupport
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ s := by rw [Finset.prod_const]; simp
 
-/-- Model-norm bound on `inputSlotChartKernel` applied to a model tensor. -/
 private lemma inputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (i : Fin r) (b : M)
@@ -275,7 +223,6 @@ private lemma inputSlotChartKernel_apply_norm_le
     _ = (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) * ‖S‖ := by
         ring
 
-/-- Model-norm bound on `outputSlotChartKernel` applied to a model tensor. -/
 private lemma outputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
@@ -299,12 +246,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Riemannian-norm uniform op-norm bound for the input-slot Christoffel
-correction.** On the chart-`α` partition-of-unity `tsupport`, the Riemannian
-fibre norm of the input-slot Christoffel correction along the chart-frame basis
-vector field is bounded by a constant times the Riemannian fibre norm of the
-section value, uniformly in the section, the basis direction `k`, the slot `i`,
-and the base point `b`. -/
+
 theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -400,10 +342,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Riemannian-norm uniform op-norm bound for the output-slot Christoffel
-correction.** The output twin of
-`chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport`, with the
-substitution acting on the output `(0, s)`-tensor slot. -/
+
 theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

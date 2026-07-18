@@ -1,73 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHSWkp
 
-/-!
-# Polymorphic-in-`K` `W^{k,2}` regularity of the per-step effective source
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the standalone
-inductive step `eigenvectorChartIteratedStep` of the eigenvector chart
-variational identity is the indicator, of the compact partition-of-unity kernel
-`chartPouKernel α`, of the chart-density-divided differentiated numerator
-`eigenvectorChartIteratedStepNumerator / densityOnEuclid g α`.
-
-This module discharges its polymorphic `W^{k,2}` regularity: for each `K : ℕ`,
-given
-
-* `MemWkp (m + 2 + K) 2` of the eigenvector chart component
-  `eigenvectorChartComponentFun`, and
-* `MemWkp (K + 1) 2` of the level-`m` effective source `fChartEffPrev` (which is
-  ae-zero off the partition-of-unity kernel `chartPouKernel α`),
-
-the level-`(m+1)` effective source `eigenvectorChartIteratedStep` lies in
-`MemWkp K 2` on the open chart target.
-
-## Strategy
-
-The work is a thin wrapper over the already-proven differentiated-numerator
-regularity. By definition
-
-```
-eigenvectorChartIteratedStep … fChartEffPrev l
-  = Set.indicator (chartPouKernel α)
-      (fun y => eigenvectorChartIteratedStepNumerator … fChartEffPrev l y /
-                densityOnEuclid g α y),
-```
-
-and `eigenvectorChartIteratedStepNumerator … m dirs fChartEffPrev l` coincides
-(via `eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator`) with the
-level-`(m+1)`-indexed `eigenvectorChartRHSDiffNumerator … m (Fin.snoc dirs l)`.
-
-Writing `Q := numerator / densityOnEuclid g α`:
-
-* `Q` lies in `MemWkp K 2` on the chart target — this is exactly the substep-2a
-  campaign lemma `eigenvectorChartRHSDiffNumerator_div_density_memWkp`;
-* `Q` ae-vanishes on `chartTargetEuclid α \ chartPouKernel α` — the public
-  restatement
-  `eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel`;
-* therefore `Set.indicator (chartPouKernel α) Q =ᵐ Q` on the open chart target
-  (split `chartTargetEuclid α = chartPouKernel α ∪ (chartTargetEuclid α \
-  chartPouKernel α)`: on the kernel the indicator returns `Q`; off the kernel
-  both the indicator and `Q` ae-vanish).
-
-`MemWkp_congr_ae` then transfers `MemWkp K 2` of `Q` to
-`eigenvectorChartIteratedStep`.
-
-## Main results
-
-* `eigenvectorChartIteratedStep_memWkp_K_two` — the headline
-  regularity propagator at every `K ≥ 0`.
-* `eigenvectorChartIteratedStep_memW1p_two` — the `K = 1` corollary,
-  restated as `DeGiorgi.MemW1p 2` via `MemWkp.one_iff_memW1p`.
-
-These are the tensor analogues of the scalar campaign's
-`fChartEffStep_memWkp_K_two` and `fChartEffStep_memW1p_two`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -100,18 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Polymorphic `MemWkp K 2` regularity of the per-step effective source.**
-Given:
-
-* `MemWkp (m + 2 + K) 2` regularity of the eigenvector chart component
-  `eigenvectorChartComponentFun` on the chart target;
-* `MemWkp (K + 1) 2` regularity of the previous-level effective source
-  `fChartEffPrev` on the chart target;
-* ae-vanishing of `fChartEffPrev` on `chartTargetEuclid α \ chartPouKernel α`,
-
-the level-`(m+1)` standalone inductive step `eigenvectorChartIteratedStep`
-lies in `MemWkp K 2` on `chartTargetEuclid α`. This discharges the per-step
-regularity propagator at every `K ≥ 0`. -/
 theorem eigenvectorChartIteratedStep_memWkp_K_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -210,9 +130,6 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     h_indicator_ae_eq_Q).mpr hQ_memWkp
 
-/-- **`K = 1` corollary.** At `K = 1`, the regularity propagator gives
-`MemWkp 1 2 (eigenvectorChartIteratedStep)`, restated as
-`DeGiorgi.MemW1p 2` via `MemWkp.one_iff_memW1p`. -/
 theorem eigenvectorChartIteratedStep_memW1p_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

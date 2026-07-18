@@ -4,44 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 
-/-!
-# Chart-based Sobolev space `W^{k,p}_chart(M)` on a smooth manifold-with-boundary
-
-This is the with-boundary parallel of `Analysis/Sobolev/Chart/Defs.lean`. We
-mirror the boundaryless predicate `MemWkpChart` and norm `wkpNormChart`,
-replacing the underlying open-set Sobolev predicate by the half-space-friendly
-Dirichlet variant from
-`Euclidean/SupportAndDomain/IteratedSobolevHalfSpace.lean`.
-
-Specifically, given a smooth manifold `M` modelled on the canonical Euclidean
-half-space `EuclideanHalfSpace n` (via `modelWithCornersEuclideanHalfSpace n`),
-each extended chart target `(extChartAt I α).target` is a subset of
-`EuclideanSpace ℝ (Fin n)` that is *relatively open in the closed half-space*
-`{y : EuclideanSpace ℝ (Fin n) | 0 ≤ y 0}` — see
-`extChartAt_target_isHalfSpaceRelOpen`. We then say:
-
-* `MemWkpChart g k p u`: the predicate that, for every chart `α : M`, the
-  chart-pushed function `(ρ_α u) ∘ (extChartAt I α).symm` is in
-  `W^{k,p}_0(chart-target)` (Dirichlet half-space variant).
-* `wkpNormChart g k p u`: the corresponding norm, given as a `tsum` over chart
-  index points.
-
-We establish the analogues of every structural / closure / a.e.-invariance /
-norm theorem from the boundaryless chart-Sobolev module.
-
-## Scope note
-
-This module is restricted to manifolds modelled on the canonical
-`EuclideanHalfSpace n`. The abstract `[HasSmoothBoundary E H I]` typeclass
-generally does not provide enough alignment between the boundary direction in
-`E` and the canonical coordinate-`0` half-space in
-`EuclideanSpace ℝ (Fin (Module.finrank ℝ E))` for chart targets to be
-half-space-friendly under the standard Mathlib equivalence
-`toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`. The
-present formulation works directly on `EuclideanSpace ℝ (Fin n)` (the model
-space of `EuclideanHalfSpace n`), avoiding any transport.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -57,10 +19,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-- The chart-pushed scalar function: given `u : M → ℝ`, the partition-of-unity
-weight `ρ α : M → ℝ`, and a chart `α : M`, return the function on the standard
-Euclidean space `EuclideanSpace ℝ (Fin n)` defined by
-`(ρ α u) ∘ (extChartAt I α).symm`. -/
 def chartPushed
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) (u : M → ℝ) :
@@ -70,25 +28,15 @@ def chartPushed
         ((extChartAt (modelWithCornersEuclideanHalfSpace n) α).symm y) *
       u ((extChartAt (modelWithCornersEuclideanHalfSpace n) α).symm y)
 
-/-- The chart-target set in `EuclideanSpace ℝ (Fin n)`. For `M` modelled on
-`EuclideanHalfSpace n`, this is precisely `(extChartAt I α).target` — a subset
-of `EuclideanSpace ℝ (Fin n)` that is half-space-friendly. -/
 def chartTargetEuclid (α : M) : Set (EuclideanSpace ℝ (Fin n)) :=
   (extChartAt (modelWithCornersEuclideanHalfSpace n) α).target
 
-/-- Each chart target is `IsHalfSpaceRelOpen`, i.e., the intersection of an
-open subset of `EuclideanSpace ℝ (Fin n)` with the closed half-space
-`{y | 0 ≤ y 0}`. -/
 theorem chartTargetEuclid_isHalfSpaceRelOpen (α : M) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.IsHalfSpaceRelOpen (d := n)
       (chartTargetEuclid (n := n) (M := M) α) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.extChartAt_target_isHalfSpaceRelOpen
     (n := n) (M := M) α
 
-/-- `MemWkpChart g k p u`: for every chart `α : M` in the canonical atlas, the
-chart-pushed function `chartPushed ρ α u` is in `MemWkpHalfSpace k p` of the
-chart target. The partition of unity `ρ` is the canonical
-`chartAtlasPOU I M`. -/
 def MemWkpChart [T2Space M] [SigmaCompactSpace M]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
       (modelWithCornersEuclideanHalfSpace n) M)
@@ -101,9 +49,6 @@ def MemWkpChart [T2Space M] [SigmaCompactSpace M]
           (modelWithCornersEuclideanHalfSpace n) M) α u)
       (chartTargetEuclid (n := n) (M := M) α)
 
-/-- The chart-based half-space `W^{k,p}` norm. We sum, over all chart points
-`α : M` in the canonical atlas, the half-space iterated `W^{k,p}` norm of the
-chart-pushed function. -/
 def wkpNormChart [T2Space M] [SigmaCompactSpace M]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
       (modelWithCornersEuclideanHalfSpace n) M)
@@ -116,7 +61,6 @@ def wkpNormChart [T2Space M] [SigmaCompactSpace M]
           (modelWithCornersEuclideanHalfSpace n) M) α u)
       (chartTargetEuclid (n := n) (M := M) α)
 
-/-- Decomposition of the chart-based norm. -/
 theorem wkpNormChart_eq_tsum
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -131,7 +75,6 @@ theorem wkpNormChart_eq_tsum
               (modelWithCornersEuclideanHalfSpace n) M) α u)
           (chartTargetEuclid (n := n) (M := M) α) := rfl
 
-/-- Equivalent membership characterization. -/
 theorem MemWkpChart_iff
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -147,7 +90,7 @@ theorem MemWkpChart_iff
           (chartTargetEuclid (n := n) (M := M) α) := Iff.rfl
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-/-- The chart-pushed function for the zero scalar function is zero. -/
+
 theorem chartPushed_zero
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) :
@@ -157,7 +100,6 @@ theorem chartPushed_zero
   unfold chartPushed
   simp
 
-/-- Membership of the zero function in `W^{k,p}_chart(M)`. -/
 theorem MemWkpChart_zero_fun
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -169,7 +111,6 @@ theorem MemWkpChart_zero_fun
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace_zero_fun
     (d := n) hp (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
 
-/-- The chart-based norm of the zero function is zero. -/
 theorem wkpNormChart_zero_fun
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -194,8 +135,7 @@ theorem wkpNormChart_zero_fun
   exact tsum_zero
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-/-- The chart-pushed function is linear in `u`:
-`chartPushed ρ α (u + v) = chartPushed ρ α u + chartPushed ρ α v`. -/
+
 theorem chartPushed_add
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) (u v : M → ℝ) :
@@ -208,7 +148,7 @@ theorem chartPushed_add
   ring
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-/-- The chart-pushed function is linear in `u` for scalar multiples. -/
+
 theorem chartPushed_const_smul
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) (c : ℝ) (u : M → ℝ) :
@@ -218,7 +158,6 @@ theorem chartPushed_const_smul
   unfold chartPushed
   ring
 
-/-- `MemWkpChart` is closed under addition. -/
 theorem MemWkpChart_add
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -235,7 +174,6 @@ theorem MemWkpChart_add
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) (hv α)
 
-/-- `MemWkpChart` is closed under scalar multiplication. -/
 theorem MemWkpChart_const_smul
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -251,7 +189,6 @@ theorem MemWkpChart_const_smul
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) c
 
-/-- `MemWkpChart` is closed under negation. -/
 theorem MemWkpChart_neg
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -266,7 +203,6 @@ theorem MemWkpChart_neg
   rw [hEq] at h
   exact h
 
-/-- `MemWkpChart` is closed under subtraction. -/
 theorem MemWkpChart_sub
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -283,9 +219,6 @@ theorem MemWkpChart_sub
   rw [hEq] at h
   exact h
 
-/-- The chart-based Sobolev subspace as an `AddSubgroup` of `M → ℝ`,
-parametrised by the metric `g`, the order `k`, the exponent `p`, and the
-assumption `1 ≤ p`. -/
 def wkpChartAddSubgroup
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -296,7 +229,6 @@ def wkpChartAddSubgroup
   add_mem' := fun hu hv => MemWkpChart_add (n := n) (M := M) g hp hu hv
   neg_mem' := fun hu => MemWkpChart_neg (n := n) (M := M) g hp hu
 
-/-- The chart-based Sobolev subspace as a `Submodule ℝ` of `M → ℝ`. -/
 def wkpChartSubmodule
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -313,8 +245,6 @@ def wkpChartSubmodule
     rw [hEq]
     exact h
 
-/-- The chart-based Sobolev space `WkpChart g k p` as a subtype of `M → ℝ`,
-implemented as the underlying subtype of `wkpChartSubmodule`. -/
 def WkpChart
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -338,7 +268,6 @@ instance
     Module ℝ (WkpChart (n := n) (M := M) g k p hp) :=
   inferInstanceAs (Module ℝ ↥(wkpChartSubmodule (n := n) (M := M) g k p hp))
 
-/-- Membership in `W^{k+1,p}_chart` implies membership in `W^{k,p}_chart`. -/
 theorem MemWkpChart.le_succ
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -349,8 +278,6 @@ theorem MemWkpChart.le_succ
   intro α
   exact (h α).le_succ
 
-/-- Membership in `W^{k',p}_chart` implies membership in `W^{k,p}_chart`
-whenever `k ≤ k'`. -/
 theorem MemWkpChart.le_of_le
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -361,11 +288,6 @@ theorem MemWkpChart.le_of_le
   intro α
   exact (h α).le_of_le hk
 
-/-- The chart-pushed-equivalence relation: two functions `u, v : M → ℝ` are
-chart-pushed equivalent if every chart-pushed image `chartPushed ρ α u` agrees
-a.e. with `chartPushed ρ α v` on the *interior part* of the chart target image.
-The interior part is `chartTarget ∩ openHalfSpace`, which is open in `E` and
-where the underlying half-space-Sobolev predicate is evaluated. -/
 def ChartPushedAEEq
     [T2Space M] [SigmaCompactSpace M]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -382,7 +304,6 @@ def ChartPushedAEEq
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU
           (modelWithCornersEuclideanHalfSpace n) M) α v
 
-/-- `ChartPushedAEEq` is reflexive. -/
 theorem ChartPushedAEEq.rfl
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -392,7 +313,6 @@ theorem ChartPushedAEEq.rfl
   intro α
   exact Filter.EventuallyEq.rfl
 
-/-- `ChartPushedAEEq` is symmetric. -/
 theorem ChartPushedAEEq.symm
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -402,7 +322,6 @@ theorem ChartPushedAEEq.symm
   intro α
   exact (h α).symm
 
-/-- `ChartPushedAEEq` is transitive. -/
 theorem ChartPushedAEEq.trans
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -414,8 +333,6 @@ theorem ChartPushedAEEq.trans
   intro α
   exact (huv α).trans (hvw α)
 
-/-- If `u, v` are chart-pushed-a.e.-equal and one is in `W^{k,p}_chart`, so is
-the other. -/
 theorem MemWkpChart_congr_chartPushed_ae
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -434,8 +351,6 @@ theorem MemWkpChart_congr_chartPushed_ae
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
       (huv α).symm).mp (h α)
 
-/-- The chart-based norm is invariant under chart-by-chart-a.e.-equality of
-inputs, provided `1 ≤ p`. -/
 theorem wkpNormChart_congr_chartPushed_ae
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -454,7 +369,6 @@ theorem wkpNormChart_congr_chartPushed_ae
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α))
     (huv α)
 
-/-- The triangle inequality for the chart-based norm. -/
 theorem wkpNormChart_add_le
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -476,7 +390,6 @@ theorem wkpNormChart_add_le
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) (hv α)
 
-/-- The scalar-multiplication identity for the chart-based norm. -/
 theorem wkpNormChart_const_smul
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -496,9 +409,6 @@ theorem wkpNormChart_const_smul
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) c
 
-/-- The chart-based norm is finite for any function in `MemWkpChart`, when `M`
-is compact and `1 ≤ p`. (Compactness ensures the partition-of-unity has
-finitely many supports.) -/
 theorem wkpNormChart_lt_top_of_memWkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric

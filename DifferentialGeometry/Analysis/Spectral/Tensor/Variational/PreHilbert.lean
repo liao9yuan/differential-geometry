@@ -9,7 +9,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Geometry.Operator.Gradient
@@ -19,34 +19,10 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# H^1 pre-Hilbert structure on compactly-supported smooth tensor sections
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file installs an `H^1` (gradient-augmented)
-pre-Hilbert structure on a wrapper type around `SmoothCcTensor g r s`.
-
-The `H^1` inner product `tensorH1Inner` (defined in `CovDerivPointwise`) is
-the sum of the `L^2` inner product of the sections and the `L^2` inner
-product of their covariant derivatives. Its algebraic properties — symmetry,
-additivity, homogeneity, and diagonal non-negativity — combine the pointwise
-algebra (from `CovDerivPointwise`) with integrability of the gradient
-integrand (from `Continuity`).
-
-## Main constructions
-
-* `tensorH1Inner_symm`, `tensorH1Inner_nonneg`, `tensorH1Inner_add_left`,
-  `tensorH1Inner_smul_left` — the global `H^1` inner-product algebra.
-* `SmoothCcTensorH1 g r s` — a wrapper around `SmoothCcTensor g r s` carrying
-  the `H^1` pre-Hilbert structure.
-* `instPreInnerProductSpaceCore`, `instSeminormedAddCommGroup`,
-  `instInnerProductSpace` — the pre-Hilbert / inner-product-space instances.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -67,7 +43,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -78,7 +54,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Symmetry of `tensorH1Inner`. -/
 theorem tensorH1Inner_symm (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s S T =
@@ -91,7 +66,6 @@ theorem tensorH1Inner_symm (g : SmoothRiemannianMetric I M) (r s : ℕ)
     intro x
     exact tensorCovDerivPointwiseInner_symm (I := I) (M := M) g r s S T x
 
-/-- Non-negativity of `tensorH1Inner` on the diagonal. -/
 theorem tensorH1Inner_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     0 ≤ tensorH1Inner (I := I) (M := M) g r s S S := by
@@ -102,7 +76,6 @@ theorem tensorH1Inner_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     intro x
     exact tensorCovDerivPointwiseInner_nonneg (I := I) (M := M) g r s S x
 
-/-- Additivity of `tensorH1Inner` in the first argument. -/
 theorem tensorH1Inner_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s (S₁ + S₂) T =
@@ -131,7 +104,6 @@ theorem tensorH1Inner_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (tensorCovDerivPointwiseInner_integrable (I := I) (M := M) g r s S₂ T)]
   ring
 
-/-- Homogeneity of `tensorH1Inner` in the first argument. -/
 theorem tensorH1Inner_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s (c • S) T =
@@ -153,22 +125,20 @@ theorem tensorH1Inner_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [MeasureTheory.integral_const_mul]
   ring
 
-/-- Compactly-supported smooth `(r, s)`-tensor section wrapped to carry the
-`H^1` pre-Hilbert structure, a distinct Lean type from `SmoothCcTensor`. -/
 structure SmoothCcTensorH1 (g : SmoothRiemannianMetric I M) (r s : ℕ) where
-  /-- The underlying `L^2`-wrapped compactly-supported smooth section. -/
+
   toCcTensor : SmoothCcTensor g r s
 
 namespace SmoothCcTensorH1
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-/-- Two `SmoothCcTensorH1` are equal iff their underlying sections are equal. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[ext] theorem ext {S T : SmoothCcTensorH1 g r s}
     (h : S.toCcTensor = T.toCcTensor) : S = T := by
   cases S; cases T; congr
 
-/-- `toCcTensor` is injective. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toCcTensor_injective :
     Function.Injective (fun S : SmoothCcTensorH1 g r s => S.toCcTensor) := by
   intro S T h
@@ -183,20 +153,26 @@ instance : Sub (SmoothCcTensorH1 g r s) :=
 instance : SMul ℝ (SmoothCcTensorH1 g r s) :=
   ⟨fun c S => ⟨c • S.toCcTensor⟩⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_zero :
     (0 : SmoothCcTensorH1 g r s).toCcTensor = 0 := rfl
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_add (S T : SmoothCcTensorH1 g r s) :
     (S + T).toCcTensor = S.toCcTensor + T.toCcTensor := rfl
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_neg (S : SmoothCcTensorH1 g r s) :
     (-S).toCcTensor = -S.toCcTensor := rfl
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_sub (S T : SmoothCcTensorH1 g r s) :
     (S - T).toCcTensor = S.toCcTensor - T.toCcTensor := rfl
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_smul (c : ℝ) (S : SmoothCcTensorH1 g r s) :
     (c • S).toCcTensor = c • S.toCcTensor := rfl
 
 instance : SMul ℕ (SmoothCcTensorH1 g r s) := ⟨nsmulRec⟩
 instance : SMul ℤ (SmoothCcTensorH1 g r s) := ⟨zsmulRec⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_nsmul (S : SmoothCcTensorH1 g r s) (n : ℕ) :
     (n • S).toCcTensor = n • S.toCcTensor := by
   induction n with
@@ -209,6 +185,7 @@ instance : SMul ℤ (SmoothCcTensorH1 g r s) := ⟨zsmulRec⟩
       have hn : (nsmulRec n S).toCcTensor = n • S.toCcTensor := ih
       rw [toCcTensor_add, hn, succ_nsmul]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_zsmul (S : SmoothCcTensorH1 g r s) (z : ℤ) :
     (z • S).toCcTensor = z • S.toCcTensor := by
   rcases z with n | n
@@ -230,8 +207,6 @@ instance : AddCommGroup (SmoothCcTensorH1 g r s) :=
     toCcTensor_nsmul
     toCcTensor_zsmul
 
-/-- Additive monoid hom from `SmoothCcTensorH1 g r s` to the underlying
-compactly-supported smooth section. -/
 def toCcTensorAddHom : SmoothCcTensorH1 g r s →+ SmoothCcTensor g r s where
   toFun := fun S => S.toCcTensor
   map_zero' := toCcTensor_zero
@@ -242,10 +217,7 @@ instance : Module ℝ (SmoothCcTensorH1 g r s) :=
 
 end SmoothCcTensorH1
 
-set_option linter.unusedSectionVars false in
-/-- The pre-inner-product core on `SmoothCcTensorH1 g r s`, whose inner product
-is the `H^1` pairing `tensorH1Inner g r s` of the underlying smooth
-compactly-supported sections. -/
+
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     PreInnerProductSpace.Core ℝ (SmoothCcTensorH1 g r s) where
@@ -273,35 +245,26 @@ noncomputable instance instPreInnerProductSpaceCore
     exact tensorH1Inner_smul_left (I := I) (M := M) g r s
       c S.toCcTensor T.toCcTensor
 
-set_option linter.unusedSectionVars false in
-/-- The seminormed structure on `SmoothCcTensorH1 g r s` derived from the
-pre-inner-product core. -/
+
 noncomputable instance instSeminormedAddCommGroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     SeminormedAddCommGroup (SmoothCcTensorH1 g r s) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-set_option linter.unusedSectionVars false in
-/-- The inner-product-space structure on `SmoothCcTensorH1 g r s` derived from
-the pre-inner-product core. -/
+
 noncomputable instance instInnerProductSpace
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     InnerProductSpace ℝ (SmoothCcTensorH1 g r s) :=
   InnerProductSpace.ofCore _
 
-set_option linter.unusedSectionVars false in
-/-- The `H^1` inner product on `SmoothCcTensorH1 g r s` unfolds to the
-`tensorH1Inner` pairing of the underlying smooth compactly-supported
-sections. -/
+
 @[simp] theorem SmoothCcTensorH1.inner_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensorH1 g r s) :
     ⟪S, T⟫_ℝ =
       tensorH1Inner (I := I) (M := M) g r s S.toCcTensor T.toCcTensor := rfl
 
-set_option linter.unusedSectionVars false in
-/-- The `H^1` seminorm on `SmoothCcTensorH1 g r s` is the square root of the
-`tensorH1Inner` pairing of the underlying section with itself. -/
+
 theorem SmoothCcTensorH1.norm_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :

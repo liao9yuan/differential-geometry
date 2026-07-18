@@ -2,43 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
 
-/-!
-# A chart-base-uniform order-2 Sobolev energy bound for the eigenvector chart
-component
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the per-`(α, P₀)`
-order-2 Sobolev energy bound
-`eigenvector_chartComponent_wkpNorm_two_energy_le` exposes, for each pair of a
-chart base point `α : M` and a chart-component multi-index
-`P₀ : TensorCompIdx r s`, a chart-geometric constant `C(α, P₀) ≥ 0` —
-eigenbasis-uniform — bounding the `wkpNorm 2 2`-norm of the eigenvector chart
-component on the Euclidean chart target by `C(α, P₀) · μ⁻¹ · ‖vec‖`. This file
-hoists the chart base point `α` and the component multi-index `P₀` inside the
-universal quantifier of a single existential, yielding a single constant `C`
-that controls the chart component for *every* `(α, P₀, i)` simultaneously.
-
-The strategy mirrors `TensorChartComponentSobolevBound`: on a compact
-manifold the chart-atlas partition of unity is locally finite, so only finitely
-many `α : M` have non-empty support of `chartAtlasPOU α`. For the inactive `α`,
-the chart component is almost everywhere zero on the chart target — its
-partition-of-unity kernel `chartPouKernel α` reduces to the empty set, so the
-already committed a.e.-vanishing-off-kernel lemma gives a.e.-vanishing on the
-entire chart target, hence a zero `wkpNorm`. For the finitely many active `α`,
-the per-`(α, P₀)` constant is the `Classical.choose` of the per-`(α, P₀)`
-bound; summing those constants over the finite product of the active finset
-with `TensorCompIdx r s` yields the single chart-base-uniform constant.
-
-## Main result
-
-* `eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β` — the
-  chart-base-uniform order-2 Sobolev energy bound: a single constant `C ≥ 0`
-  bounds the chart component for every `(α, P₀, i)`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -70,13 +33,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
         (I := I) (M := M) α := rfl
 
-/-- The partition-of-unity kernel `chartPouKernel α` is empty whenever
-`chartAtlasPOU I M α` is identically zero. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
     (h_zero : ∀ x : M,
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0) :
@@ -97,16 +60,12 @@ private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
   rw [h_tsupp_empty]
   rw [Set.image_empty, Set.image_empty]
 
-/-- The partition-of-unity kernel `chartPouKernel α` is empty whenever `α : M`
-is not in the active finset `chartAtlasPOU_activeFinset I M`. -/
 private lemma chartPouKernel_eq_empty_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     chartPouKernel (I := I) (M := M) α = (∅ : Set EuclN) :=
   chartPouKernel_eq_empty_of_pou_zero
     (chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset`. -/
 private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -131,14 +90,12 @@ private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
   rw [h_set_eq] at h_ae
   exact h_ae
 
-/-- Chart-locality-free twin of
-`wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeFinset`. -/
 private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeFinset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
     (P₀ : TensorCompIdx (E := E) r s) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -150,11 +107,11 @@ private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeF
     eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
       (I := I) (M := M) g r s i hα P₀
   have h_swap :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α) =
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (fun _ : EuclN => (0 : ℝ))
           (chartTargetEuclid (I := I) (M := M) α) :=
@@ -166,7 +123,7 @@ private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeF
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `perAlphaPCConstant`. -/
+
 private noncomputable def perAlphaPCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : ℝ :=
@@ -175,7 +132,7 @@ private noncomputable def perAlphaPCConstant
       (I := I) (M := M) g r s α P₀)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `perAlphaPCConstant_nonneg`. -/
+
 private lemma perAlphaPCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -185,12 +142,12 @@ private lemma perAlphaPCConstant_nonneg
       (I := I) (M := M) g r s α P₀)).1
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `perAlphaPCConstant_bound`. -/
+
 private lemma perAlphaPCConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -205,7 +162,6 @@ private lemma perAlphaPCConstant_bound
     (eigenvector_chartComponent_wkpNorm_two_energy_le
       (I := I) (M := M) g r s α P₀)).2 i
 
-/-- Chart-locality-free twin of `totalActivePCConstant`. -/
 private noncomputable def totalActivePCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ℝ :=
@@ -213,7 +169,6 @@ private noncomputable def totalActivePCConstant
     ∑ P₀ : TensorCompIdx (E := E) r s,
       perAlphaPCConstant (I := I) (M := M) g r s α P₀
 
-/-- Chart-locality-free twin of `totalActivePCConstant_nonneg`. -/
 private lemma totalActivePCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActivePCConstant (I := I) (M := M) g r s := by
@@ -223,8 +178,6 @@ private lemma totalActivePCConstant_nonneg
   exact Finset.sum_nonneg fun P₀ _ =>
     perAlphaPCConstant_nonneg (I := I) (M := M) g r s α P₀
 
-/-- Chart-locality-free twin of
-`perAlphaPCConstant_le_totalActivePCConstant`. -/
 private lemma perAlphaPCConstant_le_totalActivePCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∈ chartAtlasPOU_activeFinset I M)
@@ -259,26 +212,13 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
 
 set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β`.
 
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, there is a
-chart-geometric constant `C ≥ 0` — uniform over *every* chart base point
-`α : M`, every chart-component multi-index `P₀ : TensorCompIdx r s`, and every
-eigenbasis index `i` — such that, with resolvent eigenvalue
-`μ := i.fst.val ∈ (0, 1]`, the order-2 Euclidean Sobolev norm of the
-chart-locality-free eigenvector chart component
-`eigenvectorChartComponentFun_unconditional g r s i α P₀` on the chart target is
-bounded by `ENNReal.ofReal (C · μ⁻¹)` times the abstract `L²` norm of the
-intrinsic-compactness eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`. No chart-selection hypothesis appears. -/
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s)
         (i : TensorEigenIdx (I := I) (M := M) g r s),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 2 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α P₀)

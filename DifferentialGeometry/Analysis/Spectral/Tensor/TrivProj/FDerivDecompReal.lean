@@ -1,69 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 
-/-!
-# Concrete Christoffel-style decomposition of `fderiv (tensorTrivProj ∘ φ⁻¹)`
-
-This file ships the **concrete** chart-coordinate decomposition of the
-Fréchet derivative of the chart-`α`-trivialised `(r, s)`-tensor function
-
-```
-tensorTrivProj g r s S α ∘ (extChartAt I α).symm  :  E → TensorRSModel r s ℝ E
-```
-
-at a point `extChartAt I α b`, in terms of the chart-frame `(r, s)`-tensor
-covariant derivative `chartTensorRSCovariantDerivative` and the explicit
-input-slot and output-slot Christoffel corrections that appear in its
-definition.
-
-Two layers of identifications are used:
-
-* The **basic factorisation** of `fderiv (tensorTrivProj S α ∘ φ⁻¹)` through
-  `tensorRSIntrinsicChartCLM r s α S.toSection b`, which is exposed by the
-  chart-frame `(r, s)`-tensor covariant derivative construction in
-  `ChartTensorRSCovariantDerivative.lean`. The fact that
-  `tensorTrivProj g r s S α` coincides with
-  `tensorRSChartE_section_repr r s α S.toSection` as a function on `M` is a
-  direct unfolding identity.
-
-* The **chart-frame / abstract agreement** of
-  `chartTensorRSCovariantDerivative` with the bundled
-  `tensorRSCovariantDerivative` from the Levi-Civita connection
-  (`ChartTensorRSCovariantDerivativeAgreement.lean`). This lets us re-express
-  the intrinsic chart Fréchet derivative as the abstract covariant derivative
-  plus / minus the same slot-Christoffel pieces.
-
-Both pieces combine into a single concrete formula:
-
-```
-fderiv (tensorTrivProj S α ∘ φ⁻¹) (φ b) w
-  = (triv).continuousLinearMapAt ℝ b
-      ( chartTensorRSCovariantDerivative r s g α S.toSection X b
-        + ∑ k chartTensorRSInputSlotCorrection r s g α S.toSection X b k
-        - ∑ l chartTensorRSOutputSlotCorrection r s g α S.toSection X b l )
-```
-
-valid on the chart-`α` Levi-Civita good set, for any direction `w : E` and
-any smooth tangent vector field `X` with `X b = trivFromE α b w`.
-
-## Main results
-
-* `fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic` — basic
-  factorisation through the intrinsic chart CLM.
-* `fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov` —
-  Christoffel decomposition through the chart-frame covariant derivative.
-* `fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov` — Christoffel
-  decomposition through the bundled / abstract covariant derivative
-  (Layer D agreement).
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -89,9 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- `tensorTrivProj g r s S α` equals the chart-α-trivialised representation
-of `S.toSection` (as a section of the `(r, s)`-tensor bundle). Both definitions
-are `(triv).continuousLinearMapAt ℝ x (S.toSection x)`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorTrivProj_eq_tensorRSChartE_section_repr
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -100,10 +41,7 @@ lemma tensorTrivProj_eq_tensorRSChartE_section_repr
   funext x
   rfl
 
-/-- **Basic factorisation.** On the chart-α Levi-Civita good set, the Fréchet
-derivative of `tensorTrivProj S α ∘ φ⁻¹` at `φ b`, applied to a direction
-`w : E`, factors as `triv.continuousLinearMapAt ℝ b` applied to the intrinsic
-chart CLM action on `trivFromE α b w`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -139,9 +77,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb_baseRS _).symm
 
-/-- The intrinsic chart CLM acting on `X b` is the chart-frame covariant
-derivative plus the input-slot sum minus the output-slot sum (this is just
-the algebraic definition rearranged). -/
 private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -157,13 +92,6 @@ private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (I := I) r s g α T X b]
   abel
 
-/-- **Concrete Christoffel decomposition (chart-frame form).** On the chart-α
-Levi-Civita good set, the Fréchet derivative of
-`tensorTrivProj S α ∘ φ⁻¹` at `φ b`, applied to a direction `w : E`,
-decomposes through the chart-frame `(r, s)`-tensor covariant derivative
-along any smooth vector field `X` with `X b = trivFromE α b w`, plus the
-input-slot Christoffel sum minus the output-slot Christoffel sum, all
-pushed forward through `triv.continuousLinearMapAt ℝ b`. -/
 theorem fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (X : Π b' : M, TangentSpace I b')
@@ -189,14 +117,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
   rw [tensorRSIntrinsicChartCLM_apply_eq_cov
     (I := I) r s g α (fun b' => S.toSection b') X b]
 
-/-- **Concrete Christoffel decomposition (abstract form).** On the chart-α
-Levi-Civita good set, the Fréchet derivative of
-`tensorTrivProj S α ∘ φ⁻¹` at `φ b`, applied to a direction `w : E`,
-decomposes through the bundled `tensorRSCovariantDerivative` of the
-Levi-Civita connection, plus the input-slot Christoffel sum minus the
-output-slot Christoffel sum, pushed forward through
-`triv.continuousLinearMapAt ℝ b`. The decomposition is parametrised by a
-smooth tangent vector field `X` with `X b = trivFromE α b w`. -/
 theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -228,7 +148,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
       (I := I) (M := M) g r s α S.toSection X hb
   rw [hcov_eq]
 
-/-- **Manifold-derivative form of the basic factorisation.** -/
 theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -252,8 +171,6 @@ theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (I := I) (M := M) g r s α S hb (trivToE (I := I) α b v)]
   rw [trivFromE_trivToE (I := I) α hb_base v]
 
-/-- **Manifold-derivative form of the Christoffel decomposition (chart-frame
-form).** -/
 theorem mfderiv_tensorTrivProj_apply_eq_chart_pushforward_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

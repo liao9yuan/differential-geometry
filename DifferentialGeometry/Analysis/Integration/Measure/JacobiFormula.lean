@@ -6,31 +6,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Trace
 import Mathlib.LinearAlgebra.Matrix.PosDef
 
-/-!
-# Jacobi's formula for the time-derivative of a matrix determinant
-
-For a smooth family of real square matrices `G : ℝ → Matrix n n ℝ` with each
-entry differentiable in time, this file develops the derivative of `det ∘ G`
-and of `√(det ∘ G)` in the parameter, culminating in Jacobi's identity in its
-permutation-sum, trace-of-adjugate, and classical `det · trace(G⁻¹ · G')` forms,
-together with the geometric square-root variant used by the Riemannian volume
-density variation.
-
-## Main results
-
-* `hasDerivAt_det_of_entries` : derivative of `det ∘ G(t)` in the parameter `t`,
-  expressed as the canonical permutation-sum form coming from `Matrix.det_apply'`.
-* `perm_sum_eq_trace_adjugate_mul` : the permutation sum above equals
-  `trace (adjugate A · B)`.
-* `hasDerivAt_det_eq_trace_adjugate_mul` : Jacobi's formula in the form
-  `d/dt det G(t) = trace (adjugate (G t) · G'(t))`.
-* `hasDerivAt_det_eq_det_mul_trace_inv_mul` : the classical form
-  `d/dt det G(t) = det(G t) · trace(G(t)⁻¹ · G'(t))` when `(G t).det` is a unit.
-* `hasDerivAt_sqrt_det_of_entries` : derivative of `√(det G(t))` via chain rule.
-* `hasDerivAt_sqrt_det_eq_half_trace_inv_mul` : the geometric form
-  `d/dt √(det G(t)) = ½ · trace(G(t)⁻¹ · G'(t)) · √(det G(t))` under positivity.
--/
-
 noncomputable section
 
 open Matrix
@@ -44,8 +19,6 @@ section Jacobi
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- Product rule for a single term of the determinant expansion: the derivative
-of `t ↦ ∏ i, G t (σ i) i` equals the standard Leibniz sum. -/
 lemma hasDerivAt_prod_of_entries
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t)
@@ -58,9 +31,6 @@ lemma hasDerivAt_prod_of_entries
     fun k _ => hG (σ k) k
   exact HasDerivAt.fun_finset_prod hfactor
 
-/-- Jacobi's formula, permutation-sum form: the derivative of the determinant of
-a smooth family of real matrices equals the signed sum of products obtained by
-differentiating one factor at a time in the Leibniz expansion. -/
 theorem hasDerivAt_det_of_entries
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t) :
@@ -94,9 +64,6 @@ theorem hasDerivAt_det_of_entries
     exact hmul
   exact HasDerivAt.fun_sum hterm
 
-/-- Key algebraic identity: the Leibniz-product derivative sum equals
-`trace (adjugate A · B)`. Proof via the cofactor expansion of `adjugate A i j`
-combined with swapping the order of the σ- and k-summations. -/
 theorem perm_sum_eq_trace_adjugate_mul
     (A B : Matrix n n ℝ) :
     (∑ σ : Equiv.Perm n, ((Equiv.Perm.sign σ : ℤ) : ℝ) *
@@ -227,7 +194,6 @@ theorem perm_sum_eq_trace_adjugate_mul
     exact if_neg hτi_ne_v
   rw [hrest]
 
-/-- Jacobi's formula in trace-of-adjugate form. -/
 theorem hasDerivAt_det_eq_trace_adjugate_mul
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t) :
@@ -237,7 +203,6 @@ theorem hasDerivAt_det_eq_trace_adjugate_mul
   rw [perm_sum_eq_trace_adjugate_mul (n := n) (G t) G'] at h
   exact h
 
-/-- When `A.det` is a unit, `adjugate A = A.det • A⁻¹`. -/
 lemma adjugate_eq_det_smul_inv
     {A : Matrix n n ℝ} (h : IsUnit A.det) :
     adjugate A = A.det • A⁻¹ := by
@@ -246,8 +211,6 @@ lemma adjugate_eq_det_smul_inv
   rw [Ring.mul_inverse_cancel _ h]
   rw [one_smul]
 
-/-- When the determinant is a unit, Jacobi's trace-adjugate form simplifies to the
-classical formula `d/dt det G(t) = det(G t) · trace(G(t)⁻¹ · G'(t))`. -/
 theorem hasDerivAt_det_eq_det_mul_trace_inv_mul
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t)
@@ -264,8 +227,6 @@ theorem hasDerivAt_det_eq_det_mul_trace_inv_mul
   rw [hrewrite] at h
   exact h
 
-/-- Chain-rule version: derivative of `t ↦ √(det G(t))` at a time where the
-determinant is nonzero, in permutation-sum form. -/
 theorem hasDerivAt_sqrt_det_of_entries
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t)
@@ -281,9 +242,6 @@ theorem hasDerivAt_sqrt_det_of_entries
   have hcomp := hsqrt.comp t hdet
   simpa [Function.comp] using hcomp
 
-/-- The geometric form of Jacobi's identity applied to the square-root:
-`d/dt √(det G(t)) = ½ · trace(G(t)⁻¹ · G'(t)) · √(det G(t))`, under the
-hypothesis that `(G t).det > 0`. -/
 theorem hasDerivAt_sqrt_det_eq_half_trace_inv_mul
     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
     (hG : ∀ i j, HasDerivAt (fun t => G t i j) (G' i j) t)

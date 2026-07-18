@@ -10,43 +10,6 @@ import Mathlib.MeasureTheory.Function.AEEqOfIntegral
 import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Data.ENNReal.Basic
 
-/-!
-# Chart-invariance of the chart-local Voss–Weyl with-boundary divergence
-
-For a smooth Riemannian metric `g`, a smooth tangent section `X`, and two
-points `α β : M`, the chart-local Voss–Weyl with-boundary divergence agrees on
-the **manifold-interior overlap** of the two chart sources:
-$$
-\text{localDivergenceWithin}_g(\alpha, X)(x)
-  = \text{localDivergenceWithin}_g(\beta, X)(x)
-$$
-for every `x ∈ (chartAt H α).source ∩ (chartAt H β).source ∩ I.interior M`.
-
-The proof goes via integration testing. For any smooth bump function `φ` with
-compact support inside the interior overlap, the chart-local with-boundary IBP
-identity gives
-$\int_M \text{localDivergenceWithin}_g(\alpha, X)\, \phi\, d\mu_\alpha
-  = -\int_M \text{tangentSectionAction}(X, \phi)\, d\mu_\alpha$
-(and likewise at `β`). The right-hand side is intrinsic — it does not depend
-on the chart — and it integrates the same function against two measures that
-agree on the overlap. Hence the two left-hand sides agree, and a density
-argument upgrades this to pointwise equality on the manifold-interior overlap.
-
-The structural difference from the boundaryless `ChartInvariance.lean`:
-
-* The IBP identity used here (`chart_local_ibp_within`) requires the test
-  function `φ` to be supported in `I.interior M` in addition to the chart base
-  set. Consequently, the integral-equality theorem
-  `integral_localDivergenceWithin_eq_of_interior_overlap_support` requires
-  `tsupport φ ⊆ I.interior M`.
-
-* The pointwise upgrade requires positivity of the chart-local measure on
-  open subsets of the manifold-interior part of the chart base set. We supply
-  this via an inlined version of the open-positivity helper, since the helper
-  in `Measure/Properties.lean` is private and uses
-  `extChartAt I α x₁ ∈ interior (range I)`, which we deduce from
-  `x₁ ∈ I.interior M`.
--/
 
 noncomputable section
 
@@ -59,7 +22,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -70,10 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For any smooth `φ` with compact tsupport inside the interior overlap of
-`α, β`'s chart sources, the integrals of
-`localDivergenceWithin g α X · φ` against `chartLocalMeasure g α` and of
-`localDivergenceWithin g β X · φ` against `chartLocalMeasure g β` are equal. -/
 theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -132,8 +91,6 @@ theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M
           ∂((chartLocalMeasure (I := I) g β).restrict U) from rfl]
   rw [h_meas_eq]
 
-/-- A chart-local measure is positive on every nonempty open subset of the
-chart source that contains a manifold-interior point. -/
 private lemma chartLocalMeasure_open_pos_of_interior_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) {x₁ : M} (hx₁V : x₁ ∈ V)
@@ -269,8 +226,6 @@ private lemma chartLocalMeasure_open_pos_of_interior_mem
     exact measure_eq_zero_iff_ae_notMem.mpr hyNotW
   exact (ne_of_gt hW_pos) hW_zero
 
-/-- If `f` is continuous on an open `U`, `f x > 0` at some `x ∈ U`, then there
-is an open neighborhood `V` of `x` (with `V ⊆ U`) on which `f > f(x)/2`. -/
 private lemma exists_open_nbhd_positive
     {f : M → ℝ} {U : Set M} (hU : IsOpen U) (hfcont : ContinuousOn f U)
     {x : M} (hxU : x ∈ U) (hfx : 0 < f x) :
@@ -289,7 +244,6 @@ private lemma exists_open_nbhd_positive
   intro y hy
   exact hV₀ y (hW_sub hy.1)
 
-/-- Smooth bump function existence, packaged. -/
 private lemma exists_smooth_bump_in_open [T2Space M]
     {V : Set M} (hVopen : IsOpen V) {x : M} (hxV : x ∈ V) :
     ∃ φ : M → ℝ, ContMDiff I 𝓘(ℝ) ∞ φ ∧ HasCompactSupport φ ∧
@@ -302,15 +256,10 @@ private lemma exists_smooth_bump_in_open [T2Space M]
   · intro y; exact f.nonneg
   · rw [f.eq_one]; exact one_pos
 
-/-- The interior of the manifold is open. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞) (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-/-- Helper for the positive case of with-boundary chart invariance.
-
-If `localDivergenceWithin g α X x - localDivergenceWithin g β X x > 0` for some
-`x` in the interior overlap of the two chart sources, we derive a
-contradiction. -/
 private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -623,9 +572,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
       _ ≤ ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_total
   linarith
 
-/-- **Chart invariance of `localDivergenceWithin`.** For any two base points
-`α β : M` and any `x` in the **interior overlap** of their chart sources, the
-chart-local Voss–Weyl with-boundary divergence at `α` and at `β` agree at `x`. -/
 theorem localDivergenceWithin_chart_invariance [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

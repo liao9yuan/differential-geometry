@@ -8,11 +8,11 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # Time derivative of the per-mode Duhamel convolution
 
-`duhamel_integral_time_deriv`: for `λ ≥ 0` and a continuous forcing `f`, the per-mode
-Duhamel convolution `s ↦ perModeConv λ f s` is differentiable with derivative
-`-λ · perModeConv λ f t + f t`, the scalar ODE underlying each spectral mode. -/
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

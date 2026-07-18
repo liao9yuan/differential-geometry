@@ -1,43 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.Measure.TensorChartPulled
 import DifferentialGeometry.Analysis.Integration.Measure.PouDensityChartBound
 import DifferentialGeometry.Analysis.Integration.Measure.Family
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Tensor.RSTensor.Defs
-
-/-!
-# Bridge: manifold L² norm bounded by a finite sum of chart-target L² norms
-
-For a smooth closed Riemannian manifold `(M, g)` and a fiberwise tensor section
-`S : Π b : M, TensorRSSpace r s I b`, this file packages a single quantitative
-inequality
-
-  `∫⁻ x, ‖S x‖ₑ ^ 2 dμ_g(x)
-        ≤ ENNReal.ofReal C *
-            ∑ α ∈ chartAtlasPOU_finset I M,
-              ∫⁻ y in chartTargetEuclid α,
-                ENNReal.ofReal (tensorTrivProjPushedNormSq g r s α S y) ∂volume`
-
-where `μ_g` is the canonical Riemannian volume measure on `M`, `volume` is the
-canonical Lebesgue measure on the Euclidean chart-target ambient space, and the
-constant `C` depends only on `g`, the chart atlas, and the canonical partition
-of unity.
-
-The proof combines:
-
-* the finite-sum form of the Riemannian volume measure (Family.lean), which on
-  a compact manifold expresses `μ_g` as a sum, over the finite partition-of-
-  unity support set `chartAtlasPOU_finset I M`, of the chart-`α`-local measures
-  weighted by the partition-of-unity functions;
-* the bridge `chartLocalMeasure_lintegral_via_chartTargetEuclid`, which pushes
-  each chart-local lintegral through `(extChartAt I α).symm ∘ toEuclidean.symm`
-  to a chart-target Euclidean integral against the Lebesgue measure;
-* the chart-target sup bound `exists_pou_chartDensity_bound_on_chartTarget`
-  for the product of the partition-of-unity weight and the chart density;
-* the identification `‖S x‖ = ‖TensorRSSpace.toModel (S x)‖` (the fiber norm
-  on `TensorRSSpace r s I x` is the induced norm from the model fiber), and
-  `tensorTrivProjPushedNormSq_apply_of_mem` to identify the chart-target
-  pulled-back squared model-fiber norm.
--/
 
 noncomputable section
 
@@ -58,21 +23,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable (I M) in
-/-- The per-chart `α : M` POU×density chart-target sup bound, extracted via
-`Classical.choose` from the existence lemma
-`exists_pou_chartDensity_bound_on_chartTarget`. The witness depends only on
-`g`, `α`, the canonical chart atlas, and the canonical partition of unity.
 
-Naming this constant via a public `noncomputable def` (rather than via a
-local `let` inside a proof) makes the value definitionally shareable across
-different invocations of the chart-target L² bridge. -/
 noncomputable def chartL2BridgeMα
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
@@ -97,12 +54,7 @@ lemma chartL2BridgeMα_le
     (I := I) (M := M) g α).choose_spec.2 y hy
 
 variable (I M) in
-/-- The chart-target L² bridge's overall multiplicative constant, defined as
-`(euclideanHaarFactor E : ℝ) * ∑ α ∈ chartAtlasPOU_finset I M,
-  (chartL2BridgeMα g α + 1)`. This is the constant produced by
-`manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq`, exposed publicly
-so that downstream callers can quantify the existential `∃ C` outside a
-universal over input sections. -/
+
 noncomputable def chartTargetL2BridgeConstant
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) : ℝ :=
@@ -121,18 +73,11 @@ lemma chartTargetL2BridgeConstant_nonneg
     have := chartL2BridgeMα_nonneg (I := I) (M := M) g α
     linarith
 
-/-- The induced norm on the fiber `TensorRSSpace r s I x` coincides with the
-norm of the model image under `TensorRSSpace.toModel`. This holds by
-construction (the fiber-norm is *defined* as the pullback of the model norm
-along `tensorRSSpace_continuousLinearEquiv`). -/
 private lemma norm_eq_norm_toModel
     {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
     ‖T‖ = ‖TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
       (r := r) (s := s) (x := x) T‖ := rfl
 
-/-- On the chart-target image, the chart-pulled `ENNReal`-norm-squared of `S`
-coincides with `ENNReal.ofReal` of the chart-pulled squared model-fiber norm
-`tensorTrivProjPushedNormSq g r s α S`. -/
 private lemma enorm_sq_apply_eq_ofReal_pushedNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -155,21 +100,7 @@ private lemma enorm_sq_apply_eq_ofReal_pushedNormSq
   rw [henorm_eq, hpush_eq, ← hnorm_eq]
   rw [← ENNReal.ofReal_pow (norm_nonneg _) 2]
 
-set_option linter.unusedSectionVars false in
-/-- **Manifold L² norm bounded by a finite sum of chart-target L² norms.**
 
-For a smooth closed Riemannian manifold `(M, g)` and a fiberwise tensor section
-`S : Π b : M, TensorRSSpace r s I b` such that the pointwise norm-squared
-function `x ↦ ‖S x‖ ^ 2` is measurable on `M`, there exists a non-negative real
-constant `C`, depending only on `g`, the chart atlas, and the canonical
-partition of unity, such that the global L² norm-squared of `S` against the
-canonical Riemannian volume measure is bounded by `C` times the finite sum,
-over the chart-atlas partition-of-unity support set `chartAtlasPOU_finset I M`,
-of the chart-target integrals of `tensorTrivProjPushedNormSq g r s α S`.
-
-No external hypothesis is required for the chart-target sup bound; it is
-provided unconditionally by `exists_pou_chartDensity_bound_on_chartTarget`
-via the chain of α-uniform chart-target sup bounds for the chart density. -/
 theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -470,17 +401,7 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     rw [← hpull_out]
     exact hsum_bound
 
-set_option linter.unusedSectionVars false in
-/-- **Uniform-constant manifold L² bound by a finite sum of chart-target L²
-norms.**
 
-For a smooth closed Riemannian manifold `(M, g)`, the manifold L²-norm-squared
-of a fiberwise tensor section `S` against the canonical Riemannian volume
-measure is bounded by the named constant
-`chartTargetL2BridgeConstant g` times the finite sum, over the
-chart-atlas partition-of-unity support set, of the chart-target integrals of
-`tensorTrivProjPushedNormSq g r s α S`. The bound holds for every Borel-
-measurable section, with a single constant chosen uniformly. -/
 theorem uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -4,87 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorWeakPartials
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
 
-/-!
-# The non-smooth covariant-gradient partition-of-unity chart-component identity
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and an eigenbasis
-index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, let
-`φ := tensorResolventEigenbasisVec … i` be the eigenvector and
-`R := eigenvectorResolvent g r s i` its `H¹`-completion resolvent.
-The abstract `L²` covariant gradient of `R` is `tensorCovGradL2Compl g r s R`, an
-`(r, s + 1)`-tensor.
-
-This file proves the **partition-of-unity covariant-gradient chart-component
-almost-everywhere identity**: the canonical Euclidean chart component of
-`tensorCovGradL2Compl g r s R`, rescaled by `μ⁻¹`, equals — almost everywhere on
-the Euclidean chart target — a principal term (the established weak chart
-partial of `φ`'s chart component) minus a partition-of-unity Leibniz cross-term
-limit plus a Christoffel-correction limit.
-
-## The rescaling convention
-
-`R` lies in the `H¹` completion; its `L²` shadow is `μ • φ`
-(`eigenvector_eq_resolvent_smul`). The completion-extended covariant gradient
-`tensorCovGradL2Compl g r s` is `ℝ`-linear, so `tensorCovGradL2Compl g r s R`
-represents the covariant gradient of `μ • φ`, i.e. `μ` times the covariant
-gradient of `φ`. Each of the three named limit objects on the right —
-`eigenvectorChartWeakPartial`, the cross-term limit
-`covGradPouLeibnizCrossLimit` constructed here, and
-`covGradChristoffelLimit` (companion file) — is a chart
-object of the eigenvector `φ` itself, i.e. `μ`-clean. Consequently the headline
-carries a `μ⁻¹`-rescaling on its left-hand side: with it, the `μ`-factors of the
-intermediate smooth-approximant terms cancel exactly.
-
-## Proof route
-
-The approximating sequence `wₙ := eigenvectorSmoothApprox g r s i n`
-has completion embeddings converging to `R`
-(`eigenvectorSmoothApprox_tendsto`).
-Both `tensorCovGradL2Compl g r s` and `tensorL2ChartComponentCLM g r (s + 1) β
-Q'` are continuous linear maps; applying their composition to that convergence
-exhibits the chart component of `tensorCovGradL2Compl g r s R` as the `L²`-limit
-of the chart components of the section-level covariant gradients
-`covGrad g r s wₙ.toCcTensor`.
-
-For each `n`, the `n`-th term is rewritten almost everywhere on the chart
-target, by the raw chart-component formula `tensorChartComponentRaw_covGrad`
-together with the partition-of-unity Leibniz identity
-`chartPushedRaw_pou_mul_euclidPartial_eq`, into the difference of a principal
-chart-partial term and a Leibniz cross term, plus the Christoffel correction at
-the partition-of-unity-weighted approximant. Taking the three `L²`-limits
-termwise — via `eigenvectorChartPartialLp_tendsto`,
-`covGradPouLeibnizCrossLimit_tendsto`, and
-`covGradChristoffel_tendsto` — and appealing to uniqueness of
-`L²`-limits yields the headline.
-
-## Main definitions
-
-* `covGradPouLeibnizCrossLimit g r s i β P₀ k` — the explicit
-  `L²`-limit function of the partition-of-unity Leibniz cross term: the `C^∞`
-  derivative of the chart-pushed partition-of-unity weight times the cutoff
-  Euclidean chart component of the eigenvector.
-
-## Main results
-
-* `covGradPouLeibnizCrossLimit_memLp` — the cross-term limit
-  function is `L²`.
-* `covGradPouLeibnizCrossLimit_tendsto` — its `n → ∞`
-  `L²`-convergence.
-* `eigenvectorCovGrad_pou_chartComponent_ae_eq` — **the headline**:
-  the `μ⁻¹`-rescaled canonical chart component of the section-level covariant
-  gradient of the eigenvector resolvent equals, almost everywhere, the principal
-  weak chart partial minus the cross-term limit plus the Christoffel-correction
-  limit.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -117,8 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart-pushed partition-of-unity weight vanishes outside the
-partition-of-unity kernel of the chart. -/
 private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
     chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -135,8 +55,6 @@ private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     · exact toEuclidean.apply_symm_apply y
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ htar
 
-/-- The chart-Euclidean partial of the chart-pushed partition-of-unity weight
-vanishes outside the partition-of-unity kernel of the chart. -/
 private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) (k : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
@@ -170,8 +88,6 @@ private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKer
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-/-- The Leibniz cross-term multiplier `euclidPartial k (chartPushedRaw I β
-chartAtlasPOU)` is `C^∞` on the open chart target. -/
 private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -204,8 +120,6 @@ private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
   · intro z _; rw [euclidPartial_def]
   · rw [euclidPartial_def]
 
-/-- The Leibniz cross-term multiplier is bounded on the partition-of-unity
-kernel of the chart: a `C^∞`-on-the-chart-target function on a compact set. -/
 private lemma exists_bound_euclidPartial_chartPushedRaw_chartAtlasPOU
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ chartPouKernel (I := I) (M := M) β,
@@ -215,17 +129,12 @@ private lemma exists_bound_euclidPartial_chartPushedRaw_chartAtlasPOU
   exists_bound_on_chartPouKernel (I := I) (M := M) β
     (contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU (I := I) (M := M) β k)
 
-/-- The indicator-restricted Leibniz cross-term multiplier: the multiplier cut
-to the compact partition-of-unity kernel. It is globally bounded and agrees with
-the un-restricted multiplier everywhere. -/
 private def crossMultiplier
     (β : M) (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   Set.indicator (chartPouKernel (I := I) (M := M) β)
     (euclidPartial (E := E) k
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
-/-- The indicator-restricted cross-term multiplier agrees with the un-restricted
-multiplier at every Euclidean point: outside the kernel both vanish. -/
 private lemma crossMultiplier_eq
     (β : M) (k : Fin (Module.finrank ℝ E)) (y : EuclN) :
     crossMultiplier (I := I) (M := M) β k y =
@@ -239,7 +148,6 @@ private lemma crossMultiplier_eq
     exact (euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hy).symm
 
-/-- The indicator-restricted cross-term multiplier is globally bounded. -/
 private lemma exists_bound_crossMultiplier
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y : EuclN,
@@ -253,8 +161,6 @@ private lemma exists_bound_crossMultiplier
   · rw [Set.indicator_of_mem hy]; exact hC y hy
   · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC0
 
-/-- The indicator-restricted cross-term multiplier is `AEStronglyMeasurable`
-with respect to the chart `L²` measure. -/
 private lemma aestronglyMeasurable_crossMultiplier
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     AEStronglyMeasurable (crossMultiplier (I := I) (M := M) β k)
@@ -262,11 +168,6 @@ private lemma aestronglyMeasurable_crossMultiplier
   aestronglyMeasurable_indicator_mul (I := I) (M := M) β
     (contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU (I := I) (M := M) β k)
 
-/-- On the chart target, the cross-term multiplier times the chart-pushed raw
-chart component of a smooth section equals the cross-term multiplier times the
-cutoff Euclidean chart component of that section. The multiplier vanishes off
-the partition-of-unity kernel; on it, the chart-kernel cutoff equals `1`, so the
-two chart components coincide. -/
 private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β : M)
@@ -310,9 +211,6 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
   · rw [euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hker, zero_mul, zero_mul]
 
-/-- On the chart target, the chart-pushed partition-of-unity weight times the
-zeroth-order Christoffel correction of a smooth section equals the Christoffel
-correction of the partition-of-unity-weighted section. -/
 private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β : M)
@@ -332,7 +230,7 @@ private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
   ring
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit`. -/
+
 noncomputable def covGradPouLeibnizCrossLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -348,7 +246,7 @@ noncomputable def covGradPouLeibnizCrossLimit
         EuclN → ℝ) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit_memLp`. -/
+
 theorem covGradPouLeibnizCrossLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -377,7 +275,7 @@ theorem covGradPouLeibnizCrossLimit_memLp
   rw [crossMultiplier_eq (I := I) (M := M) β k y]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `cutoffComponent_smoothApprox_tendsto`. -/
+
 private lemma cutoffComponent_smoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -436,7 +334,6 @@ private lemma cutoffComponent_smoothApprox_tendsto
   rw [h_lim] at h_clm
   exact h_clm.congr (fun n => h_term n)
 
-/-- Chart-locality-free twin of `crossTermApprox`. -/
 private def crossTermApprox
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -450,7 +347,6 @@ private def crossTermApprox
           (eigenvectorSmoothApprox (I := I) (M := M)
             g r s i n).toCcTensor β P₀.1 P₀.2) y
 
-/-- Chart-locality-free twin of `crossTermCutoff`. -/
 private def crossTermCutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -463,7 +359,6 @@ private def crossTermCutoff
           g r s i n).toCcTensor) : TensorL2 r s g) β P₀ :
         EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `crossTermCutoff_memLp`. -/
 private lemma crossTermCutoff_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -479,7 +374,6 @@ private lemma crossTermCutoff_memLp
       (((eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor) : TensorL2 r s g) β P₀))
 
-/-- Chart-locality-free twin of `crossTermApprox_ae_eq_crossTermCutoff`. -/
 private lemma crossTermApprox_ae_eq_crossTermCutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -504,7 +398,6 @@ private lemma crossTermApprox_ae_eq_crossTermCutoff
     (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
     β P₀.1 P₀.2 k hy, crossMultiplier_eq (I := I) (M := M) β k y, hy_coe]
 
-/-- Chart-locality-free twin of `crossTermApprox_memLp`. -/
 private lemma crossTermApprox_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -517,7 +410,7 @@ private lemma crossTermApprox_memLp
       g r s i β P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit_tendsto`. -/
+
 theorem covGradPouLeibnizCrossLimit_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -592,7 +485,6 @@ theorem covGradPouLeibnizCrossLimit_tendsto
     (crossTermApprox_ae_eq_crossTermCutoff (I := I) (M := M)
       g r s i β P₀ k n)).symm
 
-/-- Chart-locality-free twin of `covGrad_chartComponent_ae_decompose`. -/
 private lemma covGrad_chartComponent_ae_decompose
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -638,7 +530,6 @@ private lemma covGrad_chartComponent_ae_decompose
   simp only [crossTermApprox]
   ring
 
-/-- Chart-locality-free twin of `principalTerm_tendsto`. -/
 private lemma principalTerm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -668,7 +559,6 @@ private lemma principalTerm_tendsto
         g r s i n).toCcTensor β Q'.1 (Matrix.vecTail Q'.2)
       (Q'.2 0))
 
-/-- Chart-locality-free twin of `christoffelTerm_tendsto`. -/
 private lemma christoffelTerm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -694,7 +584,8 @@ private lemma christoffelTerm_tendsto
   congr 1
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `covGrad_chartComponent_tendsto`. -/
+
+omit [CompleteSpace E] in
 private lemma covGrad_chartComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -727,14 +618,7 @@ private lemma covGrad_chartComponent_tendsto
       g r s (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `eigenvectorCovGrad_pou_chartComponent_ae_eq`.**
-The `μ⁻¹`-rescaled canonical Euclidean chart component of the section-level
-covariant gradient `tensorCovGradL2Compl g r s` of the chart-locality-free
-eigenvector resolvent `eigenvectorResolvent g r s i` equals, almost
-everywhere on the Euclidean chart target, the established weak `(Q'.2 0)`-th chart
-partial of the eigenvector chart component, minus the partition-of-unity Leibniz
-cross-term limit `covGradPouLeibnizCrossLimit`, plus the
-Christoffel-correction limit `covGradChristoffelLimit`. -/
+
 theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

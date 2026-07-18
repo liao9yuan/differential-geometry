@@ -17,12 +17,12 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F Geometry Formula Core
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
--/
+
+
+
+
+
 
 section GeometryFormula510
 
@@ -35,12 +35,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Integral bridge from the moving-volume first-variation integrand to the
-pre-cancellation formula 5.10 integral.
 
-This is the exact `hfirst` shape consumed by the component-level formula 5.10
-assembly theorem once the geometric variation producer has identified
-`delta(R + |grad f|^2)`. -/
+
+
+
+
+
 theorem firstVariationIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -121,12 +121,12 @@ theorem firstVariationIntegral_eq_pre510
             metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
         hmeas).symm
 
-/-- Closed-bracket integral bridge for formula 5.10.
 
-This is the producer form suited to the `R + Delta f` trace variation coming
-from `LeviCivita.Variation`: once the closed bracket varies by
-`-v^{ij}(Ric_ij + Hess_ij f) + div_A + Hess(h - V/2)`, the moving-volume
-integrand is exactly the pre-cancellation formula 5.10 integral. -/
+
+
+
+
+
 theorem closedIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -193,10 +193,10 @@ theorem closedIntegral_eq_pre510
             metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
         hmeas).symm
 
-/-- Integral bridge from the original `R + |grad f|^2` moving-volume integrand
-to the pre-cancellation formula 5.10 integral via the closed bracket
-`R + Delta f`.  The hypothesis `hclosed_compare` is the differentiated
-closed-manifold Green/IBP comparison between the two bracket forms. -/
+
+
+
+
 theorem firstVar_pre510_closed
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -249,8 +249,8 @@ theorem firstVar_pre510_closed
   rw [hclosed_compare]
   exact closedIntegral_eq_pre510 (I := I) (M := M) G hmeas hclosed_variation
 
-/-- Convert a per-time weighted-IBP equality into equality of the base-measure
-integrals used by the moving-volume derivative theorem. -/
+
+
 theorem bracketClosed_eventually
     {muPath : Real -> Measure M}
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
@@ -322,9 +322,9 @@ theorem bracketClosed_eventually
             fFunctionalClosedBracket (scalarCurvaturePath s)
               (lapPotentialPath s)) hmeas_s
 
-/-- Derivative comparison between the original `R + |grad f|^2` bracket and
-the closed `R + Delta f` bracket.  The input equality is the per-time weighted
-IBP identity, already transported to the base-measure integral shape. -/
+
+
+
 theorem closedCompare
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -456,8 +456,8 @@ theorem closedCompare
         ∂(volumeMeasureFamily (I := I) (M := M) G s0) := by
         simp [hpotential0, hscalar0, hlap0]
 
-/-- Formula 5.10 pre-cancellation integral with the closed-bracket comparison
-supplied by the derivative of the per-time weighted IBP identity. -/
+
+
 theorem firstVar_pre510_weighted
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -551,9 +551,9 @@ theorem firstVar_pre510_weighted
       hmetric_reg horig_reg hclosed_reg hpotential0 hscalar0 hlap0
   · exact hclosed_variation
 
-/-- Formula 5.10 pre-cancellation integral with the closed-bracket comparison
-supplied in the natural weighted-measure form:
-`∫ (R + |grad f|^2)e^{-f}dmu = ∫ (R + Delta f)e^{-f}dmu` near the base time. -/
+
+
+
 theorem firstVar_pre510_ibp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -671,9 +671,9 @@ theorem firstVar_pre510_ibp
   · exact hlap0
   · exact hclosed_variation
 
-/-- Formula 5.10 from the geometric connection-trace divergence field and the
-weighted Green shift identity.  This is the assembly form matching the book's
-step where `∇_p(e^{-f} g^{ij} A^p_{ij})` integrates to zero. -/
+
+
+
 theorem formula510_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

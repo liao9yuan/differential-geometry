@@ -1,12 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.ArzelaAscoli
 
-/-!
-# Fréchet–Kolmogorov compactness criterion in `L^p`
-
-This module develops the Fréchet–Kolmogorov compactness criterion: a
-bounded sequence in `L^p(ℝ^d)` with uniform compact support and uniform
-translation continuity has a subsequence converging in `L^p`.
--/
 
 noncomputable section
 
@@ -20,7 +13,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- `t ↦ z - t` is measure-preserving on `E`. -/
+
 private lemma measurePreserving_constSub_E (z : E) :
     MeasurePreserving (fun t : E => z - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -33,7 +26,7 @@ private lemma measurePreserving_constSub_E (z : E) :
   exact h_addL.comp h_neg
 
 omit [NeZero d] in
-/-- Translation-invariance of `eLpNorm`. -/
+
 lemma eLpNorm_translate_eq
     {p : ℝ≥0∞} {f : E → ℝ}
     (hf : AEStronglyMeasurable f volume) (h : E) :
@@ -47,8 +40,6 @@ lemma eLpNorm_translate_eq
     exact hMP_neg
   exact eLpNorm_comp_measurePreserving hf hMP
 
-/-- Jensen's inequality for `lintegral` and `pr ≥ 1`: if `ν` is a probability
-measure, then `(∫ g dν)^pr ≤ ∫ g^pr dν` (in `ℝ≥0∞`). -/
 theorem lintegral_pow_le_pow_lintegral_prob
     {α : Type*} [MeasurableSpace α] {ν : Measure α} [IsProbabilityMeasure ν]
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr)
@@ -82,8 +73,7 @@ theorem lintegral_pow_le_pow_lintegral_prob
   rw [← ENNReal.rpow_mul, show (1 / pr) * pr = 1 by field_simp, ENNReal.rpow_one]
 
 omit [NeZero d] in
-/-- Pointwise integral identity: `(η ⋆ u)(x) - u(x) = ∫ η(s)(u(x-s) - u(x)) ds`,
-when `∫ η = 1`. -/
+
 private lemma convolution_sub_eq_integral_aux
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -118,7 +108,7 @@ private lemma convolution_sub_eq_integral_aux
   rw [h1, hsub_eq, h2]
 
 omit [NeZero d] in
-/-- Integrability of `s ↦ η(s) • (u(x-s) - u(x))`. -/
+
 private lemma integrable_eta_smul_translate_sub
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -143,14 +133,14 @@ private lemma integrable_eta_smul_translate_sub
   exact hint_etaUsmul.sub hint_etaUx
 
 omit [NeZero d] in
-/-- Reformulate `‖η(s) • r‖ = η(s) * ‖r‖` for `η(s) ≥ 0`. -/
+
 private lemma norm_eta_smul_eq_eta_mul_norm
     {η : E → ℝ} (hη_nonneg : ∀ y, 0 ≤ η y) (s : E) (r : ℝ) :
     ‖η s • r‖ = η s * ‖r‖ := by
   rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (hη_nonneg s)]
 
 omit [NeZero d] in
-/-- Pointwise lintegral bound: `‖(η ⋆ u)(x) - u(x)‖_e ≤ ∫ η(s) ‖u(x-s) - u(x)‖_e ds`. -/
+
 private lemma enorm_convolution_sub_le_lintegral
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -192,12 +182,8 @@ private lemma enorm_convolution_sub_le_lintegral
   exact hf_norm_e.trans (le_of_eq hReal_to_lint)
 
 omit [NeZero d] in
-/-- For a non-negative compactly-supported continuous `η : E → ℝ` integrating
-to one, and `u : E → ℝ` measurable and locally integrable, the `L^pr`-norm of
-the convolution-difference `(η ⋆ u) - u` is bounded by the supremum of
-`‖τ_s u - u‖_{L^pr}` over `s ∈ supp η`. We work with the `lintegral` form
-throughout. -/
-theorem lintegral_rpow_convolution_sub_le_supTrans
+
+theorem lintegral_rpow_convolution_sub_le_translationAverage
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr)
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -303,11 +289,8 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
   rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
 
 omit [NeZero d] in
-/-- `eLpNorm` of `(η ⋆ u) - u` is bounded by the supremum of translation
-differences `eLpNorm (τ_s u - u) p volume` over `‖s‖ ≤ ε`, where `η` is a
-continuous nonneg compactly-supported bump in the closed `ε`-ball with
-`∫ η = 1`. The hypothesis on `T` only needs to cover `s ∈ supp η`. -/
-theorem eLpNorm_convolution_sub_le_supTrans_meas
+
+theorem eLpNorm_convolution_sub_le_of_ae_translation_bound
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -350,7 +333,7 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
     rw [hp_eq, eLpNorm_eq_lintegral_rpow_enorm_toReal hp0_pr hp_top_pr]
     simp [hpr_toReal]
   rw [hLHS_eq]
-  have hcore := lintegral_rpow_convolution_sub_le_supTrans hpr_ge_one
+  have hcore := lintegral_rpow_convolution_sub_le_translationAverage hpr_ge_one
       hη_cont hη_compact hη_nonneg hη_int_eq_one hu_meas hu_loc
   have hT_pow : ∀ᵐ s ∂(volume : Measure E),
       η s ≠ 0 →
@@ -411,8 +394,7 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
   rw [show pr * (1 / pr) = 1 by field_simp, ENNReal.rpow_one]
 
 omit [NeZero d] in
-/-- A continuous function `g : E → ℝ` supported in a compact set `K` has
-finite-volume support, hence lies in `L^p(volume)` for any `1 ≤ p ≤ ∞`. -/
+
 private lemma memLp_of_continuous_of_support_subset
     {p : ℝ≥0∞}
     {K : Set E} (hK_compact : IsCompact K)
@@ -425,16 +407,13 @@ private lemma memLp_of_continuous_of_support_subset
   exact hg_cont.memLp_of_hasCompactSupport (μ := volume) hg_compact
 
 omit [NeZero d] in
-/-- The volume of a compact subset of `E = EuclideanSpace ℝ (Fin d)` is finite. -/
+
 private lemma volume_lt_top_of_compact
     {K : Set E} (hK_compact : IsCompact K) :
     (volume : Measure E) K < ∞ :=
   hK_compact.measure_lt_top
 
-/-- **C.7.** If a sequence of continuous functions `g k`, all supported in a
-fixed compact set `K`, converges uniformly on `K` to a continuous function
-`g_∞` (also supported in `K`), then `g k - g_∞` converges to zero in
-`L^p(volume)`. -/
+omit [NeZero d] in
 theorem tendsto_lp_of_tendstoUniformlyOn_compact
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)
@@ -550,8 +529,7 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
       exact this
 
 omit [NeZero d] in
-/-- Hölder bound: an `L^p` function supported on a compact set has finite
-`L^1` norm (hence is integrable). -/
+
 private lemma integrable_of_memLp_compactSupp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {K : Set E} (hK_compact : IsCompact K)
@@ -566,8 +544,7 @@ private lemma integrable_of_memLp_compactSupp
   exact (memLp_one_iff_integrable.mp hu_memLp_one)
 
 omit [NeZero d] in
-/-- Auxiliary: the support of `u_n ⋆ η`, when `u_n` is supported in `K` and
-`η` is supported in `closedBall 0 ε`, is contained in `cthickening ε K`. -/
+
 private lemma convolution_support_subset_cthickening
     {ε : ℝ} (_hε : 0 ≤ ε)
     {K : Set E} {u η : E → ℝ}
@@ -599,9 +576,7 @@ private lemma convolution_support_subset_cthickening
   simp [h_zero_integrand]
 
 omit [NeZero d] in
-/-- If a sequence of continuous functions all supported in a compact set `K`
-is uniformly Cauchy on `K` (i.e., the dist between elements is eventually small
-on `K`), then it is Cauchy in `L^p(volume)`. -/
+
 private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)
@@ -688,8 +663,7 @@ private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
     exact h
 
 omit [NeZero d] in
-/-- A nonneg compactly-supported continuous `η` integrating to one is
-  integrable with `‖η‖_{L^1}_e = 1`. -/
+
 private lemma lintegral_of_nonneg_eta_eq_one
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -703,11 +677,7 @@ private lemma lintegral_of_nonneg_eta_eq_one
   rw [hη_int_eq_one]
   simp
 
-/-- **Step C.8.** Suppose a sequence `u_n` in `L^p(volume)`, all supported in a
-fixed compact set `K`, with uniform `L^p`-norm bound `R` and uniform translation
-continuity (the parameter `δ` for `‖h‖ < δ` is independent of `n`). Then there
-exists a strictly increasing subsequence `φ` and a function `u_∞ ∈ L^p(volume)`
-such that `eLpNorm (u_{φ k} - u_∞) p volume → 0`. -/
+omit [NeZero d] in
 theorem tendsto_subseq_of_uniform_translation_in_Lp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)
@@ -878,7 +848,7 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       have habs : εFn k = |εFn k| := (abs_of_pos (hε_pos k)).symm
       rw [habs]
       exact hd
-    refine eLpNorm_convolution_sub_le_supTrans_meas
+    refine eLpNorm_convolution_sub_le_of_ae_translation_bound
       hp_one hp_top (hη_cont k) (hη_compact k) (hη_nonneg k) (hη_int_eq_one k)
       (hv_meas n) (hv_loc n) ?_
     filter_upwards with s hs

@@ -2,57 +2,57 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Spectr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralChartRegularityAnyOrder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
 
-/-!
-# The iterated Gårding extension bound from eigenvalue-tail summability
 
-This file discharges the iterated spectral→intrinsic Gårding norm bound
-`IteratedGardingExtensionBound g r s` (the order-by-order operator bound of the
-finite-support smooth-representative map by a spectral Sobolev norm, on the dense
-finite-support subspace) **from** the single Weyl-type spectral input
-`EigenvalueTailSummable g r s`. Combined with the eigenvalue-tail summability
-producer `eigenvalueTailSummable_of_countingBound`, this exhibits the iterated
-Gårding bound as a consequence of the same root input — the polynomial
-eigenvalue-counting bound — that already discharges the spectral smooth-
-representative gate through the chart-Sobolev regularity route. There is no
-independent analytic content in the iterated Gårding bound beyond the spectral
-counting input: it follows by combining the on-disk per-eigenvector quantitative
-chart-Sobolev bound with a Cauchy–Schwarz `ℓ² → ℓ¹` argument fed by the
-eigenvalue tail.
 
-## The reduction
 
-For a fixed order `k`, the on-disk per-eigenvector quantitative bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform` controls the smooth
-representative's tensor `W^{2k,2}` norm by the explicit finite `ℓ¹` sum
 
-  `wtwokTwoNorm g k (smoothRepr T) ≤ C₀ · ∑_{i ∈ supp T} |T.coeff i| · (1 + λᵢ)^{2k+1}`,
 
-using `(i.fst.val)⁻¹ = 1 + λᵢ` (`resolvent_eigenvalue_inv_eq_one_add_lambda`).
-We choose the spectral exponent `σ = 2·(2k+1) + p`, where `p > 0` is the witness
-exponent extracted from `EigenvalueTailSummable`. Splitting each summand as
 
-  `|cᵢ| · (1 + λᵢ)^{2k+1} = [ (1 + λᵢ)^{σ/2} |cᵢ| ] · [ (1 + λᵢ)^{(2k+1) − σ/2} ]`,
 
-finite Cauchy–Schwarz `Finset.sum_mul_sq_le_sq_mul_sq` gives
 
-  `(∑ |cᵢ| (1 + λᵢ)^{2k+1})² ≤ (∑ (1 + λᵢ)^σ cᵢ²) · (∑ (1 + λᵢ)^{2(2k+1)−σ})`.
 
-The first factor is `≤ ‖T‖²_{Hˢ}` (a finite partial sum of the weighted-`ℓ²`
-norm), and the second factor is `∑ (1 + λᵢ)^{−p} ≤ S_tail`, a fixed finite
-constant by the eigenvalue tail. Hence the finite `ℓ¹` sum is `≤ √S_tail · ‖T‖`,
-and the smooth representative's `W^{2k,2}` norm is `≤ (C₀ · √S_tail) · ‖T‖`. The
-constant `C := C₀ · √S_tail ≥ 0` and the exponent `σ` are independent of `T`, so
-this is exactly `IteratedGardingExtensionBound g r s`.
 
-## Consequence
 
-Composing with `eigenvalueTailSummable_of_countingBound`, the iterated Gårding
-bound holds from the polynomial eigenvalue-counting bound
-`EigenvalueCountingBound g r s`, the same single classical input that closes the
-spectral smooth-representative gate via the chart-Sobolev route. The iterated
-Gårding bound therefore introduces **no** new analytic root: its sole hypothesis
-is `EigenvalueTailSummable`, equivalently `EigenvalueCountingBound`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -85,8 +85,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The resolvent factor `(i.fst.val)⁻¹ ^ (2k+1)` equals the spectral Sobolev
-weight `(1 + λᵢ)^{2k+1}` at the real exponent `(2 * k + 1 : ℝ)`. -/
+
+
 private lemma resolvent_pow_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
@@ -96,15 +96,15 @@ private lemma resolvent_pow_eq_weight
   unfold tensorSobolevWeight
   rw [Real.rpow_natCast]
 
-/-- **The finite `ℓ¹` Sobolev-weight sum is bounded by `√S_tail · ‖T‖`.**
 
-For a finitely-supported spectral element `T : tensorHs g r s σ` with the
-spectral exponent `σ = 2 * (2 * k + 1) + p` chosen so that
-`2 * (2 * k + 1) − σ = −p`, the finite sum
-`∑_{i ∈ supp T} |T.coeff i| · (1 + λᵢ)^{2k+1}` is bounded by
-`√(∑'ᵢ (1 + λᵢ)^{−p}) · ‖T‖`, where the `tsum` is the (finite) eigenvalue tail
-at exponent `p > 0`. This is the Cauchy–Schwarz `ℓ² → ℓ¹` core of the iterated
-Gårding reduction. -/
+
+
+
+
+
+
+
+
 private lemma garding_l1_sum_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     {p : ℝ}
@@ -195,23 +195,23 @@ private lemma garding_l1_sum_le
     _ = ‖T‖ * Real.sqrt Stail := hrhs_eq
     _ = Real.sqrt Stail * ‖T‖ := by ring
 
-/-- **The iterated Gårding extension bound from eigenvalue-tail summability.**
 
-Granting `EigenvalueTailSummable g r s` (the Weyl-type Schatten spectral input:
-some negative power `(1 + λᵢ)^{−p}`, `p > 0`, of the connection-Laplacian
-eigenvalues is summable), the iterated spectral→intrinsic Gårding norm bound
-`IteratedGardingExtensionBound g r s` holds.
 
-For each order `k` the witness exponent is `σ = 2 · (2k+1) + p` and the constant
-is `C = C₀ · √(∑'ᵢ (1 + λᵢ)^{−p})`, where `C₀ ≥ 0` is the order-`k` constant of
-the on-disk per-eigenvector quantitative chart-Sobolev bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform`. The bound is the
-Cauchy–Schwarz `ℓ² → ℓ¹` combination of that per-eigenvector bound with the
-eigenvalue tail, isolated in `garding_l1_sum_le`.
 
-This exhibits the iterated Gårding bound as a consequence of the single root
-input `EigenvalueTailSummable`; it carries **no** independent analytic content
-beyond it. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s) :
@@ -273,22 +273,22 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
         mul_le_mul_of_nonneg_left hl1 hC₀_nn
     _ = C₀ * Real.sqrt Stail * ‖T‖ := by ring
 
-/-- **The iterated Gårding extension bound from the Weyl counting bound.**
 
-Granting the polynomial eigenvalue-counting bound `EigenvalueCountingBound g r s`
-(the single classical geometric input that closes the spectral smooth-
-representative gate via the chart-Sobolev route), the iterated spectral→intrinsic
-Gårding norm bound `IteratedGardingExtensionBound g r s` holds. This is
-`iteratedGardingExtensionBound_of_eigenvalueTailSummable` precomposed with the
-counting ⟹ tail-summability reduction `eigenvalueTailSummable_of_countingBound`.
 
-The complete chain is
-```
-  EigenvalueCountingBound  ⟹  EigenvalueTailSummable  ⟹  IteratedGardingExtensionBound,
-```
-exhibiting the iterated Gårding bound as resting on exactly the same single root
-input as the spectral smooth-representative gate, with no independent analytic
-content. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem iteratedGardingExtensionBound_of_countingBound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h : EigenvalueCountingBound (I := I) (M := M) g r s) :

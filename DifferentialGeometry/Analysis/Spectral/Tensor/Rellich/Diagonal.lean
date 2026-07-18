@@ -1,48 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevBoundPerSection
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
 
-/-!
-# Per-chart per-component scalar Rellich diagonal extraction for tensor sections
-
-For a closed Riemannian manifold `(M, g)` and a sequence
-`S : ℕ → SmoothCcTensorH1 g r s` of smooth compactly-supported `H¹` tensor
-sections, every chart point `α ∈ chartAtlasPOU_finset I M` together with every
-multi-index pair `(Idx, Jdx)` produces a scalar field
-`tensorChartComponentScalar g r s (S n).toCcTensor α Idx Jdx` on `M`. This file
-delivers a **single** subsequence extraction `φ : ℕ → ℕ` which, simultaneously
-for every triple `(α, Idx, Jdx)` in the finite triple set, yields convergence
-in `L²` of the Riemannian volume measure.
-
-The construction proceeds by:
-
-* per fixed `(α, Idx, Jdx)`, applying the closed-manifold Rellich–Kondrachov
-  subsequence extraction `rellich_kondrachov_chart_seq` to the component
-  sequence, under the hypothesis that the chart-Sobolev norms of the
-  components are uniformly bounded across `n`;
-* iterating a finite-Finset diagonal extraction over the triple set
-  `S.attach × Finset.univ` with `S = chartAtlasPOU_finset I M`.
-
-The uniform component bound is taken as an explicit hypothesis. Per-section
-finiteness of each `wkpNormChart` is already known from
-`tensorChartComponentScalar_wkpNormChart_lt_top`, and a per-section bound is
-delivered by `tensorChartComponent_wkpNormChart_le_per_section`, but those
-forms do not assemble a sequence-uniform constant. The downstream user
-supplies the uniform bound separately.
-
-## Headline theorems
-
-* `tensorChartComponent_rellich_extraction_of_uniform_bound` — the diagonal
-  extraction under an explicit uniform-in-`n` chart-Sobolev bound on the
-  scalar components.
-* `tensorChartComponent_rellich_extraction` — the same conclusion, restated
-  in the natural per-section signature where the user passes the uniform
-  bound as a hypothesis dependent on each `(α, Idx, Jdx)`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1000000
 
@@ -70,8 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The manifold-side scalar field is measurable: it is smooth, hence
-continuous, hence Borel measurable. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -83,22 +44,15 @@ theorem tensorChartComponentScalar_measurable
     tensorChartComponentScalar_contMDiff (I := I) (M := M) g r s S α Idx Jdx
   exact hsmooth.continuous.measurable
 
-/-- The triple type packaging `(α ∈ chartAtlasPOU_finset, Idx, Jdx)`. -/
 private abbrev Triple (r s : ℕ) :=
   { α : M // α ∈ chartAtlasPOU_finset (I := I) (M := M) } ×
     (Fin r → Fin (Module.finrank ℝ E)) ×
     (Fin s → Fin (Module.finrank ℝ E))
 
-/-- The full triple Finset over the chart-atlas POU support set and the
-multi-index Fintype. -/
 private noncomputable def tripleFinset (r s : ℕ) :
     Finset (Triple (I := I) (M := M) r s) :=
   Finset.univ
 
-/-- Single-triple Rellich extraction: given a sequence `S : ℕ → SmoothCcTensorH1`
-and a triple `(α, Idx, Jdx)`, under a uniform chart-Sobolev bound on the
-scalar components, extract a subsequence convergent in `L²` of the
-Riemannian volume measure. -/
 private lemma single_triple_extraction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)
@@ -164,8 +118,7 @@ private lemma single_triple_extraction
     rw [h_vol, ← h2_eq]
     exact h_tendsto
 
-/-- Composing the L² convergence with a strictly monotone reindexing
-preserves the convergence. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tendsto_eLpNorm_diff_comp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)
@@ -192,11 +145,6 @@ private lemma tendsto_eLpNorm_diff_comp
       (fun n => ⟨n, hψ_mono.id_le n⟩)
   exact h_tendsto.comp h_at_top
 
-/-- **Finite diagonal extraction over a triple Finset.** Given a sequence
-`S : ℕ → SmoothCcTensorH1 g r s` of `H¹` tensor sections and a uniform
-chart-Sobolev bound on each scalar component indexed by a triple in `T`,
-extract a single strictly monotone `φ : ℕ → ℕ` such that every triple in
-`T` simultaneously enjoys `L²` convergence of its component subsequence. -/
 private lemma diagonal_extraction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}
@@ -244,16 +192,6 @@ private lemma diagonal_extraction
         exact tendsto_eLpNorm_diff_comp (I := I) (M := M) g r s t'.1.1 t'.2.1 t'.2.2
           h_tendsto_t' hσ_t_mono
 
-/-- **Headline theorem.** Per-`α` per-component scalar Rellich diagonal
-extraction at the tensor level. For each
-`α ∈ chartAtlasPOU_finset I M` and each multi-index pair `(Idx, Jdx)`, the
-extracted subsequence's scalar component converges in `L²` of the
-Riemannian volume measure to a manifold-side `L²` limit.
-
-The hypothesis `hu_bdd` is a uniform-in-`n` chart-Sobolev bound on the
-scalar components; per-section finiteness is delivered by
-`tensorChartComponentScalar_wkpNormChart_lt_top`, but a sequence-uniform
-bound requires the explicit hypothesis. -/
 theorem tensorChartComponent_rellich_extraction_of_uniform_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}
@@ -289,10 +227,6 @@ theorem tensorChartComponent_rellich_extraction_of_uniform_bound
   rcases hP ⟨⟨α, hα⟩, Idx, Jdx⟩ hmem with ⟨u_lim, hu_lim_memLp, h_tendsto⟩
   exact ⟨u_lim, hu_lim_memLp, h_tendsto⟩
 
-/-- **Per-section signature.** Given a sequence
-`S : ℕ → SmoothCcTensorH1 g r s` with a uniform-in-`n` chart-Sobolev
-bound on every scalar chart-frame component, extract a single
-subsequence on which every scalar component converges in `L²`. -/
 theorem tensorChartComponent_rellich_extraction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}
@@ -319,10 +253,6 @@ theorem tensorChartComponent_rellich_extraction
   tensorChartComponent_rellich_extraction_of_uniform_bound
     (I := I) (M := M) g r s (S := S) (R := R) hu_bdd
 
-/-- **Restricted form.** The uniform chart-Sobolev bound is only required
-on triples `(α, Idx, Jdx)` with `α ∈ chartAtlasPOU_finset`. The
-conclusion is the same diagonal extraction across the finite triple
-Finset. -/
 theorem tensorChartComponent_rellich_extraction_restricted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : ℕ → SmoothCcTensorH1 g r s}

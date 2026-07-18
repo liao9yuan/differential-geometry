@@ -1,43 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Candidate
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# Chart-local expression for the metric-Riesz dual norm of the Ricci covector
-
-For a smooth Riemannian metric `g` on a smooth manifold `(M, g)` and a smooth
-scalar `φ : C^∞⟮I, M; ℝ⟯`, the function
-
-```
-b ↦ ‖ricciTensor g b (∇φ b, ·)‖²_{g-Riesz dual}
-```
-
-is the squared `g`-Riesz dual norm of the cotangent vector
-`ricciTensor g b (∇φ b, ·) : T_bM →L ℝ`. By the Riesz isomorphism, this equals
-`g_b(R(b), R(b))` where `R(b) := metricSharp g b (ricciTensor g b (∇φ b, ·)).toLinearMap`.
-
-In chart coordinates at `α : M`, on the chart base set, this admits the
-explicit formula
-
-```
-g(R(b), R(b)) = ∑_{i, j} α_i(b) · α_j(b) · chartInvGramMatrix g α b i j,
-```
-
-where `α_i(b) := ricciTensor g b (∇φ b, chartBasisVecFiber α i b)` are the
-chart-basis coordinates of the covector. Both `α_i(b)` and
-`chartInvGramMatrix g α b i j` are smooth in `b` on the chart base set, so
-the sum is smooth.
-
-This file establishes:
-
-* `chartRicciDualNormSq g α φ : M → ℝ` — the chart-local explicit
-  expression for `g(R, R)`.
-* `chartRicciDualNormSq_contMDiffOn` — smoothness on the chart base set.
-* `chartRicciDualNormSq_eq_inner` — the chart-local expression equals
-  `g_b(R(b), R(b))` for `b` on the chart base set.
-
-The eventual goal is to assemble a finite chart cover into a global sup
-bound, but that piece is deferred to follow-up work.
--/
 
 noncomputable section
 
@@ -66,8 +29,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `j`-th chart-basis component of the Ricci-applied covector
-`Ric(∇φ b, ·)` at point `b`, in the chart at `α`. -/
 noncomputable def ricciCovectorChartCoord
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (j : Fin (Module.finrank ℝ E)) (b : M) : ℝ :=
@@ -81,11 +42,6 @@ noncomputable def ricciCovectorChartCoord
       ricciTensor (I := I) g b (gradFun (I := I) g φ b)
         (chartBasisVecFiber (I := I) α j b) := rfl
 
-/-- The chart-basis component is smooth on the chart base set. The argument:
-`ricciTensor g b` is a smooth (0,2)-tensor section, `gradFun g φ` is a smooth
-tangent section (globally), and `chartBasisVec α j` is a smooth tangent section
-on the base set. Applying the smooth (0,2)-tensor bilinearly to the two
-sections produces a smooth scalar (on the base set). -/
 theorem ricciCovectorChartCoord_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (j : Fin (Module.finrank ℝ E)) :
@@ -123,8 +79,6 @@ theorem ricciCovectorChartCoord_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
   exact hpb.2
 
-/-- The chart-local expression for the `g`-Riesz dual norm squared of the
-Ricci covector, in the chart at `α`. -/
 noncomputable def chartRicciDualNormSq
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (b : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -140,9 +94,6 @@ noncomputable def chartRicciDualNormSq
           ricciCovectorChartCoord (I := I) g α φ j b *
           chartInvGramMatrix (I := I) g α b i j := rfl
 
-/-- The chart-local expression for `g(R, R)` is smooth on the chart base
-set. Each summand is a product of three smooth functions: two copies of
-`ricciCovectorChartCoord` and one of `chartInvGramMatrix`. -/
 theorem chartRicciDualNormSq_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -157,15 +108,12 @@ theorem chartRicciDualNormSq_contMDiffOn
   have h3 := chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
   exact (h1.mul h2).mul h3
 
-/-- The chart-local expression is continuous on the chart base set. -/
 theorem chartRicciDualNormSq_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) :
     ContinuousOn (chartRicciDualNormSq (I := I) g α φ)
       (trivializationAt E (TangentSpace I) α).baseSet :=
   (chartRicciDualNormSq_contMDiffOn (I := I) g α φ).continuousOn
 
-/-- For a compact subset `K` of the chart base set, the chart-local
-expression attains a non-negative finite supremum. -/
 theorem chartRicciDualNormSq_bdd_on_compact
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {K : Set M} (hK_compact : IsCompact K)
@@ -185,28 +133,25 @@ theorem chartRicciDualNormSq_bdd_on_compact
     intro b hb
     exfalso; exact hK_ne ⟨b, hb⟩
 
-/-- The Riesz lift of the Ricci covector `Ric(∇φ b, ·)` at `b`. -/
 noncomputable def ricciSharp (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) : TangentSpace I b :=
-  metricSharp (I := I) g b
+  DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap
 
 @[simp] lemma ricciSharp_def (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     ricciSharp (I := I) g φ b =
-      metricSharp (I := I) g b
+      DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
         (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap := rfl
 
-/-- Defining identity: `g_b(R(b), w) = Ric(∇φ b, w)` for any tangent vector `w`. -/
 lemma inner_ricciSharp (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) (w : TangentSpace I b) :
     g.inner b (ricciSharp (I := I) g φ b) w =
       ricciTensor (I := I) g b (gradFun (I := I) g φ b) w := by
   rw [ricciSharp_def]
-  exact inner_metricSharp (I := I) g b
+  exact DifferentialGeometry.Integral.Connection.inner_metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap w
 
-/-- Symmetric form: `g_b(w, R(b)) = Ric(∇φ b, w)` for any `w`. -/
 lemma inner_ricciSharp_right (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) (w : TangentSpace I b) :
     g.inner b w (ricciSharp (I := I) g φ b) =
@@ -214,7 +159,6 @@ lemma inner_ricciSharp_right (g : SmoothRiemannianMetric I M)
   rw [g.symm b w (ricciSharp (I := I) g φ b)]
   exact inner_ricciSharp (I := I) g φ b w
 
-/-- The chart-coordinate expansion coefficient for `ricciSharp`. -/
 noncomputable def ricciSharpChartCoeff
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (k : Fin (Module.finrank ℝ E)) (b : M) : ℝ :=
@@ -230,7 +174,6 @@ noncomputable def ricciSharpChartCoeff
         chartInvGramMatrix (I := I) g α b k j *
           ricciCovectorChartCoord (I := I) g α φ j b := rfl
 
-/-- The chart-local linear-combination representative of `ricciSharp`. -/
 noncomputable def ricciSharpChartLocal
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) : TangentSpace I b :=
@@ -238,8 +181,6 @@ noncomputable def ricciSharpChartLocal
     ricciSharpChartCoeff (I := I) g α φ k b •
       chartBasisVecFiber (I := I) α k b
 
-/-- The chart-local inner-product identity for the Riesz lift in chart
-coordinates. The proof mirrors `inner_gradChartLocal_chartBasis`. -/
 lemma inner_ricciSharpChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -340,15 +281,13 @@ lemma inner_ricciSharpChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-- On the chart base set, the chart-local linear-combination representative
-of the Riesz dual equals the abstract pointwise Riesz dual `ricciSharp`. -/
 lemma ricciSharpChartLocal_eq_ricciSharp
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     ricciSharpChartLocal (I := I) g α φ b =
       ricciSharp (I := I) g φ b := by
   classical
-  apply metricFlatLinear_injective (I := I) g b
+  apply DifferentialGeometry.Integral.Connection.metricFlatLinear_injective (I := I) g b
   ext v
   change g.inner b (ricciSharpChartLocal (I := I) g α φ b) v =
     g.inner b (ricciSharp (I := I) g φ b) v
@@ -388,9 +327,6 @@ lemma ricciSharpChartLocal_eq_ricciSharp
   rw [inner_ricciSharpChartLocal_chartBasis (I := I) g α φ hb k]
   rfl
 
-/-- Helper: pointwise bilinear expansion of
-`g.inner b ricciSharpChartLocal ricciSharpChartLocal`. The inner-product
-of two linear combinations expands as a double Gram-matrix sum. -/
 private lemma inner_ricciSharpChartLocal_self_eq
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     g.inner b (ricciSharpChartLocal (I := I) g α φ b)
@@ -450,9 +386,6 @@ private lemma inner_ricciSharpChartLocal_self_eq
   intro j _
   rfl
 
-/-- Algebraic identity: `∑ k l, r_k r_l G_{kl} = ∑ i j α_i α_j G⁻¹_{ij}` on the
-chart base set, where `r_k = ∑ j G⁻¹_{kj} α_j`. Uses the Gram-inverse
-identity `G * G⁻¹ = 1`. -/
 private lemma sum_sharp_coeff_gram_eq_invGram
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -485,7 +418,7 @@ private lemma sum_sharp_coeff_gram_eq_invGram
         if l = i then (1 : ℝ) else 0 := by
       rw [chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hb]
       rw [Matrix.one_apply]
-    show (∑ k, G l k * Ginv k i) =
+    change (∑ k, G l k * Ginv k i) =
         if l = i then (1 : ℝ) else 0
     rw [hG_def, hGinv_def]
     rw [← hid, Matrix.mul_apply]
@@ -596,8 +529,6 @@ private lemma sum_sharp_coeff_gram_eq_invGram
   intro j _
   rw [hα'_def, hGinv_def]
 
-/-- **Identity step.** On the chart base set, the chart-local explicit
-expression for `g(R, R)` equals `g_b(ricciSharp g φ b, ricciSharp g φ b)`. -/
 theorem chartRicciDualNormSq_eq_inner_ricciSharp
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -608,8 +539,6 @@ theorem chartRicciDualNormSq_eq_inner_ricciSharp
   rw [inner_ricciSharpChartLocal_self_eq (I := I) g α φ b]
   exact (sum_sharp_coeff_gram_eq_invGram (I := I) g α φ hb).symm
 
-/-- The chart-local expression `chartRicciDualNormSq g α φ b` is
-non-negative on the chart base set. -/
 theorem chartRicciDualNormSq_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -617,9 +546,6 @@ theorem chartRicciDualNormSq_nonneg
   rw [chartRicciDualNormSq_eq_inner_ricciSharp (I := I) g α φ hb]
   exact metric_inner_self_nonneg (I := I) (M := M) g b _
 
-/-- **Cauchy-Schwarz for the Ricci pairing.** For any tangent vector `w`,
-the squared pointwise pairing is bounded by the product of the dual norm
-squared and `g_b(w, w)`. -/
 lemma ricciPairing_cs_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (b : M) (w : TangentSpace I b) :
@@ -631,7 +557,6 @@ lemma ricciPairing_cs_sq
       (inner_ricciSharp (I := I) g φ b w).symm]
   exact metric_inner_cauchy_schwarz_sq (I := I) (M := M) g b _ w
 
-/-- Same statement using the chart-local formula. -/
 lemma ricciPairing_cs_sq_chartLocal
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -645,15 +570,13 @@ section GlobalBound
 
 variable [CompactSpace M]
 
-/-- The chart-`α` tsupport of the partition of unity, on a compact manifold,
-is itself compact. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tsupport_chartAtlasPOU_compact (α : M) :
     IsCompact (tsupport (fun x : M =>
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)) :=
   isClosed_tsupport _ |>.isCompact
 
-/-- The chart-`α` tsupport of the partition of unity is contained in the
-chart base set. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma tsupport_chartAtlasPOU_subset_baseSet (α : M) :
     tsupport (fun x : M => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x) ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -663,8 +586,6 @@ private lemma tsupport_chartAtlasPOU_subset_baseSet (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hsrc
 
-/-- **Per-chart compact bound.** For each `α`, the chart-local expression
-`chartRicciDualNormSq g α φ` is bounded on the tsupport of the chart-`α` POU. -/
 private lemma chartRicciDualNormSq_bdd_on_chart_tsupport
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ tsupport (fun x : M =>
@@ -674,8 +595,6 @@ private lemma chartRicciDualNormSq_bdd_on_chart_tsupport
     (tsupport_chartAtlasPOU_compact (I := I) (M := M) α)
     (tsupport_chartAtlasPOU_subset_baseSet (I := I) (M := M) α)
 
-/-- The global Ricci dual norm-squared bound: there exists a non-negative
-constant `C` such that `g_b(R(b), R(b)) ≤ C` for all `b : M`. -/
 theorem exists_global_ricci_dual_normSq_bound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ b : M,

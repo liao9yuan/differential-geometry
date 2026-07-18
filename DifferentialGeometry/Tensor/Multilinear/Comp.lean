@@ -1,28 +1,16 @@
-/-
-Copyright (c) 2024 Yury Kudryashov. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yury Kudryashov
-Coauthors: Jack McCarthy
--/
+
+
+
+
+
+
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
-/-!
-# Composition operations for continuous multilinear maps
-
-This file proves continuity and smoothness results for pre-composition of continuous multilinear
-maps with a diagonal continuous linear map.
-
-## Main results
-
-* `ContinuousLinearMap.compContinuousMultilinearMapL_diag_continuous`: the map
-  `p ↦ compContinuousLinearMapL (fun _ ↦ p)` is continuous (general domain/codomain).
-* `ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous`: variant where
-  pre-composition maps `F₁`-multilinear maps to `F₁`-multilinear maps.
-* `ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff`: the same map is `C^∞`.
--/
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
 noncomputable section Comp
 
@@ -35,9 +23,6 @@ variable
   {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
   {ι : Type*} [Fintype ι]
 
-/-- The map sending `p : M →L[𝕜] M'` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
-(pre-composing all `ι` slots of a continuous multilinear map with the same `p`) is continuous.
-Used to prove continuity of pre-composition for alternating maps. -/
 theorem compContinuousMultilinearMapL_diag_continuous :
     Continuous (fun p : M →L[𝕜] M' ↦
       (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
@@ -59,9 +44,6 @@ variable
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
-/-- The map sending `p : F₁ →L[𝕜] F₁` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
-(pre-composing all `ι` slots of a multilinear map with the same `p`) is continuous.
-Used to prove `compContinuousLinearMapL_continuous` for alternating maps. -/
 theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous :
   Continuous (fun p : F₁ →L[𝕜] F₁ ↦
   (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
@@ -83,8 +65,6 @@ section Smooth
 variable {𝕜 ι F₁ F₂} [NontriviallyNormedField 𝕜] [Fintype ι]
   [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
 
-/-- The map sending `p : F₁ →L[𝕜] F₁` to `compContinuousLinearMapL (fun _ ↦ p)` is `C^∞`.
-Does not require `CompleteSpace 𝕜`. Used to prove the smooth version for alternating maps. -/
 theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff :
   ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁ ↦
   (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :

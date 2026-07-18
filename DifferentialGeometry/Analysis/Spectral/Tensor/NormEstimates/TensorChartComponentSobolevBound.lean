@@ -4,30 +4,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 import Mathlib.Topology.Compactness.LocallyFinite
 
-/-!
-# `α`-uniform `L²` bound for chart-frame scalar components
-
-Consolidated `α`-uniform bounds on the chart-frame scalar components of
-smooth compactly-supported `H¹` tensor sections on a closed Riemannian
-manifold `(M, g)`:
-
-1. **`α`-uniform `L²` bound for `tensorChartComponentScalar`** —
-   `tensorChartComponentScalar_eLpNorm_le` (and the equivalent functional
-   packaging `tensorChartComponentScalar_eLpNorm_le_forall`).
-
-The constant in the headline is independent of the chart base point `α`,
-the multi-index pair `(Idx, Jdx)`, and the section `S`. The strategy uses
-local finiteness of the chart-atlas partition of unity, packaged via the
-**active finset** `chartAtlasPOU_activeFinset I M`, on which the
-partition-of-unity centres are finite in number, so summing per-`α`
-constants over the active finset produces a single `α`-uniform constant.
-On inactive centres the scalar component vanishes identically.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -58,16 +38,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- On a compact manifold, only finitely many partition-of-unity centres
-have non-empty support. We package the set of such centres as a `Finset M`. -/
 noncomputable def chartAtlasPOU_activeFinset
     (I : ModelWithCorners ℝ E H)
     (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] : Finset M :=
   ((chartAtlasPOU I M).locallyFinite.finite_nonempty_of_compact).toFinset
 
-/-- An index `α : M` belongs to the active finset iff its partition-of-unity
-support is non-empty. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
     α ∈ chartAtlasPOU_activeFinset I M ↔
       (Function.support (fun x : M =>
@@ -76,7 +53,7 @@ lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
   unfold chartAtlasPOU_activeFinset
   exact Set.Finite.mem_toFinset _
 
-/-- If `α : M` is NOT in the active finset, then `POU_α` is identically zero. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := by
@@ -91,6 +68,7 @@ lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
   have := congrFun h_empty x
   simpa using this
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (h_zero : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0)
@@ -106,7 +84,7 @@ lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (0 : M → ℝ) x
   rw [h_zero x, zero_mul]; rfl
 
-/-- For an inactive centre `α`, the `eLpNorm` of the scalar component is `0`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_tensorChartComponentScalar_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -276,8 +254,6 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
   rw [coe_nnnorm_eq_ofReal_norm_scalar S]
   exact ENNReal.ofReal_le_ofReal h_l2_le_h1
 
-/-- **Headline theorem (α-uniform L² bound for chart-frame scalar
-components).** -/
 theorem tensorChartComponentScalar_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -313,7 +289,6 @@ theorem tensorChartComponentScalar_eLpNorm_le
       (by exact zero_le _)
   exact h_smoothCc'.trans h_rhs_le
 
-/-- Functional packaging of the headline `α`-uniform bound. -/
 theorem tensorChartComponentScalar_eLpNorm_le_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -342,6 +317,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (g : SmoothRiemannianMetric I M)
     {u : M → ℝ} (h_u_zero : u = 0) :
@@ -413,6 +389,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)

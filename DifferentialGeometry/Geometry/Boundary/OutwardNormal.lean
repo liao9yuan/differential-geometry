@@ -13,67 +13,6 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-!
-# Outward unit normal vector field on the boundary
-
-Given a smooth Riemannian metric `g` on the tangent bundle of a smooth manifold
-`M` modelled on `(E, H, I)` whose model with corners admits a smooth boundary
-stratum (`[hI : HasSmoothBoundary E H I]`), this file constructs at each
-boundary point `x : BoundaryManifold I M` a distinguished unit tangent vector
-
-  `outwardNormal g x : TangentSpace I x.val`
-
-with the following properties:
-
-* It is `g`-orthogonal to every tangent vector of the boundary submanifold,
-  i.e., to every vector in the image of the inclusion's differential
-  `dincl x : boundaryE →L[ℝ] E`.
-* It has unit `g`-length: `g.inner x.val (outwardNormal g x) (outwardNormal g x) = 1`.
-* It points "outward" in the sense that, when read in the ambient chart at
-  `x.val`, its `g`-inner product with the chart-coordinate "inward direction"
-  is strictly negative.
-
-## Construction
-
-At a boundary point `x`, the inclusion's manifold derivative `dincl x` is a
-continuous linear injection `boundaryE → E`. The image `range (dincl x)` is a
-linear subspace of `E` of dimension `Module.finrank ℝ boundaryE`. Its
-`g`-orthogonal complement in `E` is denoted `normalSubspace g x`; this is the
-locus of `g`-perpendicular tangent vectors to the boundary.
-
-To select the outward direction, we use the structural "inward direction"
-field of `HasSmoothBoundary`, namely `hI.inwardCoordE : E`. For the canonical
-`EuclideanHalfSpace n` model, this is the standard basis vector
-`EuclideanSpace.single 0 1`. Codimension-one transversality of this direction
-to the boundary tangent space is part of the typeclass data
-(`HasSmoothBoundary.inwardCoordE_transverse`); the bundle-level corollary
-`InwardCoordTransverse_of_HasSmoothBoundary` therefore needs no further
-hypothesis.
-
-The `g`-orthogonal projection of `-inwardCoord g x` onto the normal subspace
-gives an unnormalised outward vector `outwardDir g x`, and `outwardNormal g x`
-is its unit `g`-normalisation.
-
-## Main definitions
-
-* `inwardCoordE` — the chart-coordinate "inward direction" in `E`.
-* `inwardCoord g x` — its chart-pull-back to `TangentSpace I x.val`.
-* `normalSubspace g x` — the `g`-orthogonal complement of `range (dincl x)`.
-* `outwardDir g x` — an unnormalised outward vector in `normalSubspace g x`.
-* `outwardNormal g x` — the unit-`g`-length outward normal.
-
-## Main results
-
-* `outwardNormal_mem_normalSubspace` — `outwardNormal g x` lies in the
-  `g`-orthogonal complement of the boundary tangent space.
-* `outwardNormal_orthogonal_to_boundary` — `g`-orthogonality to all boundary
-  tangent vectors.
-* `outwardNormal_norm_one` — unit `g`-length.
-* `outwardNormal_inner_inwardCoord_neg` — strict negativity of the
-  `g`-inner product with the chart-coordinate inward direction.
-* `InwardCoordTransverse_of_HasSmoothBoundary` — transversality is automatic
-  from the typeclass; no separate hypothesis needed at use sites.
--/
 
 noncomputable section
 
@@ -94,34 +33,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-- The chart-coordinate "inward direction" in the model normed space `E`,
-read from the typeclass field `HasSmoothBoundary.inwardCoordE`. -/
 abbrev inwardCoordE : E := hI.inwardCoordE
 
-/-- The chart-local representation of the boundary inclusion
-`Φ := I ∘ inclH ∘ boundaryI.symm : boundaryE → E`. -/
 private def PhiLocal (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     hI.boundaryE → E :=
   (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm
-
-private lemma PhiLocal_eq (I : ModelWithCorners ℝ E H)
-    [hI : HasSmoothBoundary E H I] :
-    PhiLocal I = (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm := rfl
 
 private lemma infty_ne_zero_withTopENat' : (∞ : WithTop ℕ∞) ≠ 0 := by
   intro h
   have h' : ((⊤ : ℕ∞) : WithTop ℕ∞) = ((0 : ℕ∞) : WithTop ℕ∞) := h
   exact ENat.top_ne_zero (WithTop.coe_eq_coe.mp h')
 
-/-- Computation of the boundary inclusion's manifold derivative in coordinates.
-In the boundary chart at `x` and ambient chart at `x.val`, the chart-local
-representation is `PhiLocal`, so the manifold derivative agrees with the
-Fréchet derivative of `PhiLocal` at the chart point of `x`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma dincl_eq_fderiv_PhiLocal (x : BoundaryManifold I M)
     [Nonempty hI.boundaryH] :
-    (dincl x : hI.boundaryE →L[ℝ] E) =
+    (boundaryInclusionMfderiv x : hI.boundaryE →L[ℝ] E) =
       fderiv ℝ (PhiLocal I) (extChartAt hI.boundaryI x x) := by
-  unfold dincl
+  unfold boundaryInclusionMfderiv
   have h_diff : MDifferentiableAt hI.boundaryI I (boundaryInclusion I M) x :=
     (boundaryInclusion_contMDiff (I := I) (M := M)).mdifferentiableAt
       infty_ne_zero_withTopENat'
@@ -165,18 +93,10 @@ private lemma dincl_eq_fderiv_PhiLocal (x : BoundaryManifold I M)
     rfl
   rw [Filter.EventuallyEq.fderiv_eq h_eq]
 
-/-- The chart-pulled-back inward direction at a boundary point: the image of
-the chart-coordinate inward direction under the (inverse) trivialisation of
-the ambient tangent bundle at `x.val`. -/
 def inwardCoord (x : BoundaryManifold I M) : TangentSpace I (x : M) :=
   (trivializationAt E (TangentSpace I) (x : M)).symm (x : M) hI.inwardCoordE
 
-/-- At the basepoint, the inward-direction trivialisation is the identity:
-`inwardCoord x = inwardCoordE` under the type alias `TangentSpace I (x : M) = E`.
-
-The proof uses that the inverse trivialisation of the tangent bundle at the
-basepoint is `mfderivWithin 𝓘(ℝ, E) I (extChartAt I _).symm (range I) _`, which
-equals the identity by `mfderivWithin_range_extChartAt_symm`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma inwardCoord_eq (x : BoundaryManifold I M) :
     inwardCoord (M := M) x = hI.inwardCoordE := by
   have h_symmL : inwardCoord (M := M) x =
@@ -187,26 +107,18 @@ lemma inwardCoord_eq (x : BoundaryManifold I M) :
       mfderivWithin_range_extChartAt_symm]
   rfl
 
-/-- The chart-localised inward direction parameterised by a fixed base
-boundary point `α₀`: the image of `inwardCoordE : E` under the inverse
-trivialisation of the ambient tangent bundle centred at `α₀.val`, evaluated
-at `x.val`. -/
 def inwardCoordAt (α₀ : BoundaryManifold I M) (x : BoundaryManifold I M) :
     TangentSpace I (x : M) :=
   (trivializationAt E (TangentSpace I) (α₀ : M)).symm (x : M) hI.inwardCoordE
 
-/-- At `α₀ = x`, the parameterised version coincides with the original
-`inwardCoord x`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma inwardCoordAt_self (x : BoundaryManifold I M) :
     inwardCoordAt (M := M) x x = inwardCoord (M := M) x := rfl
 
-/-- The `g`-orthogonal complement of the boundary tangent space, as a
-submodule of `TangentSpace I x.val`. A vector `v` lies in this submodule iff
-`g.inner x.val v (dincl x w) = 0` for every `w : boundaryE`. -/
 def normalSubspace (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     Submodule ℝ (TangentSpace I (x : M)) where
   carrier := {v : TangentSpace I (x : M) | ∀ w : hI.boundaryE,
-    g.inner (x : M) v (dincl (M := M) x w) = 0}
+    g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w) = 0}
   zero_mem' := by
     intro w
     simp
@@ -217,51 +129,45 @@ def normalSubspace (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     intro c v hv w
     rw [map_smul, ContinuousLinearMap.smul_apply, hv w, smul_zero]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma mem_normalSubspace_iff
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v : TangentSpace I (x : M)) :
     v ∈ normalSubspace (M := M) g x ↔
-      ∀ w : hI.boundaryE, g.inner (x : M) v (dincl (M := M) x w) = 0 :=
+      ∀ w : hI.boundaryE, g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w) = 0 :=
   Iff.rfl
 
-/-- A boundary tangent vector `dincl x w` is `g`-orthogonal to every vector in
-`normalSubspace g x` (by definition). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma inner_normalSubspace_dincl
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     {v : TangentSpace I (x : M)} (hv : v ∈ normalSubspace (M := M) g x)
     (w : hI.boundaryE) :
-    g.inner (x : M) v (dincl (M := M) x w) = 0 := hv w
+    g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w) = 0 := hv w
 
-/-- Symmetric form: a vector in the normal subspace, with the metric applied
-to a boundary tangent vector first. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma inner_dincl_normalSubspace
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     {v : TangentSpace I (x : M)} (hv : v ∈ normalSubspace (M := M) g x)
     (w : hI.boundaryE) :
-    g.inner (x : M) (dincl (M := M) x w) v = 0 := by
+    g.inner (x : M) (boundaryInclusionMfderiv (M := M) x w) v = 0 := by
   rw [g.symm (x : M) _ v]; exact hv w
 
 variable (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
 
-/-- The boundary linear functional induced by the inward direction:
-`w ↦ g.inner x.val (inwardCoord g x) (dincl x w)`. This is a linear map from
-`boundaryE` to `ℝ`. -/
 def boundaryFunOfInward : hI.boundaryE →ₗ[ℝ] ℝ where
-  toFun w := g.inner (x : M) (inwardCoord (M := M) x) (dincl (M := M) x w)
+  toFun w := g.inner (x : M) (inwardCoord (M := M) x) (boundaryInclusionMfderiv (M := M) x w)
   map_add' u v := by
-    rw [ContinuousLinearMap.map_add (dincl (M := M) x) u v]
+    rw [ContinuousLinearMap.map_add (boundaryInclusionMfderiv (M := M) x) u v]
     exact ContinuousLinearMap.map_add (g.inner (x : M) (inwardCoord (M := M) x)) _ _
   map_smul' c v := by
-    rw [ContinuousLinearMap.map_smul (dincl (M := M) x) c v]
+    rw [ContinuousLinearMap.map_smul (boundaryInclusionMfderiv (M := M) x) c v]
     exact ContinuousLinearMap.map_smul (g.inner (x : M) (inwardCoord (M := M) x)) _ _
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryFunOfInward_apply (w : hI.boundaryE) :
     boundaryFunOfInward (M := M) g x w =
-      g.inner (x : M) (inwardCoord (M := M) x) (dincl (M := M) x w) := rfl
+      g.inner (x : M) (inwardCoord (M := M) x) (boundaryInclusionMfderiv (M := M) x w) := rfl
 
-/-- The induced metric `inducedMetricInner g x` viewed as a continuous bilinear
-form on `boundaryE`, in linear-map form. We unfold it through
-`metricFlatLinear` of the boundary metric. -/
 private def boundaryFlatLinear : hI.boundaryE →ₗ[ℝ] (hI.boundaryE →ₗ[ℝ] ℝ) where
   toFun u := (inducedMetricInner (M := M) g x u).toLinearMap
   map_add' u v := by
@@ -275,12 +181,11 @@ private def boundaryFlatLinear : hI.boundaryE →ₗ[ℝ] (hI.boundaryE →ₗ[�
       c • inducedMetricInner (M := M) g x v w
     rw [map_smul, ContinuousLinearMap.smul_apply]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] private lemma boundaryFlatLinear_apply (u v : hI.boundaryE) :
     boundaryFlatLinear (M := M) g x u v = inducedMetricInner (M := M) g x u v := rfl
 
-/-- The boundary flat map is injective: the induced metric is positive-definite
-on the boundary tangent space (already established in the induced metric
-construction). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatLinear_injective :
     Function.Injective (boundaryFlatLinear (M := M) g x) := by
   intro u v hpoint
@@ -298,25 +203,20 @@ private lemma boundaryFlatLinear_injective :
     rw [hsub, sub_eq_zero]; exact h
   exact (lt_irrefl 0) (hzero (u - v) ▸ hpos)
 
-/-- The boundary flat map's domain and codomain have equal finite dimension. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatLinear_finrank_eq :
     Module.finrank ℝ hI.boundaryE = Module.finrank ℝ (hI.boundaryE →ₗ[ℝ] ℝ) :=
   Subspace.dual_finrank_eq.symm
 
-/-- The boundary flat linear equivalence
-`boundaryE ≃ₗ[ℝ] (boundaryE →ₗ[ℝ] ℝ)` induced by the induced metric. -/
 private def boundaryFlatMap : hI.boundaryE ≃ₗ[ℝ] (hI.boundaryE →ₗ[ℝ] ℝ) :=
   LinearMap.linearEquivOfInjective
     (boundaryFlatLinear (M := M) g x)
     (boundaryFlatLinear_injective (M := M) g x)
     (boundaryFlatLinear_finrank_eq (E := E) (H := H) (I := I))
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] private lemma boundaryFlatMap_apply (u v : hI.boundaryE) :
     boundaryFlatMap (M := M) g x u v = inducedMetricInner (M := M) g x u v := rfl
-
-/-- The defining identity for the boundary sharp: the unique `u : boundaryE`
-such that the induced metric pairs `u` with every `w` to recover the value of
-the given linear functional. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatMap_apply_symm
     (α : hI.boundaryE →ₗ[ℝ] ℝ) (w : hI.boundaryE) :
     inducedMetricInner (M := M) g x ((boundaryFlatMap (M := M) g x).symm α) w = α w := by
@@ -326,85 +226,62 @@ private lemma boundaryFlatMap_apply_symm
   rw [boundaryFlatMap_apply] at hh
   exact hh
 
-/-- The unique boundary vector whose induced-metric pairing recovers the
-boundary linear functional `boundaryFunOfInward`. -/
 def boundaryComponentOfInward : hI.boundaryE :=
   (boundaryFlatMap (M := M) g x).symm (boundaryFunOfInward (M := M) g x)
-
-/-- Defining identity for the boundary component of the inward direction:
-the induced metric of `boundaryComponentOfInward` against any `w` equals
-`g.inner x.val (inwardCoord g x) (dincl x w)`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma inducedMetricInner_boundaryComponentOfInward (w : hI.boundaryE) :
     inducedMetricInner (M := M) g x (boundaryComponentOfInward (M := M) g x) w =
-      g.inner (x : M) (inwardCoord (M := M) x) (dincl (M := M) x w) := by
+      g.inner (x : M) (inwardCoord (M := M) x) (boundaryInclusionMfderiv (M := M) x w) := by
   unfold boundaryComponentOfInward
   have := boundaryFlatMap_apply_symm (M := M) g x (boundaryFunOfInward (M := M) g x) w
   rw [this]
   rfl
 
-/-- The "tangential part" of `inwardCoord g x`: the image of
-`boundaryComponentOfInward` in `TangentSpace I x.val`, lying in
-`range (dincl x)`. -/
 def inwardTangentialPart : TangentSpace I (x : M) :=
-  dincl (M := M) x (boundaryComponentOfInward (M := M) g x)
-
+  boundaryInclusionMfderiv (M := M) x (boundaryComponentOfInward (M := M) g x)
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma inwardTangentialPart_def :
     inwardTangentialPart (M := M) g x =
-      dincl (M := M) x (boundaryComponentOfInward (M := M) g x) := rfl
+      boundaryInclusionMfderiv (M := M) x (boundaryComponentOfInward (M := M) g x) := rfl
 
-/-- The unnormalised outward vector: `tangentialPart - inwardCoord`. By
-construction, this lies in the `g`-orthogonal complement of `range (dincl x)`
-(see `outwardDir_mem_normalSubspace`). -/
 def outwardDir : TangentSpace I (x : M) :=
   inwardTangentialPart (M := M) g x - inwardCoord (M := M) x
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma outwardDir_def :
     outwardDir (M := M) g x =
       inwardTangentialPart (M := M) g x - inwardCoord (M := M) x := rfl
-
-/-- The unnormalised outward vector lies in the `g`-orthogonal complement of
-`range (dincl x)`, by the defining identity for the boundary component of
-the inward direction. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardDir_mem_normalSubspace :
     outwardDir (M := M) g x ∈ normalSubspace (M := M) g x := by
   intro w
   rw [outwardDir_def]
   have hsub : g.inner (x : M)
         (inwardTangentialPart (M := M) g x - inwardCoord (M := M) x)
-        (dincl (M := M) x w) =
-      g.inner (x : M) (inwardTangentialPart (M := M) g x) (dincl (M := M) x w) -
-      g.inner (x : M) (inwardCoord (M := M) x) (dincl (M := M) x w) := by
+        (boundaryInclusionMfderiv (M := M) x w) =
+      g.inner (x : M) (inwardTangentialPart (M := M) g x) (boundaryInclusionMfderiv (M := M) x w) -
+      g.inner (x : M) (inwardCoord (M := M) x) (boundaryInclusionMfderiv (M := M) x w) := by
     rw [map_sub, ContinuousLinearMap.sub_apply]
   rw [hsub]
-  have h1 : g.inner (x : M) (inwardTangentialPart (M := M) g x) (dincl (M := M) x w) =
+  have h1 : g.inner (x : M) (inwardTangentialPart (M := M) g x) (boundaryInclusionMfderiv (M := M) x w) =
       inducedMetricInner (M := M) g x (boundaryComponentOfInward (M := M) g x) w := by
     rw [inducedMetricInner_apply, inwardTangentialPart_def]
   rw [h1]
   rw [inducedMetricInner_boundaryComponentOfInward (M := M) g x w]
   ring
-
-/-- The `g`-inner product of `outwardDir` with `inwardCoord g x` is the
-"deficit" between the squared `g`-norm of `inwardCoord` and the boundary-
-projected component. This is non-positive, and we will show that under
-suitable transversality it is strictly negative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma g_inner_outwardDir_inwardCoord :
     g.inner (x : M) (outwardDir (M := M) g x) (inwardCoord (M := M) x) =
       g.inner (x : M) (inwardTangentialPart (M := M) g x) (inwardCoord (M := M) x) -
       g.inner (x : M) (inwardCoord (M := M) x) (inwardCoord (M := M) x) := by
   rw [outwardDir_def, map_sub, ContinuousLinearMap.sub_apply]
-
-/-- Symmetric form. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma g_inner_inwardCoord_outwardDir :
     g.inner (x : M) (inwardCoord (M := M) x) (outwardDir (M := M) g x) =
       g.inner (x : M) (inwardTangentialPart (M := M) g x) (inwardCoord (M := M) x) -
       g.inner (x : M) (inwardCoord (M := M) x) (inwardCoord (M := M) x) := by
   rw [g.symm (x : M) (inwardCoord (M := M) x) (outwardDir (M := M) g x)]
   exact g_inner_outwardDir_inwardCoord (M := M) g x
-
-/-- A direct calculation: `g(outwardDir, outwardDir) = g(inwardCoord, inwardCoord)
-- g(tangentialPart, inwardCoord)`. We use that `outwardDir = tangentialPart -
-inwardCoord` and the fact that `outwardDir ∈ normalSubspace`, so it is
-`g`-orthogonal to `tangentialPart` (which lies in `range (dincl x)`). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma g_inner_outwardDir_outwardDir :
     g.inner (x : M) (outwardDir (M := M) g x) (outwardDir (M := M) g x) =
       g.inner (x : M) (inwardCoord (M := M) x) (inwardCoord (M := M) x) -
@@ -427,26 +304,16 @@ lemma g_inner_outwardDir_outwardDir :
   rw [g_inner_outwardDir_inwardCoord (M := M) g x]
   ring
 
-/-- **Transversality** (internal `def`): the chart-coordinate inward direction
-is not in the image of the inclusion's differential. This is provided
-automatically by the `HasSmoothBoundary` typeclass via
-`InwardCoordTransverse_of_HasSmoothBoundary`; clients of the public API need
-not supply it as a hypothesis. -/
 def InwardCoordTransverse (x : BoundaryManifold I M) : Prop :=
-  inwardCoord (M := M) x ∉ LinearMap.range (dincl (M := M) x).toLinearMap
-
-/-- The chart-coordinate inward direction is transverse to the boundary at
-every boundary point. This is the bundle-level instance of the model-level
-codimension-one transversality field `HasSmoothBoundary.inwardCoordE_transverse`,
-combined with the chart-local identification `dincl x = fderiv ℝ Φ (chart-point)`.
-The hypothesis no longer needs to be supplied at every use site. -/
+  inwardCoord (M := M) x ∉ LinearMap.range (boundaryInclusionMfderiv (M := M) x).toLinearMap
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem InwardCoordTransverse_of_HasSmoothBoundary
     (x : BoundaryManifold I M) :
     InwardCoordTransverse (M := M) x := by
   by_cases hN : Nonempty hI.boundaryH
   · haveI := hN
     intro hmem
-    have hmem' : inwardCoord (M := M) x ∈ Set.range (dincl (M := M) x) := by
+    have hmem' : inwardCoord (M := M) x ∈ Set.range (boundaryInclusionMfderiv (M := M) x) := by
       rcases hmem with ⟨w, hw⟩
       exact ⟨w, hw⟩
     rw [inwardCoord_eq, dincl_eq_fderiv_PhiLocal (I := I) (M := M) x] at hmem'
@@ -455,8 +322,7 @@ theorem InwardCoordTransverse_of_HasSmoothBoundary
     haveI : IsEmpty (BoundaryManifold I M) :=
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     exact (IsEmpty.false x).elim
-
-/-- The outward unnormalised direction is non-zero. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardDir_ne_zero :
     outwardDir (M := M) g x ≠ 0 := by
   intro h0
@@ -469,14 +335,11 @@ theorem outwardDir_ne_zero :
   apply htr
   rw [h_eq, inwardTangentialPart_def]
   exact ⟨boundaryComponentOfInward (M := M) g x, rfl⟩
-
-/-- The `g`-norm-squared of `outwardDir` is strictly positive. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem g_inner_outwardDir_pos :
     0 < g.inner (x : M) (outwardDir (M := M) g x) (outwardDir (M := M) g x) :=
   g.pos (x : M) _ (outwardDir_ne_zero (M := M) g x)
-
-/-- `outwardDir` has strictly negative `g`-inner product with
-`inwardCoord g x`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem g_inner_outwardDir_inwardCoord_neg :
     g.inner (x : M) (outwardDir (M := M) g x) (inwardCoord (M := M) x) < 0 := by
   have hpos : 0 < g.inner (x : M) (outwardDir (M := M) g x) (outwardDir (M := M) g x) :=
@@ -489,10 +352,6 @@ theorem g_inner_outwardDir_inwardCoord_neg :
   rw [h_id]
   linarith
 
-/-- The outward unit normal at a boundary point: the unit-`g`-length scaling
-of `outwardDir`. The `0 < g(outwardDir, outwardDir)` discriminator is always
-true (by `g_inner_outwardDir_pos`), but we keep the conditional form so that
-the definition is total. -/
 def outwardNormal : TangentSpace I (x : M) :=
   open scoped Classical in
   if _h : 0 < g.inner (x : M) (outwardDir (M := M) g x) (outwardDir (M := M) g x) then
@@ -500,34 +359,29 @@ def outwardNormal : TangentSpace I (x : M) :=
       outwardDir (M := M) g x
   else
     0
-
-/-- The outward normal equals the unit-normalisation of `outwardDir`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma outwardNormal_eq :
     outwardNormal (M := M) g x =
       (Real.sqrt (g.inner (x : M) (outwardDir (M := M) g x)
         (outwardDir (M := M) g x)))⁻¹ • outwardDir (M := M) g x := by
   unfold outwardNormal
   rw [dif_pos (g_inner_outwardDir_pos (M := M) g x)]
-
-/-- The outward normal lies in the normal subspace. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardNormal_mem_normalSubspace :
     outwardNormal (M := M) g x ∈ normalSubspace (M := M) g x := by
   rw [outwardNormal_eq (M := M) g x]
   exact (normalSubspace (M := M) g x).smul_mem _
     (outwardDir_mem_normalSubspace (M := M) g x)
-
-/-- The outward normal is `g`-orthogonal to every boundary tangent vector. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardNormal_orthogonal_to_boundary (w : hI.boundaryE) :
-    g.inner (x : M) (outwardNormal (M := M) g x) (dincl (M := M) x w) = 0 :=
+    g.inner (x : M) (outwardNormal (M := M) g x) (boundaryInclusionMfderiv (M := M) x w) = 0 :=
   (outwardNormal_mem_normalSubspace (M := M) g x) w
-
-/-- Symmetric form. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem inner_dincl_outwardNormal (w : hI.boundaryE) :
-    g.inner (x : M) (dincl (M := M) x w) (outwardNormal (M := M) g x) = 0 := by
+    g.inner (x : M) (boundaryInclusionMfderiv (M := M) x w) (outwardNormal (M := M) g x) = 0 := by
   rw [g.symm (x : M) _ (outwardNormal (M := M) g x)]
   exact outwardNormal_orthogonal_to_boundary (M := M) g x w
-
-/-- The outward normal has unit `g`-length. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardNormal_norm_one :
     g.inner (x : M) (outwardNormal (M := M) g x) (outwardNormal (M := M) g x) = 1 := by
   set q : ℝ := g.inner (x : M) (outwardDir (M := M) g x) (outwardDir (M := M) g x) with hq_def
@@ -557,9 +411,7 @@ theorem outwardNormal_norm_one :
     field_simp]
   rw [hsq_sq]
   exact div_self hq_ne
-
-/-- The outward normal points outward: its `g`-inner product with the
-chart-coordinate inward direction `inwardCoord g x` is strictly negative. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardNormal_inner_inwardCoord_neg :
     g.inner (x : M) (outwardNormal (M := M) g x) (inwardCoord (M := M) x) < 0 := by
   rw [outwardNormal_eq (M := M) g x]
@@ -576,26 +428,26 @@ theorem outwardNormal_inner_inwardCoord_neg :
     g_inner_outwardDir_inwardCoord_neg (M := M) g x
   exact mul_neg_of_pos_of_neg hsq_inv_pos hneg
 
-/-- The boundary linear functional induced by `inwardCoordAt α₀ x`:
-`w ↦ g.inner x.val (inwardCoordAt α₀ x) (dincl x w)`. -/
 def boundaryFunOfInwardAt (g : SmoothRiemannianMetric I M)
     (α₀ x : BoundaryManifold I M) : hI.boundaryE →ₗ[ℝ] ℝ where
-  toFun w := g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (dincl (M := M) x w)
+  toFun w := g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (boundaryInclusionMfderiv (M := M) x w)
   map_add' u v := by
-    rw [ContinuousLinearMap.map_add (dincl (M := M) x) u v]
+    rw [ContinuousLinearMap.map_add (boundaryInclusionMfderiv (M := M) x) u v]
     exact ContinuousLinearMap.map_add
       (g.inner (x : M) (inwardCoordAt (M := M) α₀ x)) _ _
   map_smul' c v := by
-    rw [ContinuousLinearMap.map_smul (dincl (M := M) x) c v]
+    rw [ContinuousLinearMap.map_smul (boundaryInclusionMfderiv (M := M) x) c v]
     exact ContinuousLinearMap.map_smul
       (g.inner (x : M) (inwardCoordAt (M := M) α₀ x)) _ _
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryFunOfInwardAt_apply
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M)
     (w : hI.boundaryE) :
     boundaryFunOfInwardAt (M := M) g α₀ x w =
-      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (dincl (M := M) x w) := rfl
+      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (boundaryInclusionMfderiv (M := M) x w) := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryFunOfInwardAt_self
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     boundaryFunOfInwardAt (M := M) g x x = boundaryFunOfInward (M := M) g x := by
@@ -603,71 +455,61 @@ def boundaryFunOfInwardAt (g : SmoothRiemannianMetric I M)
   simp [boundaryFunOfInwardAt_apply, boundaryFunOfInward_apply,
     inwardCoordAt_self]
 
-/-- The unique boundary vector whose induced-metric pairing recovers
-`boundaryFunOfInwardAt α₀ x`. -/
 def boundaryComponentOfInwardAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     hI.boundaryE :=
   (boundaryFlatMap (M := M) g x).symm (boundaryFunOfInwardAt (M := M) g α₀ x)
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryComponentOfInwardAt_self
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     boundaryComponentOfInwardAt (M := M) g x x =
       boundaryComponentOfInward (M := M) g x := by
   unfold boundaryComponentOfInwardAt boundaryComponentOfInward
   rw [boundaryFunOfInwardAt_self]
-
-/-- Defining identity for the parameterised boundary component: induced metric
-pairing recovers the boundary functional value. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma inducedMetricInner_boundaryComponentOfInwardAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M)
     (w : hI.boundaryE) :
     inducedMetricInner (M := M) g x (boundaryComponentOfInwardAt (M := M) g α₀ x) w =
-      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (dincl (M := M) x w) := by
+      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (boundaryInclusionMfderiv (M := M) x w) := by
   unfold boundaryComponentOfInwardAt
   have := boundaryFlatMap_apply_symm (M := M) g x
     (boundaryFunOfInwardAt (M := M) g α₀ x) w
   rw [this]
   rfl
 
-/-- The "tangential part" of `inwardCoordAt α₀ x`: the image of
-`boundaryComponentOfInwardAt α₀ x` in `T_x M`. -/
 def inwardTangentialPartAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     TangentSpace I (x : M) :=
-  dincl (M := M) x (boundaryComponentOfInwardAt (M := M) g α₀ x)
-
+  boundaryInclusionMfderiv (M := M) x (boundaryComponentOfInwardAt (M := M) g α₀ x)
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma inwardTangentialPartAt_def
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     inwardTangentialPartAt (M := M) g α₀ x =
-      dincl (M := M) x (boundaryComponentOfInwardAt (M := M) g α₀ x) := rfl
-
+      boundaryInclusionMfderiv (M := M) x (boundaryComponentOfInwardAt (M := M) g α₀ x) := rfl
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma inwardTangentialPartAt_self
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     inwardTangentialPartAt (M := M) g x x = inwardTangentialPart (M := M) g x := by
   unfold inwardTangentialPartAt inwardTangentialPart
   rw [boundaryComponentOfInwardAt_self]
 
-/-- The parameterised unnormalised outward direction:
-`tangentialPart - inwardCoordAt α₀ x`. -/
 def outwardDirAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     TangentSpace I (x : M) :=
   inwardTangentialPartAt (M := M) g α₀ x - inwardCoordAt (M := M) α₀ x
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma outwardDirAt_def
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     outwardDirAt (M := M) g α₀ x =
       inwardTangentialPartAt (M := M) g α₀ x - inwardCoordAt (M := M) α₀ x := rfl
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma outwardDirAt_self
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     outwardDirAt (M := M) g x x = outwardDir (M := M) g x := by
   unfold outwardDirAt outwardDir
   rw [inwardTangentialPartAt_self, inwardCoordAt_self]
-
-/-- The parameterised unnormalised outward direction lies in the
-`g`-orthogonal complement of `range (dincl x)`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem outwardDirAt_mem_normalSubspace
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     outwardDirAt (M := M) g α₀ x ∈ normalSubspace (M := M) g x := by
@@ -675,19 +517,18 @@ theorem outwardDirAt_mem_normalSubspace
   rw [outwardDirAt_def]
   have hsub : g.inner (x : M)
         (inwardTangentialPartAt (M := M) g α₀ x - inwardCoordAt (M := M) α₀ x)
-        (dincl (M := M) x w) =
-      g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (dincl (M := M) x w) -
-      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (dincl (M := M) x w) := by
+        (boundaryInclusionMfderiv (M := M) x w) =
+      g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (boundaryInclusionMfderiv (M := M) x w) -
+      g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (boundaryInclusionMfderiv (M := M) x w) := by
     rw [map_sub, ContinuousLinearMap.sub_apply]
   rw [hsub]
-  have h1 : g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (dincl (M := M) x w) =
+  have h1 : g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (boundaryInclusionMfderiv (M := M) x w) =
       inducedMetricInner (M := M) g x (boundaryComponentOfInwardAt (M := M) g α₀ x) w := by
     rw [inducedMetricInner_apply, inwardTangentialPartAt_def]
   rw [h1]
   rw [inducedMetricInner_boundaryComponentOfInwardAt (M := M) g α₀ x w]
   ring
-
-/-- Parameterised analogue of `g_inner_outwardDir_inwardCoord`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma g_inner_outwardDirAt_inwardCoordAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     g.inner (x : M) (outwardDirAt (M := M) g α₀ x) (inwardCoordAt (M := M) α₀ x) =
@@ -695,8 +536,7 @@ lemma g_inner_outwardDirAt_inwardCoordAt
         (inwardCoordAt (M := M) α₀ x) -
       g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (inwardCoordAt (M := M) α₀ x) := by
   rw [outwardDirAt_def, map_sub, ContinuousLinearMap.sub_apply]
-
-/-- Parameterised analogue of `g_inner_outwardDir_outwardDir`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma g_inner_outwardDirAt_outwardDirAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     g.inner (x : M) (outwardDirAt (M := M) g α₀ x) (outwardDirAt (M := M) g α₀ x) =
@@ -725,10 +565,6 @@ lemma g_inner_outwardDirAt_outwardDirAt
   rw [g_inner_outwardDirAt_inwardCoordAt (M := M) g α₀ x]
   ring
 
-/-- The parameterised outward unit normal: the unit-`g`-length scaling of
-`outwardDirAt g α₀ x`. The `0 < g(outwardDirAt, outwardDirAt)` discriminator
-is true on the chart base set of `α₀`, but we keep the conditional form so
-that the definition is total. -/
 def outwardNormalAt
     (g : SmoothRiemannianMetric I M) (α₀ x : BoundaryManifold I M) :
     TangentSpace I (x : M) :=
@@ -739,9 +575,7 @@ def outwardNormalAt
     (Real.sqrt (g.inner (x : M) (outwardDirAt (M := M) g α₀ x)
         (outwardDirAt (M := M) g α₀ x)))⁻¹ • outwardDirAt (M := M) g α₀ x
   else 0
-
-/-- At `α₀ = x`, the parameterised outward unit normal coincides with the
-original `outwardNormal x`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma outwardNormalAt_self
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     outwardNormalAt (M := M) g x x = outwardNormal (M := M) g x := by
@@ -765,84 +599,12 @@ private lemma infty_le_top_add' : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
     rfl
   rw [h_eq]
 
-/-- The chart-trivialisation linear map of the ambient tangent bundle, in
-`inTangentCoordinates`-form. -/
-private noncomputable def trivClmAtITC (x₀ : M) (b : M) : E →L[ℝ] E :=
-  inTangentCoordinates I 𝓘(ℝ, E) id (extChartAt I x₀)
-    (mfderiv I 𝓘(ℝ, E) (extChartAt I x₀)) x₀ b
-
-/-- Smoothness of the `inTangentCoordinates`-form of the chart-trivialisation
-linear map at the basepoint. -/
-private lemma trivClmAtITC_contMDiffAt
-    (x₀ : M) :
-    ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
-      (trivClmAtITC (I := I) x₀) x₀ := by
-  have h_chart_at : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I x₀) x₀ := by
-    refine (contMDiffOn_extChartAt (I := I) (n := ∞) (x := x₀)).contMDiffAt ?_
-    exact (chartAt H x₀).open_source.mem_nhds (mem_chart_source H x₀)
-  exact h_chart_at.mfderiv_const infty_le_top_add'
-
-/-- Smoothness of the `inTangentCoordinates`-form along the boundary
-inclusion. -/
-private lemma trivClmAtITC_along_inclusion_contMDiffAt
-    (x₀ : BoundaryManifold I M) :
-    ContMDiffAt hI.boundaryI 𝓘(ℝ, E →L[ℝ] E) ∞
-      (fun b : BoundaryManifold I M => trivClmAtITC (I := I) (x₀ : M) (b : M)) x₀ := by
-  have h_inclusion_at : ContMDiffAt hI.boundaryI I ∞ (boundaryInclusion I M) x₀ :=
-    boundaryInclusion_contMDiff.contMDiffAt
-  exact (trivClmAtITC_contMDiffAt (x₀ : M)).comp x₀ h_inclusion_at
-
-/-- Pointwise relation: on the chart source, the `inTangentCoordinates`-form
-applied to a constant inputs-from-`E` produces the chart-trivialisation
-linear map applied to that input. (Pointwise in `b ∈ chart source`.) -/
-private lemma trivClmAtITC_apply
-    (x₀ : M) {b : M} (hb : b ∈ (chartAt H x₀).source) (v : E) :
-    trivClmAtITC (I := I) x₀ b v =
-      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ b
-        (((trivializationAt E (TangentSpace I) x₀).symmL ℝ b) v) := by
-  unfold trivClmAtITC
-  have h_chart_E_src : (extChartAt I x₀) b ∈ (chartAt E ((extChartAt I x₀) x₀)).source := by
-    simp
-  have h_inT := inTangentCoordinates_eq_mfderiv_comp
-    (I := I) (I' := 𝓘(ℝ, E)) (𝕜 := ℝ)
-    (f := id) (g := extChartAt I x₀)
-    (ϕ := mfderiv I 𝓘(ℝ, E) (extChartAt I x₀)) (x₀ := x₀) (x := b)
-    (hx := hb) (hy := h_chart_E_src)
-  rw [h_inT]
-  have h_first : mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E)
-      (extChartAt 𝓘(ℝ, E) (extChartAt I x₀ x₀)) (extChartAt I x₀ b)
-      = ContinuousLinearMap.id ℝ E := by
-    have h_eq : extChartAt 𝓘(ℝ, E) (extChartAt I x₀ x₀) =ᶠ[𝓝 (extChartAt I x₀ b)]
-        (id : E → E) := by
-      filter_upwards with z; rfl
-    rw [Filter.EventuallyEq.mfderiv_eq h_eq]
-    exact mfderiv_id
-  have h_third :
-      mfderivWithin 𝓘(ℝ, E) I (extChartAt I x₀).symm (Set.range I) (extChartAt I x₀ b)
-      = (trivializationAt E (TangentSpace I) x₀).symmL ℝ b :=
-    (TangentBundle.symmL_trivializationAt hb).symm
-  change ((mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E)
-            (extChartAt 𝓘(ℝ, E) (extChartAt I x₀ x₀)) (extChartAt I x₀ b)).comp
-          ((mfderiv I 𝓘(ℝ, E) (extChartAt I x₀) b).comp
-            (mfderivWithin 𝓘(ℝ, E) I (extChartAt I x₀).symm (Set.range I)
-              (extChartAt I x₀ b)))) v =
-    ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ b)
-      (((trivializationAt E (TangentSpace I) x₀).symmL ℝ b) v)
-  rw [h_first, h_third]
-  rw [show mfderiv I 𝓘(ℝ, E) (extChartAt I x₀) b =
-      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ b from
-    (TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I) hb).symm]
-  rfl
-
-/-- The `inTangentCoordinates`-form of the dincl-applied-to-section, at a
-fixed reference point `x₀ : BoundaryManifold I M`. -/
 private noncomputable def dinclITC (x₀ : BoundaryManifold I M)
     (b : BoundaryManifold I M) (v : hI.boundaryE) : E :=
   inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
     (mfderiv hI.boundaryI I (boundaryInclusion I M)) x₀ b v
 
-/-- Smoothness of `b ↦ dinclITC x₀ b (s b)` for any smooth section
-`s : BoundaryManifold I M → boundaryE`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma dinclITC_apply_contMDiffAt
     {s : BoundaryManifold I M → hI.boundaryE} {x₀ : BoundaryManifold I M}
     (hs : ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE) ∞ s x₀) :
@@ -868,15 +630,14 @@ private lemma dinclITC_apply_contMDiffAt
     (g := id) (g₁ := id) (g₂ := s)
     h_f_uncurry h_g_at h_g₁_at hs infty_le_top_add'
 
-/-- The `inTangentCoordinates`-form of `dincl b` evaluates as
-`clmAt b.val ∘ dincl b ∘ symmL_bdy b`. We write this in pointwise form. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma dinclITC_apply
     (x₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_amb : (b : M) ∈ (chartAt H (x₀ : M)).source)
     (hb_bdy : b ∈ (chartAt hI.boundaryH x₀).source) (v : hI.boundaryE) :
     dinclITC (M := M) x₀ b v =
       (trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ
-        (b : M) (dincl (M := M) b
+        (b : M) (boundaryInclusionMfderiv (M := M) b
           (((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) x₀).symmL ℝ b) v)) := by
   unfold dinclITC
@@ -901,90 +662,13 @@ private lemma dinclITC_apply
           (mfderivWithin 𝓘(ℝ, hI.boundaryE) hI.boundaryI (extChartAt hI.boundaryI x₀).symm
             (Set.range hI.boundaryI) (extChartAt hI.boundaryI x₀ b)))) v =
       ((trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M))
-        ((dincl (M := M) b) (((trivializationAt hI.boundaryE
+        ((boundaryInclusionMfderiv (M := M) b) (((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) x₀).symmL ℝ b) v))
   rw [h_first, h_third]
   rfl
 
-/-- Smoothness of `b ↦ trivClmAtITC x₀.val b.val v(b) : E` for any smooth model-space
-function `v : BoundaryManifold I M → E`, under the trivialisation at `x₀.val`. -/
-private lemma trivClmAtITC_apply_contMDiffAt
-    {x₀ : BoundaryManifold I M} {v : BoundaryManifold I M → E}
-    (hv : ContMDiffAt hI.boundaryI 𝓘(ℝ, E) ∞ v x₀) :
-    ContMDiffAt hI.boundaryI 𝓘(ℝ, E) ∞
-      (fun b : BoundaryManifold I M => trivClmAtITC (I := I) (x₀ : M) (b : M) (v b)) x₀ :=
-  (trivClmAtITC_along_inclusion_contMDiffAt x₀).clm_apply hv
-
-/-- The boundary chart-trivialisation linear map, in `inTangentCoordinates`-form. -/
-private noncomputable def trivClmAtITC_bdy (x₀ : BoundaryManifold I M)
-    (b : BoundaryManifold I M) : hI.boundaryE →L[ℝ] hI.boundaryE :=
-  inTangentCoordinates hI.boundaryI 𝓘(ℝ, hI.boundaryE) id (extChartAt hI.boundaryI x₀)
-    (mfderiv hI.boundaryI 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀)) x₀ b
-
-/-- Smoothness of the `inTangentCoordinates`-form of the boundary chart
-trivialisation linear map. -/
-private lemma trivClmAtITC_bdy_contMDiffAt
-    (x₀ : BoundaryManifold I M) :
-    ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] hI.boundaryE) ∞
-      (trivClmAtITC_bdy (M := M) x₀) x₀ := by
-  have h_chart_at : ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE) ∞
-      (extChartAt hI.boundaryI x₀) x₀ := by
-    refine (contMDiffOn_extChartAt (I := hI.boundaryI) (n := ∞) (x := x₀)).contMDiffAt ?_
-    exact (chartAt hI.boundaryH x₀).open_source.mem_nhds (mem_chart_source _ _)
-  exact h_chart_at.mfderiv_const infty_le_top_add'
-
-/-- Pointwise relation: on the chart source of the boundary, the
-`inTangentCoordinates`-form for the boundary applied to a constant input from
-`boundaryE` produces the chart-trivialisation linear map applied to that input. -/
-private lemma trivClmAtITC_bdy_apply
-    (x₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
-    (hb : b ∈ (chartAt hI.boundaryH x₀).source) (v : hI.boundaryE) :
-    trivClmAtITC_bdy (M := M) x₀ b v =
-      (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).continuousLinearMapAt ℝ b
-        (((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).symmL ℝ b) v) := by
-  unfold trivClmAtITC_bdy
-  have h_chart_E_src : (extChartAt hI.boundaryI x₀) b ∈
-      (chartAt hI.boundaryE ((extChartAt hI.boundaryI x₀) x₀)).source := by simp
-  have h_inT := inTangentCoordinates_eq_mfderiv_comp
-    (I := hI.boundaryI) (I' := 𝓘(ℝ, hI.boundaryE)) (𝕜 := ℝ)
-    (f := id) (g := extChartAt hI.boundaryI x₀)
-    (ϕ := mfderiv hI.boundaryI 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀))
-    (x₀ := x₀) (x := b)
-    (hx := hb) (hy := h_chart_E_src)
-  rw [h_inT]
-  have h_first : mfderiv 𝓘(ℝ, hI.boundaryE) 𝓘(ℝ, hI.boundaryE)
-      (extChartAt 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀ x₀))
-      (extChartAt hI.boundaryI x₀ b) = ContinuousLinearMap.id ℝ hI.boundaryE := by
-    have h_eq : extChartAt 𝓘(ℝ, hI.boundaryE)
-        (extChartAt hI.boundaryI x₀ x₀) =ᶠ[𝓝 (extChartAt hI.boundaryI x₀ b)]
-          (id : hI.boundaryE → hI.boundaryE) := by
-      filter_upwards with z; rfl
-    rw [Filter.EventuallyEq.mfderiv_eq h_eq]
-    exact mfderiv_id
-  have h_third :
-      mfderivWithin 𝓘(ℝ, hI.boundaryE) hI.boundaryI (extChartAt hI.boundaryI x₀).symm
-        (Set.range hI.boundaryI) (extChartAt hI.boundaryI x₀ b)
-      = (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).symmL ℝ b :=
-    (TangentBundle.symmL_trivializationAt hb).symm
-  change ((mfderiv 𝓘(ℝ, hI.boundaryE) 𝓘(ℝ, hI.boundaryE)
-        (extChartAt 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀ x₀))
-        (extChartAt hI.boundaryI x₀ b)).comp
-      ((mfderiv hI.boundaryI 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀) b).comp
-        (mfderivWithin 𝓘(ℝ, hI.boundaryE) hI.boundaryI (extChartAt hI.boundaryI x₀).symm
-          (Set.range hI.boundaryI) (extChartAt hI.boundaryI x₀ b)))) v =
-    ((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).continuousLinearMapAt ℝ b)
-      (((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).symmL ℝ b) v)
-  rw [h_first, h_third]
-  rw [show mfderiv hI.boundaryI 𝓘(ℝ, hI.boundaryE) (extChartAt hI.boundaryI x₀) b =
-      (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).continuousLinearMapAt ℝ b from
-    (TangentBundle.continuousLinearMapAt_trivializationAt
-      (𝕜 := ℝ) (I := hI.boundaryI) hb).symm]
-  rfl
-
 variable (g : Measure.SmoothRiemannianMetric I M)
 
-/-- The chart-trivialised boundary metric flat, as a CLM-valued function
-`BoundaryManifold I M → (boundaryE →L[ℝ] (boundaryE →L[ℝ] ℝ))`. -/
 private noncomputable def boundaryFlatCharted
     (x₀ : BoundaryManifold I M) (b : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ :=
@@ -993,7 +677,7 @@ private noncomputable def boundaryFlatCharted
         TangentSpace hI.boundaryI y →L[ℝ] TangentSpace hI.boundaryI y →L[ℝ] ℝ) x₀)
     ⟨b, inducedMetricInner g b⟩).2
 
-/-- Smoothness of the chart-trivialised boundary metric flat. -/
+omit [InnerProductSpace ℝ E] in
 private lemma boundaryFlatCharted_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ) ∞
@@ -1006,19 +690,17 @@ private lemma boundaryFlatCharted_contMDiffAt
   exact ((trivializationAt _ _ x₀).contMDiffAt_section_iff h_x₀).mp
     h_section.contMDiffAt
 
-/-- The continuous version of `boundaryFunOfInward`, viewed as a CLM. -/
 private noncomputable def boundaryFunOfInwardCLM
     (b : BoundaryManifold I M) : hI.boundaryE →L[ℝ] ℝ :=
-  (g.inner (b : M) (inwardCoord (M := M) b)).comp (dincl (M := M) b)
+  (g.inner (b : M) (inwardCoord (M := M) b)).comp (boundaryInclusionMfderiv (M := M) b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] private lemma boundaryFunOfInwardCLM_apply
     (b : BoundaryManifold I M) (w : hI.boundaryE) :
     boundaryFunOfInwardCLM (M := M) g b w =
-      g.inner (b : M) (inwardCoord (M := M) b) (dincl (M := M) b w) := rfl
+      g.inner (b : M) (inwardCoord (M := M) b) (boundaryInclusionMfderiv (M := M) b w) := rfl
 
-/-- The boundary metric flat is invertible (as a CLM) at every boundary point.
-This follows from positive-definiteness of `inducedMetricInner` (which gives
-injectivity) combined with the equality of source and target finite dimensions. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inducedMetricInner_isInvertible
     (b : BoundaryManifold I M) :
     (inducedMetricInner (M := M) g b).IsInvertible := by
@@ -1054,14 +736,7 @@ private lemma inducedMetricInner_isInvertible
     rfl
   exact ⟨L_cle, h_eq⟩
 
-/-- Continuity of the chart-trivialised boundary metric flat. -/
-private lemma boundaryFlatCharted_continuousAt
-    (x₀ : BoundaryManifold I M) :
-    ContinuousAt (boundaryFlatCharted (M := M) g x₀) x₀ :=
-  (boundaryFlatCharted_contMDiffAt (M := M) g x₀).continuousAt
-
-/-- Helper: at the basepoint, the chart-trivialised boundary metric flat
-agrees with the bundle value `inducedMetricInner g x₀`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatCharted_basepoint
     (x₀ : BoundaryManifold I M) :
     boundaryFlatCharted (M := M) g x₀ x₀ = inducedMetricInner (M := M) g x₀ := by
@@ -1105,17 +780,11 @@ private lemma boundaryFlatCharted_basepoint
   rw [hsymm1, hsymm2, h_symmL_id u, h_symmL_id v]
   rfl
 
-/-- The chart-trivialised inverse boundary metric flat:
-`b ↦ ContinuousLinearMap.inverse (boundaryFlatCharted x₀ b) :
-   (boundaryE →L[ℝ] ℝ) →L[ℝ] boundaryE`. `C^∞` at the basepoint thanks to
-operator-norm smoothness of inverse on invertibles. -/
 private noncomputable def boundaryFlatChartedInv
     (x₀ : BoundaryManifold I M) (b : BoundaryManifold I M) :
     (hI.boundaryE →L[ℝ] ℝ) →L[ℝ] hI.boundaryE :=
   ContinuousLinearMap.inverse (boundaryFlatCharted (M := M) g x₀ b)
-
-/-- The chart-trivialised inverse boundary metric flat is `C^∞` at the
-basepoint. -/
+omit [InnerProductSpace ℝ E] in
 private lemma boundaryFlatChartedInv_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, (hI.boundaryE →L[ℝ] ℝ) →L[ℝ] hI.boundaryE) ∞
@@ -1132,27 +801,23 @@ private lemma boundaryFlatChartedInv_contMDiffAt
     h_inv.contDiffAt_map_inverse
   exact h_inverse_smooth.contMDiffAt.comp x₀ h_flat
 
-/-- The chart-trivialised covector `boundaryFunOfInwardCharted x₀ b : boundaryE
-→L[ℝ] ℝ`, defined as `(boundaryFunOfInwardCLM g b) ∘ (symmL_bdy x₀ b)`. -/
 private noncomputable def boundaryFunOfInwardCharted
     (x₀ : BoundaryManifold I M) (b : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] ℝ :=
   (boundaryFunOfInwardCLM (M := M) g b).comp
     ((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) x₀).symmL ℝ b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] private lemma boundaryFunOfInwardCharted_apply
     (x₀ : BoundaryManifold I M) (b : BoundaryManifold I M)
     (w : hI.boundaryE) :
     boundaryFunOfInwardCharted (M := M) g x₀ b w =
       g.inner (b : M) (inwardCoord (M := M) b)
-        (dincl (M := M) b
+        (boundaryInclusionMfderiv (M := M) b
           (((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) x₀).symmL ℝ b) w)) := rfl
 
-/-- The section `b ↦ TotalSpace.mk' E (b : M) (inwardCoordAt α₀ b)` is smooth
-on the chart base set of `α₀.val`. The proof mirrors
-`Measure.chartBasisVec_contMDiffOn`, with the constant input `inwardCoordE`
-in place of a basis vector. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inwardCoordAt_section_contMDiffOn
     (α₀ : BoundaryManifold I M) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -1175,9 +840,7 @@ private lemma inwardCoordAt_section_contMDiffOn
     hI.inwardCoordE
   exact congrArg Prod.snd h
 
-/-- Smoothness along the boundary inclusion: the inward direction
-`inwardCoordAt α₀ b`, viewed as a function of `b : BoundaryManifold I M`, is
-smooth at `α₀` as a totalspace-valued function. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inwardCoordAt_section_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞
@@ -1198,13 +861,7 @@ private lemma inwardCoordAt_section_contMDiffAt
     boundaryInclusion_contMDiff.contMDiffAt
   exact h_section_at.comp α₀ h_inclusion_at
 
-private lemma inwardCoordAt_section_continuousAt
-    (α₀ : BoundaryManifold I M) :
-    ContinuousAt
-      (fun b : BoundaryManifold I M =>
-        TotalSpace.mk' E (b : M) (inwardCoordAt (M := M) α₀ b)) α₀ :=
-  (inwardCoordAt_section_contMDiffAt (M := M) α₀).continuousAt
-
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma chart_triv_second_inwardCoordAt
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb : (b : M) ∈ (trivializationAt E (TangentSpace I) (α₀ : M)).baseSet) :
@@ -1215,63 +872,37 @@ private lemma chart_triv_second_inwardCoordAt
     hI.inwardCoordE
   exact congrArg Prod.snd h
 
-/-- The boundary tangent subspace at `x : BoundaryManifold I M`, expressed as
-a submodule of `E` (the model space). The `dincl x` map is naturally typed
-into `TangentSpace I (x : M) = E`, so we view its image as a submodule of `E`
-via the type alias. -/
-private noncomputable def tangentSpaceImage
-    (x : BoundaryManifold I M) : Submodule ℝ E :=
-  Submodule.map (dincl (M := M) x).toLinearMap ⊤
-
-/-- The boundary tangent subspace has dimension equal to `finrank ℝ boundaryE`. -/
-private lemma tangentSpaceImage_finrank
-    (x : BoundaryManifold I M) [Nonempty hI.boundaryH] :
-    Module.finrank ℝ (tangentSpaceImage (M := M) x) =
-      Module.finrank ℝ hI.boundaryE := by
-  have h_inj : Function.Injective (dincl (M := M) x) :=
-    dincl_injective (I := I) (M := M) x
-  have h_inj_lm : Function.Injective (dincl (M := M) x).toLinearMap := h_inj
-  unfold tangentSpaceImage
-  have h_equiv : (⊤ : Submodule ℝ hI.boundaryE) ≃ₗ[ℝ]
-      Submodule.map (dincl (M := M) x).toLinearMap ⊤ :=
-    Submodule.equivMapOfInjective (dincl (M := M) x).toLinearMap h_inj_lm ⊤
-  have h_top_finrank : Module.finrank ℝ (⊤ : Submodule ℝ hI.boundaryE) =
-      Module.finrank ℝ hI.boundaryE := finrank_top _ _
-  rw [← h_top_finrank]
-  exact (LinearEquiv.finrank_eq h_equiv).symm
-
-/-- The `g`-pullback covector linear map: `v ↦ (w ↦ g.inner x v (dincl x w))`. -/
 private noncomputable def metricPullback
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     TangentSpace I (x : M) →ₗ[ℝ] (hI.boundaryE →ₗ[ℝ] ℝ) where
   toFun v :=
-    { toFun := fun w => g.inner (x : M) v (dincl (M := M) x w)
+    { toFun := fun w => g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w)
       map_add' := fun u v' => by
-        rw [ContinuousLinearMap.map_add (dincl (M := M) x) u v']
+        rw [ContinuousLinearMap.map_add (boundaryInclusionMfderiv (M := M) x) u v']
         exact ContinuousLinearMap.map_add (g.inner (x : M) v) _ _
       map_smul' := fun c v' => by
-        rw [ContinuousLinearMap.map_smul (dincl (M := M) x) c v']
+        rw [ContinuousLinearMap.map_smul (boundaryInclusionMfderiv (M := M) x) c v']
         exact ContinuousLinearMap.map_smul (g.inner (x : M) v) _ _ }
   map_add' v₁ v₂ := by
     ext w
-    change g.inner (x : M) (v₁ + v₂) (dincl (M := M) x w) =
-      g.inner (x : M) v₁ (dincl (M := M) x w) +
-      g.inner (x : M) v₂ (dincl (M := M) x w)
+    change g.inner (x : M) (v₁ + v₂) (boundaryInclusionMfderiv (M := M) x w) =
+      g.inner (x : M) v₁ (boundaryInclusionMfderiv (M := M) x w) +
+      g.inner (x : M) v₂ (boundaryInclusionMfderiv (M := M) x w)
     rw [map_add, ContinuousLinearMap.add_apply]
   map_smul' c v := by
     ext w
-    change g.inner (x : M) (c • v) (dincl (M := M) x w) =
-      c • g.inner (x : M) v (dincl (M := M) x w)
+    change g.inner (x : M) (c • v) (boundaryInclusionMfderiv (M := M) x w) =
+      c • g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w)
     rw [map_smul, ContinuousLinearMap.smul_apply]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] private lemma metricPullback_apply
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v : TangentSpace I (x : M)) (w : hI.boundaryE) :
     metricPullback (M := M) g x v w =
-      g.inner (x : M) v (dincl (M := M) x w) := rfl
+      g.inner (x : M) v (boundaryInclusionMfderiv (M := M) x w) := rfl
 
-/-- A vector `v` is in the kernel of `metricPullback g x` iff it is in
-`normalSubspace g x`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma mem_ker_metricPullback_iff
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v : TangentSpace I (x : M)) :
@@ -1288,7 +919,7 @@ private lemma mem_ker_metricPullback_iff
     rw [metricPullback_apply, hv w]
     rfl
 
-/-- The kernel of `metricPullback` as a `Submodule` equals `normalSubspace`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma ker_metricPullback_eq_normalSubspace
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     LinearMap.ker (metricPullback (M := M) g x) = normalSubspace (M := M) g x := by
@@ -1298,9 +929,6 @@ private lemma ker_metricPullback_eq_normalSubspace
 
 variable (g : Measure.SmoothRiemannianMetric I M)
 
-/-- The chart-trivialised boundary functional, defined as the composite of
-the chart-trivialised inner-product covector with the chart-conjugated
-boundary inclusion derivative `dinclITC α₀ b`. -/
 private noncomputable def boundaryFunOfInwardAtChartedCLM
     (α₀ : BoundaryManifold I M) (b : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] ℝ :=
@@ -1310,7 +938,7 @@ private noncomputable def boundaryFunOfInwardAtChartedCLM
     (inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
       (mfderiv hI.boundaryI I (boundaryInclusion I M)) α₀ b)
 
-/-- Smoothness of the chart-trivialised boundary functional at `α₀`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFunOfInwardAtChartedCLM_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] ℝ) ∞
@@ -1356,8 +984,7 @@ private lemma boundaryFunOfInwardAtChartedCLM_contMDiffAt
     h_inclusion_at.mfderiv_const infty_le_top_add'
   exact h_α_smooth.clm_comp h_dincl_clm
 
-/-- Pointwise application of the chart-trivialised boundary functional, on
-the chart base sets. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFunOfInwardAtChartedCLM_apply_of_mem
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_amb : (b : M) ∈ (chartAt H (α₀ : M)).source)
@@ -1365,7 +992,7 @@ private lemma boundaryFunOfInwardAtChartedCLM_apply_of_mem
     (w : hI.boundaryE) :
     boundaryFunOfInwardAtChartedCLM (M := M) g α₀ b w =
       g.inner (b : M) (inwardCoordAt (M := M) α₀ b)
-        (dincl (M := M) b
+        (boundaryInclusionMfderiv (M := M) b
           (((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w)) := by
   unfold boundaryFunOfInwardAtChartedCLM
@@ -1381,7 +1008,7 @@ private lemma boundaryFunOfInwardAtChartedCLM_apply_of_mem
         (inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
           (mfderiv hI.boundaryI I (boundaryInclusion I M)) α₀ b w) =
         g.inner (b : M) (inwardCoordAt (M := M) α₀ b)
-          (dincl (M := M) b
+          (boundaryInclusionMfderiv (M := M) b
             (((trivializationAt hI.boundaryE
                 (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w)) := by
     rw [ContinuousLinearMap.inCoordinates]
@@ -1398,7 +1025,7 @@ private lemma boundaryFunOfInwardAtChartedCLM_apply_of_mem
         inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
             (mfderiv hI.boundaryI I (boundaryInclusion I M)) α₀ b w =
           (trivializationAt E (TangentSpace I) (α₀ : M)).continuousLinearMapAt ℝ
-            (b : M) (dincl (M := M) b
+            (b : M) (boundaryInclusionMfderiv (M := M) b
               (((trivializationAt hI.boundaryE
                   (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w)) := by
       have := dinclITC_apply (M := M) α₀ hb_amb hb_bdy w
@@ -1409,21 +1036,20 @@ private lemma boundaryFunOfInwardAtChartedCLM_apply_of_mem
         (((trivializationAt E (TangentSpace I) (α₀ : M)).symmL ℝ (b : M))
             ((trivializationAt E (TangentSpace I) (α₀ : M)).continuousLinearMapAt ℝ
               (b : M)
-              (dincl (M := M) b
+              (boundaryInclusionMfderiv (M := M) b
                 (((trivializationAt hI.boundaryE
                     (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w)))) =
-          dincl (M := M) b
+          boundaryInclusionMfderiv (M := M) b
             (((trivializationAt hI.boundaryE
                 (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w) :=
       (trivializationAt E (TangentSpace I) (α₀ : M)).symmL_continuousLinearMapAt
-        (R := ℝ) h_amb_baseSet (dincl (M := M) b
+        (R := ℝ) h_amb_baseSet (boundaryInclusionMfderiv (M := M) b
           (((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) α₀).symmL ℝ b) w))
     rw [h_amb_round]
   exact h_inC
 
-/-- On the chart base sets, the chart-trivialised boundary metric flat
-agrees with the bundle inner product through chart-conjugation. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatCharted_apply_of_mem
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_bdy : b ∈ (trivializationAt hI.boundaryE
@@ -1442,9 +1068,7 @@ private lemma boundaryFlatCharted_apply_of_mem
   change (Bundle.Trivial.trivialization (BoundaryManifold I M) ℝ).linearMapAt ℝ b _ = _
   rw [Bundle.Trivial.linearMapAt_trivialization (𝕜 := ℝ) (B := BoundaryManifold I M) (F := ℝ) b]
   rfl
-
-/-- Invertibility of the chart-trivialised boundary metric flat on the chart
-base set. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatCharted_isInvertible_of_mem
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_bdy : b ∈ (trivializationAt hI.boundaryE
@@ -1476,24 +1100,18 @@ private lemma boundaryFlatCharted_isInvertible_of_mem
   rw [h_T_symm_u, h_T_symm_v]
   rw [boundaryFlatCharted_apply_of_mem (M := M) g α₀ hb_bdy u v]
 
-/-- The chart-trivialised boundary component of the inward direction. -/
 private noncomputable def boundaryComponentOfInwardAtCharted
     (α₀ : BoundaryManifold I M) (b : BoundaryManifold I M) : hI.boundaryE :=
   (boundaryFlatChartedInv (M := M) g α₀ b)
     (boundaryFunOfInwardAtChartedCLM (M := M) g α₀ b)
-
-/-- Smoothness of the chart-trivialised boundary component at `α₀`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma boundaryComponentOfInwardAtCharted_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE) ∞
       (boundaryComponentOfInwardAtCharted (M := M) g α₀) α₀ :=
   (boundaryFlatChartedInv_contMDiffAt (M := M) g α₀).clm_apply
     (boundaryFunOfInwardAtChartedCLM_contMDiffAt (M := M) g α₀)
-
-/-- The defining identity for the bundle boundary component, recast in chart-
-trivialised form: applying `boundaryFlatCharted α₀ b` to
-`(triv-bdy α₀).continuousLinearMapAt ℝ b (boundaryComponentOfInwardAt α₀ g b)`
-yields the chart-trivialised boundary functional. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryFlatCharted_clmAt_bdy_BC_eq
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_amb : (b : M) ∈ (chartAt H (α₀ : M)).source)
@@ -1521,9 +1139,7 @@ private lemma boundaryFlatCharted_clmAt_bdy_BC_eq
     ((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).symm b v)]
   rw [boundaryFunOfInwardAtChartedCLM_apply_of_mem (M := M) g α₀ hb_amb hb_bdy v]
   rfl
-
-/-- The chart-trivialised boundary component agrees with the chart-image of
-the bundle boundary component on the chart base sets. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma boundaryComponentOfInwardAtCharted_eq
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_amb : (b : M) ∈ (chartAt H (α₀ : M)).source)
@@ -1536,8 +1152,7 @@ private lemma boundaryComponentOfInwardAtCharted_eq
   have h_eq := boundaryFlatCharted_clmAt_bdy_BC_eq (M := M) g α₀ hb_amb hb_bdy
   rw [← h_eq]
   exact (ContinuousLinearMap.IsInvertible.inverse_apply_eq h_inv).mpr rfl
-
-/-- Smoothness of `b ↦ dinclITC α₀ b (boundaryComponentOfInwardAtCharted α₀ g b)` at `α₀`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma inwardTangentialPartAtCharted_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, E) ∞
@@ -1545,9 +1160,7 @@ private lemma inwardTangentialPartAtCharted_contMDiffAt
         dinclITC (M := M) α₀ b (boundaryComponentOfInwardAtCharted (M := M) g α₀ b)) α₀ :=
   dinclITC_apply_contMDiffAt (M := M)
     (boundaryComponentOfInwardAtCharted_contMDiffAt (M := M) g α₀)
-
-/-- On the chart base sets, the chart-trivialised inward tangential part agrees with
-the chart-trivialised second component of the bundle inward tangential part. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inwardTangentialPartAtCharted_eq
     (α₀ : BoundaryManifold I M) {b : BoundaryManifold I M}
     (hb_amb : (b : M) ∈ (chartAt H (α₀ : M)).source)
@@ -1569,8 +1182,7 @@ private lemma inwardTangentialPartAtCharted_eq
     simpa using this
   rw [h_round_bdy]
   rfl
-
-/-- Smoothness of `b ↦ TotalSpace.mk' E b.val (outwardDirAt α₀ g b)` at `α₀`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma outwardDirAt_section_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞
@@ -1635,8 +1247,7 @@ private lemma outwardDirAt_section_contMDiffAt
       · rw [Trivialization.continuousLinearMapAt_apply]
         rw [T_amb.coe_linearMapAt_of_mem hb_amb_baseSet]
     rw [h_inwardCoord_chartTriv]
-
-/-- Smoothness of the squared `g`-norm of `outwardDirAt α₀ g b` at `α₀`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma outwardDirAt_norm_squared_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ) ∞
@@ -1672,19 +1283,14 @@ private lemma outwardDirAt_norm_squared_contMDiffAt
     h_g_at.clm_bundle_apply₂ h_outwardDir_section h_outwardDir_section
   rw [Bundle.contMDiffAt_totalSpace] at h_apply
   exact h_apply.2
-
-/-- The squared `g`-norm of `outwardDirAt α₀ g α₀` is strictly positive. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardDirAt_norm_squared_pos_basepoint
     (α₀ : BoundaryManifold I M) :
     0 < g.inner (α₀ : M) (outwardDirAt (M := M) g α₀ α₀)
         (outwardDirAt (M := M) g α₀ α₀) := by
   rw [outwardDirAt_self (M := M) g α₀]
   exact g_inner_outwardDir_pos (M := M) g α₀
-
-/-- Smoothness of the parameterised outward unit normal section at `α₀`.
-
-This is the chart-α-local smoothness result. The section
-`b ↦ TotalSpace.mk' E b.val (outwardNormalAt α₀ g b)` is `C^∞` at `α₀`. -/
+omit [InnerProductSpace ℝ E] in
 theorem outwardNormalAt_section_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞
@@ -1784,35 +1390,22 @@ theorem outwardNormalAt_section_contMDiffAt
         T_amb.continuousLinearMapAt ℝ (b : M) (outwardDirAt (M := M) g α₀ b) from ?_]
     · rw [Trivialization.continuousLinearMapAt_apply]
       rw [T_amb.coe_linearMapAt_of_mem hb_amb_baseSet]
-
-/-- The open positivity locus inside the boundary chart base set. This is the
-(open) subset of points where `outwardDirAt α₀ g b` has strictly positive
-squared `g`-norm. It is non-empty (contains `α₀`). -/
-private def positivityLocus
-    (α₀ : BoundaryManifold I M) : Set (BoundaryManifold I M) :=
-  (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet ∩
-    {b : BoundaryManifold I M |
-      0 < g.inner (b : M) (outwardDirAt (M := M) g α₀ b)
-        (outwardDirAt (M := M) g α₀ b)}
-
-/-- The metric pull-back covector map is surjective: every linear functional
-on `boundaryE` arises as `w ↦ g.inner y v (dincl y w)` for some `v ∈ T_y M`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma metricPullback_surjective
     (g : Measure.SmoothRiemannianMetric I M) (y : BoundaryManifold I M) :
     Function.Surjective (metricPullback (M := M) g y) := by
   intro α
   set u : hI.boundaryE := (boundaryFlatMap (M := M) g y).symm α with hu_def
-  refine ⟨dincl (M := M) y u, ?_⟩
+  refine ⟨boundaryInclusionMfderiv (M := M) y u, ?_⟩
   refine LinearMap.ext fun w => ?_
   rw [metricPullback_apply]
-  rw [show g.inner (y : M) (dincl (M := M) y u) (dincl (M := M) y w) =
+  rw [show g.inner (y : M) (boundaryInclusionMfderiv (M := M) y u) (boundaryInclusionMfderiv (M := M) y w) =
         inducedMetricInner (M := M) g y u w from
         (inducedMetricInner_apply g y u w).symm]
   rw [show inducedMetricInner (M := M) g y u w = boundaryFlatMap (M := M) g y u w from rfl]
   have h := (boundaryFlatMap (M := M) g y).apply_symm_apply α
   exact congrArg (fun L : hI.boundaryE →ₗ[ℝ] ℝ => L w) h
-
-/-- The kernel of the metric pull-back covector map has finrank `1`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma finrank_ker_metricPullback_eq_one
     (g : Measure.SmoothRiemannianMetric I M) (y : BoundaryManifold I M) :
     Module.finrank ℝ (LinearMap.ker (metricPullback (M := M) g y)) = 1 := by
@@ -1839,17 +1432,14 @@ private lemma finrank_ker_metricPullback_eq_one
     haveI : IsEmpty (BoundaryManifold I M) :=
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     exact (IsEmpty.false y).elim
-
-/-- **Block 1.** The `g`-orthogonal normal subspace at a boundary point is
-exactly one-dimensional. -/
+omit [InnerProductSpace ℝ E] in
 theorem normalSubspace_finrank_one
     (g : Measure.SmoothRiemannianMetric I M) (y : BoundaryManifold I M) :
     Module.finrank ℝ (normalSubspace (M := M) g y) = 1 := by
   rw [← ker_metricPullback_eq_normalSubspace (M := M) g y]
   exact finrank_ker_metricPullback_eq_one (M := M) g y
 
-/-- **Block 2.** Any two unit-`g`-length vectors in a 1-dimensional submodule
-are equal or opposite. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] hI in
 private lemma unit_vectors_in_1dim_equal_or_opposite
     (g : Measure.SmoothRiemannianMetric I M) {y : BoundaryManifold I M}
     {V : Submodule ℝ (TangentSpace I (y : M))}
@@ -1892,13 +1482,11 @@ private lemma unit_vectors_in_1dim_equal_or_opposite
     rw [show w = c • v from hc_amb.symm, h_pos, one_smul]
   · right
     rw [show w = c • v from hc_amb.symm, h_neg, neg_one_smul, neg_neg]
-
-/-- The chart-α inward direction is in the boundary tangent space iff the
-parameterised unnormalised outward direction vanishes. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardDirAt_eq_zero_iff_inwardCoordAt_mem_range
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M) :
     outwardDirAt (M := M) g α y = 0 ↔
-      inwardCoordAt (M := M) α y ∈ Set.range (dincl (M := M) y) := by
+      inwardCoordAt (M := M) α y ∈ Set.range (boundaryInclusionMfderiv (M := M) y) := by
   refine ⟨?_, ?_⟩
   · intro h0
     rw [outwardDirAt_def, sub_eq_zero] at h0
@@ -1906,7 +1494,7 @@ private lemma outwardDirAt_eq_zero_iff_inwardCoordAt_mem_range
     exact ⟨boundaryComponentOfInwardAt (M := M) g α y, rfl⟩
   · rintro ⟨u, hu⟩
     rw [outwardDirAt_def, sub_eq_zero, inwardTangentialPartAt_def, ← hu]
-    apply congrArg (dincl (M := M) y)
+    apply congrArg (boundaryInclusionMfderiv (M := M) y)
     have h_pair : ∀ w : hI.boundaryE,
         inducedMetricInner (M := M) g y
           (boundaryComponentOfInwardAt (M := M) g α y) w =
@@ -1922,31 +1510,25 @@ private lemma outwardDirAt_eq_zero_iff_inwardCoordAt_mem_range
       rw [boundaryFlatLinear_apply, boundaryFlatLinear_apply]
       exact h_pair w
     exact boundaryFlatLinear_injective (M := M) g y h_lin_eq
-
-/-- The parameterised outward direction is non-zero when the chart-α inward
-direction is transverse (not in the boundary tangent space). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardDirAt_ne_zero_of_transverse
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M)
-    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (dincl (M := M) y)) :
+    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (boundaryInclusionMfderiv (M := M) y)) :
     outwardDirAt (M := M) g α y ≠ 0 := by
   intro h0
   exact h_trans
     ((outwardDirAt_eq_zero_iff_inwardCoordAt_mem_range (M := M) g α y).mp h0)
-
-/-- Under transversality of the parameterised inward direction, the squared
-`g`-norm of `outwardDirAt α y` is strictly positive. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma g_inner_outwardDirAt_pos_of_transverse
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M)
-    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (dincl (M := M) y)) :
+    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (boundaryInclusionMfderiv (M := M) y)) :
     0 < g.inner (y : M) (outwardDirAt (M := M) g α y)
         (outwardDirAt (M := M) g α y) :=
   g.pos (y : M) _ (outwardDirAt_ne_zero_of_transverse (M := M) g α y h_trans)
-
-/-- Parameterised sign lemma: under transversality, `outwardDirAt α y` has
-strictly negative `g`-inner product with `inwardCoordAt α y`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma g_inner_outwardDirAt_inwardCoordAt_neg_of_transverse
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M)
-    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (dincl (M := M) y)) :
+    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (boundaryInclusionMfderiv (M := M) y)) :
     g.inner (y : M) (outwardDirAt (M := M) g α y)
         (inwardCoordAt (M := M) α y) < 0 := by
   have hpos : 0 < g.inner (y : M) (outwardDirAt (M := M) g α y)
@@ -1961,12 +1543,10 @@ private lemma g_inner_outwardDirAt_inwardCoordAt_neg_of_transverse
     ring
   rw [h_id]
   linarith
-
-/-- Parameterised unit-`g`-length identity: under transversality, the
-parameterised outward unit normal has unit `g`-length. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardNormalAt_norm_one_of_transverse
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M)
-    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (dincl (M := M) y)) :
+    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (boundaryInclusionMfderiv (M := M) y)) :
     g.inner (y : M) (outwardNormalAt (M := M) g α y)
         (outwardNormalAt (M := M) g α y) = 1 := by
   set q : ℝ := g.inner (y : M) (outwardDirAt (M := M) g α y)
@@ -2003,10 +1583,7 @@ private lemma outwardNormalAt_norm_one_of_transverse
     field_simp]
   rw [hsq_sq]
   exact div_self hq_ne
-
-/-- Parameterised orthogonality: the parameterised outward unit normal lies in
-the `g`-orthogonal normal subspace, i.e., it is `g`-orthogonal to every
-boundary tangent vector at `y`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardNormalAt_mem_normalSubspace
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M) :
     outwardNormalAt (M := M) g α y ∈ normalSubspace (M := M) g y := by
@@ -2019,13 +1596,10 @@ private lemma outwardNormalAt_mem_normalSubspace
       (outwardDirAt_mem_normalSubspace (M := M) g α y)
   · rw [dif_neg h_pos]
     exact (normalSubspace (M := M) g y).zero_mem
-
-/-- Parameterised sign lemma for `outwardNormalAt`: under transversality, the
-parameterised outward unit normal has strictly negative `g`-inner product
-with the chart-α inward direction. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma outwardNormalAt_inner_inwardCoordAt_neg_of_transverse
     (g : Measure.SmoothRiemannianMetric I M) (α y : BoundaryManifold I M)
-    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (dincl (M := M) y)) :
+    (h_trans : inwardCoordAt (M := M) α y ∉ Set.range (boundaryInclusionMfderiv (M := M) y)) :
     g.inner (y : M) (outwardNormalAt (M := M) g α y)
         (inwardCoordAt (M := M) α y) < 0 := by
   have hq_pos : 0 < g.inner (y : M) (outwardDirAt (M := M) g α y)
@@ -2047,17 +1621,16 @@ private lemma outwardNormalAt_inner_inwardCoordAt_neg_of_transverse
     g_inner_outwardDirAt_inwardCoordAt_neg_of_transverse (M := M) g α y h_trans
   exact mul_neg_of_pos_of_neg hsq_inv_pos hneg
 
-/-- Under the orientation hypothesis, transversality of the parameterised
-inward direction is independent of the chart base point. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inwardCoordAt_mem_range_iff_of_orientation
     (α₀ α₁ y : BoundaryManifold I M)
     (c : ℝ) (hc : 0 < c)
     (h_w : inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-        Set.range (dincl (M := M) y).toLinearMap) :
-    inwardCoordAt (M := M) α₀ y ∈ Set.range (dincl (M := M) y) ↔
-      inwardCoordAt (M := M) α₁ y ∈ Set.range (dincl (M := M) y) := by
-  have h_range_eq : Set.range (dincl (M := M) y).toLinearMap =
-      Set.range (dincl (M := M) y) := rfl
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap) :
+    inwardCoordAt (M := M) α₀ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y) ↔
+      inwardCoordAt (M := M) α₁ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y) := by
+  have h_range_eq : Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap =
+      Set.range (boundaryInclusionMfderiv (M := M) y) := rfl
   rw [h_range_eq] at h_w
   rcases h_w with ⟨w', hw'⟩
   have hc_ne : c ≠ 0 := ne_of_gt hc
@@ -2065,62 +1638,52 @@ private lemma inwardCoordAt_mem_range_iff_of_orientation
   · rcases h₀ with ⟨u, hu⟩
     refine ⟨c⁻¹ • (u - w'), ?_⟩
     have h_target : (c : ℝ) • inwardCoordAt (M := M) α₁ y =
-        (dincl (M := M) y) u - (dincl (M := M) y) w' := by
+        (boundaryInclusionMfderiv (M := M) y) u - (boundaryInclusionMfderiv (M := M) y) w' := by
       rw [hu, hw']; abel
     have h_inv_smul : (c : ℝ)⁻¹ • ((c : ℝ) • inwardCoordAt (M := M) α₁ y) =
         inwardCoordAt (M := M) α₁ y := by
       rw [← mul_smul, inv_mul_cancel₀ hc_ne, one_smul]
     have h_target_inv : inwardCoordAt (M := M) α₁ y =
-        (c : ℝ)⁻¹ • ((dincl (M := M) y) u - (dincl (M := M) y) w') := by
+        (c : ℝ)⁻¹ • ((boundaryInclusionMfderiv (M := M) y) u - (boundaryInclusionMfderiv (M := M) y) w') := by
       rw [← h_inv_smul, h_target]
       rfl
     rw [h_target_inv, ContinuousLinearMap.map_smul, map_sub]
   · rcases h₁ with ⟨u, hu⟩
     refine ⟨c • u + w', ?_⟩
     rw [map_add, ContinuousLinearMap.map_smul, hu]
-    set vw : TangentSpace I (y : M) := dincl (M := M) y w' with hvw_def
+    set vw : TangentSpace I (y : M) := boundaryInclusionMfderiv (M := M) y w' with hvw_def
     change (c : ℝ) • inwardCoordAt (M := M) α₁ y + vw = inwardCoordAt (M := M) α₀ y
     have hw'' : vw = inwardCoordAt (M := M) α₀ y -
         (c : ℝ) • inwardCoordAt (M := M) α₁ y := hw'
     rw [hw'']; abel
 
-/-- Under the orientation hypothesis, the unparameterised version: `inwardCoordAt α₀ y ∉ range`
-iff `inwardCoordAt α₁ y ∉ range`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma inwardCoordAt_not_mem_range_iff_of_orientation
     (α₀ α₁ y : BoundaryManifold I M)
     (c : ℝ) (hc : 0 < c)
     (h_w : inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-        Set.range (dincl (M := M) y).toLinearMap) :
-    inwardCoordAt (M := M) α₀ y ∉ Set.range (dincl (M := M) y) ↔
-      inwardCoordAt (M := M) α₁ y ∉ Set.range (dincl (M := M) y) := by
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap) :
+    inwardCoordAt (M := M) α₀ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) ↔
+      inwardCoordAt (M := M) α₁ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) := by
   rw [not_iff_not]
   exact inwardCoordAt_mem_range_iff_of_orientation (M := M) α₀ α₁ y c hc h_w
-
-/-- The chart-α₀ inward "outward" sign condition for `N₁ := outwardNormalAt α₁ g y`,
-under the orientation hypothesis. Concretely:
-`g.inner y N₁ (inwardCoordAt α₀ y) < 0`.
-
-This uses:
-* `inwardCoordAt α₀ y = c • inwardCoordAt α₁ y + dincl y w` with `c > 0`,
-* `N₁ ∈ normalSubspace g y` (so `g.inner y N₁ (dincl y w) = 0`),
-* `g.inner y N₁ (inwardCoordAt α₁ y) < 0` (parameterised sign at α₁).
--/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 private lemma g_inner_outwardNormalAt_inwardCoordAt_other_neg
     (g : Measure.SmoothRiemannianMetric I M) (α₀ α₁ y : BoundaryManifold I M)
-    (h_trans₁ : inwardCoordAt (M := M) α₁ y ∉ Set.range (dincl (M := M) y))
+    (h_trans₁ : inwardCoordAt (M := M) α₁ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y))
     (c : ℝ) (hc : 0 < c)
     (h_w : inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-        Set.range (dincl (M := M) y).toLinearMap) :
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap) :
     g.inner (y : M) (outwardNormalAt (M := M) g α₁ y)
         (inwardCoordAt (M := M) α₀ y) < 0 := by
-  have h_range_eq : Set.range (dincl (M := M) y).toLinearMap =
-      Set.range (dincl (M := M) y) := rfl
+  have h_range_eq : Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap =
+      Set.range (boundaryInclusionMfderiv (M := M) y) := rfl
   rw [h_range_eq] at h_w
   rcases h_w with ⟨w', hw'⟩
   set N₁ : TangentSpace I (y : M) := outwardNormalAt (M := M) g α₁ y with hN₁_def
   set v₀ : TangentSpace I (y : M) := inwardCoordAt (M := M) α₀ y with hv₀_def
   set v₁ : TangentSpace I (y : M) := inwardCoordAt (M := M) α₁ y with hv₁_def
-  set vw : TangentSpace I (y : M) := dincl (M := M) y w' with hvw_def
+  set vw : TangentSpace I (y : M) := boundaryInclusionMfderiv (M := M) y w' with hvw_def
   have hw'' : vw = v₀ - c • v₁ := hw'
   have hv₀_eq : v₀ = c • v₁ + vw := by rw [hw'']; abel
   rw [hv₀_eq, ContinuousLinearMap.map_add, ContinuousLinearMap.map_smul, smul_eq_mul]
@@ -2131,20 +1694,16 @@ private lemma g_inner_outwardNormalAt_inwardCoordAt_other_neg
   have h_neg : g.inner (y : M) N₁ v₁ < 0 :=
     outwardNormalAt_inner_inwardCoordAt_neg_of_transverse (M := M) g α₁ y h_trans₁
   exact mul_neg_of_pos_of_neg hc h_neg
-
-/-- **Chart-invariance with explicit orientation hypothesis.** If the
-parameterised inward direction at `y` viewed in two different charts differs
-only by a positive scalar multiple modulo a boundary-tangent correction, the
-parameterised outward unit normal is the same. -/
+omit [InnerProductSpace ℝ E] in
 theorem outwardNormalAt_chart_invariance_of_orientation
     (g : Measure.SmoothRiemannianMetric I M) (α₀ α₁ y : BoundaryManifold I M)
     {c : ℝ} (hc : 0 < c)
     (h_w : inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-        Set.range (dincl (M := M) y).toLinearMap) :
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap) :
     outwardNormalAt (M := M) g α₀ y = outwardNormalAt (M := M) g α₁ y := by
   classical
-  by_cases h_trans₁ : inwardCoordAt (M := M) α₁ y ∈ Set.range (dincl (M := M) y)
-  · have h_trans₀ : inwardCoordAt (M := M) α₀ y ∈ Set.range (dincl (M := M) y) := by
+  by_cases h_trans₁ : inwardCoordAt (M := M) α₁ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y)
+  · have h_trans₀ : inwardCoordAt (M := M) α₀ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y) := by
       have h_iff := inwardCoordAt_mem_range_iff_of_orientation (M := M) α₀ α₁ y c hc h_w
       exact h_iff.mpr h_trans₁
     have h0_α₀ : outwardDirAt (M := M) g α₀ y = 0 :=
@@ -2166,9 +1725,9 @@ theorem outwardNormalAt_chart_invariance_of_orientation
       rw [dif_neg]
       rw [h_q_α₁]; exact lt_irrefl 0
     rw [h_normal_α₀, h_normal_α₁]
-  · have h_trans₁_ne : inwardCoordAt (M := M) α₁ y ∉ Set.range (dincl (M := M) y) :=
+  · have h_trans₁_ne : inwardCoordAt (M := M) α₁ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) :=
       h_trans₁
-    have h_trans₀_ne : inwardCoordAt (M := M) α₀ y ∉ Set.range (dincl (M := M) y) := by
+    have h_trans₀_ne : inwardCoordAt (M := M) α₀ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) := by
       have h_iff := inwardCoordAt_not_mem_range_iff_of_orientation (M := M) α₀ α₁ y c hc h_w
       exact h_iff.mpr h_trans₁_ne
     have hN₀_mem : outwardNormalAt (M := M) g α₀ y ∈ normalSubspace (M := M) g y :=

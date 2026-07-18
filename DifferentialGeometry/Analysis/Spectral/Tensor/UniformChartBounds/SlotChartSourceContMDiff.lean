@@ -6,35 +6,10 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 
-/-!
-# Chart-source smoothness of the trivialised slot-correction sections
-
-Consolidated chart-source `ContMDiffOn` infrastructure for the chart-frame
-Christoffel slot-correction CLMs.
-
-This file ships the following headline theorems, in increasing order of
-generality:
-
-1. **`chartLeviCivitaParallelCLM_trivImage_contMDiffOn_chartSource`** — the
-   hom-bundle-trivialised image of `chartLeviCivitaParallelCLM g α b X` is
-   chart-source smooth for any bundle-smooth vector field `X`.
-2. **`chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSource`**
-   — the same, specialised to the chart-basis input
-   `X = chartBasisVecFiber α j`.
-3. **`tensorSlotSubstCLM_chartLeviCivita_chartBasisVec_trivImage_contMDiffOn_chartSource`**
-   — chart-source smoothness of the trivialised image of the slot-
-   substitution CLM at the chart-Levi-Civita parallel CLM for the
-   chart-basis input.
-4. **`chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource`**
-   and **`chartTensorRSOutputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource`**
-   — chart-source smoothness of the trivialised images of the input / output
-   slot-correction CLMs at the chart-basis input.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -62,14 +37,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-/-- A finite-dimensional inner-product space is complete. We package this as
-a local instance so that the `chartLeviCivitaParallelCLM` infrastructure
-(which requires `[CompleteSpace E]`) is usable here. -/
 private local instance parallelGeneral_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-- On the chart-`α` source (= the trivialisation base set), the chart-
-trivialised representation of a smooth vector field is `C^∞`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_contMDiffOn_chartSource
     (α : M) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -88,8 +59,7 @@ private lemma chartE_section_repr_contMDiffOn_chartSource
   have h := (contMDiffAt_section_iff_chartE I α X (k := (⊤ : ℕ∞)) hb_base).mp hX_at
   exact h.contMDiffWithinAt
 
-/-- Smoothness of the basis-component scalar `(b.repr (chartE_section_repr α X x))_j`
-on the chart-`α` source. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_basis_component_contMDiffOn_chartSource
     (α : M) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -107,9 +77,7 @@ private lemma chartE_section_repr_basis_component_contMDiffOn_chartSource
   intro b hb
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt b (hbase b hb)
 
-/-- Under `[I.Boundaryless]`, the chart target is open, hence equal to its
-interior. Therefore `chartChristoffel` precomposed with `extChartAt I α` is
-`ContMDiffOn` on the chart-`α` source. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartChristoffel_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -139,8 +107,7 @@ private lemma chartChristoffel_contMDiffOn_chartSource
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-- Smoothness of the chart-side Christoffel-correction CLM as a CLM-valued
-function of `b : M` on the chart-`α` source. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {X : Π b : M, TangentSpace I b}
@@ -170,9 +137,7 @@ private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
-/-- On the chart-`α` source, the hom-bundle trivialisation at `α` applied to
-the chart Levi-Civita parallel CLM equals the chart-side Christoffel-
-correction CLM (with `σ := X`). -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b : M, TangentSpace I b) {b : M}
@@ -210,18 +175,7 @@ private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
   rw [hY]
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
 
-/-- **Chart-source `C^∞` smoothness of the hom-trivialised chart Levi-Civita
-parallel CLM.** For a closed Riemannian manifold `(M, g)`, a chart-base point
-`α : M`, and a smooth vector field `X` (in the form of bundle-section
-smoothness of `T% X`), the function
-
-```
-b ↦ (trivializationAt (E →L[ℝ] E)
-      (fun b' => TangentSpace I b' →L[ℝ] TangentSpace I b') α
-      ⟨b, chartLeviCivitaParallelCLM g α b X⟩).2
-```
-
-is `ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞` on `(chartAt H α).source`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 theorem chartLeviCivitaParallelCLM_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b : M, TangentSpace I b)
@@ -257,11 +211,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance parallelChartBasis_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-- Chart-source smoothness of `b ↦ chartE_section_repr α (chartBasisVecFiber α j) b`.
-
-This function is *constant* on the chart base set, equal to the model basis
-vector `(chartModelBasis E) j`. The chart base set equals the chart source
-under `[I.Boundaryless]`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_chartBasisVec_eq_const_on_chart_source
     (α : M) (j : Fin (Module.finrank ℝ E)) :
     ∀ b ∈ (chartAt H α).source,
@@ -286,11 +236,7 @@ private lemma chartE_section_repr_chartBasisVec_eq_const_on_chart_source
     (R := ℝ) hb_base]
   exact h2
 
-/-- Chart-source smoothness of the scalar `(chartModelBasis E).repr applied at
-slot `j'` to the chart-frame representation of `chartBasisVecFiber α j`.
-
-On chart source this scalar equals `δ_{j', j}` (constant). Smoothness as a
-function `M → ℝ` follows by congruence with a constant. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_chartSource
     (α : M) (j : Fin (Module.finrank ℝ E))
     (j' : Fin (Module.finrank ℝ E)) :
@@ -328,6 +274,7 @@ private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_char
   intro b hb
   exact h_const_on b hb
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartChristoffel_contMDiffOn_chartSource'
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j' k : Fin (Module.finrank ℝ E)) :
@@ -357,11 +304,7 @@ private lemma chartChristoffel_contMDiffOn_chartSource'
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-- The chart-side Christoffel-correction CLM for the chart-basis vector
-field `chartBasisVecFiber α j` is chart-source smooth as a CLM-valued
-function of `b`. The proof reuses the triple-finite-sum decomposition from
-the general case, specialised to the chart-basis input (yielding a
-*constant* component scalar on chart source). -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -393,24 +336,7 @@ private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
-/-- **Chart-source smoothness of the hom-trivialised chart Levi-Civita
-parallel CLM for the chart-basis vector field.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and a
-chart-basis direction `j : Fin (Module.finrank ℝ E)`, the function
-
-```
-b ↦ (trivializationAt (E →L[ℝ] E)
-      (fun b' => TangentSpace I b' →L[ℝ] TangentSpace I b') α
-      ⟨b, chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)⟩).2
-```
-
-is `ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞` on `(chartAt H α).source`.
-
-This specialises the general-input chart-source smoothness theorem
-(`chartLeviCivitaParallelCLM_trivImage_contMDiffOn_chartSource`) to the
-chart-basis input vector field, which is the form needed downstream by the
-chart-frame Christoffel slot-correction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -481,11 +407,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance slotSubst_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-- For a chart-basis input `chartBasisVecFiber α j`, the matrix entry
-`(chartModelBasis E).repr (Φ_b_triv (chartModelBasis E j_in)) i_out` is
-chart-source `C^∞`-smooth in `b`. Here `Φ_b = chartLeviCivitaParallelCLM
-g α b (chartBasisVecFiber α j)` and `Φ_b_triv := chartJ α b ∘ Φ_b ∘
-chartJinv α b` is its `E →L[ℝ] E` trivialisation. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -543,22 +465,25 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_c
     hcoord_smooth.comp_contMDiffOn hΦv_smooth
   exact hfinal
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma chartJ_chartJinv_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
-    chartJ (I := I) (M := M) α b
-        (chartJinv (I := I) (M := M) α b v) = v := by
+    chartTrivializationLinearMap (I := I) (M := M) α b
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b v) = v := by
   classical
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJ_chartJinv (I := I) (M := M) α hbase v
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma chartJinv_chartJ_self_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
-    chartJinv (I := I) (M := M) α b
-        (chartJ (I := I) (M := M) α b v) = v := by
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b
+        (chartTrivializationLinearMap (I := I) (M := M) α b v) = v := by
   classical
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJinv_chartJ_self (I := I) (M := M) α hbase v
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eval0SCLE_symm_pi_single_at_basis_tuple
     (r : ℕ) (Idx : Fin r → Fin (Module.finrank ℝ E))
     (φ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -572,12 +497,7 @@ private lemma eval0SCLE_symm_pi_single_at_basis_tuple
   have h' := congr_fun h φ
   simpa [eval0SCLE_apply] using h'
 
-/-- Closed-form expansion of `((triv_RR α) ⟨b, T_b⟩).2 ((eval0SCLE r).symm (Pi.single Idx 1)) (chartModelBasis ∘ Jdx)`
-for `T_b = tensorSlotSubstCLM r b (tangentSlotCLM r k Φ_b)` and `Φ_b =
-chartLeviCivitaParallelCLM g α b X`.
-
-The expansion: 0 if some non-`k` index disagrees, otherwise the model-basis
-matrix entry of the trivialised parallel CLM. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma slotSubst_trivProj_entry_closedForm
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) (k : Fin r)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -616,12 +536,12 @@ private lemma slotSubst_trivProj_entry_closedForm
                 (chartLeviCivitaParallelCLM (I := I) g α b X)))
             (show Tensor0SSpace r I b from
               (((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))).compContinuousLinearMap
-                (fun _ : Fin r => chartJ (I := I) (M := M) α b)))) m =
+                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))) m =
         (show ContinuousMultilinearMap ℝ
             (fun _ : Fin r => TangentSpace I b) ℝ from
           (show Tensor0SSpace r I b from
             (((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))).compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b))))
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))))
           (fun i =>
             (tangentSlotCLM (I := I) r k
               (chartLeviCivitaParallelCLM (I := I) g α b X) i) (m i)) := by
@@ -637,17 +557,17 @@ private lemma slotSubst_trivProj_entry_closedForm
             (chartLeviCivitaParallelCLM (I := I) g α b X)))
         (show Tensor0SSpace r I b from
           (((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))).compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))))
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))))
       (fun i : Fin r =>
-        chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx i))) = _
+        chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) (Jdx i))) = _
   rw [hslot_apply]
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   set Ri : Fin r → E :=
     (fun i : Fin r =>
-      chartJ (I := I) (M := M) α b
+      chartTrivializationLinearMap (I := I) (M := M) α b
         ((tangentSlotCLM (I := I) r k
           (chartLeviCivitaParallelCLM (I := I) g α b X) i)
-          (chartJinv (I := I) (M := M) α b
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b
             ((chartModelBasis E) (Jdx i)))))
     with hRi_def
   change ((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))) Ri = _
@@ -948,22 +868,7 @@ private lemma slotSubst_trivProj_entry_closedForm
     rw [hphi_zero a]
     simp
 
-/-- **Chart-source smoothness of the hom-trivialised slot-substitution CLM
-for the chart-Levi-Civita parallel CLM at a chart-basis vector field.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a
-chart-basis direction `j : Fin (Module.finrank ℝ E)`, and a slot index
-`k : Fin r`, the function
-
-```
-b ↦ (trivializationAt (TensorRSModel r r ℝ E)
-      (fun y : M => TensorRSSpace r r I y) α
-      ⟨b, tensorSlotSubstCLM r b (tangentSlotCLM r k
-            (chartLeviCivitaParallelCLM g α b
-              (chartBasisVecFiber α j)))⟩).2
-```
-
-is `ContMDiffOn I 𝓘(ℝ, TensorRSModel r r ℝ E) ∞` on `(chartAt H α).source`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 theorem tensorSlotSubstCLM_chartLeviCivita_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) (k : Fin r) :
@@ -1071,10 +976,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance slotCorrection_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-- The trivialisation-projection of `(T b).comp S_b` on chart source, where
-`T b ∈ TensorRSSpace r s I b` and `S_b ∈ TensorRSSpace r r I b`. The result
-equals the composition (in `Tensor0SModel r ℝ E →L Tensor0SModel s ℝ E`) of
-their individual projections. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma triv_compInput_eq_trivT_compL_trivS
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace r r I b) :
@@ -1191,17 +1093,17 @@ private lemma triv_compInput_eq_trivT_compL_trivS
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
           (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))))
-      (fun i => chartJinv (I := I) (M := M) α b (w i)) = _
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))))
+      (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i)) = _
   have hinner_round_trip :
       ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
             (α'.compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-              (fun _ : Fin r => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b)) =
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+              (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)) =
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
           (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b)) :
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)) :
           ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) := by
     refine ContinuousMultilinearMap.ext ?_
     intro u
@@ -1215,13 +1117,13 @@ private lemma triv_compInput_eq_trivT_compL_trivS
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
         ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
               (α'.compContinuousLinearMap
-                (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-                (fun _ : Fin r => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b)))
-      (fun i => chartJinv (I := I) (M := M) α b (w i))
+                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+                (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))
+      (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hinner_round_trip]
 
-/-- Output-slot counterpart of `triv_compInput_eq_trivT_compL_trivS`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma triv_compOutput_eq_trivS_compL_trivT
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace s s I b) :
@@ -1336,17 +1238,17 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
       (show Tensor0SSpace s I b →L[ℝ] Tensor0SSpace s I b from Sb)
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
           (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))))
-      (fun i => chartJinv (I := I) (M := M) α b (w i)) = _
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))))
+      (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i)) = _
   have hround :
       ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
             (α'.compContinuousLinearMap
-              (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-              (fun _ : Fin s => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-            (fun _ : Fin s => chartJ (I := I) (M := M) α b)) =
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+              (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+            (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)) =
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
           (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b)) :
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)) :
           ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) := by
     refine ContinuousMultilinearMap.ext ?_
     intro u
@@ -1360,23 +1262,13 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
       (show Tensor0SSpace s I b →L[ℝ] Tensor0SSpace s I b from Sb)
         ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
               (α'.compContinuousLinearMap
-                (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-                (fun _ : Fin s => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-              (fun _ : Fin s => chartJ (I := I) (M := M) α b)))
-      (fun i => chartJinv (I := I) (M := M) α b (w i))
+                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+                (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+              (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)))
+      (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hround]
 
-/-- **Headline (input slot).**
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a
-chart-basis direction `j : Fin (Module.finrank ℝ E)`, an input slot
-`k : Fin r`, and a bundle-smooth tensor section `T`, the trivialised image
-of the chart-`α` Christoffel input-slot correction CLM
-
-```
-b ↦ chartTensorRSInputSlotCorrection r s g α T (chartBasisVecFiber α j) b k
-```
-
-is `ContMDiffOn I 𝓘(ℝ, TensorRSModel r s ℝ E) ∞` on `(chartAt H α).source`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 theorem chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1490,17 +1382,7 @@ theorem chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_cha
   intro b hb
   exact hbridge b hb
 
-/-- **Headline (output slot).**
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a
-chart-basis direction `j : Fin (Module.finrank ℝ E)`, an output slot
-`l : Fin s`, and a bundle-smooth tensor section `T`, the trivialised image
-of the chart-`α` Christoffel output-slot correction CLM
-
-```
-b ↦ chartTensorRSOutputSlotCorrection r s g α T (chartBasisVecFiber α j) b l
-```
-
-is `ContMDiffOn I 𝓘(ℝ, TensorRSModel r s ℝ E) ∞` on `(chartAt H α).source`. -/
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 theorem chartTensorRSOutputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)

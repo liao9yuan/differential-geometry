@@ -5,11 +5,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Constant scaling of realized scalar operators
 
-This file contains the gradient scaling law used by parabolic rescaling.
--/
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -57,7 +57,7 @@ private theorem metricSharp_scaleMetric
             _ = alpha w := by
                 field_simp [ne_of_gt hc]
 
-/-- Under a positive constant metric scaling, gradients scale by `c⁻¹`. -/
+
 theorem gradientFun_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (f : M -> Real) (x : M) :
@@ -67,8 +67,8 @@ theorem gradientFun_scale
     metricSharp_scaleMetric (I := I) c hc g x
       (mfderiv I 𝓘(Real, Real) f x).toLinearMap
 
-/-- Under a positive constant metric scaling, scalar Laplacians scale by
-`c⁻¹` when the connection is kept fixed. -/
+
+
 theorem laplacian_scaleMetric
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (c : Real) (hc : 0 < c)
@@ -91,8 +91,8 @@ theorem laplacian_scaleMetric
           simpa [laplacian] using
             divergence_const_smul (I := I) cov c⁻¹ hgrad
 
-/-- Combining scalar-function scaling and metric scaling gives two inverse
-factors in the scalar Laplacian. -/
+
+
 theorem laplacian_scaleMetric_const_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (c : Real) (hc : 0 < c)

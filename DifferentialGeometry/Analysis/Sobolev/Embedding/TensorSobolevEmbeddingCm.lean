@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2Bo
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
-/-! # Sobolev embedding `H^{2k} ↪ C^m` for `(r, s)`-tensor sections on a closed Riemannian manifold -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -30,52 +29,8 @@ set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/--
-**Sobolev embedding `H^{2k} ↪ C^m` for tensor sections.**
 
-When `2 * k > dim M + 2 * m` (the supercritical Sobolev threshold), the
-intrinsic order-`2k` Sobolev space of `(r, s)`-tensor sections on a closed
-Riemannian manifold embeds continuously into `C^m` tensor sections.
-
-The statement is the substantive pointwise sup-norm form of the embedding
-on the dense smooth subspace `SmoothCcTensor g r s ↪
-TensorPouSobolevHilbert g r s (2 * k)`: there exists a **strictly positive**
-constant `C` such that the bundle-fibre norm of every smooth
-compactly-supported `(r, s)`-tensor section at every point of `M` is
-controlled by `C` times the intrinsic `H^{2 * k}`-norm of the section's
-image in `TensorPouSobolevHilbert g r s (2 * k)`.
-
-The fibre norm here is the **Riemannian bundle norm** induced by the metric
-`g` (`tensorRS_riemannianBundle g r s`): the genuine `g`-fibre norm, not a
-chart-dependent model op-norm. This is the canonical norm on the
-`(r, s)`-tensor bundle and the one in which the embedding constant is
-chart-locality-free. Concretely, for `v : TensorRSSpace r s I x`,
-`‖v‖ ^ 2 = tensorInnerPointwise g r s x (toModel v) (toModel v)`.
-
-The strict-positivity hypothesis `0 < C` rules out vacuous discharges
-(`C = 0` does not satisfy the conclusion as soon as the smooth subspace
-contains a non-trivial section, which it does on any non-empty closed
-manifold). Universal quantification over `T : SmoothCcTensor g r s` and
-`x : M` together with the pointwise tensor-fibre norm `‖T.toSection x‖`
-forces `C` to genuinely control the sup-norm; no hypothesis-packaging
-fill is possible because no hypothesis of this shape is in scope.
-
-The conclusion encodes the `m = 0` (C⁰-norm) component of the full
-`C^m`-norm bound. The general `C^m`-norm version, controlling all
-iterated covariant derivatives `‖∇^j T x‖` for `0 ≤ j ≤ m`, is delivered
-separately by `iteratedCovGrad_toSobolev_embedding_Cm_unconditional`
-(file `Embedding/SobolevEmbeddingCmOrderDropping.lean`), in the same Riemannian
-bundle norm.
-
-## Proof
-
-The full manifold-side assembly (finite atlas-aligned partition of unity +
-Lebesgue-number `ρ`-localisation + Euclidean local-ball `L²` pointwise
-embedding + op-norm ↦ Hilbert–Schmidt + per-term `≤ tsum`) is carried out,
-chart-locality-free, in `tensorPouSobolevHilbert_embedding_Ck_gNorm`
-(file `Embedding/SobolevEmbeddingManifoldC0.lean`). This headline is the
-specialisation that installs the Riemannian bundle instance and delegates.
--/
+omit [I.Boundaryless] in
 theorem tensorPouSobolevHilbert_embedding_Ck
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
@@ -89,28 +44,7 @@ theorem tensorPouSobolevHilbert_embedding_Ck
             ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ :=
   tensorPouSobolevHilbert_embedding_Ck_gNorm (I := I) (M := M) g r s k m h_super
 
-/--
-**Per-chart-component scalar Sobolev embedding `H^k ↪ C⁰` (HLCC-free sub-result).**
-
-For a smooth compactly-supported `(r, s)`-tensor section `T` on a closed
-Riemannian manifold, each chart-frame scalar component
-`tensorChartComponentScalar g r s T α Idx Jdx : M → ℝ` is a smooth
-compactly-supported function, hence lies in the chart-based `W^{k,2}` space
-at every order. When the supercritical threshold `n < 2k` holds (with
-`n = dim M`) and the exponent `2` is regular for order `k`, the scalar
-Hilbert-Sobolev embedding `sobolev_embedding_chart_C0_Hk` produces
-a continuous representative `ũ`, almost-everywhere equal to the component,
-whose sup-norm is controlled by a constant multiple of the chart-`W^{k,2}`
-norm of the component.
-
-This is the genuine building block underlying the (research-level) tensor
-embedding `tensorPouSobolevHilbert_embedding_Ck`: the chart-frame component
-scalars are exactly the data whose iterated partial derivatives define the
-intrinsic Hilbert-Schmidt chart-Sobolev norm `tensorPouSobolevHsNorm`. What
-remains for the full tensor embedding is (i) reconstructing the pointwise
-fiber-norm `‖T.toSection x‖` from a finite family of per-component sup
-bounds with a *uniform* constant, and (ii) bounding the per-component
-chart-`W^{k,2}` norms by `‖T.toHs (2k)‖` at orders `k ≥ 2`. -/
+omit [BoundarylessManifold I M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_embedding_C0
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -156,25 +90,8 @@ theorem tensorChartComponentScalar_embedding_C0
 
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- **Pointwise fibre-norm reconstruction at the chart centre (HLCC-free).**
 
-For a smooth compactly-supported `(r, s)`-tensor section `T` and any point
-`x : M`, the bundle-fibre norm `‖T.toSection x‖` (which, by the induced
-norm on `TensorRSSpace`, equals the model-fibre norm
-`‖TensorRSSpace.toModel (T.toSection x)‖`) is controlled, with a single
-constant depending only on `(r, s, E)`, by the sum of squares of the
-raw chart-frame scalar components taken **in the chart centred at `x`
-itself**, evaluated at `x`:
-`‖T.toSection x‖² ≤ C · ∑_{Idx,Jdx} (tensorChartComponentRaw g r s T x Idx Jdx x)²`.
-
-This is the algebraic core of the tensor-fibre reconstruction. The
-trivialization at the chart centre coincides with `TensorRSSpace.toModel`
-(`triv_eq_toModel_at_chartCenter`), so the raw component at the chart
-centre is exactly the chart-frame projection of the model fibre element;
-finite-basis recovery (`tensorRSModel_eq_sum_basis`) then gives the
-Cauchy–Schwarz bound with constant
-`midxPairCard · tensorChartBasisNormConstant²`. No partition-of-unity or
-chart-locality hypothesis is used. -/
+omit [BoundarylessManifold I M] in
 theorem tensorFiberNorm_sq_le_chartCenterComponents
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (T : SmoothCcTensor g r s) (x : M) :

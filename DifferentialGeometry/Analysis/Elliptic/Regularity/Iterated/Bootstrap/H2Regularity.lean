@@ -2,53 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Iterated `H^{2k}` regularity for the iterated Laplacian domain
-
-For a closed Riemannian manifold `(M, g)`, this file establishes the
-non-smooth iterated regularity result:
-
-* For `k ≤ 1`, every `u_h ∈ laplacianDomainPow g k` satisfies the chart-Sobolev
-  membership `MemWkpChart g (2k) 2 ((H1ComplToLp u_h).coeFn)` with a finite
-  chart-based norm.
-
-The `k = 0` case is the trivial `Lp` membership of the canonical
-representative. The `k = 1` case is the unconditional single-step `H²`
-regularity (`laplacianDomain_memWkpChart_two_unconditional`).
-
-## Strategy
-
-For `k = 0`:
-* `MemWkpChart g 0 2` reduces (via `MemWkp_zero`) to `MemLp 2` on each chart
-  target.
-* The canonical representative `(H1ComplToLp u_h).coeFn` of any `Lp` class is
-  in `MemLp 2` globally, hence on every chart target.
-* The norm is bounded by the global `Lp` norm.
-
-For `k = 1`:
-* `laplacianDomainPow g 1 = laplacianDomain g` by `laplacianDomainPow_one`.
-* Apply `laplacianDomain_memWkpChart_two_unconditional`.
-
-## Higher orders
-
-For `k ≥ 2`, the iterated bootstrap requires differentiating the
-chart-bilinear identity `k - 1` times in chart directions and re-applying the
-single-step difference-quotient regularity at each level. The full bootstrap
-is the standard Nirenberg–Schauder bootstrap and constitutes substantial
-additional chart-bilinear infrastructure beyond the scope of this module.
-
-The combinator `laplacianDomainPow_memWkpChart_two_k` packages the available
-cases under the unified statement `MemWkpChart g (2k) 2 ...` and exposes the
-recursive structure so that downstream consumers (in particular, the heat
-semigroup `h_iterated_regularity` discharge in
-`Analysis/Heat/Smoothing/`) can invoke it.
-
-## Main theorems
-
-* `iteratedH2Regularity_zero` — `k = 0` case.
-* `iteratedH2Regularity_one` — `k = 1` case.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -82,10 +35,6 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-- The chart-pushed function of a measurable `Lp 2` class function is in
-`MemLp 2 (volume.restrict K)` for any compact subset `K` of the chart target.
-This is the direct analogue of `chartPushedWeakPartialLp_locally_memLp` for
-the chart-pushed function itself (rather than for its weak partial). -/
 private lemma chartPushed_lp_class_locally_memLp_volume
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_lp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -106,14 +55,6 @@ private lemma chartPushed_lp_class_locally_memLp_volume
   exact memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     h_memLp_w hK_compact hK_compact.isClosed.measurableSet hK_in
 
-/-- The chart-pushed function of any `Lp ℝ 2 μ_g` class is `MemLp 2`-locally
-in each chart target. This is the chart-Sobolev `k = 0` regularity.
-
-The chart-pushed function is supported in the compact image of
-`tsupport (ρ_α)` and on this compact set the chart-density is bounded
-above and below by positive constants. Combined with the existing
-`MemLp 2` of the chart-pushed function against the chart-pulled weighted
-measure, this gives `MemLp 2` against `volume.restrict (chartTargetEuclid α)`. -/
 theorem memWkpChart_zero_of_lp
     (g : SmoothRiemannianMetric I M)
     (u_lp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -163,13 +104,6 @@ theorem memWkpChart_zero_of_lp
       (Filter.Eventually.of_forall (fun y hy => h_pointwise_eq y hy))
   exact h_ind_memLp_chartTarget.ae_eq h_ae_eq.symm
 
-/-- **Iterated `H^{2k}` regularity for `laplacianDomainPow g k`** — the
-unified headline.
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`,
-`k = 0`, and any `u_h ∈ laplacianDomainPow g 0 = ⊤`, the canonical function
-representative `((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkpChart g 0 2`
-(which is just `MemLp 2` on chart targets). -/
 theorem iteratedH2Regularity_zero
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -180,12 +114,6 @@ theorem iteratedH2Regularity_zero
   memWkpChart_zero_of_lp (I := I) (M := M) g
     (H1ComplToLp (I := I) (M := M) g u_h)
 
-/-- **Iterated `H²` regularity for `laplacianDomainPow g 1` (= `laplacianDomain g`)**.
-
-For a closed Riemannian manifold `(M, g)` and any
-`u_h ∈ laplacianDomainPow g 1`, the canonical function representative
-`((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkpChart g 2 2`, with a finite
-chart-based norm. -/
 theorem iteratedH2Regularity_one
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -202,12 +130,6 @@ theorem iteratedH2Regularity_one
   exact LaplacianDomainPerChartWitness.laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g hu_h
 
-/-- **Iterated `H^{2k}` regularity for `laplacianDomainPow g k`** at the
-`k = 0` and `k = 1` boundary.
-
-For a closed Riemannian manifold `(M, g)` and any
-`u_h ∈ laplacianDomainPow g k` with `k ≤ 1`, the canonical function
-representative `((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkpChart g (2k) 2`. -/
 theorem laplacianDomainPow_memWkpChart_two_k_le_one
     (g : SmoothRiemannianMetric I M)
     {k : ℕ} (hk : k ≤ 1)

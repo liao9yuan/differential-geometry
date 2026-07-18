@@ -7,85 +7,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Witnesses
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Embedding.EvenReflectionExtension
 
-/-!
-# Manifold Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n`,
-half-space (with-boundary) variant — smooth-input case
-
-This is the with-boundary parallel of `Analysis/Sobolev/MorreyManifold.lean`.
-For a smooth manifold `M` modelled on the canonical Euclidean half-space
-`EuclideanHalfSpace n` (`n ≥ 1`) with a smooth Riemannian metric `g`, and for
-`p > n`, every smooth `u : M → ℝ` whose canonical-POU-localised chart-pushed
-functions all have `tsupport` strictly in the open interior parts of the
-chart targets satisfies a uniform-in-`u` sup-norm bound
-
-  `‖u(x)‖ ≤ C · (wkpNormChart g 1 p u).toReal`
-
-The constant `C ≥ 0` depends only on the metric, the canonical chart-atlas
-partition of unity, and the exponent `p`.
-
-## Strategy
-
-The chart-based with-boundary Sobolev predicate `MemWkpChart` and norm
-`wkpNormChart` are by construction the Dirichlet-half-space variants:
-the chart-target carriers `chartTargetEuclid α = (extChartAt I α).target`
-are half-space-relatively-open subsets of `EuclideanSpace ℝ (Fin n)`, and the
-underlying iterated Sobolev predicate is the boundaryless `MemWkp` evaluated
-on the open interior part `interiorHalfSpace Ω = Ω ∩ openHalfSpace`.
-
-When the chart-pushed function `chartPushed ρ_α α u` has `tsupport` strictly
-inside `interiorHalfSpace (chartTargetEuclid α)`, its smooth extension by
-zero across the boundary face is globally smooth on `EuclideanSpace ℝ (Fin n)`.
-We apply the boundaryless smooth Morrey
-`smooth_morrey_sup_bound_uniform` on a Euclidean ball containing the
-chart-pushed carrier, and sum the per-chart bounds over the canonical
-chart-atlas partition of unity.
-
-Two parallel uniform-in-`u` per-chart bounds are delivered:
-
-1. **Sup-norm per-chart**: each chart-extended `chartSmoothExt α (ρ_α · u)`
-   is bounded uniformly in `u` by `(C_α : ℝ) · (wkpNormChart g 1 p u).toReal`.
-2. **Hölder pair per-chart**: each chart-extended function is Hölder
-   continuous with exponent `1 - n/p` on the chart-pushed carrier, with
-   modulus uniformly controlled by `(wkpNormChart g 1 p u).toReal`.
-
-These per-chart bounds combine via the canonical chart-atlas POU sum
-identity to give the manifold-level sup-norm and per-chart Hölder modulus.
-
-## Main results
-
-### Smooth manifold-level Morrey sup-bound (with boundary)
-
-* `smooth_manifold_morrey_sup_bound_uniform_withBoundary` — for smooth
-  `u : M → ℝ` whose chart-pushed `tsupport`s lie in the open interior parts
-  of all chart targets, `‖u(x)‖ ≤ C · (wkpNormChart u).toReal` for every
-  `x ∈ M`.
-
-### Per-chart smooth Hölder modulus (with boundary)
-
-* `smooth_manifold_morrey_holder_modulus_per_chart_withBoundary` — for each
-  chart `α`, smooth `u : M → ℝ` with chart-pushed `tsupport` strictly
-  interior, and `p > n`, the canonical-POU-localised function `(ρ_α · u)`
-  satisfies a chart-α Hölder modulus on `tsupport ρ_α`.
-
-### Manifold-level decomposition
-
-* `norm_sub_le_sum_pou_diff_withBoundary` — re-export of the canonical-POU
-  triangle inequality `‖u(x) - u(y)‖ ≤ ∑_α ‖(ρ_α · u)(x) - (ρ_α · u)(y)‖`.
-
-## Scope note
-
-The fully general manifold Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)`
-extending to all measurable `u ∈ MemWkpChart` (rather than just smooth
-inputs) requires a smooth-density argument in `MemWkpChart` (analogous to
-the boundaryless `contMDiff_dense_in_WkpChart`). In the with-boundary
-setting this requires the boundary-trace / mollification-near-boundary
-infrastructure that is currently developed only chart-locally
-(`WithBoundary/Euclidean/Density.lean`); a manifold-level density bridge
-is a downstream concern and out of scope for the present file. The
-smooth-input version delivered here, together with the per-chart Hölder
-modulus, is the engine used by every downstream parabolic / elliptic
-regularity application.
--/
 
 noncomputable section
 
@@ -108,8 +29,6 @@ local notation "I_hs" => modelWithCornersEuclideanHalfSpace n
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The chart-extended function on `EuN`: equals `f ∘ (extChartAt I α).symm`
-on the chart target, and `0` outside. -/
 def chartSmoothExt (α : M) (f : M → ℝ) : EuN → ℝ := by
   classical
   exact fun y =>
@@ -141,8 +60,7 @@ private lemma chartSmoothExt_apply_of_notMem_target
   rw [if_neg hy]
 
 omit [IsManifold I_hs ∞ M] in
-/-- On the chart target, `chartSmoothExt α (ρ_α · u)` agrees pointwise with
-`chartPushed ρ α u`. -/
+
 private lemma chartSmoothExt_eq_chartPushed_on_target
     (ρ : SmoothPartitionOfUnity M I_hs M Set.univ)
     (α : M) (u : M → ℝ) {y : EuN}
@@ -155,6 +73,7 @@ private lemma chartSmoothExt_eq_chartPushed_on_target
   unfold chartPushed
   rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma image_extChartAt_tsupport_compact_subset_target
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
@@ -173,6 +92,7 @@ private lemma image_extChartAt_tsupport_compact_subset_target
   rintro y ⟨x, hx, rfl⟩
   exact (extChartAt I_hs α).map_source (h_supp_ext_src hx)
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma chartSmoothExt_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) {y : EuN}
@@ -190,6 +110,7 @@ private lemma chartSmoothExt_eq_zero_off_image_tsupport
     refine ⟨(extChartAt I_hs α).symm y, hsymm_in_supp, hy_eq⟩
   · exact chartSmoothExt_apply_of_notMem_target (n := n) (M := M) α f hy_target
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma hasCompactSupport_chartSmoothExt
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
@@ -206,7 +127,7 @@ private lemma hasCompactSupport_chartSmoothExt
   exact chartSmoothExt_eq_zero_off_image_tsupport
     (n := n) (M := M) α (f := f) hf_supp hyK
 
-/-- `tsupport (chartSmoothExt α f) ⊆ extChartAt α image of tsupport f`. -/
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma tsupport_chartSmoothExt_subset
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
@@ -236,14 +157,12 @@ private lemma contDiffOn_chartSmoothExt_formula
   exact DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
     (I := I_hs) α hf
 
-/-- Predicate on a smooth `f : M → ℝ`: the chart-pushed image of `tsupport f`
-under `extChartAt I α` lies strictly inside the open interior part of
-the chart target. -/
 def chartSmoothExtInteriorSupport
     (α : M) (f : M → ℝ) : Prop :=
   (extChartAt I_hs α) '' (tsupport f) ⊆
     DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace (d := n)
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma chartSmoothExtInteriorSupport_image_subset_interior
     {α : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -290,6 +209,7 @@ private lemma contDiffAt_chartSmoothExt_of_mem_interior_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartSmoothExt_apply_of_mem_target (n := n) (M := M) α f hz.1]
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma contDiffAt_chartSmoothExt_of_notMem_image_tsupport
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -368,6 +288,7 @@ private lemma contDiff_chartSmoothExt_pou_mul
     tsupport_pou_mul_subset_chart_source (n := n) (M := M) ρ hρ α u
   exact contDiff_chartSmoothExt (n := n) (M := M) α hf_smooth hf_supp h_int
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 private lemma hasCompactSupport_chartSmoothExt_pou_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (α : M) (ρ : SmoothPartitionOfUnity M I_hs M Set.univ)
@@ -382,8 +303,6 @@ private lemma hasCompactSupport_chartSmoothExt_pou_mul
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The compact support carrier in `EuN`: the `extChartAt I α` image of
-`tsupport ρ_α` for the canonical POU weight `ρ_α`. -/
 private def chartCarrier (α : M) : Set EuN :=
   (extChartAt I_hs α) ''
     (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
@@ -407,6 +326,7 @@ private lemma chartCarrier_isCompact (α : M) :
     (continuousOn_extChartAt α).mono hTα_ext_src
   exact hTα_compact.image_of_continuousOn hcont_ext
 
+omit [CompactSpace M] in
 private lemma chartCarrier_subset_chartTarget (α : M) :
     chartCarrier (n := n) (M := M) α ⊆ (extChartAt I_hs α).target := by
   unfold chartCarrier
@@ -423,8 +343,6 @@ private lemma chartCarrier_subset_chartTarget (α : M) :
   rintro y ⟨x, hx, rfl⟩
   exact (extChartAt I_hs α).map_source (hTα_ext_src hx)
 
-/-- A radius `R_α` such that `chartCarrier α ⊆ Metric.ball 0 (R_α / 2)` and
-`R_α > 0`. -/
 private noncomputable def chartRadius (α : M) : ℝ :=
   (((chartCarrier_isCompact (n := n) (M := M) α).isBounded.subset_ball_lt
       0 (0 : EuN)).choose) * 2 + 1
@@ -466,18 +384,12 @@ private lemma chartCarrier_subset_full_ball (α : M) :
   have h := chartRadius_pos (n := n) (M := M) α
   linarith
 
-/-- Predicate version: the canonical-POU chart-pushed image of
-`(ρ_α · u)` has tsupport strictly inside the open interior part of the
-chart target, for every chart `α`. -/
 def AllChartsInteriorSupport (u : M → ℝ) : Prop :=
   ∀ α : M,
     chartSmoothExtInteriorSupport (n := n) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
         : C^∞⟮I_hs, M; ℝ⟯) x * u x)
 
-/-- For smooth `u : M → ℝ` whose canonical POU localisation has chart-
-pushed `tsupport` strictly inside the open interior part of every chart
-target, `chartSmoothExt α (ρ_α · u)` is supported in `chartCarrier α`. -/
 private lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
     (α : M) (u : M → ℝ) :
     tsupport (chartSmoothExt (n := n) (M := M) α
@@ -516,8 +428,6 @@ private lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
   rintro y ⟨x, hx, rfl⟩
   exact ⟨x, h_pou_supp_sub_tα hx, rfl⟩
 
-/-- The function `chartSmoothExt α (ρ_α · u)` vanishes outside
-`Metric.ball 0 (chartRadius α / 2)`. -/
 private lemma chartSmoothExt_pou_mul_eq_zero_off_half_ball
     (α : M) (u : M → ℝ) {y : EuN}
     (hy : y ∉ Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α / 2)) :
@@ -590,15 +500,13 @@ private lemma chartSmoothExt_morrey_sup_uniform
       linarith
     exact h_RHS_nn
 
-omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartSmoothExt_eq_zero_off_target
     (α : M) (f : M → ℝ) {y : EuN}
     (hy : y ∉ (extChartAt I_hs α).target) :
     chartSmoothExt (n := n) (M := M) α f y = 0 :=
   chartSmoothExt_apply_of_notMem_target (n := n) (M := M) α f hy
 
-/-- For a function `h` with `tsupport h ⊆ K` and `K` closed, `fderiv h = 0`
-outside `K`. -/
+omit [NeZero n] in
 private lemma fderiv_eq_zero_off_tsupport_subset_closed
     {h : EuN → ℝ} {K : Set EuN} (hK_closed : IsClosed K)
     (hh_supp : tsupport h ⊆ K) {y : EuN} (hy : y ∉ K) :
@@ -613,8 +521,6 @@ private lemma fderiv_eq_zero_off_tsupport_subset_closed
   rw [Filter.EventuallyEq.fderiv_eq hh_zero_eventually]
   simp
 
-/-- The full-space eLpNorm of `chartSmoothExt α (ρ_α · u)` equals the
-eLpNorm restricted to a ball containing the carrier. -/
 private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball
     (α : M) (u : M → ℝ) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (n := n) (M := M) α
@@ -689,8 +595,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball
     _ = eLpNorm fnNorm q volume := by rw [← h_eq_BR]
 
 omit [CompactSpace M] in
-/-- `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u` agree a.e. on
-`volume.restrict (interiorHalfSpace (chartTargetEuclid α))`. -/
+
 private lemma chartSmoothExt_ae_eq_chartPushed_interior
     (α : M) (u : M → ℝ) :
     chartSmoothExt (n := n) (M := M) α
@@ -709,8 +614,7 @@ private lemma chartSmoothExt_ae_eq_chartPushed_interior
   exact chartSmoothExt_eq_chartPushed_on_target
     (n := n) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) α u hy.1
 
-/-- The eLpNorm of `chartSmoothExt α (ρ_α · u)` on the interior part of the
-chart target equals the eLpNorm of `chartPushed ρ α u` there. -/
+omit [CompactSpace M] in
 private lemma eLpNorm_chartSmoothExt_interior_eq_eLpNorm_chartPushed_interior
     (α : M) (u : M → ℝ) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (n := n) (M := M) α
@@ -887,7 +791,7 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
   unfold wkpNormChart
   exact ENNReal.le_tsum α
 
-/-- `‖w‖ ≤ ∑ i, ‖w i‖` in `EuclideanSpace`. -/
+omit [NeZero n] in
 private lemma euN_norm_le_sum_components_norms (w : EuN) :
     ‖w‖ ≤ ∑ i : Fin n, ‖w i‖ := by
   classical
@@ -901,7 +805,7 @@ private lemma euN_norm_le_sum_components_norms (w : EuN) :
   intro i _
   simp
 
-/-- `‖fderiv ℝ ψ y‖ = ‖(WithLp.toLp 2 (...components...))‖` for ψ : EuN → ℝ. -/
+omit [NeZero n] in
 private lemma norm_fderiv_eq_norm_partials_local
     {ψ : EuN → ℝ} (y : EuN) :
     ‖fderiv ℝ ψ y‖ =
@@ -930,7 +834,7 @@ private lemma norm_fderiv_eq_norm_partials_local
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
-/-- For ψ : EuN → ℝ, `‖fderiv ℝ ψ y‖ ≤ ∑ i, ‖(fderiv ℝ ψ y) (e_i)‖`. -/
+omit [NeZero n] in
 private lemma norm_fderiv_le_sum_partials_local
     (ψ : EuN → ℝ) (y : EuN) :
     ‖fderiv ℝ ψ y‖ ≤
@@ -942,7 +846,7 @@ private lemma norm_fderiv_le_sum_partials_local
   intro i _
   simp
 
-/-- For smooth `f` with compact support, `eLpNorm (norm fderiv f) ≤ ∑_i eLpNorm partial_i f`. -/
+omit [NeZero n] in
 private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {μ : Measure EuN}
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f) :
@@ -992,8 +896,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
-/-- The classical partial of a smooth `f`, compactly supported in open `Ω`,
-agrees a.e. with `chosenWeakPartial' p i f Ω`. -/
+omit [NeZero n] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -1034,15 +937,13 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-- For smooth `f` with compact support inside open `Ω`, the eLpNorm of
-`‖fderiv ℝ f‖` is bounded by `n * wkpNorm 1 q f Ω`. -/
 private lemma eLpNorm_norm_fderiv_le_n_mul_wkpNorm
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
     (hf_compact : HasCompactSupport f) (hf_supp : tsupport f ⊆ Ω) :
     eLpNorm (fun z : EuN => ‖fderiv ℝ f z‖) q (volume.restrict Ω) ≤
       ((n : ℕ) : ℝ≥0∞) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := n) 1 q f Ω := by
   classical
   have h_grad_le := eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
@@ -1067,7 +968,7 @@ private lemma eLpNorm_norm_fderiv_le_n_mul_wkpNorm
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
   rw [h_step1]
   have hWkpEq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := n) 1 q f Ω =
         ∑ j ∈ Finset.range 2,
           ∑ β : Fin j → Fin n,
@@ -1124,7 +1025,7 @@ private lemma eLpNorm_norm_fderiv_le_n_mul_wkpNorm
           eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' q i f Ω)
             q (volume.restrict Ω)) ≤
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := n) 1 q f Ω := by
     rw [hWkpEq, Finset.sum_range_succ, Finset.sum_range_one, ← h_j1_term]
     refine le_add_of_nonneg_left ?_
@@ -1133,9 +1034,9 @@ private lemma eLpNorm_norm_fderiv_le_n_mul_wkpNorm
   have hd_pos : 0 < n := NeZero.pos _
   have hd_one_le : (1 : ℝ≥0∞) ≤ ((n : ℕ) : ℝ≥0∞) := by
     exact_mod_cast hd_pos
-  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := n) 1 q f Ω = 1 *
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := n) 1 q f Ω from
     (one_mul _).symm]
   gcongr
@@ -1150,7 +1051,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_interior_le_wkpNormHalf
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
           (chartTargetEuclid (n := n) (M := M) α))) ≤
       ((n : ℕ) : ℝ≥0∞) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := n) 1 q
           (chartSmoothExt (n := n) (M := M) α
             (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
@@ -1198,18 +1099,17 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_interior_le_wkpNormHalf
     exact h1.trans hint_image
   exact eLpNorm_norm_fderiv_le_n_mul_wkpNorm hq_one hΩ_open hf_smooth_top hf_compact hf_supp
 
-/-- The Euclidean wkpNorm of `chartSmoothExt α (ρ_α · u)` on the interior part
-equals that of `chartPushed ρ α u`. -/
+omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_interior_eq_wkpNorm_chartPushed_interior
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := n) 1 q
         (chartSmoothExt (n := n) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
             : C^∞⟮I_hs, M; ℝ⟯) x * u x))
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
           (chartTargetEuclid (n := n) (M := M) α)) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := n) 1 q
         (chartPushed (n := n) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) α u)
@@ -1220,8 +1120,7 @@ private lemma wkpNorm_chartSmoothExt_interior_eq_wkpNorm_chartPushed_interior
     (interiorHalfSpace_chartTargetEuclid_isOpen (n := n) (M := M) α)
     (chartSmoothExt_ae_eq_chartPushed_interior (n := n) (M := M) α u)
 
-/-- The Euclidean half-space wkpNormHalfSpace of `chartPushed ρ α u` at chart α
-is bounded by `wkpNormChart u`. -/
+omit [CompactSpace M] in
 private lemma wkpNormHalfSpace_chartPushed_target_le_wkpNormChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {q : ℝ≥0∞} (α : M) (u : M → ℝ) :
@@ -1236,7 +1135,6 @@ private lemma wkpNormHalfSpace_chartPushed_target_le_wkpNormChart
   unfold wkpNormChart
   exact ENNReal.le_tsum α
 
-/-- Bound `eLpNorm fderiv chartSmoothExt q (B(0, R_α))` by `n · wkpNormChart`. -/
 private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {u : M → ℝ} (hu : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u)
@@ -1408,7 +1306,7 @@ private lemma per_chart_smooth_sup_bound
     exact le_trans hbound_y h_final
 
 omit [CompactSpace M] in
-/-- For `x ∈ chartAt α source`, `(ρ_α · u)(x) = chartSmoothExt α (ρ_α · u) (extChartAt I α x)`. -/
+
 private lemma chartSmoothExt_pou_mul_apply_at_chart_image
     (α : M) (u : M → ℝ) {x : M} (hx : x ∈ (chartAt (EuclideanHalfSpace n) α).source) :
     chartSmoothExt (n := n) (M := M) α
@@ -1429,8 +1327,7 @@ private lemma chartSmoothExt_pou_mul_apply_at_chart_image
       (I := I_hs) (M := M)]
     exact hx)]
 
-/-- For each `x : M`, `‖(ρ_α · u)(x)‖` is bounded by the sup norm of
-`chartSmoothExt α (ρ_α · u)`. -/
+omit [CompactSpace M] in
 private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
     (α : M) (u : M → ℝ) (x : M) {Cmod : ℝ}
     (hbound : ∀ y : EuN, ‖chartSmoothExt (n := n) (M := M) α
@@ -1458,8 +1355,6 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
     rw [hρ_zero, zero_mul, norm_zero]
     exact hCmod
 
-/-- Per-chart constant from `per_chart_smooth_sup_bound`, packaged as a
-function `M → ℝ`. -/
 private noncomputable def perChartMorreyConst
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) : ℝ :=
@@ -1485,15 +1380,6 @@ private lemma perChartMorreyConst_bound
   (Classical.choose_spec
     (per_chart_smooth_sup_bound (n := n) (M := M) g hp α)).2 hu h_int y
 
-/-- **Smooth manifold-level Morrey sup bound, with-boundary case** (uniform in
-`u`). For a closed Riemannian manifold-with-boundary modelled on the
-canonical Euclidean half-space `EuclideanHalfSpace n` and `p > n`, there is
-a constant `C ≥ 0` (depending on `g`, `p`, and the canonical chart-atlas
-POU) such that for every smooth `u : M → ℝ` whose canonical-POU chart-pushed
-functions all have `tsupport` strictly inside the open interior parts of
-the chart targets and every `x : M`,
-
-  `‖u(x)‖ ≤ C · (wkpNormChart g 1 p u).toReal`. -/
 theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) :
@@ -1666,7 +1552,6 @@ private lemma chartSmoothExt_holder_uniform_half_ball
     _ = C₀ * (n : ℝ) * ‖y₁ - y₂‖ ^ (1 - (n : ℝ) / p) * N := by
         rw [h_dist_eq]; ring
 
-/-- For `x ∈ tsupport ρ_α`, `extChartAt I α x ∈ Metric.ball 0 (R_α / 2)`. -/
 private lemma extChartAt_mem_half_ball_of_mem_tsupport_pou
     (α : M) {x : M}
     (hx : x ∈ tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
@@ -1678,17 +1563,6 @@ private lemma extChartAt_mem_half_ball_of_mem_tsupport_pou
     ⟨x, hx, rfl⟩
   exact chartCarrier_subset_half_ball (n := n) (M := M) α h_in
 
-/-- **Per-chart smooth Hölder modulus on the partition-of-unity-localized
-function (with-boundary)**. For each chart `α`, smooth `u : M → ℝ` with
-all-charts strict-interior support, and `p > n`, the canonical-POU
-localised function `(ρ_α · u)` satisfies a Hölder modulus on the compact
-`tsupport ρ_α`:
-
-  `‖(ρ_α x · u x) - (ρ_α y · u y)‖ ≤
-      C_α · ‖extChartAt I α x - extChartAt I α y‖^(1 - n/p) ·
-        (wkpNormChart g 1 p u).toReal`,
-
-uniformly in `u`. -/
 private lemma pou_mul_holder_chart_uniform_tsupport
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     (α : M) {p : ℝ} (hp : (n : ℝ) < p) :
@@ -1745,21 +1619,6 @@ private lemma pou_mul_holder_chart_uniform_tsupport
   rw [h_eq_x, h_eq_y] at h_pair
   exact h_pair
 
-/-- **Smooth manifold-level Hölder modulus on the canonical POU localization,
-per chart, with-boundary**. For a closed Riemannian manifold-with-boundary
-modelled on `EuclideanHalfSpace n` and `p > n`, for each chart `α : M`,
-there exists a compact `K_α ⊆ chart α source` and a constant `C_α ≥ 0`
-(depending on `g`, `p`, the canonical POU and the chart `α`, but **not**
-on `u`) such that for every smooth `u : M → ℝ` whose canonical-POU
-chart-pushed functions all have strict-interior support and every
-`x, y ∈ K_α`, the canonical chart-atlas POU localization `(ρ_α · u)`
-satisfies the chart-α Hölder modulus
-
-  `‖(ρ_α x · u x) - (ρ_α y · u y)‖ ≤
-      C_α · ‖extChartAt I α x - extChartAt I α y‖^(1 - n/p) ·
-        (wkpNormChart g 1 p u).toReal`,
-
-with the compact set `K_α := tsupport ρ_α`. -/
 theorem smooth_manifold_morrey_holder_modulus_per_chart_withBoundary
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) :
@@ -1785,8 +1644,6 @@ theorem smooth_manifold_morrey_holder_modulus_per_chart_withBoundary
       pou_mul_holder_chart_uniform_tsupport (n := n) (M := M) g α hp
     exact ⟨C, hC_nn, fun {u} hu h_int x hx y hy => hbound hu h_int x hx y hy⟩
 
-/-- The triangle decomposition: `‖u(x) - u(y)‖ ≤ ∑_α ‖(ρ_α x · u x) -
-(ρ_α y · u y)‖`, with the sum over the canonical chart-atlas POU finset `S`. -/
 theorem norm_sub_le_sum_pou_diff_withBoundary
     (u : M → ℝ) (x y : M) :
     ‖u x - u y‖ ≤
@@ -1819,31 +1676,7 @@ theorem norm_sub_le_sum_pou_diff_withBoundary
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α : M → ℝ) x * u x -
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α : M → ℝ) y * u y)
 
-
-/-- **Smooth manifold-level Morrey sup bound, with-boundary case.**
-
-For a closed Riemannian manifold-with-boundary modelled on the canonical
-Euclidean half-space `EuclideanHalfSpace n` and `p > n`, every smooth `u : M →
-ℝ` whose canonical-POU chart-pushed functions all have `tsupport` strictly
-inside the open interior parts of the chart targets satisfies a uniform-in-`u`
-sup-norm bound:
-
-  `‖u(x)‖ ≤ C · (wkpNormChart g 1 p u).toReal`.
-
-This is a re-export of `smooth_manifold_morrey_sup_bound_uniform_withBoundary`
-from `MorreyManifold.lean`, packaged together with the foundational even-
-reflection layer so a single import suffices for downstream callers wanting
-both.
-
-When the chart-pushed function takes nonzero values at boundary points
-`{y_0 = 0}` of the chart target, the chart-extended function
-`chartSmoothExt α (ρ_α · u)` is no longer smooth on `EuN`, so the
-boundaryless smooth Morrey cannot be applied directly with that function as
-input. The closed-half-space W^{1,p} witness construction
-`evenReflect_memW1pWitness_of_smooth_closedHalfSpace` delivered above
-provides the corresponding W^{1,p} ingredient: for any smooth `f : EuN → ℝ`
-with `tsupport ⊆ closedHalfSpace ∩ Metric.ball x₀ R`, the even reflection
-admits a `MemW1pWitness` on the ball, suitable for `morrey_sup_bound`. -/
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary_unconditional
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)

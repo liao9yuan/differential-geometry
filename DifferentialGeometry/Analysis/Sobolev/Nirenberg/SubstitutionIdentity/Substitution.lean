@@ -1,42 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.Defs
 
-/-!
-# Substitution of the interior-regularity test function and discrete
-integration by parts
-
-This module substitutes the interior-regularity test function
-
-  `v_test(x) := D_{-h}^k(η² · D_h^k u)(x)`
-
-into the weak-solution identity `B(u, v_test) = ⟨f, v_test⟩`, applies discrete
-integration by parts to the principal part, and produces the rearranged
-identity used as the starting point of the second-order interior estimate.
-
-The standard discrete integration-by-parts identity
-`∫ (D_h^k F) · G = -∫ F · (D_{-h}^k G)` holds for `F, G ∈ L²(volume)`. In our
-substitution, the natural `F` is `a^{ij} · ∂_i u`, which need not be globally
-`L²` — but the test slot `G` we pair with is compactly supported smooth.
-Section 1 below proves a localised version of the identity that requires only
-continuity of `F` and compact-support smoothness of `G`, sidestepping the
-global `L²` requirement.
-
-## Main outputs
-
-* `integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported`:
-  the localised discrete IBP for continuous `f` and compactly supported
-  smooth `g`.
-* `nirenbergTestFunction_is_admissible_test`: the test function lies in
-  the smooth-compactly-supported test space whose support is contained
-  in `Ω`, so it is a legal test function for the weak-solution predicate.
-* `integral_a_partial_u_partial_diffQuot_eq`: discrete IBP on a single
-  `(i, j)` pair with the test function inserted.
-* `integral_principalIntegrand_eq_sum_integral`: sum-integral commutation
-  for the principal integrand of the bilinear form.
-* `nirenberg_substitution_identity`: the headline identity. Substituting
-  `v_test` and applying discrete IBP on the principal part yields a
-  rearranged form ready for ellipticity expansion downstream.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -52,18 +15,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- Localised discrete integration by parts: for continuous `f` and
-compactly supported smooth `g`, and `h ≠ 0`,
 
-  `∫ (D_h^k f) · g dx = -∫ f · (D_{-h}^k g) dx`.
-
-The integrals are well-defined because `g` is compactly supported continuous
-(hence so are `D_{-h}^k g`, `f · g`, `f · D_{-h}^k g`, and `D_h^k f · g` —
-the latter through compact support of `g`).
-
-The proof mirrors `integral_diffQuot_mul_eq_neg_integral_mul_diffQuot` from
-`DifferenceQuotient.lean`, replacing the `L²`-based integrability arguments
-with compact-support arguments. -/
 theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
     {f g : E → ℝ} (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (hf_continuous : Continuous f) (hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -183,15 +135,7 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
   rw [div_neg, neg_neg]
 
 omit [NeZero d] in
-/-- The interior-regularity test function `v_test = D_{-h}^k(η² · D_h^k u)`
-is a legal test function for the weak-solution predicate when:
 
-* `η, u : E → ℝ` are smooth,
-* `η` is compactly supported,
-* `h ≠ 0`,
-* the closed `|h|`-thickening of `tsupport η` lies inside `Ω`.
-
-The conclusion packages smoothness, compact support, and `tsupport ⊆ Ω`. -/
 theorem nirenbergTestFunction_is_admissible_test
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -207,9 +151,7 @@ theorem nirenbergTestFunction_is_admissible_test
   · exact (tsupport_nirenbergTestFunction_subset (d := d) η u k h).trans hh_supp
 
 omit [NeZero d] in
-/-- Pointwise: for smooth `g`, the directional derivative
-`∂_j (D_h^k g) = D_h^k(∂_j g)`. (Wraps
-`fderiv_diffQuot_apply_eq_diffQuot_partial`, restated for convenience.) -/
+
 private lemma fderiv_diffQuot_pointwise
     {g : E → ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -220,14 +162,6 @@ private lemma fderiv_diffQuot_pointwise
   funext x
   exact fderiv_diffQuot_apply_eq_diffQuot_partial (d := d) hg k j hh x
 
-/-- Discrete integration by parts on a single `(i, j)` pair of the principal
-integrand, using the interior-regularity test function. For smooth `u` and
-smooth compactly supported `η`, with `h ≠ 0`:
-
-`∫ a^{ij} · ∂_i u · ∂_j v_test = -∫ D_h^k(a^{ij} · ∂_i u) ·
-  ∂_j (η² · D_h^k u)`,
-
-where `v_test = D_{-h}^k(η² · D_h^k u)`. -/
 theorem integral_a_partial_u_partial_diffQuot_eq
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -313,9 +247,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
     linarith
   rw [hLHS_eq]
 
-/-- Sum-integral commutation for the principal integrand of a smooth elliptic
-divergence-form bilinear form, applied to smooth `u` and smooth compactly
-supported `v`. -/
 theorem integral_principalIntegrand_eq_sum_integral
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u v : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hv : ContDiff ℝ (⊤ : ℕ∞) v)
@@ -395,17 +326,6 @@ theorem integral_principalIntegrand_eq_sum_integral
             ((fderiv ℝ v z) (EuclideanSpace.single j 1))) y from rfl]
   rw [integral_finset_sum _ (fun j _ => h_pair_int i j)]
 
-/-- The headline substitution identity. Substitute the test function
-`v_test = D_{-h}^k(η² · D_h^k u)` into the weak-solution identity
-`B(u, v_test) = ⟨f, v_test⟩`, apply discrete IBP to the principal part, and
-rearrange:
-
-`-∑_{i,j} ∫ D_h^k(a^{ij} · ∂_i u) · ∂_j(η² · D_h^k u) +
-  ∫_Ω c · u · v_test = ∫_Ω f · v_test`.
-
-The identity holds for any smooth weak solution `u` of `L u = f` on `Ω`,
-any smooth compactly supported cutoff `η` whose closed `|h|`-thickening of
-support lies inside `Ω`, and any nonzero step `h`. -/
 theorem nirenberg_substitution_identity
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

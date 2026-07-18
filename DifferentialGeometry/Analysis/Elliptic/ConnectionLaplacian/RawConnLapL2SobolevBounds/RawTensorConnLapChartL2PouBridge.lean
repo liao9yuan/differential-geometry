@@ -1,48 +1,13 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.TensorConnLaplacianL2Bound
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
 
-/-!
-# Manifold L² bound for the raw tensor connection Laplacian via a partition-
-# of-unity-weighted chart-target aggregate
-
-For a smooth closed Riemannian manifold `(M, g)` and a smooth compactly-
-supported `(r, s)`-tensor section `T`, this file packages a quantitative
-inequality bounding the manifold L²-norm-squared of the raw connection
-Laplacian `rawTensorConnLap g r s T.toSection` by a constant multiple of a
-chart-target aggregate built from the chart-pushed pointwise squared
-model-fiber norm of the raw connection Laplacian, with the integrand on each
-chart-target weighted by the *square* of the partition-of-unity weight
-`ρ_α` pulled back through the inverse chart.
-
-The POU-squared weight on the right-hand side localises the contribution from
-each chart to the chart-α partition-of-unity support, which is the natural
-support of the pointwise op-norm bound for the raw connection Laplacian. This
-makes the aggregate definitionally compatible with the per-chart pointwise
-bound `rawTensorConnLap_pointwise_bound_chart_data`, whose right-hand side is
-only valid on the chart-α partition-of-unity tsupport.
-
-The construction is unconditional in the sense that it makes no chart-coordinate
-references at the statement level: the input is a smooth compactly-supported
-tensor section, the connection Laplacian is the manifold-defined operator
-`rawTensorConnLap`, the integration is against the canonical Riemannian volume
-measure, and the right-hand-side aggregate is a finite sum of chart-target
-integrals against the canonical Lebesgue measure on the Euclidean model space,
-with each integrand weighted by `ρ_α((extChartAt I α).symm (toEuclidean.symm y))²`.
-
-## Sign convention
-
-Same as `RawTensorConnLapPointwiseBound`: geometer convention
-`Δ_g = div ∘ grad`, spectrum in `(-∞, 0]` on closed manifolds.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open MeasureTheory
@@ -67,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
@@ -76,13 +40,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **POU-weighted chart-target aggregate.** For a smooth Riemannian manifold
-`(M, g)`, ranks `(r, s)`, and a smooth compactly-supported `(r, s)`-tensor
-section `T : SmoothCcTensor g r s`, the POU-weighted chart-target aggregate is
-the finite sum, over the chart-atlas partition-of-unity support set
-`chartAtlasPOU_finset I M`, of the chart-target Lebesgue integrals of
-`ENNReal.ofReal` of `ρ_α((extChartAt I α).symm (toEuclidean.symm y))² ·
-(chart-pushed squared model-fiber norm)(y)`. -/
 noncomputable def chartSobolevRawNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     ℝ≥0∞ :=
@@ -99,7 +56,7 @@ noncomputable def chartSobolevRawNormPou
             y)
       ∂(volume : Measure EuclN)
 
-/-- Unfolding lemma for `chartSobolevRawNormPou`. -/
+omit [I.Boundaryless] in
 @[simp] lemma chartSobolevRawNormPou_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevRawNormPou (I := I) (M := M) g r s T =
@@ -117,19 +74,13 @@ noncomputable def chartSobolevRawNormPou
           ∂(volume : Measure EuclN) := rfl
 
 variable (I M) in
-/-- Predicate: the tsupport of `chartAtlasPOU α` is non-empty. -/
+
 private noncomputable def chartAtlasPOU_tsupp_nonempty
     (α : M) : Prop :=
   (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)).Nonempty
 
 variable (I M) in
-/-- The per-chart `α : M` density sup bound, extracted via `Classical.choose`
-from `exists_sup_chartDensity_on_pou_tsupport_image`. When `tsupport ρ_α` is
-empty (i.e., `α ∉ chartAtlasPOU_finset`), the constant is defined to be `0`.
 
-Naming this constant via a public `noncomputable def` (rather than via a local
-`let` inside a proof) makes the value definitionally shareable across different
-invocations of the POU-weighted bridge. -/
 noncomputable def chartDensitySupPou
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
   open Classical in
@@ -138,6 +89,7 @@ noncomputable def chartDensitySupPou
       g α h).choose
   else 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma chartDensitySupPou_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) :
     0 ≤ chartDensitySupPou (I := I) (M := M) g α := by
@@ -150,6 +102,7 @@ lemma chartDensitySupPou_nonneg
         g α h).choose_spec.1
   · rw [dif_neg h]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma chartDensitySupPou_le
     (g : SmoothRiemannianMetric I M) (α : M)
     (h_supp_ne :
@@ -170,20 +123,7 @@ lemma chartDensitySupPou_le
   convert h using 2
 
 variable (I M) in
-/-- The POU-weighted chart-target L² bridge's overall multiplicative constant,
-defined as
-`(card chartAtlasPOU_finset) · (euclideanHaarFactor E) ·
-  ∑ α (chartDensitySupPou g α + 1)`.
 
-The factor `(card chartAtlasPOU_finset)` comes from the pointwise Cauchy-
-Schwarz inequality `‖raw ΔT‖² = (Σ_α ρ_α · ‖raw ΔT‖)² ≤ N · Σ_α ρ_α² · ‖raw ΔT‖²`
-used to pass from the manifold L² of `‖raw ΔT‖²` to the POU²-weighted form.
-
-The factor `(euclideanHaarFactor E)` is the Haar scale factor relating the
-canonical Lebesgue measure on `EuclN` to the canonical Lebesgue measure on `E`.
-
-Each per-α factor `(chartDensitySupPou g α + 1)` controls the chart-α density
-on the (extChartAt α)-image of `tsupport ρ_α`. -/
 noncomputable def chartSobolevRawNormPouBridgeConstant
     (g : SmoothRiemannianMetric I M) : ℝ :=
   ((chartAtlasPOU_finset (I := I) (M := M)).card : ℝ) *
@@ -191,6 +131,7 @@ noncomputable def chartSobolevRawNormPouBridgeConstant
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         (chartDensitySupPou (I := I) (M := M) g α + 1))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma chartSobolevRawNormPouBridgeConstant_nonneg
     (g : SmoothRiemannianMetric I M) :
     0 ≤ chartSobolevRawNormPouBridgeConstant (I := I) (M := M) g := by
@@ -254,6 +195,7 @@ private lemma sum_finset_sq_le_card_mul_sum_sq
     rw [h_double_sum] at h_nn
     nlinarith
 
+omit [I.Boundaryless] in
 private lemma normSq_le_card_mul_sum_pou_sq_mul_normSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -286,6 +228,7 @@ private lemma normSq_le_card_mul_sum_pou_sq_mul_normSq
     _ ≤ (sset.card : ℝ) *
           ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 := hCS
 
+omit [I.Boundaryless] in
 private lemma manifold_lintegral_pou_sq_normSq_eq_chartTarget
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -340,6 +283,7 @@ private lemma manifold_lintegral_pou_sq_normSq_eq_chartTarget
   rw [chartLocalMeasure_lintegral_via_chartTargetEuclid
       (I := I) (M := M) g α hF_meas]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -355,6 +299,7 @@ private lemma normSq_apply_eq_pushedNormSq
       (fun b : M => rawTensorConnLap (I := I) g r s T₀ b) hy]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma density_pou_sq_le
     (g : SmoothRiemannianMetric I M) (α : M)
     (h_supp_ne :
@@ -397,6 +342,7 @@ private lemma density_pou_sq_le
       linarith
     exact mul_le_mul_of_nonneg_right hbound hρ_sq_nn
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma manifold_lintegral_pou_sq_normSq_eq_zero_of_empty
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -416,33 +362,7 @@ private lemma manifold_lintegral_pou_sq_normSq_eq_zero_of_empty
     exact image_eq_zero_of_notMem_tsupport hx_notsupp
   rw [hρ_zero]; simp
 
-/-- **Manifold L² bound for the raw tensor connection Laplacian via the POU-
-weighted chart-target aggregate.**
-
-For a smooth closed Riemannian manifold `(M, g)`, every smooth compactly-
-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s` whose raw
-connection Laplacian has a Borel-measurable pointwise squared norm satisfies
-the inequality
-
-  `∫⁻ x, (‖rawTensorConnLap g r s T.toSection x‖ₑ : ℝ≥0∞) ^ 2 ∂μ_g
-        ≤ ENNReal.ofReal C *
-            chartSobolevRawNormPou g r s T`,
-
-with the named uniform constant
-`C := chartSobolevRawNormPouBridgeConstant g`, which depends only on `g`, the
-canonical chart atlas, and the canonical partition of unity.
-
-The hypothesis `h_atlas` is the locally-constant chart predicate, retained in
-the public signature for parity with the unweighted bridge
-`rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm`; it is not consumed by the
-present proof (which uses only a density-only sup bound on the
-`(extChartAt α)`-image of `tsupport ρ_α`, available unconditionally on a
-compact manifold).
-
-The measurability hypothesis is the natural one: the `(r, s)`-tensor bundle
-does not currently carry an `IsContinuousRiemannianBundle` instance for
-general `(r, s)`, so the pointwise squared norm of a smooth section is not
-automatically measurable, and is supplied here as a public input. -/
+omit [I.Boundaryless] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

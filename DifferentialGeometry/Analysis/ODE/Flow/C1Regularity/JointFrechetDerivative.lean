@@ -1,43 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 
-/-!
-# Joint Fréchet differentiability of the flow at the central orbit
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, jointly `C^1` in
-`(t, x)`, and a local Picard–Lindelöf flow `Φ : E × ℝ → E` packaged by `IsLocalFlow`, this
-file establishes joint Fréchet differentiability of `(x, t) ↦ Φ ⟨x, t⟩` at the centre
-points `(x₀, t)`, for `t` in the open uniform interval `Ioo (t₀ - T) (t₀ + T)` on which the
-space-partial derivative is controlled.
-
-The joint Fréchet derivative is the *coproduct* of the two partials:
-
-* In the spatial direction: the variational linear map at time `t`,
-  `variationalLinearMapAt … ht : E →L[ℝ] E`.
-* In the time direction: the scalar-multiplication CLM `s ↦ s • f t (Φ ⟨x₀, t⟩)`.
-
-Splitting the residual into two pieces gives:
-
-```
-Φ (x₀ + δ, t + s) − Φ (x₀, t) − Lmap δ − s • f t (Φ ⟨x₀, t⟩)
-  = [Φ (x₀ + δ, t + s) − Φ (x₀ + δ, t) − s • f t (Φ ⟨x₀, t⟩)]  -- time piece
-    + [Φ (x₀ + δ, t) − Φ (x₀, t) − Lmap δ]                      -- space piece
-```
-
-The space piece is `o(‖δ‖) = o(‖(δ, s)‖)` by `hasFDerivAt_flow_at_initial_of_isLocalFlow`.
-The time piece is `o(|s|) = o(‖(δ, s)‖)` by a mean-value estimate: along the orbit
-`α (u) := Φ (x₀ + δ, u)`, the function `g (u) := α u − (u − t) • f t (Φ ⟨x₀, t⟩)` has
-derivative `f u (α u) − f t (Φ ⟨x₀, t⟩)`, which is uniformly small near `t` by joint
-continuity of `f` and `Φ`.
-
-The `ContDiffOn` upgrade is **not** delivered here: that would require continuity of the
-variational linear map jointly in the base point `(x, t)`, i.e., extending V.2.b.1's
-`variationalLinearMapAt` to varying central orbits.  This is a substantial follow-up and
-is left for a subsequent step.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is *not*
-used.  No manifold or tensor file is imported.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -55,16 +17,7 @@ section MainTheorem
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 1600000 in
-/-- **Joint Fréchet derivative of the flow at the central initial condition.**
 
-Given a local flow `Φ` of a jointly `C^1` time-dependent vector field `f`, a uniform-interval
-`Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax` on which the operator norm of the linearization along
-the central orbit is bounded by `M` with `M · T < 1`, and `0 < r` so we have a closed ball of
-positive radius around `x₀` inside the flow's spatial domain, the map
-`(x, t) ↦ Φ ⟨x, t⟩` is jointly Fréchet differentiable at `(x₀, t)` for every `t` in the open
-sub-interval `Ioo (t₀ - T) (t₀ + T)`.  Its derivative is the *coproduct* of the variational
-linear map (in the spatial direction) and the multiplication by `f t (Φ ⟨x₀, t⟩)` (in the
-time direction). -/
 theorem hasFDerivAt_flow_jointly_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

@@ -5,25 +5,12 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoothness.ChartFrameCoordMatrixPullback
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.FinsetSumSwap
 
-/-!
-# Full T₀-linear chart-coordinate formula for the chart-α `(Idx, Jdx)` raw
-component of the raw tensor connection Laplacian.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M` with component multi-indices `(Idx, Jdx)`, this file
-ships a headline that expresses the chart-α `(Idx, Jdx)` raw scalar component
-of `rawTensorConnLapSmooth g r s T₀` at any base point `b` lying in the
-chart-α partition-of-unity tsupport intersected with the chart-α Levi-Civita
-good set as a closed-form `T₀`-linear chart-coordinate expression with smooth
-`T₀`-independent coefficient families on the Euclidean chart target. -/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -51,9 +38,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Principal-block `GlobalCorr` family from sub.1, witnessing the `T₀`-independent
-smooth coefficient of `∂_m raw_T₀^{I',J'}` in the inverse-Gram-weighted bundled
-second cov-deriv. -/
 private noncomputable def secondCovDeriv_GlobalCorr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -67,7 +51,6 @@ private noncomputable def secondCovDeriv_GlobalCorr
     (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
       (I := I) (M := M) g r s α Idx Jdx k l) I' J' m
 
-/-- Zeroth-block `GlobalCorr0` family from sub.1. -/
 private noncomputable def secondCovDeriv_GlobalCorr0
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -81,6 +64,7 @@ private noncomputable def secondCovDeriv_GlobalCorr0
       (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
         (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
 
+omit [BoundarylessManifold I M] in
 private lemma secondCovDeriv_GlobalCorr_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -97,6 +81,7 @@ private lemma secondCovDeriv_GlobalCorr_contDiffOn
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
 
+omit [BoundarylessManifold I M] in
 private lemma secondCovDeriv_GlobalCorr0_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -112,7 +97,6 @@ private lemma secondCovDeriv_GlobalCorr0_contDiffOn
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.1 I' J'
 
-/-- Principal pointwise identity from sub.1 at any chart-α good-set point. -/
 private lemma secondCovDeriv_GlobalCorr_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -155,7 +139,6 @@ private lemma secondCovDeriv_GlobalCorr_pointwise
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.2 T₀ hb
 
-/-- Γ-correction `Coeff_1` family from sub.5. -/
 private noncomputable def chartFrameTraceΓ_Coeff_1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -168,7 +151,6 @@ private noncomputable def chartFrameTraceΓ_Coeff_1
     (chartFrameTraceΓCorrection_eq_T₀_linear
       (I := I) (M := M) g r s α Idx Jdx) I' J' m
 
-/-- Γ-correction `Coeff_0` family from sub.5. -/
 private noncomputable def chartFrameTraceΓ_Coeff_0
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -238,7 +220,6 @@ private lemma chartFrameTraceΓCorrection_pointwise
         (chartFrameTraceΓCorrection_eq_T₀_linear
           (I := I) (M := M) g r s α Idx Jdx))).2.2 T₀ hb
 
-/-- Pulled-back inverse Gram matrix entry on the Euclidean chart target. -/
 private noncomputable def invGramPull
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -254,7 +235,6 @@ private lemma invGramPull_contDiffOn
   chartInvGramMatrix_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α k l
 
-/-- Pulled-back chart-α coordinate matrix entry. -/
 private noncomputable def chartFrameCoordPull
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -262,6 +242,7 @@ private noncomputable def chartFrameCoordPull
   fun y => chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameCoordPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -270,7 +251,6 @@ private lemma chartFrameCoordPull_contDiffOn
   chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k
 
-/-- Pulled-back chart-α coordinate matrix directional derivative entry. -/
 private noncomputable def chartFrameCoordDirDerivPull
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E)) :
@@ -281,6 +261,7 @@ private noncomputable def chartFrameCoordDirDerivPull
     (chartBasisVecFiber (I := I) α l
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameCoordDirDerivPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E)) :
@@ -289,6 +270,7 @@ private lemma chartFrameCoordDirDerivPull_contDiffOn
   chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k l
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -345,13 +327,13 @@ private lemma chartFrameCoordDirDerivPull_at_b_eq
   unfold chartFrameCoordDirDerivPull
   rw [hsymm, hleft_inv]
 
-/-- Principal `C_2` coefficient = pulled-back inverse Gram. -/
 private noncomputable def C_2_principal
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   invGramPull (I := I) (M := M) g α k l
 
+omit [BoundarylessManifold I M] in
 private lemma C_2_principal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -359,8 +341,6 @@ private lemma C_2_principal_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   invGramPull_contDiffOn (I := I) (M := M) g α k l
 
-/-- `C_1` first-derivative coefficient: aggregates principal, Leibniz, and
-Γ-correction contributions. -/
 private noncomputable def C_1_firstDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -412,7 +392,6 @@ private lemma C_1_firstDeriv_contDiffOn
   · exact chartFrameTraceΓ_Coeff_1_contDiffOn
       (I := I) (M := M) g r s α Idx Jdx I' J' m
 
-/-- `C_0` zeroth-order coefficient. -/
 private noncomputable def C_0_zeroth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -462,17 +441,6 @@ private lemma C_0_zeroth_contDiffOn
   · exact chartFrameTraceΓ_Coeff_0_contDiffOn
       (I := I) (M := M) g r s α Idx Jdx I' J'
 
-/-- **Full T₀-linear chart-coordinate formula for the chart-α `(Idx, Jdx)` raw
-component of `rawTensorConnLap T₀` at a chart-α POU-tsupport ∩ Levi-Civita
-good-set point `b`.**
-
-There exist `T₀`-independent smooth families `C_2`, `C_1`, `C_0` on
-`chartTargetEuclid α` such that the chart-α `(Idx, Jdx)` raw scalar component
-of `rawTensorConnLapSmooth g r s T₀` at any `b` in the chart-α partition-of-unity
-tsupport intersected with the chart-α Levi-Civita good set equals the explicit
-chart-coordinate sum decomposition into a principal mixed-second-partial block,
-a first-partial block, and a zeroth-order block. No chart-locality predicate is
-required. -/
 theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

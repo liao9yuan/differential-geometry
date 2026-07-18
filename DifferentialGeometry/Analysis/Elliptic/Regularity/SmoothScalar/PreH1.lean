@@ -6,23 +6,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Pre-Hilbert structure on smooth scalar functions
-
-For a closed smooth Riemannian manifold `(M, g)`, the space of smooth real-valued
-functions on `M` carries a natural pre-Hilbert structure whose inner product is
-
-  ⟨f, h⟩ := ∫ f · h dμ_g + ∫ g(grad f, grad h) dμ_g
-
-Both integrals are finite: on a compact manifold, the integrand is continuous,
-hence integrable against the (finite) Riemannian volume measure.
-
-This file packages a wrapper type `SmoothScalar g` for smooth real-valued
-functions, equips it with the standard `AddCommGroup` and `Module ℝ` structure,
-and installs the pre-inner-product space structure via
-`InnerProductSpace.Core`. The induced `SeminormedAddCommGroup` and
-`InnerProductSpace ℝ` instances follow from `InnerProductSpace.Core`.
--/
 
 noncomputable section
 
@@ -34,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -46,22 +29,17 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A smooth real-valued function on `M`, packaged together with the
-Riemannian-metric parameter `g`. The metric `g` does not appear in the
-underlying data fields; its role is solely to make `SmoothScalar g` a
-different Lean type for each metric, so that downstream files can attach
-metric-dependent inner-product / norm instances cleanly. -/
 structure SmoothScalar (g : SmoothRiemannianMetric I M) where
-  /-- The underlying function. -/
+
   toFun : M → ℝ
-  /-- The function is smooth. -/
+
   smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ toFun
 
 namespace SmoothScalar
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- Two `SmoothScalar` are equal if their underlying functions are equal. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[ext] theorem ext {f h : SmoothScalar g} (hfh : f.toFun = h.toFun) : f = h := by
   cases f; cases h; congr
 
@@ -86,35 +64,45 @@ instance : SMul ℝ (SmoothScalar g) where
         rw [h]
         exact contMDiff_const.mul f.smooth }
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_zero : (0 : SmoothScalar g).toFun = (fun _ : M => 0) := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_zero_apply (x : M) : (0 : SmoothScalar g).toFun x = 0 := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_add (f h : SmoothScalar g) :
     (f + h).toFun = f.toFun + h.toFun := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_add_apply (f h : SmoothScalar g) (x : M) :
     (f + h).toFun x = f.toFun x + h.toFun x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_neg (f : SmoothScalar g) :
     (-f).toFun = -f.toFun := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_neg_apply (f : SmoothScalar g) (x : M) :
     (-f).toFun x = -f.toFun x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_sub (f h : SmoothScalar g) :
     (f - h).toFun = f.toFun - h.toFun := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_sub_apply (f h : SmoothScalar g) (x : M) :
     (f - h).toFun x = f.toFun x - h.toFun x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_smul (c : ℝ) (f : SmoothScalar g) :
     (c • f).toFun = c • f.toFun := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_smul_apply (c : ℝ) (f : SmoothScalar g) (x : M) :
     (c • f).toFun x = c * f.toFun x := rfl
 
-/-- `SmoothScalar.toFun` is injective. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 lemma toFun_injective :
     Function.Injective (fun f : SmoothScalar g => f.toFun) := by
   intro f h hfh
@@ -123,6 +111,7 @@ lemma toFun_injective :
 instance : SMul ℕ (SmoothScalar g) := ⟨nsmulRec⟩
 instance : SMul ℤ (SmoothScalar g) := ⟨zsmulRec⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_nsmul (f : SmoothScalar g) (n : ℕ) :
     (n • f).toFun = n • f.toFun := by
   induction n with
@@ -137,6 +126,7 @@ instance : SMul ℤ (SmoothScalar g) := ⟨zsmulRec⟩
     have hn : (nsmulRec n f).toFun = n • f.toFun := ih
     rw [toFun_add, hn, succ_nsmul]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma toFun_zsmul (f : SmoothScalar g) (z : ℤ) :
     (z • f).toFun = z • f.toFun := by
   rcases z with n | n
@@ -158,8 +148,6 @@ instance : AddCommGroup (SmoothScalar g) :=
     toFun_nsmul
     toFun_zsmul
 
-/-- The natural additive monoid hom from `SmoothScalar g` to its underlying
-function space. -/
 def toFunAddHom : SmoothScalar g →+ (M → ℝ) where
   toFun := fun f => f.toFun
   map_zero' := toFun_zero
@@ -172,8 +160,7 @@ end SmoothScalar
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The pointwise gradient inner product `x ↦ g.inner x (grad_g g hf x) (grad_g g hh x)`
-is a continuous function on `M`. -/
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma SmoothScalar.continuous_inner_grad
     {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
     Continuous (fun x : M =>
@@ -184,14 +171,13 @@ lemma SmoothScalar.continuous_inner_grad
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) g
     (grad_g (I := I) g f.smooth) (grad_g (I := I) g h.smooth)
 
-/-- The pointwise product `x ↦ f.toFun x * h.toFun x` is continuous. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma SmoothScalar.continuous_mul {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     Continuous (fun x : M => f.toFun x * h.toFun x) :=
   f.smooth.continuous.mul h.smooth.continuous
 
-/-- The product `f · h` is integrable against the Riemannian volume measure on
-a closed manifold. -/
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 lemma SmoothScalar.integrable_mul {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     Integrable (fun x : M => f.toFun x * h.toFun x)
@@ -201,7 +187,7 @@ lemma SmoothScalar.integrable_mul {g : SmoothRiemannianMetric I M}
   exact (f.continuous_mul h).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The pointwise inner product of gradients is integrable. -/
+omit [InnerProductSpace ℝ E] in
 lemma SmoothScalar.integrable_inner_grad {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     Integrable (fun x : M =>
@@ -215,8 +201,6 @@ lemma SmoothScalar.integrable_inner_grad {g : SmoothRiemannianMetric I M}
   exact (f.continuous_inner_grad h).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The H¹ inner product on smooth scalars on a closed Riemannian manifold:
-`⟨f, h⟩_{H¹} := ∫ f · h dμ_g + ∫ g(grad f, grad h) dμ_g`. -/
 def smoothScalarH1Inner {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) : ℝ :=
   (∫ x, f.toFun x * h.toFun x
@@ -227,7 +211,7 @@ def smoothScalarH1Inner {g : SmoothRiemannianMetric I M}
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
       ∂(riemannianVolumeMeasure (I := I) (M := M) g))
 
-/-- Unfolding lemma. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma smoothScalarH1Inner_def {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) f h =
@@ -239,7 +223,7 @@ lemma smoothScalarH1Inner_def {g : SmoothRiemannianMetric I M}
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := rfl
 
-/-- The H¹ inner product is symmetric in its two arguments. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma smoothScalarH1Inner_symm {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) f h =
@@ -252,7 +236,7 @@ lemma smoothScalarH1Inner_symm {g : SmoothRiemannianMetric I M}
     intro x
     exact g.symm x _ _
 
-/-- The L² self-integral of `f` is non-negative. -/
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [CompactSpace M] in
 lemma SmoothScalar.integral_mul_self_nonneg {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     0 ≤ ∫ x, f.toFun x * f.toFun x
@@ -261,9 +245,7 @@ lemma SmoothScalar.integral_mul_self_nonneg {g : SmoothRiemannianMetric I M}
   intro x
   exact mul_self_nonneg _
 
-/-- Pointwise non-negativity of the metric inner product on the diagonal:
-`g.inner x v v ≥ 0` for any `v`. Derived from `g.pos x v` (positivity for
-nonzero `v`) by case-split on `v = 0`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma SmoothRiemannianMetric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -272,7 +254,7 @@ lemma SmoothRiemannianMetric_inner_self_nonneg
     simp [map_zero]
   · exact (g.pos x v hv).le
 
-/-- The Riemannian gradient self-integral is non-negative (positivity of `g`). -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma SmoothScalar.integral_inner_grad_self_nonneg
     {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) :
     0 ≤ ∫ x, g.inner x ((grad_g (I := I) g f.smooth :
@@ -284,14 +266,14 @@ lemma SmoothScalar.integral_inner_grad_self_nonneg
   intro x
   exact SmoothRiemannianMetric_inner_self_nonneg g x _
 
-/-- The H¹ self-pairing is non-negative. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma smoothScalarH1Inner_nonneg {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     0 ≤ smoothScalarH1Inner (I := I) (M := M) f f := by
   unfold smoothScalarH1Inner
   exact add_nonneg f.integral_mul_self_nonneg f.integral_inner_grad_self_nonneg
 
-/-- L² inner product is additive in the left argument (smooth scalars). -/
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 lemma smoothScalar_integral_mul_add_left {g : SmoothRiemannianMetric I M}
     (f₁ f₂ h : SmoothScalar g) :
     (∫ x, (f₁ + f₂).toFun x * h.toFun x
@@ -310,8 +292,7 @@ lemma smoothScalar_integral_mul_add_left {g : SmoothRiemannianMetric I M}
       funext hpt]
   exact integral_add (f₁.integrable_mul h) (f₂.integrable_mul h)
 
-/-- The smooth-section gradient of the sum equals the sum of gradients
-(pointwise). -/
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma SmoothScalar.grad_g_add_apply {g : SmoothRiemannianMetric I M}
     (f₁ f₂ : SmoothScalar g) (x : M) :
     ((grad_g (I := I) g (f₁ + f₂).smooth :
@@ -326,7 +307,6 @@ lemma SmoothScalar.grad_g_add_apply {g : SmoothRiemannianMetric I M}
   exact gradFun_add (I := I) g (f₁.smooth.mdifferentiable (by simp) x)
     (f₂.smooth.mdifferentiable (by simp) x)
 
-/-- Gradient inner product is additive in the left argument. -/
 lemma smoothScalar_integral_inner_grad_add_left
     {g : SmoothRiemannianMetric I M}
     (f₁ f₂ h : SmoothScalar g) :
@@ -380,7 +360,6 @@ lemma smoothScalar_integral_inner_grad_add_left
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) from funext hpt]
   exact integral_add (f₁.integrable_inner_grad h) (f₂.integrable_inner_grad h)
 
-/-- Additivity of the H¹ inner product in the left argument. -/
 lemma smoothScalarH1Inner_add_left {g : SmoothRiemannianMetric I M}
     (f₁ f₂ h : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) (f₁ + f₂) h =
@@ -390,7 +369,7 @@ lemma smoothScalarH1Inner_add_left {g : SmoothRiemannianMetric I M}
   rw [smoothScalar_integral_mul_add_left, smoothScalar_integral_inner_grad_add_left]
   ring
 
-/-- The smooth-section gradient of `c • f` equals `c • grad f` pointwise. -/
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma SmoothScalar.grad_g_smul_apply {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f : SmoothScalar g) (x : M) :
     ((grad_g (I := I) g (c • f).smooth :
@@ -420,7 +399,7 @@ lemma SmoothScalar.grad_g_smul_apply {g : SmoothRiemannianMetric I M}
   change (c • d_f) v = c * d_f v
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-/-- L² inner product is homogeneous in the left argument. -/
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [CompactSpace M] in
 lemma smoothScalar_integral_mul_smul_left {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f h : SmoothScalar g) :
     (∫ x, (c • f).toFun x * h.toFun x
@@ -433,7 +412,7 @@ lemma smoothScalar_integral_mul_smul_left {g : SmoothRiemannianMetric I M}
   rw [hpt]
   rw [integral_const_mul]
 
-/-- Gradient inner product is homogeneous in the left argument. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma smoothScalar_integral_inner_grad_smul_left
     {g : SmoothRiemannianMetric I M} (c : ℝ) (f h : SmoothScalar g) :
     (∫ x, g.inner x ((grad_g (I := I) g (c • f).smooth :
@@ -461,7 +440,7 @@ lemma smoothScalar_integral_inner_grad_smul_left
     rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [hpt, integral_const_mul]
 
-/-- Homogeneity of the H¹ inner product in the left argument. -/
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 lemma smoothScalarH1Inner_smul_left {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f h : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) (c • f) h =
@@ -470,8 +449,6 @@ lemma smoothScalarH1Inner_smul_left {g : SmoothRiemannianMetric I M}
   rw [smoothScalar_integral_mul_smul_left, smoothScalar_integral_inner_grad_smul_left]
   ring
 
-/-- The pre-inner-product core on smooth scalars on a closed Riemannian manifold,
-whose inner product is the Riemannian H¹ inner product. -/
 noncomputable instance instPreInnerProductSpaceCoreSmoothScalar
     {g : SmoothRiemannianMetric I M} :
     PreInnerProductSpace.Core ℝ (SmoothScalar g) where
@@ -493,15 +470,11 @@ noncomputable instance instPreInnerProductSpaceCoreSmoothScalar
       c * smoothScalarH1Inner (I := I) (M := M) f h
     exact smoothScalarH1Inner_smul_left c f h
 
-/-- The seminormed structure on `SmoothScalar g` derived from the pre-inner-product
-core. -/
 noncomputable instance instSeminormedAddCommGroupSmoothScalar
     {g : SmoothRiemannianMetric I M} :
     SeminormedAddCommGroup (SmoothScalar g) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-/-- The inner-product-space structure on `SmoothScalar g` derived from the
-pre-inner-product core. -/
 noncomputable instance instInnerProductSpaceSmoothScalar
     {g : SmoothRiemannianMetric I M} :
     InnerProductSpace ℝ (SmoothScalar g) :=

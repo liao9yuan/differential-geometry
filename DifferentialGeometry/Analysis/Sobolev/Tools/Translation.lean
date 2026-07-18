@@ -1,16 +1,5 @@
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 
-/-!
-# Translation continuity for Sobolev functions on Euclidean space
-
-This module establishes the translation continuity estimate that drives the
-Rellich–Kondrachov compactness argument:
-
-  ‖τ_h u − u‖_{L^p} ≤ ‖h‖ · ‖∇u‖_{L^p}
-
-for `u` smooth and compactly supported.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -23,8 +12,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- Pointwise representation of `φ x − φ (x − h)` as the integral over `s ∈ [0,1]`
-of the directional derivative of `φ` at `x − h + s • h` in direction `h`. -/
+
 private theorem sub_translate_eq_integral_fderiv
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ) (x h : E) :
     φ x - φ (x - h) =
@@ -73,8 +61,7 @@ private theorem sub_translate_eq_integral_fderiv
     _ = ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ φ (γ s)) h := hint
 
 omit [NeZero d] in
-/-- Pointwise upper bound for `|φ x − φ (x − h)|^p` by an integral of `‖∇φ‖^p`
-along the segment, scaled by `‖h‖^p`. -/
+
 private theorem rpow_abs_sub_translate_le
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ)
     {p : ℝ} (hp_one : 1 ≤ p) (x h : E) :
@@ -194,11 +181,7 @@ private theorem rpow_abs_sub_translate_le
           exact mul_le_mul_of_nonneg_left hJensen hh_pow_nn
 
 omit [NeZero d] in
-/-- `lintegral` form of the translation estimate (raw, before passing to roots).
 
-For a smooth compactly supported `φ` and any `h ∈ E`, the `pr`-th power of the
-`L^pr`-quasinorm of `x ↦ φ x − φ (x − h)` is bounded by `‖h‖^pr` times the
-`pr`-th power of the `L^pr`-quasinorm of `x ↦ ‖∇φ x‖`. -/
 private theorem lintegral_rpow_translate_sub_le
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr) (h : E) :
@@ -412,13 +395,7 @@ private theorem lintegral_rpow_translate_sub_le
           rw [hPostSwap]
 
 omit [NeZero d] in
-/-- For `p ≥ 1` and a `C^∞` function `φ` on `ℝ^d`, the `L^p`-norm of
-`x ↦ φ x − φ (x − h)` is bounded by `‖h‖ · ‖∇φ‖_{L^p}`.
 
-This is the translation-continuity estimate underlying the Fréchet–Kolmogorov
-characterisation of compactness in `L^p`. The bound holds without the compact
-support hypothesis: the FTC representation, Jensen's inequality, and translation
-invariance of Lebesgue measure are sufficient. -/
 theorem eLpNorm_translate_sub_le_smul_eLpNorm_fderiv
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)

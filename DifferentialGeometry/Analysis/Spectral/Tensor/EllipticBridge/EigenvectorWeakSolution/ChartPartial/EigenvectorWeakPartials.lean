@@ -1,76 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
-/-!
-# The eigenvector chart partial is a genuine weak chart partial
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
-index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
-`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec …
-i` (re-keyed onto the unconditional compactness witness
-`tensorResolventL2_isCompactOperator`) is an abstract element of the
-`L²` Hilbert space `TensorL2 r s g`, with canonical Euclidean chart component
-`u := tensorL2ChartComponent g r s φ α P₀`.
-
-Two companion files established, for the canonical smooth `H¹`-approximating
-sequence `eigenvectorSmoothApprox g r s i : ℕ → SmoothCcTensorH1
-g r s`:
-
-* `EigenvectorChartComponentL2.lean`: the canonical chart component `u` is the
-  `L²`-limit of the chart components of the `μ⁻¹`-rescaled smooth approximants;
-* `EigenvectorChartPartialL2.lean`: for each chart-coordinate direction `k`, the
-  chosen weak `k`-th chart partials of those rescaled approximants converge, in
-  `Lp ℝ 2 (chartL2Measure α)`, to `eigenvectorChartPartialLp g r s
-  i α P₀ k` — the candidate weak `k`-th chart partial of `u`.
-
-This file closes the loop: it names `eigenvectorChartWeakPartial`
-as the coercion-to-function of `eigenvectorChartPartialLp`, and
-proves that it is a genuine `DeGiorgi.HasWeakPartialDeriv` of `u` on the
-Euclidean chart target.
-
-## The mechanism
-
-The chosen weak chart partial of the chart component of a *smooth* section is a
-genuine weak partial: the chart component of `eigenvectorSmoothApprox
-… n` is globally `C^∞` with compact support inside the chart target, hence
-`W^{1,2}` there (`tensorChartComponent_memW1p`), so its `chosenWeakPartial'` is an
-honest weak partial (`chosenWeakPartial'_isWeakPartial_of_mem`). The `μ⁻¹`-rescaling
-factor is absorbed because `HasWeakPartialDeriv` is `ℝ`-homogeneous.
-
-Both the chart components and the chart partials converge in `Lp ℝ 2
-(chartL2Measure α)`; convergence in the `Lp` norm is, by
-`Lp.tendsto_Lp_iff_tendsto_eLpNorm'`, exactly convergence of the `eLpNorm` of
-the difference to `0`. Feeding these two `eLpNorm`-convergences, together with
-the per-approximant genuine weak partials, into the `L²`-closure theorem
-`hasWeakPartialDeriv_of_tendsto_eLpNorm` produces the headline: the candidate
-weak chart partial is a genuine weak chart partial of the eigenvector chart
-component.
-
-The Euclidean `L²` reference measure `chartL2Measure α = volume.restrict
-(chartTargetEuclid α)` is the plain Lebesgue volume restricted to the (open)
-Euclidean chart target, matching the open-set hypothesis of the closure theorem.
-
-## Main definitions
-
-* `eigenvectorChartWeakPartial g r s i α P₀ k` — the weak `k`-th
-  chart partial of the eigenvector chart component: the coercion-to-function of
-  `eigenvectorChartPartialLp g r s i α P₀ k`.
-
-## Main results
-
-* `eigenvectorChartWeakPartial_hasWeakPartialDeriv` — **the
-  headline**: `eigenvectorChartWeakPartial …` is a
-  `DeGiorgi.HasWeakPartialDeriv` of the eigenvector chart component
-  `tensorL2ChartComponent g r s φ α P₀` on the Euclidean chart target.
-* `eigenvectorChartWeakPartial_locally_memLp` —
-  `eigenvectorChartWeakPartial …` is in `MemLp 2` of the Lebesgue
-  volume restricted to any compact subset of the Euclidean chart target.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -101,8 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- `HasWeakPartialDeriv` only depends on its function arguments up to
-almost-everywhere equality with respect to `volume.restrict Ω`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_congr_ae
     {k : Fin (Module.finrank ℝ E)} {g f g' f' : EuclN → ℝ} {Ω : Set EuclN}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict Ω] f')
@@ -124,8 +53,7 @@ private lemma hasWeakPartialDeriv_congr_ae
   rw [h_lhs, h_rhs]
   exact h φ hφ hφ_supp hφ_sub
 
-/-- `HasWeakPartialDeriv` is `ℝ`-homogeneous: a common real scalar passes
-through the weak partial and the function simultaneously. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_const_smul
     {k : Fin (Module.finrank ℝ E)} {g f : EuclN → ℝ} {Ω : Set EuclN} (c : ℝ)
     (h : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g f Ω) :
@@ -146,9 +74,6 @@ private lemma hasWeakPartialDeriv_const_smul
     simp only [smul_eq_mul]; ring
   rw [h_lhs, h_rhs, h_base, mul_neg]
 
-/-- **The weak `k`-th chart partial of an eigenvector chart component
-(chart-locality-free).** The coercion-to-function of the `Lp ℝ 2 (chartL2Measure
-α)` class `eigenvectorChartPartialLp g r s i α P₀ k`. -/
 def eigenvectorChartWeakPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -157,11 +82,6 @@ def eigenvectorChartWeakPartial
   (eigenvectorChartPartialLp (I := I) (M := M) g r s i α P₀ k :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α))
 
-/-- The coercion-to-function of the `n`-th approximant chart partial agrees,
-almost everywhere with respect to `chartL2Measure α`, with `μ⁻¹` times the
-concrete chosen weak `k`-th chart partial of the Euclidean chart component of
-the smooth section `(eigenvectorSmoothApprox … n).toCcTensor`
-(chart-locality-free). -/
 lemma eigenvectorChartPartialLp_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -194,10 +114,6 @@ lemma eigenvectorChartPartialLp_approx_coeFn
         (chartTargetEuclid (I := I) (M := M) α)))).trans ?_
   exact (MemLp.coeFn_toLp _).const_smul (i.fst.val)⁻¹
 
-/-- For each `n`, the coercion-to-function of the `n`-th approximant chart
-partial is a genuine `DeGiorgi.HasWeakPartialDeriv` — with respect to the
-chart-coordinate direction `k` — of the coercion-to-function of the `n`-th
-approximant chart component, on the Euclidean chart target (chart-locality-free). -/
 private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -259,9 +175,7 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
       g r s i α P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The coercions-to-functions of the approximant chart components converge to
-the coercion-to-function of the eigenvector chart component, measured by the
-`eLpNorm` of the difference against `chartL2Measure α` (chart-locality-free). -/
+
 private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -295,9 +209,6 @@ private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (eigenvectorChartComponentL2_tendsto (I := I) (M := M)
       g r s i α P₀)
 
-/-- The coercions-to-functions of the approximant chart partials converge to
-the coercion-to-function of the candidate eigenvector chart partial, measured by
-the `eLpNorm` of the difference against `chartL2Measure α` (chart-locality-free). -/
 private lemma eigenvectorChartPartial_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -327,12 +238,7 @@ private lemma eigenvectorChartPartial_eLpNorm_tendsto
       g r s i α P₀ k)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The eigenvector chart partial is a genuine weak chart partial
-(chart-locality-free).** The weak `k`-th chart partial
-`eigenvectorChartWeakPartial g r s i α P₀ k` is a genuine
-`DeGiorgi.HasWeakPartialDeriv` of the canonical Euclidean chart component
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec … i) α P₀`
-of the eigenvector, on the Euclidean chart target `chartTargetEuclid α`. -/
+
 theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -438,10 +344,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
   rw [hgLim_def, huLim_def] at h_closure
   exact h_closure
 
-/-- **Local `L²`-integrability of the eigenvector chart partial
-(chart-locality-free).** For any compact subset `K` of the Euclidean chart
-target, the weak `k`-th chart partial `eigenvectorChartWeakPartial
-g r s i α P₀ k` lies in `MemLp 2` of the Lebesgue volume restricted to `K`. -/
 theorem eigenvectorChartWeakPartial_locally_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

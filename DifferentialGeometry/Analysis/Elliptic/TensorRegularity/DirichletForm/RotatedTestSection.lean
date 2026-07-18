@@ -1,63 +1,11 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.CovChartMetricGramInv
 
-/-!
-# The inverse-Gram-rotated tensor test section and the Gram/inverse-Gram collapse
-
-For a smooth Riemannian metric `g` on a closed manifold `(M, g)`, a chart center
-`α : M`, and tensor ranks `(r, s)`, the per-component-pair scalar
-`covChartMetricGram g r s α P Q` and its assembled inverse
-`covChartMetricGramInv g r s α y` couple the chart-frame tensor components of a
-section. This file builds the smooth, compactly-supported `(r, s)`-tensor
-section obtained by rotating a scalar bump through that inverse Gram — the
-device that decouples a component-coupled elliptic system into per-component
-scalar equations — and proves the collapse identity that the Gram and its
-inverse contract to the identity component-wise.
-
-## Construction of the chart-frame constant basis section
-
-The bundle `TensorRSModel r s ℝ E`-bundle of mixed `(r, s)`-tensors has a
-trivialization `triv_α` at `α` whose base set is the chart-`α` source. The
-fibrewise inverse `triv_α.symmL ℝ b : TensorRSModel r s ℝ E →L[ℝ]
-TensorRSSpace r s I b` produces, from the constant model tensor
-`tensorChartBasisElement r s Q.1 Q.2`, a fiber element whose trivialization
-image is again the constant model tensor on the chart source. Multiplying this
-chart-locally smooth section by the smooth scalar bump `χ` (smooth on the chart
-source, with closed support inside the chart) yields a globally smooth section;
-on a closed manifold it has compact support automatically.
-
-## Main definitions
-
-* `chartBasisTensorSection g r s α χ hχs hχt Q` — the smooth compactly-supported
-  `(r, s)`-tensor section that is, in the chart-`α` frame, the constant chart
-  basis tensor indexed by the component multi-index `Q`, cut off by the bump
-  `χ`.
-* `rotatedTestSection g r s α P₀ χ hχs hχt` — the finite sum, over component
-  multi-indices `Q`, of the chart-frame constant basis sections cut off by the
-  chart-pulled-back inverse-Gram column entry `covChartMetricGramInv g r s α · Q
-  P₀` times `χ`.
-
-## Main results
-
-* `chartBasisTensorSection_chartComp` — on the Euclidean chart target the raw
-  chart component of `chartBasisTensorSection … Q` at a multi-index `(Idx, Jdx)`
-  equals the chart-pushed bump times the Kronecker delta `[(Idx, Jdx) = Q]`.
-* `rotatedTestSection_chartComp` — on the Euclidean chart target the raw chart
-  component of `rotatedTestSection … P₀` at a multi-index `Q` equals the
-  inverse-Gram entry `covChartMetricGramInv g r s α y Q P₀` times the
-  chart-pushed bump.
-* `covChartMetricGram_mul_inv_collapse` — on the Euclidean chart target the
-  component-wise contraction of the Gram against the inverse Gram is the
-  identity: `∑ Q, covChartMetricGram … P Q y · covChartMetricGramInv … y Q P₀`
-  equals `[P = P₀]`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -81,7 +29,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The trivialization at `α` of the mixed `(r, s)`-tensor bundle. -/
 private noncomputable abbrev rsTriv (r s : ℕ) (α : M) :
     Bundle.Trivialization (TensorRSModel r s ℝ E)
       (Bundle.TotalSpace.proj :
@@ -90,8 +37,7 @@ private noncomputable abbrev rsTriv (r s : ℕ) (α : M) :
   trivializationAt (TensorRSModel r s ℝ E)
     (fun x : M => TensorRSSpace r s I x) α
 
-/-- The base set of the `(r, s)`-tensor-bundle trivialization at `α` equals the
-chart-`α` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma rsTriv_baseSet (r s : ℕ) (α : M) :
     (rsTriv (I := I) (M := M) r s α).baseSet = (chartAt H α).source := by
   change ((trivializationAt (Tensor0SModel r ℝ E)
@@ -104,17 +50,13 @@ private lemma rsTriv_baseSet (r s : ℕ) (α : M) :
   rw [Set.inter_self]
   rfl
 
-/-- The chart-`α`-frame constant basis fiber section: the fibrewise inverse of
-the constant model tensor `tensorChartBasisElement r s Q.1 Q.2`. -/
 noncomputable def chartBasisFiberSection (r s : ℕ) (α : M)
     (Q : CompIdx E r s) :
     (b : M) → TensorRSSpace r s I b :=
   fun b => (rsTriv (I := I) (M := M) r s α).symmL ℝ b
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-/-- On the chart-`α` source, the `continuousLinearMapAt`-projection of
-`chartBasisFiberSection r s α Q` is the constant model tensor
-`tensorChartBasisElement r s Q.1 Q.2`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma continuousLinearMapAt_chartBasisFiberSection (r s : ℕ) (α : M)
     (Q : CompIdx E r s) {b : M} (hb : b ∈ (chartAt H α).source) :
     (rsTriv (I := I) (M := M) r s α).continuousLinearMapAt ℝ b
@@ -126,10 +68,7 @@ private lemma continuousLinearMapAt_chartBasisFiberSection (r s : ℕ) (α : M)
     (rsTriv (I := I) (M := M) r s α) hb'
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-/-- The chart-`α`-frame constant basis fiber section is smooth on the chart-`α`
-source. Its trivialization image is the constant model tensor, hence smooth;
-`Trivialization.contMDiffOn_section_baseSet_iff` transfers this back to the
-section. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisFiberSection_contMDiffOn (r s : ℕ) (α : M)
     (Q : CompIdx E r s) :
     ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -157,11 +96,6 @@ private lemma chartBasisFiberSection_contMDiffOn (r s : ℕ) (α : M)
   exact continuousLinearMapAt_chartBasisFiberSection
     (I := I) (M := M) r s α Q hb
 
-/-- **The chart-`α`-frame constant basis tensor section.** For a component
-multi-index `Q` and a scalar bump `χ`, smooth on the chart-`α` source with
-`tsupport χ ⊆ (chartAt H α).source`, this is the smooth compactly-supported
-`(r, s)`-tensor section that is, in the chart-`α` frame, the constant chart
-basis tensor `tensorChartBasisElement r s Q.1 Q.2`, cut off by `χ`. -/
 noncomputable def chartBasisTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (χ : M → ℝ)
@@ -186,8 +120,7 @@ noncomputable def chartBasisTensorSection
       isClosed_tsupport _
     exact isCompact_univ.of_isClosed_subset htsupp_closed (fun _ _ => trivial)
 
-/-- The underlying section of `chartBasisTensorSection` evaluated at `b` is
-`χ b • chartBasisFiberSection r s α Q b`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartBasisTensorSection_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -196,8 +129,7 @@ lemma chartBasisTensorSection_toSection_apply
     (chartBasisTensorSection (I := I) (M := M) g r s α χ hχs hχt Q).toSection b =
       χ b • chartBasisFiberSection (I := I) (M := M) r s α Q b := rfl
 
-/-- On the chart-`α` source, the trivialization-projected scalar of
-`chartBasisTensorSection … Q` is `χ b` times the constant model tensor. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_chartBasisTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -213,9 +145,7 @@ private lemma tensorTrivProj_chartBasisTensorSection
   rw [map_smul]
   rw [continuousLinearMapAt_chartBasisFiberSection (I := I) (M := M) r s α Q hb]
 
-/-- The raw chart-frame scalar component of `chartBasisTensorSection … Q` at a
-multi-index `(Idx, Jdx)`, on the chart-`α` source, is `χ b` times the Kronecker
-delta `[(Idx, Jdx) = Q]`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_chartBasisTensorSection_on_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -247,11 +177,7 @@ private lemma tensorChartComponentRaw_chartBasisTensorSection_on_source
       rw [if_neg h2, mul_zero]
     · rw [if_neg h1, zero_mul]
 
-/-- **Raw chart component of the chart-frame constant basis section.** On the
-Euclidean chart target the raw chart-frame scalar component of
-`chartBasisTensorSection … Q` at the multi-index `(Idx, Jdx)`, read at the
-chart-source preimage of `y`, equals the chart-pushed bump `chartPushedRaw I α
-χ y` times the Kronecker delta `[(Idx, Jdx) = Q]`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartBasisTensorSection_chartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -273,18 +199,13 @@ theorem chartBasisTensorSection_chartComp
     (I := I) (M := M) g r s α hχs hχt Q Idx Jdx hb]
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α χ hy]
 
-/-- The chart-pulled-back inverse-Gram column entry at `(Q, P₀)`: the entry
-`covChartMetricGramInv g r s α y Q P₀` of the inverse Gram, read at the
-chart-Euclidean image `y = toEuclidean (extChartAt I α b)` of the base point
-`b`. -/
 noncomputable def gramInvWeight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s) (b : M) : ℝ :=
   covChartMetricGramInv (I := I) (M := M) g r s α
     (toEuclidean (E := E) ((extChartAt I α) b)) Q P₀
 
-/-- The smooth chart map `b ↦ toEuclidean (extChartAt I α b)` is `C^∞` on the
-chart-`α` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEuclidean_extChartAt_contMDiffOn (α : M) :
     ContMDiffOn I 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) ∞
       (fun b : M => toEuclidean (E := E) ((extChartAt I α) b))
@@ -297,8 +218,6 @@ private lemma toEuclidean_extChartAt_contMDiffOn (α : M) :
     (toEuclidean (E := E)).toContinuousLinearMap.contMDiff
   exact htoEuc.comp_contMDiffOn hext
 
-/-- The smooth chart map `b ↦ toEuclidean (extChartAt I α b)` sends the
-chart-`α` source into the Euclidean chart target. -/
 private lemma toEuclidean_extChartAt_mapsTo (α : M) :
     Set.MapsTo (fun b : M => toEuclidean (E := E) ((extChartAt I α) b))
       ((chartAt H α).source)
@@ -308,8 +227,6 @@ private lemma toEuclidean_extChartAt_mapsTo (α : M) :
   rw [← extChartAt_source_eq_chartAt_source (I := I)] at hb
   exact (extChartAt I α).map_source hb
 
-/-- The chart-pulled-back inverse-Gram column entry `gramInvWeight g r s α P₀ Q`
-is `C^∞` on the chart-`α` source. -/
 private lemma gramInvWeight_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s) :
@@ -325,8 +242,6 @@ private lemma gramInvWeight_contMDiffOn
   exact hentry.comp (toEuclidean_extChartAt_contMDiffOn (I := I) (M := M) α)
     (toEuclidean_extChartAt_mapsTo (I := I) (M := M) α)
 
-/-- The chart-pulled-back inverse-Gram column entry times the bump is `C^∞` on
-the chart-`α` source. -/
 lemma gramInvWeight_mul_bump_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s)
@@ -336,8 +251,7 @@ lemma gramInvWeight_mul_bump_contMDiffOn
       ((chartAt H α).source) :=
   (gramInvWeight_contMDiffOn (I := I) (M := M) g r s α P₀ Q).mul hχs
 
-/-- The chart-pulled-back inverse-Gram column entry times the bump has closed
-support inside the chart-`α` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma gramInvWeight_mul_bump_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s)
@@ -357,12 +271,6 @@ lemma gramInvWeight_mul_bump_tsupport
       (g := χ)
   exact hsub.trans hχt
 
-/-- **The inverse-Gram-rotated tensor test section.** For a component
-multi-index `P₀` and a scalar bump `χ`, smooth on the chart-`α` source with
-`tsupport χ ⊆ (chartAt H α).source`, this is the finite sum, over component
-multi-indices `Q`, of the chart-frame constant basis sections cut off by the
-chart-pulled-back inverse-Gram column entry `covChartMetricGramInv g r s α · Q
-P₀` times `χ`. -/
 noncomputable def rotatedTestSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -377,8 +285,7 @@ noncomputable def rotatedTestSection
       (gramInvWeight_mul_bump_tsupport (I := I) (M := M) g r s α P₀ Q hχt)
       Q
 
-/-- The trivialization-projected scalar `tensorTrivProj` is additive over a
-finite sum of tensor sections. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s) (b : M) :
@@ -406,8 +313,7 @@ private lemma tensorTrivProj_finsetSum
   | insert i A hi ih =>
       rw [Finset.sum_insert hi, Finset.sum_insert hi, hadd, ih]
 
-/-- The raw chart-frame scalar component `tensorChartComponentRaw` is additive
-over a finite sum of tensor sections. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s)
@@ -422,11 +328,6 @@ private lemma tensorChartComponentRaw_finsetSum
   rw [tensorTrivProj_finsetSum (I := I) (M := M) g r s α t S b]
   exact map_sum (tensorChartComponentProjection (E := E) r s Idx Jdx) _ _
 
-/-- **Raw chart component of the inverse-Gram-rotated test section.** On the
-Euclidean chart target the raw chart-frame scalar component of
-`rotatedTestSection … P₀` at a multi-index `Q`, read at the chart-source
-preimage of `y`, equals the inverse-Gram entry `covChartMetricGramInv g r s α y
-Q P₀` times the chart-pushed bump `chartPushedRaw I α χ y`. -/
 theorem rotatedTestSection_chartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -485,11 +386,52 @@ theorem rotatedTestSection_chartComp
   · intro hQ
     exact absurd (Finset.mem_univ Q) hQ
 
-/-- **The Gram / inverse-Gram collapse.** On the Euclidean chart target the
-component-wise contraction of the chart-frame tensor-metric Gram against the
-inverse Gram is the identity: for component multi-indices `P, P₀`,
-`∑ Q, covChartMetricGram g r s α P Q y · covChartMetricGramInv g r s α y Q P₀`
-equals the Kronecker delta `[P = P₀]`. -/
+theorem toSection_eq_sum_chartBasisFiberSection
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
+    {b : M} (hb : b ∈ (chartAt H α).source) :
+    S.toSection b = ∑ Q : CompIdx E r s,
+      tensorChartComponentRaw (I := I) (M := M) g r s S α Q.1 Q.2 b •
+        chartBasisFiberSection (I := I) (M := M) r s α Q b := by
+  classical
+  have hb' : b ∈ (rsTriv (I := I) (M := M) r s α).baseSet := by
+    rw [rsTriv_baseSet (I := I) (M := M) r s α]; exact hb
+  have hmodel := tensorRSModel_eq_sum_basis (E := E) r s
+    (tensorTrivProj (I := I) (M := M) g r s S α b)
+  calc S.toSection b
+      = (rsTriv (I := I) (M := M) r s α).symmL ℝ b
+          ((rsTriv (I := I) (M := M) r s α).continuousLinearMapAt ℝ b
+            (S.toSection b)) :=
+        ((rsTriv (I := I) (M := M) r s α).symmL_continuousLinearMapAt
+          hb' (S.toSection b)).symm
+    _ = (rsTriv (I := I) (M := M) r s α).symmL ℝ b
+          (tensorTrivProj (I := I) (M := M) g r s S α b) := rfl
+    _ = (rsTriv (I := I) (M := M) r s α).symmL ℝ b
+          (∑ Idx, ∑ Jdx,
+            tensorChartComponentProjection (E := E) r s Idx Jdx
+                (tensorTrivProj (I := I) (M := M) g r s S α b) •
+              tensorChartBasisElement (E := E) r s Idx Jdx) := by
+        rw [← hmodel]
+    _ = ∑ Idx, ∑ Jdx,
+          tensorChartComponentProjection (E := E) r s Idx Jdx
+              (tensorTrivProj (I := I) (M := M) g r s S α b) •
+            (rsTriv (I := I) (M := M) r s α).symmL ℝ b
+              (tensorChartBasisElement (E := E) r s Idx Jdx) := by
+        rw [map_sum]
+        refine Finset.sum_congr rfl (fun Idx _ => ?_)
+        rw [map_sum]
+        refine Finset.sum_congr rfl (fun Jdx _ => ?_)
+        rw [map_smul]
+    _ = ∑ Q : CompIdx E r s,
+          tensorChartComponentRaw (I := I) (M := M) g r s S α Q.1 Q.2 b •
+            chartBasisFiberSection (I := I) (M := M) r s α Q b := by
+        rw [Fintype.sum_prod_type'
+          (f := fun Idx Jdx =>
+            tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b •
+              chartBasisFiberSection (I := I) (M := M) r s α (Idx, Jdx) b)]
+        refine Finset.sum_congr rfl (fun Idx _ => ?_)
+        refine Finset.sum_congr rfl (fun Jdx _ => ?_)
+        rfl
+
 theorem covChartMetricGram_mul_inv_collapse
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}

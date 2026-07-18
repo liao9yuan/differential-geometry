@@ -5,81 +5,7 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Bridge infrastructure: `IsGeodesic` to chart-coordinate geodesic equation
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, this file collects the
-infrastructure that bridges the integral-curve form
-(`IsGeodesic`, `IsGeodesicAt`) to the chart-coordinate
-second-derivative form (`HasGeodesicEquationAt`).
-
-## Strategy
-
-The chart-pushed lift `chartPushLift f t₀ s := extChartAt I.tangent (f t₀) (f s)`
-of an integral curve `f` of `geodesicVectorFieldChart g α` carries a
-first-derivative formula `chartPushLift_eventually_hasDerivAt` valued in
-`E × E`. Taking the first component yields a `HasDerivAt` statement on
-the chart-local curve `chartLocalCurve γ t₀`, where `γ = projectCurve f`.
-
-A key simplification occurs at the **base time** `s = t₀`: the
-change-of-coordinates `tangentCoordChange I.tangent (f t₀) (f t₀) (f t₀)`
-on the tangent bundle of the tangent bundle of `M` reduces to the identity
-(via `tangentCoordChange_self`), so the chart-pushed VF coincides with the
-chart-fixed VF at `f t₀`. We exploit this to extract the first-derivative
-clause of `HasGeodesicEquationAt` in the chart-centred case
-(`α = γ(t₀)`) unconditionally.
-
-The general (chart basepoint `α` arbitrary) case is reduced to the
-chart-centred case via a uniqueness argument: a chart-`γ(t₀)`-centred
-integral curve with the same value at `t₀` exists by Picard–Lindelöf
-(`Existence.lean`), and by chart-fixed integral-curve uniqueness
-(`Uniqueness.lean`) it agrees with the original lift on a neighbourhood.
-The full bridge composes these steps.
-
-## What is delivered here
-
-* `chartPushLift_fst_eq` / `chartPushLift_fst_eq_chartLocalCurve` — the
-  base-component decomposition of the chart-pushed lift.
-* `chartPushVF_self` — the chart-pushed VF reduces to the chart-fixed
-  VF at the base time.
-* `exists_chartCenteredLift_at` — a chart-centred integral curve exists
-  at any base time, by time-shifted Picard–Lindelöf.
-* `hasDerivAt_chartLocalCurve_of_chartCentered` — the first-derivative
-  clause of `HasGeodesicEquationAt`, established unconditionally in the
-  chart-centred case.
-* `eventually_hasDerivAt_chartLocalCurve_of_chartCentered` — the
-  eventually-clause of `HasGeodesicEquationAt`.
-* `hasGeodesicEquationAt_of_chartCentered_of_phase_identity` — the
-  conditional bridge: from the autonomous phase-space identity and a
-  chart-`γ(t₀)`-centred lift, obtain `HasGeodesicEquationAt`.
-* `chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered` — the
-  autonomous phase-space identity discharged unconditionally for a
-  chart-`γ(t₀)`-centred lift, by composing
-  `chartPushVF_eq_chartPhaseVF_at` with chart-source continuity at
-  `t₀`.
-* `hasGeodesicEquationAt_of_chartCentered` — the **unconditional**
-  chart-centred bridge: from a chart-`γ(t₀)`-centred lift alone, obtain
-  `HasGeodesicEquationAt`.
-* `hasGeodesicEquationAt_of_exists_chartCentered_lift` — the existence
-  packaging of the chart-centred bridge.
-* `IsGeodesicAt.hasGeodesicEquationAt_chartCentered` — the
-  `IsGeodesicAt` form of the chart-centred bridge, applicable when the
-  witness chart basepoint coincides with `γ(t₀)`.
-
-## What is deferred
-
-The fully unconditional `IsGeodesicAt → HasGeodesicEquationAt` bridge
-(without the chart-centring hypothesis on the witness) requires
-reducing an arbitrary `IsGeodesicAt`-witness to a chart-`γ(t₀)`-centred
-one. A new chart-centred lift can be produced by Picard–Lindelöf at
-`⟨γ t₀, (f t₀).snd⟩` with chart basepoint `γ t₀`, but identifying its
-projection with `γ` near `t₀` requires a projection-uniqueness
-argument across distinct chart-fixed vector fields. That reduction is
-not delivered in this file.
--/
 
 noncomputable section
 
@@ -92,7 +18,7 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -100,9 +26,7 @@ open DifferentialGeometry.Integral.Measure
 
 section ChartPushedDecomp
 
-/-- The first component of the chart-pushed lift coincides with the
-chart image of the projection of `f`, evaluated in the chart at the foot
-point of `f t₀`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushLift_fst_eq
     (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
     (chartPushLift (I := I) f t₀ t).1 =
@@ -114,9 +38,7 @@ lemma chartPushLift_fst_eq
   simp only [PartialEquiv.trans_apply, PartialEquiv.prod_coe]
   rfl
 
-/-- Specialisation: when the projection of `f` equals a given curve `γ`,
-the first component of the chart-pushed lift equals
-`extChartAt I (γ t₀) (γ t)`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushLift_fst_eq_chartLocalCurve
     {f : ℝ → TangentBundle I M} {γ : ℝ → M}
     (hproj : ∀ t, (f t).proj = γ t) (t₀ t : ℝ) :
@@ -128,8 +50,7 @@ end ChartPushedDecomp
 
 section ChartPushVFSelf
 
-/-- At the base time `t = t₀`, the chart-pushed phase-space vector field
-equals the chart-fixed geodesic vector field at `f t₀`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushVF_self
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
@@ -148,10 +69,6 @@ section ChartCenteredLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- For any tangent vector `v : TangentSpace I p` and base time `t₀ : ℝ`,
-there exists a lift `f : ℝ → TangentBundle I M` with `f t₀ = ⟨p, v⟩` that
-is a local integral curve of the chart-`p`-fixed geodesic vector field at
-`t = t₀`. Time-shifted Picard–Lindelöf. -/
 lemma exists_chartCenteredLift_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (t₀ : ℝ) :
     ∃ f : ℝ → TangentBundle I M,
@@ -175,10 +92,7 @@ section FirstDerivative
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **First-derivative clause.** If `f` is a chart-`γ(t₀)`-centred
-integral curve of the geodesic VF at `t₀` with `(f t).proj = γ t` for
-all `t`, then `chartLocalCurve γ t₀` admits a `HasDerivAt` at `t₀` with
-derivative the first component of `geodesicVectorFieldChart g (γ t₀) (f t₀)`. -/
+omit [CompleteSpace E] in
 theorem hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -207,9 +121,7 @@ theorem hasDerivAt_chartLocalCurve_of_chartCentered
   rw [hfst_eq] at hfst
   exact hfst
 
-/-- **Eventually first-derivative clause.** On a neighbourhood of `t₀`,
-the chart-local curve has a `HasDerivAt` at every nearby `s`, equal to
-its `deriv` at `s`. -/
+omit [CompleteSpace E] in
 theorem eventually_hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -245,15 +157,7 @@ section ConditionalHeadline
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Conditional chart-centred bridge.** Given the autonomous
-phase-space identity for the chart-pushed lift on a neighbourhood of
-`t₀`, the chart-coordinate second-derivative form of the geodesic
-equation holds at `t₀`.
-
-The hypothesis `hphase` is the chart-coordinate ODE identity in
-autonomous form: the chart-pushed phase-space VF coincides with the
-autonomous chart phase-space VF, evaluated on the chart-pushed lift,
-on a neighbourhood of the base time. -/
+omit [CompleteSpace E] in
 theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -363,11 +267,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Eventually-form of the autonomous phase identity** for a
-chart-`γ(t₀)`-centred integral curve. When `(f t).proj = γ t` for all
-`t` and `f` is a local integral curve of `geodesicVectorFieldChart g (γ t₀)`
-at `t₀`, the chart-pushed phase-space VF and the autonomous chart phase
-VF agree on a neighbourhood of `t₀`. -/
+omit [CompleteSpace E] in
 theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -400,18 +300,7 @@ theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
   exact chartPushVF_eq_chartPhaseVF_at (I := I) g (γ t₀)
     (f := f) (t₀ := t₀) hft₀_proj s hs
 
-/-- **Unconditional chart-centred bridge.** If `f` is a chart-`γ(t₀)`-
-centred lift of `γ` (i.e. `(f t).proj = γ t` for all `t` and `f` is a
-local integral curve of `geodesicVectorFieldChart g (γ t₀)` at `t₀`),
-then `γ` satisfies the chart-coordinate second-derivative form of the
-geodesic equation at `t₀`.
-
-This composes the conditional headline
-`hasGeodesicEquationAt_of_chartCentered_of_phase_identity` with the
-unconditional autonomous phase-space identity
-`chartPushVF_eq_chartPhaseVF_at`: the only remaining hypothesis is the
-chart-centring `(f t).proj = γ t` jointly with the integral-curve
-property at the chart-`γ(t₀)`-fixed VF. -/
+omit [CompleteSpace E] in
 theorem hasGeodesicEquationAt_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -424,15 +313,7 @@ theorem hasGeodesicEquationAt_of_chartCentered
     (chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
       (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf)
 
-/-- **Existence form of the chart-centred bridge.** For any manifold
-curve `γ` admitting a chart-`γ(t₀)`-centred lift at `t₀`, `γ` satisfies
-the chart-coordinate second-derivative form of the geodesic equation at
-`t₀`.
-
-This is the existence-quantified packaging of
-`hasGeodesicEquationAt_of_chartCentered`: the lift `f` is folded into an
-existential. Use this when the chart-centred witness is supplied by an
-upstream Picard–Lindelöf invocation at the basepoint `γ(t₀)`. -/
+omit [CompleteSpace E] in
 theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (h : ∃ f : ℝ → TangentBundle I M,
@@ -444,14 +325,7 @@ theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
   exact hasGeodesicEquationAt_of_chartCentered
     (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf
 
-/-- **`IsGeodesicAt` bridge, chart-centred case.** A local geodesic
-`γ` at `t₀` whose `IsGeodesicAt`-witness has chart basepoint coinciding
-with `γ(t₀)` (the chart-centred case) satisfies the chart-coordinate
-geodesic equation at `t₀`.
-
-The hypothesis `hα : α = γ t₀` selects the chart-centred witnesses: any
-`IsGeodesicAt`-data `(α, f)` with `α = γ t₀` is fed directly into
-`hasGeodesicEquationAt_of_chartCentered`. -/
+omit [CompleteSpace E] in
 theorem IsGeodesicAt.hasGeodesicEquationAt_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀)
@@ -469,15 +343,7 @@ section CrossVFReduction
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Local invariance of `HasGeodesicEquationAt`.** If two curves
-`γ, γ'` agree on a neighbourhood of `t₀` (in particular, `γ t₀ = γ' t₀`),
-then `HasGeodesicEquationAt g γ' t₀` implies `HasGeodesicEquationAt g γ t₀`.
-
-The predicate `HasGeodesicEquationAt` depends on `γ` only through
-`chartLocalCurve γ t₀ s = extChartAt I (γ t₀) (γ s)`. Local equality of
-`γ` and `γ'` near `t₀`, together with equality of the basepoint
-`γ t₀ = γ' t₀`, makes `chartLocalCurve γ t₀ =ᶠ[𝓝 t₀] chartLocalCurve γ' t₀`,
-allowing the derivative clauses to transfer via `HasDerivAt.congr_of_eventuallyEq`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t₀ : ℝ}
     (hγt₀ : γ t₀ = γ' t₀)
@@ -510,14 +376,6 @@ theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
   · rw [hγt₀]
     exact halg
 
-/-- **Construction of a chart-`γ(t₀)`-centred lift agreeing with the
-original witness lift at `t₀`.** From a general `IsGeodesicAt`-witness
-`(α, f)` of `γ` at `t₀`, construct a chart-`γ(t₀)`-centred integral
-curve `f₁` with `f₁ t₀ = f t₀` (same point in `TangentBundle I M`).
-
-Picard–Lindelöf is applied to the chart-`γ(t₀)`-fixed geodesic vector
-field at `f t₀ = ⟨γ t₀, (f t₀).snd⟩`. The latter equality holds because
-`(f t₀).proj = γ t₀` (witness projection identity) and `TotalSpace.eta`. -/
 lemma exists_chartCenteredLift_at_lift_eq
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -530,24 +388,7 @@ lemma exists_chartCenteredLift_at_lift_eq
   refine ⟨f₁, ?_, hf₁⟩
   rw [hf₁_init, ← hproj_t₀]
 
-/-- **`IsGeodesicAt → HasGeodesicEquationAt`, conditional on cross-VF
-projection-uniqueness.** A local geodesic `γ` at `t₀` (witness `(α, f)`)
-admits the chart-coordinate second-derivative form of the geodesic
-equation at `t₀`, provided one can supply a chart-`γ(t₀)`-centred
-integral curve `f₁` whose projection agrees with `γ` on a neighbourhood
-of `t₀`.
-
-The hypothesis `hf₁_init : f₁ t₀ = f t₀` and the chart-centred
-integral-curve property `hf₁` are produced by Picard–Lindelöf via
-`exists_chartCenteredLift_at_lift_eq`. The local agreement
-`γ =ᶠ[𝓝 t₀] projectCurve f₁` is the cross-VF projection-uniqueness; it
-expresses **chart-invariance of the geodesic flow on `TM`** in the form
-suitable for the bridge.
-
-This packaging exposes the cross-VF reduction as a single hypothesis,
-which downstream consumers can discharge from a chart-invariance fact
-on the geodesic spray (the chart-transition law for the `(0, 2)`-tensor
-form of Christoffel symbols at the foot point). -/
+omit [CompleteSpace E] in
 theorem IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (_hγ : IsGeodesicAt (I := I) g γ t₀)

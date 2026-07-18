@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.ChartFrameNorm
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
+
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle
@@ -19,10 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Helper lemmas: pointwise chain rule and operator-norm bound -/
-
-/-- The preimage of `extChartAt.target` under `toEuclidean.symm` equals
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEucl_symm_preimage_target (α : M) :
     ((toEuclidean (E := E)).symm) ⁻¹' (extChartAt I α).target =
       chartTargetEuclid (I := I) (M := M) α := by
@@ -35,8 +33,6 @@ private lemma toEucl_symm_preimage_target (α : M) :
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
     rw [Set.mem_preimage, h_eq]; exact hz_tgt
 
-/-- Smoothness on the chart target of the composite
-`raw chart-frame component ∘ (extChartAt I α).symm ∘ (toEuclidean.symm)`. -/
 private lemma raw_pull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -85,7 +81,7 @@ private lemma raw_pull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
-/-- The chain-rule identity for the iterated derivative on `EuclN` versus on `E`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma iteratedFDeriv_chain_rule
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -140,7 +136,7 @@ private lemma iteratedFDeriv_chain_rule
   rw [h_swap_left, h_swap_right] at h_chain
   exact h_chain
 
-/-- Pointwise operator-norm vs HS-norm-sum bound. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma opNorm_sq_le_basis_sum_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -245,8 +241,7 @@ private lemma opNorm_sq_le_basis_sum_sq
             |B (fun k => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (idx k))| ^ 2) := by ring
 
-/-- The chart-target pullback of the partition-of-unity weight is `ContinuousOn`
-`chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPull_contOn (α : M) :
     ContinuousOn
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -275,8 +270,7 @@ private lemma pouPull_contOn (α : M) :
     exact hz_tgt
   exact hPOU_cont.comp_continuousOn' h_inner
 
-/-- The iterated derivative on EuclN of the pulled raw component, evaluated on
-a basis-index tuple, is `ContinuousOn chartTargetEuclid α`. -/
+omit [BoundarylessManifold I M] in
 private lemma iteratedFDeriv_basisEval_contOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -318,7 +312,7 @@ private lemma iteratedFDeriv_basisEval_contOn
     continuous_eval_const _
   exact h_apply.comp_continuousOn h_iter_contOn
 
-/-- The integrand of the Hilbert-Schmidt norm is `ContinuousOn chartTargetEuclid α`. -/
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_real_contOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -342,7 +336,7 @@ private lemma hsIntegrand_real_contOn
     (I := I) (M := M) g r s T α Idx Jdx j basisIdx
   exact h_pou.mul (h_eval.abs.pow 2)
 
-/-- AEStronglyMeasurable of the real-valued HS integrand, restricted to chartTarget. -/
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_real_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -369,7 +363,7 @@ private lemma hsIntegrand_real_aestronglyMeasurable
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   exact h_cont.aestronglyMeasurable h_meas
 
-/-- AEMeasurable of the ENNReal HS integrand on the restricted measure. -/
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -395,7 +389,7 @@ private lemma hsIntegrand_aemeasurable
     (hsIntegrand_real_aestronglyMeasurable
       (I := I) (M := M) g r s T α Idx Jdx j basisIdx).aemeasurable
 
-/-- Per-(α, IJ, j) integral bound. -/
+omit [BoundarylessManifold I M] in
 private lemma per_alpha_j_integral_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -623,49 +617,7 @@ private lemma per_alpha_j_integral_bound
     _ = _ := h_pull_const
     _ = _ := by rw [h_swap_sum]
 
-/-- Existence of a non-negative absolute constant absorbing the
-chart-by-chart bounds on the metric, its inverse, and the Christoffel
-symbols into a single uniform bound across all charts.
-
-# Blueprint intent
-
-On a closed manifold the chart-atlas partition-of-unity finite support
-`chartAtlasPOU_finset I M` is finite; consequently any quantity that is
-bounded **chart-by-chart** by a constant `C(α)` depending on the chart
-`α` is automatically bounded **uniformly** by
-`C := max α ∈ chartAtlasPOU_finset, C(α)`.
-
-This file packages that idea into a single uniform bound `C ≥ 0`
-governing simultaneously the following chart-dependent quantities at
-all `α` in the finite cover:
-
-1. the chart-frame norm constant in `chart_frame_component_norm_bound`
-   (one-sided control of the chart-frame component seminorm by the
-   intrinsic Sobolev norm);
-2. the Gram-twist constants `c(α), C(α)` of
-   `fibrewise_gram_twist_estimate` (which depend continuously on `α`
-   through the chart representation of `g`, hence attain finite
-   strictly-positive max / min over the compact union of chart-supports);
-3. the `C^{k-1}` Christoffel constant `C_Γ(α)` of
-   `christoffel_Ck_bound_from_metric_Ck1`;
-4. the order-`r + s + k` tensor-bundle transition-matrix bounds entering
-   `nabla_tensor_iterated_Hk_formula`.
-
-The qualitative content: *all* of these chart-dependent constants can be
-replaced by a single absolute constant `C := C(g, r, s, k) ≥ 0`. The
-global Sobolev consequence is the one-sided uniform bound
-
-```
-(tensorPouSobolevNorm g k T).toReal ≤
-    C · (tensorPouSobolevHsNorm g k T).toReal,
-```
-
-valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
-which records that the (chart-aggregated) operator-norm chart-Sobolev
-norm is dominated by the (chart-aggregated) Hilbert-Schmidt chart-Sobolev
-norm with a constant `C ≥ 0` independent of `T` and of the chart used
-to compute each component, having absorbed every chart-by-chart bound
-through the finite-cover supremum. -/
+omit [BoundarylessManifold I M] in
 theorem uniform_chart_bounds_from_compactness
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

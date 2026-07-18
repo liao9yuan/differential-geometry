@@ -7,70 +7,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMO
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-/-!
-# Pointwise bound on the chart-trivialised first covariant derivative by the
-chart-frame scalar components and their chart-coordinate Fréchet derivative
-
-For a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model `I`,
-a chart-centre `α : M`, a fixed smooth tangent vector field `B`, and a smooth
-compactly-supported `(r, s)`-tensor section `T`, this file ships a pointwise
-upper bound for the model-fiber norm of the chart-α-trivialised
-representation of the section
-`covApply cov_RS B T = b ↦ cov_RS T b (B b)`,
-in terms of the chart-coordinate Fréchet derivative and the pointwise values of
-the scalar chart-frame components of `T`.
-
-Concretely, on the chart-α partition-of-unity tsupport, for every smooth
-compactly-supported `(r, s)`-tensor section `T`, the bound takes the form
-
-  `‖tensorRSChartE_section_repr r s α (covApply cov_RS B T) b‖
-      ≤ K * ∑_{Idx, Jdx}
-          (‖fderiv ℝ (tensorChartComponentRaw g r s T α Idx Jdx ∘
-              (extChartAt I α).symm) (extChartAt I α b)‖
-            + |tensorChartComponentRaw g r s T α Idx Jdx b|)`
-
-with `K` depending only on the metric `g`, the chart at `α`, the locality
-hypothesis, the ranks `r`, `s`, and on `B`; in particular `K` is independent
-of `T`.
-
-## Strategy
-
-1. Use the chart-frame agreement `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`
-   to identify `covApply cov_RS B T b` with the chart-frame value
-   `chartTensorRSCovariantDerivative r s g α T.toSection.toFun B.toFun b` on
-   the chart-α Levi-Civita good set (which contains the POU tsupport under
-   `[I.Boundaryless]`).
-2. Pass through the forward fiber op-norm bound
-   `tensorRSChartFiberToModel_opNorm_isBounded_on_compact` to bound the
-   model-fiber norm of `tensorRSChartE_section_repr r s α (covApply ...) b`
-   by a constant times the fiber norm of `covApply ... b`.
-3. Apply the chart-frame op-norm bound
-   `chartTensorRSCovariantDerivative_opNorm_le_pou_tsupport` to bound the
-   fiber norm of `chartTensorRSCovariantDerivative r s g α T B b` by
-
-       `C * MX(B, b) * (‖fderiv (repr T ∘ symm)(extChartAt b)‖ * ‖B b‖ + ‖T b‖)`.
-
-4. `‖B b‖` and `MX(B, b)` are bounded uniformly over the POU tsupport because
-   `B` is smooth and the POU tsupport is compact.
-5. Decompose `repr T = Σ_{Idx, Jdx} comp(repr T) • basis-elt`. Linearity of
-   `fderiv` gives
-
-       `fderiv (repr T ∘ symm) = Σ_{Idx, Jdx} fderiv (comp(repr T) ∘ symm) ⊗ basis-elt`.
-
-   The bound on its operator norm by `Σ_{Idx, Jdx} ‖fderiv(scalar comp ∘ symm)‖
-   * ‖basis-elt‖` follows from `norm_sum_le` and `ContinuousLinearMap.smulRight`.
-6. The reverse fiber bound `tensorRSSpace_norm_le_chartRepr_norm_on_compact`
-   bounds `‖T b‖` by a constant times `‖repr T b‖`, which is then bounded by
-   `Σ_{Idx, Jdx} |comp(repr T b)| * ‖basis-elt‖` via the basis recovery
-   `tensorRSModel_eq_sum_basis`. Each `comp(repr T b)` equals
-   `tensorChartComponentRaw g r s T α Idx Jdx b` by definition.
-7. Combine and absorb all uniform constants into a single `K`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -95,10 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The model-fiber norm of the chart-α-trivialised representation of a smooth
-compactly-supported `(r, s)`-tensor section at `b` is bounded by the sum of the
-absolute values of its chart-frame components, times the basis-element norm
-constant. -/
 lemma reprNorm_le_sum_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -137,8 +72,7 @@ lemma reprNorm_le_sum_components
     (tensorChartBasisElement_norm_le (E := E) r s Idx Jdx)
     (abs_nonneg _)
 
-/-- Each chart-frame scalar component pulled by `(extChartAt I α).symm` is
-Fréchet-differentiable at the chart-coord image of any chart-source point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chart_pulled_component_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -185,12 +119,7 @@ lemma chart_pulled_component_differentiableAt
     hcdAt.differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open_target.mem_nhds hb_target)
 
-/-- The chart-coordinate Fréchet derivative of the chart-pulled
-chart-α-trivialised representation of `T.toSection` at the chart-coord point
-`extChartAt I α b` has operator norm bounded by
-
-  `Σ_{Idx, Jdx} ‖fderiv ℝ (component_Idx_Jdx ∘ symm) (extChartAt b)‖
-                  * ‖basis-elt(Idx, Jdx)‖`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma fderiv_repr_opNorm_le_sum_fderiv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}

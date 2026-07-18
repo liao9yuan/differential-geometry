@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution CoordinateIdentities
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +25,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -51,8 +51,8 @@ theorem coordNab2Reg
         mdiffAt := coordNablaRegOn (I := I) S x₀ }
   · exact coordNab2On (I := I) S x₀
 
-/-- Symmetry of the canonical coordinate inverse throughout the coordinate
-frame domain. -/
+
+
 theorem coordInvSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -80,8 +80,8 @@ theorem coordInvSymmOn
         coordInv (I := I) S x₀ t x a b)
       hinvAt i j
 
-/-- Symmetry of canonical Ricci components throughout the coordinate-frame
-domain. -/
+
+
 theorem coordRicSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -110,8 +110,8 @@ theorem coordRicSymmOn
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt,
     IsLocalFrameOn.toBasisAt_coe] using hsym
 
-/-- Pointwise tensor-level symmetry of the canonical `∇ Ric` in the Ricci
-slots. -/
+
+
 theorem canNablaSymmAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -176,8 +176,8 @@ theorem canNablaSymmAt
   rw [hleft, hright]
   exact hsymm
 
-/-- Symmetry of the canonical coordinate `∇ Ric` components in the two Ricci
-slots. -/
+
+
 theorem coordNablaSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -190,13 +190,13 @@ theorem coordNablaSymmOn
   simpa [nablaRicComp, frame] using
     canNablaSymmAt (I := I) S t x (frame a x) (frame i x) (frame j x)
 
-/-- Fixed-time canonical second-Bianchi and trace data for the metric-derived
-curvature/Ricci/scalar tensors in a coordinate frame.
 
-This is the remaining static geometric producer below the coordinate
-contracted-Bianchi assembly.  It should ultimately be proved from the
-Levi-Civita second Bianchi identity for `S.base.rm04`, the canonical Ricci
-trace of `S.ricci`, and the scalar trace definition. -/
+
+
+
+
+
+
 theorem canBianchiAt
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -239,12 +239,12 @@ theorem canBianchiAt
     DifferentialGeometry.Integral.Connection.metricCov, DifferentialGeometry.Integral.Connection.metricRm04, DifferentialGeometry.Integral.Connection.metricRicci,
     DifferentialGeometry.Integral.Connection.metricScalarAt, basis, hframe, gInvAt] using hmetric
 
-/-- Coordinate-frame contracted Bianchi trace for the canonical `∇ Ric`.
 
-This is the remaining first-order trace producer below the local differentiated
-contracted-Bianchi assembly.  It should be proved from the invariant contracted
-second Bianchi identity, the canonical Ricci/scalar trace realizations, and
-metric compatibility in the coordinate basis. -/
+
+
+
+
+
 theorem coordBianchiTr
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -290,13 +290,13 @@ theorem coordBianchiTr
   simpa [basis, gInvAt, nablaRicT, nablaRicComp, hframe,
     IsLocalFrameOn.toBasisAt_coe] using htraces
 
-/-- Coordinate-domain differentiated contracted Bianchi for the canonical
-coordinate-frame `∇² Ric`.
 
-This is the trace-level producer needed by the local Lemma 6.3 commutator
-package.  It should be proved by differentiating the local contracted Bianchi
-identity with the checked coordinate inputs `coordInvCovZeroOn`,
-`coordNab2Reg`, and the coordinate-frame contracted-Bianchi realization. -/
+
+
+
+
+
+
 theorem coordBianchiOn
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -341,12 +341,12 @@ theorem coordBianchiOn
           (coordNab2On (I := I) S x₀) (t : Real) x hx d a i j)
       htrace
 
-/-- Fixed-time scalar-Hessian trace symmetry for the canonical coordinate
-trace of `∇² Ric`.
 
-This is the static bridge still missing below the local Lemma 6.3 commutator:
-identify `tr_g(∇² Ric)` with the Levi-Civita Hessian of `S.scalar t`, then
-apply scalar Hessian symmetry. -/
+
+
+
+
+
 theorem canHessAt
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -453,11 +453,11 @@ theorem canHessAt
           refine Finset.sum_congr rfl fun l _ => ?_
           rw [hcan j i k l]
 
-/-- Coordinate-domain scalar-Hessian symmetry for the trace represented by the
-canonical coordinate-frame `∇² Ric`.
 
-Mathematically this is symmetry of the scalar Hessian of `R`, after identifying
-the metric trace of `∇² Ric` with `∇² R` by metric compatibility. -/
+
+
+
+
 theorem coordHessOn
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -474,11 +474,11 @@ theorem coordHessOn
   subst x
   exact canHessAt (I := I) S x₀ (t : Real) i j
 
-/-- Canonical centered coordinate-frame contracted commutator package.
 
-This is the remaining static Lemma 6.3 producer: it should be obtained from
-the local contracted second Bianchi identity, scalar Hessian symmetry, and the
-`(0,2)` tensor Ricci identity for the canonical second Ricci derivative. -/
+
+
+
+
 theorem coordCommAt
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -627,18 +627,15 @@ theorem coordCommAt
           x
       simpa [SolutionOn.family, SolutionFamily.connection, SolutionFamily.rm13,
         SolutionFamily.rm04, metricCov] using h
-    have hcovReg : ConnectionLocallySmoothOn (I := I) S := by
-      intro t
-      exact connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
     have hPair :=
       rm04PairSymm_regular (I := I) S hS S.base.rm13 S.base.rm04
-        hcovReg hRm13 hLower
+        hRm13 hLower
     have hOutput :=
       rm04OutputSkew_regular (I := I) S hS S.base.rm13 S.base.rm04
-        hcovReg hRm13 hLower
+        hRm13 hLower
     have hFirst :=
       rm04FirstBianchi_regular (I := I) S hS S.base.rm13 S.base.rm04
-        hcovReg hRm13 hLower
+        hRm13 hLower
     have hRic :
         ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
           x ∈ ({x₀} : Set M) -> ∀ i j : CoordinateIdx (𝕜 := Real) E,
@@ -662,11 +659,11 @@ theorem coordCommAt
     ricciCommLoc (I := I) S S.base.rm04 gInv frame ({x₀} : Set M)
       nabla2Ric hbianchi hHess hsecond
 
-/-- Coordinate Lemma 6.3 core with theorem-level Christoffel evolution and
-pointwise coordinate inputs.
 
-This is the consumer that the canonical coordinate route should call.  The
-legacy metric-frame package appears only in compatibility wrappers below. -/
+
+
+
+
 theorem ricciEvolCore
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -716,9 +713,6 @@ theorem ricciEvolCore
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -738,16 +732,16 @@ theorem ricciEvolCore
     (ricciVarCore
       (I := I) S hS gInv nablaRic nabla2Ric Rm13 x₀ hGamma
       hginv_mdiff hN_mdiff hginv_zero hnabla2_at
-      hRicTrace hRm hcov hcurv hmix)
+      hRicTrace hRm hcurv hmix)
     hcomm
 
-/-- Local coordinate-frame Lemma 6.3 producer.
 
-This is the current closed coordinate version of Lemma 6.3: it differentiates
-the Christoffel Ricci trace formula, substitutes the Ricci-flow Christoffel
-variation and `nabla A = nabla^2 Ric`, then applies the contracted commutator
-reduction.  The result is local at the coordinate center because the coordinate
-frame is only a local frame. -/
+
+
+
+
+
+
 theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -779,9 +773,6 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -799,11 +790,11 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
     nabla2Ric
     (ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
       (I := I) S hS gInv gInvDt nablaRic nabla2Ric Rm13 x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcov hcurv hmix)
+      hnablaReg hRicTrace hRm hcurv hmix)
     hcomm
 
-/-- LaTeX Lemma 6.3, `lem:evol-ricci`, in the local coordinate-frame display
-form at a coordinate center. -/
+
+
 theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -835,9 +826,6 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -862,17 +850,17 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
   have h :=
     ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcov hcurv hmix hcomm
+      hnablaReg hRicTrace hRm hcurv hmix hcomm
   have hAt := h t x₀ (by simp) i j
   simpa [ricciEvolutionRHSInFrame] using hAt
 
-/-- Canonical centered coordinate Ricci evolution produced from a Ricci-flow
-solution.
 
-This is the theorem-level producer consumed by `DifferentialGeometry.PDE.RicciFlow.Regularity`.  The
-remaining proof frontier is to derive the centered Christoffel mixed derivative
-and contracted commutator inputs from the canonical metric/Ricci data, then
-apply `evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators`. -/
+
+
+
+
+
+
 theorem coordRicciEvol
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -974,7 +962,6 @@ theorem coordRicciEvol
       hGamma hginv_mdiff hN_mdiff hginv_zero hnabla2_at
       (ricciTraceOfSol (I := I) S)
       (rm13OfSol (I := I) S)
-      (connSmoothOfSol (I := I) S hS)
       (connCurvOfSol (I := I) S hS x₀)
       hmix hcomm
   have hAt := hEvol t x₀ (by simp) i j

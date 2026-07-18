@@ -25,19 +25,19 @@ import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
-/-!
-# Tensoriality lemmas for pointwise tensor evaluation
 
-This file records the reusable tensoriality facts that follow immediately from
-the current `RSTensor` representation.
 
-The clean scalar-slot statement is for `(0,s)` tensors: evaluating a fixed
-fiber tensor at a tuple of vector-field values is tensorial in each vector-field
-slot.  For `(r,s)` tensors, the current model is
-`Tensor0SSpace r I x ->L Tensor0SSpace s I x`, so the natural tensoriality
-statement is in a whole `(0,r)` input tensor field, plus the output `(0,s)`
-slot statements after applying such an input.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -63,9 +63,9 @@ variable {V : M -> Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
   [∀ x, TopologicalSpace (V x)] [FiberBundle F V]
 variable [AddCommGroup A] [Module K A]
 
-/-- A fixed fiberwise linear map, evaluated on the value of a section at `x`, is tensorial.
 
-This is the small algebraic core behind the tensor-evaluation lemmas below. -/
+
+
 theorem tensorialAt_apply_linearMap {x : M} (L : V x →ₗ[K] A) :
     TensorialAt I F (fun σ : (p : M) -> V p => L (σ x)) x := by
   refine ⟨?_, ?_⟩
@@ -80,11 +80,11 @@ end LinearMap
 
 namespace Tensor0SSpace
 
-/-- Evaluating a fixed `(0,s)` tensor is tensorial in each vector-field slot.
 
-The other slots are given as arbitrary section representatives; no smoothness
-assumptions are needed in the proof because tensoriality only uses the
-multilinearity of the fixed fiber tensor at `x`. -/
+
+
+
+
 theorem tensorialAt_evalSlot {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (i : Fin s)
     (slots : Fin s -> (p : M) -> TangentSpace I p) :
@@ -111,10 +111,10 @@ end Tensor0SSpace
 
 namespace TensorRSSpace
 
-/-- A fixed `(r,s)` tensor is tensorial in its whole `(0,r)` input tensor.
 
-This is the natural first statement for the current representation
-`TensorRSSpace r s I x = Tensor0SSpace r I x ->L Tensor0SSpace s I x`. -/
+
+
+
 theorem tensorialAt_applyInput {r s : ℕ} {x : M}
     (T : TensorRSSpace r s I x) :
     TensorialAt I (Tensor0SModel r K E)
@@ -124,8 +124,8 @@ theorem tensorialAt_applyInput {r s : ℕ} {x : M}
     (A := Tensor0SSpace s I x)
     (T : Tensor0SSpace r I x →ₗ[K] Tensor0SSpace s I x)
 
-/-- A fixed `(r,s)` tensor, after applying a fixed `(0,r)` input tensor, is
-tensorial in each output vector-field slot. -/
+
+
 theorem tensorialAt_evalOutputSlot {r s : ℕ} {x : M}
     (T : TensorRSSpace r s I x) (input : Tensor0SSpace r I x) (i : Fin s)
     (slots : Fin s -> (p : M) -> TangentSpace I p) :
@@ -134,8 +134,8 @@ theorem tensorialAt_evalOutputSlot {r s : ℕ} {x : M}
         (T input) (Function.update (fun j => slots j x) i (X x))) x :=
   Tensor0SSpace.tensorialAt_evalSlot (I := I) (A := T input) i slots
 
-/-- A fixed `(r,s)` tensor, evaluated on fixed output vector slots, is tensorial
-in its whole `(0,r)` input tensor-field slot. -/
+
+
 theorem tensorialAt_applyInput_evalOutput {r s : ℕ} {x : M}
     (T : TensorRSSpace r s I x)
     (slots : Fin s -> (p : M) -> TangentSpace I p) :

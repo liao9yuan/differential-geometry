@@ -13,27 +13,27 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Curvature slot convention checklist
 
-This file centralizes the lightweight convention checks for curvature slots.
-It is deliberately downstream from the tensor component layer: tensor-level
-component conventions live in `DifferentialGeometry.Tensor.RSTensor.Convention`, while
-curvature-specific names such as `Rm13`, `Rm04`, Ricci, and the 3D standard
-component convention live here.
 
-Checklist:
 
-* Ricci from `Rm13` is `contract_trace 0 2`, i.e. first upper with first lower.
-* The canonical user-facing lowered curvature convention is standard slot
-  order:
-  `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.
-* The explicit output-first compatibility evaluator is `tensor04OutAt`.
-* Lowering the intrinsic Ricci trace gives the standard lowered formula
-  `Ric_ij = sum_{k,l} gInv k l * Rm04(e_k,e_i,e_j,e_l)`.
-* The 3D algebra adapter uses
-  `standardRmCompAt i j k l = rm04CompAt i j k l`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -51,7 +51,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {x : M}
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- Checklist item: Ricci is the first-upper/first-lower trace of `Rm13`. -/
+
 @[simp]
 theorem ricciFromRm13At_eq_contract_trace
     (Rm13 : Tensor13At (I := I) (M := M) x) :
@@ -60,7 +60,7 @@ theorem ricciFromRm13At_eq_contract_trace
         (scalarOne0S (I := I) x) := by
   rfl
 
-/-- Checklist item: `Rm04` lowers the output slot of `Rm13`. -/
+
 theorem rm04LowersRm13At_convention
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13At (I := I) (M := M) x)
@@ -72,7 +72,7 @@ theorem rm04LowersRm13At_convention
         (vec3 X Y Z) :=
   h X Y Z W
 
-/-- Checklist item: the standard slot evaluator is direct bundled evaluation. -/
+
 theorem tensor04StdAt_convention
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (X Y Z W : TangentSpace I x) :
@@ -80,8 +80,8 @@ theorem tensor04StdAt_convention
       Rm04 (vec4 X Y Z W) := by
   rfl
 
-/-- Checklist item: lowering the intrinsic `Rm13` Ricci trace gives the
-standard `Rm04` component orientation. -/
+
+
 theorem ricciFromRm13At_rm04_first_trace_convention
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -111,7 +111,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Checklist item: realized bundled `Rm04` uses standard slots. -/
+
 theorem rm04RealizesConnection_convention
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -122,8 +122,8 @@ theorem rm04RealizesConnection_convention
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x) :=
   h X Y Z W x
 
-/-- Checklist item: the standard slot view of a realized `Rm04` is direct
-bundled evaluation and satisfies `Rm04Std(X,Y,Z,W) = <R(X,Y)Z,W>`. -/
+
+
 theorem rm04StdRealizesConnection_convention
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -149,8 +149,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- Checklist item: the 3D standard algebra convention directly reads the
-standard bundled lowered Riemann slots. -/
+
+
 @[simp]
 theorem standardRmCompAt_slot_convention
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))

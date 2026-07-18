@@ -2,60 +2,12 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 
-/-!
-# The intrinsic chart piece of the tensor covariant derivative on a raw component
-
-For a smooth, compactly-supported `(r, s)`-tensor section `S` over a closed
-Riemannian manifold `(M, g)` and a chart center `α : M`, the chart-coordinate
-covariant derivative `chartTensorRSCovariantDerivative r s g α S.toSection X b`
-decomposes (see `ChartTensorRSCovariantDerivative.lean`) as
-
-```
-tensorRSIntrinsicChartCLM r s α S.toSection b (X b)
-  + ∑ₖ chartTensorRSInputSlotCorrection …
-  − ∑ₗ chartTensorRSOutputSlotCorrection …
-```
-
-This file isolates the **intrinsic (Fréchet-derivative) piece**
-`tensorRSIntrinsicChartCLM` and computes its raw chart-scalar component.
-
-The raw chart-scalar component of an `(r, s)`-tensor section is the
-partition-of-unity-unweighted function
-`tensorChartComponentRaw g r s S α Idx Jdx : M → ℝ`, the `(Idx, Jdx)`-entry of
-the chart-`α`-trivialised model-fibre representation. The headline result of
-this file says: projecting the intrinsic chart piece — evaluated along the
-`k`-th chart-coordinate basis vector field — to a raw chart-scalar component
-yields exactly the `k`-th chart-Euclidean partial derivative `euclidPartial k`
-of that raw component (pushed forward to the Euclidean chart target). In other
-words, modulo the Christoffel slot-correction terms (handled elsewhere), the
-chart-coordinate covariant derivative of a tensor component is the plain chart
-partial derivative.
-
-The whole development is phrased on the **raw** component
-`tensorChartComponentRaw` (and its push-forward `chartPushedRaw`); the
-partition-of-unity weight does not appear.
-
-## Main results
-
-* `tensorRSChartE_section_repr_eq_tensorTrivProj` — the chart-`α`-trivialised
-  representation of `S.toSection` coincides with the trivialisation projection
-  `tensorTrivProj g r s S α`.
-* `tensorRSIntrinsicChartCLM_proj_eq_fderiv_component` — the raw-component
-  projection of the trivialised intrinsic chart piece equals the Fréchet
-  derivative of the chart-pulled-back raw component.
-* `tensorRSIntrinsicChartCLM_component_eq_euclidPartial` — the headline: the
-  raw-component projection of the intrinsic chart piece along the `k`-th
-  chart-coordinate basis vector equals `euclidPartial k` of the Euclidean
-  push-forward of the raw component.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -78,10 +30,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart-`α`-trivialised model-fibre representation of the underlying
-section of a `SmoothCcTensor` coincides with the trivialisation projection
-`tensorTrivProj g r s S α`. Both are
-`(trivializationAt …).continuousLinearMapAt ℝ x (S.toSection x)`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorRSChartE_section_repr_eq_tensorTrivProj
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -89,14 +38,6 @@ theorem tensorRSChartE_section_repr_eq_tensorTrivProj
       tensorTrivProj (I := I) (M := M) g r s S α :=
   rfl
 
-/-- **Raw-component projection of the intrinsic chart piece.** For `b` in the
-chart source at `α` whose chart image lies in the interior of the chart target,
-and any tangent vector `v`, projecting the trivialised intrinsic chart
-Fréchet-derivative value of `S.toSection` along `v` to the `(Idx, Jdx)`-raw
-component equals the Fréchet derivative of the chart-pulled-back raw scalar
-component `tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm`,
-evaluated at `extChartAt I α b` in the chart-trivialisation direction
-`trivToE α b v`. -/
 theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -133,15 +74,7 @@ theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
   rw [tensorChartComponentRaw_partial_decomp (I := I) (M := M) g r s α S
     hb_chart hb_int Idx Jdx (trivToE (I := I) α b v)]
 
-/-- **The intrinsic chart piece is the chart partial derivative.** Let
-`y` lie in the chart-Euclidean target `chartTargetEuclid α`, and set
-`b := (extChartAt I α).symm (toEuclidean.symm y)`. Then the raw-component
-projection of the intrinsic chart Fréchet-derivative piece of `S.toSection`,
-evaluated along the `k`-th chart-coordinate basis vector field
-`chartBasisVecFiber α k`, equals the `k`-th chart-Euclidean partial derivative
-`euclidPartial k` of the Euclidean push-forward
-`chartPushedRaw I α (tensorChartComponentRaw g r s S α Idx Jdx)` of the raw
-chart-scalar component, evaluated at `y`. -/
+omit [CompleteSpace E] in
 theorem tensorRSIntrinsicChartCLM_component_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

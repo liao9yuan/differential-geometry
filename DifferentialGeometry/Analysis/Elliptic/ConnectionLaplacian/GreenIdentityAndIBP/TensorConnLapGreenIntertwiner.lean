@@ -1,28 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGreenDivergenceIdentityAnySection
 
-/-!
-# Metric-lowering intertwiner and the connection-Laplacian Green identity at general covariant rank
-
-This file generalises the rank-`(0, s)` metric-lowering intertwiner from the
-fixed numeral cases `(0, 2)`, `(0, 3)` to arbitrary covariant rank `s`, by
-carrying explicit natural-number type-transports along `Nat.zero_add s` at every
-site where the original proofs relied on the definitional reduction `0 + s ≡ s`.
-Feeding this intertwiner into the per-section divergence identity yields the
-unconditional rank-`(0, s)` connection-Laplacian Green identity.
-
-## Main results
-
-* `loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen` — the rank-`0` metric-lowering
-  intertwiner at general covariant rank `s`.
-* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen` — the unconditional
-  rank-`(0, s)` connection-Laplacian Green identity for compactly-supported
-  smooth tensors.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -41,7 +22,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open Tensor0SNabla TensorRSNabla TensorMetricLowering
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,10 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Naturality of the `(0, n)`-tensor covariant derivative under a natural-number
-type re-identification: if `h : a = b`, then the covariant derivative at valence
-`a` of the `h`-transport of a valence-`b` section is the `h`-transport of the
-covariant derivative at valence `b`. -/
 lemma tensor0SCovariantDerivative_natCast_transport
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -70,8 +47,7 @@ lemma tensor0SCovariantDerivative_natCast_transport
   subst h
   rfl
 
-/-- The model coercion of a natural-number type-transport of a `(0, b)`-tensor
-fibre element equals the `domDomCongr` reindexing of its model coercion. -/
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_natCast_transport
     {a b : ℕ} (h : a = b) {x : M} (T : Tensor0SSpace b I x) :
     Tensor0SSpace.toModel
@@ -82,8 +58,6 @@ lemma toModel_natCast_transport
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-/-- The lifted section value is the natural-number type-transport of the genuine
-section evaluated at the unit `(0, 0)`-tensor. -/
 lemma liftedTensorSection_zero_eq_natCast_unit
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -109,11 +83,6 @@ lemma liftedTensorSection_zero_eq_natCast_unit
   congr 1
   exact (Fin.ext (by simp)).symm
 
-/-- **The rank-`0` metric-lowering intertwiner at general covariant rank `s`.**
-This generalises the committed `(0, 2)` and `(0, 3)` witnesses to arbitrary `s`.
-The single `s`-dependence in the original proofs was the definitional reduction
-`0 + s ≡ s`, only valid for numerals; here every such site carries the explicit
-natural-number type-transport along `Nat.zero_add s`. -/
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -183,9 +152,6 @@ lemma loweringIntertwiner_gen (g : SmoothRiemannianMetric I M) (s : ℕ) :
     LoweringIntertwiner (I := I) (M := M) g s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen (I := I) (M := M) g s S x v
 
-/-- **The unconditional rank-`(0, s)` connection-Laplacian Green identity** at
-arbitrary covariant rank `s`. The intertwiner witness is supplied by
-`loweringIntertwiner_gen`. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)

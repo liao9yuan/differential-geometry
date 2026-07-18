@@ -1,37 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 
-/-!
-# The partial-trace covariant-derivative commutation and the unconditional order-`2` estimate
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`, this
-file closes the final reconciliation of the order-`2` covariant Gårding route: the
-covariant-derivative **commutation** through the intrinsic partial metric trace of the Hessian
-family, and — assembling it with the committed off-diagonal curvature core — the unconditional
-order-`2` covariant Gårding estimate
-```
-‖∇²T₀‖²_{L²} ≤ C · (‖Δ_∇ T₀‖²_{L²} + ‖T₀‖²_{L²}).
-```
-
-## Layout
-
-* `metricTrace2_add` / `metricTrace2_sub` — additivity of the intrinsic partial metric trace in the
-  traced section argument, through the diagonal frame sum.
-
-The remaining development connects the committed `metricTrace2` reading of both pieces of the
-canonical commutator defect to the genuine off-diagonal Riemann curvature, and feeds the resulting
-pointwise fibre bound through the committed endpoint bridge `hpt_to_unconditional_bound`.
-
-## Conventions
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` for the rough Laplacian. The covariant gradient
-`covGrad g 0 s` raises the tensor rank from `(0, s)` to `(0, s + 1)`. All fibre norms are the
-intrinsic Riemannian fibre norm `riemannianFiberNormSq`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -63,16 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Additivity of the second covariant derivative in the tensor argument.** For smooth tangent
-fields `X, Y` and two raw `(r, s)`-tensor sections `T, T'` whose total-space liftings and
-once-covariantly-differentiated `covApply` liftings are smooth, the second covariant derivative is
-additive in the tensor argument:
-```
-∇²_{X, Y}(T + T') (x) = ∇²_{X, Y} T (x) + ∇²_{X, Y} T' (x).
-```
-Both halves of the Hessian — the iterated covariant term `cov(∇_Y ·)(X)` and the
-Christoffel-correction term `cov(·)(∇_X Y)` — are additive in the section, by
-`IsCovariantDerivativeOn.add` applied to the smooth summands. -/
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorSecondCovDeriv_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {T T' : Π b : M, TensorRSSpace r s I b} {x : M}
@@ -134,15 +97,7 @@ theorem tensorSecondCovDeriv_add
   simp only [ContinuousLinearMap.add_apply]
   abel
 
-/-- **Additivity of the partial metric trace in the traced section argument.** With
-`H := tensorSecondCovDeriv g r s` and two smooth-enough raw `(r, s)`-tensor sections `T, T'`,
-```
-metricTrace2 g r s (tensorSecondCovDeriv g r s) (T + T') x
-  = metricTrace2 g r s (tensorSecondCovDeriv g r s) T x
-    + metricTrace2 g r s (tensorSecondCovDeriv g r s) T' x.
-```
-Immediate from `tensorSecondCovDeriv_add` summed over the orthonormal frame (the frame fields are
-smooth). -/
+omit [CompactSpace M] [I.Boundaryless] in
 theorem metricTrace2_secondCovDeriv_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T T' : Π b : M, TensorRSSpace r s I b} (x : M)

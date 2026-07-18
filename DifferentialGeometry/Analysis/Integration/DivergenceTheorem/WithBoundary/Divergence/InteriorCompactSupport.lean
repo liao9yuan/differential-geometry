@@ -21,67 +21,6 @@ import Mathlib.Topology.Algebra.Support
 import Mathlib.Topology.Compactness.LocallyFinite
 import Mathlib.Topology.Compactness.LocallyCompact
 
-/-!
-# Divergence theorem for sections supported in the manifold interior
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` whose model `I` may
-carry a non-trivial boundary, and a smooth tangent section `X` whose
-topological support sits inside the manifold interior `I.interior M`, the
-integral of the global with-boundary divergence
-`divergence_g_with_boundary g X` against the canonical Riemannian volume
-measure vanishes:
-$$\int_M \operatorname{div}_g^{(\partial)}(X)\,d\mu_g = 0.$$
-
-Two variants are proved:
-
-1. `integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support` —
-   on a closed (compact) manifold, requiring only that `tsupport X ⊆
-   I.interior M`.
-2. `integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`
-   — on a σ-compact Hausdorff manifold, replacing `[CompactSpace M]` with the
-   explicit `HasCompactSupport X` hypothesis (still requiring `tsupport X ⊆
-   I.interior M`).
-
-## Strategy
-
-Both proofs follow the same scheme as the boundaryless divergence theorems
-(`Closed.lean` and `Proper.lean`), with one key technical adjustment: the
-chart-local with-boundary integration-by-parts identity `chart_local_ibp_within`
-requires the test function to be supported in `I.interior M` in addition to the
-chart base set. The canonical chart-atlas partition-of-unity functions
-`chartAtlasPOU α` are not, in general, supported inside the manifold interior,
-so we cannot directly use them as test functions.
-
-The fix is a smooth cutoff `χ : M → ℝ` with `χ ≡ 1` on a neighborhood of
-`tsupport X`, with `tsupport χ ⊆ I.interior M`, with compact support, and with
-`0 ≤ χ ≤ 1`. The cutoff is constructed from the smooth Urysohn lemma
-`exists_contMDiffMap_one_nhds_of_subset_interior`. Multiplying the test
-function `ρ_α` by `χ` gives a new test function `χ · ρ_α` whose topological
-support is contained in `tsupport ρ_α ∩ tsupport χ`, hence inside both the
-chart base set and `I.interior M`. After applying chart-local integration by
-parts with this enriched test function, the resulting tangent-section action
-integrand `tangentSectionAction X (χ · ρ_α)` agrees on `tsupport X` with
-`tangentSectionAction X ρ_α` (because `χ ≡ 1` there) and vanishes off
-`tsupport X` (because `X` does), so the partition-of-unity completeness
-argument that `∑_α ρ_α = 1` annihilates the total tangent-section action.
-
-## Main results
-
-* `support_divergence_g_with_boundary_subset_of_interior_support` — locality
-  of the with-boundary divergence: for `tsupport X ⊆ I.interior M`,
-  `support (divergence_g_with_boundary g X) ⊆ tsupport X`.
-* `tsupport_divergence_g_with_boundary_subset_of_interior_support` —
-  topological-support analogue.
-* `hasCompactSupport_divergence_g_with_boundary` — propagation of compact
-  support of `X` (with interior-support precondition) to compact support of
-  `divergence_g_with_boundary g X`.
-* `integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support`
-  — divergence theorem on a closed Riemannian manifold for sections
-  supported in the interior.
-* `integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`
-  — divergence theorem on a σ-compact Hausdorff Riemannian manifold for
-  compactly-supported sections supported in the interior.
--/
 
 noncomputable section
 
@@ -94,7 +33,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -105,14 +44,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- `I.interior M` is open in `M`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-/-- If `X` vanishes on a neighborhood of an `x` lying in some chart source,
-then the chart-local with-boundary divergence at any chart whose source
-contains `x` vanishes at `x`. -/
 private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -190,8 +126,6 @@ private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     exact hsum_zero i]
   rw [zero_div]
 
-/-- If `X` vanishes on a neighborhood of `x`, then
-`divergence_g_with_boundary g X x = 0`. -/
 lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -201,19 +135,12 @@ lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
   exact localDivergenceWithin_zero_of_eventuallyEq_zero (I := I) g x X
     (mem_chart_source H x) hev
 
-set_option linter.unusedVariables false in
-/-- The support of `divergence_g_with_boundary g X` is contained in the
-topological support of `X`, provided `tsupport X ⊆ I.interior M`.
 
-The interior-support precondition is retained for parallelism with downstream
-theorems; it is not strictly needed for this locality result, since the
-underlying lemma `divergence_g_with_boundary_zero_of_eventuallyEq_zero` works
-at every point. -/
 lemma support_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (hX_int : tsupport X ⊆ I.interior M) :
+    (_hX_int : tsupport X ⊆ I.interior M) :
     Function.support (divergence_g_with_boundary (I := I) g X) ⊆ tsupport X := by
   intro x hx
   by_contra hxnotin
@@ -226,8 +153,6 @@ lemma support_divergence_g_with_boundary_subset_of_interior_support
     exact hy (subset_tsupport _ hyS)
   exact hx (divergence_g_with_boundary_zero_of_eventuallyEq_zero (I := I) g X hev)
 
-/-- The topological support of `divergence_g_with_boundary g X` is contained
-in the topological support of `X`, provided `tsupport X ⊆ I.interior M`. -/
 lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -238,8 +163,6 @@ lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int) (isClosed_tsupport _)
 
-/-- If `X` has compact support and `tsupport X ⊆ I.interior M`, so does
-`divergence_g_with_boundary g X`. -/
 lemma hasCompactSupport_divergence_g_with_boundary
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -250,8 +173,6 @@ lemma hasCompactSupport_divergence_g_with_boundary
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int)
 
-/-- If `f : M → ℝ` is smooth and `tsupport f ⊆ I.interior M`, the
-directional derivative `tangentSectionAction X f` is continuous on `M`. -/
 private lemma tangentSectionAction_continuous_of_interior_support
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -297,9 +218,7 @@ private lemma tangentSectionAction_continuous_of_interior_support
       rw [hmfderiv_zero]; rfl
     exact (continuous_const.continuousAt.congr hev_action.symm)
 
-/-- For a compact set `K` contained in the open `I.interior M`, there is a
-smooth function `χ : M → ℝ` with compact support inside `I.interior M`,
-equal to `1` on a neighborhood of `K`, and bounded between `0` and `1`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma exists_smooth_interior_cutoff
     [T2Space M] [SigmaCompactSpace M]
     {K : Set M} (hK_compact : IsCompact K) (hK_sub : K ⊆ I.interior M) :
@@ -327,9 +246,7 @@ private lemma exists_smooth_interior_cutoff
     by_contra hyL
     exact hy (hf_zero y hyL)
 
-/-- Compactly-supported continuous integrand on the chart source is integrable
-against the chart-local measure (the chart-local measure is finite on the
-compact support). -/
+omit [InnerProductSpace ℝ E] in
 private lemma integrable_cLM_of_cs_chartSource
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -375,8 +292,7 @@ private lemma integrable_cLM_of_cs_chartSource
           rw [setLIntegral_const, one_mul]
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
-/-- For POU index `α` outside the disjoint Finset (i.e. `tsupport (ρ α) ∩ K = ∅`),
-the weighted chart-local measure restricted to `K` is zero. -/
+omit [InnerProductSpace ℝ E] in
 private lemma withDensity_pou_restrict_zero_of_disjoint
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -403,9 +319,7 @@ private lemma withDensity_pou_restrict_zero_of_disjoint
   rw [hρα_zero]
   simp
 
-/-- The restriction of the canonical Riemannian volume measure to a compact
-set `K` equals the finite-Finset sum of POU-weighted chart-local measures
-restricted to `K`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma riemannianVolumeMeasure_restrict_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -462,9 +376,7 @@ private lemma riemannianVolumeMeasure_restrict_finset_sum
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K from rfl]
     rw [ih, ← Measure.restrict_add]
 
-/-- For continuous compactly-supported `h : M → ℝ`, the integral against the
-canonical Riemannian volume measure decomposes as a finite sum over the relevant
-POU Finset of POU-weighted chart-local integrals. -/
+omit [InnerProductSpace ℝ E] in
 private lemma integral_riemannianVolume_compactSupport_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -533,10 +445,6 @@ private lemma integral_riemannianVolume_compactSupport_finset_sum
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
 
-/-- For a continuous `f : M → ℝ` on a closed manifold whose topological
-support is contained in a single chart source at `α₀`, the integral against
-the canonical Riemannian volume measure equals the integral against the
-chart-local measure at `α₀`. -/
 private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -612,8 +520,6 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     exact ρ.sum_finsupport' x (mem_univ x) hfins
   rw [hsum_one, mul_one]
 
-/-- The proper-support analogue of the single-chart equality, with no
-`[I.Boundaryless]` typeclass. -/
 private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -689,16 +595,6 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
       exact hxK (subset_tsupport _ hne)
     rw [hh_zero, zero_mul]
 
-/-- **Divergence theorem on a closed Riemannian manifold for sections supported
-in the interior.** For any smooth tangent section `X` on a closed (compact)
-smooth Riemannian manifold `(M, g)` whose topological support sits inside the
-manifold interior `I.interior M`, the integral of the with-boundary divergence
-`divergence_g_with_boundary g X` against the canonical Riemannian volume
-measure vanishes.
-
-Compared to the boundaryless `integral_divergence_eq_zero_of_compact`, this
-version drops the `[I.Boundaryless]` typeclass at the cost of imposing
-`tsupport X ⊆ I.interior M` as an explicit hypothesis. -/
 theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -954,15 +850,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
       = (fun _ : M => (0 : ℝ)) from funext h_pt]
   rw [integral_zero, neg_zero]
 
-/-- **Divergence theorem for compactly-supported sections supported in the
-manifold interior.** For any smooth tangent section `X` with compact support
-on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose topological
-support sits inside the manifold interior `I.interior M`, the integral of the
-with-boundary divergence `divergence_g_with_boundary g X` against the
-canonical Riemannian volume measure vanishes.
-
-Compared to the closed-manifold variant, this version replaces
-`[CompactSpace M]` with the explicit hypothesis `HasCompactSupport X`. -/
 theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

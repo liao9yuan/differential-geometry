@@ -24,11 +24,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Final Wrappers
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 theorem tensorBarrier_first_null_of_failure
     {G : Real -> SmoothRiemannianMetric I M}
@@ -44,12 +44,12 @@ theorem tensorBarrier_first_null_of_failure
     Nonempty (TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) := by
   exact hcompact.firstNull_of_failure hinit_pos hfail
 
-/--
-Pure scalar order contradiction used at a first null vector.
 
-Here `timeDeriv` is `partial_t phi`, `laplacian` is `Delta phi`, `drift`
-is `X · nabla phi`, and `reaction` is the evaluated reaction term.
--/
+
+
+
+
+
 private theorem firstNullOrder
     {timeDeriv laplacian drift reaction : Real}
     (htime : timeDeriv ≤ 0)
@@ -66,10 +66,10 @@ private theorem firstNullOrder
     simpa [sub_eq_add_neg] using add_nonpos htime (neg_nonpos.mpr hlap)
   exact (not_lt_of_ge htarget_nonpos) htarget_pos
 
-/--
-Step 4: evaluating the strict inequality at the first null vector contradicts
-the scalar maximum-principle signs and the null-eigenvector condition.
--/
+
+
+
+
 theorem tensor_first_null_contradiction
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -139,9 +139,9 @@ theorem tensor_first_null_contradiction
   exact firstNullOrder htime_nonpos hlaplacian_nonneg hdrift_zero
     hreaction_nonneg hstrict_ineq
 
-/--
-Step 5: the strict barrier remains nonnegative on the short slab.
--/
+
+
+
 theorem shortSlab_cert
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -217,9 +217,9 @@ theorem tensorBarrier_nonnegative_on_short_slab
       ht0 ht0T hreg hparabolic)
     hnull hinit
 
-/--
-Step 6: iterate short slabs and let `epsilon -> 0`.
--/
+
+
+
 theorem tensor_wmp_of_barrier_limit
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -246,7 +246,7 @@ theorem tensor_wmp_of_barrier_limit
           ht0 ht0T hreg hparabolic)
         hnull hinit_t0)
 
-/-- Tensor WMP from core regularity and strict-barrier certificates. -/
+
 theorem wmp_of_cert
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -269,12 +269,12 @@ theorem wmp_of_cert
         (G := G) (S := S) (X := X) (N := N)
         ht0 ht0T hreg (hcert t0 ht0 ht0T) hnull hinit_t0)
 
-/-- Theorem 7.5, section-backed producer form.
 
-This is the generic tensor WMP endpoint for smooth two-tensor sections.  The
-strict-barrier derivatives are selected from `TensorSpatialDerivs`, and the
-first-null scalar signs are produced by `strictCert_sec` for those same
-derivative witnesses. -/
+
+
+
+
+
 theorem wmp_section_sec
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -317,11 +317,11 @@ theorem wmp_section_sec
         ht0 ht0T hreg hparabolic hcov1 hcovInf hmc hS)
     hnull hinit
 
-/-- Hypothesis package for theorem 7.5 in its generic section-backed form.
 
-This is only a bundled presentation of the real inputs consumed by
-`wmp_section_sec`; it does not add a new producer predicate or hide a
-Ricci-flow-specific assumption. -/
+
+
+
+
 structure TensorWMPInput
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -351,7 +351,7 @@ structure TensorWMPInput
     DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t)
   spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
 
-/-- Theorem 7.5 in LaTeX-facing packaged form. -/
+
 theorem tensor_wmp
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -374,11 +374,11 @@ theorem tensor_wmp
     data.hT data.reg data.parabolic data.null data.initial
     data.hcov1 data.hcovInf data.hmc data.spatial
 
-/--
-Hamilton's weak maximum principle for symmetric two-tensors.
 
-The proof is routed through the named barrier blocks above.
--/
+
+
+
+
 theorem hamilton_tensor_wmp
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -402,11 +402,11 @@ theorem hamilton_tensor_wmp
         ht0 ht0T hreg _hparabolic)
     _hnull _hinit
 
-/-- Compatibility section-backed public wrapper for Hamilton's tensor WMP.
 
-This preserves the older `TensorWMPSectionReg` interface, whose scalar-sign
-field is stronger than the producer route now needs.  New theorem-7.5 producers
-should use `wmp_section_sec`. -/
+
+
+
+
 theorem hamilton_tensor_wmp_section
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

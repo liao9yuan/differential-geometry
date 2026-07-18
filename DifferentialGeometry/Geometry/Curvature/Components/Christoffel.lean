@@ -21,11 +21,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Coordinate Christoffel curvature components
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
+
+
+
+
 
 section CoordinateChristoffelCurvature
 
@@ -35,35 +35,35 @@ variable [Module.Finite Real E] [CompleteSpace Real]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Christoffel coefficients in the chart-induced coordinate frame at `x₀`.
 
-With this convention `christoffelCoordAt cov x₀ i j k` is `Γ^k_{ij}(x₀)`. -/
+
+
 def christoffelCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i j k : CoordinateIdx (𝕜 := Real) E) : Real :=
   christoffelSymbolInFrame cov (coordinateFrameAt (I := I) x₀)
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ i j k
 
-/-- The coordinate-frame Christoffel coefficient as a scalar function near `x₀`. -/
+
 def christoffelCoordFun
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i j k : CoordinateIdx (𝕜 := Real) E) (x : M) : Real :=
   christoffelSymbolInFrame cov (coordinateFrameAt (I := I) x₀)
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x i j k
 
-/-- Directional derivative of a coordinate-frame Christoffel coefficient at `x₀`. -/
+
 def christoffelCoordDerivAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (dir i j k : CoordinateIdx (𝕜 := Real) E) : Real :=
   extDerivFun (I := I) (christoffelCoordFun (I := I) cov x₀ i j k) x₀
     (coordinateFrameAt (I := I) x₀ dir x₀)
 
-/-- Coordinate curvature coefficient for the chart-induced coordinate frame.
 
-The convention is
-`R^m_{j i k} = ∂ᵢ Γ^m_{k j} - ∂ₖ Γ^m_{i j}
-  + Γ^a_{k j} Γ^m_{i a} - Γ^a_{i j} Γ^m_{k a}`.
-The bracket term is absent only for this coordinate frame. -/
+
+
+
+
+
 def christoffelCurvCoeffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i k j m : CoordinateIdx (𝕜 := Real) E) : Real :=
@@ -76,25 +76,25 @@ def christoffelCurvCoeffAt
       christoffelCoordAt (I := I) cov x₀ i j a *
         christoffelCoordAt (I := I) cov x₀ k a m)
 
-/-- Coordinate Ricci coefficient obtained by tracing the output of
-`R(∂ₖ, ∂ᵢ) ∂ⱼ` against the first input.
 
-With the present convention this is the coordinate trace
-`Ricᵢⱼ = ∑ₖ Rᵏ{}_{j k i}`. This is the first-input trace compatible with
-`ricciFromRm13At`; alternate displays that use `R(∂ₖ, ∂ⱼ) ∂ᵢ` have the last two
-Ricci slots swapped before any Levi-Civita symmetry is applied. -/
+
+
+
+
+
+
 def christoffelRicciCoeffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   ∑ k : CoordinateIdx (𝕜 := Real) E,
     christoffelCurvCoeffAt (I := I) cov x₀ k i j k
 
-/-- Expanded local-coordinate Ricci formula in the curvature
-convention.
 
-This is the trace of the coordinate curvature formula for `R(∂ₖ, ∂ᵢ) ∂ⱼ`:
-`Ricᵢⱼ = ∂ₖ Γᵏᵢⱼ - ∂ᵢ Γᵏₖⱼ + Γᵃᵢⱼ Γᵏₖₐ - Γᵃₖⱼ Γᵏᵢₐ`, summed over the
-repeated indices. -/
+
+
+
+
+
 theorem christoffelRicciCoeffAt_eq
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -115,12 +115,12 @@ theorem christoffelRicciCoeffAt_eq
   simp [christoffelRicciCoeffAt, christoffelCurvCoeffAt,
     Finset.sum_add_distrib, Finset.sum_sub_distrib]
 
-/-- Coordinate-frame expansion of the connection curvature vector.
 
-This is the geometric Christoffel-expansion frontier: it is where the product
-rule for `∇_{eᵢ}(Γ^a_{kj} e_a)` and the coordinate-frame bracket-zero theorem
-belong.  Downstream tensor statements should consume this predicate rather than
-re-expanding vector-field covariant derivatives. -/
+
+
+
+
+
 def ConnectionCurvatureCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) : Prop :=
@@ -133,7 +133,7 @@ def ConnectionCurvatureCoordAt
           christoffelCurvCoeffAt (I := I) cov x₀ i k j m •
             coordinateFrameAt (I := I) x₀ m x₀
 
-/-- Finite additivity of a covariant derivative in the section slot. -/
+
 private theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -161,11 +161,11 @@ private theorem covariantDerivative_finset_sum
               rw [ih]
               simp [Finset.sum_insert, hit]
 
-/-- Coordinate-frame component formula for the covariant derivative of an
-arbitrary tangent field.
 
-This is the vector analogue of the tensor `nabla0S` coordinate formulas: expand
-`V` locally in the coordinate frame and apply the connection Leibniz rule. -/
+
+
+
+
 private theorem covariantDerivative_coordFrame_coeff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (V : (x : M) -> TangentSpace I x)
@@ -280,7 +280,7 @@ private theorem covariantDerivative_coordFrame_coeff
     simp [z, christoffelCoordAt, frame]
   rw [hdiag, hconn]
 
-/-- Local smoothness of `∇_{e_k} e_j` in the coordinate frame. -/
+
 private theorem coordinateFrame_covariantDeriv_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -361,8 +361,8 @@ private theorem coordinateFrame_covariantDeriv_mdiffAt_one
   exact ((hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)).mdifferentiableAt
     (by norm_num)
 
-/-- A coordinate-frame Christoffel coefficient is differentiable at the chart
-center for a `C¹` covariant derivative. -/
+
+
 theorem christoffelCoordFun_mdiffAt_one
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -387,8 +387,8 @@ theorem christoffelCoordFun_mdiffAt_one
     coordinateFrameAt, coordinateFrameAt_isLocalFrame_one,
     coordinateTrivializationAt] using hcoeff
 
-/-- Coordinate coefficients of a locally smooth tangent field are smooth at the
-base point. -/
+
+
 private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
     (Z : (x : M) -> TangentSpace I x) {x₀ : M}
     (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
@@ -409,12 +409,12 @@ private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
   simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
     coordinateFrameAt] using hcoeff
 
-/-- Producer theorem for `ConnectionCurvatureCoordAt`.
 
-The proof is the coordinate-frame calculation
-`∇ᵢ(Γ^a_{kj}e_a) - ∇ₖ(Γ^a_{ij}e_a)`, with the coordinate-frame bracket term
-removed by `coordinateFrameAt_bracket_zero`.  Smoothness of the connection is
-required explicitly. -/
+
+
+
+
+
 theorem connection_curvature_coord_of_christoffel
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -618,8 +618,8 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_coordFrame
   rw [hXval, hYval]
 
 
-/-- The supplied `(1,3)` curvature tensor evaluates to the Christoffel
-curvature coefficients in the chart-induced coordinate frame. -/
+
+
 theorem rm13_eval_eq_christoffelCurvCoord
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -685,12 +685,12 @@ theorem rm13_eval_eq_christoffelCurvCoord
           rw [hcurv_raw]
           simp [cotangentToDual_apply_gen, map_sum, frame]
 
-/-- Coordinate-frame expansion of a realized `(1,3)` curvature tensor on
-arbitrary tangent vectors.
 
-The compact index `r : Fin 3 -> CoordinateIdx` records the three lower
-curvature slots.  This is the multilinear extension of
-`rm13_eval_eq_christoffelCurvCoord`. -/
+
+
+
+
+
 theorem rm13_coord_expand
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -718,14 +718,14 @@ theorem rm13_coord_expand
     fun q i => basis.repr (slot q) i • basis i
   have hslot : (fun q : Fin 3 => ∑ i : CoordinateIdx (𝕜 := Real) E, g q i) = slot := by
     funext q
-    simpa [g] using (basis.sum_repr (slot q)).symm
+    simp [g]
   calc
     Rm13 x₀ alpha (vec3 X Y Z) =
         Rm13 x₀ alpha (fun q : Fin 3 => ∑ i : CoordinateIdx (𝕜 := Real) E, g q i) := by
           rw [hslot]
     _ = ∑ r : Fin 3 -> CoordinateIdx (𝕜 := Real) E,
         Rm13 x₀ alpha (fun q : Fin 3 => g q (r q)) := by
-          rw [(Rm13 x₀ alpha).map_sum]
+          rw [Tensor0SSpace.map_sum (Rm13 x₀ alpha) g]
     _ =
       ∑ r : Fin 3 -> CoordinateIdx (𝕜 := Real) E,
         (∏ q : Fin 3,
@@ -757,8 +757,8 @@ theorem rm13_coord_expand
                 (I := I) cov hcov Rm13 x₀ alpha hRm hcurv (r 0) (r 1) (r 2)
           rw [hsmul, hbasisEval]
 
-/-- The intrinsic Ricci trace of a realized `(1,3)` curvature tensor is the
-coordinate Christoffel trace in the chart-induced coordinate frame. -/
+
+
 theorem ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

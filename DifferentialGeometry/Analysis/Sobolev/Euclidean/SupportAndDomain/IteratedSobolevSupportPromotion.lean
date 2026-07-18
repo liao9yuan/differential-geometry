@@ -1,34 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Support-aware interior-to-global promotion for iterated Euclidean Sobolev membership
-
-The σ-compact patching file shows that, without a support hypothesis, local
-`W^{k,p}` membership on every precompact interior subdomain does **not** imply
-global `W^{k,p}` membership for `k ≥ 1`: the iterated weak partials can fail to
-be globally `L^p` (the concrete obstruction is `d = 1`, `p = 2`,
-`Ω = (0, 1)`, `u(x) = x^(-0.2)`).
-
-This file supplies the structural input that makes the promotion go through:
-the function is *essentially supported in a compact subset* `K` of the
-precompact subdomain. Concretely, if
-
-* `u` lies in `W^{k,p}` on a precompact open subdomain `Ω'` with
-  `closure Ω' ⊆ Ω`,
-* `u` is globally `L^p` on `Ω`, and
-* `u` vanishes almost everywhere off a compact subset `K ⊆ Ω'`,
-
-then `u` lies in `W^{k,p}` on the whole of `Ω`.
-
-The proof multiplies `u` by a smooth cutoff `χ` that equals `1` on a
-neighbourhood of `K` and is compactly supported inside `Ω'`. The product
-`χ · u` is `W^{k,p}` on `Ω'` (smooth-multiplier closure), has compact support
-inside `Ω'`, and is almost everywhere equal to `u` on `Ω` (because `u` is
-almost everywhere zero where `χ` differs from `1`). Extension by zero and a.e.
-invariance then deliver the global membership.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -43,17 +15,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- **Support-aware interior-to-global promotion for `MemWkp`.**
-
-If `u` is iterated-Sobolev regular (`W^{k,p}`) on a precompact open subdomain
-`Ω'` with `closure Ω' ⊆ Ω`, is globally `L^p` on `Ω`, and vanishes almost
-everywhere off a compact subset `K ⊆ Ω'`, then `u` is iterated-Sobolev regular
-on the whole domain `Ω`.
-
-Mathematically, `u` is essentially supported in `K`; multiplying by a smooth
-cutoff that equals `1` near `K` and is compactly supported inside `Ω'` produces
-a compactly supported `W^{k,p}(Ω')` function almost everywhere equal to `u` on
-`Ω`. Extension by zero then yields the global membership. -/
+omit [NeZero d] in
 theorem MemWkp_of_memWkp_precompact_of_ae_zero_off_compact
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     {Ω Ω' K : Set E} {u : E → ℝ}

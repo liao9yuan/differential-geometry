@@ -4,66 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# The Leibniz-commutator integration-by-parts step for a generic chart-bilinear datum
-
-For a closed Riemannian manifold `(M, g)` and a chart center `α : M`, the
-chart-local divergence-form weak-elliptic data of a possibly non-smooth scalar
-chart component is packaged in `ChartBilinearH1ComplData g α` (and its tensor
-wrapper `TensorChartBilinearH1ComplData g r s α P₀`). Its variational identity
-reads
-
-```
-∫_{Ω} ∑_{i, j} weightedInvGramOnEuclid · (weak_partial i) · ∂_jψ
-  + ∫_{Ω} densityOnEuclid · u_chart · ψ = ∫_{Ω} densityOnEuclid · f_chart · ψ
-```
-
-on `Ω = chartTargetEuclid α`, for every smooth compactly supported `ψ` with
-`tsupport ψ ⊆ Ω`.
-
-The standard elliptic bootstrap raises the Sobolev order by *differentiating*
-this identity once. This module ships exactly that step, as the cleanest
-reusable lemma a downstream "iterated data" constructor consumes: assuming the
-chart component `u_chart` lies in `W^{1,2}(Ω)` and *each* of its weak partials
-`weak_partial i` again lies in `W^{1,2}(Ω)`, the chosen `l`-th weak partial
-`chosenWeakPartial' 2 l u_chart Ω` satisfies a new divergence-form identity with
-the **same** principal symbol `weightedInvGramOnEuclid` and a right-hand side
-shifted by the integrated-by-parts Leibniz commutator
-
-```
-−∑_{i, j} (∂_l weightedInvGramOnEuclid_{ij}) · (weak_partial i) · ∂_jψ.
-```
-
-## The differentiated source
-
-The differentiated right-hand side is recorded as the explicit pointwise
-function `diffVariationalSource g α D l` (`EuclN → ℝ`). It collects the five
-contributions produced by integrating by parts once more in direction `l`:
-
-* `A` — the Leibniz commutator of the principal symbol, integrated by parts in
-  `j`, contributing the partial of `weightedInvGramDerivOnEuclid` against the
-  weak partials of `u_chart`;
-* `B` — the same commutator, contributing `weightedInvGramDerivOnEuclid` against
-  the second weak partials `∂_j ∂_l u_chart`;
-* `C` — the zeroth-order Leibniz term `(∂_l density) · u_chart`, with a sign;
-* `D`, `E` — the differentiated genuine source `(∂_l density) · f_chart` and
-  `density · (∂_l f_chart)`.
-
-`diffVariationalSource` is the value a downstream producer plugs into
-`f_chart` of the next-level `(Tensor)ChartBilinearH1ComplData`.
-
-## Main results
-
-* `chartBilinear_diff_variational_identity` — the generic Leibniz-commutator
-  integration-by-parts step, for a scalar `ChartBilinearH1ComplData g α`.
-
-* `tensorChartComponent_diff_variational_identity` — the same step for the
-  tensor wrapper `TensorChartBilinearH1ComplData g r s α P₀`.
-
-## Sign convention
-
-We follow the geometer convention `Δ = div ∘ grad`, with spectrum `⊆ (-∞, 0]`.
--/
 
 noncomputable section
 
@@ -98,7 +38,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The partial `∂_l ψ` of a smooth function is smooth. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_partial
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -111,8 +51,7 @@ private lemma contDiff_partial
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
-/-- The partial `∂_l ψ` of a compactly supported function is compactly
-supported. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_partial
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -120,15 +59,14 @@ private lemma hasCompactSupport_partial
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
-/-- The topological support of `∂_l ψ` is contained in that of `ψ`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_partial_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-- Schwarz symmetry of mixed second partials of a smooth function:
-`∂_j ∂_l ψ = ∂_l ∂_j ψ`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -170,8 +108,7 @@ private lemma partial_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-- A function in `MemLp 2 (volume.restrict Ω)` is in `MemLp 2
-(volume.restrict K)` for every compact `K ⊆ Ω`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_restrict_of_memLp_restrict
     {Ω : Set EuclN} {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict Ω))
@@ -186,10 +123,6 @@ private lemma memLp_restrict_of_memLp_restrict
   rw [← h_eq]
   exact hf.restrict K
 
-/-- Smooth global extension of a function `φ` that is `ContDiffOn` of any order
-on the open chart target, agreeing with `φ` on a neighbourhood of a prescribed
-compact `K ⊆ chartTargetEuclid α`. The output `(δ, φExt)` has `φExt` globally
-smooth and `φExt = φ` pointwise on `cthickening δ K`. -/
 private lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ
@@ -227,24 +160,6 @@ private lemma exists_smooth_global_extension
     change η y * φ y = φ y
     rw [hη_one y hy, one_mul]
 
-/-- **Generic per-pair integration by parts on the chart target.** For a
-function `v` lying in `W^{1,2}` of the open chart target `Ω = chartTargetEuclid α`
-and a smooth chart-target scalar coefficient `φ`, integrating `φ · v · ∂_l ψ`
-by parts in direction `l` against a smooth compactly supported test function
-`ψ` with `tsupport ψ ⊆ Ω` yields
-
-```
-∫_Ω φ · v · ∂_l ψ
-  = -((∫_Ω (∂_l φ) · v · ψ) + (∫_Ω φ · (chosenWeakPartial' 2 l v Ω) · ψ)).
-```
-
-The smooth coefficient `φ` is only required to be `ContDiffOn` on the open
-chart target; it is extended to a globally smooth representative agreeing with
-`φ` on a neighbourhood of `tsupport ψ` via `exists_smooth_global_extension`.
-
-This is a reusable per-pair integration-by-parts engine: it is consumed by the
-iterated divergence-form scaffold for the once-more directional integration by
-parts of an arbitrary `W^{1,2}` weakly differentiable factor. -/
 theorem generic_per_pair_ibp
     (α : M)
     {v : EuclN → ℝ}
@@ -359,29 +274,6 @@ theorem generic_per_pair_ibp
   rw [← hLHS_eq, ← hLeib1_eq, ← hLeib2_eq]
   exact h_ibp_ext
 
-/-- The differentiated right-hand side of the chart-bilinear variational
-identity, after one integration by parts in direction `l`.
-
-For a scalar `ChartBilinearH1ComplData g α` whose chart component and weak
-partials lie in `W^{1,2}` of the chart target, this is the explicit pointwise
-function whose integral against a test function `ψ` equals the differentiated
-right-hand side. It is the sum of five contributions:
-
-* `A` (with sign `+`): the partial `∂_j` of `weightedInvGramDerivOnEuclid g α
-  i j l` against the weak partial `weak_partial i` — the Leibniz commutator of
-  the principal symbol, integrated by parts in `j`;
-* `B` (with sign `+`): `weightedInvGramDerivOnEuclid g α i j l` against the
-  `j`-th chosen weak partial of `weak_partial i` — the residual second-order
-  commutator term;
-* `C` (with sign `−`): `densityDerivOnEuclid g α l · u_chart` — the zeroth-order
-  Leibniz term;
-* `D` (with sign `+`): `densityDerivOnEuclid g α l · f_chart` — the
-  differentiated genuine source, density part;
-* `E` (with sign `+`): `densityOnEuclid g α · (chosenWeakPartial' 2 l f_chart Ω)`
-  — the differentiated genuine source, source part.
-
-This is the value a downstream producer plugs into `f_chart` of the next-level
-chart-bilinear datum. -/
 def diffVariationalSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -401,9 +293,7 @@ def diffVariationalSource
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D.f_chart
         (chartTargetEuclid (I := I) (M := M) α) y
 
-/-- Triple-product integrability: `a · u · h` is integrable on
-`volume.restrict Ω` when `a` is continuous on `Ω`, `u` is `MemLp 2` on every
-compact subset of `Ω`, and `h` is continuous with `tsupport h ⊆ Ω` compact. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integrable_triple
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {a : EuclN → ℝ} (ha : ContinuousOn a Ω)
@@ -466,35 +356,7 @@ private lemma integrable_triple
   exact full_int.restrict
 
 set_option maxHeartbeats 1600000 in
-/-- **Generic Leibniz-commutator integration-by-parts step.**
 
-Let `D : ChartBilinearH1ComplData g α` be a scalar divergence-form chart-bilinear
-datum on a closed Riemannian manifold `(M, g)`, and let `l` be a chart
-direction. Suppose the chart component `D.u_chart` lies in `W^{1,2}` of the
-chart target `Ω = chartTargetEuclid α`, that each weak partial `D.weak_partial i`
-lies in `W^{1,2}(Ω)`, and that the right-hand side `D.f_chart` lies in
-`W^{1,2}(Ω)`.
-
-Then the chosen `l`-th weak partial `chosenWeakPartial' 2 l D.u_chart Ω`
-satisfies the *differentiated* divergence-form variational identity
-
-```
-∫_Ω ∑_{i, j} weightedInvGramOnEuclid · (∂_l-weak-partial of weak_partial i) · ∂_jψ
-  + ∫_Ω densityOnEuclid · (chosenWeakPartial' 2 l u_chart Ω) · ψ
-  = ∫_Ω (diffVariationalSource g α D l) · ψ
-```
-
-for every smooth compactly supported test function `ψ` with
-`tsupport ψ ⊆ Ω`.
-
-The **principal symbol is unchanged** — it is again `weightedInvGramOnEuclid g α`
-— and the right-hand side `diffVariationalSource g α D l` is the original source
-shifted by the integrated-by-parts Leibniz commutator
-`−∑_{i,j} (∂_l weightedInvGramOnEuclid_{ij}) · (weak_partial i) · ∂_jψ`.
-
-The hypotheses (`u_chart`, every `weak_partial i`, and `f_chart` all lie in
-`W^{1,2}(Ω)`) are the honest statement of one elliptic-bootstrap increment: the
-chart component is `W^{2,2}`-regular and the source is `W^{1,2}`-regular. -/
 theorem chartBilinear_diff_variational_identity
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -933,10 +795,6 @@ theorem chartBilinear_diff_variational_identity
   rw [h_goal_principal_eq, h_goal_RHS_decomp]
   linarith [h_combine]
 
-/-- The differentiated right-hand side for a tensor chart-component datum, i.e.
-`diffVariationalSource` applied to the underlying scalar chart data. This is the
-value a downstream producer plugs into `f_chart` of the next-level tensor
-chart-bilinear datum. -/
 def tensorDiffVariationalSource
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
@@ -944,32 +802,6 @@ def tensorDiffVariationalSource
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   diffVariationalSource (I := I) (M := M) g α D.toChartData l
 
-/-- **Generic Leibniz-commutator integration-by-parts step — tensor wrapper.**
-
-For a tensor chart-component datum `D : TensorChartBilinearH1ComplData g r s α P₀`
-on a closed Riemannian manifold `(M, g)` and a chart direction `l`, suppose the
-chart component `D.u_chart`, every weak partial `D.weak_partial i`, and the
-right-hand side `D.f_chart` lie in `W^{1,2}` of the chart target
-`Ω = chartTargetEuclid α`.
-
-Then the chosen `l`-th weak partial `chosenWeakPartial' 2 l D.u_chart Ω`
-satisfies the *differentiated* divergence-form variational identity with the
-**same** principal symbol `weightedInvGramOnEuclid g α` and the differentiated
-right-hand side `tensorDiffVariationalSource D l`:
-
-```
-∫_Ω ∑_{i, j} weightedInvGramOnEuclid · (∂_l-weak-partial of weak_partial i) · ∂_jψ
-  + ∫_Ω densityOnEuclid · (chosenWeakPartial' 2 l u_chart Ω) · ψ
-  = ∫_Ω (tensorDiffVariationalSource D l) · ψ
-```
-
-for every smooth compactly supported test function `ψ` with `tsupport ψ ⊆ Ω`.
-
-This is the tensor analogue of `chartBilinear_diff_variational_identity`: the
-tensor structure being a thin wrapper around the scalar one, the conclusion is
-a definitional re-export of the scalar step applied to `D.toChartData`. The
-differentiated datum it produces is again of `(Tensor)ChartBilinearH1ComplData`
-shape, so iterating this step is the elliptic-bootstrap order increment. -/
 theorem tensorChartComponent_diff_variational_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

@@ -5,27 +5,10 @@ import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-/-!
-# Uniform op-norm bound on the chart-`(r, s)` fibre forward map over compact base sets
-
-Forward analogue of `tensorRSChartFiberFromModel_opNorm_isBounded_on_compact`:
-the family
-`(triv α).continuousLinearMapAt ℝ b : TensorRSSpace r s I b →L[ℝ] TensorRSModel r s ℝ E`
-admits a uniform pointwise op-norm bound on any compact `K ⊆ (chartAt H α).source`.
-
-Strategy: on the locality neighbourhood of `b₀ ∈ K`, the forward locality
-identity gives `(triv b₀).clmAt ℝ b` equal to the canonical
-`TensorRSSpace b ≃L TensorRSModel` CLM, so `‖(triv b₀).clmAt ℝ b T‖ = ‖T‖`. The
-`coordChangeL` formula then expresses `(triv α).clmAt ℝ b T` as
-`coordChangeL b₀ α b ((triv b₀).clmAt ℝ b T)`, yielding
-`‖(triv α).clmAt ℝ b T‖ ≤ ‖coordChangeL b₀ α b‖ · ‖T‖`. A finite compact cover
-plus operator-norm continuity of `coordChangeL` yields the uniform constant.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -43,13 +26,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- Norm pullback identity. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorRSSpace_norm_eq_fwd (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
     ‖T‖ = ‖tensorRSSpace_continuousLinearEquiv (𝕜 := ℝ) (M := M) (I := I) r s b T‖ :=
   rfl
 
-/-- CLM-level locality identity for the forward direction at `b₀`. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality_fwd
     (r s : ℕ) (b₀ : M) {b : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -73,7 +56,7 @@ private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality_fwd
   rw [h_subB]
   rfl
 
-/-- Norm of forward trivialisation equals fibre norm on locality. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma trivAt_clmAt_norm_eq_on_locality
     (r s : ℕ) (b₀ : M) {b : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -97,7 +80,7 @@ private lemma trivAt_clmAt_norm_eq_on_locality
   rw [h_apply]
   exact (tensorRSSpace_norm_eq_fwd (I := I) (M := M) r s b T).symm
 
-/-- Forward CLM norm bound by `coordChangeL` op-norm times fibre norm. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartFiberToModel_norm_le_coordChangeL_norm_on_locality
     (r s : ℕ) (α : M) {b₀ b : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -169,7 +152,7 @@ private lemma chartFiberToModel_norm_le_coordChangeL_norm_on_locality
   rw [h_norm_T] at h_le_op
   exact h_le_op
 
-/-- Continuity of `b ↦ coordChangeL b₀ α b` on the chart-source intersection. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma continuousOn_RS_coordChangeL_b₀_α (r s : ℕ) (α b₀ : M) :
     ContinuousOn
       (fun b : M => ((trivializationAt (TensorRSModel r s ℝ E)
@@ -211,7 +194,7 @@ private lemma continuousOn_RS_coordChangeL_b₀_α (r s : ℕ) (α b₀ : M) :
   rw [h_base_α, h_base_b₀] at h_smooth
   exact h_smooth.continuousOn
 
-/-- Op-norm bound on a compact from op-norm continuity. -/
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma exists_opNorm_bound_on_compact_of_continuousOn_fwd
     {r s : ℕ} (f : M → TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)
     {K : Set M} (hK : IsCompact K) (h_cont : ContinuousOn f K) :

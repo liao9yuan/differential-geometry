@@ -1,17 +1,18 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciNorm
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.IntrinsicDerivation
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Ricci-Flow Regularity Producers
 
-This file is the producer layer from the metric Ricci-flow predicate
-`IsSolutionOn` to the stronger smooth package `IsSmoothSolutionOn`.
-Downstream evolution files should consume the fields of `IsSmoothSolutionOn`;
-they should not introduce their own general smooth-solution predicates.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,11 +29,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- Fixed-time smoothness of the canonical scalar curvature produced from a
-metric Ricci-flow solution.
 
-This is the lower metric-to-curvature regularity producer needed by
-`scalarRegOfSol`. -/
+
+
+
+
 theorem scalarSmoothOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -41,18 +42,18 @@ theorem scalarSmoothOfSol
   simpa [SolutionOn.scalar, SolutionFamily.scalar] using
     metricScalar_smooth (I := I) (M := M) (S.family.metric t)
 
-/-- Spacetime continuity of the canonical scalar curvature produced from a
-metric Ricci-flow solution. -/
+
+
 theorem scalarContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    (p : Real × M) :
-    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p := by
-  exact hS.scalarCont p
+    (hS : IsSolutionOn (I := I) S) :
+    ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+      (D.carrier ×ˢ (Set.univ : Set M)) := by
+  exact hS.scalarCont
 
-/-- Within-time differentiability of the canonical scalar curvature produced
-from a metric Ricci-flow solution. -/
+
+
 theorem scalarTimeOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -62,7 +63,7 @@ theorem scalarTimeOfSol
     DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t := by
   exact hS.scalarTime ht hK x
 
-/-- Scalar regularity produced from a metric Ricci-flow solution. -/
+
 theorem scalarRegOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -70,7 +71,7 @@ theorem scalarRegOfSol
     CanonicalScalarRegularOn (I := I) (M := M) S := by
   classical
   refine
-    { scalar_continuousAt := ?_
+    { scalar_continuousOn := ?_
       scalar_time_within := ?_
       scalar_space := ?_
       scalar_grad := ?_
@@ -81,8 +82,7 @@ theorem scalarRegOfSol
       scalar_sq_div_grad := ?_
       scalar_grad_sub_const := ?_
       scalar_grad_const_mul_sub_const := ?_ }
-  · intro p
-    exact scalarContOfSol (I := I) S hS p
+  · exact scalarContOfSol (I := I) S hS
   · intro K t ht hK x
     exact scalarTimeOfSol (I := I) S hS ht hK x
   · intro t ht x
@@ -162,12 +162,12 @@ theorem scalarRegOfSol
       contMDiff_const.mul hshift
     exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t) hscaled x
 
-/-- Scalar spacetime continuity produced from the metric Ricci-flow solution
-package.
 
-As in the scalar WMP route, this package is only the scalar
-spacetime-continuity projection of the stronger canonical scalar regularity
-package.  The real producer frontier is therefore `scalarRegOfSol`. -/
+
+
+
+
+
 theorem scalarSTContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -176,8 +176,8 @@ theorem scalarSTContOfSol
   exact CanonicalScalarRegularOn.toScalarSTCont (I := I) (M := M)
     (scalarRegOfSol (I := I) S hS)
 
-/-- Ricci tensor and Ricci-norm regularity produced from a metric Ricci-flow
-solution. -/
+
+
 theorem ricciRegOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -186,12 +186,12 @@ theorem ricciRegOfSol
   exact
     { ricci_cont := hS.ricciCont
       rm04_cont := hS.rm04Cont
-      nablaRic_cont := hS.nablaRicCont
       ricci_norm_space := hS.ricciNormSpace
       ricci_norm_grad := hS.ricciNormGrad }
 
-/-- Scalar evolution produced from a metric Ricci-flow solution. -/
+
 theorem scalarEvolOfSol
+    [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
@@ -209,10 +209,10 @@ theorem scalarEvolOfSol
               (S.ricci (t : Real) x))
           D.carrier
           (t : Real) := by
-  exact hS.scalarEvolution
+  exact scalarEvolution_of_isSolution (I := I) S hS
 
-/-- Coordinate inverse-metric evolution produced from a metric Ricci-flow
-solution. -/
+
+
 theorem invEvolOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -224,7 +224,7 @@ theorem invEvolOfSol
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   exact coordInvEvol (I := I) S hS x0
 
-/-- Coordinate Ricci evolution produced from a metric Ricci-flow solution. -/
+
 theorem ricciEvolOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -245,8 +245,8 @@ theorem ricciEvolOfSol
       (t : Real) := by
   exact coordRicciEvol (I := I) S hS x0 t i j
 
-/-- Symmetry of the canonical coordinate inverse metric produced from a metric
-Ricci-flow solution. -/
+
+
 theorem invSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -260,7 +260,7 @@ theorem invSymmOfSol
     DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric t) x0
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x0) i j
 
-/-- Symmetry of Ricci components produced from a metric Ricci-flow solution. -/
+
 theorem ricciSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -279,13 +279,13 @@ theorem ricciSymmOfSol
       (fun a b => coordInv (I := I) S x0 t x0 a b) hinv i j
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt] using hsym
 
-/-- Canonical second Ricci derivative components agree with the coordinate
-formula used by `coordNab2Ric`.
 
-This is the remaining fixed-time coordinate realization frontier for the
-Ricci-norm Laplacian producer.  It should be proved from
-`TotalNabla0SRealizes.eval_C1_slots` in the coordinate frame, plus the
-component equality for the canonical first derivative. -/
+
+
+
+
+
+
 theorem coordNab2_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -422,7 +422,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
                 (Γ d a p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d a p * N p i j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -466,7 +466,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
                 (Γ d i p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d i p * N a p j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -510,7 +510,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
                 (Γ d j p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d j p * N a i p := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -550,8 +550,8 @@ theorem coordNab2_can
           rw [hcorr]
           ring
 
-/-- The intrinsic rough Laplacian of the canonical second derivative has the
-centered coordinate components used by `coordRoughRic`. -/
+
+
 theorem coordRough_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -623,8 +623,8 @@ theorem coordRough_can
             fin_cases q <;> rfl
           rw [hinput, hnab2 a b i j]
 
-/-- Ricci-norm Bochner/Laplacian expansion produced from a metric Ricci-flow
-solution. -/
+
+
 theorem ricciLapOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -808,12 +808,12 @@ theorem ricciLapOfSol
   rw [hnabla] at hval
   simpa [roughLapRic, gInv, frame] using hval
 
-/-- Upgrade a metric Ricci-flow solution to the strong smooth-solution package.
 
-The remaining frontier is to derive all scalar regularity, Ricci regularity,
-coordinate inverse-metric evolution, coordinate Ricci evolution, symmetries,
-and the Ricci-norm Bochner/Laplacian expansion from the metric smoothness and
-Ricci-flow equation recorded by `IsSolutionOn`. -/
+
+
+
+
+
 theorem smoothOfSol
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

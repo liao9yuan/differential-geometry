@@ -1,39 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 
-/-!
-# Uniform upper bound for the chart-α Gram-matrix quadratic form on the
-# closed support of the chart-atlas partition-of-unity weight at `α`
-
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`, the
-quadratic form
-`(b, ξ) ↦ ∑_{i, j} g.inner b (chartBasisVecFiber α i b) (chartBasisVecFiber α j b)
-    · ξ i · ξ j`
-on the compact closed support of the chart-atlas partition-of-unity weight at
-`α` admits a uniform upper bound by a non-negative multiple of the squared
-`ξ`-norm `∑_i ξ i ^ 2`.
-
-This is the forward companion of
-`exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport` (the same
-statement with the inverse Gram matrix and `≥ c · ∑ ξ i ^ 2`). The forward
-direction is more elementary: each entry of `chartGramMatrix g α b` is
-continuous in `b` on the chart base set, the closed POU support is compact
-and contained in the chart base set, so every entry is uniformly bounded
-there; the bound on the quadratic form then follows from
-`|G_{ij} · ξ_i · ξ_j| ≤ |G_{ij}| · ∑_k ξ_k ^ 2`.
-
-## Main result
-
-* `exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport` — there
-  exists `C ≥ 0` such that for every `b` in the closed support and every
-  coefficient vector `ξ : Fin n → ℝ`,
-  `∑ i, ∑ j, g.inner b (chartBasisVecFiber α i b) (chartBasisVecFiber α j b)
-        · ξ i · ξ j ≤ C · ∑ i, ξ i ^ 2`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -48,7 +18,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
@@ -136,21 +106,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     hK_le (i, j) b hb
   linarith
 
-/-- **Uniform upper bound on the chart-`α` Gram-matrix quadratic form over
-the closed support of the chart-atlas partition-of-unity weight at `α`.**
-
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`,
-there exists `C ≥ 0` such that for every `b` in the closed support of the
-chart-atlas partition-of-unity weight at `α` and every coefficient vector
-`ξ : Fin (Module.finrank ℝ E) → ℝ`,
-`∑ i, ∑ j, g.inner b (chartBasisVecFiber α i b) (chartBasisVecFiber α j b)
-    · ξ i · ξ j ≤ C · ∑ i, ξ i ^ 2`.
-
-The forward companion of
-`exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport`. The
-quadratic form is dominated by the entrywise bound on the Gram matrix
-(continuous entries on a compact subset of the chart base set) combined
-with the AM-GM-type inequality `|ξ i · ξ j| ≤ ∑_k ξ k ^ 2`. -/
 theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
     [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

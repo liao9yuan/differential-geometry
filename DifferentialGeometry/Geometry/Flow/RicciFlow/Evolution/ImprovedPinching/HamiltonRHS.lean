@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching HamiltonRHS
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,9 +25,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-! ## Lemma 10.6 setup: raw Hamilton quotient evolution -/
 
-/-- The non-Laplacian RHS in Lemma 10.4 for `|Ric°|²`. -/
+
+
 def tfHeatTerm
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q :
       Real -> M -> Real) : Real -> M -> Real :=
@@ -38,14 +38,14 @@ def tfHeatTerm
           tfRicNormSq scalar ricciNormSq t x - 2 * Q t x) /
         scalar t x
 
-/-- The non-Laplacian RHS in scalar curvature evolution:
-`(partial_t - Delta) R = 2 |Ric|²`. -/
+
+
 def scalarHeatTerm
     (ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
   fun t x => 2 * ricciNormSq t x
 
-/-- Raw quotient-evolution setup for Hamilton's Lemma 10.6 quantity
-`|Ric°|² / R^(2 - epsilon)`. -/
+
+
 abbrev PinchEvolOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -57,10 +57,10 @@ abbrev PinchEvolOn
     (tfHeatTerm scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q)
     (scalarHeatTerm ricciNormSq) (1 : Real) (2 - epsilon)
 
-/-- Checked raw setup for Lemma 10.6.
 
-This specializes Lemma 10.5 to Hamilton's quotient but does not yet rewrite the
-result into the square-completed final formula. -/
+
+
+
 theorem pinchEvol_setup
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -116,10 +116,10 @@ theorem pinchEvol_setup
   · intro t x
     simpa [scalarHeatTerm] using hscalar t x
 
-/-! ## Lemma 10.6: Hamilton book-form RHS -/
 
-/-- The `(0,3)` tensor `R ∇Ric - dR ⊗ Ric` appearing in Hamilton's
-Lemma 10.6.  The first slot is the derivative slot. -/
+
+
+
 def ricciGradCoupleAt {x : M}
     (scalar : Real)
     (Ric : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 2 x)
@@ -127,10 +127,13 @@ def ricciGradCoupleAt {x : M}
     (dScalar : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 1 x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 3 x :=
   scalar • nablaRic -
-    Bundle.continuousMultilinearMap.product_fun dScalar Ric
+    (show Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 3 x from
+      Bundle.continuousMultilinearMap.product_fun
+        (𝕜 := Real) (F := E) (E := TangentSpace I)
+        (s := 1) (q := 2) dScalar Ric)
 
-/-- Squared norm of `R ∇Ric - dR ⊗ Ric` for a time-dependent Ricci tensor and
-its total covariant derivative. -/
+
+
 def ricciGradCoupleSq
     (g : Real -> SmoothMetric_gen I M)
     (scalar : Real -> M -> Real)
@@ -145,8 +148,8 @@ def ricciGradCoupleSq
         (scalar t x) (Ric t x) (nablaRic t x)
         (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x))
 
-/-- Pointwise expansion of the squared norm of `R nabla Ric - dR tensor Ric`
-down to the raw mixed contraction. -/
+
+
 theorem ricciGradCoupleSq_exp_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -176,6 +179,7 @@ theorem ricciGradCoupleSq_exp_inner
         2 * scalar t x *
           inner0S (I := I) (G.metric t) x 3 (nablaRic t x)
             (Bundle.continuousMultilinearMap.product_fun
+              (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
               (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
               (Ric t x)) +
@@ -204,8 +208,8 @@ theorem ricciGradCoupleSq_exp_inner
     (Ric t x)]
   rw [← hnabla, ← hric, hgradOne]
 
-/-- The raw mixed contraction equals the gradient pairing for the Ricci norm
-square represented by a `(0,2)` tensor section. -/
+
+
 theorem ricciMixed_eq_gradNorm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
@@ -235,6 +239,7 @@ theorem ricciMixed_eq_gradNorm
         duRicNorm) :
     2 * inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
+            (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
             (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
@@ -250,6 +255,7 @@ theorem ricciMixed_eq_gradNorm
   have hcontract :
       inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
+            (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
             (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
@@ -295,6 +301,7 @@ theorem ricciMixed_eq_gradNorm
   calc
     2 * inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
+            (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
             (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
             (RicSec x))
@@ -312,12 +319,12 @@ theorem ricciMixed_eq_gradNorm
             DifferentialGeometry.Integral.Connection.normSq02 (I := I) (G.metric t) y (RicSec y)) x)
         (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x) := rfl
 
-/-- Mixed contraction rewritten to the trace-free Ricci norm gradient.
 
-This is the pointwise geometric bridge needed by the Hamilton 10.6 square
-term.  The canonical Ricci-flow wrapper still has to provide the section
-realization hypotheses and the equality between `ricciNormSq` and the tensor
-norm represented by `RicSec`. -/
+
+
+
+
+
 theorem ricciMixed_eq_tfGrad
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
@@ -359,6 +366,7 @@ theorem ricciMixed_eq_tfGrad
     2 * scalar t x *
         inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
+            (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
             (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
@@ -428,12 +436,14 @@ theorem ricciMixed_eq_tfGrad
     2 * scalar t x *
         inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
+            (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
             (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
             (RicSec x))
         = scalar t x *
             (2 * inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
               (Bundle.continuousMultilinearMap.product_fun
+                (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
                 (s := 1) (q := 2)
                 (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
                 (RicSec x))) := by ring
@@ -452,8 +462,8 @@ theorem ricciMixed_eq_tfGrad
           simp [R, DifferentialGeometry.Integral.Connection.gradientAt, hgradScalarSq, smul_eq_mul,
             mul_assoc, mul_comm]
 
-/-- Pointwise expansion of the actual square term into the book-form expression,
-assuming the remaining mixed-gradient contraction bridge. -/
+
+
 theorem ricciGradCoupleSq_exp_mixed
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -481,6 +491,7 @@ theorem ricciGradCoupleSq_exp_mixed
       2 * scalar t x *
           inner0S (I := I) (G.metric t) x 3 (nablaRic t x)
             (Bundle.continuousMultilinearMap.product_fun
+              (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
               (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
               (Ric t x)) =
@@ -505,8 +516,8 @@ theorem ricciGradCoupleSq_exp_mixed
     hnabla hric hgradScalarSq]
   rw [hmixed]
 
-/-- Drift term in Hamilton's Lemma 10.6.  The project represents `P` by the
-stable negative-power quotient field. -/
+
+
 def pinchDriftTerm
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
@@ -519,13 +530,13 @@ def pinchDriftTerm
           (quotField (M := M) (tfRicNormSq scalar ricciNormSq)
             scalar (1 : Real) (2 - epsilon) t) x)
 
-/-- Negative square term in Hamilton's Lemma 10.6. -/
+
 def pinchSquareTerm
     (scalar coupleSq : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
   fun t x => -2 / scalar t x ^ (4 - epsilon) * coupleSq t x
 
-/-- Extra scalar-gradient term in Hamilton's Lemma 10.6. -/
+
 def pinchGradTerm
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
@@ -533,7 +544,7 @@ def pinchGradTerm
     -epsilon * (1 - epsilon) / scalar t x ^ (4 - epsilon) *
       tfRicNormSq scalar ricciNormSq t x * gradScalarNormSq t x
 
-/-- Cubic reaction term in Hamilton's Lemma 10.6. -/
+
 def pinchReactTerm
     (scalar ricciNormSq Q : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
@@ -542,9 +553,9 @@ def pinchReactTerm
       (Q t x -
         epsilon * ricciNormSq t x * tfRicNormSq scalar ricciNormSq t x)
 
-/-- Book-facing right-hand side of Hamilton's Lemma 10.6 after the raw quotient
-identity has been rewritten into drift, square, scalar-gradient, and reaction
-parts. -/
+
+
+
 def pinchBookRHS
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
@@ -555,7 +566,7 @@ def pinchBookRHS
       pinchGradTerm scalar ricciNormSq gradScalarNormSq epsilon t x +
       pinchReactTerm scalar ricciNormSq Q epsilon t x
 
-/-- Gradient expansion of the drift term in Hamilton's Lemma 10.6. -/
+
 theorem pinchDrift_exp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -647,9 +658,9 @@ theorem pinchDrift_exp
   rw [hpow3]
   ring_nf
 
-/-- Scalar algebra rewriting the raw quotient RHS into Hamilton's Lemma 10.6
-book RHS, once the drift expansion and tensor-square expansion are supplied at
-the point.  The missing geometric content is exactly those two expansions. -/
+
+
+
 theorem pinchRHS_eq_book_of_parts
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
@@ -734,8 +745,8 @@ theorem pinchRHS_eq_book_of_parts
   field_simp [hscalar.ne']
   ring_nf
 
-/-- Raw Lemma 10.6 quotient RHS rewritten to the book RHS, conditional only on
-the tensor-square expansion for `R ∇Ric - dR ⊗ Ric`. -/
+
+
 theorem pinchRHS_eq_book
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -773,11 +784,11 @@ theorem pinchRHS_eq_book
   exact pinchDrift_exp (I := I) G scalar ricciNormSq gradScalarNormSq
     epsilon t x hscalar htfDiff hscalarDiff hgradScalarSq
 
-/-- Lemma 10.6 book-form evolution once the tensor-square expansion is supplied.
 
-This deliberately keeps the square expansion as a visible hypothesis; the
-producer identifying `coupleSq` with
-`|R ∇Ric - dR ⊗ Ric|²` is the remaining tensor-algebra frontier. -/
+
+
+
+
 theorem pinchEvol_book_of_couple
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -834,12 +845,12 @@ theorem pinchEvol_book_of_couple
   rw [hrhs] at h
   exact h
 
-/-- Lemma 10.6 book-form evolution using the actual tensor square
-`|R nabla Ric - dR tensor Ric|^2`.
 
-The remaining visible hypothesis is the pointwise mixed-gradient bridge
-identifying the contraction of `nabla Ric` with `dR tensor Ric` against the
-gradient of `|Ric^o|^2`. -/
+
+
+
+
+
 theorem pinchEvol_book_of_mixed
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -887,6 +898,7 @@ theorem pinchEvol_book_of_mixed
           inner0S (I := I) (G.metric (t : Real)) x 3
             (nablaRic (t : Real) x)
             (Bundle.continuousMultilinearMap.product_fun
+              (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
               (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
                 (scalar (t : Real)) x)
@@ -923,11 +935,11 @@ theorem pinchEvol_book_of_mixed
     (basis t x) (gInv t x) (hinv t x) (hnabla t x) (hric t x)
     (hgradScalarSq t x) (hmixed t x)
 
-/-- Lemma 10.6 book-form evolution from concrete Ricci tensor sections.
 
-This discharges the mixed-gradient bridge using the tensor-norm differential
-producer `du_norm02`; the remaining canonical frontier is to provide these
-section realization inputs from the solution package. -/
+
+
+
+
 theorem pinchEvol_sec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

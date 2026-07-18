@@ -1,45 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.DerivedData
 
-/-!
-# Structural machinery of the arbitrary-order eigenvector chart-component bootstrap
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the eigenvector
-chart component `eigenvectorChartComponentFun` and its recursive `m`-fold mixed
-weak partials `eigenvectorChartIteratedPartial` carry the iterated Sobolev
-structure of the resolvent eigenvector.
-
-This module collects the **Schwarz-free structural backbone** of the
-arbitrary-order interior-regularity bootstrap — the two reindexing /
-order-assembly lemmas that mediate between the level-indexed iterated mixed weak
-partials and the chart-`H^k` regularity of the chart component:
-
-* `eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae` — the
-  polymorphic Schwarz reindexing identity: the `(m + 1)`-fold mixed weak partial
-  along `Fin.cons a dirs` (which differentiates the new direction `a` innermost)
-  agrees a.e. with the chosen weak `a`-partial of the `m`-fold mixed weak
-  partial along `dirs`. This is the eigenvector/tensor mirror of the scalar
-  campaign's `chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae_weak`;
-  it lets the `Fin.cons`-indexed principal block of the iterated
-  divergence-form datum be re-expressed in genuine-chosen-weak-partial form.
-* `eigenvectorChartComponent_memWkp_m_plus_two_of_iterated` — the structural
-  order-assembly: from chart-`H²` of every `m`-fold mixed weak partial and
-  chart-`H¹` of every `j`-fold mixed weak partial for `j ≤ m`, the eigenvector
-  chart component lies in chart-`H^{m+2}`. This is the eigenvector/tensor mirror
-  of the scalar `chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two`. It
-  raises the Sobolev order of the chart component by two, given the per-level
-  regularity that the order-2 interior engine produces.
-
-Both lemmas are **unconditional structural facts** — pure manipulations of the
-iterated `MemWkp` predicate and the recursive definition of
-`eigenvectorChartIteratedPartial`, established from committed infrastructure.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -74,8 +35,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The last entry of `Fin.cons a dirs` at length `m + 2` is the last entry of
-`dirs`. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fin_cons_last_succ
     {a : Fin (Module.finrank ℝ E)} {m : ℕ}
     (dirs : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
@@ -87,8 +48,8 @@ private lemma fin_cons_last_succ
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The initial segment of `Fin.cons a dirs` at length `m + 2` is
-`Fin.cons a (Fin.init dirs)`. -/
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fin_init_cons
     {a : Fin (Module.finrank ℝ E)} {m : ℕ}
     (dirs : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
@@ -100,23 +61,6 @@ private lemma fin_init_cons
   · intro k
     simp [Fin.init, Fin.cons_succ]
 
-/-- **Polymorphic Schwarz reindexing of the eigenvector iterated mixed weak
-partial.**
-
-Re-keyed onto the chart-locality-free eigenvector chart component
-`eigenvectorChartComponentFun` — itself built from the intrinsic eigenbasis
-vector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i` — via its recursive `m`-fold
-mixed weak partial `eigenvectorChartIteratedPartial`.
-
-For every level `m`, direction multi-index `dirs : Fin m → Fin n`, and new
-direction `a`, given global chart-`H^{m+1}` regularity of the chart-locality-free
-eigenvector chart component, the `(m + 1)`-fold mixed weak partial
-`eigenvectorChartIteratedPartial g r s i α P₀ (m + 1)
-(Fin.cons a dirs)` — which differentiates `a` innermost — agrees almost
-everywhere on the chart target with the chosen weak `a`-partial
-`chosenWeakPartial' 2 a (eigenvectorChartIteratedPartial … m dirs)`
-of the `m`-fold mixed weak partial along `dirs`. -/
 theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -242,14 +186,6 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ (m + 1) dirs) Ω := h_final
 
-/-- Polymorphic per-direction-count engine for the order assembly, keyed onto the
-chart-locality-free eigenvector chart component — built from the intrinsic
-eigenbasis vector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i` — via its recursive mixed weak
-partial `eigenvectorChartIteratedPartial`. For any `m, j : ℕ` and any
-`j`-direction multi-index `dirs`, if every `(j + 1)`-fold mixed partial lies in
-chart-`H^{m+1}` and every `j`-fold mixed partial lies in chart-`H¹`, then the
-`j`-fold mixed weak partial in directions `dirs` lies in chart-`H^{m+2}`. -/
 private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -296,22 +232,6 @@ private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     rw [h_succ_eq] at h_next
     exact h_next
 
-/-- **Structural order-assembly: chart-`H^{m+2}` of the eigenvector chart
-component.**
-
-Keyed onto the chart-locality-free eigenvector chart component
-`eigenvectorChartComponentFun` — built from the intrinsic eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i` —
-and its recursive mixed weak partial `eigenvectorChartIteratedPartial`.
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, a component multi-index `P₀`, and an order
-`m : ℕ`, the chart-locality-free eigenvector chart component lies in
-chart-`H^{m+2}` on the chart target, provided:
-
-* chart-`H¹` of every chosen `j`-fold mixed weak partial for every `j ≤ m`;
-* chart-`H²` of every chosen `m`-fold mixed weak partial — the per-direction
-  chart-`H²` regularity that the order-2 interior engine delivers. -/
 theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -382,9 +302,6 @@ section ElaborationTests
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-/-- Elaboration test: the Schwarz reindexing identity re-expresses the
-`Fin.cons`-indexed chart-locality-free iterated mixed partial as a chosen weak
-partial. -/
 example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     (a : Fin (Module.finrank ℝ E))

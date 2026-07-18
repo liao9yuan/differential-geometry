@@ -1,29 +1,10 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 import DifferentialGeometry.Tensor.Alternating.Curry
-/-!
-# TensorProduct.mapL and its properties
-
-The continuous bilinear map `TensorProduct.mapL` and related properties.
-
-## Main Definitions
-
-* `TensorProduct.mapL L₁ L₂` : the continuous linear map `F₁ ⊗ F₂ →L G₁ ⊗ G₂` induced
-  by continuous linear maps `L₁ : F₁ →L G₁` and `L₂ : F₂ →L G₂`.
-* `TensorProduct.mapLBilinear` : the bilinear map `(F₁ →L G₁) →L (F₂ →L G₂) →L (F₁⊗F₂ →L G₁⊗G₂)`.
-
-## Main Results
-
-* `TensorProduct.mapL_tmul` : `mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w`.
-
-## Tags
-
-tensor product, continuous linear map
--/
 
 open scoped Topology TensorProduct
 
@@ -35,62 +16,57 @@ variable {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [Finit
 
 variable {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
 
-/-! ## TensorProduct.mapL and its properties -/
-
 section MapL
 
 variable {G₁ G₂ : Type*}
   [NormedAddCommGroup G₁] [NormedSpace 𝕜 G₁] [FiniteDimensional 𝕜 G₁]
   [NormedAddCommGroup G₂] [NormedSpace 𝕜 G₂] [FiniteDimensional 𝕜 G₂]
 
-/-- `TensorProduct.map` as a continuous linear map in finite dimensions. -/
 noncomputable def TensorProduct.mapL (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     (F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂) :=
   (TensorProduct.map L₁.toLinearMap L₂.toLinearMap).toContinuousLinearMap
 
 omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` acts on pure tensors by applying each factor: `(L₁ ⊗ L₂)(v ⊗ w) = L₁ v ⊗ L₂ w`. -/
+
 @[simp]
 theorem TensorProduct.mapL_tmul (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) (v : F₁) (w : F₂) :
     TensorProduct.mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w := by
   simp [TensorProduct.mapL, TensorProduct.map_tmul]
 
 omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is additive in the left factor: `(L₁ + L₁') ⊗ L₂ = L₁ ⊗ L₂ + L₁' ⊗ L₂`. -/
+
 theorem TensorProduct.mapL_add_left (L₁ L₁' : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL (L₁ + L₁') L₂ = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁' L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_add_left]
 
 omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is additive in the right factor: `L₁ ⊗ (L₂ + L₂') = L₁ ⊗ L₂ + L₁ ⊗ L₂'`. -/
+
 theorem TensorProduct.mapL_add_right (L₁ : F₁ →L[𝕜] G₁) (L₂ L₂' : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL L₁ (L₂ + L₂') = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁ L₂' := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_add_right]
 
 omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is homogeneous in the left factor: `(c • L₁) ⊗ L₂ = c • (L₁ ⊗ L₂)`. -/
+
 theorem TensorProduct.mapL_smul_left (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL (c • L₁) L₂ = c • TensorProduct.mapL L₁ L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_left]
 
 omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is homogeneous in the right factor: `L₁ ⊗ (c • L₂) = c • (L₁ ⊗ L₂)`. -/
+
 theorem TensorProduct.mapL_smul_right (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL L₁ (c • L₂) = c • TensorProduct.mapL L₁ L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_right]
 
-
-/-- The bilinear map (L₁, L₂) ↦ TensorProduct.mapL L₁ L₂. -/
 noncomputable def TensorProduct.mapLBilinear :
     (F₁ →L[𝕜] G₁) →L[𝕜] (F₂ →L[𝕜] G₂) →L[𝕜]
       ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) := by
   classical
-  -- continuity will be obtained from finite-dimensionality of the domains
+
   haveI : FiniteDimensional 𝕜 (F₁ →L[𝕜] G₁) := ContinuousLinearMap.finiteDimensional
   haveI : FiniteDimensional 𝕜 (F₂ →L[𝕜] G₂) := ContinuousLinearMap.finiteDimensional
   haveI : FiniteDimensional 𝕜 ((F₂ →L[𝕜] G₂) →L[𝕜] F₁ ⊗[𝕜] F₂ →L[𝕜] G₁ ⊗[𝕜] G₂)
     := ContinuousLinearMap.finiteDimensional
-  -- inner: linear in L₂
+
   let innerLM (L₁ : F₁ →L[𝕜] G₁) :
       (F₂ →L[𝕜] G₂) →ₗ[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
     { toFun := fun L₂ => TensorProduct.mapL (𝕜 := 𝕜) L₁ L₂
@@ -100,7 +76,7 @@ noncomputable def TensorProduct.mapLBilinear :
   let innerCLM (L₁ : F₁ →L[𝕜] G₁) :
       (F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
     (innerLM (L₁ := L₁)).toContinuousLinearMap
-  -- outer: linear in L₁, valued in continuous linear maps (in L₂)
+
   let outerLM :
       (F₁ →L[𝕜] G₁) →ₗ[𝕜]
         ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂))) :=
@@ -108,7 +84,7 @@ noncomputable def TensorProduct.mapLBilinear :
       map_add' := by
         intro L₁ L₁'
         ext L₂ x
-        -- evaluate in the codomain to reduce to your previously proved lemma
+
         simpa [innerCLM, innerLM] using congrArg (fun f => f x)
           (TensorProduct.mapL_add_left (𝕜 := 𝕜) (L₂ := L₂) (L₁ := L₁) (L₁' := L₁'))
       map_smul' := by
@@ -124,9 +100,6 @@ noncomputable def TensorProduct.mapLBilinear :
     ContinuousLinearMap.mk outerLM h
   exact f
 
-/-- The bilinear map `(L₁, L₂) ↦ TensorProduct.mapL L₁ L₂` is `C^∞`.
-This follows from `mapLBilinear` being a continuous bilinear map between
-finite-dimensional normed spaces. -/
 theorem TensorProduct.mapLBilinear_contDiff :
     ContDiff 𝕜 ⊤ (fun p : (F₁ →L[𝕜] G₁) × (F₂ →L[𝕜] G₂) =>
       TensorProduct.mapLBilinear (𝕜 := 𝕜) p.1 p.2) :=
@@ -135,8 +108,6 @@ theorem TensorProduct.mapLBilinear_contDiff :
     (contDiff_snd)
 
 end MapL
-
-/-! ## Tensor products of (r,s)-tensors -/
 
 namespace Tensor0SBundle
 
@@ -152,8 +123,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 
 end Tensor0SBundle
 
-/-! ## Tensor product of alternating maps -/
-
 namespace ContinuousAlternatingMap
 
 variable
@@ -164,10 +133,6 @@ variable
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
   {m n : ℕ}
 
-/-- The tensor product of `g` and `h` with respect to a bilinear map `f`, as a continuous
-multilinear map on `Fin (m + n)`. Generalizes `tensor0S_product_fun`: the curried product
-`f.compContinuousAlternatingMap₂ g h` is uncurried via `ContinuousMultilinearMap.uncurrySum`
-and relabeled to `Fin (m + n)` via `finSumFinEquiv`. -/
 def tensorProductMap (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
     (f : N →L[𝕜] N' →L[𝕜] N'') :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin (m + n) => M) N'' :=
@@ -176,8 +141,6 @@ def tensorProductMap (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜
       |>.flipAlternating.toContinuousMultilinearMap.flipMultilinear))
   |>.domDomCongr finSumFinEquiv
 
-/-- Evaluation lemma for `tensorProductMap`: the tensor product of `g` and `h` with respect to
-a bilinear map `f` evaluates as `f(g(first m args))(h(last n args))`. -/
 @[simp]
 theorem tensorProductMap_apply (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
     (f : N →L[𝕜] N' →L[𝕜] N'') (w : Fin (m + n) → M) :

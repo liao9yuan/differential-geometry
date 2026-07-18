@@ -4,56 +4,10 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-/-!
-# The Ricci–DeTurck right-hand side as a smooth, compactly-supported tensor section
-
-The Ricci–DeTurck right-hand side
-`deTurckRicciRHS g_bg g x : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ`
-(from `Geometry/Flow/RicciFlow/DeTurckRHS.lean`) is, at each base point `x`, a continuous
-bilinear form on the tangent space — i.e. a covariant `(0,2)`-tensor.  This file
-turns the family `x ↦ deTurckRicciRHS g_bg g x` into a genuine smooth section of
-the project's mixed-tensor bundle and packages it as a `SmoothCcTensor`.
-
-## Rank convention
-
-A continuous bilinear form on `TangentSpace I x` is a covariant `(0,2)`-tensor.
-In the project's bundle convention (`Tensor/RSTensor/Defs.lean`) the fibre
-`TensorRSSpace r s I x = Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x` has `r`
-contravariant slots (fed dual covectors via `dualCovariantCMM`, see
-`Analysis/Spectral/Tensor/ChartTensor/Components/Defs.lean`) and `s` covariant slots.  A covariant
-bilinear form therefore lives in the fibre with `r = 0` covariant-only slots and
-`s = 2`, namely `TensorRSSpace 0 2 I x`, whose underlying object is exactly a
-`(0,2)` continuous multilinear map `Tensor0SSpace 2 I x` extended by a scalar to
-the hom bundle `Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x`.
-
-Accordingly the section delivered here is a `SmoothCcTensor g 0 2`.  The scalar
-embedding `Tensor0SSpace 2 → (Tensor0SSpace 0 →L Tensor0SSpace 2)` is the
-isometric `MixedSection.fromMultilinearSection` of `Tensor/Mixed/Field.lean`.
-
-## Main definitions
-
-* `deTurckRHSBilinToModel x` — the fibrewise continuous linear **isometry**
-  identifying the bilinear-form fibre `TangentSpace I x →L[ℝ] TangentSpace I x
-  →L[ℝ] ℝ` with the model `(0,2)` multilinear fibre
-  `ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ` (operator-norm preserving;
-  constant `1`).  It is the inverse-curry `continuousMultilinearCurryLeftEquiv`
-  composed with the `Fin 1` curry of the inner slot.
-* `deTurckRHSField g_bg g` — the smooth covariant `(0,2)`-tensor field
-  (`Tensor0SField ∞ 2`) whose value at `x` is the model image of
-  `deTurckRicciRHS g_bg g x`.
-* `deTurckRHSSection g_bg g` — the resulting `SmoothCcTensor g 0 2`; compact
-  support is automatic on a compact manifold.
-
-## Main results
-
-* `deTurckRHSBilinToModel_norm_map` — the bridge is a fibre isometry.
-* `deTurckRHSField_apply` — the value of the field recovers the bilinear form.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -75,16 +29,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The fibrewise continuous linear **isometry** identifying a continuous
-bilinear form `F →L[ℝ] F →L[ℝ] ℝ` with the model `(0,2)`-multilinear fibre
-`ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ`.
-
-Constructed as the composite of:
-* `continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => F) ℝ` (separating the
-  first slot — a `LinearIsometryEquiv`, constant `1`), and
-* `continuousMultilinearCurryFin1 ℝ F ℝ` (identifying the inner `[×1]→L` with
-  `F →L[ℝ] ℝ` — also a `LinearIsometryEquiv`, constant `1`),
-postcomposed on the inner arrow.  The result is operator-norm preserving. -/
 def bilinFormToModel (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F] :
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
@@ -117,10 +61,6 @@ theorem bilinFormToModel_symm_apply (F : Type*)
   rw [(bilinFormToModel F).apply_symm_apply T] at h
   simpa using h.symm
 
-/-- **The fibre bridge is an operator-norm isometry (constant `1`).**  Being the
-composite of the `LinearIsometryEquiv`s `continuousMultilinearCurryLeftEquiv` and
-`continuousMultilinearCurryFin1` (both constant `1`), the identification
-`bilinFormToModel` preserves the operator norm. -/
 theorem bilinFormToModel_norm_map (F : Type*)
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     (B : F →L[ℝ] F →L[ℝ] ℝ) :
@@ -144,21 +84,17 @@ theorem bilinFormToModel_norm_map (F : Type*)
       _ = ‖bilinFormToModel F B‖ * ‖v‖ * ‖w‖ := by
           rw [Fin.prod_univ_two]; simp [Matrix.cons_val_zero, Matrix.cons_val_one]; ring
 
-/-- The fibre bridge `bilinFormToModel`, packaged as a `LinearIsometryEquiv`
-(operator-norm preserving, constant `1`). -/
 def bilinFormToModelₗᵢ (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F] :
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗᵢ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
   { bilinFormToModel F with norm_map' := bilinFormToModel_norm_map F }
 
-/-- The pointwise model value of the Ricci–DeTurck right-hand side: the
-`(0,2)`-multilinear map obtained from the bilinear form `deTurckRicciRHS g_bg g x`
-by `bilinFormToModel`. -/
 private def deTurckRHSModelFun (g_bg g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x :=
   Tensor0SSpace.ofModel
     (bilinFormToModel (TangentSpace I x) (deTurckRicciRHS (I := I) g_bg g x))
 
+omit [CompactSpace M] in
 private theorem deTurckRHSModelFun_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSModelFun (I := I) g_bg g x) v =
@@ -167,9 +103,6 @@ private theorem deTurckRHSModelFun_toModel_apply
   rw [Tensor0SSpace.toModel_ofModel]
   exact bilinFormToModel_apply (TangentSpace I x) (deTurckRicciRHS (I := I) g_bg g x) v
 
-/-- **The Ricci–DeTurck right-hand side is a smooth covariant `(0,2)`-tensor
-field.**  The value at `x` is the model `(0,2)`-multilinear map associated to the
-bilinear form `deTurckRicciRHS g_bg g x`. -/
 def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
   letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
@@ -202,46 +135,28 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     rw [deTurckRHSModelFun_toModel_apply]
     rfl⟩
 
+omit [CompactSpace M] in
 @[simp] theorem deTurckRHSField_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSField (I := I) g_bg g x) v =
       deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) :=
   deTurckRHSModelFun_toModel_apply (I := I) g_bg g x v
 
-/-- The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g`, promoted to a smooth
-mixed `(0,2)`-tensor section (a section of the hom bundle
-`Tensor0SSpace 0 →L[ℝ] Tensor0SSpace 2`), via the scalar-extension
-`MixedSection.fromMultilinearSection`.  This is the underlying smooth section of
-the delivered `SmoothCcTensor`. -/
 def deTurckRHSMixedSection (g_bg g : SmoothRiemannianMetric I M) :
     Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯ :=
   MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
     (E := (TangentSpace I : M → Type _)) ∞ (deTurckRHSField (I := I) g_bg g)
 
-/-- **The Ricci–DeTurck right-hand side as a smooth, compactly-supported
-`(0,2)`-tensor section.**  Compact support is automatic on a compact manifold
-(`HasCompactSupport.of_compactSpace`). -/
 def deTurckRHSSection (g_bg g : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 0 2 where
   toSection := deTurckRHSMixedSection (I := I) g_bg g
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- The underlying smooth section of `deTurckRHSSection` is
-`deTurckRHSMixedSection`. -/
 @[simp] theorem deTurckRHSSection_toSection
     (g_bg g : SmoothRiemannianMetric I M) :
     (deTurckRHSSection (I := I) g_bg g).toSection =
       deTurckRHSMixedSection (I := I) g_bg g := rfl
 
-/-- The value of the delivered section recovers the Ricci–DeTurck bilinear form:
-evaluating the underlying `(0,2)` mixed tensor at the canonical unit
-`(0,0)`-tensor `constOfIsEmpty 1` and a tangent pair `v` gives
-`deTurckRicciRHS g_bg g x (v 0) (v 1)`.
-
-The mixed section is `MixedSection.fromMultilinearSection` of `deTurckRHSField`,
-which sends the `(0,0)`-tensor `ω` to `(ω Fin.elim0) • (field x)`; at
-`ω = constOfIsEmpty 1` the scalar is `1`, so the value is the `(0,2)`-field
-`deTurckRHSField g_bg g x`, recovered by `deTurckRHSField_toModel_apply`. -/
 theorem deTurckRHSSection_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel

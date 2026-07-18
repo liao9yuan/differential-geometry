@@ -1,70 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothing
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 
-/-!
-# Parabolic smoothing of the Duhamel (inhomogeneous-heat) integral into every `Hˢ`
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
-inhomogeneous heat equation `∂_t u = Δ_∇ u + F`, `u(0) = 0`, has the
-Duhamel solution
-
-  `u(t) = ∫₀ᵗ e^{(t−s)Δ_∇} F(s) ds`.
-
-After the spatial spectral decomposition this decouples mode by mode: on
-the eigen-coordinate belonging to the connection-Laplacian eigenvalue
-`λᵢ ≥ 0` the heat operator acts as multiplication by `e^{−λᵢ(t−s)}`, so the
-`i`-th coordinate of `u(t)` is the scalar **per-mode Duhamel convolution**
-
-  `φᵢ(t) = ∫₀ᵗ e^{−λᵢ(t−s)} Fᵢ(s) ds`   (`perModeConv λᵢ Fᵢ t`).
-
-This file proves the **pointwise-in-time parabolic-regularity gain** at the
-level of these per-mode coordinates and assembles it into the statement
-that, for `t > 0`, the Duhamel value `u(t)` lands in the spectral Sobolev
-space `Hˢ` for every `σ` provided the forcing is spatially smooth (lands in
-`H^c` for every order `c`, with the same underlying `L²([0,T])` time
-coordinates).  This is the Duhamel half of the analytic-semigroup
-parabolic smoothing that, together with the homogeneous half
-`heat_semigroup_into_all_tensorHs` (companion file), gives the spatial
-`C^∞` of a strong solution.
-
-## The per-mode kernel estimate (the heart)
-
-The genuine smoothing is the **one-derivative pointwise gain**.  By the
-endpoint Cauchy–Schwarz inequality,
-
-  `(φᵢ(t))² ≤ (∫₀ᵗ e^{−2λᵢ(t−s)} ds) · ∫₀ᵗ Fᵢ(s)² ds`,
-
-and the kernel `L²`-mass `mass(λᵢ) = ∫₀ᵗ e^{−2λᵢ(t−s)} ds = (1 −
-e^{−2λᵢt})/(2λᵢ)` satisfies the **uniform-in-`λ`** spectral bound
-
-  `(1 + λᵢ) · mass(λᵢ) ≤ t + 1/2`.
-
-(For small `λ` the mass `→ t`; for large `λ` the `λ⁻¹` decay of the mass is
-exactly compensated by the `(1 + λ)` weight, leaving the constant `1/2`.)
-Hence `(1 + λᵢ) · (φᵢ(t))² ≤ (t + 1/2) · ‖Fᵢ‖²_{L²}` — one Sobolev order is
-gained, uniformly across the spectrum, at every fixed `t > 0`.
-
-Iterating the order: if the forcing is in `H^c` for *every* `c`, the
-gained order `c + 1` is again attained for every `c`, so the Duhamel value
-lies in `⋂_σ Hˢ`.
-
-## Main results
-
-* `duhamelKernelSqIntegral` — the kernel `L²`-mass `∫₀ᵗ e^{−2λ(t−s)} ds`.
-* `one_add_lambda_mul_duhamel_kernel_sq_integral_le` — the uniform-in-`λ`
-  spectral kernel bound `(1 + λ)·mass(λ) ≤ t + 1/2`.
-* `perModeConv_endpoint_sq_le` — the endpoint Cauchy–Schwarz bound
-  `(φ(t))² ≤ mass(λ)·∫₀ᵗ f²`.
-* `one_add_lambda_mul_perModeConv_endpoint_sq_le` — the **per-mode
-  one-derivative-gain estimate** `(1 + λ)·(φ(t))² ≤ (t + 1/2)·∫₀ᵗ f²`.
-
-## Sign convention
-
-Geometer convention `Δ_∇ = −∇*∇`, spectrum `⊆ (−∞, 0]`; resolvent
-`(1 − Δ_∇)⁻¹`, eigenvalues `λᵢ ≥ 0`, heat factor `e^{−λᵢ(t−s)} ∈ (0,1]`,
-weight `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -84,34 +20,20 @@ section Scalar
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
-/-- The kernel `L²`-mass `∫₀ᵗ e^{−2·lam·(t−s)} ds`, as a stand-alone real
-number.  Equals `(1 − e^{−2·lam·t})/(2·lam)` for `lam ≠ 0` and `t` for
-`lam = 0`; the uniform packaging used below is the weighted bound
-`one_add_lambda_mul_duhamel_kernel_sq_integral_le`. -/
 def duhamelKernelSqIntegral (lam t : ℝ) : ℝ :=
   ∫ s in (0 : ℝ)..t, Real.exp (-(2 * lam * (t - s)))
 
-/-- **The telescoped kernel-mass identity.**  For every `lam` and `t`,
-
-  `(2·lam) · ∫₀ᵗ e^{−2·lam·(t−s)} ds = 1 − e^{−2·lam·t}`,
-
-the `s`-primitive of `s ↦ e^{−2·lam·(t−s)}` being itself.  This is
-`kernelIntegral_space` of the scalar maximal-regularity core, specialised to
-decay rate `2·lam`. -/
 theorem two_lambda_mul_duhamelKernelSqIntegral (lam t : ℝ) :
     (2 * lam) * duhamelKernelSqIntegral lam t = 1 - Real.exp (-(2 * lam * t)) := by
   unfold duhamelKernelSqIntegral
   rw [← intervalIntegral.integral_const_mul]
   exact kernelIntegral_space (2 * lam) t
 
-/-- The kernel `L²`-mass is nonnegative for `0 ≤ t`. -/
 theorem duhamelKernelSqIntegral_nonneg {lam t : ℝ} (ht : 0 ≤ t) :
     0 ≤ duhamelKernelSqIntegral lam t := by
   unfold duhamelKernelSqIntegral
   exact intervalIntegral.integral_nonneg ht (fun s _ => (Real.exp_pos _).le)
 
-/-- The kernel `L²`-mass is at most `t` (the integrand is `≤ 1`), for
-`0 ≤ lam` and `0 ≤ t`. -/
 theorem duhamelKernelSqIntegral_le_t {lam t : ℝ} (hlam : 0 ≤ lam) (ht : 0 ≤ t) :
     duhamelKernelSqIntegral lam t ≤ t := by
   unfold duhamelKernelSqIntegral
@@ -125,19 +47,6 @@ theorem duhamelKernelSqIntegral_le_t {lam t : ℝ} (hlam : 0 ≤ lam) (ht : 0 �
         linarith
     _ = t := by simp
 
-/-- **The uniform-in-`λ` spectral kernel bound.**  For `0 ≤ lam` and
-`0 ≤ t`,
-
-  `(1 + lam) · ∫₀ᵗ e^{−2·lam·(t−s)} ds ≤ t + 1/2`.
-
-This is the spectral heart of the Duhamel one-derivative gain: the `λ⁻¹`
-decay of the kernel mass for large `λ` exactly cancels the `(1 + λ)` weight
-(leaving the constant `1/2`), while for `λ → 0` the mass tends to `t`.
-
-Proof.  Write `mass = duhamelKernelSqIntegral lam t`.  Two bounds:
-`mass ≤ t` always (the integrand is `≤ 1`), and `lam·mass ≤ 1/2` (from the
-telescoped identity `2·lam·mass = 1 − e^{−2·lam·t} ≤ 1`).  Then
-`(1 + lam)·mass = mass + lam·mass ≤ t + 1/2`. -/
 theorem one_add_lambda_mul_duhamel_kernel_sq_integral_le {lam t : ℝ}
     (hlam : 0 ≤ lam) (ht : 0 ≤ t) :
     (1 + lam) * duhamelKernelSqIntegral lam t ≤ t + 1 / 2 := by
@@ -156,17 +65,6 @@ theorem one_add_lambda_mul_duhamel_kernel_sq_integral_le {lam t : ℝ}
 
 variable {f : ℝ → ℝ}
 
-/-- **The endpoint Cauchy–Schwarz bound.**  For a forcing `f` continuous on
-`[0,t]` and `0 ≤ t`,
-
-  `(perModeConv lam f t)² ≤ (∫₀ᵗ e^{−2·lam·(t−s)} ds) · ∫₀ᵗ f(s)² ds`.
-
-The square of the kernel-weighted integral of `f` is `≤` the kernel mass
-times the kernel-weighted integral of `f²`; here the weight is the full
-kernel `e^{−2·lam·(t−s)}` paired against `f`, i.e. the weight is
-`e^{−lam·(t−s)}` applied with multiplicity (so that the weighted average of
-`g = e^{−lam·(t−s)}·f / w` recovers the convolution).  We pair the kernel
-`e^{−lam·(t−s)}` with `f` directly through the discriminant inequality. -/
 theorem perModeConv_endpoint_sq_le (lam : ℝ) (hf : Continuous f) {t : ℝ}
     (ht : 0 ≤ t) :
     (perModeConv lam f t) ^ 2
@@ -211,14 +109,6 @@ theorem perModeConv_endpoint_sq_le (lam : ℝ) (hf : Continuous f) {t : ℝ}
   rw [hconv_eq]
   nlinarith [hdiscrim]
 
-/-- **The per-mode one-derivative-gain estimate.**  For a forcing `f`
-continuous on `[0,t]`, `0 ≤ lam` and `0 ≤ t`,
-
-  `(1 + lam) · (perModeConv lam f t)² ≤ (t + 1/2) · ∫₀ᵗ f(s)² ds`.
-
-The endpoint Cauchy–Schwarz bound times the uniform-in-`λ` kernel bound.
-One Sobolev order is gained at every fixed `t > 0`, uniformly across the
-spectrum. -/
 theorem one_add_lambda_mul_perModeConv_endpoint_sq_le (lam : ℝ)
     (hlam : 0 ≤ lam) (hf : Continuous f) {t : ℝ} (ht : 0 ≤ t) :
     (1 + lam) * (perModeConv lam f t) ^ 2
@@ -257,14 +147,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The endpoint mass `H^{c+1}`-summability (the σ-summability heart).**
-For a fixed time `0 ≤ t`, a family of continuous-in-time per-mode forcing
-functions `φ`, and an exponent `c`: if the `H^c`-weighted endpoint masses
-`i ↦ (1 + λᵢ)^c · ∫₀ᵗ (φ i)²` are summable, then the `H^{c+1}`-weighted
-squared endpoint values `i ↦ (1 + λᵢ)^{c+1} · (perModeConv λᵢ (φ i) t)²` are
-summable.  The one-derivative gain `(1 + λᵢ)·(value)² ≤ (t + 1/2)·(mass)`
-applied mode-by-mode dominates the value family by `(t + 1/2)` times the
-forcing-mass family. -/
 theorem duhamel_endpoint_value_weighted_summable
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (c : ℝ) {t : ℝ} (ht : 0 ≤ t)
     (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
@@ -302,12 +184,6 @@ theorem duhamel_endpoint_value_weighted_summable
       _ = (t + 1 / 2) * (tensorSobolevWeight (I := I) (M := M) i c *
             ∫ s in (0 : ℝ)..t, (φ i s) ^ 2) := by ring
 
-/-- **The Duhamel value at fixed time `t`, viewed in `H^{c+1}`.**  For a
-spatially-`H^c` forcing (continuous per-mode functions `φ` with summable
-`H^c`-weighted endpoint masses), the element of `tensorHs (c + 1)` whose
-`i`-th eigen-coordinate is the per-mode Duhamel value
-`perModeConv λᵢ (φ i) t`.  The one-derivative gain places it one Sobolev
-order above the forcing. -/
 def duhamelValueHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (c : ℝ)
     {t : ℝ} (ht : 0 ≤ t)
     (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
@@ -331,9 +207,6 @@ def duhamelValueHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (c : ℝ)
     (duhamelValueHs (I := I) (M := M) c ht φ hφ hmass).coeff i =
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t := rfl
 
-/-- For a spatially-`H^c` forcing with `c ≥ 0`, the value coordinate family
-`i ↦ perModeConv λᵢ (φ i) t` is square-summable, hence the coordinate family
-of an honest `L²` tensor (`H^{c+1} ⊆ L²`). -/
 theorem duhamel_endpoint_value_summable_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {c : ℝ} (hc : 0 ≤ c) {t : ℝ}
     (ht : 0 ≤ t)
@@ -348,22 +221,7 @@ theorem duhamel_endpoint_value_summable_sq
     (duhamelValueHs (I := I) (M := M) c ht φ hφ hmass)
 
 set_option maxHeartbeats 800000 in
-/-- **The Duhamel value at fixed time `t` lands in every `Hˢ` for a
-spatially-smooth forcing.**  Fix `0 ≤ t` and continuous per-mode forcing
-functions `φ`.  Suppose the forcing is **spatially smooth**: its
-`H^c`-weighted endpoint masses `i ↦ (1 + λᵢ)^c · ∫₀ᵗ (φ i)²` are summable
-for *every* `c ≥ 0` (the forcing lies in `H^c` at the integrated-`L²` level
-for every order).  Then for every exponent `σ ≥ 0` there is an `Hˢ` element
-whose chart-locality-free `L²` realization equals the fixed `L²` element
 
-  `u := (eigenbasis).repr.symm (i ↦ perModeConv λᵢ (φ i) t)`
-
-— the Duhamel value at `t`.  This is the precise statement that the Duhamel
-value lies in the spectral smooth subspace `⋂_σ Hˢ`.
-
-The single fixed `u` is realized coherently by every `Hˢ` witness because
-all witnesses have the *same* eigen-coordinate family `i ↦ perModeConv λᵢ
-(φ i) t`, and `tensorHsToL2` is coordinate-faithful. -/
 theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {t : ℝ} (ht : 0 ≤ t)
     (h_compact : IsCompactOperator (tensorResolventL2

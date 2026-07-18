@@ -3,37 +3,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormCompariso
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 
-/-!
-# Pointwise norm bound for the Christoffel slot-correction pieces
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and tensor
-ranks `(r, s)`, the chart-coordinate Levi-Civita decomposition exposes two
-slot-correction families on the bundle fibre `TensorRSSpace r s I b`: the
-input-slot correction `chartTensorRSInputSlotCorrection r s g α T X b k`
-for `k : Fin r`, and the output-slot correction
-`chartTensorRSOutputSlotCorrection r s g α T X b l` for `l : Fin s`. Both
-depend linearly on `T` evaluated at `b` and admit operator-norm
-submultiplicativity bounds; combining with a section-side bound
-`‖S.toSection b‖² ≤ K_S · tensorInnerPointwise` produces the headline
-uniform `tensorInnerPointwise` control.
-
-This file delivers the structural assembly: it consumes a slot-substitution
-sup bound `M_F` and a section-side bound `K_S` as hypotheses and produces
-the combined headline. Continuity-on-compact extractions of these
-constants are produced upstream.
-
-## Public theorem
-
-* `exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -59,6 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensorRSInputSlotCorrection_norm_sq_le_of_F_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -84,6 +60,7 @@ private lemma chartTensorRSInputSlotCorrection_norm_sq_le_of_F_bound
   have h_expand : (M_F * ‖T b‖) ^ 2 = M_F ^ 2 * ‖T b‖ ^ 2 := by ring
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensorRSOutputSlotCorrection_norm_sq_le_of_F_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -109,29 +86,13 @@ private lemma chartTensorRSOutputSlotCorrection_norm_sq_le_of_F_bound
   have h_expand : (M_F * ‖T b‖) ^ 2 = M_F ^ 2 * ‖T b‖ ^ 2 := by ring
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma section_norm_eq_toFun_norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (b : M) :
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
 
-/-- **Pointwise sum bound for the Christoffel slot corrections, parametrised
-by a slot-substitution sup bound and a section-side `tensorInnerPointwise`
-bound.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, tensor
-ranks `(r, s)`, a smooth tangent vector field `X`, and three parameter
-hypotheses providing:
-
-* `M_F ≥ 0` and operator-norm submultiplicativity bounds
-  `‖slot correction‖ ≤ M_F · ‖T b‖` for every input slot `k : Fin r` and
-  output slot `l : Fin s`, uniformly on `tsupport(POU_α)`,
-* `K_S ≥ 0` and a section-side bound
-  `‖S.toSection b‖² ≤ K_S · tensorInnerPointwise g r s b (S.toFun b)
-  (S.toFun b)` uniformly on `tsupport(POU_α)`,
-
-the sum over all slot indices of the squared slot-correction norms at `b`
-is bounded by `((r + s) · M_F² · K_S) · tensorInnerPointwise g r s b
-(S.toFun b) (S.toFun b)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b')

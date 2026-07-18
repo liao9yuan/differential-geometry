@@ -7,65 +7,6 @@ import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Bornology.BoundedOperation
 
-/-!
-# Sobolev embedding `W^{1,p}_chart(M) ↪ L^q` on a closed manifold
-
-For a closed (compact, boundaryless) smooth manifold `M` modelled on an
-inner-product `E`, this file provides a chart-by-chart Sobolev-style continuous
-embedding from the chart-based Sobolev space `W^{1,p}_chart(M)` (defined in
-`Chart/Defs.lean`) into the chart-pushed `L^q` "norm".
-
-The Hölder/finite-measure case (`q ≤ p`) is treated rigorously: on a compact
-manifold, every chart-pushed function vanishes (within the chart target) outside
-a compact set — the toEuclidean image of the chart-image of the
-partition-of-unity tsupport — and Mathlib's
-`MemLp.mono_exponent_of_measure_support_ne_top` then transfers `L^p` membership
-to `L^q` for any lower exponent.
-
-## Main results
-
-* `eLpNorm_chartPushed_p_le_wkpNorm_one` : the order-zero L^p norm of the
-  chart-pushed function is bounded by the order-one chart Sobolev norm
-  (orderwise monotonicity).
-
-* `chartPushed_memLp_of_memWkpChart_subexp` : for `q ≤ p`, the chart-pushed
-  function lies in `L^q` of the chart target (as a subset of finite Euclidean
-  measure carried by the compact image of the partition-of-unity support).
-
-* `eLpNorm_chartPushed_q_le_wkpNorm_one_subexp` : the per-chart `q ≤ p` Hölder
-  bound, with constant given by `(volume of compact chart-image)^{1/q - 1/p}`.
-
-* `lqChartSum_le_wkpNormChart_subexp` : the **summed** chart-pushed `L^q` norm
-  over the canonical partition of unity is bounded by a constant times the
-  full chart-Sobolev `W^{1,p}` norm of `u`.
-
-* `lpChartSum_le_wkpNormChart` : the same statement specialised to `q = p`
-  (no rpow factor, valid for any boundaryless model with the canonical POU).
-
-## Scope and future work
-
-* **Bridge to the intrinsic `L^q`-norm under the Riemannian measure** is left
-  for a follow-up module. That bridge requires uniform bounds on the metric
-  volume density and on the Jacobian of `toEuclidean` over the (finitely-many)
-  supports of the partition-of-unity weights on a compact manifold, plus a
-  comparison of the canonical Haar measure on `E` with the standard volume
-  measure on `EuclideanSpace ℝ (Fin (finrank ℝ E))`. The output is a constant
-  `C(g, ρ)` such that
-  `eLpNorm u q (riemannianMeasure g) ≤ C · lqChartSum`.
-
-* **Sub-critical Sobolev `q = np/(n-p)` Sobolev conjugate embedding** (for
-  `1 ≤ p < n` on closed `M`) is deferred to a follow-up module. The natural
-  chart-by-chart route applies the vendored `sobolev_poincare_unitBall'` after
-  a translation+scaling argument that maps the compact chart-image of the
-  POU support into a unit ball, or uses the `MemW01p`-extension of an
-  indicator-truncated chart-pushed function and the vendored
-  `sobolev_of_memW01p_univ`. Both routes require additional infrastructure not
-  yet in place.
-
-* **Continuous embedding `W^{k,p}(M) ↪ C^0(M)` for `k > n/p`** is deferred.
-
-* **Sobolev algebra `H^k · H^k → H^k` for `k > n/2`** is deferred.
--/
 
 noncomputable section
 
@@ -82,19 +23,17 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The order-zero `L^p` norm of a function is bounded by its order-`k`
-Sobolev norm. -/
 theorem Euclidean.wkpNorm_zero_le_wkpNorm
     {d : ℕ} {k : ℕ} {p : ℝ≥0∞} {u : EuclideanSpace ℝ (Fin d) → ℝ} {Ω : Set (EuclideanSpace ℝ (Fin d))} :
     eLpNorm u p (MeasureTheory.volume.restrict Ω) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p u Ω := by
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
   let innerSum : ℕ → ℝ≥0∞ := fun j =>
     ∑ α : Fin j → Fin d,
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
           (d := d) p j α u Ω) p (MeasureTheory.volume.restrict Ω)
-  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p u Ω =
+  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω =
       ∑ j ∈ Finset.range (k + 1), innerSum j :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum k p u Ω
   have h_inner0 : innerSum 0 = eLpNorm u p (MeasureTheory.volume.restrict Ω) := by
@@ -117,8 +56,6 @@ theorem Euclidean.wkpNorm_zero_le_wkpNorm
   rw [← h_inner0]
   exact h_le
 
-/-- The order-zero `L^p` norm of the chart-pushed function is bounded by the
-chart Sobolev `W^{1,p}_chart` norm of `u`. -/
 theorem eLpNorm_chartPushed_p_le_wkpNorm_one
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -136,19 +73,19 @@ theorem eLpNorm_chartPushed_p_le_wkpNorm_one
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α))
-        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) :=
     Euclidean.wkpNorm_zero_le_wkpNorm
-  have h_le_tsum : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_le_tsum : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ∑' β : M,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
@@ -156,16 +93,14 @@ theorem eLpNorm_chartPushed_p_le_wkpNorm_one
     exact ENNReal.le_tsum α
   exact h_per_α.trans h_le_tsum
 
-/-- For a compact manifold `M` and a chart-source-subordinate POU member `ρ_α`,
-the `tsupport` of `ρ_α` is compact (subset of compact M). -/
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem tsupport_pou_isCompact
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     IsCompact (tsupport (ρ α : M → ℝ)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The image under `extChartAt I α` of the `tsupport` of a subordinate POU
-member is compact in `E`. -/
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem image_extChartAt_tsupport_pou_isCompact
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -180,8 +115,7 @@ private theorem image_extChartAt_tsupport_pou_isCompact
     (continuousOn_extChartAt α).mono hsub
   exact (tsupport_pou_isCompact ρ α).image_of_continuousOn hcont
 
-/-- The `toEuclidean` image of `extChartAt I α '' (tsupport ρ_α)` is compact in
-`EuclideanSpace ℝ (Fin (finrank ℝ E))`, and lies inside `chartTargetEuclid α`. -/
+omit [IsManifold I ∞ M] in
 private theorem image_chartPOU_subset_chartTargetEuclid
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source))
@@ -199,7 +133,7 @@ private theorem image_chartPOU_subset_chartTargetEuclid
     exact (extChartAt I α).map_source hx_source
   exact ⟨z, hz_target, hzy⟩
 
-/-- The `toEuclidean`-image of the chart-image of `tsupport(ρ_α)` is compact. -/
+omit [IsManifold I ∞ M] in
 private theorem chartImage_tsupport_isCompact_toEuclidean
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -209,11 +143,7 @@ private theorem chartImage_tsupport_isCompact_toEuclidean
   (image_extChartAt_tsupport_pou_isCompact (I := I) (M := M) ρ hρ α).image
     toEuclidean.continuous
 
-/-- The chart-pushed function is supported (in the genuine sense, where
-nonzero) inside `toEuclidean '' (extChartAt I α) '' (tsupport ρ_α)`, RESTRICTED
-to `chartTargetEuclid α`. That is, on `chartTargetEuclid α`, the chart-pushed
-function vanishes outside the compact set
-`toEuclidean '' (extChartAt I α) '' (tsupport ρ_α)`. -/
+omit [IsManifold I ∞ M] in
 private theorem chartPushed_eq_zero_off_image_tsupport
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u : M → ℝ) {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -242,9 +172,6 @@ private theorem chartPushed_eq_zero_off_image_tsupport
 
 variable {u : M → ℝ}
 
-/-- For a compact manifold and the canonical chart-atlas POU, the chart-pushed
-function vanishes on `chartTargetEuclid α` outside a compact set, where the
-compact set is the toEuclidean-image of the chart-image of `tsupport(ρ_α)`. -/
 theorem chartPushed_support_subset_compact_in_target
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) :
@@ -258,8 +185,7 @@ theorem chartPushed_support_subset_compact_in_target
   exact chartPushed_eq_zero_off_image_tsupport (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u hy_target hy_off
 
-/-- Volume (Euclidean) of the toEuclidean-image of the chart-image of
-`tsupport(ρ_α)` is finite, since the set is compact. -/
+omit [IsManifold I ∞ M] in
 theorem volume_chartImage_tsupport_lt_top
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -271,14 +197,6 @@ theorem volume_chartImage_tsupport_lt_top
   have hK := chartImage_tsupport_isCompact_toEuclidean (I := I) (M := M) ρ hρ α
   exact hK.measure_lt_top
 
-/-- For `q ≤ p` (with `1 ≤ q ≤ p < ∞`), and `MemWkpChart g 1 p u` (so each
-chart-pushed function is in `MemW1p p`, which contains `MemLp p`), the
-chart-pushed function is in `MemLp q` of the chart target image (under
-`volume.restrict`).
-
-The mechanism: the chart-pushed function is supported (within
-`chartTargetEuclid α`, the only place that matters for `volume.restrict`) on a
-compact set of finite measure. Apply `MemLp.mono_exponent_of_measure_support_ne_top`. -/
 theorem chartPushed_memLp_of_memWkpChart_subexp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -345,9 +263,6 @@ theorem chartPushed_memLp_of_memWkpChart_subexp
       (s := Sα) hfclean_zero_off (ne_of_lt hSα_meas_lt_top) hqp
   exact (MeasureTheory.memLp_congr_ae hae.symm).mp h_fclean_memLp_q
 
-/-- The per-chart Hölder bound: for `q ≤ p`, the chart-pushed `L^q` norm is
-controlled by `(volume of compact chart-image of tsupport(ρ_α))^{1/q - 1/p}`
-times the chart-pushed `L^p` norm. -/
 theorem eLpNorm_chartPushed_q_le_chartPushed_p_subexp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -446,8 +361,6 @@ theorem eLpNorm_chartPushed_q_le_chartPushed_p_subexp
     gcongr
   exact h_le.trans h_step1
 
-/-- Combined: per-chart `L^q` norm bounded by `(vol(compact))^{...}` times the
-chart Sobolev `W^{1,p}` norm of `u`. -/
 theorem eLpNorm_chartPushed_q_le_wkpNorm_one_subexp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -489,9 +402,6 @@ theorem eLpNorm_chartPushed_q_le_wkpNorm_one_subexp
     mul_le_mul' h2 le_rfl
   exact h1.trans h3
 
-/-- The sum of chart-pushed `L^q` norms over the canonical partition of unity
-is bounded by `(sup over α with non-empty support of vol(K_α))^{1/q-1/p}` times
-`(N : the count of α with nonempty support)` times the chart Sobolev norm. -/
 theorem lqChartSum_le_wkpNormChart_subexp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -516,11 +426,6 @@ theorem lqChartSum_le_wkpNormChart_subexp
   exact eLpNorm_chartPushed_q_le_wkpNorm_one_subexp (I := I) (M := M) g
     hq_pos hp_top hqp hu α
 
-/-- The sum of chart-pushed `L^p` norms is at most `N * wkpNormChart`, where
-`N` counts charts with non-empty POU support — but more cleanly: the sum is
-already bounded by `wkpNormChart` (since each per-chart `L^p` is bounded by
-the per-chart `wkpNorm`, and the sum is bounded by `tsum wkpNorm` =
-`wkpNormChart`). -/
 theorem lpChartSum_le_wkpNormChart
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -538,7 +443,7 @@ theorem lpChartSum_le_wkpNormChart
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α))
-        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -552,7 +457,7 @@ theorem lpChartSum_le_wkpNormChart
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)))
         ≤ ∑' α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 p
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -560,9 +465,6 @@ theorem lpChartSum_le_wkpNormChart
     ENNReal.tsum_le_tsum h_per
   exact h_step1
 
-/-- If `u ∈ W^{1,p}_chart(M)`, then for every chart `α`, the chart-pushed function
-is in `L^p(volume.restrict (chartTargetEuclid α))`. Direct corollary of the
-definition (since `MemWkp 1 p` includes the L^p part). -/
 theorem chartPushed_memLp_p
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -575,10 +477,6 @@ theorem chartPushed_memLp_p
       (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)) :=
   (hu α).memLp
 
-/-- A more user-friendly version of `chartPushed_memLp_of_memWkpChart_subexp`,
-restated with `1 ≤ q` and `q ≤ p`: on a closed manifold, every chart-pushed
-function from a `W^{1,p}_chart` element lies in `L^q` for any `1 ≤ q ≤ p`,
-because the function is supported on a compact set of finite Euclidean volume. -/
 theorem chartPushed_memLq_le_p
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

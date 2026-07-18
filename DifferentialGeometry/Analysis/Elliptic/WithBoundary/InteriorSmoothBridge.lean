@@ -1,34 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorVariational
 
-/-!
-# Smooth bridge for the variational Laplacian
-(with-boundary, half-space model, interior-supported variant)
-
-This file connects the variational Laplacian via Lax-Milgram
-(`resolventInterior`) to the classical with-boundary Laplace–Beltrami
-operator `Δ_g_with_boundary` on interior-supported smooth functions.
-
-## Strategy
-
-The smooth bridge identity, for `u, v ∈ InteriorSmoothScalar g` with both
-having interior support, is Green's first identity (with-boundary, interior
-support): the boundary terms vanish because both test functions have support
-contained in `I.interior M`. Hence the H¹ inner product reduces to an
-L²-inner-product against `(u - Δ_g_with_boundary u)`.
-
-We work with the L² class of `(u - Δ_g_with_boundary u)` rather than packaging
-it as another `InteriorSmoothScalar`, because `Δ_g_with_boundary u` is `C^∞`
-only on `I.interior M` (not globally on `M`); however it is continuous on `M`
-and supported in `tsupport u ⊆ I.interior M`, hence integrable and in `Lp 2`.
-
-## Main results
-
-* `oneSubLapClassicalLp`: the L² class of `u - Δ_g_with_boundary u`.
-* `interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul`: the H¹ inner product
-  expressed as an integral against `(u - Δ_g_with_boundary u)`.
-* `smoothToH1ComplInterior_eq_resolventInterior_oneSubLap`: the central bridge,
-  `smoothToH1ComplInterior u = resolventInterior g (oneSubLapClassicalLp u)`.
--/
 
 noncomputable section
 
@@ -56,15 +27,13 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The function `u - Δ_g_with_boundary u` is continuous on a compact `M`,
-hence `MemLp 2` against the (finite) Riemannian volume measure. -/
+omit [SigmaCompactSpace M] [CompactSpace M] in
 lemma InteriorSmoothScalar.oneSubLap_continuous
     {g : SmoothRiemannianMetric (I_half n) M} (u : InteriorSmoothScalar g) :
     Continuous (fun x : M =>
@@ -83,14 +52,11 @@ lemma InteriorSmoothScalar.oneSubLap_memLp
   exact u.oneSubLap_continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The L² class of `(u - Δ_g_with_boundary u)`. -/
 noncomputable def InteriorSmoothScalar.oneSubLapClassicalLp
     {g : SmoothRiemannianMetric (I_half n) M} (u : InteriorSmoothScalar g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   u.oneSubLap_memLp.toLp _
 
-/-- The Green-identity computation: the H¹ inner product equals an L²
-inner product against `(u - Δ_g_with_boundary u)`. -/
 theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : InteriorSmoothScalar g) :
@@ -168,7 +134,6 @@ theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
   rw [integral_sub h_uv h_vΔu]
   ring
 
-/-- Reformulation as an L² inner product. -/
 theorem interiorSmoothScalarH1Inner_eq_lpInner_oneSubLap
     {g : SmoothRiemannianMetric (I_half n) M} (u v : InteriorSmoothScalar g) :
     interiorSmoothScalarH1Inner u v =
@@ -200,8 +165,6 @@ theorem interiorSmoothScalarH1Inner_eq_lpInner_oneSubLap
       from RCLike.inner_apply _ _]
   ring
 
-/-- Inner product on `H1ComplInterior g` of two smooth lifts equals the smooth
-H¹ inner product. -/
 @[simp] lemma inner_smoothToH1ComplInterior_smoothToH1ComplInterior
     {g : SmoothRiemannianMetric (I_half n) M} (u v : InteriorSmoothScalar g) :
     ⟪smoothToH1ComplInterior g u, smoothToH1ComplInterior g v⟫_ℝ =
@@ -213,7 +176,6 @@ H¹ inner product. -/
   rw [UniformSpace.Completion.inner_coe (𝕜 := ℝ) u v]
   rfl
 
-/-- Variational identity for smooth lifts (with boundary, interior-supported). -/
 @[simp] lemma H1ComplInteriorBilin_smoothToH1ComplInterior_smoothToH1ComplInterior
     {g : SmoothRiemannianMetric (I_half n) M} (u v : InteriorSmoothScalar g) :
     H1ComplInteriorBilin g (smoothToH1ComplInterior g u) (smoothToH1ComplInterior g v) =
@@ -221,7 +183,6 @@ H¹ inner product. -/
   rw [H1ComplInteriorBilin_apply]
   exact inner_smoothToH1ComplInterior_smoothToH1ComplInterior u v
 
-/-- The variational identity at smooth test functions. -/
 theorem interiorSmoothScalar_bilin_eq_lpFunctional_smooth
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : InteriorSmoothScalar g) :
@@ -264,9 +225,6 @@ theorem smoothToH1ComplInterior_bilin_eq_lpFunctional
   exact congrFun
     ((denseRange_smoothToH1ComplInterior g).equalizer hL_cont hR_cont hLR_smooth) w
 
-/-- **Smooth bridge.** The lift of an interior-supported smooth scalar `u`
-to `H1ComplInterior g` is the resolvent of `(1 - Δ_g)` applied to the L² class
-of `(u - Δ_g_with_boundary u)`. -/
 theorem smoothToH1ComplInterior_eq_resolventInterior_oneSubLap
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : InteriorSmoothScalar g) :

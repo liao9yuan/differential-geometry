@@ -34,11 +34,11 @@ set_option backward.isDefEq.respectTransparency false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Quadratic bounds on unit tangent bundles
 
-Metric unit tangent bundles, fixed-metric compactness, and unit-vector quadratic bounds.
--/
+
+
+
+
 
 noncomputable section
 
@@ -64,12 +64,12 @@ instance metricUnitTop (g : SmoothRiemannianMetric I M) :
 
 namespace MetricUnitTangent
 
-/-- Base point of a unit tangent vector. -/
+
 def base {g : SmoothRiemannianMetric I M}
     (p : MetricUnitTangent (I := I) (M := M) g) : M :=
   (p.1).proj
 
-/-- Fiber vector of a unit tangent vector. -/
+
 def vec {g : SmoothRiemannianMetric I M}
     (p : MetricUnitTangent (I := I) (M := M) g) :
     TangentSpace I (base (I := I) (M := M) p) :=
@@ -100,7 +100,7 @@ theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
 
 end MetricUnitTangent
 
-/-- Unit tangent vectors over a closed time slab for a time-dependent metric. -/
+
 def MetricUnitTangentSlab
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real) : Type _ :=
   Σ t : {t : Real // t ∈ Set.Icc t0 t1}, MetricUnitTangent (I := I) (M := M) (G t.1)
@@ -112,9 +112,9 @@ instance metricUnitTangentSlabTop
     (Σ t : {t : Real // t ∈ Set.Icc t0 t1},
       MetricUnitTangent (I := I) (M := M) (G t.1)))
 
-/-- Geometric time slab of unit tangent vectors, with the subspace topology
-from `{t // t ∈ K} × TangentBundle`.  This is the compactness/continuity
-object for time-dependent unit-tangent arguments. -/
+
+
+
 def MetricUnitTangentTimeSlab
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real) : Type _ :=
   {q : ({t : Real // t ∈ K} × TangentBundle I M) //
@@ -127,14 +127,14 @@ instance metricUnitTangentTimeSlabTop
     {q : ({t : Real // t ∈ K} × TangentBundle I M) //
       (G q.1.1).inner q.2.proj q.2.2 q.2.2 = 1})
 
-/-- Interval version of the geometric unit-tangent time slab. -/
+
 abbrev MetricUnitTangentIccSlab
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real) : Type _ :=
   MetricUnitTangentTimeSlab (I := I) (M := M) G (Set.Icc t0 t1)
 
 namespace MetricUnitTangentTimeSlab
 
-/-- Time coordinate of a geometric unit-tangent time slab point. -/
+
 def time {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : Real :=
   q.1.1.1
@@ -145,18 +145,18 @@ theorem time_mem {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     time (I := I) (M := M) q ∈ K :=
   q.1.1.2
 
-/-- Tangent-bundle point of a geometric unit-tangent time slab point. -/
+
 def bundlePoint {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
     TangentBundle I M :=
   q.1.2
 
-/-- Base point of a geometric unit-tangent time slab point. -/
+
 def base {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : M :=
   (bundlePoint (I := I) (M := M) q).proj
 
-/-- Tangent vector of a geometric unit-tangent time slab point. -/
+
 def vec {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
     TangentSpace I (base (I := I) (M := M) q) :=
@@ -209,14 +209,14 @@ theorem vec_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
 
 end MetricUnitTangentTimeSlab
 
-/-- Evaluate a covariant two-tensor on the repeated vector `(v,v)`. -/
+
 def quad02
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (v : TangentSpace I x) : Real :=
   A (fun _ : Fin 2 => v)
 
-/-- Evaluate a covariant two-tensor on two explicit tangent vectors. -/
+
 def eval02
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -397,8 +397,8 @@ private theorem quad02_add_smul_eq
             rw [hv_add, hw_add, hsym]
             ring
 
-/-- A positive-semidefinite symmetric covariant two-tensor kills every vector
-paired with a null vector. -/
+
+
 theorem psd_null_left
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -438,7 +438,7 @@ theorem psd_null_left
       hden_sq_pos
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
 
-/-- Right-sided version of `psd_null_left`, using symmetry. -/
+
 theorem psd_null_right
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -452,15 +452,15 @@ theorem psd_null_right
   rw [← hsym v w]
   exact psd_null_left (I := I) (M := M) A hsym hpsd hnull w
 
-/-!
-## Unit tangent topology producers
 
-These are the reusable bundle-side frontiers needed by compactness arguments
-for pointwise tensor inequalities.  Ricci-flow preservation code should consume
-these facts rather than carrying its own unit-tangent compactness assumptions.
--/
 
-/-- Continuity of the metric quadratic form on the tangent bundle. -/
+
+
+
+
+
+
+
 theorem metricQuad_cont
     (g : SmoothRiemannianMetric I M) :
     Continuous (fun p : TangentBundle I M => g.inner p.proj p.2 p.2) := by
@@ -489,15 +489,15 @@ theorem metricQuad_cont
   simpa [Bundle.Trivial.homeomorphProd, TotalSpace.toProd] using
     (continuous_snd.comp hprod)
 
-/-- The unit equation for a smooth metric is closed in the tangent bundle. -/
+
 theorem metricUnit_closed
     (g : SmoothRiemannianMetric I M) :
     IsClosed {p : TangentBundle I M | g.inner p.proj p.2 p.2 = 1} := by
   simpa [Set.setOf_eq_eq_singleton] using
     isClosed_singleton.preimage (metricQuad_cont (I := I) (M := M) g)
 
-/-- On a compact subset of one tangent trivialization, the metric quadratic
-form has a positive lower bound on model-unit vectors. -/
+
+
 private theorem coordMetric_lower
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -560,8 +560,8 @@ private theorem coordMetric_lower
     exfalso
     exact hSne ⟨(x, w), ⟨hxK, by simpa [Metric.sphere, dist_eq_norm] using hw⟩⟩
 
-/-- Coordinate norm bound for metric-unit tangent vectors over a compact base
-piece inside one tangent trivialization. -/
+
+
 private theorem coordMetric_bound
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -630,8 +630,8 @@ private theorem coordMetric_bound
     have hr_le_sq : r ≤ r * r := by nlinarith
     linarith
 
-/-- Unit tangent vectors over one compact base piece inside one trivialization
-form a compact set. -/
+
+
 private theorem unitRest_compact
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -760,11 +760,11 @@ private theorem unitRest_compact
   haveI : CompactSpace D := isCompact_iff_compactSpace.mp hDcompact
   exact isCompact_range hmkCont
 
-/-- Compactness of the unit tangent bundle over a compact base.
 
-The intended proof is by local trivializations of `TangentBundle I M`, compact
-model unit spheres in finite-dimensional fibers, and a finite subcover of the
-compact base. -/
+
+
+
+
 theorem metricUnit_compact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
@@ -810,11 +810,11 @@ theorem metricUnit_compact
   rw [hunion]
   exact t.isCompact_biUnion hlocal_compact
 
-/-- Continuity of evaluating a smooth `(0,2)` tensor field on the repeated
-unit-tangent vector.
 
-This is the total-space version of smooth tensor evaluation: the input vector is
-the tautological vector over the tangent bundle, not a base-indexed section. -/
+
+
+
+
 theorem metricUnit_quadCont
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -851,7 +851,7 @@ theorem metricUnit_quadCont
     (n := 2) b hb (fun p => A (b p)) hA v hv
   simpa [quad02, b, v] using hEval
 
-/-- A covariant two-tensor scales quadratically on a repeated vector. -/
+
 theorem tensor02_smul2
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -868,7 +868,7 @@ theorem tensor02_smul2
   simpa [quad02, Fin.prod_univ_two, pow_two, smul_eq_mul,
     mul_assoc, mul_comm, mul_left_comm] using hmap
 
-/-- A Riemannian metric scales quadratically on a repeated vector. -/
+
 theorem metric_smul2
     (g : SmoothRiemannianMetric I M) {x : M}
     (a : Real) (v : TangentSpace I x) :

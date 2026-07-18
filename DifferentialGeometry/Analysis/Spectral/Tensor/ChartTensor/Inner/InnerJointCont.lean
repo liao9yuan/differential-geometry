@@ -3,35 +3,10 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 
-/-!
-# Joint continuity of the chart-frame `(r, s)`-quadratic form
-
-For a smooth Riemannian metric `g` on a manifold `M` and a chart base
-point `α : M`, the diagonal quadratic form
-`(b, T) ↦ chartTensorInnerPointwise_rs_model g r s α b T T` is jointly
-continuous on `baseSet × Set.univ`, where `baseSet` is the trivialization
-base set of the tangent bundle at `α`.
-
-The proof follows the canonical finite-basis decomposition pattern:
-expand `T` in a fixed finite basis of the model fibre, use bilinearity of
-the form to reduce the diagonal value to a finite double sum of products
-of the form `(coordᵢ T) * (coordⱼ T) * F_{i,j}(b)`, where the `F_{i,j}` are
-the chart-frame inner products of basis pairs (continuous in `b` on
-`baseSet`) and the coordinate functionals are continuous linear maps on
-the finite-dimensional model fibre. Joint continuity then follows from
-continuity of products and finite sums.
-
-## Main result
-
-* `chartTensorInnerPointwise_rs_model_quadratic_continuousOn` — joint
-  `ContinuousOn` for the diagonal quadratic form on
-  `baseSet ×ˢ Set.univ`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -48,19 +23,12 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 section Algebra
 
-/-- Bilinear expansion of the chart-frame `(r, s)`-inner product on the
-diagonal in a fixed finite basis. The proof reduces to two left-linear
-sums by symmetry-free distributivity over the basis decomposition.
-
-Mirrors the analogous expansion in
-`Geometry/Metric/TensorInner/TensorRSRiemannianBundle.lean` for the (chart-independent)
-metric inner product. -/
 private lemma chartTensorInnerPointwise_rs_model_basis_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     {ι : Type*} [Fintype ι]
@@ -160,13 +128,6 @@ section JointCont
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- Joint continuity of the chart-frame `(r, s)`-diagonal quadratic form.
-
-For a smooth Riemannian metric `g`, a chart base point `α`, and ranks
-`(r, s)`, the function
-`(b, T) ↦ chartTensorInnerPointwise_rs_model g r s α b T T`
-is continuous on the product `baseSet ×ˢ Set.univ`, where `baseSet` is
-the trivialization base set of the tangent bundle at `α`. -/
 theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ContinuousOn

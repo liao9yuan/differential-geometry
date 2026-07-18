@@ -24,11 +24,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Certification
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 private theorem reaction_bound_of_abs {a b R : Real}
     (h : |a - b| ≤ R) : b ≤ a + R := by
@@ -37,8 +37,8 @@ private theorem reaction_bound_of_abs {a b R : Real}
   have hle : -R ≤ a - b := le_trans hnegR hnegabs
   linarith
 
-/-- The smallness condition `4 K delta < 1` makes the Lipschitz reaction error
-smaller than the half-metric gain on nonzero tangent vectors. -/
+
+
 private theorem reactionErr_lt_gain
     {K epsilon delta c g : Real}
     (hK : 0 ≤ K)
@@ -61,9 +61,9 @@ private theorem reactionErr_lt_gain
   have hmul := mul_lt_mul_of_pos_right hkc_lt hepsg_pos
   nlinarith
 
-/-- Produce the strict-barrier constants and pointwise estimates from the
-metric time-gain control and the uniform small-barrier reaction Lipschitz
-bound. -/
+
+
+
 theorem strictBarrierBounds
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -147,15 +147,15 @@ theorem strictBarrierBounds
       (c := delta + t - t0) (g := (G t).inner x v v)
       hK hepsilon.1 hdelta htime_nonneg htime_le hsmall ((G t).pos x v hv)
 
-/--
-Parabolic supersolution package for the drifted tensor inequality
 
-`(partial_t - Delta) S >= X^k nabla_k S + N(S,g,t)`.
 
-The evaluated inequality is kept as an analytic predicate in this first
-interface pass, but its spatial part is the direct tensor heat-with-drift
-operator evaluated on supplied first and second covariant derivative tensors.
--/
+
+
+
+
+
+
+
 structure TensorParabolicSupersolutionWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -168,13 +168,13 @@ structure TensorParabolicSupersolutionWithDriftOn
     TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N
       nabla2S nablaS T
 
-/-! ## Barrier proof blocks -/
 
-/--
-Step 1: the barrier is initially positive definite.
 
-This is the `S_epsilon(t0) = S(t0) + epsilon * delta * g(t0)` step.
--/
+
+
+
+
+
 theorem tensorBarrier_initial_positive
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -195,7 +195,7 @@ theorem tensorBarrier_initial_positive
     mul_pos hcoeff hmetric
   exact add_pos_of_nonneg_of_pos hS hbarrier
 
-/-- Choose a short time step satisfying both slab containment and `4 K delta < 1`. -/
+
 private theorem exists_small_delta
     {t0 T delta0 K : Real}
     (hroom : t0 < T)
@@ -236,10 +236,10 @@ private theorem exists_small_delta
     (And.intro hdelta_pos
       (And.intro hdelta_le_delta0 (And.intro htime hstrict)))
 
-/--
-Step 2: the metric-variation and Lipschitz estimates make the barrier a strict
-supersolution on a sufficiently short slab.
--/
+
+
+
+
 theorem tensorBarrier_strict_supersolution
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -278,14 +278,14 @@ theorem tensorBarrier_strict_supersolution
     hsubInterior hparabolic.evaluatedInequality
     metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
 
-/--
-Compatibility adapter from the old regularity package to the certificate
-route.
 
-The old package asks scalar signs for every strict-barrier derivative witness.
-This theorem is the only place in the old raw WMP route where that stronger
-field is used: it turns the strict-barrier witnesses into `TensorStrictCert`s.
--/
+
+
+
+
+
+
+
 theorem certSlab_of_reg
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -323,8 +323,8 @@ theorem certSlab_of_reg
     hreg.firstNullScalarSigns epsilon delta t0 hepsilon.1 hdelta hsub
       nabla2Barrier nablaBarrier hstrict hnull d
 
-/-- Section-backed strict-barrier certificates with scalar signs tied to the
-section covariant derivative witnesses. -/
+
+
 theorem strictCert_sec
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -405,9 +405,9 @@ theorem strictCert_sec
       (I := I) (cov d.t1) (G d.t1) (hmc d.t1))
     hXsec.symm
 
-/-- Compatibility adapter from the old section regularity package to the
-certificate route.  New section producers should use `strictCert_sec` instead,
-where the derivative witnesses are fixed by `TensorSpatialDerivs`. -/
+
+
+
 theorem certSlab_of_sectionReg
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

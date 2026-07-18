@@ -3,59 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.CutoffChartComponentMemWkp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
 
-/-!
-# Iterated Sobolev regularity of the covariant-gradient partition-of-unity chart
-component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, this file propagates
-iterated Euclidean Sobolev regularity from the partition-of-unity-weighted chart
-components of the eigenvector resolvent to those of its section-level covariant
-gradient `tensorCovGradL2Compl g r s` — an `(r, s + 1)`-tensor.
-
-## The bridge
-
-The committed almost-everywhere identity
-`eigenvectorCovGrad_pou_chartComponent_ae_eq` expresses the `μ⁻¹`-rescaled
-canonical chart component of the covariant gradient as the sum of three terms on
-the Euclidean chart target:
-
-* the established weak chart partial `eigenvectorChartWeakPartial` of the
-  eigenvector chart component — a genuine weak partial of a `W^{K+1,2}`
-  function, hence `W^{K,2}` by uniqueness of weak partials and
-  `MemWkp.chosenWeakPartial_mem`;
-* the partition-of-unity Leibniz cross-term limit
-  `covGradPouLeibnizCrossLimit` — a globally `C^∞`, compactly supported
-  multiplier (a chart-Euclidean partial of the chart-pushed
-  partition-of-unity weight) times the `W^{K,2}` cutoff chart component;
-* the Christoffel-correction limit `covGradChristoffelLimit` — a finite sum,
-  over component multi-indices, of a chart-target-`C^∞` coefficient
-  (`covDerivLowerOrderCoeff`, indicator-cut to the partition-of-unity kernel)
-  times the `W^{K,2}` eigenvector chart component, which vanishes almost
-  everywhere off that kernel.
-
-`MemWkp K 2` is invariant under almost-everywhere equality, closed under finite
-sums, scalar multiplication, and the workhorse "smooth coefficient × ae-kernel-
-vanishing factor" closure, so the three-term sum — and hence the rescaled
-covariant-gradient chart component — is `W^{K,2}`-regular.
-
-## Main result
-
-* `eigenvectorCovGrad_pou_memWkp` — iterated Sobolev regularity
-  (`W^{K,2}`) of the partition-of-unity Euclidean chart component of the
-  covariant gradient `tensorCovGradL2Compl g r s` of the eigenvector resolvent,
-  given iterated Sobolev regularity (`W^{K+1,2}`) of every partition-of-unity
-  chart component of the eigenvector resolvent at every chart centre.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -88,10 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **A weak partial of a `W^{K+1,2}` function is `W^{K,2}`.** Given a locally
-`L²` function `gfun` that is a `DeGiorgi.HasWeakPartialDeriv` (direction `k`) of
-a function `u` lying in `MemWkp (K + 1) 2` on an open set `Ω`, the function
-`gfun` lies in `MemWkp K 2` on `Ω`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_of_hasWeakPartialDeriv
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     {k : Fin (Module.finrank ℝ E)} {gfun u : EuclN → ℝ}
@@ -119,12 +66,6 @@ private lemma memWkp_of_hasWeakPartialDeriv
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
-/-- **`MemWkp` closure for a chart-target-smooth coefficient times an
-ae-kernel-vanishing `MemWkp K 2` factor.** For a coefficient `coef` that is
-`C^∞` on the open Euclidean chart target and a factor that is `MemWkp K 2` on
-the chart target and vanishes almost everywhere off the compact
-partition-of-unity kernel `chartPouKernel β`, the pointwise product lies in
-`MemWkp K 2` on the chart target. -/
 private lemma memWkp_coef_mul_factor
     (β : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -229,13 +170,7 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `eigenvectorVec_pou_memWkp`.** The
-partition-of-unity Euclidean chart components of the chart-locality-free
-eigenvector vector `tensorResolventEigenbasisVec` are `MemWkp N 2` on
-every chart target, given that those of the `L²`-coercion of the chart-locality-
-free eigenvector resolvent are `MemWkp N 2`. The two chart components differ by
-the nonzero scalar `μ⁻¹` (`eigenvector_chartComponent_eq`), and
-`MemWkp` is scalar-invariant; the iteration order is preserved. -/
+
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -313,10 +248,7 @@ private lemma eigenvectorVec_pou_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `eigenvectorChartWeakPartial_memWkp`.** The
-established weak chart partial `eigenvectorChartWeakPartial` of the
-eigenvector chart component is a genuine weak partial of that chart component;
-since the chart component is `W^{K+1,2}`, the weak partial is `W^{K,2}`. -/
+
 private lemma eigenvectorChartWeakPartial_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -364,13 +296,7 @@ private lemma eigenvectorChartWeakPartial_memWkp
   exact memWkp_of_hasWeakPartialDeriv (K := K) hΩ_open hg_weak hg_loc hu
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `covGradPouLeibnizCrossLimit_memWkp`.** By
-definition `covGradPouLeibnizCrossLimit` is the chart-Euclidean
-partial of the chart-pushed partition-of-unity weight — a globally `C^∞`,
-compactly supported multiplier — times the cutoff Euclidean chart component of
-the chart-locality-free eigenvector. The cutoff component is `W^{K,2}` by the
-cutoff ↔ partition-of-unity bridge, and the multiplier preserves `W^{K,2}`
-regularity via `MemWkp.smul_smooth_bounded`. -/
+
 private lemma covGradPouLeibnizCrossLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -470,14 +396,7 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
   exact h_prod
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `covGradChristoffelLimit_memWkp`.** By
-definition `covGradChristoffelLimit` is a finite sum, over
-component multi-indices, of an indicator-cut chart-target-`C^∞` coefficient times
-a chart-locality-free eigenvector chart component. The coefficient is `C^∞` on
-the chart target, and the chart component is `W^{K,2}` and vanishes almost
-everywhere off the partition-of-unity kernel — so each summand is `W^{K,2}` by
-the "smooth coefficient × kernel-vanishing factor" closure; a finite sum of
-`W^{K,2}` functions is `W^{K,2}`. -/
+
 private lemma covGradChristoffelLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -634,23 +553,7 @@ private lemma covGradChristoffelLimit_memWkp
   exact h_sum
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of `eigenvectorCovGrad_pou_memWkp`.** For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, an
-iteration order `K`, a chart centre `β` and an `(r, s + 1)`-component multi-index
-`Q'`, if every partition-of-unity Euclidean chart component of the `L²`-coercion
-of the chart-locality-free eigenvector resolvent
-`eigenvectorResolvent g r s i` — taken at every chart centre and
-for every component multi-index — is iterated Sobolev regular of order `K + 1`
-(`W^{K+1,2}`), then the partition-of-unity Euclidean chart `Q'`-component of the
-section-level covariant gradient `tensorCovGradL2Compl g r s` of that resolvent
-is iterated Sobolev regular of order `K` (`W^{K,2}`) on the chart-`β` target.
 
-The committed identity `eigenvectorCovGrad_pou_chartComponent_ae_eq`
-decomposes the `μ⁻¹`-rescaled covariant-gradient chart component into a weak
-chart partial of the eigenvector chart component, a partition-of-unity Leibniz
-cross-term limit, and a Christoffel-correction limit; each of the three is
-`W^{K,2}`, and `MemWkp` is closed under almost-everywhere equality, addition,
-subtraction and scalar multiplication. -/
 theorem eigenvectorCovGrad_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)

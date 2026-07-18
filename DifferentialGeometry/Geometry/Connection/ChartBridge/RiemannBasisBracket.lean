@@ -6,33 +6,6 @@ import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 
-/-!
-# Vanishing of the chart-basis Lie bracket at the base point
-
-The chart-basis tangent-bundle sections `chartBasisVecFiber x₀ i` (defined in
-`Geometry.Metric.ChartGram`) are obtained by transporting a fixed model-space basis
-vector through the inverse of the tangent-bundle trivialization centred at `x₀`. On the
-base set of that trivialization (which is the chart source `(chartAt H x₀).source`), the
-chart pullback of such a section is *constant* — it equals the fixed model-space basis
-vector. Consequently the manifold Lie bracket of any two chart-basis sections vanishes at
-the base point: these are coordinate vector fields, and coordinate vector fields commute.
-
-This is the chart-coordinate statement `[∂ⱼ, ∂ₖ](x₀) = 0`. It does **not** assert that the
-Christoffel symbols vanish, only that the bracket of two coordinate frame fields is zero.
-
-## Main results
-
-* `chartBasisVecFiber_symmL_apply` — on the base set, `chartBasisVecFiber x₀ i x` is the
-  image of the model-basis vector under the inverse trivialization `symmL`.
-* `chartBasisVecFiber_pullback_eq_const` — the chart pullback of `chartBasisVecFiber x₀ i`
-  through `(extChartAt I x₀).symm` is eventually constant near `extChartAt I x₀ x₀`.
-* `mlieBracket_chartBasisVec_self_eq_zero` — the manifold Lie bracket of two chart-basis
-  sections vanishes at the base point.
-
-The construction mirrors `DifferentialGeometry.Coordinates.coordinateFrameAt_bracket_zero`
-in `Coordinates.CoordinateFrame`, specialised to the `chartBasisVecFiber` carrier used by
-the chart-Riemann bridge.
--/
 
 noncomputable section
 
@@ -49,24 +22,17 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The base set of the tangent-bundle trivialization at `x₀` is the chart source. -/
+omit [FiniteDimensional ℝ E] in
 private lemma chartBasis_baseSet_eq_chartSource (x₀ : M) :
     (trivializationAt E (TangentSpace I) x₀).baseSet = (chartAt H x₀).source := by
   rfl
 
-/-- On the base set, the chart-basis fiber vector is the inverse trivialization `symmL`
-applied to the fixed model-basis vector. This rewrites the bare `Trivialization.symm`
-appearing in the definition of `chartBasisVecFiber` into the continuous-linear `symmL`
-form, which `TangentBundle.symmL_trivializationAt` identifies with a chart derivative. -/
 private lemma chartBasisVecFiber_symmL_apply (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     chartBasisVecFiber (I := I) x₀ i x =
       (trivializationAt E (TangentSpace I) x₀).symmL ℝ x ((chartModelBasis E) i) := by
   rw [Trivialization.symmL_apply]
   rfl
 
-/-- On the chart domain, the chart-basis section is the derivative of `(extChartAt I x₀).symm`
-applied to the fixed model-space basis vector. This is the analogue of
-`Coordinates.coordinateFrameAt_apply_of_mem` for the `chartBasisVecFiber` carrier. -/
 private lemma chartBasisVecFiber_apply_of_mem {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (i : Fin (Module.finrank ℝ E)) :
@@ -79,9 +45,6 @@ private lemma chartBasisVecFiber_apply_of_mem {x₀ x : M}
   exact congrArg (fun L : E →L[ℝ] TangentSpace I x => L ((chartModelBasis E) i))
     (TangentBundle.symmL_trivializationAt (I := I) (𝕜 := ℝ) hx_src)
 
-/-- The chart pullback of the chart-basis section through `(extChartAt I x₀).symm` is
-eventually equal, near `extChartAt I x₀ x₀`, to the constant model-space basis vector.
-This expresses that `chartBasisVecFiber x₀ i` is a coordinate vector field. -/
 private lemma chartBasisVecFiber_pullback_eq_const (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x₀).symm
         (chartBasisVecFiber (I := I) x₀ i) (Set.range I)
@@ -103,21 +66,11 @@ private lemma chartBasisVecFiber_pullback_eq_const (x₀ : M) (i : Fin (Module.f
     (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)
     ((chartModelBasis E) i)
 
-/-- The Lie bracket within a set of two constant model-space vector fields vanishes. -/
+omit [FiniteDimensional ℝ E] in
 private lemma lieBracketWithin_const_const {s : Set E} {x v w : E} :
     VectorField.lieBracketWithin ℝ (fun _ : E => v) (fun _ : E => w) s x = 0 := by
   simp [VectorField.lieBracketWithin]
 
-/-- **Chart-basis bracket vanishing at the base point.**
-
-The manifold Lie bracket of two chart-basis sections `chartBasisVecFiber x₀ j` and
-`chartBasisVecFiber x₀ k` vanishes at the base point `x₀`: these are coordinate vector
-fields, so they commute. This is the chart-coordinate statement `[∂ⱼ, ∂ₖ](x₀) = 0`. It is
-the input that lets the section-level Riemann formula `riemannSec` drop its
-`∇_{[X, Y]} Z` correction term when `X, Y` are chart-basis sections extending the canonical
-model basis at `x₀`.
-
-No Christoffel-vanishing claim is made here. -/
 theorem mlieBracket_chartBasisVec_self_eq_zero (x₀ : M)
     (j k : Fin (Module.finrank ℝ E)) :
     VectorField.mlieBracket I
@@ -142,9 +95,7 @@ theorem mlieBracket_chartBasisVec_self_eq_zero (x₀ : M)
   rw [lieBracketWithin_const_const]
   exact ContinuousLinearMap.map_zero _
 
-/-- At the chart basepoint, the canonical tangent-bundle trivialization CLM is the
-identity on `T_x M`. This is the manifold fact `continuousLinearMapAt_trivializationAt`
-specialised to the diagonal, composed with `mfderiv_extChartAt_self`. -/
+omit [FiniteDimensional ℝ E] in
 private lemma trivToE_self_eq_id (x : M) :
     (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -156,7 +107,7 @@ private lemma trivToE_self_eq_id (x : M) :
   rw [h]
   exact mfderiv_extChartAt_self (I := I) (x := x)
 
-/-- At the chart basepoint, the inverse tangent-bundle trivialization is the identity. -/
+omit [FiniteDimensional ℝ E] in
 private lemma trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
@@ -167,8 +118,6 @@ private lemma trivFromE_self_apply (x : M) (w : E) :
     rw [trivToE_self_eq_id (I := I) x]; rfl
   rwa [hid] at h
 
-/-- At the chart basepoint, the `i`-th chart-basis fibre vector equals the `i`-th
-model-space basis vector. -/
 private lemma chartBasisVecFiber_self_aux (x : M) (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) x i x = (chartModelBasis E) i := by
   rw [chartBasisVecFiber_symmL_apply (I := I) x i x]
@@ -179,14 +128,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- **Existence of globally-smooth chart-basis extensions.** For the base point `x` there
-exists a family of globally `C^∞` tangent-bundle sections `X i` that agrees with the
-chart-basis sections `chartBasisVecFiber x i` on a neighborhood of `x`.
-
-The construction bump-multiplies the chart-basis sections (smooth on the trivialization
-base set by `chartBasisVec_contMDiffOn`) by a smooth bump function supported in the base
-set, via `exists_contMDiffSection_eqOn_nhd`. The resulting sections are honest global
-smooth sections of `TM` and coincide with the chart-basis sections near `x`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem exists_smooth_chartBasisExtension (x : M) :
     ∃ X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
       (∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i))) ∧
@@ -209,20 +151,6 @@ theorem exists_smooth_chartBasisExtension (x : M) :
   refine ⟨fun i b => s' i b, fun i => (s' i).contMDiff, ?_⟩
   filter_upwards [hs'] with b hb i using hb i
 
-/-- **Bracket-free reduction of the abstract Riemann operator on the basis triple.** For any
-family of globally-smooth tangent sections `X` agreeing with the chart-basis sections
-`chartBasisVecFiber x ·` on a neighborhood of `x`, the abstract Riemann operator value
-`riemannOp (LeviCivita g) x (e_j) (e_k) (e_i)` equals the *bracket-free* difference of the
-iterated covariant derivatives
-$$
-  \nabla_{X_j}\!\bigl(\nabla_{X_k} X_i\bigr)(x) - \nabla_{X_k}\!\bigl(\nabla_{X_j} X_i\bigr)(x).
-$$
-The `∇_{[X_j, X_k]} X_i` correction term of the section-level Riemann formula drops because
-`X_j, X_k` agree near `x` with the chart-basis (coordinate) vector fields, whose Lie bracket
-vanishes at `x` (`mlieBracket_chartBasisVec_self_eq_zero`).
-
-This is the bracket-eliminated entry point for the iterated chart-Christoffel identification
-of `chartRiemannBasisIdentity`. -/
 theorem LeviCivita_chartBasisVec_neighborhood_formula
     (g : SmoothRiemannianMetric I M) (x : M)
     {X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -262,9 +190,7 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- For `b` in the trivialization base set at `x`, the chart-trivialised representation of
-the chart-basis section `chartBasisVecFiber x i` evaluates to the constant model-basis
-vector `e_i`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_baseSet
     (x : M) (i : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -278,10 +204,6 @@ private lemma chartE_section_repr_chartBasisVec_baseSet
       chartBasisVecFiber_symmL_apply (I := I) x i b]
   exact trivToE_trivFromE (I := I) x hb ((chartModelBasis E) i)
 
-/-- **First Christoffel layer (pointwise).** At a good-set point `b` of the chart at `x`,
-where `Xi` agrees with the chart-basis section `chartBasisVec x i` on a neighborhood of `b`
-and `trivToE x b vk = e_k`, the covariant-derivative value `(LeviCivita g) Xi b vk` equals
-`trivFromE x b (∑_m Γ^m{}_{ki}(φ b) • e_m)`. -/
 private lemma LeviCivita_covApply_firstLayer_pointwise
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -378,9 +300,6 @@ private lemma LeviCivita_covApply_firstLayer_pointwise
     rw [hrepr_basis k p, if_neg (fun h => hp h.symm)]; simp
   · exact absurd (Finset.mem_univ k) hk
 
-/-- **First Christoffel layer (neighborhood).** The chart-trivialised representation of the
-intermediate section `covApply (LeviCivita g) (X k) (X i)`, pulled through
-`(extChartAt I x).symm`, is eventually equal near `φ x` to `y ↦ ∑_m Γ^m{}_{ki}(y) • e_m`. -/
 private lemma chartE_section_repr_covApply_eventuallyEq
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -444,8 +363,7 @@ private lemma chartE_section_repr_covApply_eventuallyEq
   rw [trivToE_trivFromE (I := I) x hb_base]
   rw [hb_def, (extChartAt I x).right_inv hy_tgt]
 
-/-- Each chart Christoffel symbol is differentiable at the chart image `φ x` (it is `C^∞` on
-the interior of the chart target, which contains `φ x`). -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartChristoffel_differentiableAt_self
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -464,8 +382,7 @@ private lemma chartChristoffel_differentiableAt_self
   exact (hcd.differentiableOn (by norm_num)).differentiableAt
     (isOpen_interior.mem_nhds hxint)
 
-/-- The fderiv of `y ↦ ∑_m Γ^m{}_{ki}(y) • e_m` at `φ x` in direction `e_j` expands as
-`∑_m (∂_j Γ^m{}_{ki})(φ x) • e_m`. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma fderiv_christoffelSum_apply
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -489,9 +406,6 @@ private lemma fderiv_christoffelSum_apply
   rw [ContinuousLinearMap.smulRight_apply]
   rfl
 
-/-- **Second Christoffel layer.** The second covariant derivative
-`(LeviCivita g) (covApply (LeviCivita g) (X k) (X i)) x e_j` expands in the model basis as
-`∑_l (∂_j Γ^l{}_{ki}(φ x) + ∑_m Γ^l{}_{jm}(φ x) · Γ^m{}_{ki}(φ x)) • e_l`. -/
 private lemma LeviCivita_covApply_secondLayer
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -615,8 +529,7 @@ private lemma LeviCivita_covApply_secondLayer
   congr 1
   exact trivFromE_self_apply (I := I) x ((chartModelBasis E) l)
 
-/-- The `l`-coordinate, in a basis `b`, of a basis-coordinate combination `∑ l' c l' • b l'`
-is the coefficient `c l`. -/
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma coord_sum_smul_basis
     {b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E}
     (c : Fin (Module.finrank ℝ E) → ℝ) (l : Fin (Module.finrank ℝ E)) :
@@ -630,15 +543,6 @@ private lemma coord_sum_smul_basis
     (fun hl => absurd (Finset.mem_univ l) hl)]
   rw [Module.Basis.repr_self_apply, if_pos rfl, mul_one]
 
-/-- **Deep chart-Christoffel basis identity for the Levi-Civita Riemann operator.**
-
-The basis-coordinate values of the abstract Riemann operator `riemannOp (LeviCivita g) x` on
-the canonical model basis match the chart-coordinate Riemann entries `R^l{}_{ijk}(g, x)(φ x)`.
-This is the iterated chart-Christoffel expansion: the bracket-free reduction
-`LeviCivita_chartBasisVec_neighborhood_formula` rewrites `riemannOp` as a difference of two
-second covariant derivatives, each expanded via the two Christoffel layers; the result
-matches `chartRiemannTensor` after a `chartChristoffel_symm` reindexing of the lower indices.
--/
 theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x := by

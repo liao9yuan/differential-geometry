@@ -21,14 +21,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Curvature output lowering and skewness
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
 
-/-- A lowered `(0,4)` tensor is obtained from a `(1,3)` tensor by lowering the
-output slot with the metric. -/
+
+
+
+
+
+
 def Rm04LowersRm13At
     (g : SmoothRiemannianMetric I M) (x : M)
     (Rm13 : Tensor13At (I := I) (M := M) x)
@@ -38,8 +38,8 @@ def Rm04LowersRm13At
       Rm13 (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) W))
         (vec3 X Y Z)
 
-/-- Lowering a realized `(1,3)` curvature tensor by the metric gives a
-realized lowered `(0,4)` curvature tensor for the same connection. -/
+
+
 theorem rm04RealizesLower
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -56,8 +56,8 @@ theorem rm04RealizesLower
     (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) (W x)))
   simpa [tangentFlatLinear_apply_gen, cotangentToDual_apply_gen] using h
 
-/-- Realized `(1,3)` and lowered `(0,4)` curvature tensors are related by
-metric lowering at a point. -/
+
+
 theorem rm04LowersRm13At_of_realizes
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -105,8 +105,8 @@ theorem rm04LowersRm13At_of_realizes
     simpa [alpha, hXsec, hYsec, hZsec, tangentFlatLinear_apply_gen, cotangentToDual_apply_gen] using h13
   exact h04'.trans h13'.symm
 
-/-- Metric skew-adjointness of the curvature endomorphism in `(1,3)` form:
-`<R(X,Y)Z,W> = -<R(X,Y)W,Z>`. -/
+
+
 def Rm13MetricSkewAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (Rm13 : Tensor13At (I := I) (M := M) x) : Prop :=
@@ -116,8 +116,8 @@ def Rm13MetricSkewAt
       -Rm13 (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) Z))
         (vec3 X Y W)
 
-/-- Last-pair metric skew for a lowered Riemann tensor in standard slot order:
-`Rm04(X,Y,Z,W) = -Rm04(X,Y,W,Z)`. -/
+
+
 def Rm04OutputSkewAt
     (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
   forall X Y Z W : TangentSpace I x,
@@ -139,8 +139,8 @@ theorem rm13MetricSkewAt_of_rm04_outputSkew
     _ = -Rm13 (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) Z))
         (vec3 X Y W) := by rw [hLower X Y W Z]
 
-/-- Metric skew-adjointness of `(1,3)` curvature follows from a lowered
-realization and output skew-adjointness of the lowered tensor. -/
+
+
 theorem rm13MetricSkewAt_of_realizes_outputSkew
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)

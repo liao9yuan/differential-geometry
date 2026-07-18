@@ -7,28 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
 
-/-!
-# Compactness of the L²-side resolvent of the variational Laplacian
-
-For a closed Riemannian manifold `(M, g)`, this file establishes the
-compactness of the bounded operators
-
-  `H1ComplToLp g : H1Compl g →L[ℝ] Lp ℝ 2 μ_g`
-  `resolventL2 g : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g`
-
-via the chart-Sobolev / Rellich-Kondrachov route. The argument:
-
-* approximate any bounded H¹ vector by a smooth scalar in pre-H¹ norm,
-* control the chart-Sobolev norm of the smooth scalar uniformly via the
-  reverse chart-Sobolev bridge,
-* extract a chart-Sobolev convergent subsequence in `L²` via the closed-
-  manifold Rellich-Kondrachov theorem,
-* conclude that the H1-to-L² inclusion sends bounded sequences to
-  L²-precompact sequences.
-
-The compactness of `resolventL2 g = H1ComplToLp g ∘L resolvent g` then
-follows by composition with the bounded operator `resolvent g`.
--/
 
 noncomputable section
 
@@ -60,8 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)]
 
-/-- The L² norm of a smooth scalar (as `eLpNorm` of its underlying function)
-is bounded by its pre-H¹ norm in `ENNReal`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm s.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -88,8 +65,7 @@ private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-- The continuous function `x ↦ √g(grad s, grad s)(x)` for a smooth scalar
-on a closed manifold is in `MemLp 2`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma SmoothScalar.sqrt_g_inner_grad_memLp_two
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     MemLp (fun x : M => Real.sqrt
@@ -109,7 +85,7 @@ private lemma SmoothScalar.sqrt_g_inner_grad_memLp_two
   exact h_cont.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The L² norm of `√g(grad s, grad s)` is bounded by the pre-H¹ norm of `s`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm (fun x : M => Real.sqrt
@@ -204,10 +180,7 @@ private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-- For each vector `v ∈ H1Compl g` and each `δ > 0`, there exists
-a smooth scalar `s` with `‖v - smoothToH1Compl g s‖ < δ`.
-
-Direct consequence of the density `denseRange_smoothToH1Compl`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
     (v : H1Compl g) {δ : ℝ} (hδ : 0 < δ) :
     ∃ s : SmoothScalar g, ‖v - smoothToH1Compl (I := I) (M := M) g s‖ < δ := by
@@ -224,16 +197,7 @@ private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
   exact hs_close
 
 set_option maxHeartbeats 4000000 in
-/-- **The H¹ → L² inclusion is a compact operator on a closed Riemannian
-manifold.**
 
-Argument: the closed unit ball in `H1Compl g` admits an approximation by
-smooth scalars whose pre-H¹ norms are bounded by `2`; the reverse
-chart-Sobolev bridge yields a uniform bound on their chart `W^{1,2}`
-norms; the closed-manifold Rellich-Kondrachov theorem extracts an
-`L²`-convergent subsequence; the residual `‖H1ComplToLp v - smoothToLp s‖
-≤ ‖v - smoothToH1Compl s‖_{H¹}` makes the original sequence converge
-to the same limit. -/
 theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (H1ComplToLp (I := I) (M := M) g) := by
   classical
@@ -473,11 +437,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
   · exact IsClosed.mem_of_tendsto isClosed_closure h_y_tendsto
       (Filter.Eventually.of_forall (fun k => hy_in_closure (φ k)))
 
-/-- **The L²-side resolvent of the variational Laplacian is a compact
-operator on a closed Riemannian manifold.**
-
-Direct consequence: `resolventL2 g = H1ComplToLp g ∘L resolvent g`, and a
-compact operator post-composed with a bounded operator is again compact. -/
 theorem resolventL2_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (resolventL2 (I := I) (M := M) g) := by
   have h_eq : (resolventL2 (I := I) (M := M) g : _ → _) =
@@ -491,14 +450,6 @@ theorem resolventL2_isCompactOperator (g : SmoothRiemannianMetric I M) :
   exact (H1ComplToLp_isCompactOperator (I := I) (M := M) g).comp_clm
     (resolvent (I := I) (M := M) g)
 
-/-- For a closed Riemannian manifold `(M, g)`, every eigenspace of the
-`L²`-side resolvent `resolventL2 g` at a non-zero scalar `μ` is
-finite-dimensional. Since a non-zero resolvent eigenvalue `μ` corresponds
-to the Laplacian eigenvalue `(1 - μ)/μ` (see `laplacianEigenvalueOf`),
-this is equivalently the statement that each Laplacian eigenspace is
-finite-dimensional. The compactness
-hypothesis on `resolventL2 g` required by `resolventEigenspace_finiteDim`
-is supplied by `resolventL2_isCompactOperator`. -/
 theorem resolventEigenspace_finiteDim_of_eigenvalue_ne_zero
     (g : SmoothRiemannianMetric I M)
     {μ : ℝ} (hμ : μ ≠ 0) :
@@ -506,27 +457,12 @@ theorem resolventEigenspace_finiteDim_of_eigenvalue_ne_zero
   resolventEigenspace_finiteDim (I := I) (M := M) g
     (resolventL2_isCompactOperator (I := I) (M := M) g) hμ
 
-/-- For a closed Riemannian manifold `(M, g)`, the eigenspaces of the
-`L²`-side resolvent `resolventL2 g` span a dense subspace of
-`Lp ℝ 2 μ_g`: the orthogonal complement of the supremum of
-`resolventEigenspace g μ` over all `μ` is trivial. This is the
-completeness half of the spectral theorem for the compact self-adjoint
-operator `resolventL2 g`. The compactness hypothesis required by
-`resolventEigenspaces_iSup_orthogonal_eq_bot` is supplied by
-`resolventL2_isCompactOperator`. -/
 theorem resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed
     (g : SmoothRiemannianMetric I M) :
     (⨆ μ : ℝ, resolventEigenspace (I := I) (M := M) g μ)ᗮ = ⊥ :=
   resolventEigenspaces_iSup_orthogonal_eq_bot (I := I) (M := M) g
     (resolventL2_isCompactOperator (I := I) (M := M) g)
 
-/-- For a closed Riemannian manifold `(M, g)` and any `ε > 0`, only
-finitely many eigenvalues `μ` of the `L²`-side resolvent `resolventL2 g`
-satisfy `ε ≤ |μ|`. Thus the resolvent spectrum can accumulate only at
-`0`; equivalently, the Laplacian spectrum has no finite accumulation
-point. The compactness hypothesis required by
-`resolvent_eigenvalues_finite_above` is supplied by
-`resolventL2_isCompactOperator`. -/
 theorem resolvent_eigenvalues_finite_above_on_closed
     (g : SmoothRiemannianMetric I M) {ε : ℝ} (hε : 0 < ε) :
     Set.Finite { μ : ℝ |

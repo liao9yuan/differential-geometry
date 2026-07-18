@@ -3,59 +3,10 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-/-!
-# Leibniz expansion of `cov_RS (covApply B^α_i T₀) b (∂_l b)` in the
-chart-α coordinate basis
-
-For a smooth closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀`, a chart base point `α : M`,
-and an orthonormal-frame index `i`, this file ships the Leibniz-rule based
-identity expressing the value of the bundle covariant derivative
-
-```
-cov_RS (covApply cov_RS B^α_i T₀.toSection) b
-```
-
-applied to a chart-coordinate basis vector `chartBasisVecFiber α l b` in terms
-of the chart-α coordinate matrix `C^k_i := chartFrameNormGlobalSmoothCoordMatrix
-g α i k` of the chart-α orthonormal frame `B^α_i = chartFrameNormGlobalSmooth
-g α i`.
-
-Combining:
-
-* the **chart-α coordinate-basis expansion** of `B^α_i(b)` (B.2.b,
-  `chartFrameNormGlobalSmooth_eq_coordMatrix_sum`), valid on the chart-α
-  Levi-Civita good set;
-* the **`C^∞(M)`-linearity** of `covApply cov_RS · T₀.toSection` in its
-  vector-field argument;
-* the **section-Leibniz rule** of `cov_RS` for a scalar-function-scaled
-  section,
-  `cov_RS.toFun (f • σ) b = f b • cov_RS.toFun σ b + (extDerivFun f b).smulRight (σ b)`,
-  via `IsCovariantDerivativeOn.leibniz`;
-* the **smoothness** of the coordinate matrix `b ↦ C^k_i(b)` on the chart-α
-  base set;
-
-we get the headline expansion: for every chart-coordinate index
-`l : Fin (Module.finrank ℝ E)`, the value
-`cov_RS (covApply cov_RS B^α_i T₀.toSection) b (∂_l b)` decomposes as the
-sum
-
-```
-Σ_k C^k_i(b) · cov_RS (covApply cov_RS ∂_k T₀.toSection) b (∂_l b)
-  + Σ_k (∂_l C^k_i)(b) · (covApply cov_RS ∂_k T₀.toSection) b
-```
-
-where `∂_l C^k_i = extDerivFun (C^k_i) b (chartBasisVecFiber α l b)` is the
-directional derivative of the coordinate-matrix scalar function along the
-chart-coordinate vector.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. -/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -80,14 +31,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a
-continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProj (k : Fin (Module.finrank ℝ E)) :
     E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
     (((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) :
       E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartModelBasisProj_apply (k : Fin (Module.finrank ℝ E))
     (v : E) :
     chartModelBasisProj (E := E) k v =
@@ -98,8 +48,6 @@ private noncomputable def chartModelBasisProj (k : Fin (Module.finrank ℝ E)) :
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-- On the chart-α base set, the chart-α coordinate matrix `C^k_i(b)` equals
-`chartModelBasisProj k ((triv α).continuousLinearMapAt ℝ b (B^α_i b))`. -/
 private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -122,8 +70,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) h
 
-/-- The chart-α coordinate matrix `b ↦ C^k_i(b)` is `ContMDiffOn` on the
-chart-α trivialization base set. -/
+omit [BoundarylessManifold I M] in
 lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -198,8 +145,7 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
   exact chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (I := I) (M := M) g α i k hb
 
-/-- The chart-α coordinate matrix `b ↦ C^k_i(b)` is `MDifferentiableAt` at any
-chart-α Levi-Civita good-set point. -/
+omit [BoundarylessManifold I M] in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -221,6 +167,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
+omit [I.Boundaryless] in
 private lemma covApply_frameVec_eq_coord_sum_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -267,9 +214,7 @@ private lemma covApply_frameVec_eq_coord_sum_on_goodSet
   intro k _
   rw [L.map_smul]
 
-/-- `MDifferentiableAt`-witness for the chart-α coordinate vector field
-`chartBasisVecFiber α k` viewed as a tangent-bundle section, at any point of
-the chart-α trivialization base set. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_mdiffAt
     (α : M) (k : Fin (Module.finrank ℝ E))
     {b : M}
@@ -286,9 +231,7 @@ private lemma chartBasisVecFiber_mdiffAt
     (h_contMDiffOn b hb).contMDiffAt (h_open.mem_nhds hb)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
-/-- `MDifferentiableAt`-witness for the bundle section
-`covApply cov_RS (chartBasisVecFiber α k) T₀.toSection` at any chart-α
-trivialization base-set point. -/
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -333,6 +276,7 @@ private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
     (r s : ℕ) (f : ι → M → ℝ)
@@ -392,6 +336,7 @@ private lemma finsum_smul_section_mdiffAt
       exact this
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -478,33 +423,6 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
-/-- **Chart-α coordinate-basis expansion of the bundle covariant derivative of
-`covApply cov_RS B^α_i T₀.toSection` applied to a chart-coordinate vector**,
-via Leibniz.
-
-For a smooth closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀`, a chart base point `α`, an
-orthonormal-frame index `i`, and a base point `b` in the chart-α Levi-Civita
-good set, the value of the bundle covariant derivative
-
-```
-cov_RS (covApply cov_RS B^α_i T₀.toSection) b
-```
-
-applied to any chart-coordinate basis vector `chartBasisVecFiber α l b`
-decomposes as the sum
-
-```
-Σ_k C^k_i(b) · cov_RS (covApply cov_RS ∂_k T₀.toSection) b (∂_l b)
-  + Σ_k (∂_l C^k_i)(b) · (covApply cov_RS ∂_k T₀.toSection) b
-```
-
-where `(∂_l C^k_i)(b) := extDerivFun (C^k_i) b (chartBasisVecFiber α l b)` is
-the directional derivative of the coordinate-matrix scalar along the `l`-th
-chart-coordinate vector at `b`.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. -/
 theorem cov_RS_covApply_frameVec_eq_coord_expansion
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

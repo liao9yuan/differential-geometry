@@ -2,51 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.Subs
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
 
-/-!
-# Discharge wrapper for the chart-bilinear substitution identity
-
-This module provides an unconditional discharge of the chart-bilinear
-substitution identity headline. The unconditional form is
-
-  `principal + cross_1 + cross_2 + cross_3 + f_term = c_term`,
-
-where the symbolic terms are as defined in
-`SubstitutionNonSmoothChartBilinear.lean` and `c_term`, `f_term`
-integrate against `standardNirenbergTest k h η D.u_chart` over
-`cthickening |h| K_0`.
-
-## Strategy and structure
-
-The identity follows from the variational identity supplied by
-`chart_bilinear_identity_h1_0` applied to the symmetric Nirenberg test
-function `v_h := standardNirenbergTest k h η D.u_chart`, then expanded
-via discrete IBP and the discrete product rule. The smooth approximating
-sequence required by `chart_bilinear_identity_h1_0` is constructed by
-mollifying a cutoff version of `D.u_chart`.
-
-The main building blocks of the proof are:
-
-* `chart_bilinear_identity_h1_0` — the H¹_0 variational identity.
-* `hasWeakPartialDeriv_standardNirenbergTest` — the explicit weak
-  partial of the symmetric Nirenberg test function.
-* `integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported`
-  — the localised discrete IBP identity.
-* `diffQuot_mul` — the discrete product rule.
-* `mollifyEps`, `exists_smooth_compactSupport_W1p_approx_univ` — the
-  mollification machinery.
-
-Due to the technical depth, the full implementation accompanies the
-forthcoming work on the Nirenberg interior `H²` regularity argument.
-The current module sets up the infrastructure for the algebraic
-discharge.
-
-## Main results
-
-* `chartBilinear_substitution_identity_holds` — the unconditional
-  symbolic-form identity `chartBilinear_LHS = chartBilinear_RHS`.
-* `nirenberg_substitution_identity_chartBilinear_unconditional` —
-  the unconditional explicit-form identity.
--/
 
 noncomputable section
 
@@ -82,10 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The pointwise application of the discrete product rule:
-`D_h^k(f · g)(x) = (translate k h f)(x) · (D_h^k g)(x) + (D_h^k f)(x) · g(x)`.
-This is the discrete product rule for `diffQuot` from
-`Analysis/Sobolev/Tools/DifferenceQuotient.lean`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma diffQuot_mul_apply
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (f g : EuclN → ℝ) (x : EuclN) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -99,9 +51,7 @@ lemma diffQuot_mul_apply
   DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.diffQuot_coeff_apply
     (d := Module.finrank ℝ E) k h f g x
 
-/-- A rearranged form of the localised discrete IBP identity:
-`∫ F · D_{-h}^k G = -∫ (D_h^k F) · G` for `F` continuous and `G` smooth
-with compact support, `h ≠ 0`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma integral_F_diffQuot_neg_eq_neg_integral_diffQuot_F
     {F G : EuclN → ℝ} (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0)
     (hF_cont : Continuous F) (hG_smooth : ContDiff ℝ (⊤ : ℕ∞) G)

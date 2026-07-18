@@ -1,55 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartProjFullExpansionViaChartInvGram
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
 
-/-!
-# Chart-α Leibniz remainder equals the pure first-derivative-in-`T₀` cross term
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file ships
-the identity that the chart-α Leibniz remainder
-`chartLeibnizRemainder g r s α T₀ Idx Jdx b`, defined in
-`RawConnLapChartProjFullExpansionViaChartInvGram` as the algebraic difference
-
-```
-chartFrameCoordMatrixWeightedDoubleSum b - chartInvGramPrincipalSum b
-```
-
-between the predecessor's chart-α frame-coordinate-matrix-weighted double sum
-over `(i, l)` and the chart-α inverse-Gram-matrix-weighted principal sum over
-`(k, l)`, equals at any base point `b` in the chart-α partition-of-unity
-tsupport intersected with the chart-α Levi-Civita good set the pure
-*first-derivative-in-`T₀`* triple sum
-
-```
-Σ_{i, l, k} C^l_i(b) · (∂_l · C^k_i)(b) ·
-  π_(Idx, Jdx)[(covApply cov_RS ∂_k T₀) b],
-```
-
-where `C^l_i := chartFrameNormGlobalSmoothCoordMatrix g α i l`,
-`(∂_l · C^k_i)(b) := extDerivFun (C^k_i) b (∂_l b)`, and `π_(Idx, Jdx)` is the
-chart-α `(Idx, Jdx)` component projection through the canonical chart-α
-trivialization.
-
-The proof combines:
-
-* the **Leibniz expansion** of `cov_RS (covApply cov_RS B^α_i T₀) b (∂_l b)` in
-  the chart-α coordinate basis (file `CovApplyFrameToCoordExpansion`,
-  theorem `cov_RS_covApply_frameVec_eq_coord_expansion`);
-* the **orthonormality contraction** `Σ_i C^k_i(b) · C^l_i(b) =
-  chartInvGramMatrix g α b k l` (file
-  `ChartFrameNormGlobalSmoothCoordBasisExpansion`,
-  theorem `chartFrameNormGlobalSmoothCoordMatrix_orthonormality`);
-* the `ℝ`-bilinearity of the component projection through the
-  chart-α trivialization.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -76,22 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Chart-α Leibniz remainder equals the pure first-derivative-in-`T₀`
-cross term.**
-
-At a base point `b` lying in the chart-α partition-of-unity tsupport
-intersected with the chart-α Levi-Civita good set, the chart-α Leibniz
-remainder equals the triple sum
-
-```
-Σ_{i, l, k} C^l_i(b) · (∂_l · C^k_i)(b) ·
-  π_(Idx, Jdx)[(covApply cov_RS ∂_k T₀) b]
-```
-
-where `C^l_i = chartFrameNormGlobalSmoothCoordMatrix g α i l`,
-`(∂_l · C^k_i)(b) = extDerivFun (C^k_i) b (∂_l b)`, and `π_(Idx, Jdx)` is the
-chart-α `(Idx, Jdx)` component projection through the canonical chart-α
-trivialization. -/
 theorem chartLeibnizRemainder_eq_firstDerivOnly
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

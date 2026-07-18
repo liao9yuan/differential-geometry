@@ -2,25 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorH1Compl
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.InnerProductSpace.Dual
 
-/-!
-# The variational Laplacian for interior-supported smooth scalars
-(with-boundary, half-space model)
-
-For a closed Riemannian manifold-with-boundary `(M, g)` modelled on
-`EuclideanHalfSpace n`, this file constructs the Lax–Milgram resolvent
-`(1 - Δ_g)⁻¹ : Lp ℝ 2 μ_g →L[ℝ] H1ComplInterior g` for the
-interior-supported variant of the variational Laplacian.
-
-The construction parallels the boundaryless `Variational.lean`. The bilinear
-form
-`B(u, v) := ⟨u, v⟩_{H¹}`
-is the inner product on `H1ComplInterior g`. By Lax–Milgram (which here
-amounts to the Riesz representation theorem), for every `f ∈ Lp ℝ 2 μ_g`
-there is a unique `u = resolventInterior g f ∈ H1ComplInterior g` satisfying
-`⟨u, v⟩_{H¹} = ⟨H1ComplInteriorToLp v, f⟩_{L²}`
-for every test `v`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -45,15 +26,12 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The bilinear form `B(u, v) := ⟨u, v⟩` packaged as a continuous bilinear map
-on `H1ComplInterior g`. This is the inner product itself. -/
 noncomputable def H1ComplInteriorBilin
     (g : SmoothRiemannianMetric (I_half n) M) :
     H1ComplInterior g →L[ℝ] H1ComplInterior g →L[ℝ] ℝ :=
@@ -64,7 +42,6 @@ noncomputable def H1ComplInteriorBilin
     (u v : H1ComplInterior g) :
     H1ComplInteriorBilin g u v = ⟪u, v⟫_ℝ := rfl
 
-/-- Coercivity: `B(u, u) = ‖u‖²`. -/
 lemma H1ComplInteriorBilin_isCoercive
     (g : SmoothRiemannianMetric (I_half n) M) :
     IsCoercive (H1ComplInteriorBilin g) := by
@@ -76,7 +53,6 @@ lemma H1ComplInteriorBilin_isCoercive
   ring_nf
   exact le_refl _
 
-/-- The map `f ↦ L_f` where `L_f v := ⟨H1ComplInteriorToLp v, f⟩_{L²}`. -/
 noncomputable def lpFunctionalCLMInterior
     (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]
@@ -113,7 +89,6 @@ noncomputable def H1ComplInteriorLaxMilgramEquiv
     ⟪H1ComplInteriorLaxMilgramEquiv g u, w⟫_ℝ = ⟪u, w⟫_ℝ :=
   IsCoercive.continuousLinearEquivOfBilin_apply _ u w
 
-/-- The Riesz representative of an element of the dual of `H1ComplInterior g`. -/
 noncomputable def H1ComplInteriorRieszRepr
     (g : SmoothRiemannianMetric (I_half n) M) :
     (H1ComplInterior g →L[ℝ] ℝ) →L[ℝ] H1ComplInterior g :=
@@ -133,7 +108,6 @@ noncomputable def H1ComplInteriorRieszRepr
       exact le_of_eq
         ((InnerProductSpace.toDual ℝ (H1ComplInterior g)).symm.norm_map φ))
 
-/-- Defining property of `H1ComplInteriorRieszRepr`. -/
 lemma H1ComplInteriorRieszRepr_inner
     (g : SmoothRiemannianMetric (I_half n) M)
     (φ : H1ComplInterior g →L[ℝ] ℝ) (w : H1ComplInterior g) :
@@ -142,14 +116,12 @@ lemma H1ComplInteriorRieszRepr_inner
   exact InnerProductSpace.toDual_symm_apply (𝕜 := ℝ) (E := H1ComplInterior g)
     (x := w) (y := φ)
 
-/-- The resolvent operator `(1 - Δ_g)⁻¹ : Lp ℝ 2 μ_g →L[ℝ] H1ComplInterior g`. -/
 noncomputable def resolventInterior
     (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]
       H1ComplInterior g :=
   (H1ComplInteriorRieszRepr g).comp (lpFunctionalCLMInterior g)
 
-/-- Defining property of the resolvent. -/
 theorem resolventInterior_inner_eq_lpFunctional
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g))

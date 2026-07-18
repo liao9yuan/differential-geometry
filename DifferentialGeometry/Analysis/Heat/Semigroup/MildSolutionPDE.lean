@@ -2,54 +2,6 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.Duhamel
 import DifferentialGeometry.Analysis.Heat.Semigroup.Generator
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
-/-!
-# Per-mode parabolic ODE for the Duhamel mild solution
-
-For a closed Riemannian manifold `(M, g)`, this file proves that the Duhamel
-mild solution
-
-  `mildSolution g u_0 f t := heatSemigroup g t u_0 + ∫_0^t heatSemigroup g (t-s) (f s) ds`
-
-satisfies the inhomogeneous heat equation `∂_t u = Δ_g u + f`, **packaged per
-spectral mode**: for each spectral basis index `i`, the inner product
-`α_i(t) := ⟪b_i, mildSolution g u_0 f t⟫` satisfies the scalar parabolic ODE
-
-  `α_i'(t) = -lam_i α_i(t) + ⟪b_i, f t⟫`,
-
-where `lam_i = EigenIdx.lambda i` is the corresponding Laplacian eigenvalue.
-
-## Strategy
-
-The per-mode formulation avoids the closedness / commutation issues of acting
-the unbounded operator `Δ_g` on a Bochner integral. We:
-
-1. Use self-adjointness of `heatSemigroup` (`heatSemigroup_isSelfAdjoint`) and
-   the basis evaluation (`heatSemigroup_apply_basis`) to obtain the explicit
-   coefficient formula
-
-   `α_i(t) = exp(-lam_i t) · ⟪b_i, u_0⟫ + ∫_0^t exp(-lam_i (t-s)) · ⟪b_i, f s⟫ ds`.
-
-   Crucially, the inner-product / interval-integral commutation uses
-   `ContinuousLinearMap.intervalIntegral_comp_comm` applied to the inner-
-   product CLM `(innerSL ℝ) (b_i)`.
-
-2. Differentiate the explicit formula in `t > 0` using the splitting
-
-   `α_i(t) = c_1(t) + c_2(t),  c_2(t) = exp(-lam_i t) · g(t),  g(t) := ∫_0^t exp(lam_i s) · ⟪b_i, f s⟫ ds`,
-
-   where `g'(t) = exp(lam_i t) · ⟪b_i, f t⟫` by the fundamental theorem of
-   calculus (`intervalIntegral.integral_hasDerivAt_right`), and the product
-   rule then yields `c_2'(t) = -lam_i c_2(t) + ⟪b_i, f t⟫`.
-
-## Main results
-
-* `mildSolution_inner_basis` — the explicit per-mode coefficient formula.
-* `hasDerivAt_mildSolution_inner_basis` — the per-mode parabolic ODE.
-
-For the initial value `mildSolution g u_0 f 0 = u_0`, see
-`mildSolution_zero` (it is reproduced here for completeness).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -76,7 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Continuity of the scalar coefficient `s ↦ ⟪b_i, f s⟫_ℝ`. -/
 private lemma continuous_inner_basis_apply
     (g : SmoothRiemannianMetric I M)
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -93,8 +44,6 @@ private lemma continuous_inner_basis_apply
   rw [h_eq]
   exact h_innerCLM.comp hf
 
-/-- The scalar coefficient `s ↦ ⟪b_i, f s⟫_ℝ` is interval-integrable on
-every interval. -/
 private lemma intervalIntegrable_inner_basis_apply
     (g : SmoothRiemannianMetric I M)
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -106,11 +55,6 @@ private lemma intervalIntegrable_inner_basis_apply
       MeasureTheory.volume a b' :=
   (continuous_inner_basis_apply (I := I) (M := M) g hf i).intervalIntegrable a b'
 
-/-- **Headline 1.** For continuous `f : ℝ → Lp ℝ 2 μ_g`, `u_0 ∈ Lp`, `t ≥ 0`,
-and any spectral basis index `i`, the inner product of the Duhamel mild
-solution with the basis vector `b_i` decomposes as
-
-  `α_i(t) = exp(-lam_i t) · ⟪b_i, u_0⟫ + ∫_0^t exp(-lam_i (t-s)) · ⟪b_i, f s⟫ ds`. -/
 theorem mildSolution_inner_basis
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -205,14 +149,11 @@ theorem mildSolution_inner_basis
     rw [Set.uIcc_of_le ht] at hs
     exact h_pointwise s hs
 
-/-- Algebraic identity: `exp(-lam (t-s)) = exp(-lam t) * exp(lam s)`. -/
 private lemma exp_factor (lam : ℝ) (t s : ℝ) :
     Real.exp (-lam * (t - s)) = Real.exp (-lam * t) * Real.exp (lam * s) := by
   rw [← Real.exp_add]
   congr 1; ring
 
-/-- Factored representation of the inhomogeneous Duhamel inner-product
-contribution: `∫_0^t exp(-lam (t-s)) h(s) ds = exp(-lam t) · ∫_0^t exp(lam s) h(s) ds`. -/
 private lemma duhamel_inner_factor
     (lam : ℝ) {t : ℝ} (h : ℝ → ℝ)
     (_h_int : IntervalIntegrable (fun s => Real.exp (lam * s) * h s)
@@ -226,12 +167,6 @@ private lemma duhamel_inner_factor
   rw [h_eq]
   rw [intervalIntegral.integral_const_mul]
 
-/-- **Headline 2.** For continuous `f`, `t > 0`, and any spectral basis index
-`i`, the scalar mode `α_i(s) := ⟪b_i, mildSolution g u_0 f s⟫_ℝ` satisfies
-
-  `α_i'(t) = -lam_i α_i(t) + ⟪b_i, f t⟫_ℝ`,
-
-where `lam_i = EigenIdx.lambda i` is the Laplacian eigenvalue for the mode. -/
 theorem hasDerivAt_mildSolution_inner_basis
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

@@ -10,57 +10,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Measure.Map
 
-/-!
-# Chart-pulled bilinear identity for smooth chart-supported functions
-
-For a smooth Riemannian metric `g` on a closed (compact, boundaryless) smooth
-manifold `M`, a chart point `α : M`, and a smooth function `f : M → ℝ` with
-`tsupport f ⊆ (chartAt H α).source`, this file discharges the chart-pulled
-bilinear identity
-```
-B.bilin (chartPullback I α f) ψ = ∫ y, negDensityLaplacianPullback g hf α y * ψ y ∂volume
-```
-for the smooth elliptic bilinear form `B` constructed by
-`exists_chart_metric_bilinearForm` (whose principal coefficient matrix matches
-the chart-pulled volume-weighted inverse Gram matrix on a compact thickening of
-`tsupport (chartPullback I α f)`).
-
-Combining this identity with the hypothesis-bearing wrapper
-`chart_pulled_smooth_weak_solution_of_chartIdentity` from `ChartLocalLaplacian`
-yields the headline theorem `chart_pulled_smooth_weak_solution`: the
-chart-pulled smooth function `chartPullback I α f` is a smooth weak solution of
-`B` with right-hand side `negDensityLaplacianPullback g hf α`.
-
-## Strategy
-
-The proof proceeds in three substantive steps.
-
-1. **Pointwise gradient inner-product identity.** For smooth `f, h` with chart
-   supports, on `x` in the chart base set with chart-image in the chart target's
-   interior, the metric inner product of the gradients factors through the
-   chart inverse Gram matrix and the Euclidean partial derivatives of the
-   chart-pullbacks. (Theorem `gradInner_eq_invGramMatrix_partials_smooth`.)
-
-2. **Chart-pulled pointwise identity.** Multiplying the previous formula by the
-   chart-pulled volume density and identifying the chart-Euclidean partial
-   derivatives via the chain rule for `chartPullback` (using the basis-refactor
-   identity `chartModelBasis E i = toEuclidean.symm (EuclideanSpace.single i 1)`),
-   the chart-pulled inner product equals the principal-integrand of `B` at the
-   chart-Euclidean point, on the compact `K` where `B.a` matches
-   `weightedInvGramOnEuclid`.
-
-3. **Integration via Green's identity.** A smooth-cutoff argument reduces the
-   bilinear identity for arbitrary smooth compactly-supported `ψ` to the case
-   where `tsupport ψ ⊆ chartTargetEuclid α`. In that case, the manifold-side
-   Green's first identity (with manifold-side test function
-   `chartTestPullback I α ψ`) gives the integral identity. The chart-pulled
-   volume identity from `ChartMeasureEquiv` (combined with
-   `map_toEuclidean_modelHaar_eq_volume`) transports both sides to
-   `EuclideanSpace`.
-
-The headline theorem `chart_pulled_smooth_weak_solution` then follows by
-applying `chart_pulled_smooth_weak_solution_of_chartIdentity`.
--/
 
 noncomputable section
 
@@ -91,11 +40,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The Euclidean image of `tsupport ψ` lifted to `M` via the chart-symm
-composition. Compact (under `[T2Space M]`), contained in the chart source. -/
 private def manifoldTestSupport (α : M) (ψ : EuclN → ℝ) : Set M :=
   ((extChartAt I α).symm) '' ((toEuclidean (E := E)).symm '' tsupport ψ)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma manifoldTestSupport_isCompact (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -114,6 +62,7 @@ private lemma manifoldTestSupport_isCompact (α : M)
     refine (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma manifoldTestSupport_subset_source (α : M) (ψ : EuclN → ℝ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     manifoldTestSupport (I := I) (M := M) α ψ ⊆ (chartAt H α).source := by
@@ -129,14 +78,14 @@ private lemma manifoldTestSupport_subset_source (α : M) (ψ : EuclN → ℝ)
     exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma manifoldTestSupport_isClosed [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     IsClosed (manifoldTestSupport (I := I) (M := M) α ψ) :=
   (manifoldTestSupport_isCompact (I := I) (M := M) α hψ_cs hψ_supp).isClosed
 
-/-- The support of `chartTestPullback I α ψ` is contained in
-`manifoldTestSupport α ψ`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_support_subset (α : M) (ψ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α ψ) ⊆
       manifoldTestSupport (I := I) (M := M) α ψ := by
@@ -158,6 +107,7 @@ private lemma chartTestPullback_support_subset (α : M) (ψ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α ψ hx_src] at hx
     exact (hx rfl).elim
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_tsupport_subset [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -166,8 +116,7 @@ private lemma chartTestPullback_tsupport_subset [T2Space M] (α : M)
   closure_minimal (chartTestPullback_support_subset (I := I) (M := M) α ψ)
     (manifoldTestSupport_isClosed (I := I) (M := M) α hψ_cs hψ_supp)
 
-/-- `chartTestPullback I α ψ` has compact support whenever `ψ` does and
-`tsupport ψ ⊆ chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_hasCompactSupport [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -176,8 +125,7 @@ private lemma chartTestPullback_hasCompactSupport [T2Space M] (α : M)
     (manifoldTestSupport_isCompact (I := I) (M := M) α hψ_cs hψ_supp)
     (chartTestPullback_support_subset (I := I) (M := M) α ψ)
 
-/-- The topological support of `chartTestPullback I α ψ` lies in the chart
-source. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTestPullback_tsupport_subset_chart_source [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -185,8 +133,7 @@ private lemma chartTestPullback_tsupport_subset_chart_source [T2Space M] (α : M
   (chartTestPullback_tsupport_subset (I := I) (M := M) α hψ_cs hψ_supp).trans
     (manifoldTestSupport_subset_source (I := I) (M := M) α ψ hψ_supp)
 
-/-- The composition `ψ ∘ toEuclidean ∘ extChartAt I α : M → ℝ` is `C^∞` on
-the chart source whenever `ψ : EuclN → ℝ` is `C^∞`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma compose_psi_contMDiffOn_chart_source (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -214,8 +161,7 @@ private lemma compose_psi_contMDiffOn_chart_source (α : M)
     h_toE_M_univ.comp h_ext hMaps1
   exact h_psi_M_univ.comp h1 (fun _ _ => Set.mem_univ _)
 
-/-- Helper: a manifold function smooth on an open set and zero outside a closed
-subset of that open set is smooth on the whole manifold. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contMDiff_of_smoothOn_open_zero_outside
     {U : Set M} (hU : IsOpen U) {K : Set M} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : M → ℝ}
@@ -234,8 +180,7 @@ private lemma contMDiff_of_smoothOn_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-/-- The manifold-side test pull-back is `C^∞` on `M` whenever `ψ` is smooth and
-`tsupport ψ ⊆ chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTestPullback_contMDiff [T2Space M] (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cs : HasCompactSupport ψ)
@@ -270,8 +215,7 @@ private lemma chartTestPullback_contMDiff [T2Space M] (α : M)
         exact (extChartAt I α).left_inv hy_src'
     · exact chartTestPullback_apply_of_notMem (I := I) α ψ hy_src
 
-/-- The chart-pull-back of the manifold-side test pull-back recovers `ψ` on the
-chart-target image. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartPullback_chartTestPullback_eq (α : M) (ψ : EuclN → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPullback (I := I) α (chartTestPullback (I := I) (M := M) α ψ) y = ψ y := by
@@ -296,11 +240,7 @@ private lemma chartPullback_chartTestPullback_eq (α : M) (ψ : EuclN → ℝ)
   change ψ ((toEuclidean (E := E)) ((extChartAt I α) x)) = ψ y
   rw [h_right_inv, h_apply_inv]
 
-/-- **Step 1.** Pointwise gradient inner-product identity for smooth functions
-in chart coordinates. For smooth `f, h`, on a chart base set point with
-chart-image in the chart target's interior, the metric inner product of the
-gradients equals the pairing of the chart inverse Gram matrix with the
-Euclidean partial derivatives of the chart-pullbacks. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInner_eq_invGramMatrix_partials_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     {f h : M → ℝ}
@@ -379,12 +319,7 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
     ring
   rw [h_distribute]
 
-/-- Chain rule on `chartPullback`: at any `y` in the open chart-target image,
-the Euclidean partial derivative of `chartPullback I α f` equals the
-chart-basis partial derivative of `scalarOnE α f` at the unraveled point.
-
-The basis-refactor identity `chartModelBasis E i = toEuclidean.symm (single i 1)`
-is used in the form `(toEuclidean.symm)(EuclideanSpace.single i 1) = chartModelBasis E i`. -/
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
     [I.Boundaryless] (α : M) (f : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -421,11 +356,6 @@ private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
   rw [h_iso_apply]
   rfl
 
-/-- **Step 2.** Chart-pulled pointwise identity. For a chart point `y` in the
-chart-target Euclidean image with `B.a y i j` matching `weightedInvGramOnEuclid`,
-the product of the chart-pulled volume density and the metric inner product of
-the gradients of `f` and `chartTestPullback I α ψ` (at the unraveled manifold
-point) equals the principal integrand of `B` at `y`. -/
 private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -530,12 +460,6 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
   intro j _
   rw [h_weight_eq i j, h_partial_f i, h_partial_psi j, hB_match i j]
 
-/-- **Step 3, restricted version.** For ψ smooth with compact support and
-`tsupport ψ ⊆ chartTargetEuclid α`, the chart-pulled bilinear identity holds,
-provided `B.a` matches on `euclideanChartImageOfTsupport α f` (a compact subset
-of `chartTargetEuclid α`). The Hypothesis is only on K_main (smaller than
-chartTargetEuclid α) because outside K_main both sides of the integrand
-identity are 0. -/
 private theorem bilinear_identity_of_supp_in_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -896,10 +820,7 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     · rw [MeasureTheory.integral_neg]
     · funext y; ring
 
-/-- The support of `negDensityLaplacianPullback g hf α` is contained in the
-Euclidean image of `tsupport f`. Argument parallel to
-`chartPullback_support_subset`, using positivity of the chart density and
-`tsupport (Δ_g f) ⊆ tsupport f`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma negDensityLaplacianPullback_support_subset
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -947,9 +868,7 @@ private lemma negDensityLaplacianPullback_support_subset
   · rw [negDensityLaplacianPullback_apply_of_notMem (I := I) g hf α hy_in] at hy
     exact (hy rfl).elim
 
-/-- For a smooth cutoff `ρ` equal to `1` on a neighborhood `U` of
-`tsupport (chartPullback I α f)`, the principal integrand of `B` against
-`(chartPullback f, ψ)` and against `(chartPullback f, ρ ψ)` agree pointwise. -/
+omit [FiniteDimensional ℝ E] in
 private lemma principalIntegrand_cutoff_eq
     (B : SmoothEllipticBilinearForm (Module.finrank ℝ E) (Set.univ : Set EuclN))
     {f : EuclN → ℝ} {ψ ρ : EuclN → ℝ}
@@ -994,13 +913,6 @@ private lemma principalIntegrand_cutoff_eq
         (fderiv ℝ (fun z : EuclN => ρ z * ψ z) y) (EuclideanSpace.single j 1)
     rw [ContinuousLinearMap.zero_apply]; ring
 
-/-- **Cutoff reduction.** For arbitrary smooth compactly-supported ψ, the
-bilinear identity reduces to the identity for the cutoff `ρ ψ`, where ρ is `1`
-on a neighborhood of `euclideanChartImageOfTsupport α f` and supported in
-`chartTargetEuclid α`. The neighborhood condition serves the LHS invariance
-(via `principalIntegrand_cutoff_eq`); the pointwise condition on
-`euclideanChartImageOfTsupport α f` covers the support of `negDensityLaplacianPullback`,
-giving RHS invariance. -/
 private theorem bilinear_identity_of_smooth
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1121,14 +1033,6 @@ private theorem bilinear_identity_of_smooth
       rw [hρ_y]; ring
   rw [h_LHS_invariant, h_step3, h_RHS_invariant]
 
-/-- **Chart-pulled smooth weak solution.** For a smooth Riemannian metric `g`
-on a closed (compact, boundaryless) smooth manifold `M`, a chart point
-`α : M`, and a smooth function `f : M → ℝ` with `tsupport f ⊆ (chartAt H α).source`,
-there exists a smooth elliptic bilinear form `B` on `Set.univ : Set EuclN`
-(with vanishing zeroth-order coefficient, and principal coefficient matching the
-chart-pulled volume-weighted inverse Gram matrix on the Euclidean image of
-`tsupport f`) such that `chartPullback I α f` is a smooth weak solution of `B`
-with right-hand side `negDensityLaplacianPullback g hf α`. -/
 theorem chart_pulled_smooth_weak_solution
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

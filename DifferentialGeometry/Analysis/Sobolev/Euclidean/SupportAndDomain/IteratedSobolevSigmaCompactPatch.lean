@@ -1,45 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-/-!
-# σ-compact patching helpers for iterated Euclidean Sobolev membership
-
-For any open subset `Ω ⊆ EuclideanSpace ℝ (Fin d)`, σ-compact patching results
-relate `MemWkp k p u Ω` to local membership on a precompact-open exhaustion.
-
-This file provides:
-
-* `exists_monotone_precompact_open_exhaustion` — every open subset admits a
-  monotone σ-compact exhaustion of open precompact subsets with closures
-  inside the original set.
-
-* `patchedFunction` and `patchedFunction_ae_eq_on_each` — a global combinator
-  that glues a sequence of functions defined on a monotone exhaustion into a
-  single global function, agreeing `ae` with each input on its level.
-
-* `exists_global_of_ae_coherent_monotone` — an `ae`-coherent sequence of `L^p`
-  functions on a monotone exhaustion patches into a single global `L^p`
-  function, provided the local `L^p` norms admit a uniform bound.
-
-* `MemWkp_of_sigma_compact_cover_and_globalLp_zero` — base case (`k = 0`) of
-  the σ-compact patching theorem for `MemWkp`.
-
-Note on the higher-order `MemWkp` patching theorem. The headline-form
-theorem—that local `MemWkp k p u Ω'` plus global `MemLp u p Ω` imply
-`MemWkp k p u Ω`—is **not** provable from local hypotheses alone for
-`k ≥ 1`, because membership in `W^{k,p}(Ω)` requires the iterated weak
-partials to be in `L^p(Ω)` globally, and this fails in general when only
-local `L^p`-norm finiteness is assumed. A concrete obstruction is
-`d = 1`, `p = 2`, `Ω = (0, 1)`, `u(x) = x^(-0.2)`: this `u` is `L^2(Ω)`
-and is `W^{1,2}(Ω')` for every precompact `Ω' ⊆⊆ Ω`, yet `u ∉ W^{1,2}(Ω)`
-because the classical derivative `u'(x) = -0.2 · x^(-1.2)` is not in
-`L^2(Ω)`.
-
-To patch beyond `k = 0`, an additional uniform `L^p`-norm bound on the
-iterated weak partials is needed; the patching helper
-`exists_global_of_ae_coherent_monotone` then supplies the required global
-function from local `ae`-coherent data.
--/
 
 noncomputable section
 
@@ -55,9 +16,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- An open subset of Euclidean space admits a monotone sequence of open
-precompact subsets with closures lying inside it, whose union is the whole
-set. -/
+omit [NeZero d] in
 lemma exists_monotone_precompact_open_exhaustion
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∃ Ω_seq : ℕ → Set E,
@@ -158,17 +117,13 @@ lemma exists_monotone_precompact_open_exhaustion
   exact ⟨Ω_seq, hΩ_seq_open, hΩ_seq_closure_compact,
     hΩ_seq_closure_in_Ω, hΩ_seq_mono, hΩ_seq_union⟩
 
-/-- A global `Nat.find`-based combinator of functions across a monotone
-exhaustion. For `x` in the union of `Ω_seq`, the value is `g_seq m x` for the
-smallest `m` with `x ∈ Ω_seq m`. Outside the union, the value is 0. -/
 def patchedFunction
     (Ω_seq : ℕ → Set E) (g_seq : ℕ → E → ℝ) : E → ℝ := by
   classical
   exact fun x =>
     if h : ∃ n, x ∈ Ω_seq n then g_seq (Nat.find h) x else 0
 
-/-- On the `n`-th level of the exhaustion, the patched function agrees almost
-everywhere with the `n`-th input function. -/
+omit [NeZero d] in
 lemma patchedFunction_ae_eq_on_each
     {Ω_seq : ℕ → Set E}
     (hΩ_seq_open : ∀ n, IsOpen (Ω_seq n))
@@ -230,12 +185,7 @@ lemma patchedFunction_ae_eq_on_each
       rw [ae_restrict_union_eq]
       exact ⟨h_ae_on_left, h_ae_on_right⟩
 
-/-- Given a monotone sequence of open sets `Ω_seq n` with union `Ω`, and a
-sequence of functions `g_seq n` that is `Lp` on `Ω_seq n` and ae-coherent
-across overlaps (i.e. `g_seq n =ᵐ g_seq m` on the smaller set for `m ≤ n`),
-together with a uniform `L^p`-norm envelope `C < ⊤` on the local norms,
-construct a single global function `g` that agrees `ae` with each `g_seq n` on
-`volume.restrict (Ω_seq n)` and is `Lp` on `Ω`. -/
+omit [NeZero d] in
 lemma exists_global_of_ae_coherent_monotone
     {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
     {Ω : Set E} (_hΩ_open : IsOpen Ω)
@@ -326,9 +276,7 @@ lemma exists_global_of_ae_coherent_monotone
         h_bound_eventually h_indicator_aem h_indicator_tendsto
     exact ⟨h_g_aem_Ω, lt_of_le_of_lt h_eLpNorm_g_le_C hC_lt_top⟩
 
-/-- **σ-compact patching for `MemWkp`** (base case `k = 0`). For `k = 0`,
-`MemWkp 0 p u Ω = MemLp u p (volume.restrict Ω)`, so the conclusion is
-exactly the global `L^p` hypothesis. -/
+omit [NeZero d] in
 theorem MemWkp_of_sigma_compact_cover_and_globalLp_zero
     {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
     {Ω : Set E} (_hΩ_open : IsOpen Ω) {u : E → ℝ}

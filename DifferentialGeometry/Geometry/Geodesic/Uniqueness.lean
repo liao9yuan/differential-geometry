@@ -2,43 +2,7 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.Existence
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Local uniqueness of geodesics via Picard-Lindelöf / Gronwall
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, two local integral curves
-of the chart-fixed geodesic vector field that agree at a base time `t₀`
-agree on a neighbourhood of `t₀`. This is a direct lift of Mathlib's
-
-* `isMIntegralCurveAt_eventuallyEq_of_contMDiffAt_boundaryless`
-  (`Mathlib/Geometry/Manifold/IntegralCurve/ExistUnique.lean`),
-
-specialised to the chart-fixed geodesic vector field
-`geodesicVectorFieldChart g α`, whose `C^∞`-smoothness on
-`(chartAt H α).source` is recorded in
-`DifferentialGeometry/Geometry/Geodesic/Equation.lean`.
-
-We then transfer the result to base curves on `M` via projection, and
-package the conclusion at the `IsGeodesicAt`-predicate level. The key
-observation is that the predicate `IsGeodesicAt g γ t₀` already exposes a
-lift `f : ℝ → TangentBundle I M` projecting to `γ`; uniqueness of `f` in
-the chart-fixed vector field hence projects to uniqueness of `γ` on a
-neighbourhood of `t₀`.
-
-The natural matching condition for two geodesics is "same initial tangent
-vector" — i.e. the lifts `f₁, f₂` agree at `t₀` as points of
-`TangentBundle I M`. This encodes both `γ₁ t₀ = γ₂ t₀` and a matching of
-velocity vectors in `T_{γ t₀} M`.
-
-The chart basepoint `α` is fixed once and for all in the predicate
-`IsGeodesicAt`; comparison of geodesics produced from *different* chart
-basepoints is a separate question (it asks whether two different
-chart-Christoffel ODEs share solutions through a common initial point —
-true on the chart overlap, but the natural statement is at the level of
-the moving-chart geodesic equation).
--/
 
 noncomputable section
 
@@ -51,7 +15,7 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -61,12 +25,6 @@ section ChartFixedUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Uniqueness of integral curves of the chart-fixed geodesic vector
-field.** Two `IsMIntegralCurveAt` witnesses `f₁, f₂` for the chart-fixed
-geodesic vector field `geodesicVectorFieldChart g α` at `t₀` that agree
-at `t₀` agree on a neighbourhood of `t₀`, provided the common base point
-`(f₁ t₀).proj = (f₂ t₀).proj` lies in the chart-α source (so the vector
-field is smooth there). -/
 theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -97,8 +55,6 @@ theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
       (γ := f₁) (γ' := f₂) (t₀ := t₀)
       hsmooth1 hf₁ hf₂ h0
 
-/-- **Projected uniqueness.** Under the same hypotheses, the base curves
-agree on a neighbourhood of `t₀`. -/
 theorem projectCurve_eventuallyEq_of_isMIntegralCurveAt_geodesicVectorFieldChart
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -121,11 +77,6 @@ section GeodesicUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Uniqueness of geodesics with a fixed chart basepoint.** If two
-curves are local geodesics at `t₀` witnessed by the same chart basepoint
-`α : M` and lifts `f₁, f₂` with `f₁ t₀ = f₂ t₀`, and the common starting
-point lies in `(chartAt H α).source`, then the two base curves agree on a
-neighbourhood of `t₀`. -/
 theorem isGeodesicAt_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ₁ γ₂ : ℝ → M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -147,17 +98,6 @@ theorem isGeodesicAt_eventuallyEq
   rw [projectCurve_apply, projectCurve_apply] at ht
   rw [← hproj₁ t, ← hproj₂ t]; exact ht
 
-/-- **Uniqueness of geodesics with matching initial data.** If the base
-curves `γ₁, γ₂` are projections of integral curves `f₁, f₂` of the
-chart-fixed geodesic vector field for the chart basepoint `γ₁ t₀`, and the
-lifts agree at `t₀` (`f₁ t₀ = f₂ t₀`, which encodes matching initial point
-*and* initial velocity), then `γ₁` and `γ₂` agree on a neighbourhood of
-`t₀`.
-
-Specialisation of `isGeodesicAt_eventuallyEq` with the chart basepoint
-taken to be the common starting point `γ₁ t₀`; this choice automatically
-places that point in the chart source, so no source-membership hypothesis
-is needed. -/
 theorem isGeodesicAt_eventuallyEq_of_lift_eq
     {g : SmoothRiemannianMetric I M} {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}

@@ -1,20 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroup
 
-/-!
-# Abstract spectral heat semigroup: identity at `0` and the semigroup law
-
-This file establishes the two algebraic structural properties of the
-abstract spectral heat semigroup `abstractSpectralSemigroup b hlam`:
-
-* `abstractSpectralSemigroup_apply_zero` — `S(0) = id`,
-* `abstractSpectralSemigroup_apply_add` — `S(t + s) = S(t) ∘ S(s)` for
-  `t, s ≥ 0`.
-
-Both are pure Hilbert spectral calculus, mirroring the eigenbasis
-templates but stated for an abstract `HilbertBasis ι ℝ X` of
-eigenvectors with a non-negative eigenvalue family `lam : ι → ℝ`.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -27,7 +12,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-- At `t = 0`, the abstract spectral heat semigroup is the identity. -/
 theorem abstractSpectralSemigroup_apply_zero (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) :
     abstractSpectralSemigroup b hlam 0 =
@@ -50,7 +34,6 @@ theorem abstractSpectralSemigroup_apply_zero (b : HilbertBasis ι ℝ X)
   rw [h_eq] at h_hsum
   exact h_hsum.tsum_eq
 
-/-- The semigroup law `S(t + s) = S(t) ∘ S(s)` for `t, s ≥ 0`. -/
 theorem abstractSpectralSemigroup_apply_add (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
     {t s : ℝ} (ht : 0 ≤ t) (hs : 0 ≤ s) :

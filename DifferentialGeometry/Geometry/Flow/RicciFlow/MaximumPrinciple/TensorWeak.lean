@@ -6,10 +6,3 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Limit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Certification
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Final
-
-/-!
-# Hamilton Weak Maximum Principle For Symmetric Two-Tensors
-
-Thin umbrella that re-exports the split tensor weak maximum-principle API
-for symmetric two-tensors under Ricci flow.
--/

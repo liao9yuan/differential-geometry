@@ -21,14 +21,14 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Fixed-chart Levi-Civita Christoffel formulas
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Smooth` API.
--/
 
-/-- At the chart center, the fixed-chart metric component is the intrinsic
-coordinate-frame metric component. -/
+
+
+
+
+
+
 theorem metricFlatModelInChart_component_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -165,7 +165,7 @@ private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventua
   rw [hj_symm']
   rfl
 
-/-- Fixed-chart metric coefficients are smooth model functions. -/
+
 theorem metricFlatModelInChart_component_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -181,16 +181,16 @@ theorem metricFlatModelInChart_component_contDiffWithinAt
     simpa using h.clm_apply contDiffWithinAt_const
   simpa [metricFlatModelInChart_component] using hi.clm_apply contDiffWithinAt_const
 
-/-- At the chart center, the model derivative of a fixed-chart metric coefficient
-is the intrinsic directional derivative of the corresponding coordinate-frame
-metric component. -/
+
+
+
 theorem metricFlatModelInChart_component_deriv_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
     fderivWithin Real
         (metricFlatModelInChart_component (I := I) g x₀ i j)
         (Set.range I) (extChartAt I x₀ x₀) ((Module.finBasis Real E) a) =
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ a)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ a)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x₀ i y)
             (coordinateFrameAt (I := I) x₀ j y)) x₀ := by
@@ -223,7 +223,7 @@ theorem metricFlatModelInChart_component_deriv_center
     rw [← coordinateFrameAt_toBasis_apply (I := I) x₀ a]
     rw [coordinateFrameAt_toBasis_eq_finBasis (I := I) x₀]
     rfl
-  unfold directionalDeriv extDerivFun
+  unfold directionalDerivAlong extDerivFun
   change
     fderivWithin Real
         (metricFlatModelInChart_component (I := I) g x₀ i j)
@@ -232,8 +232,8 @@ theorem metricFlatModelInChart_component_deriv_center
   rw [hframe_center, hf_md.mfderiv, hfd]
   rfl
 
-/-- Fixed-chart coordinate derivatives of metric coefficients are smooth model
-functions. -/
+
+
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
@@ -253,7 +253,7 @@ theorem metricFlatModelInChart_component_deriv_contDiffWithinAt
   exact hf.fderivWithin_right_apply hconst I.uniqueDiffOn (by simp)
     (extChartAt_target_subset_range x₀ (mem_extChartAt_target (I := I) x₀))
 
-/-- The fixed-chart right hand side of the coordinate Christoffel formula. -/
+
 noncomputable def leviCivitaChristoffelModelRHS
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) (y : E) : Real :=
@@ -274,8 +274,8 @@ noncomputable def leviCivitaChristoffelModelRHS
             (metricFlatModelInChart_component (I := I) g x₀ i j)
             (Set.range I) y ((Module.finBasis Real E) l))
 
-/-- The fixed-chart right hand side of the Christoffel formula is smooth as a
-model function. -/
+
+
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -296,8 +296,8 @@ theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
     metricFlatModelInChart_component_deriv_contDiffWithinAt (I := I) g x₀ l i j
   exact hinv.mul ((h₁.add h₂).sub h₃)
 
-/-- At the chart center, the smooth model Christoffel RHS recovers the
-coordinate Christoffel coefficient of the Koszul Levi-Civita connection. -/
+
+
 theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -328,7 +328,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (I ((chartAt H x₀) x₀)) ((Module.finBasis Real E) i) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ i)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ j y)
                 (coordinateFrameAt (I := I) x₀ l y)) x₀ := by
@@ -337,7 +337,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     have h₂ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ i l)
             (Set.range I) (I ((chartAt H x₀) x₀)) ((Module.finBasis Real E) j) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ j)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ j)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ i y)
                 (coordinateFrameAt (I := I) x₀ l y)) x₀ := by
@@ -346,7 +346,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     have h₃ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ i j)
             (Set.range I) (I ((chartAt H x₀) x₀)) ((Module.finBasis Real E) l) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ l)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ l)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ i y)
                 (coordinateFrameAt (I := I) x₀ j y)) x₀ := by
@@ -354,7 +354,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
           metricFlatModelInChart_component_deriv_center (I := I) g x₀ l i j
     rw [h₁, h₂, h₃]
 
-/-- Off-center fixed-chart metric-flat compatibility. -/
+
 theorem metricFlatModelInChart_apply_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) (v w : E) :
@@ -381,7 +381,7 @@ theorem metricFlatModelInChart_apply_of_mem
   rw [ContinuousLinearMap.inCoordinates_eq hxT hxDual]
   simp [hom_trivializationAt, Trivialization.continuousLinearMap_apply]
 
-/-- Off-center fixed-chart metric component compatibility. -/
+
 theorem metricFlatModelInChart_component_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -417,8 +417,8 @@ theorem metricFlatModelInChart_component_of_mem
   rw [metricFlatModelInChart_apply_of_mem (I := I) g x₀ hx]
   rw [hi, hj]
 
-/-- The inverse of the fixed-chart metric flat map supplies inverse metric
-coefficients for the coordinate frame at any point of the fixed chart domain. -/
+
+
 private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) :
@@ -574,10 +574,10 @@ private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
               simp [hij, hji]
   · exact hsecond i j
 
-/-- Off-center fixed-chart derivative compatibility for scalar functions.
 
-The model derivative in the fixed `extChartAt x₀` chart is the intrinsic
-directional derivative along the coordinate frame induced by the same chart. -/
+
+
+
 private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
     [I.Boundaryless]
     {f : M -> Real} {x₀ x : M}
@@ -586,7 +586,7 @@ private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
     (a : CoordinateIdx (𝕜 := Real) E) :
     fderivWithin Real (writtenInExtChartAt I 𝓘(Real, Real) x₀ f)
         (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) a) =
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ a) f x := by
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ a) f x := by
   let z : E := extChartAt I x₀ x
   let φ : E -> Real := writtenInExtChartAt I 𝓘(Real, Real) x₀ f
   let V : TangentSpace I x := coordinateFrameAt (I := I) x₀ a x
@@ -642,12 +642,12 @@ private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
   rw [fderivWithin_of_mem_nhds]
   · rw [hmodel]
     rw [← hmfd]
-    simp [directionalDeriv, V, extDerivFun_real_eq_mfderiv]
+    simp [directionalDerivAlong, V, extDerivFun_real_eq_mfderiv]
     rfl
   · rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
     exact Filter.univ_mem
 
-/-- Off-center fixed-chart derivative compatibility for metric components. -/
+
 theorem metricFlatModelInChart_component_deriv_of_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
@@ -656,7 +656,7 @@ theorem metricFlatModelInChart_component_deriv_of_mem
     fderivWithin Real
         (metricFlatModelInChart_component (I := I) g x₀ i j)
         (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) a) =
-      directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ a)
+      directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ a)
         (fun y : M =>
           g.inner y (coordinateFrameAt (I := I) x₀ i y)
             (coordinateFrameAt (I := I) x₀ j y)) x := by
@@ -696,16 +696,16 @@ theorem metricFlatModelInChart_component_deriv_of_mem
             (writtenInExtChartAt I 𝓘(Real, Real) x₀ f)
             (Set.range I) z ((Module.finBasis Real E) a) := by
             rw [hfd]
-    _ = directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ a) f x := by
+    _ = directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ a) f x := by
             exact fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
               (I := I) hx hf_md a
 
-/-- Off-center fixed-chart Christoffel compatibility.
 
-In the coordinate chart centered at `x₀`, the smooth model Christoffel RHS used
-by the geodesic spray agrees at every point of the coordinate-frame domain with
-the Christoffel coefficient of the Levi-Civita connection in the same
-coordinate-induced frame. -/
+
+
+
+
+
 theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
@@ -740,7 +740,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) i) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ i)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ j y)
                 (coordinateFrameAt (I := I) x₀ l y)) x := by
@@ -749,7 +749,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     have h₂ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ i l)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) j) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ j)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ j)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ i y)
                 (coordinateFrameAt (I := I) x₀ l y)) x := by
@@ -758,7 +758,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     have h₃ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ i j)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) l) =
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ l)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ l)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ i y)
                 (coordinateFrameAt (I := I) x₀ j y)) x := by
@@ -771,24 +771,24 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
               (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) j) -
           fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ i j)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) l)) =
-        directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ i)
+        directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)
               (fun y : M =>
                 g.inner y (coordinateFrameAt (I := I) x₀ j y)
                   (coordinateFrameAt (I := I) x₀ l y)) x +
-            directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ j)
+            directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ j)
               (fun y : M =>
                 g.inner y (coordinateFrameAt (I := I) x₀ i y)
                   (coordinateFrameAt (I := I) x₀ l y)) x -
-          directionalDeriv (I := I) (coordinateFrameAt (I := I) x₀ l)
+          directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ l)
             (fun y : M =>
               g.inner y (coordinateFrameAt (I := I) x₀ i y)
                 (coordinateFrameAt (I := I) x₀ j y)) x by
       rw [h₁, h₂, h₃]
 
-/-! ## Off-center smoothness of the fixed-chart Christoffel model RHS -/
 
-/-- Fixed-chart metric components are smooth at every point of the fixed chart
-target. -/
+
+
+
 theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -805,8 +805,8 @@ theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
     simpa using h.clm_apply contDiffWithinAt_const
   simpa [metricFlatModelInChart_component] using hi.clm_apply contDiffWithinAt_const
 
-/-- Fixed-chart coordinate derivatives of metric components are smooth at every
-point of the fixed chart target. -/
+
+
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -828,8 +828,8 @@ theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
   exact hf.fderivWithin_right_apply hconst I.uniqueDiffOn (by simp)
     (extChartAt_target_subset_range x₀ hy)
 
-/-- The fixed-chart metric flat map is invertible at every point of the fixed
-chart target. -/
+
+
 theorem metricFlatModelInChart_isInvertible_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) :
@@ -873,8 +873,8 @@ theorem metricFlatModelInChart_isInvertible_of_mem
     (e := trivializationAt E (TangentSpace I : M -> Type _) x₀)
     (b := Module.finBasis Real E) g hpT
 
-/-- Fixed-chart inverse metric components are smooth at every point of the
-fixed chart target. -/
+
+
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -911,8 +911,8 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
     simpa [εl] using hinv.clm_apply contDiffWithinAt_const
   simpa [εk, εl] using (contDiffWithinAt_const (c := εk)).clm_apply happ
 
-/-- The fixed-chart right hand side of the coordinate Christoffel formula is
-smooth at every point of the fixed chart target. -/
+
+
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)

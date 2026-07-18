@@ -2,75 +2,12 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 
-/-!
-# Expansion of the chart-α first covariant-derivative component of the global
-smooth extension `S_k_ext` in terms of `T₀`'s raw chart components and their
-first two Euclidean partials.
-
-Let `(M, g)` be a smooth Riemannian manifold modelled on a real inner-product
-space `E`, let `α : M` be a chart-centre, let `k, l` be chart-coordinate
-indices, let `(Idx, Jdx)` be a tensor component multi-index pair, and let `T₀`
-be a smooth compactly-supported `(r, s)`-tensor section. The earlier file
-`SkExtChartComponentEqCovDerivEuclid.lean` produced a globally smooth
-`(r, s)`-tensor section `S_k_ext` and an open neighbourhood `V` in the
-Euclidean chart target of a chart-α Levi-Civita good-set point `b₀` such that
-
-```
-chartPushedRaw I α (tensorChartComponentRaw … S_k_packed α Idx Jdx) y
-  = covDerivComponentEuclid g r s α T₀ k Idx Jdx y      (y ∈ V),
-```
-
-where `S_k_packed := packageAsCc g r s S_k_ext` packages the smooth section as
-a `SmoothCcTensor` via `[CompactSpace M]`. The chart-coordinate first-
-derivative formula `covDerivComponent_eq_euclidPartial_add_lowerOrder` applied
-to `S = S_k_packed` rewrites the left-hand side
-`covDerivComponentEuclid g r s α S_k_packed l Idx Jdx y` as
-
-```
-euclidPartial l (chartPushedRaw … (raw_α^{Idx,Jdx} of S_k_packed)) y
-  + covDerivLowerOrderTerm g r s S_k_packed α l Idx Jdx y.
-```
-
-Substituting `chartPushedRaw … (raw of S_k_packed) = covDerivComponentEuclid
-g r s α T₀ k …` from the earlier file inside the partial derivative (locality
-of the Fréchet derivative on the open set `V`), and inside the lower-order
-term's raw-component factors (multi-indexed: same `S_k_ext` and `V` work for
-every multi-index pair), and then applying
-`covDerivComponent_eq_euclidPartial_add_lowerOrder` *again* to each resulting
-`covDerivComponentEuclid g r s α T₀ k …`, expands the entire expression as a
-finite linear combination of
-
-* the mixed second partial `∂_l ∂_k raw_α^{Idx,Jdx}` of `T₀`'s raw chart
-  component,
-* first partials `∂_l raw_α^p`, `∂_k raw_α^p` of `T₀`'s raw chart components
-  (across all component multi-index pairs `p`),
-* undifferentiated raw chart components `raw_α^p` of `T₀`,
-
-with coefficients that are `C^∞` on the Euclidean chart target. The
-coefficient of the second-order term is `1` (definitionally); the lower-order
-coefficient families are explicit combinations of `covDerivLowerOrderCoeff`
-and its Euclidean partials, both `C^∞` on the chart target by results from
-`CovDerivComponentSecondFormula.lean`.
-
-## Main result
-
-* `covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder` — the
-  headline: there exist a global smooth extension `S_k_ext`, an open Euclidean
-  neighbourhood `V` of `toEuclidean ((extChartAt I α) b₀)`, and `C^∞`
-  coefficient families on the chart target such that, for every `y ∈ V`,
-  `covDerivComponentEuclid g r s α S_k_packed l Idx Jdx y` equals the mixed
-  second partial `∂_l ∂_k raw_α^{Idx, Jdx}` of `T₀` plus a finite linear
-  combination of `∂_l raw_α^p`, `∂_k raw_α^p`, and `raw_α^p` of `T₀`, with
-  `C^∞` coefficients on the chart target.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -94,9 +31,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-- The earlier file's headline applied uniformly across all component
-multi-index pairs `p`: the same `S_k_ext` and `V` discharge the `EqOn`
-statement for every `p`. -/
 private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -198,8 +132,6 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
   exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (I := I) (M := M) g r s T₀ α k (b := b) hb_good
 
-/-- Package a globally smooth `(r, s)`-tensor section as a `SmoothCcTensor`,
-using the ambient `[CompactSpace M]` to supply compact support. -/
 private def packageAsCcExp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -208,18 +140,14 @@ private def packageAsCcExp
   toSection := S
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma packageAsCcExp_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
                 fun b : M => TensorRSSpace r s I b⟯) :
     (packageAsCcExp (I := I) (M := M) g r s S).toSection = S := rfl
 
-/-- The raw chart-α `(Idx, Jdx)` scalar component of `S_k_packed`, evaluated
-on `M`, equals — by the definitions of `tensorChartComponentRaw` and
-`tensorTrivProj` and the field equation `S_k_packed.toSection = S_k_ext` —
-the expression
-`tensorChartComponentProjection r s Idx Jdx ((triv α).clmAt b (S_k_ext b))`
-that appears inside `chartPushedRaw` in B.2.c.iii. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_packageAsCcExp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S_k_ext : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -236,11 +164,7 @@ private lemma tensorChartComponentRaw_packageAsCcExp_eq
   funext b
   rfl
 
-/-- **Bridge to `chartPushedRaw (tensorChartComponentRaw)`.** Combine
-`chartPushedRaw_eqOn_covDerivComponentEuclid_uniform` with
-`tensorChartComponentRaw_packageAsCcExp_eq` to obtain the equality
-`chartPushedRaw I α (tensorChartComponentRaw … S_k_packed α p.1 p.2) y =
-covDerivComponentEuclid g r s α T₀ k p.1 p.2 y` for `y ∈ V`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_tensorChartComponentRaw_S_k_packed_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -272,8 +196,7 @@ private lemma chartPushedRaw_tensorChartComponentRaw_S_k_packed_eqOn
   rw [tensorChartComponentRaw_packageAsCcExp_eq]
   exact h
 
-/-- The `n`-th Euclidean partial of two functions agreeing on the open set
-`V ⊆ chartTargetEuclid α` is the same on `V`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eqOn_of_eqOn_open
     (V : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (hV_open : IsOpen V)
@@ -288,8 +211,6 @@ private lemma euclidPartial_eqOn_of_eqOn_open
     Filter.EventuallyEq.fderiv_eq hVeq
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
-/-- The `n`-th Euclidean partial of `covDerivComponentEuclid g r s α T₀ k Idx
-Jdx` is `C^∞` on the Euclidean chart target. -/
 private lemma euclidPartial_covDerivComponentEuclid_T₀_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -336,8 +257,6 @@ private lemma euclidPartial_covDerivComponentEuclid_T₀_contDiffOn
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-- The first-derivative formula in functional form, specialised to `T₀` and
-the chart-coordinate index `k`. -/
 private lemma covDerivComponentEuclid_T₀_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -352,48 +271,6 @@ private lemma covDerivComponentEuclid_T₀_eqOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α T₀ k Idx Jdx
 
-/-- **Expansion of the chart-α first covariant-derivative component of the
-global smooth extension `S_k_ext` in terms of `T₀`'s raw chart components and
-their first two Euclidean partials.**
-
-For a smooth Riemannian manifold `(M, g)` modelled on a real inner-product
-space `E`, a chart-centre `α : M`, chart-coordinate indices `k, l`, a tensor
-component multi-index pair `(Idx, Jdx)`, a smooth compactly-supported
-`(r, s)`-tensor section `T₀`, and a chart-α Levi-Civita good-set point `b₀`,
-there exist a global smooth `(r, s)`-tensor section `S_k_ext`, an open
-neighbourhood `V` (in the Euclidean chart target) of
-`(toEuclidean) ((extChartAt I α) b₀)`, and `C^∞` coefficient families on the
-chart target such that, for every `y ∈ V`,
-
-```
-covDerivComponentEuclid g r s α S_k_packed l Idx Jdx y
-  = ∂_l ∂_k raw_α^{Idx,Jdx}(y)
-    + (LO-of-T₀-differentiated-l: ∑_q (∂_l coeffᵀ_q) · rawᵀ_q
-                                + coeffᵀ_q · ∂_l rawᵀ_q)(y)
-    + (LO-of-S_k_packed: ∑_p coeffˢ_p · (∂_k rawᵀ_p + LO(T₀, k, p)))(y),
-```
-
-where `S_k_packed := packageAsCcExp g r s S_k_ext`. All coefficient families
-(`coeffᵀ_q`, `∂_l coeffᵀ_q`, `coeffˢ_p`) and all lower-order pieces are `C^∞`
-on the Euclidean chart target.
-
-In a slightly more compact form which is what the statement below asserts:
-there are `C^∞` correction functions `Corr_l, Corr_kl, Corr_T₀l_LO,
-Corr_S_k_LO : EuclideanSpace ℝ (Fin n) → ℝ` such that
-
-```
-covDerivComponentEuclid g r s α S_k_packed l Idx Jdx y
-  = euclidPartial l (euclidPartial k (chartPushedRaw … raw T₀^{Idx,Jdx})) y
-    + Corr_T₀l_LO(y) + Corr_S_k_LO(y)
-```
-
-where `Corr_T₀l_LO y := euclidPartial l (covDerivLowerOrderTerm T₀ k Idx Jdx) y`
-and `Corr_S_k_LO y := covDerivLowerOrderTerm S_k_packed l Idx Jdx y`. Both
-corrections are `C^∞` on the chart target; on `V`, they are equivalently a
-finite linear combination of `∂_l raw_T₀^q`, `∂_k raw_T₀^p`, and `raw_T₀^p`
-with `C^∞` coefficients, by `covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder`
-applied to `T₀` and the multi-indexed expansion of the chart-pushed raw
-components of `S_k_packed`. -/
 theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

@@ -5,14 +5,14 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Ricci-Flow Metric Evolution in a Fixed Frame
 
-This file translates the first Section 6.2 metric calculation into the realized
-interval API.  The core geometric input is the Ricci-flow equation
-`partial_t g = -2 Ric`; the inverse-metric result is obtained by differentiating
-the frame identity `g^{-1} g = I`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -35,10 +35,10 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-- Covariant derivative components of the inverse metric in a local frame.
 
-For a metric-compatible connection these components vanish:
-`nabla_d g^{kl} = 0`.  The signs are the contravariant-slot convention. -/
+
+
+
 def inverseMetricCovDerivCompInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -347,12 +347,12 @@ theorem inverseMetric_derivative_solve
                           rw [hsymm b j]
                           ring
 
-/-- Metric compatibility in coordinates for the inverse metric:
-`nabla_d g^{kl} = 0`.
 
-The differentiability hypotheses are deliberately explicit.  In Ricci-flow
-applications they should be supplied by `gInv_spacetimeSmooth` and the
-regularity package for the first Ricci covariant derivative. -/
+
+
+
+
+
 theorem inverseMetricCovDerivCompInFrame_eq_zero
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -652,8 +652,8 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
   rw [hDU]
   ring
 
-/-- Local metric compatibility for inverse metric components:
-`nabla_d g^{kl} = 0` on a local frame domain. -/
+
+
 theorem invCovZeroLocal
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

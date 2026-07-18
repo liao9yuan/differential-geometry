@@ -1,61 +1,5 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# Smoothness of the metric musical sharp of a smooth covector field
-
-Given a smooth Riemannian metric `g` on the tangent bundle of a smooth manifold
-`M` and a covector field
-
-```
-cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ,
-```
-
-the pointwise metric musical sharp `metricSharp g b (cv b)` produces a tangent
-vector at every point `b`. This file proves that, on a boundaryless model and
-under a natural chart-local smoothness hypothesis on `cv`, the resulting map
-
-```
-b ↦ TotalSpace.mk' E b (metricSharp g b (cv b))
-```
-
-is a smooth tangent-bundle section.
-
-The construction mirrors the gradient smoothness chain in
-`Geometry/Operator/Gradient.lean`. The gradient is the special case `cv = df`, in which
-case `cv b (chartBasisVecFiber α j b) = ∂_j f̃ (φ b)` are the chart-pullback
-partial derivatives. Here `cv` is arbitrary, with its chart-basis components
-`cv_j(b) := cv b (chartBasisVecFiber α j b)` supplied as the smoothness witness.
-
-## Construction
-
-At a chart center `α : M`, define the chart-coordinate coefficients
-$$c_i(b) = \sum_j G^{ij}(b)\, \omega_j(b),
-  \qquad \omega_j(b) = \omega_b(e_j(b)),$$
-where `G^{ij}` is the inverse chart Gram matrix and `e_j(b)` is the `j`-th
-chart-basis frame vector. The chart-local representative is
-`∑_i c_i(b) • e_i(b)`. On the chart base set this agrees with
-`metricSharp g b (cv b)`, by the defining Riesz identity
-`g_b(metricSharp g b (cv b), w) = cv_b(w)` together with the Gram-inverse
-identity. Smoothness of the coefficients (from smoothness of the
-`cv_j` and of the inverse Gram matrix entries) and of the chart-basis frame
-gives smoothness of the chart-local representative; the global statement is
-obtained by gluing over charts.
-
-## Main definitions
-
-* `metricSharpChartCoeff g α cv i` : the `i`-th chart-coordinate coefficient
-  `∑_j G^{ij} cv_j`.
-* `metricSharpChartLocal g α cv` : the chart-local linear-combination
-  representative `∑_i c_i • e_i`.
-
-## Main results
-
-* `metricSharpChartLocal_eq_metricSharp` : the chart-local representative
-  equals the pointwise sharp on the chart base set.
-* `metricSharp_contMDiff_total` : on a boundaryless model, `metricSharp g · (cv ·)`
-  is a smooth tangent-bundle section, given the chart-local smoothness of the
-  covector components.
--/
 
 noncomputable section
 
@@ -67,15 +11,26 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The `i`-th chart-basis component of `metricSharp g · (cv ·)` at `x`, in the
-chart at `α`. This is `∑_j G^{ij}(x) · cv_j(x)`, where
-`cv_j(x) := cv x (chartBasisVecFiber α j x)`. -/
+lemma metricSharp_eq_connectionMetricSharp
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (alpha : TangentSpace I x →ₗ[ℝ] ℝ) :
+    metricSharp (I := I) g x alpha =
+      DifferentialGeometry.Integral.Connection.metricSharp (I := I) g x alpha := by
+  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
+    (I := I) g x
+  ext w
+  change g.inner x (metricSharp (I := I) g x alpha) w =
+    g.inner x (DifferentialGeometry.Integral.Connection.metricSharp
+      (I := I) g x alpha) w
+  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp,
+    DifferentialGeometry.Integral.Connection.inner_metricSharp]
+
 def metricSharpChartCoeff (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=
@@ -92,8 +47,6 @@ def metricSharpChartCoeff (g : SmoothRiemannianMetric I M) (α : M)
         chartInvGramMatrix (I := I) g α x i j *
           cv x (chartBasisVecFiber (I := I) α j x) := rfl
 
-/-- The chart-local representative of `metricSharp g · (cv ·)` as a linear
-combination of the chart-basis frame at `α`. -/
 def metricSharpChartLocal (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) (x : M) :
     TangentSpace I x :=
@@ -101,8 +54,6 @@ def metricSharpChartLocal (g : SmoothRiemannianMetric I M) (α : M)
     metricSharpChartCoeff (I := I) g α cv i x •
       chartBasisVecFiber (I := I) α i x
 
-/-- The inner product of `metricSharpChartLocal` with a chart-basis frame vector
-`e_k` is the `k`-th chart-basis component `cv_k(x)` of the covector. -/
 lemma inner_metricSharpChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
@@ -204,8 +155,6 @@ lemma inner_metricSharpChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-- On the chart base set, the chart-local linear-combination representative of
-the sharp equals the abstract pointwise sharp `metricSharp g x (cv x)`. -/
 lemma metricSharpChartLocal_eq_metricSharp
     (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
@@ -249,9 +198,6 @@ lemma metricSharpChartLocal_eq_metricSharp
   congr 1
   rw [inner_metricSharpChartLocal_chartBasis (I := I) g α cv hx k]
 
-/-- `metricSharpChartCoeff g α cv i` is `C^∞` on the chart base set, given that
-the chart-basis covector components `b ↦ cv b (chartBasisVecFiber α j b)` are
-`C^∞` there. -/
 lemma metricSharpChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}
@@ -275,9 +221,6 @@ lemma metricSharpChartCoeff_contMDiffOn
   rw [hbase_eq] at h1
   exact h1
 
-/-- The chart-local representative `metricSharpChartLocal g α cv` is smooth as a
-tangent-bundle section on the chart base set, given chart-local smoothness of
-the covector components. -/
 lemma metricSharpChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}
@@ -315,10 +258,6 @@ lemma metricSharpChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-/-- **Smoothness of the metric sharp of a smooth covector field.** On a
-boundaryless model, if the chart-basis components `b ↦ cv b (chartBasisVecFiber α j b)`
-of the covector field `cv` are `C^∞` on each chart source, then
-`b ↦ metricSharp g b (cv b)` is a smooth tangent-bundle section. -/
 lemma metricSharp_contMDiff_total [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}

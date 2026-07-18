@@ -10,62 +10,6 @@ import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Green's first identity with boundary contribution — full smooth scalar version
-(half-space model)
-
-Extends `green_first_with_boundary` from interior-supported `h` to **arbitrary
-smooth `h`**, with the boundary correction term expressed as a surface integral
-against the outward unit normal vector field.
-
-The two key ingredients consumed from earlier files:
-
-* `grad_g_full_section g hh` (`GradientGlobalSection.lean`): the metric
-  gradient of an arbitrary smooth scalar `h` packaged as a globally smooth
-  tangent-bundle section, valid up to the boundary on a half-space-modelled
-  smooth manifold-with-boundary.
-
-* `boundaryFaceSum_eq_surface_integral_of_chartIdentification`
-  (`SurfaceIntegralIdentification.lean`): under a per-chart identification
-  hypothesis (`chartFaceIntegralEqualsSurfaceIntegralOnChart`), the
-  chart-by-chart boundary face sum equals the intrinsic surface integral over
-  the boundary submanifold.
-
-## Strategy
-
-1. Use `grad_g_full_section g hh` to package the gradient of `h` as a
-   globally smooth tangent section, **with no interior-support hypothesis on
-   `h`**.
-
-2. Apply the global Stokes theorem
-   (`integral_divergence_with_boundary_eq_boundaryFaceSum`) to the smooth
-   tangent section `Y := f · ∇h`.
-
-3. Apply the divergence Leibniz rule
-   `divergence_g_with_boundary_smoothSmul`:
-   `div_g^{(\partial)}(f · ∇h) = f · div_g^{(\partial)}(∇h) + ⟨X, ∇f⟩`,
-   where `⟨X, ∇f⟩` (the tangent-section action) coincides with
-   `g.inner ∇f ∇h` by Riesz duality and metric symmetry.
-
-4. Identify `boundaryFaceSum g (f · ∇h)` with the intrinsic surface integral
-   `∫_{∂M} f · g.inner (ν, ∇h) dS` via the per-chart identification
-   hypothesis from `SurfaceIntegralIdentification.lean`.
-
-## Main definition
-
-* `Δ_g_classical g hh` — the classical Laplace–Beltrami operator on an
-  arbitrary smooth scalar function `h` on the half-space-modelled
-  manifold-with-boundary, defined as the with-boundary divergence of the
-  full smooth gradient section `grad_g_full_section g hh`. No
-  interior-support hypothesis on `h` is required.
-
-## Main result
-
-* `green_first_eq_boundary_surface_integral` — Green's first identity with boundary contribution for
-  arbitrary smooth `h` on a compact half-space-modelled manifold-with-boundary,
-  with the boundary correction expressed as a surface integral over `∂M`
-  against the outward unit normal.
--/
 
 noncomputable section
 
@@ -93,9 +37,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-- **Classical Laplace–Beltrami operator on a half-space-modelled
-manifold-with-boundary, for arbitrary smooth scalars.** Defined as the
-with-boundary divergence of the full smooth gradient section. -/
 noncomputable def Δ_g_classical
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
@@ -120,21 +61,13 @@ end ClassicalLaplacian
 section IntegrabilityHelpers
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 private local instance instMeasurableSpaceE : MeasurableSpace E := borel E
 private local instance instBorelSpaceE : @BorelSpace E _ (borel E) := ⟨rfl⟩
 
-/-- **Integrability of the with-boundary divergence against the volume
-measure.** For any smooth tangent section `X` on a compact half-space-modelled
-manifold-with-boundary `M`, the function `divergence_g_with_boundary g X` is
-integrable against the canonical Riemannian volume measure.
-
-The proof uses the partition-of-unity decomposition of the volume measure into
-a finite sum of POU-weighted chart-local measures (mirrors the structure of
-`stokes_compact_via_pou`'s proof). -/
 private lemma integrable_divergence_g_with_boundary
     [hI : HasSmoothBoundary E H I]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -316,33 +249,6 @@ variable {M : Type*} [TopologicalSpace M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **Green's first identity with a boundary surface integral.** For smooth
-`f, h : M → ℝ` on a compact (`T2`, σ-compact) half-space-modelled smooth
-manifold-with-boundary `(M, g)`,
-$$\int_M \langle \nabla_g f, \nabla_g h\rangle_g\,d\mu_g
-   + \int_M f \cdot \Delta_g h\,d\mu_g
-   = \int_{\partial M} f\cdot g(\nu, \nabla_g h)\,dS,$$
-where `ν := outwardNormal g` and `dS := surfaceMeasure g`.
-
-Unlike `green_first_with_boundary`, the right-hand side here is a genuine
-surface integral over the boundary `∂M` against `surfaceMeasure`, and `h` need
-not be interior-supported. This identification of the boundary term is not
-proved internally: it is supplied through two explicit hypotheses, so the
-statement is conditional on them.
-
-- `h_chart_iden`: for each chart in the partition-of-unity support set, the
-  per-chart boundary face integral equals the corresponding piece of the
-  surface integral (`chartFaceIntegralEqualsSurfaceIntegralOnChart`, from
-  `SurfaceIntegralIdentification.lean`). Summing these is what turns the
-  abstract `boundaryFaceSum` into the surface integral over `∂M`.
-- `h_int`: the boundary integrand `b ↦ g(ν, f·∇h)` is integrable against
-  `surfaceMeasure`.
-
-Given these, the proof combines Stokes' theorem applied to `Y := f · ∇h`
-(gradient packaged via `grad_g_full_section`), the pointwise divergence Leibniz
-rule `divergence_g_with_boundary g (f · ∇h) = f · Δ_g h + ⟨∇f, ∇h⟩`, the
-identification `boundaryFaceSum g Y = ∫_{∂M} f · g(ν, ∇h) dS`, and `integral_add`
-to split the volume integral. -/
 theorem green_first_eq_boundary_surface_integral
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
     {f h : M → ℝ}
@@ -407,7 +313,7 @@ theorem green_first_eq_boundary_surface_integral
           (gradFun (I := I') g f x)
           (gradFun (I := I') g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I') g hf X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I') g X x]
     change g.inner x
         (gradFun (I := I') g h x)
         (gradFun (I := I') g f x) =

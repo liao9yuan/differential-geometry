@@ -1,37 +1,16 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapPointwisePouSobolevSummandBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.CompDataIJChartOnMMeasurable
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 
-/-!
-# Intrinsic manifold L² bound on the raw tensor connection Laplacian by the
-squared partition-of-unity-weighted chart-Sobolev norm
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-smooth compactly-supported `(r, s)`-tensor section `T₀`, this file ships the
-intrinsic L² control of the raw tensor connection Laplacian: there exists a
-single constant `C : ℝ≥0∞ \ {⊤}`, uniform in `T₀`, such that
-
-```
-∫⁻ b, ENNReal.ofReal (riemannianFiberNormSq g r s b (rawTensorConnLap g r s T₀ b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T₀) ^ 2.
-```
-
-The constant depends only on `g`, `r`, `s`, and on the chart-atlas partition of
-unity; it is independent of the section `T₀`. There is no chart-locality or
-chart-source-consistency hypothesis at the headline.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 6400000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter MeasureTheory
 open scoped Manifold Topology Bundle ContDiff BigOperators ENNReal NNReal
@@ -82,6 +61,7 @@ private noncomputable def tensorPouSobolevNormSqSum_one
                   ((toEuclidean (E := E)).symm y)‖ ^ 2)
           ∂(volume : Measure EuclN)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorPouSobolevNorm_one_sq_eq
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -112,6 +92,7 @@ private lemma tensorPouSobolevNorm_one_sq_eq
     rw [h1]; exact ENNReal.rpow_one BigSum
   rw [h_pow, hBigSum_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorPouSobolevNormSqSum_one_eq_finsetSum
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -169,6 +150,7 @@ private noncomputable def perChartDensityCeil
     (exists_sup_chartDensity_on_pou_tsupport_image (I := I) (M := M) g α h).choose
   else 0
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma perChartDensityCeil_nonneg
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -182,6 +164,7 @@ private lemma perChartDensityCeil_nonneg
       (exists_sup_chartDensity_on_pou_tsupport_image (I := I) (M := M) g α h).choose_spec.1
   · rw [dif_neg h]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma perChartDensityCeil_bound
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -210,6 +193,7 @@ private noncomputable def compNormSqOnM
       ∘ (extChartAt I α).symm)
     (extChartAtExt (I := I) α b)‖ ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma compNormSqOnM_measurable
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T₀ : SmoothCcTensor g r s)
@@ -217,8 +201,9 @@ private lemma compNormSqOnM_measurable
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (j : ℕ) :
     Measurable (compNormSqOnM (I := I) (M := M) g r s T₀ α Idx Jdx j) :=
-  compDataIJ_chart_on_M_measurable (I := I) (M := M) g r s T₀ α Idx Jdx j
+  measurable_tensorChartComponentRaw_iteratedFDeriv_normSq (I := I) (M := M) g r s T₀ α Idx Jdx j
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma compNormSqOnM_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T₀ : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -227,6 +212,7 @@ private lemma compNormSqOnM_nonneg
     0 ≤ compNormSqOnM (I := I) (M := M) g r s T₀ α Idx Jdx j b :=
   sq_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma compNormSqOnM_eq_of_mem_chartSrc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T₀ : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -240,6 +226,7 @@ private lemma compNormSqOnM_eq_of_mem_chartSrc
   unfold compNormSqOnM
   rw [extChartAtExt_apply_of_mem (I := I) (α := α) hb]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma per_alpha_measurable_lintegral_le
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -641,24 +628,6 @@ private lemma per_alpha_measurable_lintegral_le
   rw [← Finset.sum_product']
   exact le_refl _
 
-/-- **Intrinsic L² bound for the raw tensor connection Laplacian by the squared
-partition-of-unity-weighted chart-Sobolev norm.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, there
-exists a finite constant `C : ℝ≥0∞ \ {⊤}` such that for every smooth
-compactly-supported `(r, s)`-tensor section `T₀`,
-
-```
-∫⁻ b, ENNReal.ofReal (riemannianFiberNormSq g r s b
-        (rawTensorConnLap g r s T₀ b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T₀) ^ 2.
-```
-
-The constant depends only on `g`, `r`, `s`, and the chart-atlas partition of
-unity; it is uniform in the input section `T₀`. The Sobolev order `k = 1`
-corresponds to derivatives up to order `2k = 2`, matching the second
-covariant derivative implicit in the connection Laplacian. -/
 theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

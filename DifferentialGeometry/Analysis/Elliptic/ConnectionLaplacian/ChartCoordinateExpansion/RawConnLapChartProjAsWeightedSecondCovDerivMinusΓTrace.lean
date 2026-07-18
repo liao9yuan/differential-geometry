@@ -2,60 +2,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 
-/-!
-# Chart-α `(Idx, Jdx)`-projection of the raw tensor connection Laplacian as a
-chart-coordinate-weighted bundle second covariant derivative double sum minus a
-chart-frame trace Γ-correction
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file ships
-the identity that expresses the chart-α `(Idx, Jdx)` raw scalar component of
-the trivialized raw tensor connection Laplacian at a base point `b` lying in
-the chart-α partition-of-unity tsupport intersected with the chart-α
-Levi-Civita good set, as a finite double sum
-
-```
-Σ_i Σ_l C(b)^l_i ·
-   [chart-α (Idx, Jdx) projection of
-      (cov_RS).toFun (covApply cov_RS B_i T₀.toSection) b
-        (chartBasisVecFiber α l b)]
-```
-
-where `B_i = chartFrameNormGlobalSmooth g α i` is the chart-α globally smooth
-orthonormal frame and `C(b)^l_i =
-chartFrameNormGlobalSmoothCoordMatrix g α i l b` is its coordinate matrix in
-the chart-α coordinate basis, minus the chart-frame trace Γ-correction
-
-```
-Σ_i [chart-α (Idx, Jdx) projection of
-       (cov_RS).toFun T₀.toSection b ((LC g) B_i b (B_i b))]
-```
-
-(unchanged from the underlying frame-trace identity).
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. It is the natural composition of:
-
-* the chart-α `(Idx, Jdx)`-projection of the chart-frame trace identity for
-  the raw tensor connection Laplacian
-  (`tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum`); and
-* the coordinate-basis expansion of the chart-α globally smooth orthonormal
-  frame
-  (`chartFrameNormGlobalSmooth_eq_coordMatrix_sum`), applied in the *outer*
-  tangent-vector slot of the first piece of the chart-frame trace summand.
-
-The distribution through the chart-α `(Idx, Jdx)`-projection is by linearity
-of the trivialization continuous-linear-map composed with the dual coordinate
-projection; the distribution through the outer tangent-vector slot of the
-bundle covariant derivative is by `ContinuousLinearMap.map_smul` /
-`ContinuousLinearMap.map_sum` of the bundle covariant derivative's continuous
-linear action on `TangentSpace I b`. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
 
@@ -81,20 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Coordinate-basis expansion of the outer tangent-vector slot of one
-chart-frame trace summand for the raw tensor connection Laplacian.**
-
-For a base point `b` in the chart-α Levi-Civita good set and an index
-`i : Fin n`, the value of the bundle covariant derivative
-`cov_RS (∇_{B_i} T₀) b (B_i b)` decomposes, via the chart-α coordinate-basis
-expansion of `B_i(b)` and the continuous linearity of
-`cov_RS (∇_{B_i} T₀) b` on `TangentSpace I b`, as the finite sum
-
-```
-Σ_l C(b)^l_i · cov_RS (∇_{B_i} T₀) b (chartBasisVecFiber α l b)
-```
-
-over the chart-α coordinate-basis index `l`. -/
+omit [I.Boundaryless] in
 private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -143,16 +79,7 @@ private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
   intro l _
   rw [Lcov.map_smul]
 
-/-- **Chart-α `(Idx, Jdx)`-projection of one outer-coordinate-basis-expanded
-chart-frame trace summand.**
-
-For a base point `b` in the chart-α Levi-Civita good set and an index
-`i : Fin n`, applying the continuous linear functional
-`tensorChartComponentProjection r s Idx Jdx ∘ (triv α).clmAt b` to both sides
-of the coordinate-basis expansion of `cov_RS (∇_{B_i} T₀) b (B_i b)` yields
-the chart-α `(Idx, Jdx)` scalar of the LHS as a finite sum over `l` of
-`C(b)^l_i ·` (chart-α `(Idx, Jdx)` scalar of `cov_RS (∇_{B_i} T₀) b (∂_l b)`).
--/
+omit [I.Boundaryless] in
 private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -217,27 +144,7 @@ private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
   simp only [hL_def, ContinuousLinearMap.comp_apply, smul_eq_mul] at hApply
   exact hApply
 
-/-- **Chart-α `(Idx, Jdx)` raw component of `rawTensorConnLapSmooth T₀` as a
-chart-coordinate-weighted bundle second covariant derivative double sum minus
-a chart-frame trace Γ-correction.**
-
-For a base point `b` lying in the chart-α partition-of-unity tsupport
-intersected with the chart-α Levi-Civita good set, the chart-α `(Idx, Jdx)`
-raw scalar component of `rawTensorConnLapSmooth g r s T₀` at `b` decomposes as
-a double finite sum over `(i, l)` of `C(b)^l_i ·` (chart-α `(Idx, Jdx)`
-projection of `cov_RS (∇_{B_i} T₀) b (∂_l b)`), minus a single finite sum over
-`i` of (chart-α `(Idx, Jdx)` projection of `cov_RS T₀ b ((LC g) B_i b (B_i b))`).
-
-The coefficient `C(b)^l_i = chartFrameNormGlobalSmoothCoordMatrix g α i l b` is
-the chart-α coordinate matrix of the chart-α globally smooth orthonormal frame
-`B_i = chartFrameNormGlobalSmooth g α i`.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. It is the natural combination of the chart-α `(Idx, Jdx)`-projection
-of the chart-frame trace identity for the raw tensor connection Laplacian and
-the coordinate-basis expansion of the chart-α globally smooth orthonormal
-frame, applied in the outer tangent-vector slot of the first piece of each
-chart-frame trace summand. -/
+omit [I.Boundaryless] in
 theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_frameTraceΓ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

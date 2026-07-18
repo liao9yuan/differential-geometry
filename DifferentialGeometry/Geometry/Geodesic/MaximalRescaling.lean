@@ -6,78 +6,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformUniqueness
 import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Manifold-level geodesic rescaling at the lift level
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the classical geodesic
-rescaling identity
-`γ_{(p, a • v)}(s) = γ_{(p, v)}(a · s)`
-is reduced to **chart-coordinate ODE uniqueness** (via R.A's uniform
-chart-coord uniqueness on a fixed `Ioo (-T) T`) combined with the
-chart-coordinate rescaling identity for the chart-phase ODE.
-
-## Strategy
-
-1. Let `γ_v := maximalGeodesicChosenCurve g p v _` with a witness lift
-   `f_v` projecting to it, and `γ_av := maximalGeodesicChosenCurve g p (a • v) _`
-   with witness lift `f_av`.
-
-2. Form the chart-pushed lifts `c_v(t) := chartPushLift f_v 0 t` and
-   `c_av(s) := chartPushLift f_av 0 s`, valued in `E × E`. Both satisfy
-   the **chart-phase ODE** on a neighbourhood of `0`, by the unconditional
-   identification of `chartPushVF` with `chartPhaseVF`
-   (`Exponential/ChartPushVFEq.lean`).
-
-3. Define the **rescaled chart-coord orbit** `c_R(s) := rescaleChartOrbit a (c_v (a * s))`.
-   By `hasDerivAt_rescaled_orbit` (chart-coord rescaling, R.A predecessor
-   in `Exponential/SmoothnessClose.lean`), `c_R` ALSO satisfies the
-   chart-phase ODE on a neighbourhood of `0`. The initial values match:
-   `c_R(0) = c_av(0) = (extChartAt I p p, a • v)`.
-
-4. By chart-coordinate ODE uniqueness
-   (`chartPhaseVF_orbit_uniqueness`), `c_R =ᶠ c_av` on a neighbourhood
-   of `0`. Take first components: `extChartAt I p (γ_v (a * s)) =
-   extChartAt I p (γ_av s)` near `0`. Apply the chart inverse to obtain
-   `γ_v (a * s) = γ_av s` near `0`.
-
-5. **Specialised headline (small `a`).** When `a` lies in a small
-   interval around `0`, the time `1` for `γ_av` lands inside the
-   agreement neighbourhood, giving the manifold rescaling identity
-   `maximalGeodesic g p (a • v) 1 = maximalGeodesic g p v a` for `a` in
-   that small interval.
-
-## Main results
-
-* `chartPushLift_rescaled_eventually_hasDerivAt_chartPhaseVF` — the
-  rescaled chart-coord orbit `c_R(s) = rescaleChartOrbit a (chartPushLift f_v 0 (a*s))`
-  satisfies the chart-phase geodesic ODE on a neighbourhood of `0`.
-
-* `chartPushLift_rescaled_eq_chartPushLift_av_eventually` — chart-coord
-  ODE uniqueness applied to `c_R` and `c_av`: they agree on a
-  neighbourhood of `0`.
-
-* `maximalGeodesicChosenCurve_rescale_eventually` — eventually-near-`0`
-  manifold rescaling identity for the chosen curves.
-
-* `maximalGeodesic_rescale_at_one_smallScale` — the manifold rescaling
-  identity at time `1`, valid for `a` in a small interval around `0`
-  (the size of which depends on `p, v`).
-
-## Implementation notes
-
-* We deliberately do NOT construct a TM-level "rescaled lift"
-  `f_R : ℝ → TangentBundle I M`. The fibre-rescaling operation on `TM`
-  was carved out of the codebase; we route the entire argument through
-  chart-coordinate `E × E` orbits and use ODE uniqueness on `E × E`.
-
-* The s = 1 propagation to arbitrary `a` (with `1 ∈ J_av` and
-  `a ∈ J_v`) requires extending the chart-coord agreement across the
-  whole preconnected witness intersection. That extension is a separate
-  development; here we ship the unconditional small-scale form.
--/
 
 noncomputable section
 
@@ -90,7 +19,7 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -100,8 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 section ChartFiberCoordSelfApply
 
-/-- **Fibre coordinate at a self-application point.** The chart-α fibre
-coordinate at the tangent bundle point `⟨α, v⟩` equals `v`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartFiberCoord_mk_self (α : M) (v : E) :
     chartFiberCoord (I := I) α (⟨α, v⟩ : TangentBundle I M) = v := by
   classical
@@ -141,8 +69,6 @@ section ChartPushLiftAtZero
 
 variable [I.Boundaryless]
 
-/-- **Initial value of the chart-pushed lift.** When `f 0 = ⟨p, v⟩`,
-`chartPushLift f 0 0 = (extChartAt I p p, v)`. -/
 lemma chartPushLift_zero_of_init
     {f : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf0 : f 0 = (⟨p, v⟩ : TangentBundle I M)) :
@@ -160,10 +86,6 @@ section RescaledChartOrbit
 
 variable [I.Boundaryless]
 
-/-- **Rescaled chart-pushed lift.** Given `f_v : ℝ → TM` with the
-chart-pushed derivative property at `0`, the rescaled chart-coord orbit
-`s ↦ rescaleChartOrbit a (chartPushLift f_v 0 (a * s))` satisfies the
-chart-phase geodesic ODE on a neighbourhood of `s = 0`. -/
 theorem chartPushLift_rescaled_eventually_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M}
     {f_v : ℝ → TangentBundle I M}
@@ -193,8 +115,6 @@ theorem chartPushLift_rescaled_eventually_hasDerivAt_chartPhaseVF
   exact hasDerivAt_rescaled_orbit (I := I) (g := g) (α := p)
     (c := chartPushLift (I := I) f_v 0) (s₀ := s) (a := a) hs
 
-/-- **Initial value of the rescaled chart-coord orbit.** Plugging in
-`s = 0` and using `f_v 0 = ⟨p, v⟩`. -/
 lemma rescaled_chartPushLift_at_zero
     {f_v : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf_v0 : f_v 0 = (⟨p, v⟩ : TangentBundle I M)) (a : ℝ) :
@@ -211,10 +131,6 @@ section ChartCoordUniqueness
 
 variable [I.Boundaryless]
 
-/-- **Chart-pushed lift of `f_av` satisfies the chart-phase ODE with
-target-interior condition near `0`.** Adapted form of
-`chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior`,
-specialised to the chart basepoint `p`. -/
 lemma chartPushLift_av_phaseVF_and_target_interior
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_av : ℝ → TangentBundle I M}
@@ -230,12 +146,6 @@ lemma chartPushLift_av_phaseVF_and_target_interior
   exact chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     (I := I) (g := g) (α := p) (f := f_av) hproj hf_av_int
 
-/-- **Rescaled chart-pushed orbit with target-interior condition near
-`0`.** The rescaled orbit eventually lies in the chart-target interior
-product, since at `s = 0` it equals `(extChartAt I p p, a • v)` and
-`extChartAt I p p ∈ interior (extChartAt I p).target` (via
-`extChartAt_target_subset_interior_of_boundaryless`). Combined with
-continuity, this gives an eventually-in-interior condition. -/
 lemma rescaled_chartPushLift_phaseVF_and_target_interior
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v : ℝ → TangentBundle I M}
@@ -293,10 +203,6 @@ lemma rescaled_chartPushLift_phaseVF_and_target_interior
     exact (extChartAt I p).map_source h_src
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) p h_target
 
-/-- **Chart-coord ODE uniqueness, rescaled vs `c_av` form.** If `f_v`
-lifts `(p, v)` and `f_av` lifts `(p, a • v)`, both being chart-`p`
-integral curves at `0`, then the rescaled chart-coord orbit and
-`chartPushLift f_av 0` agree on a neighbourhood of `0`. -/
 theorem chartPushLift_rescaled_eq_chartPushLift_av_eventually
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v f_av : ℝ → TangentBundle I M}
@@ -338,10 +244,6 @@ section ManifoldProjection
 
 variable [I.Boundaryless]
 
-/-- **First-component decomposition of the rescaled chart-pushed orbit.**
-On times where `(f_v (a*s)).proj ∈ (chartAt H p).source`,
-`(rescaleChartOrbit a (chartPushLift f_v 0 (a*s))).1 = extChartAt I p (γ_v (a*s))`,
-where `γ_v := projectCurve f_v`. -/
 lemma rescaled_chartPushLift_fst
     {f_v : ℝ → TangentBundle I M} {p : M} {a : ℝ} {s : ℝ}
     (hf_v0_proj : (f_v 0).proj = p)
@@ -358,9 +260,6 @@ lemma rescaled_chartPushLift_fst
   change ((chartPushLift (I := I) f_v 0 (a * s)).1, _).1 = _
   rw [hfst]; rfl
 
-/-- **Eventually-manifold rescaling for the projected curves.** From the
-chart-coord agreement, `projectCurve f_v (a * s) = projectCurve f_av s`
-on a neighbourhood of `0`. -/
 theorem projectCurve_rescale_eventually
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v f_av : ℝ → TangentBundle I M}
@@ -444,19 +343,8 @@ end ManifoldProjection
 
 section ChosenCurveRescaling
 
-variable [I.Boundaryless] [CompleteSpace E]
-  [T2Space (TangentBundle I M)]
+variable [I.Boundaryless]
 
-/-- **Eventually-rescaling for the chosen curve.** If
-`a ∈ maximalGeodesicInterval g p v` and `1 ∈ maximalGeodesicInterval g p (a • v)`,
-then on a neighbourhood of `s = 0`,
-`maximalGeodesicChosenCurve g p v ha_dom (a * s)
-  = maximalGeodesicChosenCurve g p (a • v) h1_dom s`.
-
-This is the **chart-coord-uniqueness-driven** form of the manifold
-rescaling identity, valid near `s = 0`. Lifting it to `s = 1` requires
-preconnected propagation along the witness intervals; we ship the
-near-`0` form here. -/
 theorem maximalGeodesicChosenCurve_rescale_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -489,15 +377,7 @@ end ChosenCurveRescaling
 
 section RescaleAtOneSmallScale
 
-variable [I.Boundaryless] [CompleteSpace E]
-  [T2Space (TangentBundle I M)]
-
-/-- **Manifold rescaling at time `1`, near-`0` form.** If the eventual
-agreement neighbourhood (as produced by
-`maximalGeodesicChosenCurve_rescale_eventually`) contains the point
-`1 : ℝ`, then
-`maximalGeodesicChosenCurve g p (a • v) h1_dom 1
-  = maximalGeodesicChosenCurve g p v ha_dom a`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesicChosenCurve_rescale_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -511,9 +391,7 @@ theorem maximalGeodesicChosenCurve_rescale_at_one
   simp only [Set.mem_setOf_eq, mul_one] at h
   exact h.symm
 
-/-- **Manifold rescaling at time `1`, via `maximalGeodesic`.** Same as
-above but using the headline `maximalGeodesic g p v t` (which equals the
-chosen curve on the maximal interval). -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_rescale_at_one_of_agreement
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -528,12 +406,7 @@ theorem maximalGeodesic_rescale_at_one_of_agreement
   exact maximalGeodesicChosenCurve_rescale_at_one (I := I)
     g p v a ha_dom h1_dom h1_in
 
-/-- **Manifold rescaling at time `1`, eventually-`a`-small form.** There
-exists an open neighbourhood `U_a ⊆ ℝ` of `1` (depending on `p, v, a`)
-such that, when the chart-coord agreement neighbourhood contains `1`,
-the manifold rescaling holds at time `1`. This is the cleanest packaged
-form of the small-scale theorem; the openness condition encapsulates
-the precise smallness hypothesis. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_rescale_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (_ha_pos : 0 < a)

@@ -4,48 +4,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
-/-!
-# Chart-local Levi-Civita covariant derivative
-
-Given a smooth Riemannian metric `g : SmoothRiemannianMetric I M` and a base
-point `α : M`, this file constructs the *chart-local* Levi-Civita covariant
-derivative on the tangent bundle in the chart at `α`, and verifies that it
-satisfies Mathlib's `IsCovariantDerivativeOn` (additivity in the section
-argument and the Leibniz rule for scalar-function smul) on a suitable open
-"good set".
-
-## Construction
-
-For `x` in the open *good set*
-
-  `chartLeviCivitaGoodSet α := (extChartAt I α).source ∩
-       (trivializationAt E (TangentSpace I) α).baseSet ∩
-       (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E)`
-
-and a section `σ : Π x : M, TangentSpace I x`, the chart-local Levi-Civita
-covariant derivative `chartLeviCivita g α σ x : TangentSpace I x →L[ℝ]
-TangentSpace I x` is defined by the standard chart-coordinate formula
-
-  `(∇_v σ)(x) =`
-    `trivFromE α x [ fderiv (σ̃ ∘ φ.symm)(φ x)(triv v)`
-    `              + Σᵢⱼₖ (b.repr (triv v))ᵢ (b.repr σ̃(x))ⱼ Γᵏᵢⱼ(φ x) eₖ ]`
-
-where `σ̃ := chartE_section_repr α σ`, `φ := extChartAt I α`, `Γᵏᵢⱼ` is
-`chartChristoffel g α i j k`, and `triv := trivToE α x` is the canonical
-tangent-bundle trivialization. Off the good set, the operator is the zero CLM
-(junk).
-
-## API
-
-* `chartLeviCivitaGoodSet α` and `chartLeviCivitaGoodSet_isOpen`: the open
-  good set on which the construction is well-defined.
-* `chartLeviCivita g α σ x`: the chart-local Levi-Civita CLM.
-* `chartLeviCivita_isCovariantDerivativeOn g α`:
-  `IsCovariantDerivativeOn E (chartLeviCivita g α) (chartLeviCivitaGoodSet α)`.
-
-The torsion-free and metric-compatibility properties of `chartLeviCivita`
-are verified in subsequent files.
--/
 
 noncomputable section
 
@@ -64,16 +22,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The open *good set* at `α` on which the chart-local Levi-Civita
-construction is well-defined: the intersection of the chart source, the
-trivialization base set at `α`, and the preimage under `extChartAt I α` of the
-interior of the chart target. -/
 def chartLeviCivitaGoodSet (α : M) : Set M :=
   (extChartAt I α).source ∩
     (trivializationAt E (TangentSpace I) α).baseSet ∩
     (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E)
 
-/-- The good set is open. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_isOpen (α : M) :
     IsOpen (chartLeviCivitaGoodSet (I := I) α) := by
   classical
@@ -99,7 +53,7 @@ lemma chartLeviCivitaGoodSet_isOpen (α : M) :
   rw [heq]
   exact hcap_open.inter hS₂
 
-/-- Membership in the good set unfolded. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma mem_chartLeviCivitaGoodSet_iff {α x : M} :
     x ∈ chartLeviCivitaGoodSet (I := I) α ↔
       x ∈ (extChartAt I α).source ∧
@@ -109,34 +63,31 @@ lemma mem_chartLeviCivitaGoodSet_iff {α x : M} :
   rw [Set.mem_inter_iff, Set.mem_inter_iff, and_assoc]
   rfl
 
-/-- A point in the good set lies in the extended-chart source. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_extChartAt_source {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (extChartAt I α).source :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).1
 
-/-- A point in the good set lies in the chart source at `α`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_chartAt_source {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (chartAt H α).source := by
   have := chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
   simpa using this
 
-/-- A point in the good set lies in the trivialization base set at `α`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_baseSet {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).2.1
 
-/-- The chart image of a good-set point lies in the interior of the chart target. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_extChartAt_mem_interior {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).2.2
 
-/-- The Christoffel-correction CLM at a good-set point `x`, as a function of
-`Y : E` representing the section's chart-trivialised value. The map sends
-`v ↦ ∑ᵢⱼₖ (b.repr (trivToE α x v))ᵢ * (b.repr Y)ⱼ * Γᵏᵢⱼ(φ x) • eₖ`. -/
 def christoffelCorrection (g : SmoothRiemannianMetric I M)
     (α : M) (x : M) (Y : E) :
     TangentSpace I x →L[ℝ] E :=
@@ -149,7 +100,7 @@ def christoffelCorrection (g : SmoothRiemannianMetric I M)
               chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
             (chartModelBasis E) k)
 
-/-- Pointwise formula for `christoffelCorrection`. -/
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) :
@@ -178,7 +129,7 @@ lemma christoffelCorrection_apply
   rw [hcoord]
   rw [smul_smul, ← mul_assoc]
 
-/-- Additivity of `christoffelCorrection` in the section component `Y`. -/
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_add
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y Y' : E)
     (v : TangentSpace I x) :
@@ -210,8 +161,7 @@ lemma christoffelCorrection_add
           chartChristoffel (I := I) g α i j k (extChartAt I α x) by ring]
   rw [add_smul]
 
-/-- Scalar-multiplication compatibility of `christoffelCorrection` in the
-section component `Y`. -/
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_smul
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (c : ℝ) (Y : E)
     (v : TangentSpace I x) :
@@ -237,10 +187,6 @@ lemma christoffelCorrection_smul
           chartChristoffel (I := I) g α i j k (extChartAt I α x)) by ring]
   rw [← smul_smul]
 
-/-- The "inner CLM" of the chart-local Levi-Civita derivative at a good-set
-point: the sum of the chart-pulled-back Fréchet derivative of the section's
-representation and the Christoffel-correction CLM. Returns a CLM
-`TangentSpace I x →L[ℝ] E`. -/
 def chartLeviCivitaInnerCLM (g : SmoothRiemannianMetric I M)
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) :
     TangentSpace I x →L[ℝ] E :=
@@ -248,7 +194,7 @@ def chartLeviCivitaInnerCLM (g : SmoothRiemannianMetric I M)
       (extChartAt I α x)).comp (trivToE (I := I) α x) +
   christoffelCorrection (I := I) g α x (chartE_section_repr (I := I) α σ x)
 
-/-- Pointwise formula for the inner CLM. -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivitaInnerCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) (x : M) (v : TangentSpace I x) :
@@ -262,9 +208,7 @@ lemma chartLeviCivitaInnerCLM_apply
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]
 
 open scoped Classical in
-/-- The chart-local Levi-Civita covariant derivative on the tangent bundle, at
-the basepoint `α`. On the *good set* of `α` it is the standard chart-coordinate
-Levi-Civita; off the good set it is the zero CLM (junk value). -/
+
 def chartLeviCivita (g : SmoothRiemannianMetric I M) (α : M) :
     (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :=
@@ -274,7 +218,7 @@ def chartLeviCivita (g : SmoothRiemannianMetric I M) (α : M) :
         (chartLeviCivitaInnerCLM (I := I) g α σ x)
     else 0
 
-/-- On the good set, `chartLeviCivita` unfolds. -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_eq_of_mem (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -284,7 +228,7 @@ lemma chartLeviCivita_eq_of_mem (g : SmoothRiemannianMetric I M) (α : M)
   classical
   simp only [chartLeviCivita, if_pos hx]
 
-/-- Pointwise formula for `chartLeviCivita` on the good set. -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_apply (g : SmoothRiemannianMetric I M)
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) (v : TangentSpace I x) :
@@ -299,8 +243,7 @@ lemma chartLeviCivita_apply (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.comp_apply]
   rw [chartLeviCivitaInnerCLM_apply]
 
-/-- At a good-set point, `MDiffAt (T% σ) x` implies
-`DifferentiableAt ℝ (chartE_section_repr α σ ∘ (extChartAt I α).symm) (extChartAt I α x)`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma differentiableAt_chartE_pullback_of_MDiff
     (α : M) {σ : Π x : M, TangentSpace I x} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -313,9 +256,7 @@ lemma differentiableAt_chartE_pullback_of_MDiff
     (chartLeviCivitaGoodSet_mem_baseSet (I := I) hx)
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx)).mp hσ
 
-/-- **Additivity of `chartLeviCivita`.** For sections `σ σ'` differentiable at
-a good-set point, `chartLeviCivita g α (σ + σ') x = chartLeviCivita g α σ x +
-chartLeviCivita g α σ' x` (as CLMs). -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
     {σ σ' : Π x : M, TangentSpace I x} {x : M}
     (hσ : MDiffAt (T% σ) x) (hσ' : MDiffAt (T% σ') x)
@@ -373,22 +314,7 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
   rw [ContinuousLinearMap.add_apply]
   abel
 
-/-- **Leibniz rule for `chartLeviCivita`.** For a section `σ` and a scalar
-function `f` differentiable at a good-set point, `chartLeviCivita g α (f • σ) x
-= f x • chartLeviCivita g α σ x + (extDerivFun f x).smulRight (σ x)` (as CLMs).
-
-The proof uses:
-- `chartE_section_repr_smul_function` to identify
-  `chartE_section_repr α (f • σ) = (f) • (chartE_section_repr α σ)` pointwise.
-- `fderiv_smul` (Mathlib) for the Fréchet derivative of a scalar–vector product.
-- `mfderiv_scalar_eq_chart_fderiv` (from `ChartSection.lean`) to bridge the
-  chart-pulled-back derivative of `f` to its manifold derivative `mfderiv I 𝓘(ℝ)
-  f x`.
-- `christoffelCorrection_smul` to scale the Christoffel-correction term by
-  `f x`.
-- The trivialization round-trip `trivFromE_trivToE` to identify
-  `trivFromE α x (chartE_section_repr α σ x) = σ x` on the trivialization base
-  set. -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
     {σ : Π x : M, TangentSpace I x} {f : M → ℝ} {x : M}
     (hσ : MDiffAt (T% σ) x) (hf : MDiffAt f x)
@@ -551,8 +477,7 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
   rw [htriv_round]
   rw [← hmf_to_fderiv, ← hextDeriv]
 
-/-- **The chart-local Levi-Civita satisfies `IsCovariantDerivativeOn`** on the
-good set at `α`. -/
+omit [InnerProductSpace ℝ E] in
 theorem chartLeviCivita_isCovariantDerivativeOn (g : SmoothRiemannianMetric I M)
     (α : M) :
     IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E

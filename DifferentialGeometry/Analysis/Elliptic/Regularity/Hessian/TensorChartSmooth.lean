@@ -1,78 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCasePairingIdentification
 
-/-!
-# Chart-α tensor smooth Hessian for smooth scalars
-
-For a smooth scalar `v : SmoothScalar g` and a chart point `α : M`, this file
-constructs the chart-α tensor Hessian of `v.toFun`, pulled back to
-`EuclideanSpace`, and assembles the corresponding chart-α tensor Frobenius
-pairing function on the chart-α target. The chart-α tensor Hessian carries
-the **Christoffel correction** built in, in contrast to
-`chartPushedEuclidHessian` (the chart-α Euclidean iterated partial of
-`chartPushed POU α v.toFun`, without Christoffel correction).
-
-The chart-α tensor pairing function for smooth scalars is a geometric
-quantity reflecting the inner product of the smooth Hessian tensors of `φ`
-and `v` with respect to the metric `g`. This file develops the chart-α local
-infrastructure that, combined with chart-invariance of tensor inner products,
-provides the geometric bridge between the LapDom chart-Euclidean pairing and
-the smooth pairing `hessPairingChart g φ v`.
-
-## Main definitions
-
-* `chartHessianVOnEuclid g α v k l y` — the chart-α tensor Hessian of
-  `v.toFun` in directions `(k, l)`, evaluated at `(extChartAt α).symm
-  (toEuclidean.symm y)`. Continuous on `chartTargetEuclid α`.
-
-* `chartPushedChristoffelCorrection g α v k l y` — the chart-α Christoffel
-  correction sum `∑ m, Γ^m_{kl,α}(y) · ∂_m v_chart_α(y)`. Continuous on
-  `chartTargetEuclid α`.
-
-* `smoothTensorPairingChart g α φ v y` — the chart-α tensor Frobenius
-  pairing function. Continuous on `chartTargetEuclid α`.
-
-* `cutoffHessianV g α v k l y` — the chart cutoff η · `chartHessianVOnEuclid`,
-  continuous and compactly supported on `EuclN`.
-
-* `cutoffSmoothTensorPairingChart g α φ v y` — the η-cutoff version of the
-  chart-α tensor pairing. Continuous and compactly supported on `EuclN`,
-  hence in `MemLp 2` of any locally-finite measure.
-
-## Main results
-
-* `chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target` — pointwise
-  decomposition of the chart-α tensor Hessian as the plain Euclidean
-  iterated partial minus the Christoffel correction, on the chart target.
-
-* `chartHessianVOnEuclid_continuousOn` — continuity of `chartHessianVOnEuclid`
-  on the chart target.
-
-* `chartPushedChristoffelCorrection_continuousOn` — continuity of the
-  Christoffel correction on the chart target.
-
-* `smoothTensorPairingChart_continuousOn` — continuity of the chart-α tensor
-  pairing on the chart target.
-
-* `cutoffHessianV_continuous` — continuity of the cutoff Hess of `v`
-  on `EuclN`.
-
-* `cutoffHessianV_hasCompactSupport` — compact support of `cutoffHessianV`.
-
-* `cutoffSmoothTensorPairingChart_continuous` — continuity of the cutoff
-  pairing function on `EuclN`.
-
-* `cutoffSmoothTensorPairingChart_hasCompactSupport` — compact support.
-
-* `cutoffSmoothTensorPairingChart_memLp_two` — `MemLp 2` of the cutoff
-  pairing on the chart-target-restricted volume.
-
-* `cutoffSmoothTensorPairingChart_eq_on_kernel` — pointwise agreement of the
-  cutoff and original pairings on the chart-α POU support kernel.
-
-* `smoothEuclidHessianPairingChart_eq_tensor_plus_diff` — algebraic
-  decomposition relating the LapDom-side Euclidean pairing to the chart-α
-  tensor pairing plus an explicit Christoffel-correction difference.
--/
 
 noncomputable section
 
@@ -111,14 +38,13 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart-α tensor Hessian of the smooth scalar `v.toFun` in coordinate
-directions `(k, l)`, pulled back to `EuclideanSpace`. -/
 noncomputable def chartHessianVOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   chartHessianTensor (I := I) g α v.toFun k l
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessianVOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -126,7 +52,6 @@ noncomputable def chartHessianVOnEuclid
       chartHessianTensor (I := I) g α v.toFun k l
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- The chart-α Christoffel correction sum, pulled back to `EuclideanSpace`. -/
 noncomputable def chartPushedChristoffelCorrection
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
@@ -135,6 +60,7 @@ noncomputable def chartPushedChristoffelCorrection
       partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
         ((toEuclidean (E := E)).symm y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartPushedChristoffelCorrection_def
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -144,8 +70,7 @@ noncomputable def chartPushedChristoffelCorrection
           partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
             ((toEuclidean (E := E)).symm y) := rfl
 
-/-- **Pointwise identity** `tensor = plain - christoffel` on
-`chartTargetEuclid α`. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -164,7 +89,7 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (extChartAt I α).right_inv hy_target
   rw [h_inv]
 
-/-- Continuity of `chartPushedChristoffelCorrection g α v k l` on `chartTargetEuclid α`. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedChristoffelCorrection_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -213,7 +138,7 @@ theorem chartPushedChristoffelCorrection_continuousOn
     h_pd_cont.comp h_toE_cont.continuousOn h_maps
   exact h_chris_comp.mul h_pd_comp
 
-/-- Continuity of `chartHessianVOnEuclid g α v k l` on `chartTargetEuclid α`. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessianVOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -262,9 +187,6 @@ theorem chartHessianVOnEuclid_continuousOn
     exact h_smooth_iter.continuousOn.comp h_toE_cont.continuousOn h_maps
   · exact chartPushedChristoffelCorrection_continuousOn (I := I) (M := M) g α v k l
 
-/-- The chart-α tensor smooth Hess pairing function on `EuclideanSpace`:
-`∑_{ijkl} G^{ik}_α(y) G^{jl}_α(y) · H^φ_{ij,α}(y) · H^v_{kl,α}(y)`,
-where `H^v` is the chart-α tensor Hess of `v.toFun`. -/
 noncomputable def smoothTensorPairingChart
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) : ℝ :=
@@ -277,6 +199,7 @@ noncomputable def smoothTensorPairingChart
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartHessianVOnEuclid (I := I) (M := M) g α v k l y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma smoothTensorPairingChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -290,7 +213,7 @@ noncomputable def smoothTensorPairingChart
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
-/-- Continuity of `invGramOnEuclid g α i j` on `chartTargetEuclid α`. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -316,7 +239,7 @@ private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
   intro y _hy
   rfl
 
-/-- **Continuity of `smoothTensorPairingChart`** on `chartTargetEuclid α`. -/
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem smoothTensorPairingChart_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -346,8 +269,6 @@ theorem smoothTensorPairingChart_continuousOn
     chartHessianVOnEuclid_continuousOn (I := I) (M := M) g α v k l
   exact (((h_G_ik.mul h_G_jl).mul h_Hphi).mul h_Hv)
 
-/-- The cutoff-multiplied chart-α tensor Hess of `v`: continuous on `EuclN` and
-compactly supported. -/
 noncomputable def cutoffHessianV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
@@ -361,9 +282,6 @@ noncomputable def cutoffHessianV
       chartCutoffα (I := I) (M := M) α y *
         chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
-/-- The cutoff-multiplied chart-α tensor Hess of `φ`: continuous on `EuclN` and
-compactly supported. (Public version of the corresponding private lemma in
-`HessianPairingLapDom`.) -/
 noncomputable def cutoffHessianPhiPub
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
@@ -377,7 +295,6 @@ noncomputable def cutoffHessianPhiPub
       chartCutoffα (I := I) (M := M) α y *
         chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y := rfl
 
-/-- `cutoffHessianV` is continuous on `EuclN`. -/
 theorem cutoffHessianV_continuous
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -418,7 +335,6 @@ theorem cutoffHessianV_continuous
       exact h_zero_off z hz
     exact (continuousAt_const (y := (0 : ℝ))).congr h_eventually_zero.symm
 
-/-- `cutoffHessianPhiPub` is continuous on `EuclN`. -/
 theorem cutoffHessianPhiPub_continuous
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -459,7 +375,6 @@ theorem cutoffHessianPhiPub_continuous
       exact h_zero_off z hz
     exact (continuousAt_const (y := (0 : ℝ))).congr h_eventually_zero.symm
 
-/-- `cutoffHessianV` has compact support. -/
 theorem cutoffHessianV_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -477,7 +392,6 @@ theorem cutoffHessianV_hasCompactSupport
   unfold cutoffHessianV
   rw [hη_zero, zero_mul]
 
-/-- `cutoffHessianPhiPub` has compact support. -/
 theorem cutoffHessianPhiPub_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -495,7 +409,6 @@ theorem cutoffHessianPhiPub_hasCompactSupport
   unfold cutoffHessianPhiPub
   rw [hη_zero, zero_mul]
 
-/-- `cutoffHessianV` is bounded on `EuclN`. -/
 theorem cutoffHessianV_bounded
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -536,9 +449,6 @@ theorem cutoffHessianV_bounded
     have hy_notK : y ∉ Kη := fun hyK => hKη_ne ⟨y, hyK⟩
     rw [h_zero_off y hy_notK, abs_zero]
 
-/-- The cutoff version of the chart-α tensor smooth Hess pairing: each factor
-is replaced by its cutoff counterpart (multiplied by η). Continuous on `EuclN`
-with compact support. -/
 noncomputable def cutoffSmoothTensorPairingChart
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) : ℝ :=
@@ -564,7 +474,6 @@ noncomputable def cutoffSmoothTensorPairingChart
                 cutoffHessianPhiPub (I := I) (M := M) g α φ i j y *
                 cutoffHessianV (I := I) (M := M) g α v k l y := rfl
 
-/-- `cutoffSmoothTensorPairingChart` is continuous on `EuclN`. -/
 theorem cutoffSmoothTensorPairingChart_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -589,7 +498,6 @@ theorem cutoffSmoothTensorPairingChart_continuous
     cutoffHessianV_continuous (I := I) (M := M) g α v k l
   exact (((h_G_ik.mul h_G_jl).mul h_Hphi).mul h_Hv)
 
-/-- `cutoffSmoothTensorPairingChart` has compact support. -/
 theorem cutoffSmoothTensorPairingChart_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -618,8 +526,6 @@ theorem cutoffSmoothTensorPairingChart_hasCompactSupport
     rw [hη_zero, zero_mul]
   rw [h_Hv_zero, mul_zero]
 
-/-- `cutoffSmoothTensorPairingChart` is in `MemLp 2` on the chart-target-restricted
-volume measure. -/
 theorem cutoffSmoothTensorPairingChart_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -632,8 +538,6 @@ theorem cutoffSmoothTensorPairingChart_memLp_two
     cutoffSmoothTensorPairingChart_hasCompactSupport (I := I) (M := M) g α φ v
   exact h_cont.memLp_of_hasCompactSupport h_supp
 
-/-- On the support kernel `chartImagePOUTsupport α`, `cutoffHessianV` equals
-`chartHessianVOnEuclid` pointwise. -/
 theorem cutoffHessianV_eq_chartHessianVOnEuclid_on_kernel
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E))
@@ -646,8 +550,6 @@ theorem cutoffHessianV_eq_chartHessianVOnEuclid_on_kernel
   unfold cutoffHessianV
   rw [hη_one, one_mul]
 
-/-- On the support kernel `chartImagePOUTsupport α`, `cutoffHessianPhiPub` equals
-`chartHessianPhiOnEuclid` pointwise. -/
 theorem cutoffHessianPhiPub_eq_chartHessianPhiOnEuclid_on_kernel
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E))
@@ -660,8 +562,6 @@ theorem cutoffHessianPhiPub_eq_chartHessianPhiOnEuclid_on_kernel
   unfold cutoffHessianPhiPub
   rw [hη_one, one_mul]
 
-/-- On the support kernel `chartImagePOUTsupport α`,
-`cutoffSmoothTensorPairingChart` equals `smoothTensorPairingChart` pointwise. -/
 theorem cutoffSmoothTensorPairingChart_eq_on_kernel
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -680,16 +580,13 @@ theorem cutoffSmoothTensorPairingChart_eq_on_kernel
   rw [hη_one]
   ring
 
-/-- The pointwise difference between the LapDom-side Euclidean pairing
-(using Hess of `POU·v_chart_α`) and the chart-α tensor pairing (using Hess of
-`v_chart_α` with Christoffel correction). This packages the chart-α algebraic
-gap that the LapDom-vs.-smooth bridge must close. -/
 noncomputable def smoothPairingChristoffelDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) : ℝ :=
   smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v y -
     smoothTensorPairingChart (I := I) (M := M) g α φ v y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothPairingChristoffelDiff_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -697,8 +594,7 @@ noncomputable def smoothPairingChristoffelDiff
       smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v y -
         smoothTensorPairingChart (I := I) (M := M) g α φ v y := rfl
 
-/-- Telescoping identity: `LapDom Euclidean pairing = tensor pairing +
-ChristoffelDiff`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem smoothEuclidHessianPairingChart_eq_tensor_plus_diff
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :

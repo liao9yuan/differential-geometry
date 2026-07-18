@@ -1,17 +1,9 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
-/-!
-# Pointwise tensor coordinates from a tangent basis
-
-This file is the metric-free coordinate core for realized tensor fibers.  The
-primitive algebraic object is a pointwise `Module.Basis` of one tangent fiber;
-local-frame coordinates should pass through `IsLocalFrameOn.toBasisAt`.
--/
 
 noncomputable section
 
@@ -31,25 +23,22 @@ section ModelBasis
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace 𝕜 V] [FiniteDimensional 𝕜 V]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- The covector dual to a vector-space basis element, as a continuous linear map. -/
 def coframeOfBasis (basis : Module.Basis Idx 𝕜 V) (i : Idx) : V →L[𝕜] 𝕜 :=
   LinearMap.toContinuousLinearMap (basis.coord i)
 
+omit [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem coframeOfBasis_apply (basis : Module.Basis Idx 𝕜 V) (i : Idx) (v : V) :
     coframeOfBasis basis i v = basis.coord i v :=
   rfl
 
-/-- The covariant tensor basis element indexed by `slots : Fin s -> Idx`.
-
-It is the tensor product of the coordinate covectors:
-`v ↦ ∏ a, basis.coord (slots a) (v a)`. -/
 def continuousMultilinearMapBasisElem
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) (slots : Fin s -> Idx) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => V) 𝕜 :=
   (ContinuousMultilinearMap.mkPiRing 𝕜 (Fin s) (1 : 𝕜)).compContinuousLinearMap
     (fun a => coframeOfBasis basis (slots a))
 
+omit [Fintype Idx] in
 @[simp]
 theorem continuousMultilinearMapBasisElem_apply
     (basis : Module.Basis Idx 𝕜 V) (s : Nat)
@@ -71,7 +60,6 @@ theorem continuousMultilinearMapBasisElem_apply
       exact funext h
     exact Finset.prod_eq_zero (Finset.mem_univ a) (if_neg (Ne.symm ha))
 
-/-- Linear independence of the coordinate covariant tensor basis. -/
 theorem continuousMultilinearMapBasisElem_linearIndependent
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     LinearIndependent 𝕜 (continuousMultilinearMapBasisElem basis s) := by
@@ -88,7 +76,6 @@ theorem continuousMultilinearMapBasisElem_linearIndependent
   simp only [smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true] at h1
   rwa [smul_eq_mul, mul_one] at h1
 
-/-- The coordinate covariant tensor basis induced by a basis of `V`. -/
 def continuousMultilinearMapBasis
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     Module.Basis (Fin s -> Idx) 𝕜
@@ -108,8 +95,6 @@ theorem continuousMultilinearMapBasis_apply
   congr_fun (Module.Basis.coe_mk
     (continuousMultilinearMapBasisElem_linearIndependent basis s) _) slots
 
-/-- The coordinate of a multilinear map in the induced tensor basis is evaluation
-on the corresponding tuple of basis vectors. -/
 theorem continuousMultilinearMapBasis_repr
     (basis : Module.Basis Idx 𝕜 V) (s : Nat)
     (A : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => V) 𝕜)
@@ -129,29 +114,37 @@ section Tensor0S
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {s : Nat} {x : M}
 
-/-- The pointwise covariant tensor basis induced by a tangent basis. -/
 def tensor0SBasis (basis : Module.Basis Idx 𝕜 (TangentSpace I x)) (s : Nat) :
     Module.Basis (Fin s -> Idx) 𝕜 (Tensor0SSpace s I x) :=
   continuousMultilinearMapBasis basis s
 
-/-- The covariant basis tensor indexed by `slots`. -/
 def basisTensor0S
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x)) (slots : Fin s -> Idx) :
     Tensor0SSpace s I x :=
   tensor0SBasis (I := I) basis s slots
 
-/-- Component of a pointwise covariant tensor in a tangent basis. -/
 def component0S
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) : 𝕜 :=
   A (fun a => basis (slots a))
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_apply
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
     component0S (I := I) basis A slots = A (fun a => basis (slots a)) :=
   rfl
+
+
+
+
+theorem component0S_congr_slots
+    (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
+    (A : Tensor0SSpace s I x) {slots slots' : Fin s -> Idx}
+    (h : slots = slots') :
+    component0S (I := I) basis A slots = component0S (I := I) basis A slots' := by
+  rw [h]
 
 @[simp]
 theorem tensor0SBasis_repr
@@ -161,7 +154,6 @@ theorem tensor0SBasis_repr
       component0S (I := I) basis A slots := by
   exact continuousMultilinearMapBasis_repr basis s A slots
 
-/-- Linear coordinate map for a covariant tensor fiber in a tangent basis. -/
 def coordMap0S
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x)) (s : Nat) :
     Tensor0SSpace s I x →ₗ[𝕜] ((Fin s -> Idx) -> 𝕜) :=
@@ -177,7 +169,6 @@ theorem coordMap0S_apply
     component0S (I := I) basis A slots
   exact tensor0SBasis_repr (I := I) basis A slots
 
-/-- Linear coordinate equivalence for a covariant tensor fiber in a tangent basis. -/
 def coordEquiv0S
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x)) (s : Nat) :
     Tensor0SSpace s I x ≃ₗ[𝕜] ((Fin s -> Idx) -> 𝕜) :=
@@ -193,7 +184,6 @@ theorem coordEquiv0S_apply
     component0S (I := I) basis A slots
   exact tensor0SBasis_repr (I := I) basis A slots
 
-/-- Extensionality for covariant tensors from equality of all basis components. -/
 theorem ext0S_basis
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     {A B : Tensor0SSpace s I x}

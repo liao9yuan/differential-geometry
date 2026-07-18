@@ -1,23 +1,23 @@
 import Mathlib.Tactic
 
-/-!
-# Three-dimensional curvature algebra
 
-This file contains native component algebra for the
-three-dimensional identity expressing the algebraic curvature tensor in terms
-of Ricci and scalar curvature.
 
-The component theorem below is intentionally stated for an abstract
-`Fin 3`-indexed algebraic curvature tensor.  Geometric producers from
-`Tensor04Section`, orthonormal frames, and realized curvature symmetries can
-feed this layer without changing the finite algebra.
 
-The standard component convention in this file is the usual algebraic one:
-`R i j k l = g (R(e_i,e_j)e_k, e_l)`.  The project's bundled lowered
-curvature field now uses the same standard slot order
-`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, so component producers can feed this layer
-without an output-first slot permutation.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -25,25 +25,25 @@ namespace DifferentialGeometry.Integral.Connection
 
 open scoped BigOperators
 
-/-- Kronecker delta on the standard three-element index type. -/
+
 def delta3 (i j : Fin 3) : Real :=
   if i = j then 1 else 0
 
-/-- Ricci contraction of a standard-convention `Fin 3` curvature tensor. -/
+
 def stdRicci3 (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (i j : Fin 3) : Real :=
   R 0 i 0 j + R 1 i 1 j + R 2 i 2 j
 
-/-- Scalar contraction of a standard-convention `Fin 3` curvature tensor. -/
+
 def stdScalar3 (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real) : Real :=
   stdRicci3 R 0 0 + stdRicci3 R 1 1 + stdRicci3 R 2 2
 
-/-- The standard 3D Riemann-from-Ricci right hand side in an orthonormal basis.
 
-This is the convention-compatible form of Lemma 8.1:
-`R_ijkl = g_ik Ric_jl - g_il Ric_jk - g_jk Ric_il + g_jl Ric_ik
-  - (1/2) R (g_ik g_jl - g_il g_jk)`.
--/
+
+
+
+
+
 def stdRiemannFromRicciRhs3
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (i j k l : Fin 3) : Real :=
@@ -54,11 +54,11 @@ def stdRiemannFromRicciRhs3
     - (1 / 2 : Real) * stdScalar3 R *
         (delta3 i k * delta3 j l - delta3 i l * delta3 j k)
 
-/-- The displayed Appendix/Lemma 14.2 right hand side.
 
-For the standard convention used by `stdRiemannFromRicciRhs3`, this is the
-formula for the last-pair-flipped component `R i j l k`.  Equivalently, it is
-the formula one obtains if a text writes `R_ijkl` for that slot convention. -/
+
+
+
+
 def displayedRiemannFromRicciRhs3
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (i j k l : Fin 3) : Real :=
@@ -69,14 +69,14 @@ def displayedRiemannFromRicciRhs3
     - (1 / 2 : Real) * stdScalar3 R *
         (delta3 i l * delta3 j k - delta3 j l * delta3 i k)
 
-/-- Residual for the standard 3D Riemann-from-Ricci identity. -/
+
 def stdRiemannFromRicciResidual3
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (i j k l : Fin 3) : Real :=
   R i j k l - stdRiemannFromRicciRhs3 R i j k l
 
-/-- Curvature symmetries needed by the 3D algebraic identity.  These are the
-standard symmetries for the convention `R i j k l = g(R(e_i,e_j)e_k,e_l)`. -/
+
+
 structure AlgebraicCurvatureSymmetries3
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real) : Prop where
   anti_first : forall i j k l, R j i k l = -R i j k l
@@ -135,8 +135,8 @@ private theorem displayedRiemannFromRicciRhs3_eq_neg_stdRhs
     simp [displayedRiemannFromRicciRhs3, stdRiemannFromRicciRhs3, stdScalar3,
       delta3, hRic_symm] <;> ring
 
-/-- A skew-skew four-index tensor on `Fin 3` is zero once all ordered pair
-components vanish. -/
+
+
 theorem tensor04_fin3_eq_zero_of_ordered_pair_components
     (T : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (h_anti_first : forall i j k l, T j i k l = -T i j k l)
@@ -167,9 +167,9 @@ theorem tensor04_fin3_eq_zero_of_ordered_pair_components
       have h0 := h_components j i l k hji_lt hlk_lt
       linarith
 
-/-- A skew-skew tensor with block symmetry is zero once the lexicographically
-ordered block components vanish.  For a three-dimensional algebraic curvature
-residual this leaves exactly the six sectional-block components. -/
+
+
+
 theorem tensor04_fin3_eq_zero_of_ordered_block_components
     (T : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (h_anti_first : forall i j k l, T j i k l = -T i j k l)
@@ -200,11 +200,11 @@ theorem tensor04_fin3_eq_zero_of_ordered_block_components
         exact (h_block i j k l).symm
       _ = 0 := h_components k l i j hkl hij hswap_lex
 
-/-- The finite residual checks needed for the 3D Riemann-from-Ricci formula.
 
-The geometric work is to produce this package from curvature symmetries,
-Ricci/scalar trace definitions, and the three-dimensional basis choice.  Once
-it is available, the full four-index identity follows by finite algebra. -/
+
+
+
+
 structure RiemannFromRicci3DResidualPackage
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real) : Prop where
   anti_first : forall i j k l,
@@ -223,9 +223,9 @@ structure RiemannFromRicci3DResidualPackage
   c0212 : stdRiemannFromRicciResidual3 R 0 2 1 2 = 0
   c1212 : stdRiemannFromRicciResidual3 R 1 2 1 2 = 0
 
-/-- Standard curvature symmetries produce the residual package for the 3D
-Riemann-from-Ricci formula.  This is the finite algebraic heart of Lemma 14.2
-in an orthonormal `Fin 3` component frame. -/
+
+
+
 theorem residual_package_of_algebraic_curvature_symmetries3
     {R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real}
     (h : AlgebraicCurvatureSymmetries3 R) :
@@ -310,8 +310,8 @@ private theorem residual_ordered_components_of_package
     | simpa using pkg.c0212
     | simpa using pkg.c1212
 
-/-- Full standard-convention 3D Riemann-from-Ricci formula from the residual
-symmetry package. -/
+
+
 theorem stdRiemannFromRicci3D_of_residual_package
     {R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real}
     (pkg : RiemannFromRicci3DResidualPackage R) :
@@ -326,8 +326,8 @@ theorem stdRiemannFromRicci3D_of_residual_package
   unfold stdRiemannFromRicciResidual3 at hz
   linarith
 
-/-- Three-dimensional Riemann-from-Ricci formula for an abstract algebraic
-curvature tensor in a standard orthonormal `Fin 3` component frame. -/
+
+
 theorem stdRiemannFromRicci3D_of_algebraic_curvature_symmetries
     {R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real}
     (h : AlgebraicCurvatureSymmetries3 R) :
@@ -335,13 +335,13 @@ theorem stdRiemannFromRicci3D_of_algebraic_curvature_symmetries
   stdRiemannFromRicci3D_of_residual_package
     (residual_package_of_algebraic_curvature_symmetries3 h)
 
-/-- Lemma 14.2 in the displayed slot convention.
 
-If a text writes `R_ijkl` for the last-pair-flipped component of the standard
-algebraic curvature tensor in this file, this is exactly the displayed formula:
-`R_ijkl = Ric_il g_jk - Ric_jl g_ik - Ric_ik g_jl + Ric_jk g_il
-  - (1/2) R (g_il g_jk - g_jl g_ik)`.
--/
+
+
+
+
+
+
 theorem displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries
     {R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real}
     (h : AlgebraicCurvatureSymmetries3 R) :

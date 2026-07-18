@@ -1,32 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 
-/-!
-# Locality of the raw connection Laplacian on `(r, s)`-tensor sections
-
-The raw connection Laplacian `rawTensorConnLap g r s T` is a local operator:
-its pointwise value depends only on the germ of `T` near the evaluation point.
-In particular, if `T` vanishes on a neighbourhood of `b`, then
-`rawTensorConnLap g r s T b = 0`.
-
-This file packages two convenient corollaries of the locality lemma
-`rawTensorConnLap_eq_zero_of_eventually_zero` from `TensorConnLaplacian.lean`,
-with the smoothness hypothesis stated directly as a `ContMDiff` predicate on
-the raw section (rather than as a bundled `Cₛ^∞⟮…⟯` section).
-
-## Main results
-
-* `rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff` — if a raw section
-  `T : Π b : M, TensorRSSpace r s I b` is `C^∞` and vanishes on a neighbourhood
-  of `b`, then `rawTensorConnLap g r s T b = 0`.
-* `rawTensorConnLap_tsupport_subset` — the topological support of the model
-  image of `rawTensorConnLap g r s T` is contained in the topological support
-  of the model image of `T`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
 
@@ -47,10 +23,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **Locality of `rawTensorConnLap` (raw `ContMDiff` hypothesis).** If a raw
-`(r, s)`-tensor section `T : Π b : M, TensorRSSpace r s I b` is smooth in the
-total-space sense and vanishes on a neighbourhood of `b`, then the raw
-connection Laplacian of `T` vanishes at `b`. -/
 theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -100,10 +72,6 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
   exact rawTensorConnLap_eq_zero_of_eventually_zero (I := I) g r s
     (T := T) (U := U) hU_open hbU hT_zero_U hT_diff_b hcov_diff_b
 
-/-- **Topological-support subset for `rawTensorConnLap` (raw `ContMDiff`
-hypothesis).** The topological support of the model image of
-`rawTensorConnLap g r s T` is contained in the topological support of the
-model image of `T`, provided `T` is smooth. -/
 theorem rawTensorConnLap_tsupport_subset [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

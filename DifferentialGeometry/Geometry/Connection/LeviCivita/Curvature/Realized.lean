@@ -20,21 +20,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Realized canonical curvature endpoints
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Curvature`.
--/
 
-/-! ## Static metric Bianchi producers
 
-The algebraic Bianchi file consumes pointwise second-Bianchi and trace data.
-The canonical metric producer belongs here, where the Levi-Civita curvature
-constructors and curvature symmetries are available without creating an import
-cycle.
--/
 
-/-- Canonical scalar trace derivative for the Levi-Civita Ricci tensor. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem canScalTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -74,7 +74,7 @@ theorem canScalTrace
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
       Ric basis gInv hinv X
 
-/-- Canonical scalar Hessian is the metric trace of canonical `∇²Ric`. -/
+
 theorem canScalHess
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -309,8 +309,8 @@ private theorem slots4_eq_vec4 {x : M}
   funext q
   fin_cases q <;> rfl
 
-/-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
-is last-pair-skew in its curvature slots. -/
+
+
 theorem nabla4OutSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -337,8 +337,8 @@ theorem nabla4OutSkew
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- The covariant derivative of an all-point input-skew `(0,4)` tensor field
-is first-pair-skew in its curvature slots. -/
+
+
 theorem nabla4InSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -367,8 +367,8 @@ theorem nabla4InSkew
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) Y W Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- The covariant derivative of an all-point pair-symmetric `(0,4)` tensor
-field is pair-symmetric in its curvature slots. -/
+
+
 theorem nabla4Pair
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -397,7 +397,7 @@ theorem nabla4Pair
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-/-- Canonical Levi-Civita `∇Rm04` inherits the lowered-Riemann symmetries. -/
+
 theorem canRmSymm
     (g : SmoothRiemannianMetric I M)
     {x : M} :
@@ -432,7 +432,7 @@ theorem canRmSymm
       nabla4OutSkew (I := I) cov Asec Rm04 x
         (fun y =>
           DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
-            (I := I) g hcov1 Rm04
+            (I := I) g Rm04
             (DifferentialGeometry.Integral.Connection.rm04Section_realizes
               (I := I) g cov hcov) (x := y))
         W X Y Z
@@ -508,7 +508,7 @@ theorem canRmSymm
       nabla4Pair (I := I) cov Asec Rm04 x
         (fun y =>
           DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
-            (I := I) g hcov1 Rm04
+            (I := I) g Rm04
             (DifferentialGeometry.Integral.Connection.rm04Section_realizes
               (I := I) g cov hcov) (x := y))
         W X Y Z
@@ -530,8 +530,8 @@ theorem canRmSymm
     rw [hleft, hright]
     exact hsymm
 
-/-- Canonical Levi-Civita `∇Rm04` satisfies the lowered second Bianchi
-identity. -/
+
+
 theorem canRmSecond
     (g : SmoothRiemannianMetric I M)
     {x : M} :
@@ -905,8 +905,8 @@ theorem canRmSecond
   simpa [add_assoc] using hinner
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The canonical Levi-Civita Ricci section is the metric trace of the
-canonical lowered Riemann section. -/
+
+
 theorem canRicField
     (g : SmoothRiemannianMetric I M) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
@@ -999,8 +999,8 @@ theorem canRicField
         (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
         simp [metricTraceFirstTwo0STensor_apply, metricTraceFirstTwo0SAt]
 
-/-- Canonical Levi-Civita `∇Ric` is the first metric trace of canonical
-`∇Rm04`. -/
+
+
 theorem canRicTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1055,10 +1055,10 @@ theorem canRicTrace
   simpa [cov, hcov, Rm04, Ric, nablaRm04, nablaRic, hRicField,
     finCons_vec4_eq_vec5] using htrace
 
-/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric.
 
-The scalar trace derivative is deliberately excluded from this frontier; it is
-now supplied by `canScalTrace`. -/
+
+
+
 theorem canBianchiCore
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1108,12 +1108,12 @@ theorem canBianchiCore
       canRicTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hSecond, hSymm, hTrace⟩
 
-/-- Canonical fixed-time Bianchi and trace data for one smooth metric.
 
-This is the honest static frontier below the Ricci-flow coordinate consumer.
-The intended proof is the Levi-Civita second Bianchi identity, plus the
-metric-compatibility trace product rules for `Ric = tr_g Rm04` and
-`scalar = tr_g Ric`. -/
+
+
+
+
+
 theorem canSecondBianchi
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1171,8 +1171,8 @@ theorem canSecondBianchi
       canScalTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hcore.1, hcore.2.1, hcore.2.2, hscalar⟩
 
-/-- Static metric Bianchi package in the existential shape consumed by the
-Ricci-flow coordinate proof. -/
+
+
 theorem metricBianchiAt
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

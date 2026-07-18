@@ -2,80 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorCutoffWeakPartials
 
-/-!
-# Iterated Sobolev regularity of the chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`
-and a component multi-index `P₀`, the chart-Euclidean right-hand side
-`eigenvectorChartRHS g r s h_atlas i α P₀` of the limiting per-component
-variational identity is the `μ⁻¹`-rescaled seven-summand bracket
-
-```
-(1) − (2) + (3) − (4) − (5) + (6) − (7).
-```
-
-`eigenvectorChartRHS_memLp_weighted` (in `EigenvectorChartRHS.lean`) established
-its weighted-`L²` membership — i.e. `MemWkp 0 2` — by splitting the bracket and
-proving each summand `MemLp 2`. This module upgrades **all seven summands** to
-iterated Euclidean Sobolev regularity `MemWkp K 2` for an arbitrary order `K`,
-and assembles the full headline `eigenvectorChartRHS_memWkp`, given the genuine
-bootstrap input
-
-* `h_pou` — every partition-of-unity Euclidean chart component of the
-  `L²`-coercion `TensorH1ComplToTensorL2 g r s (eigenvectorResolvent …)` of the
-  eigenvector resolvent is `W^{K+1,2}` on its chart target, at every chart
-  centre and for every component multi-index.
-
-## The seven summands
-
-* **Summand 1** — the canonical eigenvector chart component
-  `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀`.
-  It is `μ⁻¹` times the chart component of `TensorH1ComplToTensorL2 g r s
-  (eigenvectorResolvent …)` (`eigenvector_chartComponent_eq`); `MemWkp` is
-  scalar-invariant, so `h_pou α P₀` and `MemWkp.le_of_le` give `MemWkp K 2`.
-* **Summand 2** — the cross-left double sum: a finite `C^∞`-coefficient-weighted
-  sum of the cross-left limit object `crossLeftLimitComponent`, which is the
-  cutoff Euclidean chart component of the section-level covariant gradient
-  `tensorCovGradL2Compl g r s (eigenvectorResolvent …)`. The cutoff ↔
-  partition-of-unity bridge `tensorL2ChartComponentCutoff_memWkp_of_pou`, fed the
-  covariant-gradient chart-component regularity `eigenvectorCovGrad_pou_memWkp`,
-  makes it `W^{K,2}`; `MemWkp.smul_smooth_bounded` carries the smooth coefficient.
-* **Summand 3** — the cross-right double sum: a finite `C^∞`-coefficient-weighted
-  sum of the cross-right limit object `crossRightLimitComponent`, which is the
-  cutoff Euclidean chart component of the `L²`-coercion `TensorH1ComplToTensorL2
-  g r s (eigenvectorResolvent …)`. The cutoff ↔ partition-of-unity bridge, fed
-  `h_pou` directly (after a `MemWkp.le_of_le` from `K + 1` to `K`), makes it
-  `W^{K,2}`; `MemWkp.smul_smooth_bounded` carries the smooth coefficient.
-* **Summands 4, 5, 6** — the principal rotation coefficient limit, the
-  lower-order rotation value coefficient limit, and the chart-density-divided
-  lower-order gradient divergence limit. Each unfolds to a finite
-  `C^∞`-coefficient-weighted sum — each coefficient indicator-cut to the compact
-  partition-of-unity kernel — whose atoms are `componentLpLimit` and
-  `partialLpLimit`, the `μ`-rescaled canonical eigenvector chart component and
-  its weak chart partial. The chart component is `W^{K,2}` (Summand 1 route);
-  its weak partial is `W^{K,2}` because the canonical chart component is
-  `W^{K+1,2}` and a weak partial of a `W^{K+1,2}` function lies in `W^{K,2}`.
-  The atoms vanish almost everywhere off the compact kernel, so the indicator
-  cut is absorbed and `MemWkp.smul_smooth_bounded` carries the smooth
-  coefficient.
-* **Summand 7** — the cross-right gradient divergence limit, divided by the
-  chart density. Its atoms are the cutoff cross-right limit object
-  `crossRightLimitComponent` (Summand 3 route) and `μ` times the eigenvector
-  cutoff chart partial `eigenvectorCutoffChartPartialLp`. The latter is `W^{K,2}`
-  because the eigenvector cutoff chart component is `W^{K+1,2}` (the cutoff ↔
-  partition-of-unity bridge at order `K + 1`) and the cutoff chart partial is a
-  weak partial of it.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -108,9 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **`MemWkp` is closed under finite sums.** If every member of a family of
-functions indexed by a finite set is `W^{k,p}`-regular on an open set, then the
-pointwise finite sum is `W^{k,p}`-regular. -/
 private lemma memWkp_finsetSum
     {d : ℕ} [NeZero d] {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
@@ -138,12 +64,6 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
-/-- **`MemWkp` closure for a chart-target-smooth coefficient times an
-ae-kernel-vanishing `MemWkp K 2` factor.** For a coefficient `coef` that is `C^∞`
-on the open Euclidean chart target, a compact kernel `Kkern` inside the chart
-target, and a factor that is `MemWkp K 2` on the chart target and vanishes almost
-everywhere off `Kkern`, the pointwise product lies in `MemWkp K 2` on the chart
-target. -/
 private lemma memWkp_smoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -246,15 +166,7 @@ private lemma memWkp_smoothCoef_mul_aeZeroFactor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
-/-- **A weak chart partial of a `W^{K+1,2}` function is `W^{K,2}`.** For an open
-set `Ω`, a weak `k`-th partial `gpart` of a function `u` that is `W^{K+1,2}` on
-`Ω`, with `gpart` itself `L²` on `Ω`, lies in `W^{K,2}` on `Ω`.
-
-`u ∈ W^{K+1,2}` is in particular `W^{1,2}`, so `chosenWeakPartial' 2 k u Ω` is a
-weak `k`-th partial of `u` and lies in `W^{K,2}` (`MemWkp.chosenWeakPartial_mem`).
-Both `gpart` and `chosenWeakPartial' 2 k u Ω` are weak `k`-th partials of `u` and
-locally integrable, so they agree almost everywhere; `MemWkp` is invariant under
-almost-everywhere equality. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_of_weakPartial_of_memWkp_succ
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -286,17 +198,7 @@ private lemma memWkp_of_weakPartial_of_memWkp_succ
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
-/-- **A weak chart partial inherits the off-kernel vanishing of the
-differentiated function.** For an open set `Ω`, a closed set `Kc`, a weak `k`-th
-partial `gp` of a `W^{1,2}`-on-`Ω` function `u` that vanishes almost everywhere
-off `Kc`, with `gp` itself `L²` on `Ω`, the weak partial `gp` vanishes almost
-everywhere off `Kc`.
-
-The open subset `V := Ω \ Kc` carries `u =ᵐ 0`. The chosen weak `k`-th partial
-of `u` on `V` is therefore almost everywhere zero on `V`
-(`chosenWeakPartial'_ae_zero_of_ae_zero`); it and the restriction of `gp` to `V`
-are both weak `k`-th partials of `u` on `V`, so they agree almost everywhere on
-`V`, whence `gp =ᵐ 0` on `V`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -362,15 +264,7 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
   exact hy ⟨hy_mem, hy_notKc⟩
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The eigenvector cutoff chart component is `W^{1,2}` unconditionally
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvectorCutoffChartComponent_memW1p`, keyed on the unconditional compactness
-witness `tensorResolventL2_isCompactOperator` through
-`tensorResolventEigenbasisVec`. Its weak `k`-th partial in every
-chart-coordinate direction `k` is the chart-locality-free `L²` cutoff
-chart-partial limit object `eigenvectorCutoffChartPartialLp g r s i
-α P k`, so the canonical `W^{1,2}`-membership predicate holds with no
-partition-of-unity regularity input and no chart-selection hypothesis. -/
+
 lemma eigenvectorCutoffChartComponent_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -392,18 +286,7 @@ lemma eigenvectorCutoffChartComponent_memW1p
     (I := I) (M := M) g r s i α P k
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Off-cutoff-kernel vanishing of the cutoff chart-partial atom
-(chart-locality-free).** Chart-locality-free twin of
-`cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid`, keyed on the
-unconditional compactness witness `tensorResolventL2_isCompactOperator`
-through `tensorResolventEigenbasisVec`. For any eigenbasis index `i`,
-the chart-locality-free cutoff chart-partial atom `cutoffPartialLpLimit
-g r s i α P k` vanishes almost everywhere — on the plain Lebesgue volume
-restricted to the chart target — off the compact cutoff kernel
-`cutoffChartKernelEuclid α`. No partition-of-unity regularity hypothesis and no
-chart-selection hypothesis are needed: the cutoff chart component is
-unconditionally `W^{1,2}`, the cutoff chart-partial atom is a weak partial of it,
-and the locality of weak partials transfers the off-kernel vanishing. -/
+
 lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -463,18 +346,6 @@ lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
   filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-/-- **`MemWkp` closure for an indicator-cut chart-target-smooth coefficient times
-an ae-kernel-vanishing `MemWkp K 2` factor.** For a coefficient `coef` that is
-`C^∞` on the open Euclidean chart target, a compact kernel `Kkern` inside the
-chart target, and a factor that is `MemWkp K 2` on the chart target and vanishes
-almost everywhere off `Kkern` (with respect to the chart `L²` measure), the
-pointwise product of the `Kkern`-indicator-cut coefficient with the factor lies
-in `MemWkp K 2` on the chart target.
-
-Off `Kkern` the indicator-cut coefficient is zero and the factor vanishes almost
-everywhere; on `Kkern` the indicator-cut coefficient equals `coef`. Hence the
-indicator-cut product agrees almost everywhere with `coef · factor`, which is
-`MemWkp K 2` by `memWkp_smoothCoef_mul_aeZeroFactor`. -/
 private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -512,16 +383,7 @@ private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr h_bare
 
-/-- **`MemWkp` closure for a chart-target-smooth, off-kernel-vanishing
-coefficient times an arbitrary `MemWkp K 2` factor.** For a coefficient `coef`
-that is `C^∞` on the open Euclidean chart target and vanishes pointwise off a
-compact kernel `Kkern` inside the chart target, and an arbitrary `MemWkp K 2`
-factor, the pointwise product `coef · factor` lies in `MemWkp K 2` on the chart
-target.
-
-The off-kernel vanishing makes `coef` globally `C^∞` (smooth on its closed
-support inside the chart target, identically zero on the open complement) and
-compactly supported; `MemWkp.smul_smooth_bounded` then keeps `MemWkp K 2`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_offKernelSmoothCoef_mul
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -567,9 +429,6 @@ private lemma memWkp_offKernelSmoothCoef_mul
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hcoef_smooth
     (fun j _hj y _hy => hC_bd y j _hj) hfactor_memWkp
 
-/-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
-open Euclidean chart target: the chart density is `C^∞` and strictly positive
-there, so the quotient is `C^∞`. -/
 private lemma recipDensityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -581,13 +440,7 @@ private lemma recipDensityOnEuclid_contDiffOn
       (Laplacian.MetricExtension.densityOnEuclid_pos (I := I) g α hy).ne')
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The partition-of-unity Euclidean chart components of the chart-locality-free
-eigenvector vector `tensorResolventEigenbasisVec` are `MemWkp N 2` on
-every chart target, given that those of the `L²`-coercion of the chart-locality-free
-eigenvector resolvent are `MemWkp N 2`. Chart-locality-free twin of
-`eigenvectorVec_pou_memWkp`: the two chart components differ by the nonzero scalar
-`μ⁻¹` (`eigenvector_chartComponent_eq`), and `MemWkp` is
-scalar-invariant; the iteration order is preserved. -/
+
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -653,11 +506,7 @@ private lemma eigenvectorVec_pou_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 1 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand1_memWkp`: the canonical chart-locality-free
-eigenvector chart component is `MemWkp K 2` on the chart-`α` target, given the
-order-`(K + 1)` partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand1_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -680,15 +529,7 @@ theorem eigenvectorChartRHS_summand1_memWkp
     h_pou α P₀).le_of_le (Nat.le_succ K)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The cross-left limit object is `W^{K,2}` (chart-locality-free).**
-Chart-locality-free twin of `crossLeftLimitComponent_memWkp`, keyed on the
-unconditional compactness witness through `eigenvectorResolvent`.
-The cross-left limit object `crossLeftLimitComponent g r s i α P` is
-by definition the cutoff Euclidean chart component of the section-level covariant
-gradient `tensorCovGradL2Compl g r s (eigenvectorResolvent …)`. The
-cutoff ↔ partition-of-unity bridge `tensorL2ChartComponentCutoff_memWkp_of_pou` is
-fed the order-`K` covariant-gradient chart-component regularity
-`eigenvectorCovGrad_pou_memWkp` (which itself consumes `h_pou`). -/
+
 theorem crossLeftLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -714,11 +555,7 @@ theorem crossLeftLimitComponent_memWkp
       g r s i K h_pou β Q)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The cross-right limit object is `W^{K,2}` (chart-locality-free).**
-Chart-locality-free twin of `crossRightLimitComponent_memWkp`, keyed on the
-unconditional compactness witness through `eigenvectorResolvent`.
-The cutoff ↔ partition-of-unity bridge `tensorL2ChartComponentCutoff_memWkp_of_pou`
-is fed `h_pou` directly, after the order monotonicity `MemWkp.le_of_le`. -/
+
 theorem crossRightLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -743,9 +580,7 @@ theorem crossRightLimitComponent_memWkp
     (fun β Q => (h_pou β Q).le_of_le (Nat.le_succ K))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The component atom `componentLpLimit g r s i α P` — `μ` times
-the canonical chart-locality-free eigenvector chart component — is `MemWkp K 2` on
-the chart-`α` target. Chart-locality-free twin of `componentLpLimit_memWkp`. -/
+
 lemma componentLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -807,9 +642,7 @@ lemma componentLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The component atom `componentLpLimit g r s i α P` vanishes
-almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`.
-Chart-locality-free twin of `componentLpLimit_ae_zero_off_chartPouKernel`. -/
+
 private lemma componentLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -840,10 +673,7 @@ private lemma componentLpLimit_ae_zero_off_chartPouKernel
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The chart-partial atom `partialLpLimit g r s i α P k` — `μ`
-times the weak `k`-th chart partial of the canonical chart-locality-free
-eigenvector chart component — is `MemWkp K 2` on the chart-`α` target.
-Chart-locality-free twin of `partialLpLimit_memWkp`. -/
+
 lemma partialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -919,10 +749,7 @@ lemma partialLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The chart-partial atom `partialLpLimit g r s i α P k` vanishes
-almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou`.
-Chart-locality-free twin of `partialLpLimit_ae_zero_off_chartPouKernel`. -/
+
 private lemma partialLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -997,10 +824,7 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The cutoff chart-partial atom `cutoffPartialLpLimit g r s i α P k`
-— `μ` times the chart-locality-free eigenvector cutoff chart partial — is
-`MemWkp K 2` on the chart-`α` target. Chart-locality-free twin of
-`cutoffPartialLpLimit_memWkp`. -/
+
 theorem cutoffPartialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1092,12 +916,7 @@ theorem cutoffPartialLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The lower-order gradient divergence limit `weightedGradCoeffDivLimit`
-is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`weightedGradCoeffDivLimit_memWkp`: for a chart direction `l`, the
-chart-locality-free divergence limit is `MemWkp K 2` on the chart-`α` target,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
+
 theorem weightedGradCoeffDivLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1221,12 +1040,7 @@ theorem weightedGradCoeffDivLimit_memWkp
             (fun p _ => h_leaf P Q k p))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 2 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand2_memWkp`: the cross-left double sum — a finite
-`C^∞`-coefficient-weighted sum of the chart-locality-free cross-left limit object
-`crossLeftLimitComponent` — is `MemWkp K 2` on the chart-`α` target,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand2_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1297,12 +1111,7 @@ theorem eigenvectorChartRHS_summand2_memWkp
       (fun Q _ => h_leaf P Q))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 3 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand3_memWkp`: the cross-right double sum — a finite
-`C^∞`-coefficient-weighted sum of the chart-locality-free cross-right limit object
-`crossRightLimitComponent` — is `MemWkp K 2` on the chart-`α` target,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand3_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1373,11 +1182,7 @@ theorem eigenvectorChartRHS_summand3_memWkp
       (fun Q _ => h_leaf P Q))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 4 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand4_memWkp`: the chart-locality-free principal rotation
-coefficient limit `covPrincipalRotationCoeffLimit` is `MemWkp K 2` on
-the chart-`α` target, given the order-`(K + 1)` partition-of-unity regularity input
-`h_pou` keyed on `eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand4_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1446,11 +1251,7 @@ theorem eigenvectorChartRHS_summand4_memWkp
           (fun l _ => h_leaf P Q k l))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 5 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand5_memWkp`: the chart-locality-free lower-order rotation
-value coefficient limit `covLowerOrderRotationValueCoeffLimit` is
-`MemWkp K 2` on the chart-`α` target, given the order-`(K + 1)` partition-of-unity
-regularity input `h_pou` keyed on `eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand5_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1580,12 +1381,7 @@ theorem eigenvectorChartRHS_summand5_memWkp
               (fun p _ => h_leaf P Q k l p)))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 6 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand6_memWkp`: the chart-density-divided sum over chart
-directions of the chart-locality-free lower-order gradient divergence limit
-`weightedGradCoeffDivLimit` is `MemWkp K 2` on the chart-`α` target,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand6_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1631,11 +1427,7 @@ theorem eigenvectorChartRHS_summand6_memWkp
     h_sum h_sum_ae_zero
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Summand 7 is `W^{K,2}` (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorChartRHS_summand7_memWkp`: the chart-density-divided chart-locality-free
-cross-right gradient divergence limit `crossRightGradCoeffDivLimit` is
-`MemWkp K 2` on the chart-`α` target, given the order-`(K + 1)` partition-of-unity
-regularity input `h_pou` keyed on `eigenvectorResolvent`. -/
+
 theorem eigenvectorChartRHS_summand7_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1803,17 +1595,7 @@ theorem eigenvectorChartRHS_summand7_memWkp
     h_div h_div_ae_zero
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The chart-Euclidean right-hand side is `W^{K,2}` (chart-locality-free).**
-Chart-locality-free twin of `eigenvectorChartRHS_memWkp`: the chart-locality-free
-chart-Euclidean right-hand side `eigenvectorChartRHS g r s i α P₀` is
-`MemWkp K 2` on the chart-`α` target, given the order-`(K + 1)` partition-of-unity
-regularity input `h_pou` keyed on `eigenvectorResolvent`.
 
-`eigenvectorChartRHS` is the `μ⁻¹`-rescaled bracketed combination
-`(1) − (2) + (3) − (4) − (5) + (6) − (7)` of the seven chart-locality-free summand
-objects; the seven summand twins `eigenvectorChartRHS_summand{1,…,7}_memWkp_unconditional`
-make each summand `W^{K,2}`, and the `MemWkp` arithmetic closures assemble the
-bracket and carry the global `μ⁻¹` factor. -/
 theorem eigenvectorChartRHS_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

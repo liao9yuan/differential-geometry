@@ -1,59 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 
-/-!
-# The pointwise covariant Leibniz rule for a smooth-scalar-weighted tensor section
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product
-space `E`, this file records the pointwise covariant Leibniz rule for the
-directional covariant derivative of a *smooth-scalar-weighted* `(r, s)`-tensor
-section, together with the resulting Leibniz identity for the pointwise
-covariant-derivative inner product `tensorCovDerivPointwiseInner`.
-
-The scaling is by a smooth real-valued function `ζ : C^∞⟮I, M; ℝ⟯` on `M`.
-Multiplying a smooth compactly-supported `(r, s)`-tensor section `w` by `ζ`
-produces another smooth compactly-supported tensor section `scalarSmul g r s ζ w`
-(its support sits inside `tsupport w.toFun`, hence is still compact).
-
-## Main constructions
-
-* `scalarSmul g r s ζ w` — the smooth compactly-supported tensor section
-  `ζ • w`, the smooth scalar `ζ` times the section `w`.
-* `tensorCovDerivCrossLeft g r s ζ w S x` — the explicit cross term
-  `⟨∇w, dζ ⊗ S⟩` of the Leibniz identity below, an inverse-Gram-weighted double
-  sum of `∂ₖζ` times the `(r, s)`-tensor pointwise inner product.
-* `tensorCovDerivCrossRight g r s ζ w S x` — the explicit cross term
-  `⟨dζ ⊗ w, ∇S⟩` of the Leibniz identity below.
-
-## Main results
-
-* `tensorCovDerivAt_scalarSmul` — the pointwise covariant Leibniz rule:
-  the directional covariant derivative of `ζ • w` at `x` along `v` is
-  `ζ x • tensorCovDerivAt … w x v + (extDerivFun ζ x v) • w.toSection x`.
-  This is the genuine non-constant analogue of `tensorCovDerivAt_smul`: the
-  derivative-of-`ζ` term `extDerivFun ζ x` is retained.
-* `tensorCovDerivPointwiseInner_scalarSmul_left` — the Leibniz identity for the
-  pointwise covariant-derivative inner product: the inverse-Gram-weighted
-  expression `tensorCovDerivPointwiseInner g r s (ζ • w) S` decomposes as
-  `tensorCovDerivPointwiseInner g r s w (ζ • S)
-     − ⟨∇w, dζ ⊗ S⟩ + ⟨dζ ⊗ w, ∇S⟩`
-  with the two cross terms given the explicit concrete form above.
-
-## Strategy
-
-`tensorCovDerivAt g r s S x v` is the bundled `(r, s)`-tensor covariant
-derivative `tensorRSCovariantDerivative` applied to `S.toSection`; that bundled
-object satisfies `IsCovariantDerivativeOn … Set.univ`, so its `leibniz` field
-applies verbatim once `ζ` and `w.toSection` are seen as manifold-differentiable.
-This yields `tensorCovDerivAt_scalarSmul` directly. Headline 2 then substitutes
-`tensorCovDerivAt_scalarSmul` into each summand of `tensorCovDerivPointwiseInner`
-and expands the bilinear pointwise inner product `tensorInnerPointwise`; the two
-remaining summands are precisely the explicit cross terms.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -73,7 +23,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -84,10 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The smooth real-valued function `ζ` times a smooth compactly-supported
-`(r, s)`-tensor section `w`, packaged as a smooth compactly-supported tensor
-section. The underlying section is the pointwise scalar product
-`fun x => ζ x • w.toSection x`. -/
 noncomputable def scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) : SmoothCcTensor g r s where
@@ -109,16 +55,12 @@ noncomputable def scalarSmul
       show TensorRSSpace.toModel (w.toSection x) = w.toFun x from rfl, hw_zero,
       smul_zero]
 
-/-- The underlying section of `scalarSmul g r s ζ w` is the pointwise scalar
-product of `ζ` and the underlying section of `w`. -/
 @[simp] lemma scalarSmul_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
     (scalarSmul (I := I) (M := M) g r s ζ w).toSection x =
       (ζ : M → ℝ) x • w.toSection x := rfl
 
-/-- The underlying map of `scalarSmul g r s ζ w` is the pointwise scalar product
-of `ζ` and the underlying map of `w`. -/
 @[simp] lemma scalarSmul_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
@@ -128,16 +70,6 @@ of `ζ` and the underlying map of `w`. -/
     TensorRSSpace.toModel_smul]
   rfl
 
-/-- **The pointwise covariant Leibniz rule.** For a smooth real-valued function
-`ζ` and a smooth compactly-supported `(r, s)`-tensor section `w`, the directional
-covariant derivative of the smooth-scalar-weighted section `ζ • w` at a point
-`x` along a model-fibre direction `v` is
-
-  `ζ x • tensorCovDerivAt g r s w x v + (extDerivFun ζ x v) • w.toSection x`.
-
-This is the genuine non-constant analogue of `tensorCovDerivAt_smul`: the
-constant-scalar special case discards the term `extDerivFun ζ x`; here it is the
-exterior derivative of `ζ` and is retained. -/
 theorem tensorCovDerivAt_scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -170,13 +102,6 @@ theorem tensorCovDerivAt_scalarSmul
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply]
 
-/-- The explicit cross term `⟨∇w, dζ ⊗ S⟩` of the Leibniz identity for the
-pointwise covariant-derivative inner product. The `dζ ⊗ S` factor contributes,
-in the gradient direction `j`, only the scalar `extDerivFun ζ x (chartModelBasis E j)`;
-the remaining factor is the `(r, s)`-tensor pointwise inner product of the
-genuine covariant gradient `tensorCovDerivAt … w` against the section value
-`S.toSection x`. The inverse Gram matrix `(gramMatrixAt g x)⁻¹` couples the two
-gradient slots exactly as in `tensorCovDerivPointwiseInner`. -/
 noncomputable def tensorCovDerivCrossLeft
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) : ℝ :=
@@ -188,13 +113,6 @@ noncomputable def tensorCovDerivCrossLeft
             (tensorCovDerivAt (I := I) (M := M) g r s w x ((chartModelBasis E) i)))
           (S.toFun x))
 
-/-- The explicit cross term `⟨dζ ⊗ w, ∇S⟩` of the Leibniz identity for the
-pointwise covariant-derivative inner product. The `dζ ⊗ w` factor contributes,
-in the gradient direction `i`, only the scalar `extDerivFun ζ x (chartModelBasis E i)`;
-the remaining factor is the `(r, s)`-tensor pointwise inner product of the
-section value `w.toSection x` against the genuine covariant gradient
-`tensorCovDerivAt … S`. The inverse Gram matrix `(gramMatrixAt g x)⁻¹` couples
-the two gradient slots exactly as in `tensorCovDerivPointwiseInner`. -/
 noncomputable def tensorCovDerivCrossRight
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) : ℝ :=
@@ -206,7 +124,6 @@ noncomputable def tensorCovDerivCrossRight
           (TensorRSSpace.toModel
             (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j))))
 
-/-- Unfolding lemma for `tensorCovDerivCrossLeft`. -/
 lemma tensorCovDerivCrossLeft_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -220,7 +137,6 @@ lemma tensorCovDerivCrossLeft_def
                   ((chartModelBasis E) i)))
               (S.toFun x)) := rfl
 
-/-- Unfolding lemma for `tensorCovDerivCrossRight`. -/
 lemma tensorCovDerivCrossRight_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -234,10 +150,6 @@ lemma tensorCovDerivCrossRight_def
                 (tensorCovDerivAt (I := I) (M := M) g r s S x
                   ((chartModelBasis E) j)))) := rfl
 
-/-- Auxiliary expansion: the summand of `tensorCovDerivPointwiseInner` for the
-smooth-scalar-weighted section `ζ • w` (first argument) splits, via the pointwise
-covariant Leibniz rule and bilinearity of `tensorInnerPointwise`, into the
-`ζ`-scaled genuine-gradient summand plus the `dζ`-contracted cross summand. -/
 private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -275,10 +187,6 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
   simp only [tensorInnerPointwise_smul_left]
   ring
 
-/-- Auxiliary expansion: the summand of `tensorCovDerivPointwiseInner` for the
-smooth-scalar-weighted section `ζ • S` (second argument) splits, via the
-pointwise covariant Leibniz rule and bilinearity of `tensorInnerPointwise`, into
-the `ζ`-scaled genuine-gradient summand plus the `dζ`-contracted cross summand. -/
 private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -316,9 +224,6 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
   simp only [tensorInnerPointwise_smul_right]
   ring
 
-/-- A `ζ`-scaled rewriting of `tensorCovDerivPointwiseInner`: the inverse-Gram-
-weighted double sum with each summand scaled by the constant `ζ x` equals the
-constant `ζ x` times `tensorCovDerivPointwiseInner`. -/
 private lemma smul_const_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -339,26 +244,6 @@ private lemma smul_const_tensorCovDerivPointwiseInner
   intro i _
   rw [Finset.mul_sum]
 
-/-- **The Leibniz identity for the pointwise covariant-derivative inner
-product.** For a smooth real-valued function `ζ` and smooth compactly-supported
-`(r, s)`-tensor sections `w` and `S`, the inverse-Gram-weighted pointwise
-covariant-derivative inner product of the smooth-scalar-weighted section
-`ζ • w` against `S` decomposes as the inner product of `w` against the
-smooth-scalar-weighted section `ζ • S`, corrected by the two explicit cross
-terms:
-
-  `tensorCovDerivPointwiseInner g r s (ζ • w) S x
-     = tensorCovDerivPointwiseInner g r s w (ζ • S) x
-       − tensorCovDerivCrossLeft g r s ζ w S x
-       + tensorCovDerivCrossRight g r s ζ w S x`.
-
-The cross term `tensorCovDerivCrossLeft` is `⟨∇w, dζ ⊗ S⟩` and
-`tensorCovDerivCrossRight` is `⟨dζ ⊗ w, ∇S⟩`; both are inverse-Gram-weighted
-double sums of `∂ₖζ = extDerivFun ζ x (chartModelBasis E ·)` against the
-`(r, s)`-tensor pointwise inner product. Integrating over `M` against the
-Riemannian volume measure splits the Dirichlet integrand
-`∫ tensorCovDerivPointwiseInner g r s (ζ • w) S` into the corresponding three
-integrals. -/
 theorem tensorCovDerivPointwiseInner_scalarSmul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :

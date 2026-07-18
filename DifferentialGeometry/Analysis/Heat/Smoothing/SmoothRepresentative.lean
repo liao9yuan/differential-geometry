@@ -2,44 +2,9 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import DifferentialGeometry.Analysis.Heat.Semigroup.SpectralBounds
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbeddingCInfty
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Solutions.SobolevToCinftyRep
 import Mathlib.MeasureTheory.Measure.OpenPos
-
-/-!
-# Smoothing property of the heat semigroup on a closed Riemannian manifold
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional real
-inner-product space `E` with `n := finrank ℝ E ≥ 1`, given an initial datum
-`u_0 ∈ Lp ℝ 2 μ_g` and a positive time `t > 0`, this file establishes the
-**smoothing property** of the heat semigroup: under the standing iterated
-regularity hypothesis
-
-  `∀ k : ℕ, MemWkpChart g (2k) 2 ((heatSemigroup g t u_0).coeFn)`,
-
-the `L²` element `heatSemigroup g t u_0` is a.e.-equal to a smooth function
-`u_smooth : M → ℝ` of class `C^∞`.
-
-## Main results
-
-* `heatSemigroup_smooth_representative` (headline (1)) — under the iterated
-  regularity hypothesis, produce a `C^∞` representative of
-  `heatSemigroup g t u_0`. The chart-Sobolev `C^∞` smoothing is supplied
-  unconditionally by
-  `sobolev_smooth_representative_of_memWkpChart_forall`
-  (`Analysis/Sobolev/Manifold/IteratedSobolevEmbeddingCInfty.lean`).
-* `heatSemigroup_contMDiff_in_time` (headline (2)) — the smoothness of
-  `t ↦ heatSemigroup g t u_0` on `(0, ∞)` as a map into `Lp`. This part
-  follows from existing operator-norm smoothness.
-* `heatSemigroup_smooth_in_space_and_time` (headline (3)) — combined endpoint.
-
-## Hypothesis structure
-
-`h_iterated_regularity` captures the elliptic-regularity output (iterated
-chart-Sobolev membership at `(2k, 2)` for every `k`). The chart-Sobolev
-`W^{∞,2} ↪ C^∞` smoothing step is discharged internally via the unconditional
-representative theorem; no `C^∞` lift hypothesis is exposed at this layer.
--/
 
 noncomputable section
 
@@ -66,11 +31,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **Headline (1): smoothing property of the heat semigroup**.
-
-For `t > 0`, given the iterated regularity hypothesis at every order, the
-`Lp` element `heatSemigroup g t u_0` is a.e.-equal to a smooth function
-`u_smooth : M → ℝ` of class `C^∞`. -/
 theorem heatSemigroup_smooth_representative
     (g : SmoothRiemannianMetric I M)
     {t : ℝ} (_ht : 0 < t) (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -193,10 +153,6 @@ theorem heatSemigroup_smooth_representative
   refine ⟨u_smooth, h_smooth, ?_⟩
   exact hu_coe_ae_meas.trans h_smooth_ae_meas.symm
 
-/-- **Headline (2): time-smoothness of the heat semigroup**.
-
-For every `t > 0`, the map `t ↦ heatSemigroup g t u_0` is `C^∞` on `(0, ∞)`
-as a function into `Lp ℝ 2 μ_g`. -/
 theorem heatSemigroup_contMDiff_in_time
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -220,11 +176,6 @@ theorem heatSemigroup_contMDiff_in_time
   have h_eval_smooth : ContDiff ℝ ∞ evalAt := evalAt.contDiff
   exact h_eval_smooth.contDiffOn.comp h_op (Set.mapsTo_univ _ _)
 
-/-- **Headline (3): combined space-time endpoint of the heat semigroup smoothing**.
-
-For every `t > 0`, the `L²` element `heatSemigroup g t u_0` is a.e.-equal to a
-smooth spatial function. Simultaneously, the map `t ↦ heatSemigroup g t u_0` is
-`C^∞ ((0, ∞); Lp)`. -/
 theorem heatSemigroup_smooth_in_space_and_time
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

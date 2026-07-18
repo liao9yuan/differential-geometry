@@ -1,66 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 
-/-!
-# Bounding the energy quantity `G_total` by the divergence-form data's own
-`L²` norms
-
-The uniform-in-`h` difference-quotient estimate of
-`UniformDiffQuotBound.lean` packages its constant through the energy
-quantity
-
-```
-G_total = ∫_{Ω'} ∑_l (g_g l)² + ∫_{Ω'} (u_g)² + ∫_{Ω'} (f_g)²
-```
-
-where the chart-localised data `g_g`, `u_g` are the canonical cutoff
-extensions of a `ChartBilinearH1ComplData` `D`, and `f_g` is the cutoff
-extension of an arbitrary `L²`-loc source `fSrc`:
-
-* `u_g := χ · D.u_chart`,
-* `f_g := χ · fSrc`,
-* `g_g l := (∂_l χ) · D.u_chart + χ · D.weak_partial l`,
-
-for a smooth compactly-supported cutoff `χ` supported in the chart
-target.
-
-For a quantitative campaign, `G_total` must be re-expressed and bounded
-by the underlying data's own `L²` norms — `eLpNorm` of
-`D.weak_partial l`, `D.u_chart`, `fSrc` over `closure Ω'` — with a
-constant depending only on the chart geometry (the cutoff `χ`), not on
-`D` or `fSrc`.
-
-A density-reconciliation helper (`chartDensitySup`,
-`densityWeightedSource_memLp`, `densityWeightedSource_eLpNorm_sq_le`)
-lets a downstream consumer instantiate the free source as
-`fun x => densityOnEuclid g α x · f x` for an `L²`-loc `f` — the
-chart-pulled bilinear form carries a volume-density factor — and then
-trade the `density · f` norm for the `f` norm with the explicit constant
-`chartDensitySup²`.
-
-## Main results
-
-* `gTotal_le_data_eLpNorm`: the `G_total` expression — first two terms
-  from the canonical cutoff extensions of `D`, third term from the free
-  source `fSrc` — is bounded by `C_χ` times the sum of squared
-  `L²(closure Ω')` norms of `D.weak_partial l`, `D.u_chart`, `fSrc`,
-  where `C_χ = 2 · (n + 1) · (M_χ² + M_∂χ² + 1)` depends only on the
-  cutoff sup bounds `M_χ ≥ |χ|`, `M_∂χ ≥ |∂_l χ|` and the dimension `n`.
-  The constant is quantified before `D` and `fSrc`.
-* `chartDensitySup`, `densityWeightedSource_memLp`,
-  `densityWeightedSource_eLpNorm_sq_le`: the density-reconciliation
-  helper described above.
-
-## Strategy
-
-Each energy integral is dominated by the corresponding integral over
-`closure Ω'` (nonnegative integrand, larger domain). On `closure Ω'`,
-where the data lies in `L²`, the principal-sum integrand is bounded
-pointwise: `((∂_l χ) · u + χ · w)² ≤ 2 M_∂χ² · u² + 2 M_χ² · w²`;
-summing the `n` directional terms and integrating gives a bound by
-`∫_{closure Ω'} u²` and `∫_{closure Ω'} ∑_l w_l²`. Each such integral is
-rewritten as `(eLpNorm v 2 (volume.restrict (closure Ω')))².toReal` via
-the `L²`-norm / squared-integral identity.
--/
 
 noncomputable section
 
@@ -89,8 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For `v ∈ L²(μ)` real-valued, the square of `eLpNorm v 2 μ` equals
-`ENNReal.ofReal (∫ v²)`. A local re-derivation of the standard identity. -/
 private lemma sq_eLpNorm_two_eq_ofReal_integral_sq
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {v : α → ℝ}
     (hv : MemLp v 2 μ) :
@@ -123,7 +60,6 @@ private lemma sq_eLpNorm_two_eq_ofReal_integral_sq
     Filter.Eventually.of_forall (fun x => sq_nonneg _)
   exact (ofReal_integral_eq_lintegral_ofReal h_sq_int h_sq_nn).symm
 
-/-- For `v ∈ L²(μ)` real-valued, `∫ v² = (eLpNorm v 2 μ).toReal²`. -/
 private lemma integral_sq_eq_eLpNorm_two_toReal_sq
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {v : α → ℝ}
     (hv : MemLp v 2 μ) :
@@ -138,8 +74,7 @@ private lemma integral_sq_eq_eLpNorm_two_toReal_sq
   rw [ENNReal.toReal_ofReal h_int_nn] at h_toReal
   exact h_toReal
 
-/-- The principal cutoff-extension integrand is dominated pointwise:
-`((∂_l χ) · u + χ · w)² ≤ 2 M_∂χ² · u² + 2 M_χ² · w²`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sq_cutoffPartial_le
     {χ : EuclN → ℝ} {u w : EuclN → ℝ}
     {M_χ M_dχ : ℝ} {l : Fin (Module.finrank ℝ E)}
@@ -171,8 +106,6 @@ private lemma sq_cutoffPartial_le
     _ ≤ 2 * (M_dχ ^ 2 * (u x) ^ 2) + 2 * (M_χ ^ 2 * (w x) ^ 2) := by gcongr
     _ = 2 * M_dχ ^ 2 * (u x) ^ 2 + 2 * M_χ ^ 2 * (w x) ^ 2 := by ring
 
-/-- The cutoff-multiplied function `χ · v` lies in `L²` of any measure on
-which `v` does, when `|χ|` is uniformly bounded. -/
 private lemma memLp_cutoff_mul
     {α : Type*} [MeasurableSpace α] {μ : Measure α}
     {χ v : α → ℝ} {M_χ : ℝ} (hM_χ_nn : 0 ≤ M_χ)
@@ -187,44 +120,6 @@ private lemma memLp_cutoff_mul
     exact mul_le_mul_of_nonneg_right (hM_χ_bd x) (abs_nonneg _)
   exact MemLp.mono (hv.const_mul M_χ) (hχ_aesm.mul hv.aestronglyMeasurable) h_pt_le
 
-/-- **`G_total` is bounded by the divergence-form data's own `L²` norms.**
-
-Let `g` be a smooth Riemannian metric, `α : M`, and `Ω'` a subset of
-`EuclN` whose closure is a compact subset of the chart target
-`chartTargetEuclid α`. Let `χ : EuclN → ℝ` be a smooth, compactly
-supported cutoff supported in the chart target, with `|χ|` bounded by
-`M_χ` and each directional partial `|∂_l χ|` bounded by `M_∂χ`.
-
-Let `fSrc : EuclN → ℝ` be an arbitrary source function lying in
-`L²(closure Ω')`. Then, for every `ChartBilinearH1ComplData D`, the
-energy quantity
-
-```
-G_total = ∫_{Ω'} ∑_l ((∂_l χ) · D.u_chart + χ · D.weak_partial l)²
-        + ∫_{Ω'} (χ · D.u_chart)²
-        + ∫_{Ω'} (χ · fSrc)²
-```
-
-— whose first two terms are the canonical cutoff extensions
-`u_g = χ · D.u_chart`, `g_g l = (∂_l χ) · D.u_chart + χ · D.weak_partial l`
-of `D`, and whose third term is the cutoff extension `χ · fSrc` of the
-free source `fSrc` — is bounded by
-
-```
-C_χ · ( ∑_l (eLpNorm (D.weak_partial l) 2 (volume.restrict (closure Ω')))²
-        + (eLpNorm D.u_chart 2 (volume.restrict (closure Ω')))²
-        + (eLpNorm fSrc 2 (volume.restrict (closure Ω')))² )
-```
-
-(all `eLpNorm`s in `toReal` form), with the explicit constant
-
-```
-C_χ = 2 · (n + 1) · (M_χ² + M_∂χ² + 1)
-```
-
-depending only on the cutoff sup bounds `M_χ`, `M_∂χ` and the dimension
-`n = finrank ℝ E` — and **not** on `D` or `fSrc`. The constant `C_χ` is
-quantified before `D` and `fSrc`. -/
 theorem gTotal_le_data_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -573,20 +468,11 @@ theorem gTotal_le_data_eLpNorm
     _ = (2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1)) *
           (Sw + Su + Sf) := by rw [hCχ_def]
 
-/-- An explicit real upper bound for `|densityOnEuclid g α|` over
-`closure Ω'`: the supremum of the image of `closure Ω'` under
-`|densityOnEuclid g α|`.
-
-This is a named geometric constant. It is defined unconditionally (when
-`closure Ω'` is empty the supremum of the empty set is `0`); under the
-compactness and chart-target hypotheses it is an honest sup bound, see
-`abs_densityOnEuclid_le_chartDensitySup`. -/
 noncomputable def chartDensitySup
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) : ℝ :=
   sSup ((fun x => |densityOnEuclid (I := I) g α x|) '' closure Ω')
 
-/-- `chartDensitySup` is nonnegative: it is the supremum of a set of
-nonnegative reals (or `0` when `closure Ω'` is empty). -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartDensitySup_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) :
     0 ≤ chartDensitySup (I := I) (M := M) g α Ω' := by
@@ -595,9 +481,7 @@ lemma chartDensitySup_nonneg
   rintro y ⟨x, _, rfl⟩
   exact abs_nonneg _
 
-/-- Under compactness of `closure Ω'` and containment in the chart
-target, `chartDensitySup` is an honest upper bound for `|densityOnEuclid|`
-at every point of `closure Ω'`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma abs_densityOnEuclid_le_chartDensitySup
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -616,10 +500,7 @@ lemma abs_densityOnEuclid_le_chartDensitySup
     hΩ'_closure_compact.bddAbove_image h_abs_contOn
   exact le_csSup h_bddAbove (Set.mem_image_of_mem _ hx)
 
-/-- The density-weighted source `fun x => densityOnEuclid g α x · f x`
-lies in `L²(closure Ω')` whenever `f` does: `densityOnEuclid g α` is
-continuous, hence bounded on the compact `closure Ω'`, and the product of
-a bounded function with an `L²` function is `L²`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityWeightedSource_memLp
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -653,9 +534,7 @@ lemma densityWeightedSource_memLp
   exact MemLp.mono (hf.const_mul Mden)
     (h_dens_aesm.mul hf.aestronglyMeasurable) h_pt_le
 
-/-- The squared `L²(closure Ω')` norm of the density-weighted source
-`fun x => densityOnEuclid g α x · f x` is bounded by `chartDensitySup²`
-times the squared `L²(closure Ω')` norm of `f`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityWeightedSource_eLpNorm_sq_le
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))

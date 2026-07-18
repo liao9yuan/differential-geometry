@@ -6,25 +6,25 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Levi-Civita Christoffel trace and the chart log-density
 
-This file proves the local-coordinate identity behind the divergence /
-Laplace-Beltrami formula
-`∂_p log ρ = ∑_a Γ^a_{p a}`,
-i.e. the trace of the chart Levi-Civita Christoffel symbols equals the
-logarithmic derivative of the chart volume density `ρ = √det g`.
 
-Both sides are expressed in the chart at the base point `x` using the
-`chartModelBasis`-frame conventions of the divergence-theorem machinery:
-`partialDeriv` differentiates along the `chartModelBasis` directions, the chart
-Gram matrix `chartGramMatrix` (and its pull-back `chartGramOnE`) is the Gram
-matrix of the `chartModelBasis` frame, and `chartChristoffel` is the
-Christoffel symbol of the second kind in that frame.  The density-side identity
-`chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram` supplies
-`∂_p log ρ = ½ tr(G⁻¹ ∂_p G)`, and the algebraic trace lemma here identifies the
-same matrix trace with the Christoffel trace `∑_a Γ^a_{p a}`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -43,12 +43,12 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- Pure algebraic telescoping of the Christoffel trace.
 
-Tracing the Christoffel formula
-`Γ^a_{p a} = ½ ∑_l gInv a l (D p a l + D a p l - D l p a)`
-over `a`, the `D a p l` and `D l p a` terms cancel by symmetry of `gInv`,
-leaving `½ ∑_{i,j} gInv i j (D p i j)`. -/
+
+
+
+
+
 private lemma traceChristoffelAlg
     {Idx : Type*} [Fintype Idx]
     (gInv : Idx → Idx → ℝ) (D : Idx → Idx → Idx → ℝ)
@@ -93,12 +93,12 @@ private lemma traceChristoffelAlg
           ring
     _ = (1 / 2 : ℝ) * ∑ i : Idx, ∑ j : Idx, gInv i j * D p i j := rfl
 
-/-- **Christoffel trace as a half-trace of the inverse-Gram / Gram-derivative
-product.**
 
-The trace `∑_a Γ^a_{p a}` of the chart Levi-Civita Christoffel symbols at the
-base point `x` equals `½ ∑_{i,j} G^{ij} ∂_p G_{ij}`, where `G = chartGramOnE` is
-the `chartModelBasis`-frame Gram matrix and `∂` is `partialDeriv`. -/
+
+
+
+
+
 theorem lcTrace_halfTrace
     (g : SmoothRiemannianMetric I M) (x : M)
     (p : Fin (Module.finrank ℝ E)) :
@@ -164,12 +164,12 @@ theorem lcTrace_halfTrace
                   chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
                 y₀ := rfl
 
-/-- **Levi-Civita log-density / Christoffel-trace identity.**
 
-`∂_p log ρ = ∑_a Γ^a_{p a}`: at the chart base point `x`, the logarithmic
-derivative of the chart volume density `ρ = chartDensity g x` along the
-`chartModelBasis` direction `p` equals the trace of the chart Levi-Civita
-Christoffel symbols. -/
+
+
+
+
+
 theorem lcTrace_logDensity
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)

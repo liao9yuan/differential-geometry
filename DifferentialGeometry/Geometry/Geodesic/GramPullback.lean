@@ -1,36 +1,8 @@
 import DifferentialGeometry.Geometry.Operator.Hessian
-import DifferentialGeometry.Geometry.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-set_option linter.unusedSectionVars false
-set_option linter.style.show false
 
-/-!
-# Gram-matrix pullback under the chart-transition map
-
-For two basepoints `α β : M` on a smooth Riemannian manifold and a chart-target
-point `x : E` lying in the chart-α image of the chart-α-β overlap, the
-chart-coordinate Gram matrix at the chart-β picture decomposes against the
-chart-α picture via the Fréchet derivative of the chart-transition map.
-
-This file packages two equivalent forms of the resulting identity:
-
-* `chartTransitionAtEntry α β x i a` — the `(i, a)` entry of
-  `chartTransitionAt α β x : E →L[ℝ] E` in the canonical model-space basis
-  `chartModelBasis E`. (A scalar.)
-* `chartGramOnE_eq_sum_chartTransition` — the standard transformation
-  law for a `(0, 2)`-covariant tensor:
-  `G_α(x)_{ij} = ∑ a b, (DT_{αβ})^a_i(x) (DT_{αβ})^b_j(x) G_β(T x)_{ab}`,
-  with the chart-α data on the LHS expressed in chart-β data on the RHS.
-* `chartGramOnE_pullback_under_chartTransition` — the inverse direction,
-  obtained by exchanging the roles of α and β.
-
-Both forms reduce to `chartGramMatrix_pullback_eq_sum` from
-`Integral/Measure/Invariance.lean`; the new content is the bridge from the
-manifold-level Jacobian `tangentCoordChange I α β p` to the chart-level
-Jacobian `chartTransitionAt α β x` valid in the boundaryless setting (where
-`fderivWithin (range I) = fderiv`).
--/
 
 noncomputable section
 
@@ -46,14 +18,10 @@ namespace Riemannian
 namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `(i, a)`-entry of the chart-transition Fréchet derivative
-`chartTransitionAt α β x : E →L[ℝ] E` in the canonical model-space basis
-`chartModelBasis E`. With `J := chartTransitionAt α β x` and `eₖ` the
-model-basis vectors, this is the `i`-th coordinate of `J(e_a)`. -/
 def chartTransitionAtEntry (α β : M) (x : E)
     (i a : Fin (Module.finrank ℝ E)) : ℝ :=
   (chartModelBasis E).repr
@@ -66,7 +34,6 @@ def chartTransitionAtEntry (α β : M) (x : E)
         (chartTransitionAt (I := I) α β x
           ((chartModelBasis E) a)) i := rfl
 
-omit [IsManifold I ∞ M] in
 private lemma fderivWithin_range_I_eq_fderiv [I.Boundaryless]
     (f : E → E) (y : E) :
     fderivWithin ℝ f (Set.range I) y = fderiv ℝ f y := by
@@ -74,8 +41,6 @@ private lemma fderivWithin_range_I_eq_fderiv [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
-/-- Bridge: on the chart overlap, the manifold-level Jacobian `tangentCoordChange`
-agrees with the chart-level Jacobian `chartTransitionAt`. -/
 lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) (p : M) :
     tangentCoordChange I α β p =

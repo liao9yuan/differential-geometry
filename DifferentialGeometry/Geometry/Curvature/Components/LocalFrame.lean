@@ -21,11 +21,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-/-!
-# Local-frame curvature component wrappers
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Components` API.
--/
+
+
+
+
 
 section LocalFrame
 
@@ -69,8 +69,8 @@ theorem ricciTraceAt_of_frame
   simpa [RicciTensorRealizesRm04TraceInFrame, tensor02ToField, tensor04ToField,
     IsLocalFrameOn.toBasisAt_coe] using hRic x X Y
 
-/-- Convention-correct frame Ricci trace in standard slots:
-`Ric_ij = g^{kl} Rm04(e_k,e_i,e_j,e_l)`. -/
+
+
 def RicciTensorRealizesRm04FirstTraceInFrame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -81,8 +81,8 @@ def RicciTensorRealizesRm04FirstTraceInFrame
       ∑ k : Idx, ∑ l : Idx,
         gInv x k l * Rm04 x (vec4 (frame k x) (frame i x) (frame j x) (frame l x))
 
-/-- A local frame turns the convention-correct frame trace into the pointwise
-basis trace. -/
+
+
 theorem ricciFirstTraceAt_of_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -97,7 +97,7 @@ theorem ricciFirstTraceAt_of_frame
   simpa [RicciTensorRealizesRm04FirstTraceInFrame, IsLocalFrameOn.toBasisAt_coe]
     using hRic x i j
 
-/-- Component form of the convention-correct frame Ricci trace. -/
+
 theorem ricciComp_eq_firstTrace_rm04_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))

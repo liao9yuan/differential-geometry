@@ -1,48 +1,10 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentity.LeibnizCompensatedSource
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.LeibnizCompensatedSource
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimit
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFromDom
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
-/-!
-# Chart-pulled integral as a bounded linear functional on `Lp ℝ 2 μ_g`
-
-For a chart point `α : M` of a closed Riemannian manifold `(M, g)` and a
-smooth bounded test function `θ : EuclN → ℝ` whose topological support sits
-inside a compact subset of `chartTargetEuclid α`, the integral
-
-```
-I(F) := ∫_{chartTargetEuclid α} (F ∘ symm)(y) · θ(y) dy
-```
-
-defines a bounded linear functional on `Lp ℝ 2 μ_g`, hence is continuous in
-`F`. The construction here represents the functional via an explicit
-manifold-side weight `w_θ : M → ℝ`, continuous with compact support inside
-the chart source, defined by
-
-```
-w_θ(x) := θ((toEuclidean ∘ extChartAt I α) x) / chartDensity g α x   (x ∈ chart α source)
-w_θ(x) := 0                                                            (otherwise)
-```
-
-The chart-pulled volume identity (`integral_riemannianVolumeMeasure_eq_euclidean_chartTarget`)
-identifies `∫ F · w_θ dμ_g` with `I(F)` on smooth `F`, and continuity in `F`
-extends the identification to all of `Lp ℝ 2 μ_g` by density of smooth
-scalars.
-
-## Main definitions
-
-* `chartPulledIntegralWeight g α θ` — the manifold-side weight `w_θ`.
-* `chartPulledIntegralCLM g α θ` — the bounded linear functional itself.
-
-## Main results
-
-* `chartPulledIntegralCLM_norm_le` — operator-norm bound for the functional.
-* `chartPulledIntegralCLM_smoothToLp` — the smooth-case integral formula.
-* `laplacianDomain_variational_identity_general` — extension of the
-  smooth-case variational identity to `u_h ∈ laplacianDomain g`.
--/
 
 noncomputable section
 
@@ -80,7 +42,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The chart-source preimage of `tsupport θ`. -/
 private def chartSrcPreimage (α : M) (θ : EuclN → ℝ) : Set M :=
   (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y)) ''
     (tsupport θ)
@@ -105,8 +66,6 @@ private lemma chartSrcPreimage_subset_chartSource
   rw [← hxy]
   exact symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α (hθ_supp hy_supp)
 
-/-- The manifold-side weight `w_θ` corresponding to a chart-pulled test
-function `θ`. -/
 noncomputable def chartPulledIntegralWeight
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) : M → ℝ := by
   classical
@@ -115,6 +74,7 @@ noncomputable def chartPulledIntegralWeight
       θ ((toEuclidean (E := E)) ((extChartAt I α) x)) / chartDensity g α x
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartPulledIntegralWeight_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -124,6 +84,7 @@ lemma chartPulledIntegralWeight_apply_of_mem
   unfold chartPulledIntegralWeight
   exact dif_pos hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∉ (chartAt H α).source) :
@@ -132,8 +93,7 @@ private lemma chartPulledIntegralWeight_apply_of_notMem
   unfold chartPulledIntegralWeight
   exact dif_neg hx
 
-/-- On the chart source, away from `chartSrcPreimage α θ`, the manifold weight
-vanishes (because `θ` vanishes outside `tsupport θ`). -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_apply_zero_off_preimage
     (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ} {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -160,6 +120,7 @@ private lemma chartPulledIntegralWeight_apply_zero_off_preimage
     image_eq_zero_of_notMem_tsupport hTx_not_in
   rw [hθ_zero, zero_div]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_support_subset
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) :
     Function.support (chartPulledIntegralWeight (I := I) (M := M) g α θ) ⊆
@@ -206,8 +167,6 @@ private lemma chartPulledIntegralWeight_tsupport_subset_chartSource
       hθ_cs hθ_supp).trans
     (chartSrcPreimage_subset_chartSource (I := I) (M := M) α hθ_supp)
 
-/-- The chart map `T α := toEuclidean ∘ extChartAt I α` is continuous on the
-chart source. -/
 private lemma chart_map_continuousOn (α : M) :
     ContinuousOn (fun x : M => (toEuclidean (E := E)) ((extChartAt I α) x))
       (chartAt H α).source := by
@@ -218,7 +177,6 @@ private lemma chart_map_continuousOn (α : M) :
     rw [h_src]; exact continuousOn_extChartAt α
   exact (toEuclidean (E := E)).continuous.continuousOn.comp h_ext (Set.mapsTo_univ _ _)
 
-/-- The chart-density-divided test function is continuous on the chart source. -/
 private lemma chartPulledIntegralWeight_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) :
@@ -253,10 +211,6 @@ private lemma chartPulledIntegralWeight_continuousOn_chartSource
       (I := I) g α hx_base).ne'
   exact h_num_cont.div h_dens_cont h_dens_ne_zero
 
-/-- Globally on `M`, the manifold-side weight is continuous: it is continuous
-on the chart source (smooth division by a strictly positive density), and
-identically zero on a neighborhood of every point off the chart source
-(thanks to the compact-support property of the numerator). -/
 lemma chartPulledIntegralWeight_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -307,7 +261,6 @@ lemma chartPulledIntegralWeight_memLp
       hθ_cont hθ_cs hθ_supp).memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The `Lp ℝ 2 μ_g` class of the manifold-side weight. -/
 noncomputable def chartPulledIntegralWeightLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -316,8 +269,6 @@ noncomputable def chartPulledIntegralWeightLp
   (chartPulledIntegralWeight_memLp (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp).toLp _
 
-/-- Auxiliary: the product `w_θ · v` is continuous and supported in the chart
-source whenever `v : M → ℝ` is continuous on `M`. -/
 private lemma weight_smul_continuous_aux
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -351,8 +302,7 @@ private lemma weight_smul_tsupport_subset_chartSource
   exact chartPulledIntegralWeight_tsupport_subset_chartSource
     (I := I) (M := M) g α hθ_cs hθ_supp
 
-/-- Pointwise identification on the chart source:
-`density(x) · w_θ(x) = θ((toEuclidean ∘ extChartAt I α) x)`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma density_mul_weight_eq_theta
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -368,12 +318,6 @@ private lemma density_mul_weight_eq_theta
     DifferentialGeometry.Integral.Measure.chartDensity_pos (I := I) g α hx_base
   field_simp
 
-/-- The change-of-variable identity for the weight against a continuous scalar
-`v : M → ℝ`. The right-hand integral is over `chartTargetEuclid α` against
-plain Euclidean volume.
-
-This identifies the manifold-side `Lp` inner product against the weight with
-the desired chart-pulled integral. -/
 private lemma integral_weight_smul_eq_chartPulled
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -434,17 +378,6 @@ private lemma integral_weight_smul_eq_chartPulled
   rw [h_pw']
   ring
 
-/-- The chart-pulled integral as a bounded linear functional on `Lp ℝ 2 μ_g`.
-
-For `F : Lp ℝ 2 μ_g`, the value `chartPulledIntegralCLM g α θ ... F` equals
-the inner product `⟪chartPulledIntegralWeightLp, F⟫_{L²(μ_g)}`, which by
-the change-of-variable identity coincides with the chart-pulled integral
-
-```
-∫_{chartTargetEuclid α} (F ∘ symm)(y) · θ(y) dy.
-```
-
-Continuity in `F` is automatic from the operator-norm bound on `innerSL`. -/
 noncomputable def chartPulledIntegralCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -454,7 +387,6 @@ noncomputable def chartPulledIntegralCLM
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ)
     (chartPulledIntegralWeightLp (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp)
 
-/-- The operator-norm bound on the chart-pulled-integral CLM. -/
 theorem chartPulledIntegralCLM_norm_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -467,13 +399,6 @@ theorem chartPulledIntegralCLM_norm_le
   exact le_of_eq (innerSL_apply_norm (𝕜 := ℝ)
     (chartPulledIntegralWeightLp (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp))
 
-/-- The smooth-case formula: applied to the smooth lift `smoothToLp g v`, the
-chart-pulled-integral CLM reduces to the explicit chart-pulled integral
-
-```
-∫_{chartTargetEuclid α} v.toFun(symm y) · θ(y) dy.
-```
--/
 theorem chartPulledIntegralCLM_smoothToLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -526,8 +451,6 @@ theorem chartPulledIntegralCLM_continuous
       hθ_cont hθ_cs hθ_supp) :=
   (chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp).continuous
 
-/-- For a convergent sequence `F_n → F_lim` in `Lp ℝ 2 μ_g`, the chart-pulled
-integrals converge accordingly. -/
 theorem chartPulledIntegralCLM_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -567,15 +490,11 @@ theorem chartPulledIntegralCLM_tendsto_of_smoothToLp_tendsto
   exact chartPulledIntegralCLM_tendsto (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp h_tendsto
 
-/-- The Lp-class equality identifying `smoothToLp ((pouScalar α v).oneSubLap)`
-with `fHLeibniz g α (smoothToH1Compl v) _` as members of `Lp ℝ 2 μ_g`. This is
-the Lp-class form of the a.e.-pointwise lemma
-`pouScalar_oneSubLap_aeEq_fHLeibniz_smooth`. -/
 lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothToLp (I := I) (M := M) g
         (pouScalar (I := I) (M := M) α v).oneSubLapClassical =
-      fHLeibniz (I := I) (M := M) g α
+      leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v)
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) := by
   classical
@@ -587,7 +506,7 @@ lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     MemLp.coeFn_toLp (pouScalar (I := I) (M := M) α v).oneSubLapClassical.memLp_two
   have h_rhs_aeeq : (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
-      ((fHLeibniz (I := I) (M := M) g α
+      ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 _) : M → ℝ) :=
@@ -603,19 +522,11 @@ theorem chartPulledIntegralCLM_pouScalar_oneSubLap_eq_fHLeibniz_smooth
         (smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α v).oneSubLapClassical) =
       chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp
-        (fHLeibniz (I := I) (M := M) g α
+        (leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)) := by
   rw [smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz (I := I) (M := M) g α v]
 
-/-- **General-case identity for the chart-pulled RHS integral.**
-
-For `u_h ∈ laplacianDomain g`, equipped with a smooth approximating sequence
-`v_n` whose smooth-case `fHLeibniz` Lp classes converge to the general-case
-`fHLeibniz`, the chart-pulled RHS integral converges accordingly. The
-convergence is reduced via
-`smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz` to a `chartPulledIntegralCLM`
-continuity application. -/
 theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -623,22 +534,22 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α)
     {v : ℕ → SmoothScalar g}
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => chartPulledIntegralCLM (I := I) (M := M) g α
         hθ_cont hθ_cs hθ_supp
         (smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical))
       atTop (𝓝 (chartPulledIntegralCLM (I := I) (M := M) g α
         hθ_cont hθ_cs hθ_supp
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   classical
   have h_eq_n : ∀ n,
       smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical =
-      fHLeibniz (I := I) (M := M) g α
+      leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g (v n))
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)) :=
     fun n => smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
@@ -649,7 +560,7 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
         (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical)) =
     fun n => chartPulledIntegralCLM (I := I) (M := M) g α
       hθ_cont hθ_cs hθ_supp
-      (fHLeibniz (I := I) (M := M) g α
+      (leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g (v n))
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n))) := by
     funext n
@@ -658,13 +569,6 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
   exact chartPulledIntegralCLM_tendsto (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp h_fHLeibniz_tendsto
 
-/-- **General-case identity for the smooth-side RHS integral.**
-
-For a smooth approximating sequence `v_n` with the appropriate convergence,
-the smooth-side RHS integral
-`∫_{chartTarget} density · ((pouScalar α v_n).oneSubLap.toFun ∘ symm) · ψ dvol`
-converges to the general-case identity's chart-pulled RHS, expressed via
-`chartPulledIntegralCLM g α (density · ψ) (fHLeibniz g α u_h hu_h)`. -/
 theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -673,10 +577,10 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α)
     {v : ℕ → SmoothScalar g}
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           ((pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical.toFun)
@@ -714,7 +618,7 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
           apply hy
           have hψ_y : ψ y = 0 := Function.notMem_support.mp hyψ
           rw [hψ_y, mul_zero])
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   classical
   set θ : EuclN → ℝ := fun y : EuclN => densityOnEuclid (I := I) g α y * ψ y with hθ_def
   have hθ_cont : Continuous θ := by
@@ -786,14 +690,6 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
   exact chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (I := I) (M := M) g α u_h hu_h hθ_cont hθ_cs hθ_supp h_fHLeibniz_tendsto
 
-/-- **General-case variational identity (LHS u_chart_mass + RHS half).**
-
-For an approximating sequence `v_n` of smooth scalars with
-`smoothToH1Compl v_n → u_h` in `H1Compl g` and the `fHLeibniz`-convergence
-hypothesis discharged, the smooth-case integrals
-`∫ density · chartPushed POU α v_n · ψ dvol` and
-`∫ density · ((pouScalar α v_n).oneSubLap.toFun ∘ symm) · ψ dvol` converge
-to their respective general-case values via `chartPulledIntegralCLM`. -/
 theorem laplacianDomain_variational_identity_general_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -805,10 +701,10 @@ theorem laplacianDomain_variational_identity_general_partial
       Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
         atTop (𝓝 u_h))
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           ((pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical.toFun)
@@ -846,7 +742,7 @@ theorem laplacianDomain_variational_identity_general_partial
           apply hy
           have hψ_y : ψ y = 0 := Function.notMem_support.mp hyψ
           rw [hψ_y, mul_zero])
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   exact rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (I := I) (M := M) g α u_h hu_h hψ hψ_cs hψ_supp h_fHLeibniz_tendsto
 

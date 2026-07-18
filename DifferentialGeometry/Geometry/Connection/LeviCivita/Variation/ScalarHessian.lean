@@ -22,11 +22,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-!
-# Levi-Civita Variation Scalar Hessian
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Variation`.
--/
+
+
+
+
 
 section RicciCoordVariation
 
@@ -43,11 +43,11 @@ def scalarHessCoordAt
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 i j p *
         scalarCoordDerivAt (I := I) f x0 p
 
-/-- Covariant trace variation bridge.  Once the traced Christoffel variation
-one-form has derivative `1/2 * partial_i partial_j V` and pointwise value
-`1/2 * partial_a V`, the full covariant derivative is
-`1/2 * Hess_ij V`.  The middle connection-correction terms cancel by finite
-trace algebra. -/
+
+
+
+
+
 theorem gammaTraceCovVar
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -140,7 +140,7 @@ theorem gammaTraceCovVar
           rw [hsum_half]
           ring
 
-/-- Time derivative package for scalar first coordinate derivatives. -/
+
 def scalarFirstVarCoordAt
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M) : Prop :=
@@ -151,7 +151,7 @@ def scalarFirstVarCoordAt
       timeSet
       base
 
-/-- Time derivative package for scalar second coordinate derivatives. -/
+
 def scalarSecondVarCoordAt
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M) : Prop :=
@@ -162,8 +162,8 @@ def scalarSecondVarCoordAt
       timeSet
       base
 
-/-- A fixed-base mixed derivative rule for the scalar path produces the first
-coordinate-derivative variation package. -/
+
+
 theorem scalarFirst_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -178,8 +178,8 @@ theorem scalarFirst_of_fixedBase
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
 
-/-- Regular-time version of `scalarFirst_of_fixedBase`, used when the chart
-mixed-derivative theorem is available only at the base time. -/
+
+
 theorem scalarFirst_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -195,8 +195,8 @@ theorem scalarFirst_of_fixedBaseRegular
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
 
-/-- Fixed-base mixed derivative rules for the first scalar coordinate
-derivatives produce the second coordinate-derivative variation package. -/
+
+
 theorem scalarSecond_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -212,8 +212,8 @@ theorem scalarSecond_of_fixedBase
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
 
-/-- Regular-time version of `scalarSecond_of_fixedBase`, used when the mixed
-derivative of `∂_j f_s` is only produced at the base time. -/
+
+
 theorem scalarSecond_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -231,8 +231,8 @@ theorem scalarSecond_of_fixedBaseRegular
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
 
-/-- Coordinate-frame Hessian variation from Christoffel variation:
-`d Hess_ij(f_s) / ds = Hess_ij(h) - A^p_ij partial_p f`. -/
+
+
 theorem lcHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -284,9 +284,9 @@ theorem lcHessVarCoord
   simp [scalarHessCoordAt, Finset.sum_add_distrib, sub_eq_add_neg, add_comm,
     add_left_comm]
 
-/-- The weighted-divergence component
-`nabla_p A^p_ij - A^p_ij partial_p f`, i.e. the coordinate expression for
-`e^f nabla_p(e^{-f} A^p_ij)`. -/
+
+
+
 def gammaWeightedDivCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -299,8 +299,8 @@ def gammaWeightedDivCoordAt
     ∑ p : CoordinateIdx (𝕜 := Real) E,
       gammaDot x0 p i j * scalarCoordDerivAt (I := I) f x0 p
 
-/-- Coordinate RHS for the variation of `Ric_ij + Hess_ij f` before replacing
-`nabla_i A^p_pj` by the Hessian of the metric trace. -/
+
+
 def ricciHessVarCoordRHS
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -312,8 +312,8 @@ def ricciHessVarCoordRHS
     scalarHessCoordAt (I := I) cov h x0 i j -
       gammaTraceCovAt (I := I) cov gammaDot x0 i j
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` in the pre-trace form:
-`nabla_p A^p_ij - A^p_ij partial_p f + Hess_ij h - nabla_i A^p_pj`. -/
+
+
 theorem lcRicciHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -347,9 +347,9 @@ theorem lcRicciHessVarCoord
     gammaTraceCovAt, scalarHessCoordAt, sub_eq_add_neg]
   ring
 
-/-- Shifted scalar Hessian term `Hess_ij(h - V/2)`, represented as
-`Hess_ij h - (1/2) Hess_ij V` to avoid needing linearity of the coordinate
-Hessian in this local producer. -/
+
+
+
 def shiftedScalarHessCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (h metricTrace : M -> Real) (x0 : M)
@@ -357,8 +357,8 @@ def shiftedScalarHessCoordAt
   scalarHessCoordAt (I := I) cov h x0 i j -
     (1 / 2 : Real) * scalarHessCoordAt (I := I) cov metricTrace x0 i j
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` after identifying
-`nabla_i A^p_pj` with half the Hessian of the metric trace. -/
+
+
 theorem lcRicciHessVarShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -394,9 +394,9 @@ theorem lcRicciHessVarShifted
   rw [htrace]
   ring_nf
 
-/-- Trace contraction of the shifted `Ric + Hess f` variation formula.  This is
-the scalar producer for the variation of `g^{ij}(Ric_ij + Hess_ij f)` before
-identifying the inverse-metric variation term with `-v_ij(Ric_ij+Hess_ij f)`. -/
+
+
+
 theorem lcTraceVar
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -449,8 +449,8 @@ theorem lcTraceVar
     exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
       metricTrace gammaDot hgamma hmix hfirst hsecond i j (htrace i j)
 
-/-- Coordinate-frame variation of `Ric_ij + Hess_ij f` with the trace
-covariant-derivative input produced from the traced Christoffel one-form. -/
+
+
 theorem lcRicciHessShifted_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -502,8 +502,8 @@ theorem lcRicciHessShifted_of_trace
   exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
     metricTrace gammaDot hgamma hmix hfirst hsecond i j htrace_cov
 
-/-- Trace contraction of `lcRicciHessShifted_of_trace`.  This removes the
-pointwise `nabla_i A^p_pj` input from the scalar trace variation producer. -/
+
+
 theorem lcTraceVar_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -572,10 +572,10 @@ theorem lcTraceVar_of_trace
       hgamma hmix hfirst hsecond i j (htrace_eventual j) htrace_point
       (hgamma_mdiff j) (hscalar_mdiff j)
 
-/-- Trace contraction of `Ric + Hess f` with the inverse-metric variation
-normalized as the contravariant metric-variation contraction.  This is the
-formula 5.10 scalar trace producer: the first term in the product rule is
-rewritten as `-v^{ij}(Ric_ij + Hess_ij f)`. -/
+
+
+
+
 theorem lcTraceVar_inv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -659,9 +659,9 @@ theorem lcTraceVar_inv
             metricTrace x0 i j))
     hcontra
 
-/-- Coordinate-frame shifted Ricci-plus-Hessian variation with the Christoffel
-trace inputs produced from the metric-trace and inverse-metric compatibility
-bridges. -/
+
+
+
 theorem lcTraceShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,

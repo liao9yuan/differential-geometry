@@ -4,32 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 
-/-!
-# The L²-side resolvent of the variational Laplacian
-
-For a closed Riemannian manifold `(M, g)`, this file constructs the L²-side
-resolvent operator `resolventL2 g : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g` of the
-variational Laplacian, defined as the composition
-`resolventL2 g := H1ComplToLp g ∘L resolvent g`.
-
-We prove:
-* `resolventL2_symm`: `resolventL2 g` is symmetric on `Lp ℝ 2 μ_g`.
-* `resolventL2_isSelfAdjoint`: `resolventL2 g` is a self-adjoint
-  continuous linear operator on `Lp ℝ 2 μ_g`.
-
-The self-adjointness reduces to symmetry of the H¹ inner product on
-`H1Compl g` (already established in `Variational.lean`).
-
-Compactness of `resolventL2 g` (via the chart-Sobolev / Rellich-Kondrachov
-route) is established separately in `Scalar/Compactness.lean` as
-`resolventL2_isCompactOperator`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_g = div_g ∘ grad_g`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_g)⁻¹`, and `resolventL2 g` is its
-restriction-and-corestriction to `Lp ℝ 2 μ_g`.
--/
 
 noncomputable section
 
@@ -42,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -56,8 +30,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The L²-side resolvent operator of the variational Laplacian:
-`(1 - Δ_g)⁻¹` viewed as a continuous linear endomorphism of `Lp ℝ 2 μ_g`. -/
 noncomputable def resolventL2 (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -68,9 +40,6 @@ noncomputable def resolventL2 (g : SmoothRiemannianMetric I M) :
     resolventL2 (I := I) (M := M) g f =
       H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) := rfl
 
-/-- The defining inner-product identity used in the self-adjointness proof:
-for `f, h ∈ Lp ℝ 2 μ_g`,
-`⟨resolventL2 f, h⟩_{L²} = ⟨resolvent g f, resolvent g h⟩_{H¹}`. -/
 private lemma inner_resolventL2_eq_inner_resolvent
     (g : SmoothRiemannianMetric I M)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -83,9 +52,6 @@ private lemma inner_resolventL2_eq_inner_resolvent
   rw [← hvar]
   exact real_inner_comm _ _
 
-/-- **Self-adjointness via symmetry of the H¹ inner product.** The L²-side
-resolvent `resolventL2 g` is symmetric in the L² inner product:
-`⟨resolventL2 f, h⟩_{L²} = ⟨f, resolventL2 h⟩_{L²}` for every `f, h ∈ Lp ℝ 2 μ_g`. -/
 theorem resolventL2_symm
     (g : SmoothRiemannianMetric I M)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -97,7 +63,6 @@ theorem resolventL2_symm
   rw [inner_resolventL2_eq_inner_resolvent (I := I) (M := M) g h f]
   exact real_inner_comm _ _
 
-/-- **Self-adjointness as a Mathlib `IsSelfAdjoint`.** -/
 theorem resolventL2_isSelfAdjoint (g : SmoothRiemannianMetric I M) :
     IsSelfAdjoint (resolventL2 (I := I) (M := M) g) := by
   rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric]

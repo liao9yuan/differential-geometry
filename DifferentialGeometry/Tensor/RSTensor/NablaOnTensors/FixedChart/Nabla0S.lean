@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 
-/-!
-# Fixed-chart model expression for covariant tensor nabla
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -25,20 +25,20 @@ variable [CompleteSpace 𝕜]
 
 section SmoothVectorFieldRSNabla
 
-/-!
-## Implementation layer: chart transport and connection extraction
 
-The `mcovariantDeriv_*` declarations transport the model-space formula through a
-chart and optionally extract the local connection endomorphism from mathlib's
-`CovariantDerivative`.  They are support code for the canonical `nabla*` API.
--/
+
+
+
+
+
+
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
-/-- Fixed-chart model expression for the covariant derivative of a covariant
-tensor field. This is the model-space function that should represent
-`nabla0SFun` after trivializing the output tensor bundle at the fixed base point
-`x₀`. -/
+
+
+
+
 noncomputable def fixedChartNabla0SModel (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -53,8 +53,8 @@ noncomputable def fixedChartNabla0SModel (s : ℕ)
       (I := I) (M := M) s x₀ (fun x => α x))
     (range I) y
 
-/-- Evaluation of the fixed-chart `(0,s)` covariant-derivative model on
-arbitrary model slots. -/
+
+
 theorem fixedChartNabla0SModel_apply_slots (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -78,9 +78,9 @@ theorem fixedChartNabla0SModel_apply_slots (s : ℕ)
   unfold fixedChartNabla0SModel
   rw [covariantDeriv_tensor0SModelWithin_apply_slots]
 
-/-- Evaluation of the fixed-chart `(0,s)` model with the extracted connection
-endomorphism unfolded into the actual covariant derivative of fixed-chart
-constant tangent fields. -/
+
+
+
 theorem fixedChartNabla0SModel_apply_slots_of_mem (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -113,9 +113,9 @@ theorem fixedChartNabla0SModel_apply_slots_of_mem (s : ℕ)
   exact connectionEndomorphismInChart_apply_of_mem
     (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ hy (slots a)
 
-/-- Smoothness of the fixed-chart `(0,s)` model expression. This is the easy
-analytic part of `nabla0S_reg`; the remaining hard part is proving that the
-moving-center definition of `nabla0SFun` has this fixed-chart representative. -/
+
+
+
 theorem fixedChartNabla0SModel_contDiffWithinAt (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)

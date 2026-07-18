@@ -14,17 +14,17 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Realized bridge for the 3D Riemann-from-Ricci formula
 
-This file connects the checked `Fin 3` algebra in
-`DifferentialGeometry.Integral.Connection.CurvatureAlgebra` to realized pointwise curvature components.
 
-The bridge is intentionally explicit about conventions.  The lowered
-curvature convention is the standard component convention
-`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, matching the algebraic convention
-`R i j k l = g(R(e_i,e_j)e_k,e_l)`.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -40,21 +40,21 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- Pointwise orthonormality for a `Fin 3` tangent basis. -/
+
 def OrthonormalBasisAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Prop :=
   forall i j : Fin 3, g.inner x (basis i) (basis j) = delta3 i j
 
-/-- Standard algebraic curvature components read directly from the
-standard lowered curvature convention. -/
+
+
 def standardRmCompAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (i j k l : Fin 3) : Real :=
   rm04CompAt (I := I) basis Rm04 i j k l
 
-/-- Pointwise symmetry of a Ricci-type `(0,2)` tensor. -/
+
 def RicciSymAt
     (Ric : Tensor02At (I := I) (M := M) x) : Prop :=
   forall X Y : TangentSpace I x,
@@ -161,7 +161,7 @@ private theorem vec2_update_one {x : M}
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
 
-/-- A `(0,2)` tensor symmetric on a basis is symmetric on all tangent vectors. -/
+
 theorem ricciSym_of_basis
     {Idx : Type*} [Finite Idx]
     {x : M}
@@ -291,12 +291,12 @@ theorem ricciSym_of_basis
   rw [hL, hR, hsym j i]
   ring
 
-/-- Pointwise nonnegativity of a Ricci-type `(0,2)` tensor. -/
+
 def RicciNonnegAt
     (Ric : Tensor02At (I := I) (M := M) x) : Prop :=
   forall X : TangentSpace I x, 0 <= Ric (vec2 X X)
 
-/-- The covector `Y |-> Ric(X,Y)`. -/
+
 def ricciCovAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (X : TangentSpace I x) :
@@ -371,7 +371,7 @@ private theorem ricciCovAt_smul
     fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
   simpa [ricciCovAt, hleft, hX] using hmap
 
-/-- Raise the first slot of a Ricci-type tensor to get an endomorphism. -/
+
 def ricciEndAt
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -429,13 +429,13 @@ theorem standardRmCompAt_apply
     standardRmCompAt basis Rm04 i j k l =
       rm04CompAt (I := I) basis Rm04 i j k l := rfl
 
-/-- Lemma 14.2 as a pointwise `Rm04` component formula with the Ricci and
-scalar terms taken to be the canonical traces of the same standard curvature
-component array.
 
-This is the assumption-free trace-data form of the realized bridge: the only
-geometric input is the algebraic curvature symmetry package for the adapted
-components `standardRmCompAt basis Rm04`. -/
+
+
+
+
+
+
 theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     {Rm04 : Tensor04At (I := I) (M := M) x}
@@ -454,8 +454,8 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
       h i j k l
   simpa [displayedRiemannFromRicciRhs3, standardRmCompAt_apply] using hformula
 
-/-- Local-frame wrapper for
-`rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries`. -/
+
+
 theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
     {Rm04 : Tensor04Section (I := I) (M := M)}
     {u : Set M}
@@ -480,14 +480,12 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
   rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     (I := I) h
 
-/-- Levi-Civita lowered curvature supplies the three standard algebraic
-curvature symmetries needed by the dimension-three algebra file. -/
+
+
 theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
@@ -501,7 +499,7 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
   · intro i j k l
     have h :=
       DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
+        (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
     have h' :
         (Rm04 x) (vec4 (basis i) (basis j) (basis l) (basis k)) =
           -(Rm04 x) (vec4 (basis i) (basis j) (basis k) (basis l)) := by
@@ -510,16 +508,14 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
   · intro i j k l
     simpa [standardRmCompAt_apply] using
       (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
+        (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
 
-/-- Lemma 14.2 for a Levi-Civita lowered curvature realization, with Ricci and
-scalar terms expressed as canonical traces of the same curvature array. -/
+
+
 theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
@@ -534,13 +530,13 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
               (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
   rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries (I := I)
     (algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
-      (I := I) g hcov Rm04 hRm04 basis)
+      (I := I) g Rm04 hRm04 basis)
 
-/-- Pointwise data needed to feed the realized 3D bridge.
 
-The trace equalities are deliberately stated for the standard slot adapter,
-not inferred from the existing realized Ricci trace interfaces.  This keeps the
-bridge convention-auditable. -/
+
+
+
+
 structure RiemannFromRicci3DTraceDataAt
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -556,12 +552,12 @@ structure RiemannFromRicci3DTraceDataAt
   scalar_trace :
     scalar = stdScalar3 (standardRmCompAt basis Rm04)
 
-/-- The convention-correct first trace of `Rm04` is the negative of the
-displayed-slot Ricci contraction used by `stdRicci3`.
 
-This is the sign bridge between the intrinsic convention
-`Ric(Y,Z) = tr (X |-> R(X,Y)Z)` and the displayed component convention used in
-the 3D finite algebra file. -/
+
+
+
+
+
 theorem firstTrace_delta3_eq_neg_stdRicci3
     {Rm04 : Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -604,12 +600,12 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
   simp [standardRmCompAt_apply, rm04CompAt_apply]
   ring
 
-/-- Produce the displayed-slot 3D trace-data package from the
-convention-correct first trace.
 
-Because `RiemannFromRicci3DTraceDataAt` is stated for the displayed-slot
-contraction `stdRicci3`, the geometric Ricci tensor and scalar appear with a
-minus sign. -/
+
+
+
+
+
 theorem traceDataOfFirst
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -658,12 +654,12 @@ theorem traceDataOfFirst
     simp [stdScalar3, Fin.sum_univ_three, delta3, hdiag0, hdiag1, hdiag2]
     ring
 
-/-- Lemma 14.2 as a realized pointwise `Rm04` component formula in an
-orthonormal `Fin 3` basis.
 
-The left side is the last-pair-flipped component
-`rm04CompAt basis Rm04 i j l k`, matching the displayed convention theorem in
-the finite algebra layer. -/
+
+
+
+
+
 theorem rm04Comp_displayedRiemannFromRicci3D_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -689,9 +685,9 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
   rw [← h.ricci_trace i l, ← h.ricci_trace j l, ← h.ricci_trace i k,
     ← h.ricci_trace j k, ← h.scalar_trace]
 
-/-- Component form of the three-dimensional space-form calculation under an
-Einstein Ricci tensor.  The left side is the displayed last-pair-flipped
-component `Rm04(e_i,e_j,e_l,e_k)`. -/
+
+
+
 theorem rm04Comp_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -712,9 +708,9 @@ theorem rm04Comp_einstein3_at
   fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;>
     simp [delta3] <;> ring
 
-/-- Arbitrary-vector version of the three-dimensional space-form calculation
-under an Einstein Ricci tensor, for the standard sectional slot
-`Rm04(X,Y,Y,X)`. -/
+
+
+
 theorem rm04_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -757,12 +753,12 @@ theorem rm04_einstein3_at
   simp [slots4, DifferentialGeometry.Integral.Connection.vec4, delta3, Fin.sum_univ_three, Fin.prod_univ_four]
   ring
 
-/-- First-trace version of the three-dimensional Einstein space-form bridge.
 
-This consumes the geometric first-trace realization.  Because
-`traceDataOfFirst` converts geometric Ricci/scalar to the displayed algebraic
-trace data with a minus sign, this theorem is the sign audit needed before
-Hamilton's Section 12 endpoint can use the space-form formula. -/
+
+
+
+
+
 theorem rm04_firstTrace_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -800,7 +796,7 @@ theorem rm04_firstTrace_einstein3_at
   rw [hRm]
   ring
 
-/-- Standard-slot version of `rm04_firstTrace_einstein3_at`. -/
+
 theorem rm04Std_ein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -821,7 +817,7 @@ theorem rm04Std_ein3_at
           g.inner x X Y * g.inner x X Y) :=
   rm04_firstTrace_einstein3_at (I := I) horth hcurv hRic hScalar hEin X Y
 
-/-- Local-frame wrapper for the pointwise bridge. -/
+
 theorem rm04Comp_displayedRiemannFromRicci3D_frame
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02Section (I := I) (M := M)}
@@ -842,5 +838,59 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame
           - (1 / 2 : Real) * scalar x *
               (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
   rm04Comp_displayedRiemannFromRicci3D_at (I := I) h
+
+
+
+
+
+
+theorem rm04_kn_gform
+    {g : SmoothRiemannianMetric I M}
+    {Ric : Tensor02At (I := I) (M := M) x}
+    {scalar : Real}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (h : RiemannFromRicci3DTraceDataAt g Ric scalar Rm04 basis)
+    (X Y Z W : TangentSpace I x) :
+    Rm04 (vec4 (I := I) X Y Z W) =
+      Ric (vec2 (I := I) X Z) * g.inner x Y W
+        - Ric (vec2 (I := I) Y Z) * g.inner x X W
+        - Ric (vec2 (I := I) X W) * g.inner x Y Z
+        + Ric (vec2 (I := I) Y W) * g.inner x X Z
+        - (scalar / 2) *
+            (g.inner x X Z * g.inner x Y W - g.inner x Y Z * g.inner x X W) := by
+  classical
+  have horth := h.orthonormal
+
+  have hcomp : ∀ a b c d : Fin 3,
+      component0S (I := I) basis Rm04 (slots4 a b c d) =
+        ricciCompAt (I := I) basis Ric a c * delta3 b d
+          - ricciCompAt (I := I) basis Ric b c * delta3 a d
+          - ricciCompAt (I := I) basis Ric a d * delta3 b c
+          + ricciCompAt (I := I) basis Ric b d * delta3 a c
+          - (1 / 2 : Real) * scalar *
+              (delta3 a c * delta3 b d - delta3 b c * delta3 a d) := by
+    intro a b c d
+    have hd := rm04Comp_displayedRiemannFromRicci3D_at (I := I) h a b d c
+    simpa [rm04CompAt] using hd
+
+  have hg : ∀ P Q : TangentSpace I x,
+      g.inner x P Q = ∑ i : Fin 3, basis.repr P i * basis.repr Q i :=
+    fun P Q => inner_eq_sum_repr3 (I := I) horth P Q
+  have hric : ∀ P Q : TangentSpace I x,
+      Ric (vec2 (I := I) P Q) =
+        ∑ a : Fin 3, ∑ c : Fin 3,
+          ricciCompAt (I := I) basis Ric a c * (basis.repr P a * basis.repr Q c) := by
+    intro P Q
+    rw [tensor0S_apply_eq_sum (I := I) basis Ric (vec2 (I := I) P Q), sum_fin_two_fun]
+    refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun c _ => ?_
+    simp [ricciCompAt, slots2, DifferentialGeometry.Integral.Connection.vec2,
+      Fin.prod_univ_two, Module.Basis.coord_apply, mul_comm, mul_assoc]
+
+  rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X Y Z W), sum_fin_four_fun]
+  simp_rw [hcomp, hg, hric]
+  simp [DifferentialGeometry.Integral.Connection.vec4, slots4, Fin.prod_univ_four,
+    Module.Basis.coord_apply, delta3, Fin.sum_univ_three]
+  ring
 
 end DifferentialGeometry.Integral.Connection

@@ -13,35 +13,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Smooth-section integration by parts on a Riemannian manifold with boundary
-
-For a smooth Riemannian metric `g` on a σ-compact Hausdorff smooth manifold `M`
-whose model `I` may carry a non-trivial boundary, smooth scalar functions
-`f, h : M → ℝ` whose topological supports are contained in the manifold interior
-`I.interior M`, and a smooth tangent section `X` with **compact support also
-contained in the interior**, we establish the two integration-by-parts
-identities:
-
-* `integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary`:
-  $$\int_M X(f)\,d\mu_g = -\int_M f \cdot \operatorname{div}_g^{(\partial)}(X)\,d\mu_g.$$
-
-* `integral_tangentSectionAction_mul_add_eq_neg_with_boundary`:
-  $$\int_M \bigl(X(f)\,h + f\,X(h)\bigr)\,d\mu_g
-       = -\int_M f\,h \cdot \operatorname{div}_g^{(\partial)}(X)\,d\mu_g.$$
-
-The argument mirrors the boundaryless variant: the divergence-Leibniz rule
-`divergence_g_with_boundary_smoothSmul` rewrites `div_g^{(\partial)} (f · X)`
-as `f · div_g^{(\partial)} X + X(f)`, the integral of which vanishes by
-`integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`
-applied to `f · X` (which inherits both compact support and interior support
-from `X`). Identity (b) follows from (a) applied to the smooth product `f · h`,
-combined with the tangent-action Leibniz rule `tangentSectionAction_mul`.
-
-The interior-support hypotheses on `f` and `X` are needed because the
-with-boundary divergence theorem itself requires the section to be supported in
-the interior.
--/
 
 noncomputable section
 
@@ -54,7 +25,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -65,14 +36,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- `I.interior M` is open in `M`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-/-- A continuous function with compact support is integrable against the
-canonical Riemannian volume measure on a σ-compact Hausdorff manifold whose
-model `I` may carry a boundary. -/
 lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -82,8 +50,6 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
 
-/-- If `f : M → ℝ` is smooth and `tsupport f ⊆ I.interior M`, the directional
-derivative `tangentSectionAction X f` is continuous on `M`. -/
 lemma tangentSectionAction_continuous_of_interior_support
     [T2Space M]
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -128,7 +94,7 @@ lemma tangentSectionAction_continuous_of_interior_support
       rw [hmfderiv_zero]; rfl
     exact (continuous_const.continuousAt.congr hev_action.symm)
 
-/-- The support of `smoothSmul f hf X` is contained in the support of `X`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 lemma support_smoothSmul_subset
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -143,8 +109,6 @@ lemma support_smoothSmul_subset
     rw [hneX]; exact smul_zero _
   exact hx hYx
 
-/-- The topological support of `smoothSmul f hf X` is contained in the
-topological support of `X`. -/
 lemma tsupport_smoothSmul_subset
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -153,7 +117,6 @@ lemma tsupport_smoothSmul_subset
     ((support_smoothSmul_subset (I := I) hf X).trans (subset_tsupport _))
     (isClosed_tsupport _)
 
-/-- If `X` has compact support, so does `smoothSmul f hf X`. -/
 lemma hasCompactSupport_smoothSmul
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -161,7 +124,6 @@ lemma hasCompactSupport_smoothSmul
     HasCompactSupport (smoothSmul (I := I) f hf X) :=
   hX.mono' ((support_smoothSmul_subset (I := I) hf X).trans (subset_tsupport _))
 
-/-- If `tsupport X ⊆ I.interior M`, then so is `tsupport (smoothSmul f hf X)`. -/
 lemma tsupport_smoothSmul_subset_interior
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -169,18 +131,6 @@ lemma tsupport_smoothSmul_subset_interior
     tsupport ((smoothSmul (I := I) f hf X) : ∀ x, TangentSpace I x) ⊆ I.interior M :=
   (tsupport_smoothSmul_subset (I := I) hf X).trans hX_int
 
-/-- **Integration by parts (basic) on a manifold with boundary.** For a smooth
-scalar `f : M → ℝ` with `tsupport f ⊆ I.interior M`, and a smooth tangent
-section `X` with compact support contained in `I.interior M` on a σ-compact
-Hausdorff smooth Riemannian manifold `(M, g)` whose model `I` may carry a
-boundary,
-$$\int_M X(f)\,d\mu_g = -\int_M f \cdot \operatorname{div}_g^{(\partial)}(X)\,d\mu_g.$$
-
-The proof applies the divergence-Leibniz rule
-`divergence_g_with_boundary_smoothSmul` to the section `smoothSmul f hf X`,
-which has compact support and interior support inherited from `X`, so the
-integral of its divergence vanishes by
-`integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`. -/
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -280,10 +230,6 @@ theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_bound
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
 
-/-- The topological support of a pointwise product `f * h : M → ℝ` is
-contained in `tsupport f`. (Symmetry: it is also contained in `tsupport h`.)
-This is the support-shrinking principle applied to multiplication: a product
-vanishes wherever either factor does. -/
 private lemma tsupport_mul_subset_left (f h : M → ℝ) :
     tsupport (fun x : M => f x * h x) ⊆ tsupport f := by
   refine closure_minimal ?_ (isClosed_tsupport _)
@@ -295,28 +241,13 @@ private lemma tsupport_mul_subset_left (f h : M → ℝ) :
     exact hne (subset_tsupport _ hne')
   exact hx (by rw [hf_zero, zero_mul])
 
-set_option linter.unusedVariables false in
-/-- **Integration by parts (symmetric form) on a manifold with boundary.** For
-smooth scalars `f, h : M → ℝ` with `tsupport f, tsupport h ⊆ I.interior M`, and
-a smooth tangent section `X` with compact support contained in `I.interior M`
-on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose model `I`
-may carry a boundary,
-$$\int_M \bigl(X(f)\,h + f\,X(h)\bigr)\,d\mu_g
-       = -\int_M f\,h \cdot \operatorname{div}_g^{(\partial)}(X)\,d\mu_g.$$
-The proof applies identity (a) to the smooth product `f · h` (interior-supported
-because both factors are) and uses the tangent-action Leibniz rule
-`tangentSectionAction_mul`.
 
-The hypothesis `hh_int` is retained in the signature for symmetry with `hf_int`
-even though only `hf_int` is strictly necessary internally — the proof routes
-through `tsupport (f * h) ⊆ tsupport f ⊆ I.interior M`, but the symmetric
-hypothesis pair makes the statement transparent at the call site. -/
 theorem integral_tangentSectionAction_mul_add_eq_neg_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ) ∞ h)
-    (hf_int : tsupport f ⊆ I.interior M) (hh_int : tsupport h ⊆ I.interior M)
+    (hf_int : tsupport f ⊆ I.interior M) (_hh_int : tsupport h ⊆ I.interior M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hX : HasCompactSupport X)
     (hX_int : tsupport X ⊆ I.interior M) :

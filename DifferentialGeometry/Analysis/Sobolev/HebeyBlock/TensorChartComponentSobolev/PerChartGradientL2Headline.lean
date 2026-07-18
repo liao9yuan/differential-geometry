@@ -3,51 +3,10 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.IntrinsicSlotOpNormRiem
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 
-/-!
-# Intrinsic per-`α` `eLpNorm` headline on the gradient of a chart component
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and
-ranks `(r, s)`, this file assembles — without any chart-locality predicate —
-the per-`α` `L²` bound
-
-```
-eLpNorm (b ↦ √ g.inner b (∇ u_α b) (∇ u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊
-```
-
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`. The
-proof mirrors the trivialisation-driven assembly of the locality-conditioned
-companion, but sources its pointwise decomposition and its three atom `L²`
-bounds from the unconditional Riemannian-fibre-norm pieces:
-
-* the naked Riemannian-fibre-norm gradient decomposition
-  `g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1`;
-* the raw indicator atom `L²` bound
-  `exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq`;
-* the Riemannian-fibre-norm covariant-derivative atom `L²` bound
-  `exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm`;
-* the intrinsic G1↔G3 bridge
-  `norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_intrinsic_h1`
-  combined with the Riemannian-fibre-norm slot operator-norm bounds
-  `chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport`,
-  `chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport`,
-  and the exact identity `‖S.toSection b‖²_Riem = tensorInnerPointwise b S S`.
-
-The fibre norm on `TensorRSSpace r s I b` is interpreted in the `g`-induced
-`Bundle.RiemannianBundle` convention (installed via `letI` plus removal of the
-canonical bundle-trivialisation norm instances) throughout. No
-`HasLocallyConstantChartAt` (or any chart-locality predicate) appears.
-
-## Public theorem
-
-* `exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm`
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option linter.style.show false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 4000000
 
@@ -79,15 +38,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-compact (closed in a compact ambient space). -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma a3_pouTsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-contained in the chart-`α` source. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma a3_pouTsupport_subset_chartSource (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -99,9 +56,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Total-space-valued continuity of the per-`k` chart-frame covariant
-derivative section on the chart-`α` base set. -/
-private lemma a3_covDeriv_totalSpace_continuousOn
+
+private lemma chartTensorRSCovariantDerivative_totalSpace_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) (k : Fin (Module.finrank ℝ E)) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -148,9 +104,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The Riemannian-fibre-norm covariant-derivative atom integrand is
-`AEStronglyMeasurable` with respect to `riemannianVolumeMeasure g`. -/
-private lemma a3_fiber_cov_atom_aestronglyMeasurable
+
+private lemma chartTensorRSCovariantDerivative_pouWeightedNorm_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -215,8 +170,8 @@ private lemma a3_fiber_cov_atom_aestronglyMeasurable
                 (chartBasisVecFiber (I := I) α k) b⟫_ℝ : ℝ))
         (chartAt H α).source :=
       ContinuousOn.inner_bundle
-        (a3_covDeriv_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
-        (a3_covDeriv_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
+        (chartTensorRSCovariantDerivative_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
+        (chartTensorRSCovariantDerivative_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
     refine h_inner.congr ?_
     intro b _
     exact (real_inner_self_eq_norm_sq _).symm
@@ -236,9 +191,9 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Riemannian-norm form of the intrinsic G1↔G3 bridge inequality, per
-direction `k`. The constant `2 · (r + s)` is purely combinatorial. -/
-private lemma a3_riem_bridge
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private lemma chartTensorRSSlotCorrection_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) (k : Fin (Module.finrank ℝ E)) (b : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -335,22 +290,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Intrinsic per-`α` gradient `eLpNorm` headline.** For a closed Riemannian
-manifold `(M, g)`, a chart base point `α : M`, and ranks `(r, s)`, there is a
-non-negative real constant `C` (depending only on `(g, r, s, α)`) such that for
-every smooth compactly-supported `H¹` tensor section `S : SmoothCcTensorH1 g r s`
-and all multi-indices `Idx, Jdx`,
 
-```
-eLpNorm (b ↦ √ g.inner b (∇ u_α b) (∇ u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞),
-```
-
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` and
-`g.inner` is the tangent-bundle Riemannian fibre inner product. The constant
-`C := √(A · C₄² + B · C₂² + C₃)` with `C₃ := B · C_bridge · (r + s) · M_F²`
-depends only on `(g, r, s, α)`. Unlike the locality-conditioned companion, no
-`HasLocallyConstantChartAt` hypothesis is required. -/
 theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -412,7 +352,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
     rw [hTinner_def]
     exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
       (I := I) (M := M) g b _
-  show eLpNorm TinnerSqrt 2 μ ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
+  change eLpNorm TinnerSqrt 2 μ ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
   set rawZ : M → ℝ := fun b : M =>
       scalarOnE (I := I) α
         (tensorChartComponentRaw (I := I) (M := M)
@@ -470,7 +410,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ∑ k : Fin (Module.finrank ℝ E), C_bridge * TchrPerK k b :=
           Finset.sum_le_sum (fun k _ => by
             rw [hTchrPerK_def, hC_bridge_def]
-            exact a3_riem_bridge (I := I) (M := M) g r s α S k b)
+            exact chartTensorRSSlotCorrection_norm_sq_le (I := I) (M := M) g r s α S k b)
         rwa [← Finset.mul_sum] at h1
       have h_Tcov_nn : 0 ≤ Tcov b := by
         rw [hTcov_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -483,7 +423,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
           (Finset.sum_nonneg (fun _ _ => sq_nonneg _))
       have h_Bρ_sq_nn : 0 ≤ B * (ρ b) ^ 2 := mul_nonneg hB_nn (sq_nonneg _)
       have h_rawInd_eq : rawInd b = rawZ b := by
-        show (tsupport ρ).indicator rawZ b = rawZ b
+        change (tsupport ρ).indicator rawZ b = rawZ b
         exact Set.indicator_of_mem hb _
       have h_TchrFib_step : B * (ρ b) ^ 2 * TchrFib b ≤
           B * (ρ b) ^ 2 * (C_bridge * TchrSumK b) :=
@@ -514,7 +454,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         exact (Real.sqrt_eq_zero h_nn).mp h_sqrt_zero
       rw [h_Tinner_zero]
       have h_rawInd_zero : rawInd b = 0 := by
-        show (tsupport ρ).indicator rawZ b = 0
+        change (tsupport ρ).indicator rawZ b = 0
         exact Set.indicator_of_notMem hb _
       have h_ρ_zero : ρ b = 0 := by
         by_contra hne
@@ -611,7 +551,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       by_cases hb : b ∈ tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
       · have h1 : rawInd b = rawZ b := by
-          show (tsupport _).indicator rawZ b = rawZ b
+          change (tsupport _).indicator rawZ b = rawZ b
           exact Set.indicator_of_mem hb _
         have h2 :
             (tsupport (fun x : M =>
@@ -623,7 +563,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
           Set.indicator_of_mem hb _
         rw [h1, h2, sq_abs]
       · have h1 : rawInd b = 0 := by
-          show (tsupport _).indicator rawZ b = 0
+          change (tsupport _).indicator rawZ b = 0
           exact Set.indicator_of_notMem hb _
         have h2 :
             (tsupport (fun x : M =>
@@ -662,7 +602,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
                       (fun b' => S.toCcTensor.toSection b')
                       (chartBasisVecFiber (I := I) α k) b‖ ^ 2))
           μ :=
-      a3_fiber_cov_atom_aestronglyMeasurable (I := I) (M := M) g r s α S
+      chartTensorRSCovariantDerivative_pouWeightedNorm_aestronglyMeasurable (I := I) (M := M) g r s α S
     have h_Tcov_nn_pt : ∀ b, 0 ≤ Tcov b := fun b => by
       rw [hTcov_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
     have h_rho_Tcov_sq_eq : ∀ b,
@@ -751,7 +691,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ENNReal.ofReal ((rawInd b) ^ 2) := by
           rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _),
             sq_abs]
-        show ENNReal.ofReal (A * (rawInd b) ^ 2) =
+        change ENNReal.ofReal (A * (rawInd b) ^ 2) =
           ENNReal.ofReal A * (‖rawInd b‖ₑ : ℝ≥0∞) ^ 2
         rw [h_enn_sq, ENNReal.ofReal_mul hA_nn]
       have h_int_eq :
@@ -821,7 +761,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ENNReal.ofReal ((h2 b) ^ 2) := by
           rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _),
             sq_abs]
-        show ENNReal.ofReal (B * (ρ b) ^ 2 * Tcov b) =
+        change ENNReal.ofReal (B * (ρ b) ^ 2 * Tcov b) =
           ENNReal.ofReal B * (‖h2 b‖ₑ : ℝ≥0∞) ^ 2
         rw [h_enn_sq, show B * (ρ b) ^ 2 * Tcov b = B * ((ρ b) ^ 2 * Tcov b)
           from by ring, h_rho_Tcov, ENNReal.ofReal_mul hB_nn]
@@ -886,13 +826,13 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       have hC₃'_eq : C₃' = C₃ := by rw [hC₃'_def, hC₃_def]
       have h_secSq_eq : ∀ b : M, ‖S.toCcTensor.toSection b‖ ^ 2 = TIP b := by
         intro b
-        show ‖S.toCcTensor.toSection b‖ ^ 2 =
+        change ‖S.toCcTensor.toSection b‖ ^ 2 =
           tensorInnerPointwise (I := I) (M := M) g r s b
             (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)
         have h_inner : (⟪S.toCcTensor.toSection b, S.toCcTensor.toSection b⟫_ℝ : ℝ) =
             tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := by
-          show tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b
+          change tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b
               (S.toCcTensor.toSection b) (S.toCcTensor.toSection b) = _
           rw [tensorRSRiemannianInnerCLM_apply]
           rfl

@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Derivative of two-tensor traces
 
-Metric-compatible derivative identities for tracing smooth `(0,2)` tensors.
--/
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -52,8 +52,8 @@ private theorem freezeHead03Slots_vec3
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Freeze the first slot of a smooth `(0,3)` tensor field against a smooth
-tangent section, leaving a smooth `(0,2)` tensor field. -/
+
+
 noncomputable def freezeHead03Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -181,9 +181,9 @@ private theorem freezeTail04Slots_vec4
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Freeze the last two slots of a smooth `(0,4)` tensor field against two
-smooth tangent sections, leaving a smooth `(0,2)` tensor field in the first two
-slots. -/
+
+
+
 noncomputable def freezeTail04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -313,9 +313,9 @@ private theorem freezeMiddle04Slots_vec4
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Freeze the middle two slots of a smooth standard-slot `(0,4)` tensor field
-against two smooth tangent sections, leaving a smooth `(0,2)` tensor field in
-slots `0` and `3`. -/
+
+
+
 noncomputable def freezeMiddle04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -429,9 +429,9 @@ noncomputable def freezeMiddle04Field
         (vec2 (I := I) (Y x) (Z x)) := by
   rfl
 
-/-- Metric-compatible covariant differentiation commutes with the metric trace
-of a smooth `(0,2)` tensor, in the concrete basis form used by the contracted
-Bianchi interface. -/
+
+
+
 theorem nablaTrace02
     [T2Space M] [CompleteSpace E] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -547,8 +547,8 @@ theorem nablaTrace02
             intro j _
             rw [hnabla i j]
 
-/-- Basis-free form of `nablaTrace02`: metric-compatible covariant
-differentiation commutes with the metric trace of a smooth `(0,2)` tensor. -/
+
+
 theorem dTrace02_eq
     [T2Space M] [CompleteSpace E] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

@@ -6,31 +6,13 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
+import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
-/-!
-# Uniform operator-norm bounds for slot-correction infrastructure
-
-Uniform operator-norm bounds used throughout the chart-spectral machinery on a
-closed Riemannian manifold `(M, g)`:
-
-* **Unconditional chart Levi-Civita parallel CLM op-norm bound** — for a
-  chart base point `α`, the chart Levi-Civita parallel CLM
-  `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)` has a uniform
-  operator-norm bound on the closed support of the chart-atlas
-  partition-of-unity weight at `α`, where the operator norm is computed with
-  respect to the Riemannian fibre norm on `TangentSpace I b`. No locality
-  hypothesis on the chart selection is required.
-
-Supporting model-side suprema, slot-substitution pointwise bounds, and
-`tangentSlotCLM` factor-product bounds are provided as private helpers.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -56,12 +38,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma section_norm_eq_toFun_norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (b : M) :
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
 
-private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private lemma tsupport_chartAtlasPOU_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source := by
@@ -71,16 +55,13 @@ private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
 
-/-- The closed support of the canonical POU weight at `α` is contained in the
-chart source at `α` by subordinacy of the chart-atlas partition of unity. -/
-private theorem pouTsupport_subset_chartAt_source_chrCorr (α : M) :
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+private theorem tsupport_chartAtlasPOU_subset_chartAt_source_of_isSubordinate (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-- The model-space coordinate functional sup. This is a positive constant
-depending only on the dimension and the model space `E`. -/
 private noncomputable def chartModelBasisCoordSup (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -90,7 +71,6 @@ private noncomputable def chartModelBasisCoordSup (E : Type*) [NormedAddCommGrou
       exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
 
-/-- The model-space basis vector norm sup. -/
 private noncomputable def chartModelBasisVecSup (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -144,13 +124,11 @@ private lemma norm_basis_le_chartModelBasisVecSup
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-/-- Operator-norm bound on a single summand of the triple sum defining
-`christoffelCorrection`, at a point `b` of the tangent-trivialisation
-neighbourhood, with all geometric / model-side constants exposed. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma christoffelCorrection_summand_opNorm_le
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (Y : E)
     (i j k : Fin (Module.finrank ℝ E))
-    (C_J : ℝ) (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J)
+    (C_J : ℝ) (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J)
     (hCJ_nn : 0 ≤ C_J)
     (C_Γ : ℝ) (hCΓ : |chartChristoffel (I := I) g α i j k (extChartAt I α b)| ≤ C_Γ)
     (hCΓ_nn : 0 ≤ C_Γ) :
@@ -172,7 +150,7 @@ private lemma christoffelCorrection_summand_opNorm_le
         ‖L_i‖ * ‖trivToE (I := I) α b‖ :=
     ContinuousLinearMap.opNorm_comp_le L_i (trivToE (I := I) α b)
   have h_triv_eq_chartJ :
-      ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+      ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
   rw [h_triv_eq_chartJ] at hcomp_le
   have h_scalar_norm :
       ‖((chartModelBasis E).repr Y j * Γijk) • (chartModelBasis E) k‖ =
@@ -221,7 +199,7 @@ private lemma christoffelCorrection_summand_opNorm_le
   have h_Li_le : ‖L_i‖ ≤ chartModelBasisCoordSup E :=
     norm_coord_le_chartModelBasisCoordSup (E := E) i
   have h_Li_nn : 0 ≤ ‖L_i‖ := norm_nonneg _
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_J_nn : 0 ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := norm_nonneg _
   have h_coord_nn : 0 ≤ chartModelBasisCoordSup E := chartModelBasisCoordSup_nonneg
   have h_vec_nn : 0 ≤ chartModelBasisVecSup E := chartModelBasisVecSup_nonneg
   set A : ℝ := ‖L_i.comp (trivToE (I := I) α b)‖
@@ -232,11 +210,11 @@ private lemma christoffelCorrection_summand_opNorm_le
     exact abs_nonneg _
   have hA_le : A ≤ chartModelBasisCoordSup E * C_J := by
     refine hcomp_le.trans ?_
-    have h_first : ‖L_i‖ * ‖chartJ (I := I) (M := M) α b‖ ≤
-        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ :=
+    have h_first : ‖L_i‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤
+        chartModelBasisCoordSup E * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ :=
       mul_le_mul_of_nonneg_right h_Li_le h_J_nn
     have h_second :
-        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ ≤
+        chartModelBasisCoordSup E * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤
           chartModelBasisCoordSup E * C_J :=
       mul_le_mul_of_nonneg_left hCJ h_coord_nn
     linarith
@@ -277,22 +255,20 @@ private lemma christoffelCorrection_summand_opNorm_le
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The closed support of the canonical POU weight at `α` (a compact subset of
-`(chartAt H α).source` on a closed manifold). -/
 private def pouTsupportSet (α : M) : Set M :=
   tsupport (fun x : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem pouTsupportSet_isCompact (α : M) :
     IsCompact (pouTsupportSet (I := I) (M := M) α) :=
   (isClosed_tsupport _).isCompact
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem pouTsupportSet_subset_chartAt_source (α : M) :
     pouTsupportSet (I := I) (M := M) α ⊆ (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-- The model-space basis vector norm sup. Local copy used by the chart
-Levi-Civita parallel CLM bound below. -/
 private noncomputable def chartModelBasisVecSup' (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -323,16 +299,13 @@ private lemma norm_basis_le_chartModelBasisVecSup'
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-/-- The chart Levi-Civita parallel CLM at `b`, applied to the vector field
-`chartBasisVecFiber α j`, decomposes as the composition of `trivFromE α b`
-with the Christoffel correction in the model-side basis vector `chartJ α b
-(chartBasisVecFiber α j b)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (j : Fin (Module.finrank ℝ E))
     (C_J C_Jinv C_χ : ℝ)
-    (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
-    (hCJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
+    (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
+    (hCJinv : ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
     (hCχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖)
     (hCχ_nn : 0 ≤ C_χ) :
     ‖chartLeviCivitaParallelCLM (I := I) g α b (chartBasisVecFiber (I := I) α j)‖ ≤
@@ -349,15 +322,15 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
           ‖christoffelCorrection (I := I) g α b Y‖ :=
     ContinuousLinearMap.opNorm_comp_le _ _
   have h_χ_le : ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖ := hCχ Y
-  have h_trivFromE_norm : ‖trivFromE (I := I) α b‖ = ‖chartJinv (I := I) (M := M) α b‖ :=
+  have h_trivFromE_norm : ‖trivFromE (I := I) α b‖ = ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ :=
     rfl
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := by
     rw [h_trivFromE_norm]; exact hCJinv
   have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
   have h_X_eq : (chartBasisVecFiber (I := I) α j b : TangentSpace I b) =
       trivFromE (I := I) α b ((chartModelBasis E) j) := rfl
-  have h_Y_le : ‖Y‖ ≤ ‖chartJ (I := I) (M := M) α b‖ *
-      (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
+  have h_Y_le : ‖Y‖ ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+      (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
     rw [hY_def, h_X_eq]
     have h1 :
         ‖trivToE (I := I) α b (trivFromE (I := I) α b ((chartModelBasis E) j))‖ ≤
@@ -368,9 +341,9 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
         ‖trivFromE (I := I) α b ((chartModelBasis E) j)‖ ≤
           ‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖ :=
       (trivFromE (I := I) α b).le_opNorm _
-    have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+    have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
     have h_triv_Jinv : ‖trivFromE (I := I) α b‖ =
-        ‖chartJinv (I := I) (M := M) α b‖ := rfl
+        ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := rfl
     have h_J_nn : 0 ≤ ‖trivToE (I := I) α b‖ := norm_nonneg _
     calc ‖trivToE (I := I) α b (trivFromE (I := I) α b ((chartModelBasis E) j))‖
         ≤ ‖trivToE (I := I) α b‖ *
@@ -378,25 +351,25 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
       _ ≤ ‖trivToE (I := I) α b‖ *
             (‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖) :=
             mul_le_mul_of_nonneg_left h2 h_J_nn
-      _ = ‖chartJ (I := I) (M := M) α b‖ *
-            (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
+      _ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+            (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
             rw [h_triv_J, h_triv_Jinv]
   have hej_nn : 0 ≤ ‖(chartModelBasis E) j‖ := norm_nonneg _
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_Jinv_nn : 0 ≤ ‖chartJinv (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_J_nn : 0 ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_Jinv_nn : 0 ≤ ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := norm_nonneg _
   have h_Y_le' : ‖Y‖ ≤ C_J * (C_Jinv * ‖(chartModelBasis E) j‖) := by
     refine h_Y_le.trans ?_
     have h_inner_le :
-        ‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ ≤
+        ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ ≤
           C_Jinv * ‖(chartModelBasis E) j‖ :=
       mul_le_mul_of_nonneg_right hCJinv hej_nn
     have h_inner_nn :
-        0 ≤ ‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ :=
+        0 ≤ ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ :=
       mul_nonneg h_Jinv_nn hej_nn
     calc
-      ‖chartJ (I := I) (M := M) α b‖ *
-          (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖)
-          ≤ ‖chartJ (I := I) (M := M) α b‖ *
+      ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+          (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖)
+          ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
               (C_Jinv * ‖(chartModelBasis E) j‖) :=
             mul_le_mul_of_nonneg_left h_inner_le h_J_nn
       _ ≤ C_J * (C_Jinv * ‖(chartModelBasis E) j‖) := by
@@ -432,19 +405,7 @@ set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Unconditional uniform operator-norm bound for the chart Levi-Civita
-parallel CLM applied to a chart-basis vector field, on
-`tsupport (chartAtlasPOU I M α)`.**
 
-For a closed Riemannian manifold `(M, g)`, there exists a non-negative constant
-`C` such that for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every model-basis index `j`,
-
-  `‖chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)‖ ≤ C`,
-
-where the operator norm uses the Riemannian fibre norm on `TangentSpace I b`.
-The constant `C` is independent of `b` and `j`. No locality hypothesis on the
-chart selection is required. -/
 theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
@@ -469,7 +430,7 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
       (I := I) (M := M) g α
   obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartJinv_opNorm_isBounded_on_compact_unconditional
+    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartTrivInv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   set C_e : ℝ := chartModelBasisVecSup' E with hCe_def
   have hCe_nn : 0 ≤ C_e := chartModelBasisVecSup'_nonneg
@@ -506,15 +467,7 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     exact mul_le_mul_of_nonneg_left h_Xb_le hC_B_nn
   exact h_clm_le.trans h_chain
 
-/-- Pointwise upper bound on `tensorSlotSubstCLM` in the model fibre norm.
-The argument proceeds in three steps:
-
-1. By definition, `tensorSlotSubstCLM n b Φ x = CLE.symm (compCLML Φ (CLE x))`.
-2. CLE / CLE.symm preserve norms (Part C.a's `tensor0SSpace_continuousLinearEquiv_norm_apply` /
-   `_symm_norm_apply`), so the LHS norm equals `‖compCLML Φ (CLE x)‖`.
-3. `compCLML Φ` is a CLM with op-norm `≤ ∏ ‖Φ i‖` (Mathlib's
-   `norm_compContinuousLinearMapL_le`), so the standard CLM bound gives
-   `‖compCLML Φ (CLE x)‖ ≤ (∏ ‖Φ i‖) * ‖CLE x‖ = (∏ ‖Φ i‖) * ‖x‖`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (x : Tensor0SSpace n I b) :
@@ -571,7 +524,6 @@ private lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
-/-- Sup-style bound on the slot-CLM factor at slot `k`. -/
 private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -585,10 +537,6 @@ private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
-/-- Product bound on the `tangentSlotCLM` factor — at slot `k` the norm is
-`‖Φ‖`, at every other slot it is `‖id‖ ≤ 1`. We absorb the `id` factors into
-the constant `1`, yielding `∏ ≤ ‖Φ‖` when `n ≥ 1` and `∏ = 1` when `n = 0`.
-We state the bound `∏ ≤ (max ‖Φ‖ 1) ^ n` which handles all cases. -/
 private lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤

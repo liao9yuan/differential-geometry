@@ -3,65 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorLeibnizCommutator
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevSupportPromotion
 
-/-!
-# The iterated divergence-form weak-elliptic datum of the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the chart
-`P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇`
-satisfies a scalar divergence-form weak-elliptic identity, packaged at level `0`
-in `eigenvectorTensorChartBilinearData`, a value of
-`TensorChartBilinearH1ComplData g r s α P₀`.
-
-This module assembles the **`m`-fold-differentiated** weak-elliptic datum
-`eigenvectorIteratedTensorChartBilinearData`, again a value of
-`TensorChartBilinearH1ComplData g r s α P₀`. It is built by recursion on `m`:
-
-* level `0` is `eigenvectorTensorChartBilinearData`;
-* level `m + 1` is obtained from level `m` by the Leibniz-commutator
-  integration-by-parts step `tensorChartComponent_diff_variational_identity`.
-
-## The interior-regularity → global-`W^{1,2}` bridge
-
-The per-level step `tensorChartComponent_diff_variational_identity` requires the
-level-`m` datum's `u_chart`, every `weak_partial i`, and `f_chart` to lie
-*globally* in `W^{1,2}` of the Euclidean chart target `chartTargetEuclid α`. The
-order-2 interior engine `eigenvector_chartComponent_memWkp` yields only interior
-`W^{2,2}` regularity on a precompact subdomain `Ω''`. The bridge:
-
-* the eigenvector chart component, its weak partials, and the differentiated
-  right-hand side are almost everywhere zero off the compact partition-of-unity
-  kernel `chartPouKernel α`;
-* picking a precompact open `Ω''` with `chartPouKernel α ⊆ Ω''` and
-  `closure Ω'' ⊆ chartTargetEuclid α`, the order-2 engine delivers interior
-  `W^{2,2}(Ω'')`;
-* the support-aware promotion lemma
-  `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact` raises that interior
-  `W^{2,2}(Ω'')` to global `W^{2,2}(chartTargetEuclid α)`, hence global
-  `W^{1,2}`.
-
-The global `W^{1,2}` of every datum field discharges the per-level step's
-hypotheses, so the recursion produces a genuine global divergence-form datum at
-every level.
-
-## The differentiated right-hand side
-
-The per-level step produces the right-hand side `tensorDiffVariationalSource D l`
-(not density-weighted). The `f_chart` field of the next-level datum is
-`tensorDiffVariationalSource D l` divided by the chart density
-`densityOnEuclid g α`; because the density is strictly positive on the chart
-target, the density-weighted variational identity then reduces, on the chart
-target, exactly to the step's identity.
-
-## Main definition
-
-* `eigenvectorIteratedTensorChartBilinearData` — the `m`-fold-differentiated
-  weak-elliptic datum.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -98,31 +39,19 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The open complement of the partition-of-unity kernel inside the chart
-target. -/
 private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
   (DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
 
-/-- The open complement of the partition-of-unity kernel is a subset of the
-chart target. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_subset (α : M) :
     chartTargetEuclid (I := I) (M := M) α \
         chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
-/-- **Locality of the chosen weak partial.** If `u` is almost everywhere zero on
-the open set `chartTargetEuclid α \ chartPouKernel α`, then the chosen weak
-`i`-partial of `u` over the chart target is almost everywhere zero there too.
-
-The proof case-splits on whether `u ∈ W^{1,2}(chartTargetEuclid α)`: when it is
-not, the chosen weak partial is identically zero; when it is, the chosen weak
-partial over the chart target and the chosen weak partial over the open subset
-agree there (uniqueness of weak partials), and the latter is almost everywhere
-zero by `chosenWeakPartial'_ae_zero_of_ae_zero`. -/
 lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
     (α : M) {u : EuclN → ℝ}
     (hu_ae : u =ᵐ[(volume : Measure EuclN).restrict
@@ -182,18 +111,7 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
     exact Filter.Eventually.of_forall (fun _ => rfl)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of
-`eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel`.** The candidate weak
-chart partial `eigenvectorChartWeakPartial k`, re-keyed onto the
-intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-is almost everywhere zero on the open complement of the partition-of-unity
-kernel inside the chart target. The chart component of any abstract `L²` element
-is a.e. zero there (`tensorL2ChartComponent_ae_zero_off_chartPouKernel`), so the
-constant `0` is a weak `k`-partial there; the candidate weak chart partial is a
-genuine weak `k`-partial there too
-(`eigenvectorChartWeakPartial_hasWeakPartialDeriv`), and by
-uniqueness the two agree almost everywhere. -/
+
 lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -282,15 +200,7 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     h_wp_loc h_zero_loc
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of
-`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`.** The
-chart-locality-free eigenvector chart component
-`eigenvectorChartComponentFun`, re-keyed onto the
-intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-is almost everywhere zero on the open complement of the partition-of-unity
-kernel inside the chart target. The chart component of any abstract `L²` element
-is a.e. zero there (`tensorL2ChartComponent_ae_zero_off_chartPouKernel`). -/
+
 lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -326,16 +236,6 @@ lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
   intro hy_V
   exact hy hy_V hy_V.2
 
-/-- **Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel`.** Every `m`-fold
-mixed weak chart partial `eigenvectorChartIteratedPartial`,
-re-keyed onto the intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-is almost everywhere zero on the open complement of the partition-of-unity
-kernel inside the chart target. The proof is induction on `m`: the base case is
-the chart-locality-free chart component
-(`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`), and the
-inductive step is the locality of the chosen weak partial. -/
 lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -356,8 +256,6 @@ lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
       exact chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
         α (ih (Fin.init l)) (l (Fin.last m))
 
-/-- The cross-left test-decoupling coefficient vanishes off the
-partition-of-unity kernel. -/
 lemma crossLeftTestCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) (Q : TensorCompIdx (E := E) r (s + 1))
@@ -367,8 +265,6 @@ lemma crossLeftTestCoeff_eq_zero_off_chartPouKernel
     euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
       (I := I) (M := M) α (Q.2 0) hy, zero_mul]
 
-/-- The Euclidean gradient chart-frame coefficient of the chart-atlas
-partition-of-unity weight vanishes off the partition-of-unity kernel. -/
 lemma gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -381,8 +277,6 @@ lemma gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
   rw [euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) α j hy, mul_zero]
 
-/-- The cross-right value test-decoupling coefficient vanishes off the
-partition-of-unity kernel. -/
 lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) (Q : TensorCompIdx (E := E) r s)
@@ -395,18 +289,7 @@ lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
     (I := I) (M := M) g α m hy, zero_mul]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Chart-locality-free twin of
-`eigenvectorChartRHS_ae_zero_off_chartPouKernel`.** The seven-term
-chart-locality-free eigenvector chart right-hand side
-`eigenvectorChartRHS`, re-keyed onto the intrinsic-compactness
-eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-is almost everywhere zero on the open complement of the partition-of-unity kernel
-inside the chart target: the chart-component term is almost everywhere zero there
-(`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`), and each of
-the remaining six terms carries a factor that vanishes pointwise there (either an
-`indicator (chartPouKernel α)`, or a test-decoupling coefficient built from a
-chart-Euclidean partial of the chart-pushed partition-of-unity weight). -/
+
 lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -469,7 +352,6 @@ lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ l hy)]
   ring
 
-/-- Monotonicity of a thickening in the radius. -/
 private lemma thickening_mono_of_lt
     {β : Type*} [PseudoEMetricSpace β]
     {ρ ρ' : ℝ} (hρ_lt : ρ < ρ') (K : Set β) :
@@ -479,16 +361,7 @@ private lemma thickening_mono_of_lt
   exact lt_of_lt_of_le (Metric.mem_thickening_iff_infEDist_lt.mp hy)
     (ENNReal.ofReal_le_ofReal hρ_lt.le)
 
-/-- **Generic uniform-in-`h` difference-quotient bound for a chart-bilinear
-datum.** For any chart-bilinear divergence-form datum `D`, an interior subdomain
-`Ω''` and a room radius `R₀ > 0` with
-`Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, there is a
-nonnegative bound `M_bound j k` such that, at the difference-quotient sub-radius
-`R₀ / 16`, for every `0 < |h| ≤ R₀ / 16` and every pair `(j, k)`,
-`‖D_h^k (D.weak_partial j)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound j k)`.
-
-The bound delegates, through `D.toChartData`, to the scalar unconditional
-uniform difference-quotient bound `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`. -/
+omit [CompleteSpace E] in
 private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
@@ -585,18 +458,6 @@ private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
-/-- **Generic order-2 interior `W^{2,2}` regularity for a chart-bilinear datum.**
-
-For any chart-bilinear divergence-form datum `D`, an interior subdomain `Ω''`
-(open, relatively compact closure) and a difference-quotient room radius
-`R₀ > 0` with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, the
-chart component `D.u_chart` lies in `W^{1,2}(Ω'')` and every weak partial
-`D.weak_partial j` lies in `W^{1,2}(Ω'')`.
-
-The order-2 engine `tensor_h2_chart_loc_of_uniform_bound`, fed the discharged
-uniform difference-quotient bound, produces a weak `H¹` partial of every
-`D.weak_partial j` on `Ω''`; the chart component lies in `W^{1,2}(Ω'')` because
-its weak partials `D.weak_partial j` are themselves `L²(Ω'')`. -/
 lemma tensorChartBilinear_chartComponent_regularity_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

@@ -4,13 +4,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Ricci-Norm Evolution Producers
 
-This file is the Ricci-flow evolution layer for intrinsic Ricci-norm data.
-`DifferentialGeometry.PDE.RicciFlow.Basic` owns the definitions and algebraic component assembly; this
-file owns the smooth-solution producers that need Section 6 evolution inputs.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,9 +26,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Regularity package needed to use scalar-Laplacian linearity on the
-intrinsic trace-free Ricci norm expression.  This is kept below Section 10 so
-the book-facing theorem does not acquire regularity assumptions. -/
+
+
+
 structure TFLapReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -67,12 +67,12 @@ structure TFLapReg
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2 / 3) y) x
 
-/-- Smooth solutions provide the spatial regularity needed by the intrinsic
-trace-free Ricci-norm Laplacian identity.
 
-This is a lower regularity producer: it should eventually be proved from
-spatial smoothness of metric-derived scalar and Ricci tensors, plus smoothness
-of tensor norms. -/
+
+
+
+
+
 theorem tfLapReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -89,8 +89,8 @@ theorem tfLapReg
       scalar_sq_div_space := hS.scalarRegular.scalar_sq_div_space
       scalar_sq_div_grad := hS.scalarRegular.scalar_sq_div_grad }
 
-/-- Intrinsic scalar-Laplacian identity for
-`|Ric|² - R² / 3`, written without Section 10 names. -/
+
+
 theorem tfLapCore
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -170,12 +170,12 @@ theorem tfLapCore
           rw [hdiv, hsq]
           simp [G, ricciNormLap, flowG]
 
-/-- Canonical component data needed to assemble the intrinsic Ricci-norm heat
-equation.
 
-The shared `roughLapInner` field is the contraction `<Delta Ric, Ric>`.
-Producing this package from a smooth Ricci flow is the genuine Ricci tensor
-evolution/Bochner frontier; consuming it is just algebra. -/
+
+
+
+
+
 structure RicciHeatData
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -188,8 +188,8 @@ structure RicciHeatData
     RicciNormLaplacianComponentsOn
       (ricciNormLap (I := I) S) roughLapInner (ricciGradSq (I := I) S)
 
-/-- Algebraic assembly of the intrinsic Ricci-norm heat equation from the
-canonical component data. -/
+
+
 theorem ricciHeat_of_data
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -209,14 +209,26 @@ theorem ricciHeat_of_data
       h.timeDeriv
       h.laplacian
 
-private theorem pair04_apply {x : M}
+
+@[simp]
+theorem ricciPair04_apply {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (v : Fin 4 -> TangentSpace I x) :
     ricciPair04 (I := I) Ric v =
       Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 0) (v 2)) *
         Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 1) (v 3)) := by
   unfold ricciPair04
-  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  have hdom :
+      (ContinuousMultilinearMap.domDomCongr (Equiv.swap (1 : Fin 4) (2 : Fin 4))
+        (Bundle.continuousMultilinearMap.product_fun
+          (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+          (s := 2) (q := 2) (x := x) Ric Ric)) v =
+        (Bundle.continuousMultilinearMap.product_fun
+          (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+          (s := 2) (q := 2) (x := x) Ric Ric)
+          (fun i => v ((Equiv.swap (1 : Fin 4) (2 : Fin 4)) i)) := by
+    with_unfolding_all rfl
+  refine hdom.trans ?_
   rw [Bundle.continuousMultilinearMap.product_fun_apply]
   have hswap0 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 0 = 0 := by decide
   have hswap1 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 1 = 2 := by decide
@@ -294,7 +306,7 @@ private theorem pairSum_eq
     refine Finset.sum_congr rfl fun c _ => ?_
     refine Finset.sum_congr rfl fun b _ => ?_
     refine Finset.sum_congr rfl fun d _ => ?_
-    simp [slot4ikjl, pair04_apply, Fin.prod_univ_four, DifferentialGeometry.Integral.Connection.vec2]
+    simp [slot4ikjl, ricciPair04_apply, Fin.prod_univ_four]
     ring_nf
   · exact (sumPairProd
       (fun a c : Idx =>
@@ -366,8 +378,8 @@ private theorem coordPair4_eq
               Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b) (basis d))) := by
           ring
 
-/-- Produce intrinsic Ricci-norm heat data from an existing frame-level Ricci
-evolution and Bochner route, plus the frame-to-intrinsic identifications. -/
+
+
 private def ricciDataOfFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -435,9 +447,9 @@ private def ricciDataOfFrame
     exact (hlap t x).trans (by
       rw [hnabla t x])
 
-/-- The coordinate-frame zero-order reaction at the center is the intrinsic
-reaction scalar.  This is not independent data: it is the coordinate expression
-of the intrinsic contraction defining `ricciReact`. -/
+
+
+
 theorem coordReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -463,14 +475,14 @@ theorem coordReact
   refine Finset.sum_congr rfl fun j _ => ?_
   refine Finset.sum_congr rfl fun k _ => ?_
   refine Finset.sum_congr rfl fun l _ => ?_
-  simp [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec4]
+  simp [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
 
-/-- Produce intrinsic Ricci-norm heat data from pointwise coordinate-frame
-data.
 
-At each spatial point `x`, this uses the coordinate frame centered at `x`
-only to prove the two identities at that same point.  This avoids assuming any
-global frame on `M`. -/
+
+
+
+
+
 def ricciDataAtCoord
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -582,10 +594,10 @@ def ricciDataAtCoord
           2 * ricciGradSq (I := I) S t x
     exact hLap t x
 
-/-- Smooth-solution producer for canonical Ricci-norm component data.
 
-This theorem consumes the strengthened `IsSmoothSolutionOn` coordinate fields;
-the production of those fields belongs to `DifferentialGeometry.PDE.RicciFlow.Regularity`. -/
+
+
+
 def ricciHeatDataSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -600,10 +612,10 @@ def ricciHeatDataSmooth
       (fun x0 => hS.ricciSymm x0)
       hS.ricciLap
 
-/-- Canonical Ricci-norm heat producer from a smooth Ricci-flow solution.
 
-This theorem is a thin consumer of `ricciHeatDataSmooth`; the remaining work is
-to derive that data from the smooth metric and Ricci-flow equation. -/
+
+
+
 theorem ricciHeatSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]

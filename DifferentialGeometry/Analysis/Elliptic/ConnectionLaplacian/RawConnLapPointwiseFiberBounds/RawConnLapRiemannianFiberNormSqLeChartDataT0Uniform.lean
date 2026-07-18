@@ -1,37 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapChartCoeffsUniformBoundT0Uniform
 
-/-!
-# Uniform-in-`T₀` pointwise bound on `riemannianFiberNormSq` of the raw tensor
-connection Laplacian by chart-`α` second-derivative, first-derivative, and
-zeroth-derivative data.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M`, this file ships a single non-negative constant `C`,
-depending only on `g`, `r`, `s`, `α` (and **independent of the input section
-`T₀`**), such that for every smooth compactly-supported `(r, s)`-tensor
-section `T₀` and every base point `b` lying in the intersection of the chart-`α`
-partition-of-unity tsupport with the chart-`α` Levi-Civita good set, the
-intrinsic Riemannian fiber norm-squared of the raw tensor connection Laplacian
-at `b` is dominated by `C` times the multi-index sum of squared iterated-second-
-Fréchet, squared Fréchet, and squared zeroth-order pull-back data of `T₀`'s raw
-chart components on the Euclidean chart target.
-
-The proof composes the intrinsic-to-raw-component bound
-(`riemannianFiberNormSq_le_raw_components_on_pouTsupport`) with the
-uniform-in-`T₀` per-`(Idx, Jdx)` bound on the squared raw chart scalar component
-of the connection Laplacian
-(`rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform`),
-then collects a `cardIJ`-factor across the multi-index sum.
-
-The quantifier order is `∃ C, ∀ T₀`: the constant is uniform in `T₀`. No
-chart-locality predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -62,26 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Uniform-in-`T₀` pointwise bound on `riemannianFiberNormSq` of the raw
-tensor connection Laplacian.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M`, there exists a non-negative constant `C`, depending
-only on `g`, `r`, `s`, `α` and **independent of the section `T₀`**, such that
-for every smooth compactly-supported `(r, s)`-tensor section `T₀` and every
-base point `b` in the intersection of the chart-`α` partition-of-unity tsupport
-with the chart-`α` Levi-Civita good set,
-```
-riemannianFiberNormSq g r s b (rawTensorConnLap g r s T₀.toSection b)
-  ≤ C · ∑_{Idx Jdx} (‖iteratedFDeriv ℝ 2 (chartPushedRaw …) y‖²
-                   + ‖fderiv ℝ (chartPushedRaw …) y‖²
-                   + (chartPushedRaw … y)²),
-```
-where `y = (toEuclidean) ((extChartAt I α) b)`.
-
-The bound is unconditional in the chart atlas: no chart-locality predicate is
-required. The quantifier order is `∃ C, ∀ T₀`: the constant is uniform across
-all input sections `T₀`. -/
 theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

@@ -2,56 +2,12 @@ import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
-/-!
-# Equality of the chart-α raw component of the globally smooth extension with the
-chart-α coordinate component of the first covariant derivative
-
-For a smooth Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E`, a chart-centre `α : M`, a chart coordinate index `k`, and a smooth
-compactly-supported `(r, s)`-tensor section `T₀`, the global smooth extension
-`S_k_ext` (built in `covApply_covRS_chartBasis_globalSmoothExtension`) of the
-chart-basis-applied bundled covariant derivative
-`covApply cov_RS (chartBasisVecFiber α k) T₀.toSection` agrees, on an open
-neighbourhood of any chart-α Levi-Civita good-set point `b₀`, with the
-chart-frame covariant derivative
-`chartTensorRSCovariantDerivative r s g α T₀.toSection (chartBasisVecFiber α k)`.
-
-This file packages the chart-α `(Idx, Jdx)` raw scalar component of `S_k_ext`,
-pulled back to the Euclidean chart target, into an equality with the
-chart-α coordinate component of the first covariant derivative
-`covDerivComponentEuclid g r s α T₀ k Idx Jdx`, on an open neighbourhood (in
-the Euclidean chart target) of the chart-Euclidean image of `b₀`.
-
-The proof chains:
-
-1. **B.2.c.i** (`covApply_covRS_chartBasis_globalSmoothExtension`) — produces
-   `S_k_ext`, an open set `U ⊆ chartLeviCivitaGoodSet α` containing `b₀`, and the
-   pointwise identity `S_k_ext y = covApply cov_RS (chartBasisVecFiber α k)
-   T₀.toSection y` for `y ∈ U`.
-2. **Definitional unfolding of `covApply`** — rewrites the right-hand side as
-   `cov.toFun T₀.toSection y (chartBasisVecFiber α k y) =
-   tensorCovDerivAt g r s T₀ y (chartBasisVecFiber α k y)`.
-3. **`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`** — replaces the
-   bundled covariant derivative by the chart-frame one on the good set.
-4. **`covDerivComponentEuclid_def`** — equates the chart-frame raw component
-   with `covDerivComponentEuclid`.
-
-## Main result
-
-* `chartPushedRaw_tensorChartComponentRaw_S_k_ext_eqOn_covDerivComponentEuclid`
-  — the headline: the chart-pushed raw chart-α `(Idx, Jdx)` scalar component
-  of the global smooth extension `S_k_ext` agrees on an open neighbourhood
-  (in the Euclidean chart target) of `toEuclidean ((extChartAt I α) b₀)` with
-  `covDerivComponentEuclid g r s α T₀ k Idx Jdx`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -75,24 +31,26 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-- The Euclidean-side neighbourhood corresponding to `U ⊆ M`. -/
 private def euclidNeighbourhood (α : M) (U : Set M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   chartTargetEuclid (I := I) (M := M) α ∩
     {y | (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ U}
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_mem_iff (α : M) (U : Set M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))} :
     y ∈ euclidNeighbourhood (I := I) (M := M) α U ↔
       y ∈ chartTargetEuclid (I := I) (M := M) α ∧
       (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ U := Iff.rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_subset_chartTargetEuclid
     (α : M) (U : Set M) :
     euclidNeighbourhood (I := I) (M := M) α U ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   intro y hy; exact hy.1
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_isOpen
     (α : M) {U : Set M} (hU_open : IsOpen U) :
     IsOpen (euclidNeighbourhood (I := I) (M := M) α U) := by
@@ -130,6 +88,7 @@ private lemma euclidNeighbourhood_isOpen
   rw [hset_eq]
   exact hcont_comp.isOpen_inter_preimage hchartT_open hU_open
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEuclidean_extChartAt_mem_euclidNeighbourhood
     (α : M) {U : Set M} (hU_sub_good : U ⊆ chartLeviCivitaGoodSet (I := I) α)
     {b₀ : M} (hb₀_U : b₀ ∈ U) :
@@ -155,22 +114,6 @@ private lemma toEuclidean_extChartAt_mem_euclidNeighbourhood
     rw [hleft_inv]
     exact hb₀_U
 
-/-- **Equality of the chart-α `(Idx, Jdx)` raw component of the globally
-smooth extension with `covDerivComponentEuclid`.**
-
-For a chart-α Levi-Civita good-set point `b₀`, the global smooth extension
-`S_k_ext` of the chart-basis-applied bundled covariant derivative agrees with
-the chart-α `(Idx, Jdx)` raw component formula on an open neighbourhood (in
-the Euclidean chart target) of `toEuclidean ((extChartAt I α) b₀)`:
-
-```
-chartPushedRaw I α (b ↦ tensorChartComponentProjection r s Idx Jdx
-  ((triv α).continuousLinearMapAt ℝ b (S_k_ext.toFun b))) y
-=
-covDerivComponentEuclid g r s α T₀ k Idx Jdx y
-```
-
-for all `y ∈ V`, where `V ⊆ chartTargetEuclid α` is the open neighbourhood. -/
 theorem chartPushedRaw_tensorChartComponentRaw_S_k_ext_eqOn_covDerivComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))

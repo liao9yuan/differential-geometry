@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching BookData
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,7 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Intrinsic `|∇ R|²` for the scalar curvature of a solution candidate. -/
+
 def scalGradSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -36,7 +36,7 @@ def scalGradSq
       (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x)
       (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x)
 
-/-- Intrinsic Laplacian of `|Ric°|²` for a solution candidate. -/
+
 def tfLapBook
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -46,9 +46,9 @@ def tfLapBook
     DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
       (fun y : M => tfRicNormSq S.scalar (ricciNorm (I := I) S) t y) x
 
-/-- Canonical smooth section representing `∇ Ric` for a solution candidate at
-a fixed time.  This is the bundled section form of the pointwise
-`totalNabla0SFun` used in `ricciGradSq`. -/
+
+
+
 noncomputable def ricciNablaSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -63,8 +63,8 @@ noncomputable def ricciNablaSec
         metricCov_smooth (I := I) (M := M) (S.base.metric t))
     (S.ricci t)).nablaA
 
-/-- Canonical smooth one-form section representing `d |Ric|²` for a solution
-candidate at a fixed time. -/
+
+
 noncomputable def ricciNormDuSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -78,7 +78,7 @@ noncomputable def ricciNormDuSec
       exact DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M)
         (S.base.metric t) (S.ricci t))
 
-/-- The canonical tensor-square term in Lemma 10.6 for a solution candidate. -/
+
 def pinchCoupleSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -89,13 +89,13 @@ def pinchCoupleSol
     (fun t y => S.ricci t y)
     (fun t y => ricciNablaSec (I := I) S t y)
 
-/-- Lemma 10.6 book-form evolution with the Ricci-section realization data
-produced canonically from a solution candidate.
 
-This removes the manual `RicSec`, `∇RicSec`, `du |Ric|²`, inverse-basis, and
-norm-identification inputs from `pinchEvol_sec`.  It still deliberately
-consumes the raw quotient setup and pointwise scalar regularity/positivity
-inputs; producing those is the remaining solution-level wrapper frontier. -/
+
+
+
+
+
+
 theorem pinchEvol_solSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -195,7 +195,7 @@ theorem pinchEvol_solSec
           (S.base.metric (t : Real)) (S.ricci (t : Real))
     exact hf.contMDiffAt.mdifferentiableAt (by simp)
 
-/-- The metric-derived Ricci tensor is symmetric at each point. -/
+
 theorem ricciSym_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -260,18 +260,18 @@ theorem ricciSym_can
   exact ricciSym_rm04 (I := I) basis gInv
     (S.ricciAt t x) (S.base.rm04 t x) hTrace
     (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
-      (I := I) (g := S.base.metric t) (hcov := hcov)
+      (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
     (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
-      (I := I) (g := S.base.metric t) (hcov := hcov)
+      (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
     (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
     hInvSym
 
-/-- Canonical signed three-dimensional trace data for the metric-derived
-curvature tensor, in any orthonormal `Fin 3` basis. -/
+
+
 theorem traceData_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -320,7 +320,7 @@ theorem traceData_can
       DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
         (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (S.base.rm04 t x)) :=
     DifferentialGeometry.Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
-      (I := I) (g := S.base.metric t) (hcov := hcov)
+      (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04) basis
   have hRicFirst :
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
@@ -337,9 +337,9 @@ theorem traceData_can
   exact DifferentialGeometry.Integral.Connection.traceDataOfFirst (I := I) (M := M) horth
     hcurv hRicFirst hScalarTrace
 
-/-- Intrinsic zero-order reaction relation for the canonical metric-derived
-Ricci and Riemann tensors.  The proof uses a pointwise Ricci eigenbasis only;
-no smooth eigenframe is selected. -/
+
+
+
 theorem tfReactSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -396,9 +396,9 @@ theorem tfReactSmooth
   simpa [tfRicNormSq, cubicQ, SolutionOn.scalar_eq_metricTrace,
     hnorm, hreact] using hrel
 
-/-- Section 10 assembly producer for the book-facing trace-free heat equation.
-The Ricci-norm heat equation is supplied by the lower `ricciHeatSmooth`, and
-the trace-free Laplacian identity is supplied by `tfLapCore` at regular times. -/
+
+
+
 theorem ricciDataSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -423,8 +423,8 @@ theorem ricciDataSmooth
   simpa [tfLapBook, tfLap, scalarSqLap, scalGradSq, tfRicNormSq,
     tfRicNormSqAt, ricciNormLap, flowG] using h
 
-/-- Trace-free Laplacian projection from the canonical lower analytic
-producer. -/
+
+
 theorem tfLapBook_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -442,12 +442,12 @@ theorem tfLapBook_eq
           (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x :=
   (ricciDataSmooth (I := I) S hS hdim).2
 
-/-- Smooth-solution producer frontier for the canonical non-scalar data in the
-book-facing Lemma 10.4.
 
-The Ricci-norm Laplacian is fixed to the intrinsic `ricciNormLap S`; the
-remaining missing work is isolated in `ricciDataSmooth`, while the pointwise
-three-dimensional cubic reaction relation is proved by `tfReactSmooth`. -/
+
+
+
+
+
 theorem tfDataSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -475,10 +475,10 @@ theorem tfDataSmooth
   rcases ricciDataSmooth (I := I) S _hS _hdim with ⟨hRic, hLap⟩
   exact ⟨ricciReact (I := I) S, hRic, hLap, tfReactSmooth (I := I) S _hdim⟩
 
-/-- Producer frontier for the non-scalar part of the book-facing Lemma 10.4
-statement.  The remaining mathematical frontier is now `tfDataSmooth`, where
-the Ricci-norm Laplacian has already been fixed to the canonical intrinsic
-operator `ricciNormLap S`. -/
+
+
+
+
 theorem tfBookData
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -506,13 +506,13 @@ theorem tfBookData
   rcases tfDataSmooth (I := I) S _hS _hdim with ⟨reaction, hRic, hLap, hRel⟩
   exact ⟨ricciNormLap (I := I) S, reaction, hRic, hLap, hRel⟩
 
-/-- Lemma 10.4 in its book-facing form.
 
-This is intentionally stated outside the component-frame/eigenbasis route:
-the conclusion is the heat equation for `|Ric°|²` along a smooth
-three-dimensional Ricci flow, wherever scalar curvature is nonzero.  The proof
-frontier is now the producer chain from the canonical intrinsic quantities to
-the checked frame-level Section 6 and 3D reaction identities above. -/
+
+
+
+
+
+
 theorem tfHeat_book
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -586,10 +586,10 @@ theorem tfHeat_book
   have hcore' := hcore t x hR
   simpa [hLap t x] using hcore'
 
-/-- Lemma 10.4 from the base Ricci-flow solution predicate.
 
-This is the final consumer-facing form: the strengthened smooth-solution
-package is produced by `smoothOfSol`, not passed as an endpoint hypothesis. -/
+
+
+
 theorem tfHeat_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -610,8 +610,8 @@ theorem tfHeat_sol
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S)) := by
   exact tfHeat_book (I := I) S (smoothOfSol (I := I) S hS) hdim
 
-/-- The trace-free Ricci norm square is nonnegative for the canonical
-three-dimensional Ricci tensor. -/
+
+
 theorem tfNonneg_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -666,7 +666,7 @@ theorem tfNonneg_sol
   rw [htf]
   exact DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
 
-/-- Spatial differentiability of the canonical trace-free Ricci norm square. -/
+
 theorem tfDiff_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -684,8 +684,8 @@ theorem tfDiff_sol
     (hSmooth.ricciRegular.ricci_norm_space (t : Real) ht x).sub
       (hSmooth.scalarRegular.scalar_sq_div_space (t : Real) ht x)
 
-/-- Gradient-field differentiability of the canonical trace-free Ricci norm
-square. -/
+
+
 theorem tfGrad_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -750,8 +750,8 @@ theorem tfGrad_sol
   rw [hsection_eq]
   exact hcombined
 
-/-- Gradient-field differentiability for the negative scalar power appearing
-in Hamilton's quotient. -/
+
+
 theorem scalarPowGrad_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -817,12 +817,12 @@ theorem scalarPowGrad_sol
   rw [hsection_eq]
   exact hsmul
 
-/-- Lemma 10.6 book-form evolution from a base Ricci-flow solution, after
-assembling the raw quotient setup from Lemma 10.4 and scalar evolution.
 
-The remaining explicit geometric region hypothesis is positivity of scalar
-curvature, `R > 0`; quotient regularity and `|Ric^o|^2 >= 0` are produced from
-the solution package. -/
+
+
+
+
+
 theorem pinchEvol_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]

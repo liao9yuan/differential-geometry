@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
 import DifferentialGeometry.Geometry.Operator.Gradient
@@ -15,33 +15,10 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# Pointwise covariant-derivative inner product for the H^1 structure
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file defines the directional covariant
-derivative `tensorCovDerivAt` of a compactly-supported smooth `(r, s)`-tensor
-section, its pointwise gradient inner product `tensorCovDerivPointwiseInner`
-(the inverse-Gram-weighted Hilbert-Schmidt pairing of two covariant
-derivatives), and the global `H^1` inner product `tensorH1Inner`.
-
-The pointwise gradient inner product carries its immediate algebraic API
-(symmetry, additivity, homogeneity, and diagonal non-negativity via the
-spectral diagonalisation of the inverse Gram matrix); these are the
-ingredients the downstream pre-Hilbert structure assembles.
-
-## Main definitions
-
-* `tensorCovDerivAt g r s S x v` — the directional covariant derivative.
-* `tensorCovDerivPointwiseInner g r s S T x` — the pointwise gradient inner
-  product.
-* `tensorH1Inner g r s S T` — the global `H^1` inner product.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -62,7 +39,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -73,9 +50,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The directional covariant derivative of a smooth compactly-supported
-`(r, s)`-tensor section at a point `x`, along a model-fibre direction `v : E`
-(canonically identified with `TangentSpace I x`). -/
 noncomputable def tensorCovDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -83,7 +57,6 @@ noncomputable def tensorCovDerivAt
   tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     (fun y : M => S.toSection y) x v
 
-/-- Unfolding lemma for `tensorCovDerivAt`. -/
 lemma tensorCovDerivAt_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -91,7 +64,6 @@ lemma tensorCovDerivAt_def
       tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun y : M => S.toSection y) x v := rfl
 
-/-- The directional covariant derivative is additive in the section. -/
 lemma tensorCovDerivAt_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -123,7 +95,6 @@ lemma tensorCovDerivAt_add
   rw [hclm]
   rfl
 
-/-- The directional covariant derivative is `ℝ`-homogeneous in the section. -/
 lemma tensorCovDerivAt_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -156,10 +127,6 @@ lemma tensorCovDerivAt_smul
   rw [hext_zero]
   simp [ContinuousLinearMap.smul_apply]
 
-/-- The pointwise Hilbert-Schmidt-type inner product of the covariant
-derivatives of two smooth compactly-supported `(r, s)`-tensor sections at a
-point `x`, expanded against the inverse Gram matrix of `g(x)` on the canonical
-model-fibre basis. -/
 noncomputable def tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) : ℝ :=
@@ -171,7 +138,6 @@ noncomputable def tensorCovDerivPointwiseInner
         (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g r s T x ((chartModelBasis E) j)))
 
-/-- Unfolding lemma for `tensorCovDerivPointwiseInner`. -/
 lemma tensorCovDerivPointwiseInner_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :
@@ -186,7 +152,6 @@ lemma tensorCovDerivPointwiseInner_def
               (tensorCovDerivAt (I := I) (M := M) g r s T x
                 ((chartModelBasis E) j))) := rfl
 
-/-- Symmetry of the pointwise gradient inner product. -/
 lemma tensorCovDerivPointwiseInner_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :
@@ -206,7 +171,6 @@ lemma tensorCovDerivPointwiseInner_symm
   rw [hG]
   rw [tensorInnerPointwise_symm]
 
-/-- Additivity in the first argument of the pointwise gradient inner product. -/
 lemma tensorCovDerivPointwiseInner_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) (x : M) :
@@ -228,7 +192,6 @@ lemma tensorCovDerivPointwiseInner_add_left
   rw [hAdd, TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
   ring
 
-/-- Homogeneity in the first argument of the pointwise gradient inner product. -/
 lemma tensorCovDerivPointwiseInner_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S T : SmoothCcTensor g r s) (x : M) :
@@ -248,10 +211,6 @@ lemma tensorCovDerivPointwiseInner_smul_left
   rw [hSmul, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
   ring
 
-/-- Non-negativity of the pointwise gradient inner product on the diagonal,
-proved by the spectral argument: diagonalise the inverse Gram matrix,
-re-expand the sum into a sum of squares of the pointwise inner product, each
-of which is non-negative. -/
 lemma tensorCovDerivPointwiseInner_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -428,11 +387,6 @@ lemma tensorCovDerivPointwiseInner_nonneg
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x
     (∑ i : Fin n, U i k • vfam i)
 
-/-- The global H^1 inner product of two smooth compactly-supported
-`(r, s)`-tensor sections on a closed Riemannian manifold:
-
-  `⟨S, T⟩_{H^1} := tensorL2Inner g r s S.toFun T.toFun
-                 + ∫_M tensorCovDerivPointwiseInner g r s S T x dvol_g(x)`. -/
 noncomputable def tensorH1Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) : ℝ :=
@@ -440,7 +394,6 @@ noncomputable def tensorH1Inner
     ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T x
       ∂(riemannianVolumeMeasure (I := I) (M := M) g)
 
-/-- Unfolding lemma for the global H^1 inner product. -/
 lemma tensorH1Inner_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

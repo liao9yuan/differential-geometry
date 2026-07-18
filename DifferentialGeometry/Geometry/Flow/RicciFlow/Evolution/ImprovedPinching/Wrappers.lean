@@ -4,11 +4,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching Wrappers
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.ImprovedPinching`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,11 +25,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Lemma 10.6 in the book's hypothesis range.
 
-The equality itself was proved in `pinchEvol_sol` for arbitrary `epsilon`.
-This wrapper records the book assumptions `0 < epsilon < 1`, which are used by
-the later pinching estimates rather than by the algebraic evolution identity. -/
+
+
+
+
 theorem pinchEvol_book
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -64,8 +64,8 @@ theorem pinchEvol_book
         (t : Real) := by
   exact pinchEvol_sol (I := I) S hS hdim epsilon hscalar
 
-/-- Section 10.4 from Section 6 heat equations and a convention-correct
-diagonal 3D Ricci eigenframe. -/
+
+
 theorem tfHeat_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -131,8 +131,8 @@ theorem tfHeat_frame
     (tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
       l1 l2 l3 hscalar hcube hInv hRic hRm)
 
-/-- Section 10.4 from Section 6 heat equations and signed 3D trace data in a
-diagonal frame. -/
+
+
 theorem tfHeat_data
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -201,8 +201,8 @@ theorem tfHeat_data
       fin_cases i <;> fin_cases j <;> simp [DifferentialGeometry.Integral.Connection.ricciDiag3])
     h_lap hRel
 
-/-- Section 10.4 from Section 6 heat equations and convention-correct
-first-trace data in a diagonal frame. -/
+
+
 theorem tfHeat_first
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]

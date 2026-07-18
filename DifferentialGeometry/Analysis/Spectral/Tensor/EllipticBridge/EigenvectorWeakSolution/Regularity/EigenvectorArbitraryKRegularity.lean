@@ -3,73 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorNonSmoothRegularity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevSupportPromotion
 
-/-!
-# Arbitrary-order interior `W^{k,2}` regularity of the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the eigenvector
-chart component `eigenvectorChartComponentFun g r s i α P₀` — the
-chart `P₀`-component of a resolvent eigenvector of the connection Laplacian
-`Δ_∇`, presented as a function `EuclN → ℝ` — has been shown to lie in
-`MemWkp 2 2 … Ω''` on every interior subdomain `Ω''`, and that order-2
-regularity globalises to `MemWkp 2 2 … (chartTargetEuclid α)` on the whole chart
-target.
-
-This module **closes the coupled interior-regularity induction** and ships the
-arbitrary-order conclusion: the eigenvector chart component lies in
-`MemWkp k 2 … (chartTargetEuclid α)` for *every* `k : ℕ`.
-
-## The coupled induction
-
-The induction is on the order. Write
-
-```
-P_m : ∀ α P₀, MemWkp (m + 2) 2
-        (eigenvectorChartComponentFun g r s i α P₀)
-        (chartTargetEuclid α).
-```
-
-* **Base `P_0`.** The committed order-2 interior engine
-  `eigenvector_chartComponent_memWkp` delivers `MemWkp 2 2 … Ω''` on an interior
-  subdomain `Ω''`. Taking `Ω''` to be a thickening of the compact
-  partition-of-unity kernel `chartPouKernel α` inside the chart target, and
-  promoting the interior regularity to the whole chart target via the
-  support-aware promotion `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact`
-  (the chart component vanishes a.e. off the compact kernel), yields global
-  `MemWkp 2 2 … (chartTargetEuclid α)`.
-
-* **Step `P_m → P_{m+1}`.** Given `P_m`, for every `α, P₀` and every direction
-  tuple `directions : Fin (m + 1) → Fin n`:
-  - the carrier-builder `exists_eigenvectorIteratedCarrier` produces a level-`(m
-    + 1)` iterated divergence-form carrier whose direction field is `directions`;
-    its `h_pou` regularity input — chart-component regularity at every order
-    `j + 2`, `j < m + 1` — is supplied by `P_m` through `MemWkp.le_of_le`;
-  - the carrier-to-`W^{2,2}` engine
-    `eigenvectorChartIteratedPartial_memWkp_two_two` delivers global `W^{2,2}` of
-    every `(m + 1)`-fold mixed weak partial, with parent regularity `P_m`;
-  - the polymorphic regularity bridge
-    `eigenvectorChartIteratedPartial_memWkp_of_memWkp` at `k = 1` delivers
-    `W^{1,2}` of every `j`-fold mixed weak partial for `j ≤ m + 1`, again from
-    `P_m`;
-  - the structural order-raiser
-    `eigenvectorChartComponent_memWkp_m_plus_two_of_iterated` assembles these
-    into `MemWkp ((m + 1) + 2) 2 = MemWkp (m + 3) 2` of the chart component.
-
-The arbitrary-`k` headline then specialises `P_m` at `m := k` and drops the
-order from `k + 2` to `k` by the downward monotonicity `MemWkp.le_of_le`.
-
-## Main result
-
-* `eigenvector_chartComponent_memWkp_arbitrary` — the eigenvector
-  chart component lies in `MemWkp k 2 … (chartTargetEuclid α)` for every
-  `k : ℕ`, unconditionally.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -104,7 +37,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `resolventChartComponent_memWkp_of_componentFun`. -/
 private lemma resolventChartComponent_memWkp_of_componentFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -159,7 +91,6 @@ private lemma resolventChartComponent_memWkp_of_componentFun
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp i.fst.val)
 
-/-- Chart-locality-free twin of `eigenvector_chartComponent_memWkp_global`. -/
 private lemma eigenvector_chartComponent_memWkp_global
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -234,7 +165,6 @@ private lemma eigenvector_chartComponent_memWkp_global
     h_chart_open hΩ''_open hK_compact hK_in_Ω'' h_closureΩ''_in_chart
     h_global_Lp h_ae_zero h_interior
 
-/-- Chart-locality-free twin of `eigenvector_chartComponent_memWkp_pm`. -/
 private theorem eigenvector_chartComponent_memWkp_pm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -316,7 +246,6 @@ private theorem eigenvector_chartComponent_memWkp_pm
           h_intermediate_w1p h_top_memWkp_two
       exact h_raised
 
-/-- Chart-locality-free twin of `eigenvector_chartComponent_memWkp_arbitrary`. -/
 theorem eigenvector_chartComponent_memWkp_arbitrary
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

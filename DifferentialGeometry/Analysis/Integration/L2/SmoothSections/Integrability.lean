@@ -9,7 +9,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -24,49 +24,10 @@ import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Borel measurability and `L²` integrability of smooth compactly-supported tensor sections
-
-For a smooth, compactly supported `(r, s)`-tensor section `S : SmoothCcTensor g r s`
-on a smooth manifold `M` equipped with a smooth Riemannian metric `g`, this file
-delivers:
-
-* `SmoothCcTensor.aestronglyMeasurable_inner_self`,
-  `SmoothCcTensor.aestronglyMeasurable_inner_cross` — the diagonal and
-  cross pointwise inner products `b ↦ ⟨S(b), S(b)⟩_{g(b)}` and
-  `b ↦ ⟨S(b), T(b)⟩_{g(b)}` are almost-everywhere strongly measurable
-  with respect to the Riemannian volume measure.
-* `SmoothCcTensor.memL2_toFun` — `S.toFun` lies in `L²` against the
-  Riemannian volume measure.
-* `SmoothCcTensor.integrable_inner_cross` — the cross pointwise inner
-  product is Bochner-integrable against the Riemannian volume measure.
-
-The strategy combines:
-
-1. **Continuity of pointwise inner products.** The chart-local lowering-then-
-   covariant-pairing identity from
-   `TensorMetricLowering.continuous_loweredCompose` (which feeds smooth
-   `(r, s)`-sections through metric-induced index lowering) provides the
-   continuity hypothesis for `TensorRSBundle.continuous_inner_of_smooth_sections`,
-   yielding global continuity of `b ↦ ⟨S(b), T(b)⟩_{g(b)}`.
-
-2. **Compact-support integrability.** Combining continuity with the
-   compact-support property of the inner product (already established in
-   `PreHilbert.lean`) and the fact that the Riemannian volume measure is
-   finite on compact sets (from `Measure.Properties.lean`), we conclude
-   integrability via `Continuous.integrable_of_hasCompactSupport`.
-
-3. **Borel measurability of `S.toFun`.** Since the bundle topology on each
-   tensor fibre coincides with the norm topology on the model fibre
-   (`Bundle.continuousMultilinearMap.topology_eq`), the section's underlying
-   map agrees, after the canonical fibre-to-model coercion, with a
-   continuous map. Continuity gives Borel measurability.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -82,7 +43,7 @@ open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -93,16 +54,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 namespace SmoothCcTensor
 
-set_option linter.unusedSectionVars false in
-/-- The underlying map of a `SmoothCcTensor` has compact support. -/
+
 theorem hasCompactSupport_toFun
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) : HasCompactSupport S.toFun :=
   S.hasCompactSupport
 
-set_option linter.unusedSectionVars false in
-/-- The diagonal pointwise pairing of a `SmoothCcTensor` has compact
-support: it vanishes off `support S.toFun`. -/
+
 theorem hasCompactSupport_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -118,9 +76,7 @@ theorem hasCompactSupport_inner_self
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x 0
 
-set_option linter.unusedSectionVars false in
-/-- The cross pointwise pairing of two `SmoothCcTensor`s has compact
-support. -/
+
 theorem hasCompactSupport_inner_cross
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensor g r s) :
@@ -136,7 +92,6 @@ theorem hasCompactSupport_inner_cross
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
 
-set_option linter.unusedSectionVars false in
 private lemma rs_baseSet_eq_chart_source (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x) α).baseSet =
@@ -149,11 +104,10 @@ private lemma rs_baseSet_eq_chart_source (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 private lemma tangent_baseSet_eq_chart_source (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_trivProj_chart_source
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -173,7 +127,6 @@ private lemma contMDiffOn_trivProj_chart_source
   rw [hbase] at hrewrite
   exact hrewrite
 
-set_option linter.unusedSectionVars false in
 private lemma continuousOn_trivProj_chart_source
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -184,7 +137,6 @@ private lemma continuousOn_trivProj_chart_source
       ((chartAt H α).source) :=
   (contMDiffOn_trivProj_chart_source (I := I) (M := M) S α).continuousOn
 
-set_option linter.unusedSectionVars false in
 private lemma continuous_totalSpace_section
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -192,6 +144,7 @@ private lemma continuous_totalSpace_section
       (fun x : M => TotalSpace.mk' (TensorRSModel r s ℝ E) x (S.toSection x)) :=
   S.toSection.contMDiff.continuous
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_continuousLinearMapAt_self (x : M) :
     (trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x =
       (1 : E →L[ℝ] E) := by
@@ -201,6 +154,7 @@ private lemma tangent_continuousLinearMapAt_self (x : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H x) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H x) v
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_symmL_self (x : M) :
     (trivializationAt E (TangentSpace I) x).symmL ℝ x = (1 : E →L[ℝ] E) := by
   rw [TangentBundle.symmL_trivializationAt_eq_core
@@ -209,7 +163,6 @@ private lemma tangent_symmL_self (x : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H x) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H x) v
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0S_continuousLinearMapAt_self_apply (s : ℕ) (x : M)
     (p : Tensor0SSpace s I x) :
     (trivializationAt (Tensor0SModel s ℝ E)
@@ -235,7 +188,6 @@ private lemma tensor0S_continuousLinearMapAt_self_apply (s : ℕ) (x : M)
   change p (fun i => (1 : E →L[ℝ] E) (v i)) = p v
   congr
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0S_symmL_self_apply (s : ℕ) (x : M)
     (p : Tensor0SModel s ℝ E) :
     (trivializationAt (Tensor0SModel s ℝ E)
@@ -255,7 +207,6 @@ private lemma tensor0S_symmL_self_apply (s : ℕ) (x : M)
         (fun y : M => Tensor0SSpace s I y) x).symmL ℝ x p)
   exact hid.symm.trans hinv
 
-set_option linter.unusedSectionVars false in
 private lemma tensorRS_centre_point_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (x : M) :
@@ -276,7 +227,6 @@ private lemma tensorRS_centre_point_identity
     ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma inner_self_eq_zero_off_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s)
     {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -287,7 +237,6 @@ private lemma inner_self_eq_zero_off_support
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x 0
 
-set_option linter.unusedSectionVars false in
 private lemma inner_cross_eq_zero_off_S_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S T : SmoothCcTensor g r s)
     {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -298,11 +247,7 @@ private lemma inner_cross_eq_zero_off_S_support
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
 
-set_option linter.unusedSectionVars false in
-/-- Continuity of the pointwise inner product on smooth `(r, s)`-tensor
-sections, applied diagonally. Combines the chart-local
-`TensorMetricLowering.continuous_loweredCompose` hypothesis with the
-global gluing theorem `TensorRSBundle.continuous_inner_of_smooth_sections`. -/
+
 theorem continuous_inner_self
     [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -319,9 +264,7 @@ theorem continuous_inner_self
       TensorMetricLowering.continuous_loweredCompose
         (I := I) (M := M) g r s S.toSection α)
 
-set_option linter.unusedSectionVars false in
-/-- Continuity of the pointwise inner product on smooth `(r, s)`-tensor
-sections, applied to a pair (cross). -/
+
 theorem continuous_inner_cross
     [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -339,10 +282,7 @@ theorem continuous_inner_cross
       TensorMetricLowering.continuous_loweredCompose
         (I := I) (M := M) g r s T.toSection α)
 
-set_option linter.unusedSectionVars false in
-/-- The diagonal pointwise inner product `b ↦ ⟨S(b), S(b)⟩_{g(b)}` is
-almost-everywhere strongly measurable with respect to the Riemannian
-volume measure. Follows from continuity. -/
+
 theorem aestronglyMeasurable_inner_self
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -352,10 +292,7 @@ theorem aestronglyMeasurable_inner_self
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (continuous_inner_self (I := I) (M := M) S).aestronglyMeasurable
 
-set_option linter.unusedSectionVars false in
-/-- The cross pointwise inner product `b ↦ ⟨S(b), T(b)⟩_{g(b)}` is
-almost-everywhere strongly measurable with respect to the Riemannian
-volume measure. -/
+
 theorem aestronglyMeasurable_inner_cross
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -366,9 +303,7 @@ theorem aestronglyMeasurable_inner_cross
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (continuous_inner_cross (I := I) (M := M) S T).aestronglyMeasurable
 
-set_option linter.unusedSectionVars false in
-/-- The cross pointwise inner product `b ↦ ⟨S(b), T(b)⟩_{g(b)}` is
-Bochner-integrable against the Riemannian volume measure. -/
+
 theorem integrable_inner_cross
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -383,10 +318,7 @@ theorem integrable_inner_cross
   exact (continuous_inner_cross (I := I) (M := M) S T).integrable_of_hasCompactSupport
     (hasCompactSupport_inner_cross (I := I) (M := M) S T)
 
-set_option linter.unusedSectionVars false in
-/-- The diagonal pointwise inner product `b ↦ ⟨S(b), S(b)⟩_{g(b)}` is
-Bochner-integrable against the Riemannian volume measure: i.e.,
-`S` lies in `L²` (`MemL2`). -/
+
 theorem memL2_toFun
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :

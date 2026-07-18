@@ -1,49 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaFrobenius
 
-/-!
-# Lp-class assembly via chart-α tensor pairing
-
-This module begins the Lp-class assembly of the smooth-case Hessian bridge.
-Using the unconditional chart-α Frobenius invariance (from
-`HessianChartAlphaFrobenius`), we package per-chart pointwise identification
-of the **chart-α tensor pairing** with the chart-invariant Hess pairing.
-
-The remaining gap to the full Lp-class equality
-`hessPairingLpOnLapDom g φ ⟨smoothToH1Compl v, _⟩ = hessPairingSmoothLp g φ v`
-is the partition-of-unity (POU) cancellation of the Christoffel-correction
-difference between the LapDom-side chart-pushed Euclidean Hessian and the
-chart-α tensor Hessian.
-
-## Main results
-
-* `smoothTensorPairing_eq_hessPairingChart_on_chartSource` — pointwise
-  identification on the chart-α source: for `x ∈ (chartAt H α).source`,
-  the chart-α tensor pairing evaluated at `toEuclidean (extChartAt α x)`
-  equals the chart-invariant Hess pairing at `x`.
-
-* `pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise` — for any
-  `x ∈ M`, the POU-weighted sum of chart-α tensor pairings (over the POU
-  finset) equals the chart-invariant Hess pairing at `x`. The sum is
-  understood with the tensor pairing taking its junk value off the chart
-  source, but the POU weights are zero there.
-
-## Gap to full Lp-class equality
-
-The Lp-class equality requires also showing that the LapDom-side pairing
-(using `chartPushedEuclidHessian`) and the chart-α tensor pairing (using
-`chartHessianVOnEuclid`) agree after POU summation. The difference, encoded
-in `smoothPairingChristoffelDiff`, captures:
-- Christoffel correction (built into chart-α tensor Hess, missing from
-  chart-pushed Euclidean Hess).
-- POU Leibniz cross-terms (chart-pushed function is `POU·v_chart_α`, whose
-  second partial involves partials of POU).
-
-The POU-weighted sum of these Christoffel diffs should vanish a.e. (via
-`∑ POU = 1`, `∑ ∂_i POU = 0`, `∑ ∂_i ∂_j POU = 0`), but the proof requires
-careful POU calculus tracking chart-α coordinate derivatives. This is
-reserved for follow-up work.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function FiberBundle
@@ -85,11 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Pointwise identification on the chart-α source.** For smooth `φ : C^∞⟮I, M; ℝ⟯`,
-smooth scalar `v : SmoothScalar g`, chart base point `α : M`, and manifold point
-`x ∈ (chartAt H α).source`, the chart-α tensor pairing evaluated at
-`toEuclidean (extChartAt α x)` equals the chart-invariant Hess pairing
-`hessPairingChart g φ v_bundle x`. -/
 theorem smoothTensorPairing_eq_hessPairingChart_on_chartSource
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -116,12 +67,6 @@ theorem smoothTensorPairing_eq_hessPairingChart_on_chartSource
   rw [h_toE_inv]
   rw [(extChartAt I α).left_inv hx_src_ext]
 
-/-- **POU-weighted pointwise identification.** For smooth `φ` and `v`,
-the POU-weighted sum (over the chart atlas POU finset) of the chart-α tensor
-pairings evaluated at the chart-α image of `x` equals the chart-invariant
-Hess pairing at `x`. The sum is finite (POU finset) and each non-zero term
-satisfies `x ∈ (chartAt H α).source` (since POU(α) is supported in chart α
-source). -/
 theorem pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :

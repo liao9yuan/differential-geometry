@@ -19,7 +19,7 @@ variable {M : Type _} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace CovariantDerivative
 
-private theorem exists_contMDiffSection_eventuallyEq_tangentConstAt
+theorem exists_contMDiffSection_eventuallyEq_tangentConstAt
     [T2Space M] (x : M) (v : TangentSpace I x) :
     ∃ V : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
       (fun p : M => V p) =ᶠ[𝓝 x] tangentConstAt (I := I) x v ∧ V x = v := by
@@ -64,7 +64,7 @@ private theorem exists_contMDiffSection_eventuallyEq_tangentConstAt
   refine ⟨V, hV, ?_⟩
   exact hV.self_of_nhds.trans (tangentConstAt_self (I := I) x v)
 
-private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst
+theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
     {x : M} (X Y Z : TangentSpace I x)
@@ -167,12 +167,12 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangen
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
-/-- The pointwise `(1,3)` Riemann tensor evaluates on smooth tangent sections
-as the connection curvature operator.
 
-The pointwise constructor `riemannCurvatureAt` is defined using chart-constant
-representatives.  This theorem is the raw tensoriality bridge needed before
-bundling the tensor as a smooth section. -/
+
+
+
+
+
 theorem riemannCurvatureAt_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -210,8 +210,8 @@ theorem riemannCurvatureAt_apply_smooth
   simpa [riemannCurvatureAux_eq_connectionRiemannCurvatureField] using
     congrArg (cotangentToDual_gen α) (hraw.trans hsmooth)
 
-/-- The lowered pointwise `(0,4)` Riemann tensor evaluates on smooth tangent
-sections as the metric pairing with the connection curvature operator. -/
+
+
 theorem riemannCurvature04At_apply_smooth
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -364,12 +364,12 @@ private theorem riemannCurvatureAt_contMDiff
   simpa [G, e] using hG
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The bundled `(1,3)` Riemann tensor section of a locally smooth connection.
 
-The value is the intrinsic curvature tensor `R(X,Y)Z` packaged pointwise.  The
-smooth-section proof is the single section-assembly frontier: it should be
-proved from smoothness and tensoriality of `connectionRiemannCurvatureField`,
-not by a coordinate definition. -/
+
+
+
+
+
 noncomputable def rm13Section
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -408,13 +408,13 @@ theorem rm13Section_apply_const
   rw [rm13Section_apply, riemannCurvatureAt_apply_const]
   rfl
 
-/-- The canonical bundled `(1,3)` Riemann section evaluates on smooth tangent
-sections as the connection curvature operator.
 
-This is the smooth-slot tensoriality theorem for curvature.  The pointwise
-constructor `riemannCurvatureAt` is defined using chart-constant
-representatives; this theorem is the bridge from that constructor to arbitrary
-smooth vector-field representatives. -/
+
+
+
+
+
+
 theorem rm13Section_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -523,8 +523,8 @@ private theorem riemannCurvature04At_contMDiff
     riemannCurvature04At_apply_smooth (I := I) g cov hcov Xs Ys Zs Ws p
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The bundled lowered `(0,4)` Riemann tensor section of a locally smooth
-connection and a metric. -/
+
+
 noncomputable def rm04Section
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -561,7 +561,7 @@ theorem rm04Section_apply_const
   rw [rm04Section_apply, riemannCurvature04At_apply_const]
   rfl
 
-/-- Smooth-slot evaluation form of the canonical lowered Riemann section. -/
+
 theorem rm04Section_apply_smooth
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -579,7 +579,7 @@ theorem rm04Section_apply_smooth
   exact riemannCurvature04At_apply_smooth (I := I) g cov hcov X Y Z W x
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The bundled Ricci tensor section of a locally smooth connection. -/
+
 noncomputable def ricciSection
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)

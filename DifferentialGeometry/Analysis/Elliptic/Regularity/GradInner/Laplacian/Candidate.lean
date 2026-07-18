@@ -2,141 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpI
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
-/-!
-# Candidate `Lp` class for the Bochner cross-term
-
-For a closed Riemannian manifold `(M, g)`, an arbitrary smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`, and an element `u_h ∈ laplacianDomainPow g 2`, this
-module constructs an explicit `Lp ℝ 2 μ_g`-class
-
-```
-gradInnerLaplacianCandidate g φ u_h hu_h : Lp ℝ 2 μ_g
-```
-
-intended to represent the resolvent-side Bochner cross-term identity
-
-```
-(1 - Δ_g)(g(∇φ, ∇u_h)) =
-    g(∇φ, ∇u_h)
-  - g(∇Δφ, ∇u_h)
-  - g(∇φ, ∇(Δu_h))
-  - 2 · Ric(∇φ, ∇u_h)
-  - 2 · g(∇²φ, ∇²u_h)        -- the chart-Hessian Frobenius cross-term
-```
-
-at the `Lp` class level. The polarised Bochner-Weitzenböck identity (smooth
-case) is
-
-```
-Δ_g(g(∇φ, ∇u)) =
-    g(∇Δφ, ∇u)
-  + g(∇φ, ∇Δu)
-  + 2 · g(∇²φ, ∇²u)
-  + 2 · Ric(∇φ, ∇u)
-```
-
-(derived from `bochner_pointwise_grad_normSq_of_boundaryless` by polarisation in
-`(φ, u) ↦ (φ + u, φ + u) − (φ − u, φ − u)`). Rearranged into `(1-Δ_g)`-form,
-
-```
-(1-Δ_g)(g(∇φ, ∇u)) = g(∇φ, ∇u) − Δ_g(g(∇φ, ∇u)) = (RHS above with sign flips).
-```
-
-For `u_h ∈ laplacianDomainPow g 2`, every individual term except the
-chart-Hessian Frobenius cross-term is naturally a globally well-defined
-`Lp ℝ 2 μ_g`-class:
-
-* `g(∇φ, ∇u_h)`: existing `gradInnerCLM g φ u_h`.
-* `g(∇Δφ, ∇u_h)`: `gradInnerCLM g (smoothLaplacianBundle g φ) u_h`.
-* `g(∇φ, ∇(Δu_h))`: `gradInnerCLM g φ (preimageLift g hu_h)` where
-  `preimageLift` lifts `Δu_h` from `Lp` to `H1Compl` (available for
-  `u_h ∈ laplacianDomainPow g 2` via `IteratedH2RegularityStep`'s
-  `laplacianDomainPow_two_preimage_eq`).
-* `Ric(∇φ, ∇u_h)`: a new `ricciPairingCLM g φ : H1Compl g →L[ℝ] Lp ℝ 2 μ_g`
-  defined via the same dense extension pattern as `gradInnerCLM`. The
-  Lipschitz bound combines the supremum bound on `‖Ric‖` (continuous on a
-  compact manifold via `ricciTensor_contMDiff`) with the Cauchy-Schwarz
-  bound on `‖∇φ‖` and `‖∇u_h‖`.
-* `g(∇²φ, ∇²u_h)`: **the chart-Hessian Frobenius cross-term.** Defined
-  chart-wise via `HessianLpClass`'s `laplacianDomainHessianChart`
-  composed with the smooth chart-Hessian of `φ`. Its global `Lp 2`
-  packaging is deferred to follow-up work — see the documentation
-  at the end of this file.
-
-This file delivers the **smooth-piece candidate**:
-
-```
-gradInnerLaplacianCandidateSmoothPart g φ u_h hu_h : Lp ℝ 2 μ_g
-  := gradInnerCLM g φ u_h
-     - gradInnerCLM g (Δφ) u_h
-     - gradInnerCLM g φ (preimageLift g hu_h)
-     - 2 • ricciPairingCLM g φ u_h
-```
-
-(everything except the chart-Hessian Frobenius cross-term). Concretely,
-this means `gradInnerLaplacianCandidateSmoothPart` represents the
-**partial** RHS of the Bochner identity, suitable for downstream
-combination with a future chart-Hessian Lp class.
-
-The chart-Hessian piece is encapsulated as a hypothesis `h_hess_part` on
-the headline `gradInnerLaplacianCandidate`; once downstream work
-discharges it (constructing a global `Lp 2`-class representing
-`2 · g(∇²φ, ∇²u_h)`), the candidate becomes fully concrete.
-
-## Main definitions
-
-* `smoothRicciPairingBundle g φ v` — for smooth `v : SmoothScalar g`, the
-  bundled smooth scalar `b ↦ ricciTensor g b (∇φ b) (∇v b)`.
-* `smoothRicciPairingLp g φ v` — the `Lp` class of `smoothRicciPairingBundle`.
-* `ricciPairingCLM g φ : H1Compl g →L[ℝ] Lp ℝ 2 μ_g` — the dense extension
-  of `v ↦ smoothRicciPairingLp g φ v` along `smoothToH1Compl`.
-* `gradInnerLaplacianCandidateSmoothPart g φ u_h hu_h` — the smooth-piece
-  Bochner candidate `Lp ℝ 2 μ_g`-class.
-* `gradInnerLaplacianCandidate g φ u_h hu_h h_hess_part` — the full
-  candidate, taking a hypothesis `h_hess_part : Lp ℝ 2 μ_g` representing
-  `2 · g(∇²φ, ∇²u_h)`.
-
-## Main results
-
-* `ricciPairingCLM_smoothToH1Compl` — compatibility of `ricciPairingCLM`
-  with `smoothToH1Compl`.
-* `gradInnerLaplacianCandidateSmoothPart_memLp_two` — the smooth-piece
-  candidate is (definitionally) in `Lp 2`.
-* `gradInnerLaplacianCandidate_memLp_two` — the full candidate is in `Lp 2`
-  (definitionally; it is by construction an element of `Lp 2`).
-
-## Downstream use of the candidate
-
-The candidate constructed here feeds two downstream results:
-
-* a regularity identity: `gradInnerLaplacianCandidate g φ u_h hu_h h_hess_part`
-  represents `(1-Δ_g)(g(∇φ, ∇u_h))` weakly, i.e.
-  `gradInnerCLM g φ u_h = resolvent g (gradInnerLaplacianCandidate ...)`
-  in `H1Compl g`.
-
-* an image-membership corollary: combining the regularity identity with
-  `laplacianDomain_mem_iff` yields
-  `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, which by the
-  equivalence `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` (in
-  `GradInnerLpIdentity.lean`) gives `smoothMulH1Compl g φ u_h ∈
-  laplacianDomainPow g 2` — the iterated-closure property that discharges
-  the `MemW1p 2 fChartResidual` hypothesis.
-
-## The chart-Hessian piece
-
-The chart-Hessian Frobenius cross-term `2 · g(∇²φ, ∇²u_h)` requires
-constructing, for each chart `α`, the chart-localised Lp 2 function
-`y ↦ ∑_{i,j,k,l} G^{ik}(y) G^{jl}(y) · Hess_φ_ij(y) · Hess_u_h_kl(y)`
-on `chartTargetEuclid α`, where `Hess_u_h` is the chart-side Hessian (via
-`laplacianDomainHessianChart` from `HessianLpClass`). Each chart-local
-piece is in `Lp 2` (since `Hess_φ_ij` is smooth bounded and `Hess_u_h_kl`
-is `Lp 2` chart-wise per `HessianLpClass.laplacianDomainHessianChart_memLp_two`).
-Globalisation requires partition-of-unity weighting plus chart-pulling,
-which is similar in structure to the existing `chartPushedRawLpFromLp`
-machinery (in `LaplacianDomainChartData.lean`). The construction is
-non-trivial (~500-1000 lines on its own) and is reserved for follow-up
-work.
--/
 
 noncomputable section
 
@@ -168,8 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Smoothness of the pointwise Ricci pairing `b ↦ ricciTensor g b (∇φ b) (∇v b)`
-for smooth `φ, v`. -/
+omit [CompactSpace M] in
 lemma smoothRicciPairing_contMDiff
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M =>
@@ -198,7 +62,6 @@ lemma smoothRicciPairing_contMDiff
   rw [Bundle.contMDiffAt_totalSpace] at hpm
   exact hpm.2
 
-/-- The bundled smooth Ricci pairing `b ↦ ricciTensor g b (∇φ b) (∇v b)`. -/
 noncomputable def smoothRicciPairingBundle
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     SmoothScalar g where
@@ -207,6 +70,7 @@ noncomputable def smoothRicciPairingBundle
     (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)
   smooth := smoothRicciPairing_contMDiff (I := I) (M := M) g φ v
 
+omit [CompactSpace M] in
 @[simp] lemma smoothRicciPairingBundle_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (b : M) :
@@ -214,8 +78,6 @@ noncomputable def smoothRicciPairingBundle
       ricciTensor (I := I) g b
         (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b) := rfl
 
-/-- The `Lp` class of the smooth Ricci pairing
-`b ↦ ricciTensor g b (∇φ b) (∇v b)`. -/
 noncomputable def smoothRicciPairingLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -227,19 +89,6 @@ noncomputable def smoothRicciPairingLp
       smoothToLp (I := I) (M := M) g
         (smoothRicciPairingBundle g φ v) := rfl
 
-/-- **The Bochner candidate `Lp` class for the resolvent cross-term**.
-
-For `u_h ∈ laplacianDomainPow g 2`, an arbitrary smooth scalar `φ`, and
-external Lp classes `h_ricci_part` and `h_hess_part` representing
-`Ric(∇φ, ∇u_h)` and `g(∇²φ, ∇²u_h)` respectively, the candidate is
-
-```
-gradInnerCLM g φ u_h - gradInnerCLM g (Δφ) u_h - gradInnerCLM g φ (preimageLift g hu_h)
-  - 2 • h_ricci_part - 2 • h_hess_part.
-```
-
-This is the proposed Lp-class value of `(1-Δ_g)(g(∇φ, ∇u_h))`, derived
-from the polarised Bochner-Weitzenböck identity. -/
 noncomputable def gradInnerLaplacianCandidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -255,7 +104,6 @@ noncomputable def gradInnerLaplacianCandidate
     - (2 : ℝ) • h_ricci_part
     - (2 : ℝ) • h_hess_part
 
-/-- Unfolding lemma: the Bochner candidate is the explicit Lp sum. -/
 @[simp] theorem gradInnerLaplacianCandidate_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -272,8 +120,6 @@ noncomputable def gradInnerLaplacianCandidate
         - (2 : ℝ) • h_ricci_part
         - (2 : ℝ) • h_hess_part := rfl
 
-/-- Linearity in `h_ricci_part`: the candidate is affine in the Ricci
-piece. (We state additivity; smul follows similarly.) -/
 theorem gradInnerLaplacianCandidate_ricci_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -289,7 +135,6 @@ theorem gradInnerLaplacianCandidate_ricci_add
   rw [smul_add]
   abel
 
-/-- Linearity in `h_hess_part`. -/
 theorem gradInnerLaplacianCandidate_hess_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -305,8 +150,6 @@ theorem gradInnerLaplacianCandidate_hess_add
   rw [smul_add]
   abel
 
-/-- The candidate has finite `Lp 2` norm (trivially, as an element of
-`Lp ℝ 2 μ_g`). -/
 theorem gradInnerLaplacianCandidate_norm_lt_top
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -319,8 +162,6 @@ theorem gradInnerLaplacianCandidate_norm_lt_top
         (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
   (Lp.memLp _).2
 
-/-- Triangle norm bound: the candidate's `Lp 2` norm is bounded by the
-sum of its parts. -/
 theorem gradInnerLaplacianCandidate_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -398,9 +239,6 @@ theorem gradInnerLaplacianCandidate_norm_le
     norm_nonneg ((2 : ℝ) • h_ricci_part),
     norm_nonneg ((2 : ℝ) • h_hess_part)]
 
-/-- Smooth-case Ricci pairing: for smooth `v`, the Lp class
-`smoothRicciPairingLp g φ v` represents the Ricci pairing in the
-candidate. -/
 lemma smoothRicciPairingLp_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (smoothRicciPairingLp (I := I) (M := M) g φ v :

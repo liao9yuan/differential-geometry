@@ -10,19 +10,19 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Mixed Tensor Fibers
 
-`TensorRSSpace r s I x` is modeled as
-`Tensor0SSpace r I x ->L Tensor0SSpace s I x`.  Once the metric-induced inner
-products on the covariant tensor fibers are supplied, a mixed tensor gets its
-inner product by the Hilbert-Schmidt formula
 
-`<A, B> = tr(A^† B)`.
 
-The construction below is fiberwise and metric-bound.  It uses the covariant
-tensor metrics constructed recursively from the Riemannian metric.
--/
+
+
+
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -45,8 +45,8 @@ def componentL2SqRS
   ∑ upper : Fin r -> Idx, ∑ lower : Fin s -> Idx,
     (componentRS_gen (I := I) basis A upper lower) ^ 2
 
-/-- In an orthonormal-coordinate basis, the Hilbert-Schmidt squared norm of a
-mixed tensor is the sum of squares of its components. -/
+
+
 theorem normSqRS_identity_eq_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) (r s : Nat)
@@ -89,8 +89,8 @@ theorem normSqRS_identity_eq_componentL2SqRS
       (componentRS_gen (I := I) basis A upper lower) ^ 2
   ring
 
-/-- The `(1,2)` specialization of
-`normSqRS_identity_eq_componentL2SqRS`, written as a three-index sum. -/
+
+
 theorem normSqRS_one_two_identity_eq_sum
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -109,8 +109,8 @@ theorem normSqRS_one_two_identity_eq_sum
   intro k _
   rw [sum_fin_two_fun]
 
-/-- A single mixed-tensor component is bounded by the full component `l^2`
-sum in the same basis. -/
+
+
 theorem componentRS_sq_le_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} {r s : Nat}
@@ -142,8 +142,8 @@ theorem componentRS_sq_le_componentL2SqRS
       (by simp)
   exact h_lower.trans h_upper
 
-/-- In an orthonormal-coordinate basis, the absolute value of a single
-mixed-tensor component is bounded by the metric-induced tensor norm. -/
+
+
 theorem abs_componentRS_le_sqrt_normSqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) (r s : Nat)
@@ -181,6 +181,116 @@ theorem abs_componentRS_le_sqrt_normSqRS
         (Real.sqrt (normSqRS (I := I) (g := g) (x := x) r s A)) ^ 2 := by
     simpa [sq_abs] using hsq
   exact abs_le_of_sq_le_sq hsq_no_abs (Real.sqrt_nonneg _)
+
+
+
+
+theorem sqrt_normSqRS_apply
+    (g : SmoothMetric_gen I M) {x : M} {r s : Nat}
+    (A : TensorRSSpace r s I x) (input : Tensor0SSpace r I x) :
+    Real.sqrt (normSq0S (I := I) g x s (A input)) <=
+      Real.sqrt (normSqRS (I := I) (g := g) (x := x) r s A) *
+        Real.sqrt (normSq0S (I := I) g x r input) := by
+  classical
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  let basis := ob.toBasis
+  have hON : forall i j,
+      g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    change g.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g x) (ob.toBasis i) (ob.toBasis j)]
+    change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+    rw [← hinner]
+    exact ob.inner_eq_ite i j
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  have hout :
+      normSq0S (I := I) g x s (A input) =
+        ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            component0S (I := I) basis input upper *
+              componentRS_gen (I := I) basis A upper lower) ^ 2 := by
+    rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
+    apply Finset.sum_congr rfl
+    intro lower _
+    rw [componentRS_apply_input_eq_sum (I := I) basis A input lower]
+  have hinput :
+      normSq0S (I := I) g x r input =
+        ∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+          (component0S (I := I) basis input upper) ^ 2 :=
+    normSq0S_identity_eq_sum_sq (I := I) g x r basis hinv input
+  have hA :
+      normSqRS (I := I) (g := g) (x := x) r s A =
+        ∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+          ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+            (componentRS_gen (I := I) basis A upper lower) ^ 2 := by
+    rw [normSqRS_identity_eq_componentL2SqRS (I := I) g x r s basis hinv A]
+    rfl
+  have hsq :
+      (∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            component0S (I := I) basis input upper *
+              componentRS_gen (I := I) basis A upper lower) ^ 2) <=
+        (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+          ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+            (componentRS_gen (I := I) basis A upper lower) ^ 2) *
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            (component0S (I := I) basis input upper) ^ 2) := by
+    calc
+      (∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            component0S (I := I) basis input upper *
+              componentRS_gen (I := I) basis A upper lower) ^ 2)
+          <= ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+            (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              (component0S (I := I) basis input upper) ^ 2) *
+            (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              (componentRS_gen (I := I) basis A upper lower) ^ 2) := by
+            apply Finset.sum_le_sum
+            intro lower _
+            exact Finset.sum_mul_sq_le_sq_mul_sq Finset.univ _ _
+      _ = (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+                (componentRS_gen (I := I) basis A upper lower) ^ 2) *
+            (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              (component0S (I := I) basis input upper) ^ 2) := by
+            rw [← Finset.mul_sum, Finset.sum_comm]
+            ring
+  rw [hout, hA, hinput]
+  calc
+    Real.sqrt
+        (∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            component0S (I := I) basis input upper *
+              componentRS_gen (I := I) basis A upper lower) ^ 2)
+        <= Real.sqrt
+          ((∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+                (componentRS_gen (I := I) basis A upper lower) ^ 2) *
+            (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+              (component0S (I := I) basis input upper) ^ 2)) :=
+      Real.sqrt_le_sqrt hsq
+    _ = Real.sqrt
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            ∑ lower : Fin s -> Fin (Module.finrank Real (TangentSpace I x)),
+              (componentRS_gen (I := I) basis A upper lower) ^ 2) *
+        Real.sqrt
+          (∑ upper : Fin r -> Fin (Module.finrank Real (TangentSpace I x)),
+            (component0S (I := I) basis input upper) ^ 2) := by
+      rw [Real.sqrt_mul (Finset.sum_nonneg fun _ _ =>
+        Finset.sum_nonneg fun _ _ => sq_nonneg _)]
 
 
 end

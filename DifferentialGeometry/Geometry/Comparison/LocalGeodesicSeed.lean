@@ -18,19 +18,7 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Local geodesic seeded at a point and velocity
-
-Existence of a fresh local geodesic launched from a point `y` with prescribed
-initial velocity `w`, on a small symmetric interval `Ioo (-δ) δ`, satisfying the
-intrinsic moving-foot geodesic equation throughout (and, in the velocity form,
-exposing its launch velocity and chart-source membership).  This is the
-continuation seed consumed by the endpoint-continuation producer.
-
-The headline assembly lives in `Comparison.HopfRinow`, which imports this file.
--/
 
 noncomputable section
 
@@ -50,7 +38,7 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -59,22 +47,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **Local geodesic existence on an open interval, intrinsic form.**
-From the local existence-of-geodesics theorem (`exists_geodesic_with_initial_velocity_at`,
-which yields an integral curve of the chart-fixed geodesic spray on a
-neighbourhood of `0`), the moving-foot geodesic equation
-`HasGeodesicEquationAt g η t` holds at *every* `t` in a small open
-interval `Ioo (-δ) δ`, not merely at the launch time `0`.
-
-The key step is that `IsMIntegralCurveAt` packages an integral-curve
-property holding on a whole *neighbourhood* of the launch time, so it
-restricts to `IsMIntegralCurveAt f (gvfChart g y) t` for every `t` in a
-small ball, while the lift's foot stays inside the launch chart at `y`
-(continuity of the projection plus openness of `(chartAt H y).source`).
-Each such `t` therefore carries an `IsGeodesicAt g η t` witness whose
-chart basepoint is held fixed at the launch point `y`, and the
-unconditional bridge `IsGeodesicAt.hasGeodesicEquationAt` converts it to
-the moving-foot equation. -/
 theorem exists_isGeodesicOn_Ioo_at
     (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
     ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧
@@ -110,18 +82,6 @@ theorem exists_isGeodesicOn_Ioo_at
     ⟨y, f, hηt, ht_src, hf_at_t⟩
   exact hgeo_at.hasGeodesicEquationAt g
 
-/-- **Local geodesic existence on an open interval, exposing the launch
-velocity.** Strengthens `exists_isGeodesicOn_Ioo_at`: the fresh local geodesic
-`η` launched from `(y, w)` not only satisfies the moving-foot geodesic equation
-on a symmetric interval `Ioo (-δ) δ`, but additionally `η 0 = y`, `η` is
-continuous at `0`, and its raw manifold velocity at the launch time is the seed
-vector `w`: `mfderiv 𝓘(ℝ, ℝ) I η 0 1 = w`.
-
-The proof reuses the integral-curve construction of `exists_isGeodesicOn_Ioo_at`
-(the same lift `f` of the chart-fixed geodesic spray with `f 0 = ⟨y, w⟩`),
-and reads off the launch velocity through
-`IsMIntegralCurveAt.mfderiv_proj_one`: the manifold derivative of the projected
-curve at the launch time equals the fibre vector `(f 0).snd = w`. -/
 theorem exists_isGeodesicOn_Ioo_at_velocity
     (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
     ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧ ContinuousAt η 0 ∧

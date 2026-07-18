@@ -22,93 +22,6 @@ import Mathlib.Topology.Algebra.Support
 import Mathlib.Topology.Compactness.LocallyFinite
 import Mathlib.Topology.Compactness.LocallyCompact
 
-/-!
-# Stokes' theorem on a smooth Riemannian manifold-with-boundary
-(chart-by-chart formulation)
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` whose model `I`
-admits a smooth boundary stratum (`[hI : HasSmoothBoundary E H I]`), this
-file establishes the chart-α local form of the divergence theorem
-(integration-by-parts identity for the chart-α local within-divergence),
-in chart-by-chart form.
-
-Since the global outward unit normal vector field on the boundary is, in
-the present architecture, established only pointwise (not as a smooth
-bundle section), the natural formulation of the boundary contribution is
-chart-by-chart: the chart-α boundary face integral packages the chart-α
-boundary contribution as a single quantity, parameterised by a chart-α-
-supported smooth weight function.
-
-## Main definition
-
-* `chartBoundaryFaceIntegral g α X f` — the chart-α boundary face integral
-  of the smooth tangent section `X` against a chart-α-supported smooth
-  weight function `f : M → ℝ`. By definition, it is the chart-α-integral
-  `∫ (localDivergenceWithin g α X x) · f x ∂(chartLocalMeasure g α)`.
-
-  The dependence on a chart-supported weight `f` is structural: in the
-  with-boundary setting the chart-α local within-divergence and the global
-  divergence may disagree at chart-α boundary points, so the chart-α
-  boundary contribution is well-defined only when accompanied by a
-  chart-supported weight that selects the chart-α contribution.
-
-## Main results
-
-* `chart_local_stokes_within` — for any smooth tangent section `X` and any
-  smooth function `f : M → ℝ`, the chart-α-pulled-back integral of
-  `localDivergenceWithin g α X · f` equals the chart-α boundary face
-  integral. By construction this is a definitional equality.
-
-* `chartBoundaryFaceIntegral_eq_neg_tangentSectionAction_of_interior_support`
-  — the chart-α boundary face integral against a smooth chart-supported,
-  interior-supported test function equals minus the chart-α-pulled-back
-  tangent-section action integral. This is the chart-α form of integration
-  by parts in the with-boundary setting.
-
-* `chartBoundaryFaceIntegral_zero_weight` — vanishing under a zero weight.
-
-## Geometric interpretation
-
-By the chart-local Voss–Weyl identity together with Mathlib's box
-divergence theorem applied to a Euclidean rectangle that contains the
-chart image of the support of the integrand, the chart-α boundary face
-integral equals an integral over `(extChartAt I α).target ∩ frontier (range I)`
-of the chart-coordinate first component of `f · X` against the chart-target
-boundary measure (chart density restricted to the boundary face). The
-matching of these chart-α boundary face integrals to a single intrinsic
-surface integral over `boundary I M` against an outward unit normal vector
-field requires further geometric hypotheses on the boundary; that
-identification is **not** carried out in the present file.
-
-## Architectural note on the global Stokes theorem
-
-A natural goal for this file would be the global Stokes theorem
-$$\int_M \operatorname{div}_g^{(\partial)}(X)\, d\mu_g
-   = \sum_\alpha \chartBoundaryFaceIntegral{g, \alpha, X, \rho_\alpha},$$
-where the sum is over a smooth partition of unity subordinate to the chart
-atlas. Decomposing the global integral into chart-local integrals by the
-canonical Riemannian volume measure formula
-`riemannianMeasure_def` gives
-$$\int_M \operatorname{div}_g^{(\partial)}(X)\, d\mu_g
-   = \sum_\alpha \int_M \operatorname{div}_g^{(\partial)}(X)\, \rho_\alpha\,
-       d(\chartLocalMeasure{g, \alpha}).$$
-Identifying each chart-local integrand
-`divergence_g_with_boundary g X · ρ_α` with the chart-α boundary face
-integrand `localDivergenceWithin g α X · ρ_α` requires showing that
-the chart-α boundary set `(chartAt H α).source ∩ I.boundary M` has
-`chartLocalMeasure g α`-measure zero. By the chart-local pushforward
-characterisation of `chartLocalMeasure g α`, this reduces to showing that
-the chart-target boundary `(extChartAt I α).target ∩ frontier (range I)`
-is Lebesgue-null in `E`. This Lebesgue-null property is true for the
-canonical `EuclideanHalfSpace n` model (the boundary face is a
-codimension-one affine subspace) but is not stated as a generic fact of
-`HasSmoothBoundary` in the present infrastructure, so the global Stokes
-theorem in chart-by-chart form is not proved here. The sole structural
-statement at the global level is
-`integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support`
-(`WithBoundary/Divergence/InteriorCompactSupport.lean`), which establishes the boundary-vanishing
-case.
--/
 
 noncomputable section
 
@@ -121,7 +34,7 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -132,29 +45,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- `I.interior M` is open in `M`. Re-export of
-`ModelWithCorners.isOpen_interior` at `n = ∞`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-/-- **Chart-α boundary face integral.** The chart-α boundary contribution of
-the with-boundary divergence: by definition, the integral of the chart-α
-local within-divergence times a smooth weight function `f : M → ℝ`
-against the chart-local measure `chartLocalMeasure g α`.
-
-The dependence on a smooth weight `f` is structural: when `f` has
-topological support in the chart base set at `α`, this quantity packages
-the chart-α boundary contribution as a single real number; for general
-`f`, it is the chart-α-pulled-back integral of
-`localDivergenceWithin g α X · f`.
-
-Geometric interpretation. By the chart-local Voss–Weyl formula and Mathlib's
-box divergence theorem applied to a Euclidean rectangle that contains the
-chart image of the support of the integrand, this quantity equals an
-integral over `(extChartAt I α).target ∩ frontier (range I)` of the
-chart-coordinate first component of `f · X` against the chart-target
-boundary measure. -/
 noncomputable def chartBoundaryFaceIntegral
     (g : SmoothRiemannianMetric I M)
     (α : M)
@@ -163,8 +58,7 @@ noncomputable def chartBoundaryFaceIntegral
   ∫ x, localDivergenceWithin (I := I) g α X x * f x
     ∂(chartLocalMeasure (I := I) g α)
 
-/-- Unfolding lemma — the chart-α boundary face integral is the
-chart-α-pulled-back integral of `localDivergenceWithin g α X · f`. -/
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartBoundaryFaceIntegral_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -173,10 +67,7 @@ chart-α-pulled-back integral of `localDivergenceWithin g α X · f`. -/
       ∫ x, localDivergenceWithin (I := I) g α X x * f x
         ∂(chartLocalMeasure (I := I) g α) := rfl
 
-/-- **Chart-α Stokes (with-boundary).** For a smooth tangent section `X` and
-a smooth function `f : M → ℝ`, the chart-α-pulled-back integral of
-`localDivergenceWithin g α X · f` equals the chart-α boundary face
-integral. -/
+omit [InnerProductSpace ℝ E] in
 theorem chart_local_stokes_within
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -185,7 +76,7 @@ theorem chart_local_stokes_within
         ∂(chartLocalMeasure (I := I) g α) =
       chartBoundaryFaceIntegral (I := I) g α X f := rfl
 
-/-- The chart-α boundary face integral with zero weight vanishes. -/
+omit [InnerProductSpace ℝ E] in
 @[simp] theorem chartBoundaryFaceIntegral_zero_weight
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -196,13 +87,6 @@ theorem chart_local_stokes_within
     funext x; rw [mul_zero]
   rw [h, integral_zero]
 
-/-- **Chart-α IBP relation (interior support).** When the test function `f`
-has topological support strictly inside the manifold interior and inside
-the chart base set at `α`, the chart-α boundary face integral against `f`
-equals minus the chart-α-pulled-back tangent-section action integral. This
-is the with-boundary integration-by-parts identity from
-`chart_local_ibp_within` rephrased through the chart-α boundary face
-integral. -/
 theorem chartBoundaryFaceIntegral_eq_neg_tangentSectionAction_of_interior_support
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -220,14 +104,7 @@ section StokesGlobal
 
 variable [hI : HasSmoothBoundary E H I]
 
-/-- For a manifold-boundary point `x` lying in the source of a chart at any
-base point `α`, the chart-α image `extChartAt I α x` lies in the model-level
-boundary `frontier (Set.range I)`. This is the chart-independent
-characterisation of boundary points (cf.
-`ModelWithCorners.isBoundaryPoint_iff_of_mem_atlas`).
-
-This generalises `BoundaryManifold.extChart_mem_frontier_of_mem_source` to
-arbitrary `x : M`, without packaging `x` as a `BoundaryManifold` element. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] hI in
 private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
     (α : M) {x : M}
     (hx_chart : x ∈ (chartAt H α).source)
@@ -265,8 +142,7 @@ private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
         (s := (extChartAt I α).target)).le_bot
       ⟨hx_target_int, hx_frontier⟩
 
-/-- The image under `(extChartAt I α).symm` of the chart-α boundary stratum
-intersected with the chart target is contained in the model-level boundary. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] hI in
 private lemma symm_preimage_chart_boundary_inter_target_subset_frontier
     (α : M) :
     (extChartAt I α).symm ⁻¹' ((chartAt H α).source ∩ I.boundary M)
@@ -285,10 +161,7 @@ private lemma symm_preimage_chart_boundary_inter_target_subset_frontier
   rw [h_right] at h_front
   exact h_front
 
-/-- The chart-α boundary set `(chartAt H α).source ∩ I.boundary M` has
-`chartLocalMeasure g α`-measure zero. This is the key consequence of the
-boundary's codimension-one null property
-(`HasSmoothBoundary.range_frontier_basis_addHaar_zero`). -/
+omit [InnerProductSpace ℝ E] in
 lemma chartLocalMeasure_chart_boundary_zero
     (g : SmoothRiemannianMetric I M) (α : M) :
     chartLocalMeasure (I := I) g α
@@ -341,11 +214,6 @@ lemma chartLocalMeasure_chart_boundary_zero
     rw [h_eq, MeasureTheory.Measure.smul_apply, h_fb, smul_zero]
   exact MeasureTheory.measure_mono_null hsub h_mh_zero
 
-/-- For a smooth Riemannian metric `g`, smooth tangent section `X`, and any
-`α : M`, the global with-boundary divergence equals the chart-α local
-within-divergence `chartLocalMeasure g α`-almost-everywhere on the chart-α
-source. The exception set is the chart-α boundary, which has measure zero by
-`chartLocalMeasure_chart_boundary_zero`. -/
 private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -371,12 +239,6 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     rw [← I.compl_interior]
     exact hx_int
 
-/-- For each chart α, the integral
-`∫ (divergence_g_with_boundary g X) · ρ α x ∂(chartLocalMeasure g α)` equals
-`∫ (localDivergenceWithin g α X) · ρ α x ∂(chartLocalMeasure g α)`, when ρ α
-has chart-α-supported topological support. The proof uses
-`chartLocalMeasure_chart_boundary_zero` to pass between the two divergence
-forms a.e. -/
 private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -397,10 +259,7 @@ private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
       exact hx_nots (subset_tsupport _ hne)
     rw [hρ_zero, mul_zero, mul_zero]
 
-/-- The chart-local measure of `I.boundary M` (the entire boundary, not just
-the part inside chart α source) is zero. Combines
-`chartLocalMeasure_apply_of_disjoint_source` (for the part outside chart α
-source) with `chartLocalMeasure_chart_boundary_zero` (for the part inside). -/
+omit [InnerProductSpace ℝ E] in
 private lemma chartLocalMeasure_boundary_zero_of_total
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M) :
     chartLocalMeasure (I := I) g α (I.boundary M) = 0 := by
@@ -430,10 +289,7 @@ private lemma chartLocalMeasure_boundary_zero_of_total
       chartLocalMeasure_apply_of_disjoint_source (I := I) g α hdiff_meas hdiff_disj]
   simp
 
-/-- A continuous compactly-supported function on a chart-source is integrable
-against the chart-local measure. (Reproduction of an analogous private lemma
-in `WithBoundary/Divergence/InteriorCompactSupport.lean`, exposed here so the global Stokes proof can
-use it.) -/
+omit [InnerProductSpace ℝ E] hI in
 private lemma integrable_chartLocalMeasure_of_cs_chartSource
     [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -474,28 +330,6 @@ private lemma integrable_chartLocalMeasure_of_cs_chartSource
           simp
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
-/-- **Global Stokes theorem on a compact manifold-with-boundary**, in
-chart-by-chart form. The integral of the with-boundary divergence
-`divergence_g_with_boundary g X` against the canonical Riemannian volume
-measure on a compact smooth Riemannian manifold equals the finite sum, over
-the chart-atlas POU support set, of the chart-α boundary face integrals
-`chartBoundaryFaceIntegral g α X (ρ α)` against the chart-atlas POU `ρ`.
-
-The proof uses three ingredients:
-
-1. **Measure-level POU decomposition.** On a compact manifold the canonical
-   Riemannian volume measure equals the finite sum of POU-weighted chart-local
-   measures (`riemannianVolumeMeasure_eq_finset_sum`).
-2. **Boundary-null reduction.** The chart-α boundary stratum has
-   `chartLocalMeasure g α`-measure zero (`chartLocalMeasure_chart_boundary_zero`,
-   from the typeclass field `range_frontier_basis_addHaar_zero`). Hence
-   `divergence_g_with_boundary g X` and `localDivergenceWithin g α X` agree
-   `chartLocalMeasure g α`-a.e. on the chart-α source.
-3. **Chart-by-chart reassembly.** Each summand becomes the chart-α boundary
-   face integral via the `withDensity` identity for Bochner integrals.
-
-This is the with-boundary analogue of the closed-manifold (boundaryless)
-Stokes / divergence theorem on a compact manifold. -/
 theorem stokes_compact_via_pou
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

@@ -3,19 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 import Mathlib.Analysis.Calculus.MeanValue
 
-/-!
-# Friedrichs commutator estimate
-
-For `u ∈ L²(ℝ^d)` and a smooth bounded function `a` with bounded gradient on
-`E := EuclideanSpace ℝ (Fin d)`, we control the commutator
-```
-[a, *φ_ε](u)(x) := a x · (u ⋆ φ_ε)(x) - ((a · u) ⋆ φ_ε)(x)
-```
-in `L²` by `Λ · ε · ‖u‖_{L²}`, where `Λ` is a uniform bound on both `|a|`
-and `‖∇a‖`. As a consequence, the commutator tends to `0` in `L²` as
-`ε → 0⁺`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -27,14 +14,12 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The Friedrichs commutator
-`commutatorPointwise a u φ x := a x · (u ⋆ φ) x - ((a · u) ⋆ φ) x`. -/
 def commutatorPointwise (a u φ : E → ℝ) (x : E) : ℝ :=
   a x * (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] φ) x -
     ((fun y => a y * u y) ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] φ) x
 
 omit [NeZero d] in
-/-- Sup-norm bound on a continuous compactly supported function. -/
+
 private lemma exists_sup_bound_nonneg
     {φ : E → ℝ} (hφ_cont : Continuous φ) (hφ_compact : HasCompactSupport φ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ y, |φ y| ≤ M := by
@@ -43,7 +28,7 @@ private lemma exists_sup_bound_nonneg
   exact (hM y).trans (le_max_left _ _)
 
 omit [NeZero d] in
-/-- A bounded measurable function preserves `MemLp` under pointwise product. -/
+
 private lemma memLp_smul_of_bound
     {a u : E → ℝ}
     (ha_meas : AEStronglyMeasurable a (volume : Measure E))
@@ -67,7 +52,7 @@ private lemma memLp_smul_of_bound
     exact mul_le_mul_of_nonneg_right (ha_bd x) (abs_nonneg _)
 
 omit [NeZero d] in
-/-- The map `t ↦ x - t` is measure-preserving on `E`. -/
+
 private lemma measurePreserving_constSub' (x : E) :
     MeasurePreserving (fun t : E => x - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -79,15 +64,14 @@ private lemma measurePreserving_constSub' (x : E) :
   rw [heq]; exact h_addL.comp h_neg
 
 omit [NeZero d] in
-/-- Compact support of the translated kernel. -/
+
 private lemma hasCompactSupport_translateSub
     {φ : E → ℝ} (hφ_compact : HasCompactSupport φ) (x : E) :
     HasCompactSupport (fun t : E => φ (x - t)) :=
   hφ_compact.comp_homeomorph (Homeomorph.subLeft x)
 
 omit [NeZero d] in
-/-- For `u ∈ L²` and `φ` continuous compactly supported, the convolution
-integrand `t ↦ u(t) · φ(x - t)` is integrable. -/
+
 private lemma integrable_conv_integrand
     {u φ : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E))
@@ -141,7 +125,7 @@ private lemma integrable_conv_integrand
   exact h_ind.const_mul M
 
 omit [NeZero d] in
-/-- The convolution `(u ⋆ φ) x` equals `∫ u(t) · φ(x - t) dt` (with `lsmul ℝ ℝ`). -/
+
 private lemma conv_apply
     {u φ : E → ℝ} (x : E) :
     (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] φ) x =
@@ -149,7 +133,7 @@ private lemma conv_apply
   simp [MeasureTheory.convolution_def, ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
 omit [NeZero d] in
-/-- Pointwise integral representation of the commutator. -/
+
 lemma commutatorPointwise_eq_integral
     {a u φ : E → ℝ} {Λ : ℝ}
     (ha_cont : Continuous a)
@@ -175,9 +159,7 @@ lemma commutatorPointwise_eq_integral
   ring
 
 omit [NeZero d] in
-/-- Pointwise bound on the commutator integrand: when `φ` has support in
-`closedBall 0 ε` and `a` is `Λ`-Lipschitz, the integrand `φ(x-t)·(a x - a t)·u(t)`
-is dominated by `φ(x-t)·(Λε)·|u t|`. -/
+
 private lemma abs_commutator_integrand_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ)
@@ -211,7 +193,7 @@ private lemma abs_commutator_integrand_le
     exact mul_le_mul_of_nonneg_left h_sub_bnd hub
 
 omit [NeZero d] in
-/-- `|commutator(x)| ≤ Λε · ∫ φ(x-t) |u(t)| dt`. -/
+
 lemma abs_commutatorPointwise_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ)
@@ -248,7 +230,7 @@ lemma abs_commutatorPointwise_le
         congr 1; funext t; ring
 
 omit [NeZero d] in
-/-- Translate-invariance of the lintegral on `E`. -/
+
 private lemma lintegral_constSub
     (x : E) (f : E → ℝ≥0∞) :
     ∫⁻ t, f (x - t) ∂(volume : Measure E) =
@@ -257,7 +239,7 @@ private lemma lintegral_constSub
   exact hMP.lintegral_comp_emb (Homeomorph.subLeft x).measurableEmbedding f
 
 omit [NeZero d] in
-/-- The pointwise bound, expressed in `ℝ≥0∞`. -/
+
 private lemma enorm_commutatorPointwise_le_lintegral
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)
@@ -303,8 +285,7 @@ private lemma enorm_commutatorPointwise_le_lintegral
   exact le_of_eq (by rw [Real.enorm_eq_ofReal_abs])
 
 omit [NeZero d] in
-/-- Cauchy–Schwarz at the lintegral level for our integrand:
-`(∫⁻ ofReal(φ(x-t))·‖u t‖ₑ)² ≤ (∫⁻ ofReal(φ(x-t)))·(∫⁻ ofReal(φ(x-t))·‖u t‖ₑ²)`. -/
+
 private lemma lintegral_phi_norm_u_sq_le
     {φ : E → ℝ}
     (hφ_meas : Measurable φ)
@@ -370,7 +351,7 @@ private lemma lintegral_phi_norm_u_sq_le
   exact hsq
 
 omit [NeZero d] in
-/-- For continuous compactly supported `φ : E → ℝ`, `∫⁻ ofReal(φ) < ∞`. -/
+
 private lemma lintegral_ofReal_phi_lt_top
     {φ : E → ℝ} (hφ_cont : Continuous φ) (hφ_compact : HasCompactSupport φ) :
     ∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E) < ∞ := by
@@ -385,15 +366,14 @@ private lemma lintegral_ofReal_phi_lt_top
   exact ENNReal.ofReal_le_ofReal (le_abs_self _)
 
 omit [NeZero d] in
-/-- AE measurability of `t ↦ ‖u t‖ₑ ^ 2` from `MemLp u 2`. -/
+
 private lemma aemeasurable_enorm_sq
     {u : E → ℝ} (hu : MemLp u 2 (volume : Measure E)) :
     AEMeasurable (fun t : E => ‖u t‖ₑ ^ (2 : ℝ)) (volume : Measure E) :=
   ((hu.aestronglyMeasurable.aemeasurable.enorm).pow_const _)
 
 omit [NeZero d] in
-/-- The square of the L²-norm of the commutator is bounded by
-`(Λε · ‖φ‖_{L¹})² · ‖u‖_{L²}²`. -/
+
 private lemma eLpNorm_commutatorPointwise_sq_le_aux
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)
@@ -530,8 +510,7 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     mul_assoc Eu B B, mul_comm Eu (B * B), ← mul_assoc]
 
 omit [NeZero d] in
-/-- L²-norm bound on the commutator:
-`‖[a, *φ](u)‖_{L²} ≤ Λε · ‖φ‖_{L¹} · ‖u‖_{L²}`. -/
+
 theorem eLpNorm_commutatorPointwise_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)
@@ -572,8 +551,7 @@ theorem eLpNorm_commutatorPointwise_le
   rw [hRHS] at h_root
   exact h_root
 
-/-- For `0 < ε`, the rescaled mollifier `mollifierEps hε` is continuous, has
-compact support in `closedBall 0 ε`, is nonneg, and integrates to `1`. -/
+omit [NeZero d] in
 private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
     Continuous (mollifierEps (d := d) hε)
       ∧ HasCompactSupport (mollifierEps (d := d) hε)
@@ -596,10 +574,7 @@ private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
     rw [← this]
     simp
 
-/-- **Friedrichs's commutator lemma.** For `u ∈ L²(ℝ^d)` and a smooth bounded
-function `a` with bounded gradient, the commutator
-`[a, *φ_ε] u := a · (u ⋆ φ_ε) - (a · u) ⋆ φ_ε` converges to `0` in `L²` as
-`ε → 0⁺`. The mollifier `φ_ε` is the rescaled bump of radius `ε`. -/
+omit [NeZero d] in
 theorem friedrichsCommutator_tendsto_zero
     {a : E → ℝ} (ha_smooth : ContDiff ℝ ⊤ a)
     {Λ : ℝ} (hΛ_nn : 0 ≤ Λ)

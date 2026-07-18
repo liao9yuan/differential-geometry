@@ -1,34 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.ParametricLinearODE
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-/-!
-# Joint `C^∞` regularity of the local flow (Hartman smooth-dependence theorem)
-
-For a time-dependent vector field `f : ℝ → E → E` on a finite-dimensional Banach space
-`E` and a local Picard–Lindelöf flow `Φ : E × ℝ → E` packaged by `IsLocalFlow`, this
-file proves that `Φ` is jointly `C^∞` on the strictly-interior open neighbourhood
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`, provided `f` is jointly `C^∞`.
-
-## Strategy
-
-The proof is by induction on `n : ℕ`, showing that `Φ` is `C^n` on the *fixed* open
-neighbourhood for every `n`.
-
-**Base case**: `C^1` from `contDiffOn_flow_of_isLocalFlow`.
-
-**Inductive step (`n → n + 1`)**: assuming `Φ` is `C^n`, the variational coefficient
-`A(x, t) := fderiv ℝ (f t) (Φ(x, t))` is jointly `C^n` (composition of `C^∞` with
-`C^n`).  For each `δ`, the variational solution equals
-`linearODESolution A ... (fun _ => δ) x t` by ODE uniqueness, hence is `C^n` by
-`linearODESolution_contDiffOn`.  By `contDiffOn_clm_apply` (finite-dimensional `E`),
-the CLM-valued spatial piece is `C^n`, and `contDiffOn_flow_succ_of_spatial_smooth`
-upgrades `Φ` to `C^{n+1}`.
-
-## Main result
-
-* `IsLocalFlow.contDiffOn_top`
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.Analysis.ODE.Flow
@@ -36,7 +8,6 @@ namespace DifferentialGeometry.Analysis.ODE.Flow
 open Set Metric Function
 open scoped ContDiff NNReal
 
-/-- If `f` is `C^k` on `S` for every natural number `k`, then `f` is `C^∞` on `S`. -/
 theorem contDiffOn_top_of_forall_nat
     {𝕜 E F : Type*} [NontriviallyNormedField 𝕜]
     [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -51,8 +22,7 @@ section CoefficientRegularity
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {Φ : E × ℝ → E}
 
-/-- The variational coefficient `(x, t) ↦ fderiv ℝ (f t) (Φ(x, t))` is `C^n` when
-`f` is `C^{n+1}` and `Φ` is `C^n`. -/
+omit [CompleteSpace E] in
 private theorem contDiffOn_variational_coeff_aux
     {n : ℕ} {T : ℝ} {ρ : ℝ≥0}
     (hf_succ : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry f) (univ : Set (ℝ × E)))
@@ -78,11 +48,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Hartman smooth-dependence theorem for ODE flows.**
-
-If the vector field `f : ℝ → E → E` is jointly `C^∞` and `Φ` is a local
-Picard–Lindelöf flow of `f`, then `Φ` is jointly `C^∞` on the strictly interior open
-neighbourhood `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
 theorem IsLocalFlow.contDiffOn_top
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_top : ContDiff ℝ ∞ (uncurry f))

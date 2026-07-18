@@ -2,76 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 
-/-!
-# Chain-rule decomposition of partial derivatives of `(r, s)`-tensor chart components
-
-Let `S : SmoothCcTensor g r s` be a smooth, compactly-supported `(r, s)`-tensor
-section over a closed Riemannian manifold `(M, g)`, and let `α : M` be a chart
-center. For each pair of multi-indices `Idx : Fin r → Fin n` and
-`Jdx : Fin s → Fin n` (with `n := Module.finrank ℝ E`), the file
-`ChartTensor/Components/Defs.lean` defines the
-chart-`α`-trivialised scalar component
-
-```
-tensorChartComponentRaw g r s S α Idx Jdx : M → ℝ.
-```
-
-This file exposes the **chain-rule decomposition** of the Fréchet derivative
-of the chart-pulled-back component
-
-```
-tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm  :  E → ℝ
-```
-
-at any point `extChartAt I α b` in the interior of the chart target with
-`b ∈ baseSet`. The decomposition factors through the chart-trivialised
-tensor function
-
-```
-tensorTrivProj g r s S α : M → TensorRSModel r s ℝ E
-```
-
-(itself smooth on the chart source by
-`tensorTrivProj_contMDiffOn_chart_source`), exposing the Fréchet derivative of
-the scalar component as the composition of the (constant) component
-projection `tensorChartComponentProjection r s Idx Jdx` with the Fréchet
-derivative of `tensorTrivProj g r s S α ∘ (extChartAt I α).symm`.
-
-## Why this is the right decomposition
-
-The Fréchet derivative of the scalar component at the chart point
-`extChartAt I α b` is a linear functional on `E`. Splitting it via the chain
-rule gives:
-
-* a **tensorial** Fréchet derivative on `E` — the derivative of the
-  chart-trivialised section as an `E → TensorRSModel`-valued function — which
-  in canonical chart coordinates picks up the partial-derivative-and-Christoffel
-  decomposition; and
-* a **fixed** continuous linear functional — the component projection
-  `tensorChartComponentProjection` — that selects the `(Idx, Jdx)` coordinate
-  from a model-fibre tensor.
-
-Downstream consumers integrating `eLpNorm`-type quantities of the scalar
-component's partial derivatives only need the bound
-
-```
-‖∂_k component‖ ≤ ‖tensorChartComponentProjection‖_op · ‖∂_k (tensorTrivProj ∘ φ⁻¹)‖
-```
-
-which is immediate from this chain-rule decomposition.
-
-## Main results
-
-* `tensorTrivProj_chart_pullback_hasFDerivAt`
-* `tensorChartComponentRaw_chart_pullback_hasFDerivAt`
-* `tensorChartComponentRaw_partial_decomp`
-* `tensorChartComponentRaw_mfderiv_decomp`
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -98,8 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The trivialization-at-`α` projection of `S.toSection` is smooth on the
-chart source. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorTrivProj_contMDiffOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -139,8 +72,7 @@ lemma tensorTrivProj_contMDiffOn_chart_source
       (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x (S.toSection x) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
 
-/-- `MDifferentiableAt` of `tensorTrivProj g r s S α` at a chart-source
-point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma mdifferentiableAt_tensorTrivProj
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -154,8 +86,7 @@ lemma mdifferentiableAt_tensorTrivProj
     hcontMDiff.contMDiffAt ((chartAt H α).open_source.mem_nhds hb_chart)
   exact hAt.mdifferentiableAt (by simp)
 
-/-- The chart pull-back `tensorTrivProj g r s S α ∘ (extChartAt I α).symm` is
-`DifferentiableAt ℝ` at an interior point of the chart target. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma differentiableAt_tensorTrivProj_pullback
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -194,12 +125,7 @@ lemma differentiableAt_tensorTrivProj_pullback
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
 
-/-- **Manifold derivative of `tensorTrivProj` in chart coordinates.** At a
-point `b` in the chart source whose chart image lies in the interior of the
-chart target, the manifold derivative of `tensorTrivProj g r s S α` at `b`
-applied to a tangent vector `v` equals the Fréchet derivative of the chart
-pull-back at `extChartAt I α b` applied to the canonical trivialisation
-image of `v`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem mfderiv_tensorTrivProj_eq_chart_fderiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -265,11 +191,7 @@ theorem mfderiv_tensorTrivProj_eq_chart_fderiv
   rw [htriv_eq]
   rfl
 
-/-- **HasFDerivAt for the chart-pulled-back `tensorTrivProj`.** At an interior
-chart-target point, the function
-`tensorTrivProj g r s S α ∘ (extChartAt I α).symm` has Fréchet derivative
-equal to `fderiv` of itself. (This is a restatement of
-`DifferentiableAt.hasFDerivAt`.) -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorTrivProj_chart_pullback_hasFDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -285,9 +207,7 @@ theorem tensorTrivProj_chart_pullback_hasFDerivAt
   (differentiableAt_tensorTrivProj_pullback (I := I) (M := M) g r s S α
     hb_chart hb_int).hasFDerivAt
 
-/-- The chart pull-back of `tensorChartComponentRaw` equals
-`tensorChartComponentProjection r s Idx Jdx` applied to the chart pull-back
-of `tensorTrivProj`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_pullback_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -300,12 +220,7 @@ private lemma tensorChartComponentRaw_pullback_eq
   funext y
   rfl
 
-/-- **HasFDerivAt for the chart-pulled-back scalar component.** At an interior
-chart-target point, the function
-`tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm`
-has Fréchet derivative equal to the composition of the (constant) CLM
-`tensorChartComponentProjection r s Idx Jdx` with the Fréchet derivative of
-`tensorTrivProj g r s S α ∘ (extChartAt I α).symm`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -337,9 +252,7 @@ theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (tensorChartComponentProjection (E := E) r s Idx Jdx).hasFDerivAt
   exact HasFDerivAt.comp (extChartAt I α b) hCLM_hasFDeriv htriv
 
-/-- **Fréchet derivative of the chart-pulled-back component, formula form.**
-The `fderiv` of `tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm`
-at `extChartAt I α b` equals the CLM composition `projection ∘L fderiv (triv ∘ symm)`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chart_pullback_fderiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -359,13 +272,7 @@ theorem tensorChartComponentRaw_chart_pullback_fderiv
   (tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int).fderiv
 
-/-- **Headline partial-derivative formula.** For `b` in the chart source at
-`α` with `extChartAt I α b` in the interior of the chart target, the `k`-th
-partial derivative of the chart-pulled-back scalar component
-`tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm` at
-`extChartAt I α b` equals the component projection applied to the `k`-th
-partial derivative of the chart-pulled-back tensor function
-`tensorTrivProj g r s S α ∘ (extChartAt I α).symm`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_partial_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -388,11 +295,7 @@ theorem tensorChartComponentRaw_partial_decomp
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int]
   rfl
 
-/-- **Manifold-derivative form of the partial-decomposition formula.** The
-manifold derivative `mfderiv I 𝓘(ℝ) (tensorChartComponentRaw g r s S α Idx
-Jdx) b` applied to a tangent vector `v` equals the component projection
-applied to `mfderiv I 𝓘(ℝ, TensorRSModel r s ℝ E) (tensorTrivProj g r s S α)
-b` applied to `v`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_mfderiv_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -436,10 +339,7 @@ theorem tensorChartComponentRaw_mfderiv_decomp
   rw [hP_eq, hP_fderiv]
   rfl
 
-/-- **`k`-th chart-frame partial of the scalar chart component.** Feeding the
-`k`-th chart-frame tangent vector at `b` into the manifold derivative of
-`tensorChartComponentRaw` gives the projection of the `k`-th chart-frame
-partial of `tensorTrivProj`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chartBasis_partial
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}

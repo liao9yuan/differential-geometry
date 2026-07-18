@@ -21,14 +21,14 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Coordinate-frame metric component smoothness
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Smooth` API.
--/
 
-/-- Fixed-coordinate-frame metric components are smooth throughout the
-coordinate-frame domain. -/
+
+
+
+
+
+
 theorem metric_coordinateFrame_component_contMDiffAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -74,7 +74,7 @@ theorem metric_coordinateFrame_component_contMDiffAt_of_mem
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
 
-/-- Coordinate-frame metric components are smooth at the chart center. -/
+
 theorem metric_coordinateFrame_component_contMDiffAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -85,8 +85,8 @@ theorem metric_coordinateFrame_component_contMDiffAt
   metric_coordinateFrame_component_contMDiffAt_of_mem
     (I := I) g x₀ (coordinateFrameAt_mem (I := I) x₀) i j
 
-/-- Coordinate directional derivatives of metric components are smooth at the
-chart center. -/
+
+
 theorem metric_coordinateFrame_component_directional_contMDiffAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :

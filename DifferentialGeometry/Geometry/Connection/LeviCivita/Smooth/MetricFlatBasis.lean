@@ -26,24 +26,24 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Local-frame metric-flat basis and Koszul coefficients
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Smooth` API.
--/
+
+
+
+
 
 theorem leviCivitaConnectionOfMetric_isLeviCivita_smoothFile
     (g : SmoothRiemannianMetric I M) :
     IsLeviCivita (I := I) (leviCivitaConnectionOfMetric (I := I) g) g :=
   leviCivitaConnectionOfMetric_isLeviCivita (I := I) g
 
-/-! ## Local-frame metric and Koszul coefficient smoothness
 
-The local-frame route keeps the trivialization `e` fixed on a neighborhood.
-Metric coefficients and their frame-directional derivatives are scalar
-functions in that fixed local frame; these are the inputs for the Koszul
-Christoffel formula.
--/
+
+
+
+
+
+
 
 private def localMetricCoeff
     {ι : Type*}
@@ -175,12 +175,12 @@ private theorem koszulScalar_localFrame_contMDiffAt
   simpa [koszulScalar, directionalDeriv, localMetricCoeff] using
     (((h1.add h2).sub h3).sub h4).add h5 |>.add h6
 
-/-- The coordinate functional associated to a basis vector of the model fiber. -/
+
 private noncomputable def coordCLM {ι : Type*} (b : Module.Basis ι Real E) (i : ι) :
     E →L[Real] Real :=
   LinearMap.toContinuousLinearMap (b.coord i)
 
-/-- The elementary bilinear form `(v,w) ↦ v_i w_j` in a model-fiber basis. -/
+
 private noncomputable def basisBilin {ι : Type*} (b : Module.Basis ι Real E) (i j : ι) :
     E →L[Real] E →L[Real] Real :=
   (coordCLM (E := E) b i).smulRight (coordCLM (E := E) b j)
@@ -190,9 +190,9 @@ private theorem basisBilin_apply {ι : Type*} (b : Module.Basis ι Real E) (i j 
     basisBilin (E := E) b i j v w = b.coord i v * b.coord j w := by
   simp [basisBilin, coordCLM]
 
-/-- The metric bilinear form written in a fixed local frame, as a model-fiber
-continuous bilinear map. This avoids nested Hom-bundle trivialization while
-retaining the exact local-frame Gram matrix. -/
+
+
+
 noncomputable def localMetricFlatBasis {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -305,8 +305,8 @@ theorem localMetricFlatBasis_isInvertible {ι : Type*} [Fintype ι]
   rw [← hA]
   exact ContinuousLinearMap.isInvertible_equiv
 
-/-- The metric flat map in a fixed local-frame basis is smooth at every point
-of the trivialization base set. -/
+
+
 theorem localMetricFlatBasis_contMDiffAt {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -317,8 +317,8 @@ theorem localMetricFlatBasis_contMDiffAt {ι : Type*} [Fintype ι]
   refine ContMDiffAt.sum fun i _ => ContMDiffAt.sum fun j _ => ?_
   exact (localMetricCoeff_contMDiffAt (I := I) e b g hx i j).smul contMDiffAt_const
 
-/-- Inverse metric coefficients in a fixed local-frame basis, obtained by
-inverting the local-frame Gram operator. -/
+
+
 private noncomputable def localInvMetricCoeff {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -362,8 +362,8 @@ private theorem localInvMetricCoeff_contMDiffAt {ι : Type*} [Fintype ι]
   localInvMetricCoeff_contMDiffAt_of_isInvertible (I := I) e b g hx
     (localMetricFlatBasis_isInvertible (I := I) e b g hx) k l
 
-/-- Fixed-chart inverse metric components are spatially differentiable
-throughout the coordinate-frame domain. -/
+
+
 theorem coordGInvMdiff
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)

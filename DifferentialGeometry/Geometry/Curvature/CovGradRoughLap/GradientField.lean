@@ -1,73 +1,9 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-/-!
-# The rough-Laplacian / covariant-gradient commutator (order-`2` Gårding core)
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product
-space `E`, and a smooth compactly-supported `(0, 2)`-tensor field `T₀`, this file
-develops the third-order Weitzenböck commutator that drives the order-`2`
-elliptic-regularity ("Gårding") estimate.
-
-Writing `∇T₀ = covGrad g 0 2 T₀` for the `(0, 3)`-tensor covariant gradient,
-`Δ_∇` for the rough (connection) Laplacian, the target commutator says that
-applying the rough Laplacian to the gradient field equals taking the gradient of
-the rough Laplacian, up to an explicit curvature defect:
-
-```
-Δ_∇(∇T₀) (x) = ∇(Δ_∇ T₀) (x) + Curv x.
-```
-
-## What this file establishes
-
-* `rawTensorConnLap_covGrad_eq_frame_trace` — the rough Laplacian of the
-  `(0, 3)`-tensor gradient field is the frame trace `∑ᵢ ∇²_{Bᵢ, Bᵢ}(∇T₀)` of its
-  second covariant derivative over the smooth `g_x`-orthonormal frame (the
-  rank-`(0, 3)` instance of the trace identity
-  `rawTensorConnLap_eq_frame_trace_secondCovDeriv`).
-
-* `covGrad_apply_unit_eval_generic` — the gradient `covGrad g 0 2 S` of a smooth
-  `(0, 2)`-tensor field `S` reads its extra tangent direction off the leftmost
-  slot when evaluated at the unit `(0, 0)`-tensor (right-hand side reading).
-
-* `covDeriv_unit_eval_eq` / `covApply_unit_eval_eq` — the unit `(0, 0)`-evaluation
-  intertwines the `(0, 3) = (0, 0) → (0, 3)` Hom-bundle covariant derivative
-  `tensorCov g 0 3` with the abstract `(0, 3)`-tensor covariant derivative
-  `tensor0SCovariantDerivative I M 3 (LeviCivita g)`, with no correction term:
-  the unit section is `∇`-parallel.
-
-* `tensorSecondCovDeriv_covGrad_unit_eval` — the **transport** of the
-  `(0, 3)` second covariant derivative of `∇T₀`, evaluated at the unit, into the
-  abstract `(0, 3)`-tensor second covariant derivative of the unit-evaluated
-  gradient field `U y := (∇T₀) y (unit)`. Combined with
-  `rawTensorConnLap_covGrad_eq_frame_trace`, this writes the entire left-hand side
-  of the target commutator as the abstract `(0, 3)` rough Laplacian of `U`.
-
-## Remaining piece (documented, not assumed)
-
-The target curvature defect `Curv x` is the leftmost-slot reading of the
-explicit third-order curvature field `Tensor3rdCurv` of
-`TensorThirdOrderWeitzenbock.lean`. Closing the full commutator from the abstract
-reduction above is the depth-`3` parallel naturality of the covariant-gradient
-bundle equivalence `covGradBundleEquiv`: identifying the abstract `(0, 3)` rough
-Laplacian of `U` (whose leftmost slot is the gradient direction, differentiated
-through the slot-`0` Christoffel correction) with the `(0, 2)` frame-trace swap
-`frame_trace_thirdCovDeriv_swap` of the directionally-derived `T₀`. That
-identification is the slot-`0`-Christoffel-vs-field-direction matching; it is the
-sole remaining structural input and is not assumed here.
-
-## Sign / convention
-
-Geometer convention `Δ_∇ = -∇*∇` for the rough Laplacian (the frame trace
-`∑ᵢ ∇²_{Bᵢ, Bᵢ}`), matching `TensorThirdOrderWeitzenbock.lean`,
-`TensorConnLaplacian.lean`, and `CovGradParallelNaturality.lean`. The covariant
-gradient `covGrad g 0 s` curries the new tangent-direction slot as the leftmost
-covariant slot, the convention produced by the directional covariant derivative.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -99,9 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The `(0, 3)`-tensor gradient field `covGrad g 0 2 T₀` is smooth in total-space
-`mk'` form. This is the smoothness field of the underlying smooth section of the
-`SmoothCcTensor`, which is already stated in `T% = mk'` form. -/
+omit [BoundarylessManifold I M] in
 lemma covGrad_contMDiff_mk'
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 3 ℝ E)) ∞
@@ -110,10 +44,6 @@ lemma covGrad_contMDiff_mk'
         ((covGrad (I := I) (M := M) g 0 2 T₀).toSection b)) :=
   (covGrad (I := I) (M := M) g 0 2 T₀).toSection.contMDiff
 
-/-- The rough Laplacian of the `(0, 3)`-tensor gradient field is the frame trace
-of its second covariant derivative. This is the rank-`(0, 3)` instance of the
-trace identity `rawTensorConnLap_eq_frame_trace_secondCovDeriv`, applied to the
-underlying section of `covGrad g 0 2 T₀`. -/
 lemma rawTensorConnLap_covGrad_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     rawTensorConnLap (I := I) g 0 3
@@ -125,12 +55,6 @@ lemma rawTensorConnLap_covGrad_eq_frame_trace
   rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 3
     (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x
 
-/-- **Unit-evaluation of the gradient of a smooth `(0, 2)`-tensor (right-hand
-side).** The `(0, 3)`-tensor `(covGrad g 0 2 S).toSection x`, evaluated at the
-unit `(0, 0)`-tensor and on a `Fin 3`-tuple `v`, reads the tangent direction
-`v 0` off the leftmost slot: it is the directional covariant derivative
-`tensorCovDerivAt g 0 2 S x (v 0)`, applied to the unit tensor and evaluated on
-the tail `(v 1, v 2)`. -/
 lemma covGrad_apply_unit_eval_generic
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (x : M)
     (v : Fin 3 → TangentSpace I x) :
@@ -146,16 +70,52 @@ lemma covGrad_apply_unit_eval_generic
   covGrad_toSection_apply_eval (I := I) (M := M) g 0 2 S x
     (unitZeroSec (I := I) (M := M) x) v
 
-/-- **Unit-evaluation commutes with the `(0, 3)`-covariant derivative.** For an
-arbitrary smooth `Cₛ^∞` `(0, 3)`-tensor section `σ`, the directional
-`(0, 3)`-tensor covariant derivative of `σ` along `v`, applied to the unit
-`(0, 0)`-tensor, equals the abstract `(0, 3)`-tensor covariant derivative of the
-unit-evaluated section `y ↦ σ y (unit)`:
-```
-(∇^{(0,3)}_v σ)(x)(unit) = (∇^{(0,3)}_v (y ↦ σ y (unit)))(x).
-```
-The product rule against the parallel unit `(0, 0)`-section has no correction
-term, exactly as in `covGrad_covDeriv_at_unit_eq`. -/
+lemma covGrad_apply_unit_eval_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (v : Fin (s + 1) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (covGrad (I := I) (M := M) g 0 s S).toSection x)
+          (unitZeroSec (I := I) (M := M) x)) v =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 s S x (v 0))
+          (unitZeroSec (I := I) (M := M) x))
+        (Matrix.vecTail v) :=
+  covGrad_toSection_apply_eval (I := I) (M := M) g 0 s S x
+    (unitZeroSec (I := I) (M := M) x) v
+
+lemma curry_covGrad_unit_eval_general
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (w : TangentSpace I x) :
+    tensor0S_curry (I := I) (M := M) s x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (covGrad (I := I) (M := M) g 0 s S).toSection x)
+          (unitZeroSec (I := I) (M := M) x)) w =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s S x w)
+        (unitZeroSec (I := I) (M := M) x) := by
+  classical
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  change Tensor0SSpace.toModel
+      (tensor0S_curry (I := I) (M := M) s x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (covGrad (I := I) (M := M) g 0 s S).toSection x)
+          (unitZeroSec (I := I) (M := M) x)) w) m =
+    Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s S x w)
+        (unitZeroSec (I := I) (M := M) x)) m
+  rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+    (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+      (covGrad (I := I) (M := M) g 0 s S).toSection x)
+      (unitZeroSec (I := I) (M := M) x)) (v0 := w) (vs := m)]
+  rw [covGrad_apply_unit_eval_genVal (I := I) (M := M) g s S x (Fin.cons w m)]
+  simp only [Fin.cons_zero, Matrix.vecTail]
+  rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
+
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDeriv_unit_eval_eq
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun y : M => TensorRSSpace 0 3 I y)⟯)
@@ -178,11 +138,30 @@ lemma covDeriv_unit_eval_eq
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
 
-/-- **Unit-evaluation intertwines `covApply`.** For a smooth `Cₛ^∞`
-`(0, 3)`-tensor section `σ` and a smooth tangent vector field `X`, the
-unit-evaluation of `covApply (tensorCov g 0 3) X σ` equals `covApply
-(tensor0SCovariantDerivative I M 3 (LeviCivita g)) X` of the unit-evaluated
-section `y ↦ σ y (unit)`, as dependent functions of the base point. -/
+omit [CompactSpace M] [I.Boundaryless] in
+lemma covDeriv_unit_eval_eq_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯)
+    (x : M) (v : TangentSpace I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)
+          (fun y : M => σ y) x v)
+        (unitZeroSec (I := I) (M := M) x) =
+      Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+        (fun y : M =>
+          (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from σ y)
+            (unitZeroSec (I := I) (M := M) y))
+        x v := by
+  classical
+  rw [tensorRSCovariantDerivative_apply (I := I) (M := M) 0 s
+    (LeviCivita (I := I) g) σ (unitZeroSec (I := I) (M := M)) x v]
+  rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
+        (fun y : M => unitZeroSec (I := I) (M := M) y) x v) = 0 from
+    tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)
+      (LeviCivita (I := I) g) x v]
+  rw [map_zero, sub_zero]
+
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covApply_unit_eval_eq
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun y : M => TensorRSSpace 0 3 I y)⟯)
@@ -199,10 +178,6 @@ lemma covApply_unit_eval_eq
   rw [covApply_apply, covApply_apply]
   exact covDeriv_unit_eval_eq (I := I) (M := M) g σ y (X y)
 
-/-- The directionally-derived gradient field `covApply (tensorCov g 0 3) X
-(covGrad g 0 2 T₀)` packaged as a smooth `Cₛ^∞` `(0, 3)`-tensor section, for a
-smooth tangent vector field `X`. Its smoothness is the bundle-generic
-`covApplyRS_contMDiff` applied to the smooth gradient field. -/
 noncomputable def covApplyCovGradSection
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X : Π b : M, TangentSpace I b}
@@ -223,11 +198,6 @@ noncomputable def covApplyCovGradSection
       covApply (tensorCov (I := I) g 0 3) X
         (fun z : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection z) y := rfl
 
-/-- The **unit-evaluated gradient field** `U y := (covGrad g 0 2 T₀) y (unit)`,
-the `(0, 3)`-valued section whose value on a `Fin 3`-tuple reads the leftmost slot
-as the tangent direction of the directional covariant derivative of `T₀`. This is
-the section that the abstract `(0, 3)`-tensor covariant derivative
-`tensor0SCovariantDerivative I M 3` differentiates in the transported commutator. -/
 noncomputable def unitGradField
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     Π y : M, Tensor0SSpace 3 I y :=
@@ -243,17 +213,6 @@ noncomputable def unitGradField
         (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
         (unitZeroSec (I := I) (M := M) y) := rfl
 
-/-- **Transport of the `(0, 3)` second covariant derivative through the unit.**
-For smooth tangent vector fields `B`, the second covariant derivative
-`tensorSecondCovDeriv g 0 3 B B (covGrad g 0 2 T₀)` of the gradient field,
-evaluated at the unit `(0, 0)`-tensor, equals the abstract `(0, 3)`-tensor second
-covariant derivative of the unit-evaluated gradient field `U`:
-```
-(∇²_{B, B}(∇T₀))(x)(unit)
-  = ∇^{(0,3)abs}_B(∇^{(0,3)abs}_B U)(x) − ∇^{(0,3)abs}_{(∇_B B)(x)} U (x).
-```
-The right-hand side is the abstract `(0, 3)`-tensor second covariant derivative of
-`U` along `B`. -/
 lemma tensorSecondCovDeriv_covGrad_unit_eval
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {B : Π b : M, TangentSpace I b}
@@ -285,6 +244,297 @@ lemma tensorSecondCovDeriv_covGrad_unit_eval
     rfl
   · exact covDeriv_unit_eval_eq (I := I) (M := M) g
       (covGrad (I := I) (M := M) g 0 2 T₀).toSection x ((LeviCivita (I := I) g).toFun B x (B x))
+
+omit [CompactSpace M] [I.Boundaryless] in
+theorem curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : Π y : M, Tensor0SSpace (s + 1) I y)
+    {Vfield Y : Π b : M, TangentSpace I b} {x : M}
+    (hC : MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel s ℝ E))
+      (fun y => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
+        (E := fun z : M => (TangentSpace I z →L[ℝ] Tensor0SSpace s I z)) y
+        (Tensor0SNabla.curriedSection I M W y)) x)
+    (hVfield : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Vfield y)) x)
+    (hYfield : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x) :
+    (tensor0S_curry (I := I) (M := M) s x
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          W x (Vfield x))) (Y x) =
+      (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun
+          (fun y : M => Tensor0SNabla.curriedSection I M W y (Y y)) x (Vfield x) -
+        Tensor0SNabla.curriedSection I M W x
+          ((LeviCivita (I := I) g).toFun Y x (Vfield x)) := by
+  classical
+  have hHom := HomConnection.homBundleCovariantDerivativeFun_apply_eq
+    (I := I) (M := M) (F := Tensor0SModel s ℝ E)
+    (V := fun z : M => Tensor0SSpace s I z)
+    (cov_TM := LeviCivita (I := I) g)
+    (cov_V := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+    (τ := Tensor0SNabla.curriedSection I M W) (x := x) hC
+    (V_field := fun y => Vfield y) (Y := fun y => Y y) hVfield hYfield
+  have hsucc : tensor0S_curry (I := I) (M := M) s x
+      ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+        W x (Vfield x)) =
+      HomConnection.homBundleCovariantDerivativeFun (I := I) (M := M)
+        (F := Tensor0SModel s ℝ E)
+        (V := fun z : M => Tensor0SSpace s I z)
+        (cov_TM := LeviCivita (I := I) g)
+        (cov_V := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (τ := Tensor0SNabla.curriedSection I M W) x (Vfield x) := by
+    rw [show
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          W x (Vfield x) =
+        (Tensor0SNabla.tensor0SCovariantDerivative_succ I M (LeviCivita (I := I) g)
+          (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))).toFun
+          W x (Vfield x) from by
+      rw [Tensor0SNabla.tensor0SCovariantDerivative_succ_eq]]
+    rw [Tensor0SNabla.tensor0SCovariantDerivative_succ_apply]
+    exact (tensor0S_curry (I := I) (M := M) s x).apply_symm_apply _
+  rw [hsucc]
+  exact hHom
+
+noncomputable def unitGradFieldGen
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    Π y : M, Tensor0SSpace (s + 1) I y :=
+  fun y : M =>
+    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+      (covGrad (I := I) (M := M) g 0 s S).toSection y)
+      (unitZeroSec (I := I) (M := M) y)
+
+@[simp] lemma unitGradFieldGen_apply
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (y : M) :
+    unitGradFieldGen (I := I) (M := M) g s S y =
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+        (covGrad (I := I) (M := M) g 0 s S).toSection y)
+        (unitZeroSec (I := I) (M := M) y) := rfl
+
+lemma contMDiff_unitGradFieldGen (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
+        (E := fun z : M => Tensor0SSpace (s + 1) I z) y
+        (unitGradFieldGen (I := I) (M := M) g s S y)) := by
+  classical
+  have hϕ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel (s + 1) ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel (s + 1) ℝ E)
+        (E := fun z : M => (Tensor0SSpace 0 I z →L[ℝ] Tensor0SSpace (s + 1) I z)) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+          (covGrad (I := I) (M := M) g 0 s S).toSection y))) :=
+    (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
+        (E := fun z : M => Tensor0SSpace 0 I z) y
+        (unitZeroSec (I := I) (M := M) y)) :=
+    contMDiff_unitZeroSection (I := I) (M := M)
+  exact ContMDiff.clm_bundle_apply (b := fun y : M => y)
+    (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace (s + 1) I z)
+    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel (s + 1) ℝ E) hϕ hv
+
+lemma contMDiff_curried_unitGradFieldGen (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
+        (E := fun z : M => (TangentSpace I z →L[ℝ] Tensor0SSpace s I z)) y
+        (Tensor0SNabla.curriedSection I M (unitGradFieldGen (I := I) (M := M) g s S) y)) :=
+  (Tensor0SNabla.contMDiff_curriedSection_iff_section (I := I) (M := M)
+    (unitGradFieldGen (I := I) (M := M) g s S)).mp
+    (contMDiff_unitGradFieldGen (I := I) (M := M) g s S)
+
+lemma curry_unitGradFieldGen_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) (y : M) (w : TangentSpace I y) :
+    Tensor0SNabla.curriedSection I M (unitGradFieldGen (I := I) (M := M) g s S) y w =
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
+        tensorCovDerivAt (I := I) (M := M) g 0 s S y w)
+        (unitZeroSec (I := I) (M := M) y) := by
+  rw [Tensor0SNabla.curriedSection_apply, unitGradFieldGen_apply]
+  exact curry_covGrad_unit_eval_general (I := I) (M := M) g s S y w
+
+omit [BoundarylessManifold I M] in
+lemma covGrad_contMDiff_mk'_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (s + 1) I z) b
+        ((covGrad (I := I) (M := M) g 0 s S).toSection b)) :=
+  (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff
+
+noncomputable def covApplyCovGradSection_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
+    @ContMDiffSection ℝ _ E _ _ H _ I M _ _ (TensorRSModel 0 (s + 1) ℝ E) _ _ ∞
+      (fun y : M => TensorRSSpace 0 (s + 1) I y)
+      (Tensor0SBundle.tensorRSBundle_topology 0 (s + 1)) (fun _ => inferInstance)
+      (Tensor0SBundle.tensorRSBundle_fiber 0 (s + 1)) :=
+  @ContMDiffSection.mk ℝ _ E _ _ H _ I M _ _ (TensorRSModel 0 (s + 1) ℝ E) _ _ ∞
+    (fun y : M => TensorRSSpace 0 (s + 1) I y)
+    (Tensor0SBundle.tensorRSBundle_topology 0 (s + 1)) (fun _ => inferInstance)
+    (Tensor0SBundle.tensorRSBundle_fiber 0 (s + 1))
+    (fun y : M =>
+      covApply (tensorCov (I := I) g 0 (s + 1)) X
+        (fun z : M => (covGrad (I := I) (M := M) g 0 s S).toSection z) y)
+    (covApplyRS_contMDiff (I := I) g 0 (s + 1)
+      (covGrad_contMDiff_mk'_genVal (I := I) (M := M) g s S) hX)
+
+@[simp] lemma covApplyCovGradSection_genVal_apply
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) (y : M) :
+    covApplyCovGradSection_genVal (I := I) (M := M) g s S hX y =
+      covApply (tensorCov (I := I) g 0 (s + 1)) X
+        (fun z : M => (covGrad (I := I) (M := M) g 0 s S).toSection z) y := rfl
+
+omit [CompactSpace M] [I.Boundaryless] in
+lemma covApply_unit_eval_eq_genVal
+    (g : SmoothRiemannianMetric I M) (t : ℕ)
+    (σ : Cₛ^∞⟮I; TensorRSModel 0 t ℝ E, (fun y : M => TensorRSSpace 0 t I y)⟯)
+    (X : Π b : M, TangentSpace I b) :
+    (fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace t I y from
+        covApply (tensorCov (I := I) g 0 t) X (fun z : M => σ z) y)
+        (unitZeroSec (I := I) (M := M) y)) =
+      covApply (Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)) X
+        (fun y : M =>
+          (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace t I y from σ y)
+            (unitZeroSec (I := I) (M := M) y)) := by
+  funext y
+  rw [covApply_apply, covApply_apply]
+  exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g t σ y (X y)
+
+lemma tensorSecondCovDeriv_covGrad_unit_eval_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {B : Π b : M, TangentSpace I b}
+    (hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% B)) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        tensorSecondCovDeriv (I := I) g 0 (s + 1) B B
+          (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+              (LeviCivita (I := I) g)) B
+            (unitGradFieldGen (I := I) (M := M) g s S)) x (B x) -
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          (unitGradFieldGen (I := I) (M := M) g s S) x
+          ((LeviCivita (I := I) g).toFun B x (B x)) := by
+  classical
+  rw [tensorSecondCovDeriv_def]
+  rw [ContinuousLinearMap.sub_apply]
+  congr 1
+  · have h1 := covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covApplyCovGradSection_genVal (I := I) (M := M) g s S hB) x (B x)
+    simp only [covApplyCovGradSection_genVal_apply] at h1
+    rw [h1]
+    rw [covApply_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covGrad (I := I) (M := M) g 0 s S).toSection B]
+    rfl
+  · exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covGrad (I := I) (M := M) g 0 s S).toSection x ((LeviCivita (I := I) g).toFun B x (B x))
+
+theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) (x : M)
+    (m : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from
+          (covGrad (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+          (unitZeroSec (I := I) (M := M) x))
+        (Fin.cons (X x) (Fin.cons (Y x) m)) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorSecondCovDeriv (I := I) g 0 s X Y (fun y : M => S.toSection y) x)
+          (unitZeroSec (I := I) (M := M) x))
+        m := by
+  classical
+
+  set GS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hGS
+
+  rw [covGrad_apply_unit_eval_genVal (I := I) (M := M) g (s + 1) GS x
+    (Fin.cons (X x) (Fin.cons (Y x) m))]
+  simp only [Fin.cons_zero, Matrix.vecTail]
+  rw [show (Fin.cons (X x) (Fin.cons (Y x) m) ∘ Fin.succ) = Fin.cons (Y x) m from
+    funext (fun j => by simp [Fin.cons_succ])]
+
+  rw [show
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) GS x (X x))
+        (unitZeroSec (I := I) (M := M) x) =
+      (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+        (unitGradFieldGen (I := I) (M := M) g s S) x (X x) from by
+    rw [tensorCovDerivAt_def (I := I) (M := M) g 0 (s + 1) GS x (X x)]
+    exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1) GS.toSection x (X x)]
+
+  rw [show Tensor0SSpace.toModel
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          (unitGradFieldGen (I := I) (M := M) g s S) x (X x))
+        (Fin.cons (Y x) m) =
+      Tensor0SSpace.toModel
+        (tensor0S_curry (I := I) (M := M) s x
+          ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+            (unitGradFieldGen (I := I) (M := M) g s S) x (X x)) (Y x)) m from
+    (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+        (unitGradFieldGen (I := I) (M := M) g s S) x (X x)) (v0 := Y x) (vs := m)).symm]
+
+  rw [curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection (I := I) (M := M) g s
+    (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := X) (Y := Y) (x := x)
+    ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
+    ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]
+
+  rw [show (fun y : M => Tensor0SNabla.curriedSection I M
+        (unitGradFieldGen (I := I) (M := M) g s S) y (Y y)) =
+      (fun y : M =>
+        (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
+          tensorCovDerivAt (I := I) (M := M) g 0 s S y (Y y))
+          (unitZeroSec (I := I) (M := M) y)) from
+    funext (fun y => curry_unitGradFieldGen_eq (I := I) (M := M) g s S y (Y y))]
+  rw [curry_unitGradFieldGen_eq (I := I) (M := M) g s S x
+    ((LeviCivita (I := I) g).toFun Y x (X x))]
+
+  rw [tensorSecondCovDeriv_def (I := I) g 0 s X Y (fun y : M => S.toSection y) x]
+
+  refine congrArg (fun T : Tensor0SSpace s I x => Tensor0SSpace.toModel T m) ?_
+
+  rw [ContinuousLinearMap.sub_apply]
+
+  have houter :
+      (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun
+          (fun y : M =>
+            (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
+              tensorCovDerivAt (I := I) (M := M) g 0 s S y (Y y))
+              (unitZeroSec (I := I) (M := M) y)) x (X x) =
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          (tensorCov (I := I) g 0 s).toFun
+            (covApply (tensorCov (I := I) g 0 s) Y (fun y : M => S.toSection y)) x (X x))
+          (unitZeroSec (I := I) (M := M) x) := by
+    set σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯ :=
+      ContMDiffSection.mk
+        (fun y : M => covApply (tensorCov (I := I) g 0 s) Y (fun z : M => S.toSection z) y)
+        (covApplyRS_contMDiff (I := I) g 0 s
+          (T := fun z : M => S.toSection z) S.toSection.contMDiff (X := Y) hY) with hσ
+    have hσapp : ∀ y : M, σ y =
+        covApply (tensorCov (I := I) g 0 s) Y (fun z : M => S.toSection z) y := fun y => rfl
+    rw [show (covApply (tensorCov (I := I) g 0 s) Y (fun y : M => S.toSection y)) =
+        (fun y : M => σ y) from funext (fun y => (hσapp y).symm)]
+    rw [covDeriv_unit_eval_eq_genVal (I := I) (M := M) g s σ x (X x)]
+    refine congrArg (fun F : Π z : M, Tensor0SSpace s I z =>
+      (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun F x (X x)) ?_
+    funext y
+    rw [hσapp y, covApply_apply, ← tensorCovDerivAt_def (I := I) (M := M) g 0 s S y (Y y)]
+
+  have hchr :
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s S x ((LeviCivita (I := I) g).toFun Y x (X x)))
+        (unitZeroSec (I := I) (M := M) x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x
+          ((LeviCivita (I := I) g).toFun Y x (X x)))
+        (unitZeroSec (I := I) (M := M) x) := by
+    rw [tensorCovDerivAt_def (I := I) (M := M) g 0 s S x ((LeviCivita (I := I) g).toFun Y x (X x))]
+  rw [houter, hchr]
 
 end Connection
 end Integral

@@ -1,6 +1,6 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Bundle
@@ -170,22 +170,22 @@ import Mathlib.LinearAlgebra.TensorProduct.Basis
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-/-!
-# Smooth Tensor Fields on Manifolds
 
-This file defines smooth tensor fields on a smooth manifold `M`.
 
-## Main Definitions
 
-* `TensorRSField r s` : `C^n` (r,s)-tensor fields on `M`, i.e. `C^n` sections of the
-  (r,s)-tensor bundle `TensorRSSpace r s I`.
-* `Tensor0SField s` : `C^n` (0,s)-tensor fields on `M`, i.e. `C^n` sections of the
-  (0,s)-tensor bundle `Tensor0SSpace s I`.
 
-## Tags
 
-tensor field, smooth section, smooth manifold, vector space
--/
+
+
+
+
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 noncomputable section
@@ -204,17 +204,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
-/-!
-## Manifold tensor fields (sections of the bundle)
--/
+
+
+
 
 
 section ApplyInput
 
 variable {r s : ℕ} [CompleteSpace 𝕜]
 
-/-- Model-level evaluation of a mixed tensor on a covariant tensor input,
-packaged as a continuous bilinear map. -/
+
+
 noncomputable def model_applyInput_bilinear (r s : ℕ) :
     Tensor0SModel r 𝕜 E →L[𝕜]
       (TensorRSModel r s 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E) :=
@@ -226,19 +226,25 @@ theorem model_applyInput_bilinear_apply (r s : ℕ)
     (θ : Tensor0SModel r 𝕜 E) (T : TensorRSModel r s 𝕜 E) :
     model_applyInput_bilinear (𝕜 := 𝕜) (E := E) r s θ T = T θ := rfl
 
-/-- Fixed-trivialization model identity for evaluating a mixed tensor on a
-covariant input. -/
+
+
 theorem tensor0SModelAt_applyInput_eq
     (r s : ℕ) {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x)
     (θ : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r x) :
+    letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r
+    letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
+    letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
     ((trivializationAt (Tensor0SModel s 𝕜 E)
         (fun x => Tensor0SSpace s I x) x₀) ⟨x, T θ⟩).2 =
       (((trivializationAt (TensorRSModel r s 𝕜 E)
           (fun x => TensorRSSpace r s I x) x₀) ⟨x, T⟩).2)
         (((trivializationAt (Tensor0SModel r 𝕜 E)
           (fun x => Tensor0SSpace r I x) x₀) ⟨x, θ⟩).2) := by
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   ext v
   rw [Tensor0SSpace.trivializationAt_apply (𝕜 := 𝕜) (I := I)
     (x₀ := x₀) (x := x) s hx]
@@ -263,7 +269,7 @@ theorem tensor0SModelAt_applyInput_eq
         (R := 𝕜) hx θ
   rw [hθ]
 
-/-- Pointwise evaluation of a mixed tensor field on a covariant tensor field. -/
+
 noncomputable def tensorRSField_applyInput_fun
     (T : (x : M) ->
       TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x)
@@ -273,8 +279,8 @@ noncomputable def tensorRSField_applyInput_fun
       Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x :=
   fun x => T x (θ x)
 
-/-- Evaluating a smooth mixed tensor field on a smooth covariant tensor input
-gives a smooth covariant tensor field. -/
+
+
 noncomputable def tensorRSField_applyInput
     (T : TensorRSField n r s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
     (θ : Tensor0SField n r (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -318,13 +324,13 @@ theorem tensorRSField_applyInput_apply
 
 end ApplyInput
 
-/-!
-## Manifold tensor fields: addition and smooth-function scalar multiplication
 
-Addition and constant-scalar smul are inherited directly from `ContMDiffSection` (which is an
-`AddCommGroup` and a `𝕜`-module).  We additionally provide pointwise smul by a smooth function
-`φ : M → 𝕜`.
--/
+
+
+
+
+
+
 
 section SmulByFun
 
@@ -335,14 +341,14 @@ variable {r s : ℕ} [CompleteSpace 𝕜]
 
 end SmulByFun
 
-/-!
-## Equivalence of (0,0)-tensor fields and smooth scalar functions
 
-A `C^n` scalar function `f : M → 𝕜` determines a `C^n` (0,0)-tensor field via the
-isomorphism `𝕜 ≃ ContinuousMultilinearMap 𝕜 (Fin 0 → E) 𝕜` given by `constOfIsEmpty`,
-and conversely a (0,0)-tensor field determines a scalar function by evaluation at
-the unique empty argument. These two operations are inverses of each other.
--/
+
+
+
+
+
+
+
 
 
 noncomputable def Tensor0SField.one0 [CompleteSpace 𝕜] :
@@ -358,10 +364,10 @@ theorem Tensor0SField.one0_apply [CompleteSpace 𝕜]
   exact Tensor0SField.fromScalarField_apply n (fun _ : M => (1 : 𝕜))
     contMDiff_const x v
 
-/-!
-A `C^n` (0,0)-tensor field `α` determines a `C^n` scalar function by evaluating each fiber
-element (a 0-multilinear map, i.e. essentially a scalar) at the unique empty argument.
--/
+
+
+
+
 
 
 
@@ -372,9 +378,9 @@ element (a 0-multilinear map, i.e. essentially a scalar) at the unique empty arg
 end
 end Tensor0SBundle
 
-/-!
-## Tensor product of (0,s)-tensor fields
--/
+
+
+
 
 namespace Tensor0SBundle
 noncomputable section

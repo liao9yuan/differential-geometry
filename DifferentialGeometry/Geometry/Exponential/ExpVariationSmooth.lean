@@ -1,57 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
+import DifferentialGeometry.Geometry.Geodesic.AffineReparam
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Joint smoothness of the intrinsic exponential map in basepoint and vector
-
-For a smooth Riemannian metric `g` on a boundaryless, complete smooth manifold
-`M` modelled on a complete inner-product space `E`, the *intrinsic* exponential
-map `expMapIntrinsic g hEnorm p v` (the value at time `1` of the complete
-moving-foot geodesic through `p` with launch velocity `v`,
-`Exponential/IntrinsicExp.lean`) follows the geodesic across charts.  The
-second-variation analysis of arc length needs the *manifold lift* of its joint
-regularity: along a smooth curve `γ` of basepoints and a smooth field `V` of
-launch directions, the two-parameter map `(s, t) ↦ expMapIntrinsic (γ t) (s • V t)`
-is jointly smooth in `(s, t)` for small `s`.
-
-## Architecture
-
-The chart-coordinate analytic content is supplied by
-`exists_chartExp_jointContDiffOn_nat` (`Exponential/OffZeroRegularity.lean`):
-for a fixed chart center `α` and finite order `n`, the chart-`α` geodesic flow
-`Φ : (E × E) × ℝ → E × E` is jointly `C^n` in the phase point `z = (chart-position,
-velocity)`, and the chart position of the geodesic at the fixed time `t'` is
-`(Φ (z, t')).1`.  Pulling the first component back through `(extChartAt I α).symm`
-yields a candidate manifold map.
-
-The identification of this chart-`α` flow projection with `expMapIntrinsic q w`
-for a moving basepoint `q ≠ α` is the **chart-independence of geodesics**.  It is
-proved entirely *inside the fixed chart `α`*: the flow orbit's tangent-bundle lift
-is an integral curve of `geodesicVectorFieldChart g α` (its foot stays in `α`'s
-chart-target interior for free), and so is the chart-`α` velocity lift of the
-intrinsic geodesic from `(q, vq)`; single-chart integral-curve uniqueness
-(`isMIntegralCurveOn_eq_of_isPreconnected`) identifies them on `[0, t']`, with a
-clopen/boundary argument supplying the confinement.  Spray homogeneity
-(`intrinsicGeodesic_smul`) absorbs the fixed evaluation time `t'`.  No moving
-chart and no small-velocity exponential-radius input are used.  Everything built
-on top of it — the smooth chart-coordinate coordinatisation, the `t`-local joint
-`ContMDiff`, and the local-agreement gluing across the basepoint chart cover — is
-proved unconditionally.
-
-## Main results
-
-* `expMapIntrinsic_eq_chartFlow_proj_residual` — the chart-independence bridge:
-  for `q` in chart `α`'s source and small `w`, the intrinsic exponential is the
-  chart-`α` flow projection at the appropriate phase point.
-* `chartFlowVelCoordMap_contMDiff` — joint `C∞` smoothness of the
-  chart-coordinate coordinatisation `(s, t) ↦ (extChartAt I α (γ t),
-  chartFiberCoord α ⟨γ t, (s • V t) rescaled⟩)`.
-* `expMapIntrinsic_variation_contMDiff` — the headline: the two-parameter map
-  `(s, t) ↦ expMapIntrinsic (γ t) (s • V t)` is jointly `ContMDiff
-  (𝓘(ℝ,ℝ).prod 𝓘(ℝ,ℝ)) I n` near every `(s₀, t₀)`, for every finite `n`.
--/
 
 noncomputable section
 
@@ -69,7 +20,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -77,26 +28,73 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
+section DiagExp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+def diagExp
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))) :
+    TangentBundle I M → M × M :=
+  fun u => (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+@[simp] theorem diagExp_apply
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (u : TangentBundle I M) :
+    diagExp (I := I) g hEnorm u =
+      (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd) := rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+@[simp] theorem diagExp_fst
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (u : TangentBundle I M) :
+    (diagExp (I := I) g hEnorm u).1 = u.proj := rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+@[simp] theorem diagExp_snd
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (u : TangentBundle I M) :
+    (diagExp (I := I) g hEnorm u).2 =
+      expMapIntrinsic (I := I) g hEnorm u.proj u.snd := rfl
+
+end DiagExp
+
 section JointVariationSmooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The chart-`α` velocity lift of a curve `Γ`: invert the chart of `TM` at
-`⟨α, 0⟩` applied to the chart-`α` phase curve `(chartCurve α Γ s, deriv (chartCurve
-α Γ) s)`.  On the set where `Γ`'s foot lies in `α`'s chart source and `Γ` solves
-the moving-foot geodesic equation, this is an integral curve of
-`geodesicVectorFieldChart g α`. -/
+
 private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle I M :=
   fun s => (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
     (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Chart-`α` velocity lift is an integral curve.**  If `Γ` is a moving-foot
-geodesic (continuous on the open set `O` and satisfying the geodesic equation
-there) keeping its foot in `(chartAt H α).source` on `O`, then its chart-`α`
-velocity lift `chartVelocityLift α Γ` is an `IsMIntegralCurveOn` of
-`geodesicVectorFieldChart g α` on `O`, with projection `Γ` there. -/
+
 private theorem chartVelocityLift_isMIntegralCurveOn
     [CompleteSpace E] [T2Space (TangentBundle I M)]
     (g : SmoothRiemannianMetric I M) (α : M) {Γ : ℝ → M} {O : Set ℝ}
@@ -210,8 +208,10 @@ private theorem chartVelocityLift_isMIntegralCurveOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The projection of the chart-`α` velocity lift recovers `Γ` where the foot is
-in `α`'s source. -/
+
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private theorem chartVelocityLift_proj
     (α : M) {Γ : ℝ → M} {s : ℝ} (hs : Γ s ∈ (chartAt H α).source) :
     (chartVelocityLift (I := I) α Γ s).proj = Γ s := by
@@ -235,21 +235,7 @@ private theorem chartVelocityLift_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Chart-independence bridge.**  For a chart center `α`, a finite order
-`n ≥ 1`, the chart-`α` joint geodesic flow `Φ`, its evaluation time `t'`, its
-phase-ball radius `ρ`, and a basepoint `q` in chart `α`'s source whose chart-`α`
-phase point `(extChartAt I α q, chartFiberCoord α ⟨q, t' • w⟩)` lies in the flow's
-phase-ball, the intrinsic exponential map `expMapIntrinsic g hEnorm q w` is the
-chart-`α` flow projection at the rescaled velocity, pulled back through
-`(extChartAt I α).symm`.
 
-This is the chart-independence of geodesics.  The chart-`α` flow base orbit
-`s ↦ (extChartAt I α).symm (Φ((x, v), s)).1` is, lifted to the tangent bundle, an
-integral curve of `geodesicVectorFieldChart g α`; the intrinsic geodesic launched
-from `q` with velocity `vq = t'⁻¹ • w` has a chart-`α` velocity lift which is also
-such an integral curve.  Single-chart integral-curve uniqueness identifies them on
-`[0, t']`, so at time `t'` the orbit reaches the intrinsic geodesic's value, and
-the launch-velocity rescaling `intrinsicGeodesic_smul` absorbs the fixed `t'`. -/
 theorem expMapIntrinsic_eq_chartFlow_proj_residual
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -644,10 +630,6 @@ end JointVariationSmooth
 
 section CoordMap
 
-/-- The chart-coordinate phase point of a smooth basepoint curve `γ` and a smooth
-total-space section `V₀` of launch directions, rescaled by `c • ·` in the first
-parameter:
-`(s, t) ↦ (extChartAt I α (γ t), chartFiberCoord α ⟨γ t, c · s • (V₀ t).snd⟩)`. -/
 def chartFlowVelCoordMap
     (α : M) (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ) :
     ℝ × ℝ → E × E :=
@@ -657,6 +639,9 @@ def chartFlowVelCoordMap
         (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
           ((p.1 / c) • (V₀ p.2).snd)))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 @[simp] lemma chartFlowVelCoordMap_apply
     (α : M) (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ) (p : ℝ × ℝ) :
     chartFlowVelCoordMap (I := I) α γ V₀ c p =
@@ -665,10 +650,9 @@ def chartFlowVelCoordMap
           (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
             ((p.1 / c) • (V₀ p.2).snd))) := rfl
 
-/-- Fibre-coordinate smoothness of the rescaled section through the
-trivialisation at the base point `γ p₀.2`.  On the trivialisation's base set the
-second-coordinate map is `ℝ`-linear, so it commutes with the scalar `(c · s)`,
-reducing to the smoothness of the unscaled section's trivialisation coordinate. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma rescaledSection_fiberCoord_contMDiffAt
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ)
     (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
@@ -710,12 +694,9 @@ private lemma rescaledSection_fiberCoord_contMDiffAt
   rw [hV₀eq]
   exact hlin
 
-/-- **Joint smoothness of the chart-coordinate coordinatisation.**  At the
-base parameter `(s₀, t₀)`, with chart center `α := γ t₀`, the coordinate map
-`chartFlowVelCoordMap α γ V₀ c` is jointly `C∞`.  Its first factor `extChartAt α (γ ·)`
-is smooth (smooth `γ` composed with the chart, valid since `γ t₀ ∈ chart α`'s
-source) and its second factor is the chart-`α` fibre coordinate of the rescaled
-section, smooth by `rescaledSection_fiberCoord_contMDiffAt`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma chartFlowVelCoordMap_contMDiffAt
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ)
     (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
@@ -746,22 +727,7 @@ section Headline
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint smoothness of the intrinsic exponential variation (manifold lift).**
-For a `C∞` basepoint curve `γ`, a `C∞` total-space field `V₀` of launch
-directions with `(V₀ t).proj = γ t`, and every finite regularity order `n`, the
-two-parameter map `(s, t) ↦ expMapIntrinsic (γ t) (s • (V₀ t).snd)` is jointly
-`ContMDiff (𝓘(ℝ,ℝ).prod 𝓘(ℝ,ℝ)) I n` near every base parameter `(s₀, t₀)`,
-provided the variation point `(extChartAt I (γ t₀) (γ t), chart-fibre of the
-rescaled direction)` stays in the chart-`(γ t₀)` flow's phase-ball near
-`(s₀, t₀)` (a uniform-smallness coupling, satisfied for small `s`).
 
-The proof factors the map through the chart-`(γ t₀)` flow projection (jointly
-`C^n` by `exists_chartExp_jointContDiffOn_nat`) precomposed with the smooth
-coordinatisation `chartFlowVelCoordMap` and postcomposed with `(extChartAt I (γ
-t₀)).symm`; the chart-independence bridge
-`expMapIntrinsic_eq_chartFlow_proj_residual` supplies the pointwise factorisation
-on a neighbourhood, and `ContMDiffAt.congr_of_eventuallyEq` transfers smoothness
-of the composite to the variation map. -/
 theorem expMapIntrinsic_variation_contMDiff
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -858,14 +824,7 @@ theorem expMapIntrinsic_variation_contMDiff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint smoothness of the intrinsic exponential variation, flow obtained
-internally.**  The wrapper of `expMapIntrinsic_variation_contMDiff` that obtains
-the chart-`(γ t₀)` geodesic flow internally from
-`exists_chartExp_jointContDiffOn_nat`; the only remaining hypothesis is the
-uniform-smallness coupling, stated against the *obtained* phase-ball radius `ρ`
-and evaluation time `t'`.  This is the form the second-variation test field
-consumes: it requires only that, near `(s₀, t₀)`, the chart-`(γ t₀)` coordinate
-of the rescaled launch direction stays in the geodesic flow's phase-ball. -/
+
 theorem expMapIntrinsic_variation_contMDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -898,22 +857,9 @@ theorem expMapIntrinsic_variation_contMDiffAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Continuity discharge of the geometric conjuncts of the smallness coupling.**
-For the chart-`(γ t₀)` phase-ball radius `ρ > 0` and a smooth basepoint curve `γ`,
-there is `δ > 0` such that for every `s₀` in the `δ`-ball about `0`, on a
-neighbourhood of `(s₀, t₀)` the basepoint `γ p.2` lies in the chart-`(γ t₀)`
-source and the coordinatisation `chartFlowVelCoordMap (γ t₀) γ V₀ t' p` lies in
-the phase-ball about `(extChartAt I (γ t₀) (γ t₀), 0)`.
 
-This is pure continuity: `chartFlowVelCoordMap (γ t₀) γ V₀ t'` is jointly
-continuous (it is `ContMDiffAt` by `chartFlowVelCoordMap_contMDiffAt`), and its
-value at `(0, t₀)` is the phase-ball centre, since the first factor is
-`extChartAt I (γ t₀) (γ t₀)` and the second factor is
-`chartFiberCoord (γ t₀) ⟨γ t₀, (0/t') • (V₀ t₀).snd⟩ = 0` by
-`chartFiberCoord_self_zero`.  Hence the joint preimage of the open phase-ball is
-an open neighbourhood of `(0, t₀)`; a small enough `δ` keeps `(s₀, t₀)` inside it
-for `‖s₀‖ < δ`, and the open neighbourhood itself witnesses the eventual
-statement at each such `(s₀, t₀)`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem expMapIntrinsic_variation_smallField_phaseBall
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
@@ -982,24 +928,7 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Internal discharge of the smallness coupling for small variation parameter.**
-The wrapper of `expMapIntrinsic_variation_contMDiff` that obtains the chart-`(γ t₀)`
-geodesic flow internally and discharges the smallness coupling `hsmall` for
-sufficiently small variation parameter `s₀`: there is `δ > 0` such that for every
-`s₀` in the `δ`-ball about `0`, the two-parameter intrinsic exponential variation
-`(s, t) ↦ expMapIntrinsic (γ t) (s • (V₀ t).snd)` is jointly `ContMDiff
-(𝓘(ℝ,ℝ).prod 𝓘(ℝ,ℝ)) I n` at `(s₀, t₀)`.
 
-This is the form the second-variation construction consumes.  Both conjuncts of
-`hsmall` (chart-source and phase-ball membership) are pure continuity, discharged
-by `expMapIntrinsic_variation_smallField_phaseBall` (the coordinatisation hits the
-phase-ball centre at `(0, t₀)`).  The cross-chart geodesic identification — which
-formerly required moving-basepoint smallness conjuncts (foot confinement,
-intrinsic/chart-fixed agreement, geodesic rescaling) — is absorbed entirely into
-the chart-independence bridge `expMapIntrinsic_eq_chartFlow_proj_residual` via
-single-chart integral-curve uniqueness, so no moving-basepoint coupling remains.
-The smallness `δ` is genuine (it is the variation-parameter threshold), not the
-conclusion. -/
 theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1029,6 +958,172 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
     s₀ t₀ Φ ρ T t'
     ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
     (hphase s₀ hs₀)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+
+theorem diagExp_variation_contMDiffAt_of_smallField
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
+    (hproj : ∀ t, (V₀ t).proj = γ t)
+    (n : ℕ) (hn : 1 ≤ n) (t₀ : ℝ) :
+    ∃ δ > 0, ∀ s₀ ∈ Metric.ball (0 : ℝ) δ,
+      ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod I) (n : ℕ∞)
+        (fun p : ℝ × ℝ =>
+          diagExp (I := I) g hEnorm
+            (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
+              ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))))
+        (s₀, t₀) := by
+  classical
+  obtain ⟨δ, hδ_pos, hsmooth⟩ :=
+    expMapIntrinsic_variation_contMDiffAt_of_smallField (I := I) g hEnorm γ V₀ hγ
+      hV₀ hproj n hn t₀
+  refine ⟨δ, hδ_pos, fun s₀ hs₀ => ?_⟩
+  have hγn : ContMDiff 𝓘(ℝ, ℝ) I (n : ℕ∞) γ :=
+    hγ.of_le (by exact_mod_cast le_top)
+  have hfst : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (n : ℕ∞)
+      (fun p : ℝ × ℝ => γ p.2) (s₀, t₀) :=
+    (hγn t₀).comp (s₀, t₀) contMDiffAt_snd
+  have hsnd := hsmooth s₀ hs₀
+  have hpair : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod I) (n : ℕ∞)
+      (fun p : ℝ × ℝ =>
+        (γ p.2,
+          expMapIntrinsic (I := I) g hEnorm (γ p.2)
+            ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)))) (s₀, t₀) :=
+    hfst.prodMk hsnd
+  simpa [diagExp, TotalSpace.mk'] using hpair
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+theorem diagExp_contMDiffAt_zero
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (n : ℕ) (hn : 1 ≤ n) :
+    ContMDiffAt I.tangent (I.prod I) (n : ℕ∞) (diagExp (I := I) g hEnorm)
+      (⟨p, (0 : E)⟩ : TangentBundle I M) := by
+  classical
+  obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
+    hΦ_target, _hΦ_cd⟩ :=
+    exists_chartExp_jointContDiffOn_nat (I := I) g p n hn
+  set u₀ : TangentBundle I M := (⟨p, (0 : E)⟩ : TangentBundle I M) with hu₀_def
+  set ctr : E × E := ((extChartAt I p p, (0 : E)) : E × E) with hctr_def
+  set Ξ : TangentBundle I M → E × E := fun u => extChartAt I.tangent u₀ u with hΞ_def
+  set R : E × E → E × E := fun z => (z.1, t'⁻¹ • z.2) with hR_def
+  set G : E × E → E := fun z => (Φ ((z, t') : (E × E) × ℝ)).1 with hG_def
+  have hp_src : p ∈ (chartAt H p).source := mem_chart_source H p
+  have hΞ0 : Ξ u₀ = ctr := by
+    rw [hΞ_def]; simp only
+    rw [extChartAt_tangent_zero_apply_chartFiber (I := I) p (p := u₀) (by rw [hu₀_def]; exact hp_src)]
+    rw [hu₀_def, chartFiberCoord_self_zero (I := I) p]
+  have hRctr : R ctr = ctr := by rw [hR_def, hctr_def]; simp
+  have hctr_ball : ctr ∈ Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ := by
+    rw [hctr_def]; exact Metric.mem_ball_self hρ_pos
+
+  have hΞ_cd : ContMDiffAt I.tangent 𝓘(ℝ, E × E) (n : ℕ∞) Ξ u₀ := by
+    rw [hΞ_def]
+    exact (contMDiffAt_extChartAt (I := I.tangent) (x := u₀)).of_le (by exact_mod_cast le_top)
+
+  have hR_cd : ContMDiffAt 𝓘(ℝ, E × E) 𝓘(ℝ, E × E) (n : ℕ∞) R (Ξ u₀) := by
+    have hReq : R = ⇑((ContinuousLinearMap.fst ℝ E E).prod
+        (t'⁻¹ • ContinuousLinearMap.snd ℝ E E)) := by
+      funext z; rw [hR_def]; simp
+    have hRcd : ContDiff ℝ (n : ℕ∞) R := by
+      rw [hReq]; exact ContinuousLinearMap.contDiff _
+    exact hRcd.contMDiff.contMDiffAt
+  have hRΞ_cd : ContMDiffAt I.tangent 𝓘(ℝ, E × E) (n : ℕ∞) (fun u => R (Ξ u)) u₀ :=
+    hR_cd.comp u₀ hΞ_cd
+
+  have hG_at : ContDiffAt ℝ (n : ℕ∞) G (R (Ξ u₀)) := by
+    rw [hΞ0, hRctr]
+    exact hG_cd.contDiffAt (Metric.isOpen_ball.mem_nhds hctr_ball)
+  have hGRΞ := (hG_at.contMDiffAt).comp u₀ hRΞ_cd
+
+  have hGRu₀_target : G (R (Ξ u₀)) ∈ (extChartAt I p).target := by
+    rw [hΞ0, hRctr]
+    have ht'_Icc : t' ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self ht'_Ioo
+    have hmem := hΦ_target ctr hctr_ball t' ht'_Icc
+    rw [hG_def]; exact interior_subset hmem.1
+  have hsymm : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞) (extChartAt I p).symm (G (R (Ξ u₀))) := by
+    have hwithin : ContMDiffWithinAt 𝓘(ℝ, E) I (n : ℕ∞) (extChartAt I p).symm
+        (extChartAt I p).target (G (R (Ξ u₀))) :=
+      contMDiffWithinAt_extChartAt_symm_target (I := I) p hGRu₀_target
+    exact hwithin.contMDiffAt (extChartAt_target_mem_nhds' (I := I) hGRu₀_target)
+  have hcomp := hsymm.comp u₀ hGRΞ
+
+  have h2 : ContMDiffAt I.tangent I (n : ℕ∞)
+      (fun u : TangentBundle I M =>
+        expMapIntrinsic (I := I) g hEnorm u.proj u.snd) u₀ := by
+    refine hcomp.congr_of_eventuallyEq ?_
+    have hsrc_ev : ∀ᶠ u in 𝓝 u₀, u.proj ∈ (chartAt H p).source := by
+      have hproj_cont : ContinuousAt (fun u : TangentBundle I M => u.proj) u₀ :=
+        (FiberBundle.continuous_proj E (TangentSpace I)).continuousAt
+      exact hproj_cont.preimage_mem_nhds
+        (by rw [show u₀.proj = p from rfl]; exact (chartAt H p).open_source.mem_nhds hp_src)
+    have hball_ev : ∀ᶠ u in 𝓝 u₀,
+        R (Ξ u) ∈ Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ := by
+      have hcont : ContinuousAt (fun u => R (Ξ u)) u₀ := hRΞ_cd.continuousAt
+      have hmem : Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ ∈ 𝓝 (R (Ξ u₀)) := by
+        rw [hΞ0, hRctr]; exact Metric.isOpen_ball.mem_nhds hctr_ball
+      exact hcont.preimage_mem_nhds hmem
+    filter_upwards [hsrc_ev, hball_ev] with u hu_src hu_ball
+    change expMapIntrinsic (I := I) g hEnorm u.proj u.snd
+        = (extChartAt I p).symm (G (R (Ξ u)))
+    have hRΞ : R (Ξ u) =
+        ((extChartAt I p u.proj, t'⁻¹ • chartFiberCoord (I := I) p u) : E × E) := by
+      rw [hR_def, hΞ_def]; simp only
+      rw [extChartAt_tangent_zero_apply_chartFiber (I := I) p (p := u) hu_src]
+    have hfs : chartFiberCoord (I := I) p
+          (⟨u.proj, t'⁻¹ • u.snd⟩ : TangentBundle I M) = t'⁻¹ • chartFiberCoord (I := I) p u :=
+      chartFiberCoord_fiberScale (I := I) p (t'⁻¹) (q := u) hu_src
+    have harg : ((extChartAt I p u.proj,
+          chartFiberCoord (I := I) p (⟨u.proj, t'⁻¹ • u.snd⟩ : TangentBundle I M)) : E × E)
+        = R (Ξ u) := by rw [hRΞ, hfs]
+    have hphase : ((extChartAt I p u.proj,
+          chartFiberCoord (I := I) p (⟨u.proj, t'⁻¹ • u.snd⟩ : TangentBundle I M)) : E × E)
+        ∈ Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ := by
+      rw [harg]; exact hu_ball
+    have hbridge := expMapIntrinsic_eq_chartFlow_proj_residual (I := I) g hEnorm p n hn
+      Φ ρ T t' ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
+      u.proj hu_src u.snd hphase
+    rw [hbridge, harg, hG_def]
+
+  have h1 : ContMDiffAt I.tangent I (n : ℕ∞)
+      (fun u : TangentBundle I M => u.proj) u₀ := contMDiffAt_proj (TangentSpace I)
+  have hpair := h1.prodMk h2
+  simpa [diagExp, TotalSpace.mk'] using hpair
 
 end Headline
 

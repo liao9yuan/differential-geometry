@@ -25,11 +25,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-!
-# TensorWeak Barrier Core
 
-Split-out component of `MaximumPrinciple.TensorWeak`.
--/
+
+
+
+
 
 structure TensorSpatialDerivs
     (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -45,9 +45,9 @@ structure TensorSpatialDerivs
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         3 (cov t) (nablaS t) (nabla2S t)
 
-/-- The section-backed barrier has the same spatial covariant derivative data
-as `S`, because the metric addend has zero covariant derivative for a
-metric-compatible connection. -/
+
+
+
 theorem barrierDerivs
     [T2Space M]
     (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -88,18 +88,18 @@ theorem barrierDerivs
   · intro t
     exact hS.second t
 
-/-- Barrier sizes used in the final tensor-WMP epsilon limit. -/
+
 def SmallBarrierEps (epsilon : Real) : Prop :=
   0 < epsilon ∧ epsilon ≤ 1
 
-/--
-Hamilton's null-eigenvector condition for the reaction term.
 
-At each point, whenever any symmetric two-tensor input is nonnegative and has a
-null vector, the reaction term is nonnegative on that null vector.  This
-reaction-wide shape is needed because Hamilton's barrier argument applies the
-condition to `S_epsilon`, not only to the original tensor family.
--/
+
+
+
+
+
+
+
 def TensorNullEigenvectorCondition
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -112,10 +112,10 @@ def TensorNullEigenvectorCondition
       A x v v = 0 ->
       0 ≤ N t (G t) A x v v
 
-/-- Fiberwise symmetrization of a raw two-tensor evaluator.  This is useful for
-reaction terms that are meant to depend only on the symmetric part of their
-two-tensor input while the legacy WMP null condition is stated for raw
-evaluators. -/
+
+
+
+
 def rawSym2 (A : RawTwoTensorField (I := I) (M := M)) :
     RawTwoTensorField (I := I) (M := M) :=
   fun x v w => (A x v w + A x w v) / 2
@@ -144,7 +144,7 @@ theorem rawSym2_nonneg
   intro v
   simpa using hA v
 
-/-- Symmetrization preserves pointwise bilinearity. -/
+
 theorem rawSym2_bilin
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -168,10 +168,10 @@ theorem rawSym2_bilin
     rw [hA.smul_right c X Z, hA.smul_left c Z X]
     ring
 
-/-- Null-eigenvector condition for reaction terms proved only on symmetric
-two-tensor inputs.  This is the mathematically natural form for Hamilton's
-tensor maximum principle; `null_of_symm` below converts it to the legacy raw
-condition when the reaction ignores skew input. -/
+
+
+
+
 def TensorNullEigenvectorConditionSymm
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -184,8 +184,8 @@ def TensorNullEigenvectorConditionSymm
       A x v v = 0 ->
       0 ≤ N t (G t) A x v v
 
-/-- The reaction depends only on the symmetric part of its raw two-tensor
-argument, at least after quadratic evaluation. -/
+
+
 def TensorReactionSymmInputOn
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -195,8 +195,8 @@ def TensorReactionSymmInputOn
       N t (G t) A x v v =
         N t (G t) (rawSym2 (I := I) (M := M) A) x v v
 
-/-- Convert the natural symmetric-input null condition to the legacy raw-input
-condition when the reaction symmetrizes its input. -/
+
+
 theorem null_of_symm
     {G : Real -> SmoothRiemannianMetric I M}
     {N : TwoTensorReaction (I := I) (M := M)}
@@ -211,7 +211,7 @@ theorem null_of_symm
     (rawSym2_bilin (I := I) (M := M) hbilin)
     (rawSym2_nonneg (I := I) (M := M) hA) v (by simpa using hv)
 
-/-- Quadratic expansion for a pointwise symmetric bilinear raw two-tensor. -/
+
 theorem raw_quad_add_smul_eq
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v w : TangentSpace I x} {a : Real}
@@ -233,8 +233,8 @@ theorem raw_quad_add_smul_eq
             hsym w v]
           ring
 
-/-- A positive-semidefinite symmetric bilinear raw two-tensor kills every
-vector paired on the left with a null vector. -/
+
+
 theorem psd_null_left_raw
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v : TangentSpace I x}
@@ -273,7 +273,7 @@ theorem psd_null_left_raw
       hden_sq_pos
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
 
-/-- Right-sided version of `psd_null_left_raw`, using symmetry. -/
+
 theorem psd_null_right_raw
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v : TangentSpace I x}
@@ -286,14 +286,14 @@ theorem psd_null_right_raw
   rw [← hsym v w]
   exact psd_null_left_raw (I := I) (M := M) hsym hbilin hpsd hnull w
 
-/--
-Analytic regularity predicate for the tensor WMP barrier argument.
 
-This records the concrete scalar-evaluation regularity and uniform small-barrier
-reaction Lipschitz control needed by the barrier estimate.  The compact
-first-null extraction and tensor heat-operator realization remain separate
-frontiers.
--/
+
+
+
+
+
+
+
 structure TensorBarrierRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -352,14 +352,14 @@ structure TensorBarrierRegularityOn
                   x v v| ≤
               K * |epsilon * (delta + t - t0) * (G t).inner x v v|
 
-/--
-Analytic predicate for the evaluated drifted parabolic supersolution
-inequality.
 
-The heat-with-drift term is evaluated by the direct tensor operator
-`tensorHeatWithDrift2QuadMetricAt` from supplied first and second covariant
-derivative tensors.
--/
+
+
+
+
+
+
+
 def TensorParabolicInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -381,7 +381,7 @@ def TensorParabolicInequalityWithDriftOn
             (nabla2S t x) (nablaS t x) v +
           N t (G t) (S t) x v v ≤ timeDeriv t x v)
 
-/-- Strict evaluated drifted parabolic inequality for the positive barrier on a time set. -/
+
 def TensorParabolicStrictInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -404,13 +404,13 @@ def TensorParabolicStrictInequalityWithDriftOn
             (nabla2S t x) (nablaS t x) v +
           N t (G t) (S t) x v v < timeDeriv t x v)
 
-/--
-Local comparison estimates that turn the base parabolic inequality for `S`
-into the strict parabolic inequality for the positive barrier.
 
-The analytic work is concentrated in producing these estimates.  The order
-argument consuming them is `strictBarrier_of_est` below.
--/
+
+
+
+
+
+
 def TensorBarrierLocalEst
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -444,9 +444,9 @@ def TensorBarrierLocalEst
         N t (G t) (S t) x v v + reactionErr ∧
         (v ≠ 0 -> heatErr + reactionErr < metricGain))
 
-/-- Reduced local estimate when the barrier spatial derivative tensors are the
-same supplied tensors as for `S`.  The remaining analytic inputs are the
-barrier time derivative, the positive metric gain, and the reaction error. -/
+
+
+
 def BarrierLocalCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -471,9 +471,9 @@ def BarrierLocalCore
         N t (G t) (S t) x v v + reactionErr ∧
         (v ≠ 0 -> reactionErr < metricGain))
 
-/-- Product rule for the pointwise time derivative of the barrier quadratic
-form.  The derivative of the metric quadratic form is still supplied by the
-caller; this lemma only packages the affine barrier coefficient calculation. -/
+
+
+
 theorem hasDerivWithinAt_barrier_quad
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -509,9 +509,9 @@ theorem hasDerivWithinAt_barrier_quad
   simpa [tensorBarrierFamily, add_comm, add_left_comm, add_assoc,
     mul_comm, mul_left_comm, mul_assoc] using htotal
 
-/-- Build the reduced barrier core from the time derivatives of `S(t)(v,v)`
-and `g(t)(v,v)`.  The remaining hypotheses are exactly the local gain,
-reaction-error, and positive-margin estimates. -/
+
+
+
 theorem barrierCore_deriv
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -562,8 +562,8 @@ theorem barrierCore_deriv
     have h := hGain t ht x v
     linarith
 
-/-- Direct constructor for the reduced local barrier estimate from pointwise
-time-derivative, reaction-error, and margin inequalities. -/
+
+
 theorem barrierCore_of_pt
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -602,9 +602,9 @@ theorem barrierCore_of_pt
     exact ⟨reactionErr t x v, metricGain t x v,
       hTime t ht x v, hReaction t ht x v, hMargin t ht x v⟩
 
-/-- If the metric barrier contributes no spatial heat-with-drift error, the
-reduced time/reaction estimates produce the full local estimate expected by the
-strict-barrier theorem. -/
+
+
+
 theorem localEst_of_core
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -631,9 +631,9 @@ theorem localEst_of_core
       have h := hmargin hv
       linarith
 
-/-- Full local barrier estimate from pointwise time derivatives of `S` and
-the metric quadratic form, when the metric barrier has already been eliminated
-from the spatial heat term. -/
+
+
+
 theorem localEst_deriv
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}

@@ -1,78 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorCutoffChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
-/-!
-# The eigenvector cutoff chart partial is a genuine weak cutoff chart partial
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
-index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
-`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`
-is an abstract element of the `L²` Hilbert space `TensorL2 r s g`, with canonical
-cutoff Euclidean chart component `u := tensorL2ChartComponentCutoff g r s φ α P₀`.
-
-Two companion files established, for the canonical smooth `H¹`-approximating
-sequence `eigenvectorSmoothApprox g r s h_atlas i : ℕ → SmoothCcTensorH1 g r s`:
-
-* `EigenvectorChartComponentL2.lean`: the `μ⁻¹`-rescaled `L²`-coercions of the
-  smooth approximants converge, in `TensorL2 r s g`, to the eigenvector `φ`;
-* `EigenvectorCutoffChartPartialL2.lean`: for each chart-coordinate direction
-  `k`, the chosen weak `k`-th cutoff chart partials of those `μ⁻¹`-rescaled
-  approximants converge, in `Lp ℝ 2 (chartL2Measure α)`, to
-  `eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k` — the candidate weak
-  `k`-th cutoff chart partial of `u`.
-
-This file closes the loop: it names `eigenvectorCutoffChartWeakPartial` as the
-coercion-to-function of `eigenvectorCutoffChartPartialLp`, and proves that it is
-a genuine `DeGiorgi.HasWeakPartialDeriv` of `u` on the Euclidean chart target.
-It is the verbatim cutoff-weight analogue of the partition-of-unity-weighted
-headline `eigenvectorChartWeakPartial_hasWeakPartialDeriv`.
-
-## The mechanism
-
-The chosen weak cutoff chart partial of the cutoff chart component of a *smooth*
-section is a genuine weak partial: the cutoff chart component of
-`eigenvectorSmoothApprox … n` is globally `C^∞` with compact support inside the
-chart target, hence `W^{1,2}` there (`cutoffComponentEuclid_memW1p`), so its
-`chosenWeakPartial'` is an honest weak partial
-(`chosenWeakPartial'_isWeakPartial_of_mem`). The `μ⁻¹`-rescaling factor is
-absorbed because `HasWeakPartialDeriv` is `ℝ`-homogeneous.
-
-Both the cutoff chart components and the cutoff chart partials converge in
-`Lp ℝ 2 (chartL2Measure α)`; convergence in the `Lp` norm is, by
-`Lp.tendsto_Lp_iff_tendsto_eLpNorm'`, exactly convergence of the `eLpNorm` of
-the difference to `0`. Feeding these two `eLpNorm`-convergences, together with
-the per-approximant genuine weak partials, into the `L²`-closure theorem
-`hasWeakPartialDeriv_of_tendsto_eLpNorm` produces the headline: the candidate
-weak cutoff chart partial is a genuine weak cutoff chart partial of the
-eigenvector cutoff chart component.
-
-The Euclidean `L²` reference measure `chartL2Measure α = volume.restrict
-(chartTargetEuclid α)` is the plain Lebesgue volume restricted to the (open)
-Euclidean chart target, matching the open-set hypothesis of the closure theorem.
-
-## Main definitions
-
-* `eigenvectorCutoffChartWeakPartial g r s h_atlas i α P₀ k` — the weak `k`-th
-  cutoff chart partial of the eigenvector cutoff chart component: the
-  coercion-to-function of `eigenvectorCutoffChartPartialLp g r s h_atlas i α
-  P₀ k`.
-
-## Main results
-
-* `eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv` — **the headline**:
-  `eigenvectorCutoffChartWeakPartial …` is a `DeGiorgi.HasWeakPartialDeriv` of
-  the eigenvector cutoff chart component `tensorL2ChartComponentCutoff g r s φ α
-  P₀` on the Euclidean chart target.
-* `eigenvectorCutoffChartWeakPartial_locally_memLp` —
-  `eigenvectorCutoffChartWeakPartial …` is in `MemLp 2` of the Lebesgue volume
-  restricted to any compact subset of the Euclidean chart target.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -103,8 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- `HasWeakPartialDeriv` only depends on its function arguments up to
-almost-everywhere equality with respect to `volume.restrict Ω`. -/
+
 private lemma hasWeakPartialDeriv_congr_ae
     {k : Fin (Module.finrank ℝ E)} {g f g' f' : EuclN → ℝ} {Ω : Set EuclN}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict Ω] f')
@@ -127,8 +54,7 @@ private lemma hasWeakPartialDeriv_congr_ae
   exact h φ hφ hφ_supp hφ_sub
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- `HasWeakPartialDeriv` is `ℝ`-homogeneous: a common real scalar passes
-through the weak partial and the function simultaneously. -/
+
 private lemma hasWeakPartialDeriv_const_smul
     {k : Fin (Module.finrank ℝ E)} {g f : EuclN → ℝ} {Ω : Set EuclN} (c : ℝ)
     (h : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g f Ω) :
@@ -149,9 +75,6 @@ private lemma hasWeakPartialDeriv_const_smul
     simp only [smul_eq_mul]; ring
   rw [h_lhs, h_rhs, h_base, mul_neg]
 
-/-- **The weak `k`-th cutoff chart partial of an eigenvector cutoff chart
-component (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorCutoffChartWeakPartial`. -/
 def eigenvectorCutoffChartWeakPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -162,7 +85,7 @@ def eigenvectorCutoffChartWeakPartial
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `cutoff_smoothApprox_smul_coe_tendsto`. -/
+
 private lemma cutoff_smoothApprox_smul_coe_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -213,7 +136,6 @@ private lemma cutoff_smoothApprox_smul_coe_tendsto
   have h_smul := h_l2.const_smul (i.fst.val)⁻¹
   rwa [smul_smul, inv_mul_cancel₀ hμ_ne, one_smul] at h_smul
 
-/-- Chart-locality-free twin of `eigenvectorCutoffChartComponentL2_approx_coeFn`. -/
 lemma eigenvectorCutoffChartComponentL2_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -248,7 +170,6 @@ lemma eigenvectorCutoffChartComponentL2_approx_coeFn
       g r s i n).toCcTensor
     α P₀).const_smul (i.fst.val)⁻¹
 
-/-- Chart-locality-free twin of `eigenvectorCutoffChartPartialLp_approx_coeFn`. -/
 lemma eigenvectorCutoffChartPartialLp_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -281,8 +202,6 @@ lemma eigenvectorCutoffChartPartialLp_approx_coeFn
         (chartTargetEuclid (I := I) (M := M) α)))).trans ?_
   exact (MemLp.coeFn_toLp _).const_smul (i.fst.val)⁻¹
 
-/-- Chart-locality-free twin of
-`eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv`. -/
 private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -344,7 +263,7 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
       (I := I) (M := M) g r s i α P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorCutoffChartComponentL2_tendsto`. -/
+
 private lemma eigenvectorCutoffChartComponentL2_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -369,8 +288,7 @@ private lemma eigenvectorCutoffChartComponentL2_tendsto
   exact h_clm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvectorCutoffChartComponent_eLpNorm_tendsto`. -/
+
 private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -404,7 +322,6 @@ private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
     (eigenvectorCutoffChartComponentL2_tendsto (I := I) (M := M)
       g r s i α P₀)
 
-/-- Chart-locality-free twin of `eigenvectorCutoffChartPartial_eLpNorm_tendsto`. -/
 private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -434,9 +351,7 @@ private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
       g r s i α P₀ k)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The eigenvector cutoff chart partial is a genuine weak cutoff chart partial
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv`. -/
+
 theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -543,9 +458,6 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
   rw [hgLim_def, huLim_def] at h_closure
   exact h_closure
 
-/-- **Local `L²`-integrability of the eigenvector cutoff chart partial
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvectorCutoffChartWeakPartial_locally_memLp`. -/
 theorem eigenvectorCutoffChartWeakPartial_locally_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -1,46 +1,9 @@
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
-
-/-!
-# Chain-rule bridge: chart-pushed raw scalar versus chart-pulled composition
-
-For a scalar function `u : M → ℝ` on a smooth Riemannian manifold and a chart
-`α`, this file relates two views of the iterated Fréchet derivative of `u` at
-a Euclidean chart-target point `y ∈ chartTargetEuclid α`:
-
-* **View A** — the iterated Fréchet derivative of the raw chart-pushed function
-  `chartPushedRaw I α u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ` at
-  `y`, with derivatives valued in continuous multilinear maps on the standard
-  Euclidean space.
-
-* **View B** — the iterated Fréchet derivative of the chart-pulled
-  composition `u ∘ (extChartAt I α).symm : E → ℝ` at the model-space point
-  `(toEuclidean (E := E)).symm y`, with derivatives valued in continuous
-  multilinear maps on the model fibre `E`.
-
-Both views are pointwise equal on the chart target after composition with the
-continuous-linear-equivalence `(toEuclidean (E := E)).symm : EuclN → E`; their
-iterated derivatives differ by the operator-norm chain factor
-`‖(toEuclidean (E := E)).symm.toContinuousLinearMap‖^j` (each of the `j`
-derivative slots contributes one factor of the operator norm), which when
-squared gives `‖…‖^(2j)`.
-
-We package the comparison as the squared-norm bounds at orders `j = 0, 1, 2`:
-
-* `chartPushedRaw_sq_eq_compositionSq` — the order-`0` identity (no
-  derivative, just function value composition).
-* `fderiv_chartPushedRaw_sq_le_compFderivSq` — the order-`1` squared
-  Fréchet-derivative bound.
-* `iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq` — the order-`2`
-  squared iterated-Fréchet-derivative bound.
-
-All bounds avoid any chart-locality assumptions: they apply uniformly to any
-`α`, any `u`, and any `y` in the chart-α Euclidean target.
--/
 
 noncomputable section
 
@@ -58,9 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Order-0 bridge.** On the chart-α Euclidean target, the squared raw
-chart-pushed value of `u` equals the squared composition value of `u ∘ symm`
-at the corresponding model-space point. -/
+omit [IsManifold I ∞ M] in
 theorem chartPushedRaw_sq_eq_compositionSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)
@@ -72,11 +33,7 @@ theorem chartPushedRaw_sq_eq_compositionSq
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
     (I := I) (M := M) α u hy]
 
-/-- **Order-1 bridge.** On the chart-α Euclidean target, the squared
-Fréchet-derivative norm of the raw chart-pushed function at `y` is bounded by
-the operator-norm-squared chain factor times the squared Fréchet-derivative
-norm of the composition `u ∘ (extChartAt I α).symm` at the corresponding
-model-space point. -/
+omit [IsManifold I ∞ M] in
 theorem fderiv_chartPushedRaw_sq_le_compFderivSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)
@@ -140,11 +97,7 @@ theorem fderiv_chartPushedRaw_sq_le_compFderivSq
   rw [hf_def, hL_def]
   ring
 
-/-- **Order-2 bridge.** On the chart-α Euclidean target, the squared order-2
-iterated-Fréchet-derivative norm of the raw chart-pushed function at `y` is
-bounded by the operator-norm-to-the-fourth chain factor times the squared
-order-2 iterated-Fréchet-derivative norm of the composition
-`u ∘ (extChartAt I α).symm` at the corresponding model-space point. -/
+omit [IsManifold I ∞ M] in
 theorem iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)

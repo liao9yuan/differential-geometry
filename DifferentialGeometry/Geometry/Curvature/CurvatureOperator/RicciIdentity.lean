@@ -2,63 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-/-!
-# Ricci identities for vectors and 1-forms; trace-commutator identity for the gradient
-
-This file develops the three classical **Ricci identities** for the Levi-Civita covariant
-derivative of a smooth Riemannian metric `g : SmoothRiemannianMetric I M`:
-
-## Vector Ricci identity
-
-For any covariant derivative `cov` on the tangent bundle, smooth tangent fields `X`, `Y`,
-`V`, and a point `x : M`, the section-level Riemann formula
-$$
-  R(X, Y) V := \nabla_X (\nabla_Y V) - \nabla_Y (\nabla_X V) - \nabla_{[X, Y]} V
-$$
-is built into the definition of `riemannSec`. We expose this as the
-**vector Ricci identity** `ricci_identity_vector`, providing a usable callsite for the
-direct unfolding.
-
-## 1-form Ricci identity
-
-For the cotangent extension of any covariant derivative `cov` (denoted `cotangentCov cov`),
-smooth tangent fields `X`, `Y`, `W`, and a smooth cotangent section `θ`, the iterated
-commutator on `θ` evaluated against `W x` equals minus the contraction of `θ` against the
-section-level Riemann curvature on `W`:
-$$
-  \bigl[(\nabla^*_X \nabla^*_Y \theta) - (\nabla^*_Y \nabla^*_X \theta)
-        - (\nabla^*_{[X, Y]}\,\theta)\bigr](W(x))
-    = -\,\theta\bigl(R(X, Y) W\bigr)(x).
-$$
-Here `(∇^*_Y θ)` is interpreted as the cotangent section
-`b ↦ (cotangentCov cov).toFun θ b (Y b)`, and `(∇^*_X (∇^*_Y θ))` is the cotangent
-covariant derivative of that section along `X`. The proof uses the dual-pairing Leibniz
-identity `cotangentCov_dualPairing` iteratively, combined with the foundational identity
-`extDerivFun_apply_mlieBracket` for the second derivative of a scalar along a Lie
-bracket.
-
-## Trace-commutator identity for the gradient
-
-The **trace-commutator** (also known as the heart-of-Bochner reduction) packages the
-abstract Ricci tensor at `(∇f, w)` as the basis-coefficient sum of the section-level
-Riemann curvature on a smooth global tangent frame:
-$$
-  \mathrm{Ric}_x\bigl(\nabla f,\, w\bigr) =
-    \sum_i (\mathrm{finBasis}\,\mathbb R\,E).\mathrm{repr}\bigl(R(B_i, w)(\nabla f)(x)\bigr)_i.
-$$
-
-A fully bundled connection Laplacian on tangent vectors is constructed in a downstream
-file. Here we provide:
-
-* `localConnLap_vector cov B V x` — the **local connection Laplacian** of a tangent
-  section `V` at the point `x`, computed against a smooth tangent frame `B : Fin n → Π b,
-  TangentSpace I b`. The definition matches the textbook trace formula
-  `Δ_∇ V = ∑_i (∇_{B_i} ∇_{B_i} V - ∇_{∇_{B_i} B_i} V)`.
-
-* `ricciTensor_gradFun_eq_frame_sum_riemannSec` — the **trace identity** at the heart of Bochner.
-  It is the trace formulation of the vector Ricci identity (item 1) plus the basis
-  expansion of the abstract Ricci tensor.
--/
 
 noncomputable section
 
@@ -79,21 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- **Vector Ricci identity.** For any covariant derivative `cov` on the tangent bundle,
-smooth tangent vector fields `X`, `Y`, `V`, and a point `x : M`, the iterated covariant
-derivative commutator equals the section-level Riemann curvature:
-$$
-  \nabla_X(\nabla_Y V)\,(x) - \nabla_Y(\nabla_X V)\,(x) - \nabla_{[X, Y]} V\,(x)
-    = R(X, Y) V\,(x).
-$$
-With Mathlib's argument convention `cov.toFun σ x v ≅ (∇_v σ)(x)`, this is the equality
-$$
-  \mathrm{cov.toFun}(\nabla_Y V)(x)(X(x))
-    - \mathrm{cov.toFun}(\nabla_X V)(x)(Y(x))
-    - \mathrm{cov.toFun}(V)(x)([X, Y]_x)
-    = \mathrm{riemannSec}\,\mathrm{cov}\,X\,Y\,V\,x.
-$$
-The identity is purely definitional (`riemannSec_def`). -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricci_identity_vector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y V : Π b : M, TangentSpace I b) (x : M) :
@@ -102,16 +31,6 @@ theorem ricci_identity_vector
       riemannSec cov X Y V x :=
   (riemannSec_def cov X Y V x).symm
 
-/-- The **iterated cotangent connection** of a cotangent section `θ` along smooth
-tangent fields `X` and `Y`, evaluated at `(x, W(x))`. Concretely:
-$$
-  (\nabla^*_X \nabla^*_Y \theta)\,x\,(W(x))
-    := \bigl((\mathrm{cotangentCov}\,\mathrm{cov})
-          (\,b \mapsto (\mathrm{cotangentCov}\,\mathrm{cov})(\theta)\,b\,(Y(b)))\,
-          x\,(X(x))\bigr)\,(W(x)).
-$$
-The intermediate cotangent section `b ↦ (cotangentCov θ) b (Y b)` is the cotangent
-covariant derivative of `θ` along the smooth vector field `Y`. -/
 private noncomputable def iterCotangentCov
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (θ : Π b : M, TangentSpace I b →L[ℝ] ℝ)
@@ -119,18 +38,6 @@ private noncomputable def iterCotangentCov
   ((cotangentCov cov).toFun
     (fun b : M => (cotangentCov cov).toFun θ b (Y b)) x (X x)) (W x)
 
-/-- **1-form Ricci identity.** Let `cov : CovariantDerivative I E (TangentSpace I)` be a
-covariant derivative of class `C^∞` on the tangent bundle of a smooth manifold `M`. For
-smooth tangent vector fields `X, Y, W`, a smooth cotangent section `θ`, and a point
-`x : M`, the iterated cotangent commutator on `θ` applied to `W x` equals minus the
-contraction of `θ` against the section-level Riemann curvature on `W`:
-$$
-  \bigl[(\nabla^*_X \nabla^*_Y \theta)\,(W) - (\nabla^*_Y \nabla^*_X \theta)\,(W)
-        - (\nabla^*_{[X, Y]}\,\theta)(W)\bigr](x)
-    = -\,\theta(x)\bigl(R(X, Y) W\,(x)\bigr).
-$$
-The required smoothness on `f := b ↦ θ(b)(W(b))` enables the foundational scalar-bracket
-identity `extDerivFun_apply_mlieBracket`. -/
 theorem ricci_identity_oneForm
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -343,17 +250,6 @@ theorem ricci_identity_oneForm
   unfold iterCotangentCov
   linarith
 
-/-- The **local connection Laplacian on tangent sections** with respect to a smooth
-global tangent frame `B : Fin n → Π b, TangentSpace I b`. With the standing argument
-convention `cov.toFun σ x v ≅ (∇_v σ)(x)`, this is the textbook formula
-$$
-  (\Delta_\nabla^{B} V)(x)
-    := \sum_i \bigl(\nabla_{B_i x}\nabla_{B_i} V - \nabla_{(\nabla_{B_i} B_i)(x)} V\bigr).
-$$
-The dependence on `B` is genuine in the absence of an orthonormality hypothesis. The
-downstream connection-Laplacian instance proves frame-invariance under `g`-orthonormal
-frames; here we expose the frame-dependent operator at the level needed by the
-trace-commutator identity. -/
 noncomputable def localConnLap_vector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -362,7 +258,7 @@ noncomputable def localConnLap_vector
     (cov.toFun (covApply cov (B i) V) x (B i x) -
       cov.toFun V x (cov.toFun (B i) x (B i x)))
 
-/-- The defining identity for `localConnLap_vector`. -/
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma localConnLap_vector_def
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -372,24 +268,6 @@ lemma localConnLap_vector_def
         (cov.toFun (covApply cov (B i) V) x (B i x) -
           cov.toFun V x (cov.toFun (B i) x (B i x))) := rfl
 
-/-- **Frame-trace expansion of the Ricci tensor at the gradient.** Let `g` be a smooth
-Riemannian metric on `M`, let `f : M → ℝ` be a smooth scalar, let `w` be a smooth tangent
-vector field, and let `B : Fin n → Π b, TangentSpace I b` be a smooth global tangent frame
-agreeing with the model basis `chartModelBasis E` at the point `x`. Then the Ricci tensor
-at `(∇f, w)` equals the `chartModelBasis E`-coordinate sum of the section-level Riemann
-curvature `riemannSec (LeviCivita g)` on the frame:
-$$
-  \mathrm{Ric}_x\bigl(\nabla f,\, w\bigr) =
-    \sum_i (\mathrm{chartModelBasis}\,E).\mathrm{repr}
-      \bigl(R(B_i, w)(\nabla f)(x)\bigr)_i.
-$$
-Here `∇f` is `gradFun g f` and `R = riemannSec (LeviCivita g)`.
-
-The proof is the basis-trace expansion `ricciTensor_apply_smooth_basisSum`
-(with `Y := w`, `Z := ∇f`) composed with `ricciTensor_symm` to put the gradient in the
-first slot. This frame-trace identity is the algebraic ingredient consumed downstream when
-assembling the connection-Laplacian/gradient commutator
-`Δ_∇(∇f) = ∇(Δ_g f) + Ric^♯(∇f)`; that commutator itself is NOT proved here. -/
 theorem ricciTensor_gradFun_eq_frame_sum_riemannSec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -414,16 +292,11 @@ theorem ricciTensor_gradFun_eq_frame_sum_riemannSec [I.Boundaryless]
   rw [ricciTensor_symm (I := I) g x (gradFun (I := I) g f x) (w x)]
   exact hbasisSum
 
-/-- The (1,1)-Ricci endomorphism `ricciSharp g x v` of a tangent vector `v ∈ T_x M`. By the
-defining identity (see `inner_ricciSharp`), it is the unique vector `W ∈ T_x M` such that
-`g_x(W, w) = ricciTensor g x v w` for every `w ∈ T_x M`. -/
 noncomputable def ricciSharpVec
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
   metricSharp (I := I) g x ((ricciTensor (I := I) g x v).toLinearMap)
 
-/-- **Defining identity for `ricciSharpVec`.** For any `v, w ∈ T_x M`,
-`g_x(\mathrm{Ric}^\sharp(v), w) = \mathrm{Ric}_x(v, w)`. -/
 lemma inner_ricciSharpVec
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -431,7 +304,6 @@ lemma inner_ricciSharpVec
   unfold ricciSharpVec
   exact inner_metricSharp (I := I) g x ((ricciTensor (I := I) g x v).toLinearMap) w
 
-/-- Symmetric form of the defining identity. -/
 lemma inner_ricciSharpVec_right
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -439,9 +311,6 @@ lemma inner_ricciSharpVec_right
   rw [g.symm x w (ricciSharpVec (I := I) g x v)]
   exact inner_ricciSharpVec (I := I) g x v w
 
-/-- The vector `ricciSharpVec g x v` is **uniquely** characterised by its defining
-inner-product identity: any `W ∈ T_x M` with `g.inner x W w = ricciTensor g x v w` for all
-`w` is equal to `ricciSharpVec g x v`. -/
 lemma ricciSharpVec_unique
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)
     {W : TangentSpace I x}
@@ -454,7 +323,6 @@ lemma ricciSharpVec_unique
   rw [hW w]
   exact (inner_ricciSharpVec (I := I) g x v w).symm
 
-/-- Additivity of `ricciSharpVec` in the input vector. -/
 lemma ricciSharpVec_add
     (g : SmoothRiemannianMetric I M) (x : M) (v v' : TangentSpace I x) :
     ricciSharpVec (I := I) g x (v + v') =
@@ -472,7 +340,6 @@ lemma ricciSharpVec_add
         ricciTensor (I := I) g x v w + ricciTensor (I := I) g x v' w from by
       rw [map_add, ContinuousLinearMap.add_apply]]
 
-/-- Real-scalar homogeneity of `ricciSharpVec` in the input vector. -/
 lemma ricciSharpVec_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     ricciSharpVec (I := I) g x (c • v) = c • ricciSharpVec (I := I) g x v := by
@@ -487,10 +354,6 @@ lemma ricciSharpVec_smul
         c * ricciTensor (I := I) g x v w from by
       rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]]
 
-/-- The (1,1)-Ricci endomorphism `ricciSharp g x : T_x M →L[ℝ] T_x M`, packaged as a
-continuous linear map. The definition uses the underlying linear-algebraic map
-`v ↦ ricciSharpVec g x v` (linear by `ricciSharpVec_add` / `ricciSharpVec_smul`),
-upgraded to a continuous map via finite-dimensional automatic continuity. -/
 noncomputable def ricciSharp
     (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -502,14 +365,10 @@ noncomputable def ricciSharp
       map_smul' := fun c v => by
         simpa using ricciSharpVec_smul (I := I) g x c v }
 
-/-- Defining identity for `ricciSharp` as a continuous linear endomorphism: it agrees with
-`ricciSharpVec` pointwise. -/
 @[simp] lemma ricciSharp_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     ricciSharp (I := I) g x v = ricciSharpVec (I := I) g x v := rfl
 
-/-- **Inner-product defining identity for `ricciSharp`.** For any `v, w ∈ T_x M`,
-`g_x(\mathrm{Ric}^\sharp(v), w) = \mathrm{Ric}_x(v, w)`. -/
 theorem inner_ricciSharp
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -517,7 +376,6 @@ theorem inner_ricciSharp
   rw [ricciSharp_apply]
   exact inner_ricciSharpVec (I := I) g x v w
 
-/-- Symmetric form: `g_x(w, \mathrm{Ric}^\sharp(v)) = \mathrm{Ric}_x(v, w)`. -/
 theorem inner_ricciSharp_right
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -525,11 +383,6 @@ theorem inner_ricciSharp_right
   rw [ricciSharp_apply]
   exact inner_ricciSharpVec_right (I := I) g x v w
 
-/-- **Bridge between `g(∇_X (∇f), Y)` and the abstract Hessian.** For the Levi-Civita
-covariant derivative, the inner product `g(∇_X (∇f), Y)` agrees with the abstract Hessian
-`abstractHessian g f x (X x) (Y x)`. This identity links the local (Hessian) and global
-(covariant-derivative-of-gradient) descriptions of the second-order behaviour of `f`,
-through the metric duality `g(grad f, ·) = mfderiv f`. -/
 theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -586,11 +439,6 @@ theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
   rw [hkey]
   rfl
 
-/-- **Heart-of-Bochner identity, inner-product / abstract-Hessian formulation.** Combining
-the symmetry of the abstract Hessian with the bridge between `g(∇_X(∇f), Y)` and the
-abstract Hessian, the inner product `g(∇_X(∇f), Y)` is symmetric in `(X, Y)` at any point
-where `f` is `C²`. This is the engine identity that, traced over any orthonormal frame,
-produces the heart-of-Bochner reduction. -/
 theorem inner_cov_gradFun_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -609,10 +457,6 @@ theorem inner_cov_gradFun_symm [I.Boundaryless]
       exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
     simpa using h1)) (X x) (Y x)
 
-/-- **Section-level Hessian symmetry for the gradient.** As scalar functions on `M`, the
-inner products `b ↦ g(∇_{X b}(∇f)(b), Y b)` and `b ↦ g(∇_{Y b}(∇f)(b), X b)` are equal.
-This is the global form of `inner_cov_gradFun_symm` and is the natural input for
-metric-compatibility differentiation steps in the heart-of-Bochner derivation. -/
 theorem inner_cov_gradFun_symm_globally [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -626,16 +470,7 @@ theorem inner_cov_gradFun_symm_globally [I.Boundaryless]
   funext b
   exact inner_cov_gradFun_symm (I := I) g hf hX hY
 
-/-- **Heart-of-Bochner inner-product reduction at the curvature step.** For smooth tangent
-fields `B`, `w` and smooth scalar `f` (with `f` of class `C∞`), the section-level vector
-Ricci identity applied to `B, w, ∇f` plus metric skewness of the Riemann curvature
-encodes the curvature contribution of the heart-of-Bochner identity:
-$$
-  g_x\bigl(\nabla_B \nabla_w (\nabla f) - \nabla_w \nabla_B (\nabla f) - \nabla_{[B, w]}(\nabla f),\, B\bigr) =
-    g_x\bigl(R(B, w)(\nabla f),\, B\bigr) = - g_x\bigl(\nabla f,\, R(B, w) B\bigr).
-$$
-The right-most equality is the metric skewness of `riemannSec` (already exposed). -/
-theorem heart_of_bochner_curvature_term [I.Boundaryless]
+theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {B w : Π b : M, TangentSpace I b} {x : M}
@@ -650,11 +485,6 @@ theorem heart_of_bochner_curvature_term [I.Boundaryless]
     (gradFun_contMDiff_total_section (I := I) g hf) hB
   linarith
 
-/-- **Riesz uniqueness reduction for the heart-of-Bochner vector identity.** Two tangent
-vectors `LHS, RHS ∈ T_x M` are equal iff `g.inner x LHS w = g.inner x RHS w` for every
-`w ∈ T_x M`. This is the standard Riesz uniqueness on a finite-dimensional inner-product
-space; we package it as a named lemma to highlight its role as the entry point from the
-inner-product formulation to the vector formulation of the heart-of-Bochner identity. -/
 lemma vector_eq_iff_inner_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     (LHS RHS : TangentSpace I x) :
@@ -665,19 +495,6 @@ lemma vector_eq_iff_inner_eq
   rw [metricFlatLinear_apply, metricFlatLinear_apply]
   exact h w
 
-/-- **Frame-traced inner product of the connection Laplacian on `∇f` against `w`.** This
-is the LHS of the heart-of-Bochner identity in inner-product form, displayed in the trace
-form that the downstream connection-Laplacian Bochner derivation will work with. It
-unfolds the local connection-Laplacian against the inner product, applying metric
-compatibility in two steps and the abstract-Hessian bridge to pre-organise the data into
-the four atomic pieces:
-
-* `B_i (Hess f(B_i, w))` — second-derivative term;
-* `Hess f(B_i, ∇_{B_i} w)` — connection-correction in `w`;
-* `Hess f(∇_{B_i} B_i, w)` — connection-correction in `B`.
-
-The final assembly into `mfderiv (Δf) (w x) + ricciTensor g x (∇f x) (w x)` requires
-orthonormality of the frame `B` at `x` and is performed in a downstream file. -/
 lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -720,24 +537,7 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
   rw [hu_def]
   rw [map_sub, ContinuousLinearMap.sub_apply]
 
-/-- **Heart-of-Bochner vector identity, conditional form.** Given a smooth frame
-`B : Fin n → Π b, TangentSpace I b` and a smooth scalar `f : M → ℝ`, suppose the
-inner-product reduction holds: for every smooth tangent test field `w` (and at the point
-`x`),
-$$
-  g_x\bigl((\Delta_\nabla^B \nabla f)(x), w(x)\bigr) =
-    g_x\bigl(\nabla(\Delta_g f)(x), w(x)\bigr) + g_x\bigl(\mathrm{Ric}^\sharp(\nabla f x), w(x)\bigr).
-$$
-Then the vector identity holds:
-$$
-  (\Delta_\nabla^B \nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f x).
-$$
-The hypothesis is exactly the inner-product form of the heart-of-Bochner identity, which
-holds for `B` orthonormal at `x` by the algebraic content packaged in
-`inner_cov_gradFun_eq_abstractHessian`, `inner_cov_gradFun_symm`, and
-`heart_of_bochner_curvature_term` together with the Hessian-trace-equals-Laplacian
-identity (in turn the divergence-of-gradient identity). -/
-theorem heart_of_bochner_of_inner_form [I.Boundaryless]
+theorem localConnLap_vector_eq_bochnerFormula_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)

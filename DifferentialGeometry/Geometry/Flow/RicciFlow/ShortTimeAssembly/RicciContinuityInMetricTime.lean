@@ -1,11 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.RicciTensor
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
@@ -15,22 +16,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
-/-!
-# Time-continuity of the Ricci tensor along a metric family
-
-This assembly file shows that the Ricci tensor depends continuously on time when read along a
-time-family of metrics `g_DT`, provided the family's chart-coordinate Gram entries (and their
-derivatives up to second order) are time-continuous.  The Ricci tensor is built from these
-chart data through the Christoffel symbols, so continuity propagates through the chart formula.
-
-## Main results
-
-* `gfam_inner_continuous_on` — time-continuity of the metric pairings along the family.
-* `ricci_gfam_continuous_on` — time-continuity of the Ricci tensor in chart coordinates.
-* `ricci_continuous_in_metric_time` — the assembled statement: `s ↦ ricciTensor (g_DT s) x v w`
-  is continuous on `[0, T]`.
--/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -67,7 +54,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-/-- `chartGramOnE` is twice differentiable at any point of the chart-target interior. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -77,8 +64,7 @@ private lemma chartGramOnE_diffAt_int
     (chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   exact (hcd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The Fréchet derivative `fderiv (chartGramOnE g α i j)` is differentiable at any
-point of the chart-target interior (the chart-Gram entry is `C^∞`, hence `C²`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma fderiv_chartGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -91,8 +77,7 @@ private lemma fderiv_chartGramOnE_diffAt_int
   have hderiv := hcdAt.fderiv_right (m := ∞) le_rfl
   exact hderiv.differentiableAt (by simp)
 
-/-- The second directional partial of `chartGramOnE` equals the value of the second
-iterated Fréchet derivative on the two basis directions, at a chart-target interior point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_partialDeriv_chartGramOnE_eq_iteratedFDeriv_two
     (g : SmoothRiemannianMetric I M) (α : M) (i j m l : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -111,8 +96,7 @@ private lemma partialDeriv_partialDeriv_chartGramOnE_eq_iteratedFDeriv_two
     (differentiableAt_const _)]
   simp [ContinuousLinearMap.flip_apply]
 
-/-- Continuity-in-time of the `0`-jet chart-Gram entry from the `iteratedFDeriv 0`
-continuity supplied by `hC2`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramOnE_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     (y : E) (s : Set ℝ)
@@ -127,8 +111,7 @@ private lemma chartGramOnE_continuous_of_hC2
   simp only [Function.comp_apply, ContinuousMultilinearMap.apply_apply,
     iteratedFDeriv_zero_apply]
 
-/-- Continuity-in-time of the `1`-jet directional chart-Gram partial from the
-`iteratedFDeriv 1` continuity supplied by `hC2`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_chartGramOnE_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (l i j : Fin (Module.finrank ℝ E)) (y : E) (s : Set ℝ)
@@ -145,8 +128,7 @@ private lemma partialDeriv_chartGramOnE_continuous_of_hC2
     iteratedFDeriv_one_apply, Matrix.cons_val_zero]
   rfl
 
-/-- Continuity-in-time of the `2`-jet directional second chart-Gram partial from the
-`iteratedFDeriv 2` continuity supplied by `hC2`, at a chart-target interior point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_partialDeriv_chartGramOnE_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (m l i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -165,7 +147,7 @@ private lemma partialDeriv_partialDeriv_chartGramOnE_continuous_of_hC2
   rw [← partialDeriv_partialDeriv_chartGramOnE_eq_iteratedFDeriv_two
     (I := I) (g_DT t) α i j m l hy]
 
-/-- Continuity-in-time of the `gramBracket` (a `1`-jet chart-Gram combination). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramBracket_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) (y : E) (s : Set ℝ)
@@ -185,8 +167,7 @@ private lemma gramBracket_continuous_of_hC2
   · exact partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α j l i y s (h1 l i)
   · exact partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l i j y s (h1 i j)
 
-/-- Continuity-in-time of the `gramBracketDeriv` (a `2`-jet chart-Gram combination),
-at a chart-target interior point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramBracketDeriv_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (m i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -213,9 +194,7 @@ private lemma gramBracketDeriv_continuous_of_hC2
   · exact partialDeriv_partialDeriv_chartGramOnE_continuous_of_hC2
       (I := I) g_DT α m l i j hy s (h2 i j)
 
-/-- Continuity-in-time of the directional inverse-Gram partial, at a chart-target
-interior point, from the `0`- and `1`-jet chart-Gram continuity plus positive
-definiteness. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_chartInvGramOnE_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (m k l : Fin (Module.finrank ℝ E)) {y : E}
@@ -252,8 +231,7 @@ private lemma partialDeriv_chartInvGramOnE_continuous_of_hC2
   · exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s hentry hx b l
   · exact partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α m a b y s (h1 a b)
 
-/-- Continuity-in-time of the directional Christoffel partial `∂_m Γ^k_{ij}`, at a
-chart-target interior point, from the `0`-, `1`- and `2`-jet chart-Gram continuity. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_chartChristoffel_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (m i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -294,8 +272,7 @@ private lemma partialDeriv_chartChristoffel_continuous_of_hC2
   · exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s hentry hx k l
   · exact gramBracketDeriv_continuous_of_hC2 (I := I) g_DT α m i j l hy s h2
 
-/-- Continuity-in-time of a chart-Riemann tensor entry, at a chart-target interior point,
-from the `0`-, `1`- and `2`-jet chart-Gram continuity. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartRiemannTensor_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (i j k r : Fin (Module.finrank ℝ E)) {y : E}
@@ -341,8 +318,7 @@ private lemma chartRiemannTensor_continuous_of_hC2
     exact ContinuousOn.sub (ContinuousOn.mul (hΓ j n r) (hΓ i k n))
       (ContinuousOn.mul (hΓ k n r) (hΓ i j n))
 
-/-- Continuity-in-time of a chart-Ricci tensor entry, at a chart-target interior point,
-from the `0`-, `1`- and `2`-jet chart-Gram continuity. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartRicciTensor_continuous_of_hC2
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -369,6 +345,140 @@ private lemma chartRicciTensor_continuous_of_hC2
   refine continuousOn_finset_sum _ (fun j _ => ?_)
   exact chartRiemannTensor_continuous_of_hC2 (I := I) g_DT α i j k j hy s hx h0 h1 h2
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private lemma chartDeTurckVFComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (k : Fin (Module.finrank ℝ E)) {y : E}
+    (_hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y) s := by
+  classical
+  have hentry : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have h_partial : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  exact chartDeTurckVFComp_continuous_in_metric_at (I := I) g_bg α y s g_DT hentry h_partial hx k
+
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private lemma partialDeriv_chartDeTurckVFComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (m k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      partialDeriv (E := E) m
+        (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) s := by
+  classical
+  have hentry : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have h_partial : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  have hΓ : ∀ a b c : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartChristoffel (I := I) (g_DT t) α a b c y) s :=
+    fun a b c => chartChristoffel_continuous_in_metric_at (I := I) g_DT α y s hentry
+      (fun l p q => h_partial l p q) hx a b c
+  have heq : ∀ t ∈ s,
+      partialDeriv (E := E) m
+          (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y =
+        ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) m (chartInvGramOnE (I := I) (g_DT t) α a b) y *
+              (chartChristoffel (I := I) (g_DT t) α a b k y -
+                chartChristoffel (I := I) g_bg α a b k y)
+            + chartInvGramOnE (I := I) (g_DT t) α a b y *
+              (partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT t) α a b k) y -
+                partialDeriv (E := E) m (chartChristoffel (I := I) g_bg α a b k) y)) := by
+    intro t _
+    exact partialDeriv_chartDeTurckVFComp_eq (I := I) (g_DT t) g_bg α m k hy
+  refine ContinuousOn.congr ?_ heq
+  refine continuousOn_finset_sum _ (fun a _ => ?_)
+  refine continuousOn_finset_sum _ (fun b _ => ?_)
+  refine ContinuousOn.add (ContinuousOn.mul ?_ ?_) (ContinuousOn.mul ?_ ?_)
+  · exact partialDeriv_chartInvGramOnE_continuous_of_hC2 (I := I) g_DT α m a b hy s hx h0 h1
+  · exact (hΓ a b k).sub continuousOn_const
+  · exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s hentry hx a b
+  · exact (partialDeriv_chartChristoffel_continuous_of_hC2
+      (I := I) g_DT α m a b k hy s hx h0 h1 h2).sub continuousOn_const
+
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private lemma chartLieDeTurckComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      chartLieDeTurckComp (I := I) (g_DT t) g_bg α i j y) s := by
+  classical
+  have hVF : ∀ k : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y) s :=
+    fun k => chartDeTurckVFComp_continuous_of_hC2 (I := I) g_DT g_bg α k hy s hx h0 h1
+  have hVFp : ∀ m k : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) m
+          (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) s :=
+    fun m k => partialDeriv_chartDeTurckVFComp_continuous_of_hC2
+      (I := I) g_DT g_bg α m k hy s hx h0 h1 h2
+  have hgram : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have hgp : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  have heq : (fun t : ℝ => chartLieDeTurckComp (I := I) (g_DT t) g_bg α i j y)
+      = fun t : ℝ =>
+          (∑ k : Fin (Module.finrank ℝ E),
+              DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y *
+                partialDeriv (E := E) k (chartGramOnE (I := I) (g_DT t) α i j) y)
+          + (∑ k : Fin (Module.finrank ℝ E),
+              chartGramOnE (I := I) (g_DT t) α k j y *
+                partialDeriv (E := E) i
+                  (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y)
+          + (∑ k : Fin (Module.finrank ℝ E),
+              chartGramOnE (I := I) (g_DT t) α i k y *
+                partialDeriv (E := E) j
+                  (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) := by
+    funext t; rw [chartLieDeTurckComp_def]
+  rw [heq]
+  refine ContinuousOn.add (ContinuousOn.add ?_ ?_) ?_
+  · exact continuousOn_finset_sum _ (fun k _ => (hVF k).mul (hgp k i j))
+  · exact continuousOn_finset_sum _ (fun k _ => (hgram k j).mul (hVFp i k))
+  · exact continuousOn_finset_sum _ (fun k _ => (hgram i k).mul (hVFp j k))
+
 end RicciContInMetricAux
 
 namespace RicciContJointAux
@@ -379,7 +489,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
 
-/-- The joint `0`-jet chart-Gram value continuity, from the `iteratedFDeriv 0` joint input. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGram_continuousOn
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
@@ -393,7 +503,7 @@ private lemma jointGram_continuousOn
   simp only [Function.comp_apply, ContinuousMultilinearMap.apply_apply,
     iteratedFDeriv_zero_apply]
 
-/-- The joint `1`-jet directional chart-Gram partial continuity. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramPartial_continuousOn
     (h1 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
@@ -410,7 +520,7 @@ private lemma jointGramPartial_continuousOn
     iteratedFDeriv_one_apply, Matrix.cons_val_zero]
   rfl
 
-/-- The joint `2`-jet directional second chart-Gram partial continuity, on good-set points. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramPartialPartial_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h2 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -431,7 +541,7 @@ private lemma jointGramPartialPartial_continuousOn
   rw [← RicciContInMetricAux.partialDeriv_partialDeriv_chartGramOnE_eq_iteratedFDeriv_two
     (I := I) (g_DT q.1) α a b m l hy]
 
-/-- Joint determinant continuity of the chart Gram matrix (a Leibniz polynomial). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointDet_continuousOn
     (hentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun q : ℝ × M => chartGramOnE (I := I) (g_DT q.1) α a b
@@ -451,7 +561,7 @@ private lemma jointDet_continuousOn
   refine ContinuousOn.mul continuousOn_const ?_
   exact continuousOn_finset_prod _ (fun k _ => hentry (σ k) k)
 
-/-- Joint adjugate-entry continuity of the chart Gram matrix. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointAdjugate_continuousOn
     (hentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun q : ℝ × M => chartGramOnE (I := I) (g_DT q.1) α a b
@@ -488,7 +598,7 @@ private lemma jointAdjugate_continuousOn
       funext q; rw [Matrix.updateRow_ne hσk]; rfl
     rw [heq]; exact hentry (σ k) k
 
-/-- Joint inverse-Gram entry continuity (Cramer's rule, non-vanishing det on good-set points). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointInvGram_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (hentry : ∀ a b : Fin (Module.finrank ℝ E),
@@ -535,7 +645,7 @@ private lemma jointInvGram_continuousOn
       ((extChartAt I α).symm (extChartAt I α q.2))).det := by rw [hGmat_eq q]
   rw [this]; exact ne_of_gt hpos
 
-/-- Joint `gramBracket` continuity (a `1`-jet chart-Gram combination). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramBracket_continuousOn
     (h1 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
@@ -554,7 +664,7 @@ private lemma jointGramBracket_continuousOn
     (jointGramPartial_continuousOn g_DT α Sp h1 j l i)).sub
     (jointGramPartial_continuousOn g_DT α Sp h1 l i j)
 
-/-- Joint `gramBracketDeriv` continuity (a `2`-jet chart-Gram combination), good-set points. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointGramBracketDeriv_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h2 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -577,7 +687,7 @@ private lemma jointGramBracketDeriv_continuousOn
     (jointGramPartialPartial_continuousOn g_DT α Sp hgood h2 m j l i)).sub
     (jointGramPartialPartial_continuousOn g_DT α Sp hgood h2 m l i j)
 
-/-- Joint directional inverse-Gram partial continuity, good-set points. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointInvGramPartial_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -613,7 +723,7 @@ private lemma jointInvGramPartial_continuousOn
     (jointInvGram_continuousOn g_DT α Sp hgood hentry b l)).mul
     (jointGramPartial_continuousOn g_DT α Sp h1 m a b)
 
-/-- Joint chart-Christoffel value continuity, good-set points. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChristoffel_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -656,7 +766,7 @@ private lemma jointChristoffel_continuousOn
       (jointGramPartial_continuousOn g_DT α Sp h1 j l i)).sub
       (jointGramPartial_continuousOn g_DT α Sp h1 l i j)
 
-/-- Joint directional chart-Christoffel partial continuity, good-set points. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointChristoffelPartial_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -697,7 +807,7 @@ private lemma jointChristoffelPartial_continuousOn
   · exact jointInvGram_continuousOn g_DT α Sp hgood hentry k l
   · exact jointGramBracketDeriv_continuousOn g_DT α Sp hgood h2 m i j l
 
-/-- Joint chart-Riemann-tensor entry continuity, good-set points. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointRiemann_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -736,7 +846,7 @@ private lemma jointRiemann_continuousOn
       fun a b c => jointChristoffel_continuousOn g_DT α Sp hgood h0 h1 a b c
     exact ((hΓ j n r).mul (hΓ i k n)).sub ((hΓ k n r).mul (hΓ i j n))
 
-/-- Joint chart-Ricci-tensor entry continuity, good-set points. -/
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma jointRicci_continuousOn
     (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
     (h0 : ∀ a b : Fin (Module.finrank ℝ E),
@@ -764,11 +874,7 @@ end RicciContJointAux
 
 namespace MovingPushforwardAux
 
-/-- Chart-`α` trivialization-coordinate continuity-within-at of the moving pushforward,
-from the total-space (bundle) continuity of `s ↦ ⟨Φ_fam s x, dΦ_s u⟩`.  The trivialization
-is continuous on its source, the total-space point lies in the source eventually near `s₀`
-(its base point lies in the open base set, by the orbit continuity), and on the base set the
-fibre component of the trivialization is exactly `continuousLinearMapAt`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma moving_chartCoord_continuousWithinAt
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (u : TangentSpace I x)
     (α : M) (S : Set ℝ) (s₀ : ℝ)
@@ -807,13 +913,6 @@ private lemma moving_chartCoord_continuousWithinAt
     rw [hF, e.apply_eq_prod_continuousLinearEquivAt ℝ _ hbase0,
       e.coe_continuousLinearEquivAt_eq (R := ℝ) hbase0]
 
-/-- **Joint `(t, x)` chart-`α` trivialization-coordinate continuity of the moving pushforward.**
-
-The joint (`ℝ × M`-domain) generalization of `moving_chartCoord_continuousWithinAt`: from the
-joint continuity of the moving-pushforward bundle section `p ↦ ⟨Φ_fam p.1 p.2, dΦ·(cbvf x₀ i p.2)⟩`
-(`htotal`, with image base point in the open base set of the chart-`α` trivialization via
-`hbase0`/`horbit`), the trivialization-`α` coordinate `continuousLinearMapAt` of
-`dΦ·(cbvf x₀ i p.2)` is jointly continuous within `S` at `p₀`. -/
 theorem moving_chartCoord_jointContinuousWithinAt
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x₀ : M) (i : Fin (Module.finrank ℝ E)) (α : M)
     (S : Set (ℝ × M)) (p₀ : ℝ × M)
@@ -857,8 +956,6 @@ theorem moving_chartCoord_jointContinuousWithinAt
     rw [hF, e.apply_eq_prod_continuousLinearEquivAt ℝ _ hbase0,
       e.coe_continuousLinearEquivAt_eq (R := ℝ) hbase0]
 
-/-- Within-at continuity of a finite sum of within-at-continuous functions (Mathlib has the
-`Continuous`/`ContinuousOn` variants but not this `ContinuousWithinAt` one). -/
 private lemma cwa_finset_sum {ι : Type*} {N : Type*} [AddCommMonoid N] [TopologicalSpace N]
     [ContinuousAdd N] {f : ι → ℝ → N} (s : Finset ι) {t : Set ℝ} {x : ℝ}
     (h : ∀ i ∈ s, ContinuousWithinAt (f i) t x) :
@@ -871,8 +968,7 @@ private lemma cwa_finset_sum {ι : Type*} {N : Type*} [AddCommMonoid N] [Topolog
       exact (h i (Finset.mem_insert_self i s)).add
         (ih (fun j hj => h j (Finset.mem_insert_of_mem hj)))
 
-/-- A model-basis `repr`-coordinate of a continuous-within `E`-valued function is
-continuous-within. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma repr_continuousWithinAt {S : Set ℝ} {s₀ : ℝ} {f : ℝ → E}
     (hf : ContinuousWithinAt f S s₀) (p : Fin (Module.finrank ℝ E)) :
     ContinuousWithinAt (fun s : ℝ => ((chartModelBasis E).repr (f s)) p) S s₀ := by
@@ -881,11 +977,7 @@ private lemma repr_continuousWithinAt {S : Set ℝ} {s₀ : ℝ} {f : ℝ → E}
       (chartModelBasis E).repr.toLinearMap).continuous_of_finiteDimensional
   exact hlin.continuousWithinAt.comp hf (Set.mapsTo_univ _ _)
 
-/-- Moving-frame chart-`α` bilinear expansion of the abstract Ricci tensor at a good-set
-point `y`, on the chart-`α` frame coordinates of the (arbitrary) vectors `vy`, `wy`.  By
-`chartBasisVecFiber_recompose` each vector decomposes in the chart-`α` frame, and
-`ricciTensor_chartBasisVec_alpha_eq` rewrites each frame-pair Ricci value as a chart-Ricci
-entry. -/
+omit [CompactSpace M] in
 private lemma ricci_moving_chart_sum
     (g : SmoothRiemannianMetric I M) (α : M) {y : M}
     (hy : y ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -920,16 +1012,16 @@ private lemma ricci_moving_chart_sum
 
 end MovingPushforwardAux
 
-set_option linter.unusedVariables false in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem gfam_inner_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ Set.univ))
+        (Set.Icc 0 T ×ˢ (chartAt H α).source))
     (hΦ_orbit : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T))
     (hΦ_total : ∀ (y : M) (u : TangentSpace I y),
@@ -972,18 +1064,26 @@ theorem gfam_inner_continuous_on
         (fun s : ℝ => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
           (extChartAt I α ((Φ_fam s : M → M) x))) (Set.Ico 0 T) s₀ := by
     intro i j
+    set Sp : Set (ℝ × M) := Set.Icc 0 T ×ˢ (chartAt H α).source with hSp
+    have hsrc0' : (Φ_fam s₀ : M → M) x ∈ (chartAt H α).source := by
+      rw [hα]; exact mem_chart_source H α
     have hpair : ContinuousWithinAt (fun s : ℝ => (s, (Φ_fam s : M → M) x))
         (Set.Ico 0 T) s₀ :=
       continuousWithinAt_id.prodMk horbit
-    have hmaps : Set.MapsTo (fun s : ℝ => (s, (Φ_fam s : M → M) x))
-        (Set.Ico 0 T) (Set.Icc 0 T ×ˢ Set.univ) := by
-      intro s hs
-      exact ⟨⟨hs.1, le_of_lt hs.2⟩, Set.mem_univ _⟩
-    have hg : ContinuousWithinAt
-        (fun q : ℝ × M => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
-          (extChartAt I α q.2)) (Set.Icc 0 T ×ˢ Set.univ) (s₀, (Φ_fam s₀ : M → M) x) :=
-      (hg_joint α i j).continuousWithinAt (hmaps hs₀)
-    have hcomp := hg.comp_of_eq hpair hmaps rfl
+    have hpre : (fun s : ℝ => (s, (Φ_fam s : M → M) x)) ⁻¹' Sp
+        ∈ nhdsWithin s₀ (Set.Ico 0 T) := by
+      have hsnhds : (chartAt H α).source ∈ nhds ((Φ_fam s₀ : M → M) x) :=
+        (chartAt H α).open_source.mem_nhds hsrc0'
+      have hs : (fun s : ℝ => (Φ_fam s : M → M) x) ⁻¹' (chartAt H α).source
+          ∈ nhdsWithin s₀ (Set.Ico 0 T) :=
+        horbit.preimage_mem_nhdsWithin hsnhds
+      have hself : (Set.Ico 0 T : Set ℝ) ∈ nhdsWithin s₀ (Set.Ico 0 T) := self_mem_nhdsWithin
+      filter_upwards [hs, hself] with s hssrc hsico
+      exact ⟨⟨hsico.1, le_of_lt hsico.2⟩, hssrc⟩
+    have hpt0 : ((s₀, (Φ_fam s₀ : M → M) x) : ℝ × M) ∈ Sp :=
+      ⟨⟨hs₀.1, le_of_lt hs₀.2⟩, hsrc0'⟩
+    have hcomp := ((hg_joint α i j).continuousWithinAt hpt0).comp_of_preimage_mem_nhdsWithin_of_eq
+      hpair hpre rfl
     simpa only [Function.comp_def] using hcomp
   have hsum : ∀ s, (Φ_fam s : M → M) x ∈ e.baseSet →
       (Φ_fam s : M → M) x ∈ (extChartAt I α).source →
@@ -1027,9 +1127,9 @@ theorem gfam_inner_continuous_on
     exact hsum s hb hsr
   · exact hsum s₀ hbase0 hsrc0
 
-set_option linter.unusedVariables false in
+omit [CompactSpace M] in
 theorem ricci_gfam_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
         ContinuousOn
@@ -1149,11 +1249,9 @@ theorem ricci_gfam_continuous_on
     exact hsum s hg
   · exact hsum s₀ hgood0
 
-set_option linter.unusedVariables false in
+omit [CompactSpace M] in
 theorem ricci_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (x : M) (v w : TangentSpace I x)
-    (hval : ∀ y : M, ∀ p q : TangentSpace I y,
-      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
     (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
       ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
         ContinuousOn
@@ -1208,6 +1306,202 @@ theorem ricci_continuous_in_metric_time
   refine continuousOn_finset_sum _ (fun k _ => ?_)
   refine ContinuousOn.mul continuousOn_const ?_
   exact chartRicciTensor_continuous_of_hC2 (I := I) g_DT x i k hx_int (Set.Icc 0 T)
+    hx_base h0 h1 h2
+
+open RicciContInMetricAux DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients in
+
+omit [CompactSpace M] [I.Boundaryless] in
+theorem chartRicci_jointContinuousOn
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      chartRicciTensor (I := I) (g_DT q.1) α i k (extChartAt I α q.2)) Sp :=
+  RicciContJointAux.jointRicci_continuousOn g_DT α Sp hgood h0 h1 h2 i k
+
+
+theorem chartRiemann_jointContinuousOn
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i j k r : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      chartRiemannTensor (I := I) (g_DT q.1) α i j k r (extChartAt I α q.2)) Sp :=
+  RicciContJointAux.jointRiemann_continuousOn g_DT α Sp hgood h0 h1 h2 i j k r
+
+
+theorem ricciChartFrameComp_jointContinuousOn [I.Boundaryless]
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      ricciTensor (I := I) (g_DT q.1) q.2
+        (chartBasisVecFiber (I := I) α i q.2)
+        (chartBasisVecFiber (I := I) α j q.2)) Sp :=
+  (chartRicci_jointContinuousOn g_DT α Sp hgood h0 h1 h2 i j).congr
+    (fun q hq => ricciTensor_chartBasisVec_alpha_eq (I := I) (g_DT q.1) α i j (hgood q hq))
+
+omit [CompactSpace M] in
+
+
+theorem metricScalar_chartTrace_eq [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    metricScalarAt (I := I) g x =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) g α i j (extChartAt I α x) *
+          ricciTensor (I := I) g x
+            (chartBasisVecFiber (I := I) α i x) (chartBasisVecFiber (I := I) α j x) := by
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  have hxsrc : x ∈ (extChartAt I α).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
+  have hgram : ∀ k l : Fin (Module.finrank ℝ E),
+      g.inner x (chartBasisFamily (I := I) α hbase k) (chartBasisFamily (I := I) α hbase l)
+        = chartGramMatrix (I := I) g α x k l := by
+    intro k l
+    rw [chartBasisFamily_apply, chartBasisFamily_apply]
+    exact (chartGramMatrix_apply (I := I) g α x k l).symm
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) g x
+      (chartBasisFamily (I := I) α hbase)
+      (fun k l => chartInvGramMatrix (I := I) g α x k l) := by
+    intro i j
+    refine ⟨?_, ?_⟩
+    · simp only [hgram]
+      rw [← Matrix.mul_apply, chartInvGramMatrix_mul_chartGramMatrix (I := I) g α hbase,
+        Matrix.one_apply]
+    · simp only [hgram]
+      rw [← Matrix.mul_apply, chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase,
+        Matrix.one_apply]
+  have htrace := DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
+    (I := I) g (chartBasisFamily (I := I) α hbase)
+    (fun k l => chartInvGramMatrix (I := I) g α x k l) hinv (metricRicciAt (I := I) g x)
+  unfold metricScalarAt
+  rw [htrace]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  rw [chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc, chartBasisFamily_apply,
+    chartBasisFamily_apply]
+  congr 1
+  exact metricRicciAt_apply_eq_ricciTensor (I := I) g x
+    (chartBasisVecFiber (I := I) α i x) (chartBasisVecFiber (I := I) α j x)
+
+
+theorem chartScalar_jointContinuousOn [I.Boundaryless]
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp) :
+    ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_DT q.1) q.2) Sp := by
+  refine (?_ : ContinuousOn (fun q : ℝ × M =>
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2) *
+          ricciTensor (I := I) (g_DT q.1) q.2
+            (chartBasisVecFiber (I := I) α i q.2)
+            (chartBasisVecFiber (I := I) α j q.2)) Sp).congr
+    (fun q hq => metricScalar_chartTrace_eq (I := I) (g_DT q.1) α (hgood q hq))
+  refine continuousOn_finset_sum _ (fun i _ => continuousOn_finset_sum _ (fun j _ => ?_))
+  exact (RicciContJointAux.jointInvGram_continuousOn g_DT α Sp hgood
+      (fun a b => RicciContJointAux.jointGram_continuousOn g_DT α Sp h0 a b) i j).mul
+    (ricciChartFrameComp_jointContinuousOn (I := I) g_DT α Sp hgood h0 h1 h2 i j)
+
+open RicciContInMetricAux
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients in
+theorem lieDeriv_deTurckVF_continuous_in_metric_time
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T : ℝ) (x : M) (v w : TangentSpace I x)
+    (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T)) :
+    ContinuousOn (fun s : ℝ =>
+      lieDerivMetric (I := I) (g_DT s)
+        (deTurckVF (I := I) (g_DT s) g_bg) x v w) (Set.Icc 0 T) := by
+  classical
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hxgood
+  have hx_base : ((extChartAt I x).symm (extChartAt I x x)) ∈
+      (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [(extChartAt I x).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hxgood)]
+    exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
+  have h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 0 (by norm_num)
+  have h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 1 (by norm_num)
+  have h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 2 (by norm_num)
+  have hbridge : ∀ t : ℝ,
+      lieDerivMetric (I := I) (g_DT t)
+          (deTurckVF (I := I) (g_DT t) g_bg) x v w =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) i *
+              ((chartModelBasis E).repr w) j *
+              chartLieDeTurckComp (I := I) (g_DT t) g_bg x i j (extChartAt I x x) := by
+    intro t
+    rw [lieDerivMetric_apply]
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+    rw [lieDerivMetricMatrix_def_chart,
+      chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp (I := I) (g_DT t) g_bg x i j hxgood]
+  rw [show (fun s : ℝ =>
+        lieDerivMetric (I := I) (g_DT s)
+          (deTurckVF (I := I) (g_DT s) g_bg) x v w)
+        = fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E),
+            ∑ j : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr v) i *
+                ((chartModelBasis E).repr w) j *
+                chartLieDeTurckComp (I := I) (g_DT s) g_bg x i j (extChartAt I x x) from by
+    funext s; exact hbridge s]
+  refine continuousOn_finset_sum _ (fun i _ => ?_)
+  refine continuousOn_finset_sum _ (fun j _ => ?_)
+  refine ContinuousOn.mul continuousOn_const ?_
+  exact chartLieDeTurckComp_continuous_of_hC2 (I := I) g_DT g_bg x i j hx_int (Set.Icc 0 T)
     hx_base h0 h1 h2
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -3,22 +3,22 @@ import Mathlib.Topology.Homotopy.Path
 import Mathlib.Topology.Subpath
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.Basic
 
-/-!
-# Homotopy of a path to a concatenation of finitely many truncations
 
-For a path `γ : Path a b` and a monotone partition
-`0 = t₀ ≤ t₁ ≤ … ≤ t_k = 1` of the unit interval, the concatenation of
-the truncations `γ.truncateOfLE (t_i ≤ t_{i+1})` is path-homotopic
-(rel endpoints) to `γ` itself.
 
-The proof bridges each truncation to the corresponding Mathlib
-`Path.subpath`, then collapses the resulting concatenation via
-`Path.Homotopic.concat_subpath`.
 
-* `concatTrans` — thin wrapper around `Path.concat`.
-* `truncateOfLE_homotopic_subpath` — bridges `truncateOfLE` to `subpath`.
-* `Path.trans_truncate_homotopic` — headline statement.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,13 +30,13 @@ namespace UniversalCover
 
 open Set unitInterval
 
-/-- Iterated `Path.trans` of a `Fin k`-indexed family of compatible-endpoint
-paths. Wrapper around Mathlib's `Path.concat`.
 
-Given a sequence of points `p : Fin (k+1) → X` and paths
-`F i : Path (p i.castSucc) (p i.succ)` for each `i : Fin k`, the result is
-`Path (p 0) (p (Fin.last k))`, built as
-`(((refl (p 0)).trans (F 0)).trans (F 1)).trans … (F (k-1))`. -/
+
+
+
+
+
+
 def concatTrans {X : Type*} [TopologicalSpace X]
     {k : ℕ} {p : Fin (k + 1) → X}
     (F : (i : Fin k) → _root_.Path (p i.castSucc) (p i.succ)) :
@@ -47,10 +47,10 @@ namespace TruncateHomotopy
 
 variable {X : Type*} [TopologicalSpace X]
 
-/-- The truncation reparametrisation `s ↦ min (max s t₀) t₁`. -/
+
 private def truncParam (t₀ t₁ : ℝ) (s : I) : ℝ := min (max (s : ℝ) t₀) t₁
 
-/-- The linear reparametrisation `s ↦ (1-s) * t₀ + s * t₁`. -/
+
 private def linParam (t₀ t₁ : ℝ) (s : I) : ℝ := (1 - (s : ℝ)) * t₀ + (s : ℝ) * t₁
 
 private lemma continuous_truncParam (t₀ t₁ : ℝ) :
@@ -89,8 +89,8 @@ private lemma linParam_one (t₀ t₁ : ℝ) :
 end TruncateHomotopy
 
 open TruncateHomotopy in
-/-- **Bridge lemma.** `γ.truncateOfLE h` is path-homotopic to
-`γ.subpath ⟨t₀, ht₀⟩ ⟨t₁, ht₁⟩` (after a `Path.cast` to align endpoints). -/
+
+
 lemma truncateOfLE_homotopic_subpath
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)
     {t₀ t₁ : ℝ} (h : t₀ ≤ t₁) (ht₀ : t₀ ∈ I) (ht₁ : t₁ ∈ I) :
@@ -161,8 +161,8 @@ lemma truncateOfLE_homotopic_subpath
       change γ.extend t₁ = (γ.truncateOfLE h) 1
       rw [_root_.Path.target]
 
-/-- Two `Path.concat`s over pointwise-equal index families are equal up to
-`Path.cast`. The proof is by induction on `k`. -/
+
+
 lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
     ∀ {k : ℕ} {p p' : Fin (k + 1) → X} (heq : ∀ i, p i = p' i)
       (F : (i : Fin k) → _root_.Path (p i.castSucc) (p i.succ)),
@@ -194,9 +194,9 @@ lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
         exact key
       · rfl
 
-/-- **Headline lemma.** A path on `[0,1]` is path-homotopic to the
-concatenation of finitely many of its truncated sub-segments, given a
-monotone partition `0 = t₀ ≤ t₁ ≤ … ≤ t_k = 1` of the unit interval. -/
+
+
+
 lemma Path.trans_truncate_homotopic
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)
     {k : ℕ} (t : Fin (k + 1) → unitInterval)

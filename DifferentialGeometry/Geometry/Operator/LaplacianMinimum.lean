@@ -8,16 +8,16 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Laplacian at a Spatial Minimum
 
-This file contains the single-metric geometric input used by the scalar weak
-maximum principle: at a spatial local minimum, the Laplacian is nonnegative.
 
-The first lemma below is connection-independent and fully algebraic: at a point
-where a vector-field section vanishes, the divergence of that section does not
-depend on the chosen connection.
--/
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -36,8 +36,8 @@ private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
 
-/-- The tangent field whose coordinates in the tangent trivialization centered
-at `x` are constantly the tangent vector `v`. -/
+
+
 private noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
   TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p
@@ -71,11 +71,11 @@ private theorem extDerivFun_real_eq_mfderiv
       mfderiv I 𝓘(Real, Real) u x v := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
 
-/-- Necessary second-derivative condition at a one-dimensional local minimum.
 
-This is the converse direction needed here from the usual second-derivative
-test: a negative second derivative would make the same point a local maximum,
-and local min plus local max forces the function to be locally constant. -/
+
+
+
+
 private theorem deriv_deriv_nonneg_of_isLocalMin
     {φ : Real -> Real} {t₀ : Real}
     (hmin : IsLocalMin φ t₀)
@@ -98,8 +98,8 @@ private theorem deriv_deriv_nonneg_of_isLocalMin
     simpa using hderiv_const.deriv_eq
   linarith
 
-/-- Model-space form of Hessian positivity at a local minimum, in one fixed
-direction. -/
+
+
 private theorem fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
     {F : E -> Real} {y : E}
     (hmin : IsLocalMin F y)
@@ -252,13 +252,13 @@ private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
   rw [extDerivFun_real_eq_mfderiv, hfield]
   exact hchain_apply.symm.trans hwithin_to_fderiv
 
-/-! ## First-order minimum facts -/
 
-/-- First-order Fermat rule for a scalar function on a boundaryless realized
-manifold.
 
-The boundaryless assumption makes the model-with-corners range locally equal
-to the whole model space, so `fderivWithin` becomes `fderiv`. -/
+
+
+
+
+
 theorem mfderiv_eq_zero_at_spatial_min
     [I.Boundaryless]
     {f : M -> Real} {x : M}
@@ -291,7 +291,7 @@ theorem mfderiv_eq_zero_at_spatial_min
     _ = 0 := by
       simpa [writtenInExtChartAt] using hderiv_chart
 
-/-- At a spatial local minimum, the realized gradient vanishes. -/
+
 theorem gradientFun_eq_zero_at_spatial_min
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real} {x : M}
@@ -301,9 +301,9 @@ theorem gradientFun_eq_zero_at_spatial_min
   exact gradientFun_eq_zero_of_mfderiv_eq_zero (I := I) g f
     (mfderiv_eq_zero_at_spatial_min (I := I) hmin hf)
 
-/-! ## Laplacian minimum input -/
 
-/-- The single-metric second-order local input needed for maximum principles. -/
+
+
 def LaplacianNonnegativeAtSpatialMin
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -316,8 +316,8 @@ def LaplacianNonnegativeAtSpatialMin
         MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x ->
           0 <= laplacian (I := I) cov g f x
 
-/-- If a vector-field section vanishes at `x`, its divergence at `x` is
-independent of the chosen connection. -/
+
+
 theorem divergence_eq_of_section_eq_zero
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -339,8 +339,8 @@ theorem divergence_eq_of_section_eq_zero
     exact sub_eq_zero.mp hsub
   simp [divergence, hcov_eq]
 
-/-- At a critical point of `f`, the Laplacian is independent of the chosen
-connection. -/
+
+
 theorem laplacian_eq_laplacian_of_gradient_eq_zero
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -351,13 +351,13 @@ theorem laplacian_eq_laplacian_of_gradient_eq_zero
     laplacian (I := I) cov g f x = laplacian (I := I) cov' g f x := by
   exact divergence_eq_of_section_eq_zero (I := I) cov cov' hgradSec hgrad
 
-/-! ## Local Hessian positivity -/
 
-/-- In local chart coordinates, the second derivative of a scalar function in
-the same direction is nonnegative at a local minimum.
 
-This is the remaining analytic finite-dimensional calculus fact behind the
-operator minimum principle. -/
+
+
+
+
+
 private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -471,8 +471,8 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
     rw [mfderiv, if_neg hu]
     exact le_rfl
 
-/-- Metric-compatible expression of Hessian positivity at a spatial minimum:
-`g(∇_v grad f, v) >= 0`. -/
+
+
 private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -526,8 +526,8 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
   rw [← hmetric']
   exact fderiv_fderiv_self_nonneg_of_isLocalMin (I := I) g hmin hf hf_near hgrad v
 
-/-- At a spatial local minimum, the Laplacian is nonnegative for a
-metric-compatible connection. -/
+
+
 theorem laplacian_nonneg_at_spatial_min_of_metricCompatible
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -550,7 +550,7 @@ theorem laplacian_nonneg_at_spatial_min_of_metricCompatible
         cov_gradient_inner_self_nonneg_at_spatial_min
           (I := I) cov g hmc hmin hf hf_near hgrad v)
 
-/-- The producer form of `LaplacianNonnegativeAtSpatialMin`. -/
+
 theorem laplacianNonnegativeAtSpatialMin_of_metricCompatible
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

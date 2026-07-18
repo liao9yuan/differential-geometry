@@ -15,42 +15,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 
-/-!
-# Leibniz rule and partition-of-unity decomposition for the with-boundary
-chart-Voss-Weyl divergence
-
-For a smooth Riemannian metric `g` on a manifold whose model `I` may carry a
-non-trivial boundary, a smooth tangent section `X`, and a smooth scalar function
-`φ : M → ℝ`, the pointwise smul-section `(φ • X) x := φ x • X x` is again a
-smooth tangent section, and the with-boundary divergence satisfies the Leibniz
-rule
-$$
-\operatorname{div}_g^{(\partial)}(\varphi \cdot X)(x)
-    = \varphi(x) \cdot \operatorname{div}_g^{(\partial)}(X)(x) + X(\varphi)(x).
-$$
-
-Combined with a smooth partition of unity `ρ` on `M`, this gives the
-decomposition identity
-$$
-\operatorname{div}_g^{(\partial)}(X)(x)
-    = \sum'_{\alpha \in M} \operatorname{div}_g^{(\partial)}(\rho_\alpha
-        \cdot X)(x).
-$$
-
-The countable sum is locally finite: in a neighborhood of any point only finitely
-many terms are nonzero.
-
-The construction parallels the boundaryless variant in
-`DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean`. The
-fiberwise smul `smoothSmul`, the chart-coefficient pull-out lemmas
-`chartCoeff_smoothSmul` / `chartCoeffOnE_smoothSmul`, and the intrinsic
-tangent-action helpers `tangentSectionAction_finset_sum`,
-`tangentSectionAction_const`, `tangentSectionAction_pou_tsum_eq_zero` are all
-boundary-agnostic and re-used directly from the boundaryless file. The new
-technical content is the with-boundary chart-local representation of
-`tangentSectionAction` using `partialDerivWithin`, valid at every point of the
-chart base set without an interior precondition.
--/
 
 noncomputable section
 
@@ -63,23 +27,17 @@ namespace DivergenceTheorem
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The boundaryless `smoothSmul` packages `(fun x => φ x • X x)` as a smooth
-tangent section. The construction is intrinsic — it does not refer to the chart
-target — so it is reused verbatim under the with-boundary hypotheses. -/
 example (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (smoothSmul
         (I := I) φ hφ X) x = φ x • X x := rfl
 
-/-- The pull-back `scalarOnE α f` is `MDifferentiableWithinAt` (as a map
-`E → ℝ`) on the chart target at every point of the chart target, when `f` is
-smooth on `M`. Auxiliary lemma feeding the chain rule. -/
 private lemma scalarOnE_mdifferentiableWithinAt_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -93,26 +51,7 @@ private lemma scalarOnE_mdifferentiableWithinAt_target
     hcont.differentiableWithinAt (by simp)
   exact hdiff.mdifferentiableWithinAt
 
-/-- The chart-target `(extChartAt I α).target` and `range I` agree on a
-neighborhood of any chart-target point. Convenience repackaging of
-`extChartAt_target_eventuallyEq_of_mem`. -/
-private lemma extChartAt_target_eventuallyEq_range
-    (α : M) {y : E} (hy : y ∈ (extChartAt I α).target) :
-    (extChartAt I α).target =ᶠ[𝓝 y] (Set.range I) :=
-  extChartAt_target_eventuallyEq_of_mem hy
-
-/-- The within-Fréchet derivative on the chart target equals the within-Fréchet
-derivative on `range I` at any chart-target point. Direct application of
-`fderivWithin_congr_set` to `extChartAt_target_eventuallyEq_range`. -/
-private lemma fderivWithin_target_eq_fderivWithin_range
-    (α : M) (u : E → ℝ) {y : E} (hy : y ∈ (extChartAt I α).target) :
-    fderivWithin ℝ u (extChartAt I α).target y =
-      fderivWithin ℝ u (Set.range I) y :=
-  fderivWithin_congr_set
-    (extChartAt_target_eventuallyEq_range (I := I) α hy)
-
-/-- The chart map `extChartAt I α : M → E` sends every chart-source point into
-the chart target. Auxiliary lemma feeding the chain rule. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAt_mapsTo_target_chart_source (α : M) :
     Set.MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (extChartAt I α).target := by
@@ -121,13 +60,7 @@ private lemma extChartAt_mapsTo_target_chart_source (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hx'
 
-/-- The chart-basis vector identity: `mfderiv (extChartAt I α) x` applied to
-`chartBasisVecFiber α i x` returns the constant model-basis vector
-`(chartModelBasis E) i`, for any `α : M` and any `x` in the chart base set.
-
-This is the key chart-basis duality that the boundaryless `mfderiv_chartBasisVecFiber`
-proves implicitly (as `hmfderiv_chartBasis`). It is intrinsic — it does not need
-any interior assumption on the chart image of `x`. -/
+omit [InnerProductSpace ℝ E] in
 private lemma mfderiv_extChartAt_chartBasisVecFiber
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source)
     (i : Fin (Module.finrank ℝ E)) :
@@ -158,28 +91,19 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber
   exact Trivialization.continuousLinearMapAt_symmL (R := ℝ) T (b := x) hbase
     ((chartModelBasis E) i)
 
-/-- Equality of `mfderivWithin (extChartAt I α) (chart source) x` with
-`mfderiv (extChartAt I α) x`, on a chart-source point. The chart source is open,
-and `extChartAt I α` is `MDifferentiable` on its source. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma mfderivWithin_extChartAt_chart_source
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     mfderivWithin I 𝓘(ℝ, E) (extChartAt I α : M → E) (chartAt H α).source x =
       mfderiv I 𝓘(ℝ, E) (extChartAt I α : M → E) x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-/-- Equality of `mfderivWithin f (chart source) x` with `mfderiv f x`, on a
-chart-source point. The chart source is open, and `f` is `MDifferentiable` on
-all of `M`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma mfderivWithin_chart_source_of_mdiff
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) (f : M → ℝ) :
     mfderivWithin I 𝓘(ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-/-- **Within-aware decomposition of `mfderiv` for `f : M → ℝ` smooth.** For
-`α : M` and `x` in the chart base set at `α`, `mfderiv I 𝓘(ℝ) f x` factors as the
-composition of the within-Fréchet derivative `fderivWithin ℝ (scalarOnE α f)
-(extChartAt I α).target` at the chart image of `x`, with the manifold derivative
-`mfderiv (extChartAt I α)` at `x`. -/
 private lemma mfderiv_factor_through_extChartAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -255,12 +179,6 @@ private lemma mfderiv_factor_through_extChartAt
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
-/-- The with-boundary chart-basis evaluation lemma:
-`mfderiv I 𝓘(ℝ) f x` applied to `chartBasisVecFiber α i x` equals
-`partialDerivWithin (extChartAt I α).target i (scalarOnE α f) ((extChartAt I α) x)`,
-for any chart-source point `x`. This is the with-boundary analogue of the
-boundaryless `mfderiv_chartBasisVecFiber`, replacing `partialDeriv` by
-`partialDerivWithin (extChartAt I α).target`. -/
 private lemma mfderiv_chartBasisVecFiber_within
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -275,16 +193,6 @@ private lemma mfderiv_chartBasisVecFiber_within
   rw [mfderiv_extChartAt_chartBasisVecFiber (I := I) α hx i]
   rfl
 
-/-- **Chart-local representation of `tangentSectionAction` (with boundary).**
-For `f : M → ℝ` smooth, `X` a smooth tangent section, `α : M`, and `x` in the
-chart base set at `α`,
-`tangentSectionAction X f x = ∑ᵢ chartCoeff α X i x · partialDerivWithin
-(extChartAt I α).target i (scalarOnE α f) ((extChartAt I α) x)`.
-
-This is the key with-boundary representation: it holds at every chart-source
-point, with no interior precondition. The boundaryless analogue
-`tangentSectionAction_chartLocal` requires the chart image of `x` to lie in the
-interior of the chart target. -/
 theorem tangentSectionAction_chartLocal_within
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -309,9 +217,6 @@ theorem tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within (I := I) α hf hx i]
   exact smul_eq_mul ..
 
-/-- The integrand `y ↦ chartCoeffOnE α X i y * chartDensityOnE g α y` is
-`DifferentiableWithinAt ℝ` on the chart target at any chart-target point.
-Auxiliary lemma feeding the within-Leibniz expansion. -/
 private lemma chartCoeffOnE_mul_chartDensityOnE_differentiableWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -328,8 +233,7 @@ private lemma chartCoeffOnE_mul_chartDensityOnE_differentiableWithinAt
     chartCoeffOnE_mul_chartDensityOnE_contDiffOn (I := I) g α X i
   exact (hsmooth y hy).differentiableWithinAt (by simp)
 
-/-- `scalarOnE α φ` is `DifferentiableWithinAt ℝ` on the chart target at any
-chart-target point, when `φ : M → ℝ` is smooth. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma scalarOnE_differentiableWithinAt
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -339,8 +243,6 @@ private lemma scalarOnE_differentiableWithinAt
     scalarOnE_contDiffOn (I := I) α hφ
   exact (hsmooth y hy).differentiableWithinAt (by simp)
 
-/-- The Leibniz rule for the chart-local with-boundary Voss–Weyl divergence at
-the chart at the point itself. -/
 private lemma localDivergenceWithin_at_self_smoothSmul
     (g : SmoothRiemannianMetric I M) (x : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -479,7 +381,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     intro i _
     rw [hchartCoeff i]
 
-/-- **Leibniz rule for the global with-boundary divergence.** -/
 theorem divergence_g_with_boundary_smoothSmul [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -494,8 +395,6 @@ theorem divergence_g_with_boundary_smoothSmul [T2Space M]
   rw [divergence_g_with_boundary_def, divergence_g_with_boundary_def]
   exact localDivergenceWithin_at_self_smoothSmul (I := I) g x φ hφ X
 
-/-- Sum rule: `divergence_g_with_boundary g (X + Y) = divergence_g_with_boundary g X +
-divergence_g_with_boundary g Y`. -/
 theorem divergence_g_with_boundary_add [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -596,7 +495,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
         Finset.sum_congr rfl (fun i _ => hpartial_split i)]
   rw [Finset.sum_add_distrib, add_div]
 
-/-- The divergence of the zero section vanishes. -/
 @[simp] theorem divergence_g_with_boundary_zero [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     ∀ x : M, divergence_g_with_boundary (I := I) g
@@ -672,9 +570,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
         Finset.sum_eq_zero (fun i _ => hpartial_zero i)]
   rw [zero_div]
 
-/-- For a smooth POU `ρ` indexed by `M`, the with-boundary divergence
-`divergence_g_with_boundary g X x` decomposes as the locally-finite tsum
-$\sum'_\alpha \operatorname{div}_g^{(\partial)}(\rho_\alpha \cdot X)(x)$. -/
 theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)

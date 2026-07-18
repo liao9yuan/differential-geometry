@@ -1,35 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 
-/-!
-# Algebraic properties of the global metric-induced `L²` pairing
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`. Building on
-`tensorL2Inner`, `MemL2`, and `tensorL2Norm` from `Pairing.Defs`,
-this file proves:
-
-* `tensorL2Inner_symm` — symmetry, unconditional;
-* `tensorL2Inner_add_left/right` — additivity under cross-integrability
-  hypotheses;
-* `tensorL2Inner_smul_left/right` — scalar homogeneity, unconditional
-  (uses Bochner real-scalar homogeneity which is unconditional);
-* `tensorL2Inner_zero_left/right` — vanishing on the zero section;
-* `tensorL2Inner_nonneg` — non-negativity on the diagonal;
-* `MemL2.integrable_inner_of_aestronglyMeasurable` — the cross diagonal
-  inner is integrable, given diagonal `MemL2` of both sections plus an
-  ae-strong-measurability hypothesis on the cross integrand. The proof
-  uses pointwise Cauchy–Schwarz combined with the AM–GM inequality
-  `|b| ≤ (a + c) / 2`;
-* `MemL2.add` — closure of `MemL2` under addition (with the same
-  ae-strong-measurability hypothesis on the cross integrand);
-* `MemL2.smul` — closure of `MemL2` under scalar multiplication.
-
-The cross-integrability hypotheses for additivity and the
-ae-strong-measurability hypothesis for `MemL2.add` are the natural
-analytic prerequisites: the diagonal pairing being integrable does not
-automatically give integrability of the cross pairing without
-measurability of the cross integrand.
--/
 
 noncomputable section
 
@@ -43,7 +13,7 @@ namespace L2
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -52,9 +22,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
-/-- Symmetry of the global `L²` inner product: follows from pointwise
-symmetry, no integrability hypothesis required. -/
+
 theorem tensorL2Inner_symm
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -67,9 +35,7 @@ theorem tensorL2Inner_symm
   intro x
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s x (S x) (T x)
 
-set_option linter.unusedSectionVars false in
-/-- Left additivity of the global `L²` inner product, under joint
-integrability of the two cross-integrand pieces. -/
+
 theorem tensorL2Inner_add_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -99,9 +65,7 @@ theorem tensorL2Inner_add_left
   rw [hcongr]
   exact MeasureTheory.integral_add h₁ h₂
 
-set_option linter.unusedSectionVars false in
-/-- Right additivity of the global `L²` inner product, under joint
-integrability. -/
+
 theorem tensorL2Inner_add_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -131,8 +95,7 @@ theorem tensorL2Inner_add_right
   rw [hcongr]
   exact MeasureTheory.integral_add h₁ h₂
 
-set_option linter.unusedSectionVars false in
-/-- Left `ℝ`-homogeneity of the global `L²` inner product. -/
+
 theorem tensorL2Inner_smul_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -152,8 +115,7 @@ theorem tensorL2Inner_smul_left
     exact this
   rw [hcongr, MeasureTheory.integral_const_mul]
 
-set_option linter.unusedSectionVars false in
-/-- Right `ℝ`-homogeneity of the global `L²` inner product. -/
+
 theorem tensorL2Inner_smul_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -173,9 +135,7 @@ theorem tensorL2Inner_smul_right
     exact this
   rw [hcongr, MeasureTheory.integral_const_mul]
 
-set_option linter.unusedSectionVars false in
-/-- Vanishing of the global `L²` inner product on the zero section in the
-left slot: the integrand is identically zero. -/
+
 theorem tensorL2Inner_zero_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -192,9 +152,7 @@ theorem tensorL2Inner_zero_left
   rw [hzero]
   exact MeasureTheory.integral_zero M ℝ
 
-set_option linter.unusedSectionVars false in
-/-- Vanishing of the global `L²` inner product on the zero section in the
-right slot: the integrand is identically zero. -/
+
 theorem tensorL2Inner_zero_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -211,10 +169,7 @@ theorem tensorL2Inner_zero_right
   rw [hzero]
   exact MeasureTheory.integral_zero M ℝ
 
-set_option linter.unusedSectionVars false in
-/-- Non-negativity of the global `L²` inner product on the diagonal: the
-pointwise integrand is non-negative and the Bochner integral preserves
-non-negativity. -/
+
 theorem tensorL2Inner_nonneg
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -225,12 +180,7 @@ theorem tensorL2Inner_nonneg
   intro x
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (S x)
 
-set_option linter.unusedSectionVars false in
-/-- The cross diagonal pointwise inner is integrable, given that both
-diagonal pointwise pairings are integrable and the cross integrand is
-ae-strongly-measurable. The proof bounds the cross pairing pointwise by
-half the sum of the diagonal pairings (a consequence of pointwise
-Cauchy–Schwarz combined with AM–GM). -/
+
 theorem MemL2.integrable_inner_of_aestronglyMeasurable
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -297,12 +247,7 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
   refine MeasureTheory.Integrable.mono' hG_integrable hST_meas ?_
   exact Filter.Eventually.of_forall h_bound
 
-set_option linter.unusedSectionVars false in
-/-- `MemL2` is closed under addition, given an ae-strong-measurability
-hypothesis on the cross integrand. The diagonal pairing of `S + T`
-expands by bilinearity into `⟨S, S⟩ + 2 ⟨S, T⟩ + ⟨T, T⟩`; each term is
-integrable using `MemL2 S`, `MemL2 T`, and the cross-integrability
-consequence of `MemL2.integrable_inner_of_aestronglyMeasurable`. -/
+
 theorem MemL2.add
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -362,10 +307,7 @@ theorem MemL2.add
   rw [hcongr]
   exact hsum
 
-set_option linter.unusedSectionVars false in
-/-- `MemL2` is closed under scalar multiplication: the diagonal pairing of
-`c • S` is `c²` times the diagonal pairing of `S`, so integrability is
-preserved. -/
+
 theorem MemL2.smul
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

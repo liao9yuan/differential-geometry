@@ -6,22 +6,22 @@ set_option autoImplicit false
 set_option linter.unusedSectionVars false
 set_option linter.style.longLine false
 
-/-!
-# Elementary variation producers for Perelman's `W`
 
-This file contains the first actual derivative producers for the geometric first
-variation of Perelman's entropy functional.  The scalar-curvature and
-gradient-square derivatives remain scalar inputs; the geometric content provided
-here is the pointwise derivative of Perelman's density, the derivative of the
-`W` bracket, and the moving-volume derivative of the weighted base integral,
-ending in the path-level `WEntropyHasFirstVariationAt` producer.
 
-The geometric measure infrastructure (`RealizedMetricFamily`,
-`volumeMeasureFamily`, `traceTimeDerivMetricAt`, `metricFamilyForMeasure`,
-`MetricFamilyRegularAt`, `FunctionRegularAt`, `volume_variation_formula_clean_at`)
-comes from `DifferentialGeometry.Integral.Measure`; the abstract `W` functional
-and its first-variation predicate come from the entropy `Defs` sibling.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -33,7 +33,7 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-! ## Scalar pointwise producers -/
+
 
 theorem perelmanDensityPrefactor_hasDerivAt {n : Nat}
     {tauPath : Real -> Real} {s0 tau tauVariation : Real}
@@ -68,8 +68,8 @@ theorem perelmanDensityPrefactor_hasDerivAt {n : Nat}
   ring_nf
   rfl
 
-/-- Pointwise derivative of Perelman's density
-`u = (4*pi*tau)^(-n/2) * exp (-f)`. -/
+
+
 theorem perelmanDensity_hasDerivAt {n : Nat}
     {tauPath : Real -> Real} {potentialPath : Real -> M -> Real}
     {s0 tau tauVariation : Real}
@@ -103,8 +103,8 @@ theorem perelmanDensity_hasDerivAt {n : Nat}
   rw [htau]
   ring_nf
 
-/-- Scalar derivative of the bracket
-`tau * (R + |grad f|^2) + f - n`. -/
+
+
 def wEntropyBracketVariation (tau tauVariation : Real)
     (scalarCurvature scalarCurvatureVariation gradPotentialNormSq
       gradPotentialNormSqVariation potentialVariation : M -> Real) :
@@ -152,22 +152,22 @@ theorem wEntropyBracket_hasDerivAt {n : Nat}
   rw [htau]
   simp only [Pi.add_apply]
 
-/-! ## Base-integral producers -/
 
-/-- The scalar factor in the variation of the weighted measure:
-`delta (u dmu) = wEntropyWeightedMeasureVariationFactor * u dmu`.
 
-Here `potentialVariation` is the book's `h`, `metricVariationTrace` is `V`,
-and `tauVariation` is the constant `zeta`. -/
+
+
+
+
+
 def wEntropyWeightedMeasureVariationFactor (n : Nat) (tau tauVariation : Real)
     (potentialVariation metricVariationTrace : M -> Real) : M -> Real :=
   fun x =>
     -((n : Real) / (2 * tau)) * tauVariation - potentialVariation x +
       metricVariationTrace x / 2
 
-/-- The scalar integrand produced by differentiating
-`phi_s * u_s dmu_s`, where `u_s` is Perelman's density and `dmu_s` is the
-Riemannian volume measure. -/
+
+
+
 def wEntropyWeightedIntegralVariationIntegrand (n : Nat)
     (tau tauVariation : Real)
     (potential potentialVariation metricVariationTrace phi phiVariation :
@@ -190,12 +190,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Moving-volume derivative for integrals against Perelman's weighted density.
 
-The regularity hypothesis is exactly the one required by
-`volume_variation_formula_clean_at` for the base-measure integrand
-`u_s * phi_s`; deriving it from spacetime smoothness is a later analytic
-regularity bridge. -/
+
+
+
+
+
 theorem weightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -280,9 +280,9 @@ theorem weightedMeasureIntegral_hasDerivAt_at
     wEntropyWeightedMeasureVariationFactor
   ring
 
-/-- Formula specialized to the `W` bracket.  The scalar derivatives of
-curvature and `|grad f|^2` are inputs; the later geometric producer identifies
-them. -/
+
+
+
 theorem wEntropyBaseIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -364,9 +364,9 @@ theorem wEntropyBaseIntegral_hasDerivAt_at
         htau htau_deriv hscalar_deriv hgrad_deriv hpotential_deriv)
       htrace hmetric_reg hintegrand_reg)
 
-/-- Convert a base-integral derivative into the path-level first-variation
-predicate for `W`.  The eventual equality isolates the routine but verbose
-`withDensity` measurability conversion. -/
+
+
+
 theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
     {muPath : Real -> Measure M} {n : Nat} {tauPath : Real -> Real}
@@ -398,9 +398,9 @@ theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
   unfold WEntropyHasFirstVariationAt wFunctionalAlong
   exact hbase.congr_of_eventuallyEq hbase_eq
 
-/-- `WEntropyHasFirstVariationAt` producer obtained from the moving-volume
-formula, plus the local equality between `W` and the corresponding base
-integral. -/
+
+
+
 theorem WEntropyHasFirstVariationAt_of_volumeVariation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

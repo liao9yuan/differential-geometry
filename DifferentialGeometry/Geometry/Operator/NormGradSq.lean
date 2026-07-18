@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
-/-!
-# `|∇f|²_g` and smoothness of the metric inner product on tangent sections
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` and a smooth scalar
-`f : M → ℝ`, this file defines the pointwise squared gradient norm
-`normGradSqFun g f x = g(∇f, ∇f)(x)` and proves its continuity and smoothness.
-The unconditional Bochner-Weitzenböck identity using these quantities is in
-`Geometry/Curvature/Bochner/BochnerConcrete.lean` and
-`Geometry/Connection/WithBoundary/BochnerConcrete.lean`.
--/
 
 noncomputable section
 
@@ -24,13 +14,12 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- Pointwise squared gradient norm `|∇f|²_g(x) = g(∇f, ∇f)(x)`. -/
 def normGradSqFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : ℝ :=
   g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x)
 
@@ -57,6 +46,7 @@ namespace BochnerInternal
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contMDiff_g_inner_aux
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x}
@@ -77,7 +67,6 @@ private lemma contMDiff_g_inner_aux
 
 end BochnerInternal
 
-/-- Smoothness of `b ↦ g.inner b (X b) (Y b)` for smooth tangent sections `X`, `Y`. -/
 theorem contMDiff_g_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -90,7 +79,6 @@ theorem contMDiff_g_inner_of_smooth_sections
         (E := (TangentSpace I : M → Type _)) x (Y x)) := Y.contMDiff
   exact BochnerInternal.contMDiff_g_inner_aux (I := I) (M := M) g hX hY
 
-/-- Continuity of `|∇f|²_g`. -/
 theorem normGradSqFun_continuous [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -108,7 +96,6 @@ theorem normGradSqFun_continuous [I.Boundaryless]
   rw [grad_g_apply]
   rfl
 
-/-- `C^∞` smoothness of `|∇f|²_g`. -/
 theorem normGradSqFun_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

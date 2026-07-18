@@ -8,31 +8,6 @@ import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# H¹ Hilbert space and L² inclusion for interior-supported smooth scalars
-(with-boundary, half-space model)
-
-The Hausdorff completion of `InteriorSmoothScalar g` (the pre-Hilbert space of
-interior-supported smooth real-valued functions on a closed Riemannian
-manifold-with-boundary `(M, g)` modelled on `EuclideanHalfSpace n`) carries
-the canonical Hilbert-space structure. We package:
-
-* `H1ComplInterior g`: the completion, a real Hilbert space.
-* `smoothToH1ComplInterior`: the canonical embedding `InteriorSmoothScalar g
-  →L[ℝ] H1ComplInterior g`.
-* `smoothToLpInterior`: the L² inclusion `InteriorSmoothScalar g →L[ℝ]
-  Lp ℝ 2 μ_g`.
-* `H1ComplInteriorToLp`: the unique continuous linear extension of
-  `smoothToLpInterior` along `smoothToH1ComplInterior`, i.e. the H¹ → L²
-  inclusion.
-
-This shared infrastructure is then used to build the with-boundary Neumann
-and Dirichlet variants of the variational Laplacian. Both variants restrict
-the test-function space to the interior-supported smooth functions; under
-this restriction, the boundary terms in Green's identities vanish, and the
-smooth bridge reduces to the boundaryless case.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -59,20 +34,15 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The H¹ Hilbert space for interior-supported smooth functions on `(M, g)`,
-defined as the Hausdorff completion of the pre-Hilbert space
-`InteriorSmoothScalar g`. -/
 abbrev H1ComplInterior (g : SmoothRiemannianMetric (I_half n) M) : Type _ :=
   UniformSpace.Completion (InteriorSmoothScalar g)
 
-/-- The canonical embedding `InteriorSmoothScalar g →L[ℝ] H1ComplInterior g`. -/
 noncomputable def smoothToH1ComplInterior (g : SmoothRiemannianMetric (I_half n) M) :
     InteriorSmoothScalar g →L[ℝ] H1ComplInterior g :=
   UniformSpace.Completion.toComplL
@@ -82,9 +52,6 @@ noncomputable def smoothToH1ComplInterior (g : SmoothRiemannianMetric (I_half n)
     (f : InteriorSmoothScalar g) :
     smoothToH1ComplInterior g f = (f : H1ComplInterior g) := rfl
 
-/-- An interior-supported smooth scalar function on a closed
-manifold-with-boundary lies in `MemLp 2`: it is continuous and supported in
-a compact set (since `M` itself is compact). -/
 lemma InteriorSmoothScalar.memLp_two
     {g : SmoothRiemannianMetric (I_half n) M} (f : InteriorSmoothScalar g) :
     MemLp f.toFun 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) := by
@@ -94,7 +61,6 @@ lemma InteriorSmoothScalar.memLp_two
   exact f.smooth.continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The linear map from interior-supported smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpLinInterior (g : SmoothRiemannianMetric (I_half n) M) :
     InteriorSmoothScalar g →ₗ[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) where
@@ -136,8 +102,6 @@ lemma InteriorSmoothScalar.norm_smoothToLp_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-/-- The squared seminorm of an interior-supported smooth scalar in pre-H¹
-equals the H¹ self-pairing. -/
 lemma InteriorSmoothScalar.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric (I_half n) M} (f : InteriorSmoothScalar g) :
     ‖f‖ ^ 2 = interiorSmoothScalarH1Inner f f := by
@@ -145,7 +109,6 @@ lemma InteriorSmoothScalar.norm_sq_eq_inner_self
   rw [InteriorSmoothScalar.inner_def] at h
   exact h.symm
 
-/-- Squared L² norm is bounded by the squared pre-H¹ norm. -/
 lemma InteriorSmoothScalar.norm_smoothToLp_sq_le
     {g : SmoothRiemannianMetric (I_half n) M} (f : InteriorSmoothScalar g) :
     ‖smoothToLpLinInterior g f‖ ^ 2 ≤ ‖f‖ ^ 2 := by
@@ -164,7 +127,6 @@ lemma InteriorSmoothScalar.norm_smoothToLp_sq_le
     f.integral_inner_grad_self_nonneg
   linarith
 
-/-- L²-norm of the smooth-inclusion is bounded by the pre-H¹ norm. -/
 lemma InteriorSmoothScalar.norm_smoothToLp_le
     {g : SmoothRiemannianMetric (I_half n) M} (f : InteriorSmoothScalar g) :
     ‖smoothToLpLinInterior g f‖ ≤ ‖f‖ := by
@@ -178,8 +140,6 @@ lemma InteriorSmoothScalar.norm_smoothToLp_le_one_mul
     ‖smoothToLpLinInterior g f‖ ≤ 1 * ‖f‖ := by
   rw [one_mul]; exact f.norm_smoothToLp_le
 
-/-- The continuous linear map from interior-supported smooth scalars to
-`Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpInterior (g : SmoothRiemannianMetric (I_half n) M) :
     InteriorSmoothScalar g →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
@@ -214,8 +174,6 @@ private lemma isUniformInducing_toComplL_interiorSmoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (InteriorSmoothScalar g)
 
-/-- The continuous linear extension of `smoothToLpInterior` along the dense
-embedding `smoothToH1ComplInterior`. -/
 noncomputable def H1ComplInteriorToLp
     (g : SmoothRiemannianMetric (I_half n) M) :
     H1ComplInterior g →L[ℝ]

@@ -19,14 +19,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Bianchi Identity Interfaces
 
-This file records the realized tensor statements for first Bianchi, second
-Bianchi, and contracted Bianchi.  The identities are stated on bundled or
-pointwise tensors; constructing the relevant curvature and covariant-derivative
-tensors from a connection is kept as a separate producer frontier.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -338,8 +338,8 @@ private theorem mlieBracket_jacobi_cyclic
   rw [h0]
   abel
 
-/-- Feed five explicit tangent vectors into a `Fin 5` tensor.  For a covariant
-derivative of a `(0,4)` tensor, the first slot is the derivative direction. -/
+
+
 def vec5 {x : M} (A B C D F : TangentSpace I x) :
     Fin 5 -> TangentSpace I x :=
   fun i =>
@@ -349,8 +349,8 @@ def vec5 {x : M} (A B C D F : TangentSpace I x) :
     else if i = 3 then D
     else F
 
-/-- First Bianchi identity for a lowered Riemann tensor in standard slots:
-`R(X,Y,Z,W) + R(Y,Z,X,W) + R(Z,X,Y,W) = 0`. -/
+
+
 def FirstBianchiAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
   ∀ X Y Z W : TangentSpace I x,
     Rm04 (vec4 X Y Z W) + Rm04 (vec4 Y Z X W) + Rm04 (vec4 Z X Y W) = 0
@@ -361,7 +361,7 @@ theorem first_bianchi {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     Rm04 (vec4 X Y Z W) + Rm04 (vec4 Y Z X W) + Rm04 (vec4 Z X Y W) = 0 :=
   h X Y Z W
 
-/-- Section-level first Bianchi identity. -/
+
 def FirstBianchiSection (Rm04 : Tensor04Section (I := I) (M := M)) : Prop :=
   ∀ x : M, FirstBianchiAt (I := I) (Rm04 x)
 
@@ -373,12 +373,12 @@ theorem first_bianchi_apply
       Rm04 x (vec4 Z X Y W) = 0 :=
   h x X Y Z W
 
-/-- Operator-level first Bianchi identity for a torsion-free connection,
-specialized to tangent-constant extensions at one point.
 
-This is the geometric producer frontier behind the lowered tensor statement:
-differentiate the torsion-free identity, use the Jacobi identity for the Lie
-bracket, and cancel the cyclic terms. -/
+
+
+
+
+
 theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -409,11 +409,11 @@ theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFre
   abel_nf
   simpa [add_assoc] using hJac
 
-/-- Operator covariant derivative of the curvature endomorphism.
 
-This is the tensorial expression
-`(∇_X R)(Y,Z)W`, written before lowering by the metric.  The correction terms
-differentiate the three tensorial slots of `R(Y,Z)W`. -/
+
+
+
+
 def curvCovDerivOpAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z W :
@@ -434,7 +434,7 @@ def curvCovDerivOpAt
       (fun p : M => Y p) (fun p : M => Z p)
       (fun p : M => (cov (fun q : M => W q) p) (X p)) x
 
-/-- The operator commutator `[∇_X, R(Y,Z)]W`, evaluated at a point. -/
+
 def curvCommAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z W :
@@ -448,8 +448,8 @@ def curvCommAt
       (fun p : M => Y p) (fun p : M => Z p)
       (fun p : M => (cov (fun q : M => W q) p) (X p)) x
 
-/-- Relate the operator commutator to the tensorial covariant derivative of
-curvature. -/
+
+
 theorem curvComm_eq_deriv
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z W :
@@ -775,13 +775,13 @@ private theorem curvJacobiAt
         (fun p : M =>
           VectorField.mlieBracket I (fun q : M => X q) (fun q : M => Y q) p)
         (fun p : M => W p) x = 0 := by
-  -- Frontier: operator Jacobi for covariant-derivative commutators.
-  --
-  -- This is the statement obtained from
-  --   [∇_X,[∇_Y,∇_Z]] + [∇_Y,[∇_Z,∇_X]] + [∇_Z,[∇_X,∇_Y]] = 0
-  -- after rewriting `[∇_Y,∇_Z] = R(Y,Z) + ∇_[Y,Z]` and canceling
-  -- `∇_[X,[Y,Z]] + cyc` by Lie-bracket Jacobi.  It is the remaining
-  -- operator-level API below the tensor second-Bianchi theorem.
+
+
+
+
+
+
+
   have hJac := mlieBracket_jacobi_cyclic (I := I) X Y Z x
   have hJacCov :
       (cov (fun p : M => W p) x)
@@ -811,12 +811,12 @@ private theorem curvJacobiAt
   abel_nf at hJacCovNeg ⊢
   exact hJacCovNeg
 
-/-- Operator form of the second Bianchi identity.
 
-This is the genuine geometric producer behind the lowered tensor statement:
-expand curvature as `[∇_X, ∇_Y] - ∇_[X,Y]`, apply the Jacobi identity for
-operator commutators, and cancel the remaining bracket terms using
-torsion-freeness and skew-symmetry of the curvature operator. -/
+
+
+
+
+
 theorem curvSecondBianchi
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -884,8 +884,8 @@ theorem curvSecondBianchi
     S = S + T := by rw [hT, add_zero]
     _ = 0 := hsum
 
-/-- Second Bianchi identity for the covariant derivative of lowered Riemann.
-The tensor slots are `(derivative, X, Y, Z, W)` in the standard convention. -/
+
+
 def SecondBianchiAt {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
@@ -905,7 +905,7 @@ theorem second_bianchi {x : M}
         nablaRm04 (vec5 Y A X Z W) = 0 :=
   h A X Y Z W
 
-/-- Section-level second Bianchi identity. -/
+
 def SecondBianchiSection
     (nablaRm04 : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
@@ -922,9 +922,9 @@ theorem second_bianchi_apply
         nablaRm04 x (vec5 Y A X Z W) = 0 :=
   h x A X Y Z W
 
-/-- Contracted second Bianchi in a tangent basis:
-`div Ric = (1/2) d scalar`.  The slots of `nablaRic` are
-`(derivative, first Ricci slot, second Ricci slot)`. -/
+
+
+
 def ContractedBianchiAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -954,12 +954,12 @@ theorem contracted_bianchi
         (1 / 2 : Real) * dScalar (fun _ : Fin 1 => X) :=
   h X
 
-/-- Three-dimensional Schur algebra at one point: once the covariant derivative
-of Ricci has the Einstein form `∇Ric = (1 / 3) dR ⊗ g`, the contracted
-Bianchi identity forces `dR = 0`.
 
-The geometric producer for the Einstein-form covariant derivative is separate:
-it should come from differentiating `Ric = (R / 3) g` and using `∇g = 0`. -/
+
+
+
+
+
 theorem dR_zero_nablaEin3
     {x : M}
     (g : SmoothMetric_gen I M)
@@ -1034,8 +1034,8 @@ theorem dR_zero_nablaEin3
     rw [← hBianchi X, htrace]
   nlinarith
 
-/-- Section-level contracted Bianchi identity, with the basis and trace data
-chosen pointwise. -/
+
+
 def ContrBianchiSec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1061,9 +1061,9 @@ theorem contrBianchi_apply
     ContractedBianchiAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x) :=
   h x
 
-/-- The scalar differential is the metric trace of `∇ Ric` in the supplied
-basis.  The slots of `nablaRic` are `(derivative, first Ricci slot, second
-Ricci slot)`. -/
+
+
+
 def DScalarTraceAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1078,7 +1078,7 @@ def DScalarTraceAt
       ∑ i : Idx, ∑ j : Idx,
         gInv i j * nablaRic (vec3 X (basis i) (basis j))
 
-/-- Section-level scalar-trace identity, with all data chosen pointwise. -/
+
 def DScalarTraceSec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1103,8 +1103,8 @@ theorem dScalarTrace_apply
     DScalarTraceAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x) :=
   h x
 
-/-- The covariant derivative of Ricci is the metric trace of the covariant
-derivative of lowered Riemann in the supplied basis. -/
+
+
 def NablaRicTraceAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1119,7 +1119,7 @@ def NablaRicTraceAt
       ∑ i : Idx, ∑ j : Idx,
         gInv i j * nablaRm04 (vec5 A (basis i) B C (basis j))
 
-/-- Section-level `∇Ric = tr_g ∇Rm04`, with all data chosen pointwise. -/
+
 def NablaRicTraceSec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1144,8 +1144,8 @@ theorem nablaRicTrace_apply
     NablaRicTraceAt (I := I) (basis x) (gInv x) (nablaRm04 x) (nablaRic x) :=
   h x
 
-/-- The covariant derivative of a symmetric Ricci tensor is symmetric in the
-two Ricci slots. -/
+
+
 def NablaRicSymmAt
     {x : M}
     (nablaRic :
@@ -1154,7 +1154,7 @@ def NablaRicSymmAt
   ∀ A B C : TangentSpace I x,
     nablaRic (vec3 A B C) = nablaRic (vec3 A C B)
 
-/-- Section-level symmetry of `∇Ric` in the Ricci slots. -/
+
 def NablaRicSymmSec
     (nablaRic : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
@@ -1168,10 +1168,10 @@ theorem nablaRicSymm_apply
     NablaRicSymmAt (I := I) (nablaRic x) :=
   h x
 
-/-- Riemann symmetries inherited by the covariant derivative of lowered
-Riemann.  The first slot is the covariant-derivative direction, and the
-curvature slots follow the standard convention
-`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`. -/
+
+
+
+
 def NablaRmSymmAt
     {x : M}
     (nablaRm04 :
@@ -1184,7 +1184,7 @@ def NablaRmSymmAt
       ∀ A X Y Z W : TangentSpace I x,
         nablaRm04 (vec5 A X Y Z W) = nablaRm04 (vec5 A Z W X Y)
 
-/-- Section-level inherited lowered-Riemann symmetries for `∇Rm04`. -/
+
 def NablaRmSymmSec
     (nablaRm04 : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
@@ -1216,8 +1216,8 @@ private theorem trace_swap_symm
     _ = ∑ k : Idx, ∑ l : Idx, gInv k l * N k l := by
           rfl
 
-/-- Contracted Bianchi plus scalar-trace and Ricci-slot symmetry gives the two
-trace orientations used by the Ricci-evolution component proof. -/
+
+
 theorem contractTracesAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1271,9 +1271,9 @@ theorem contractTracesAt
             gInv k l * nablaRic (vec3 (basis a) (basis k) (basis l))) := by
             rw [hScalarA]
 
-/-- Explicit bridge saying that a second-Bianchi proof supplies the contracted
-Bianchi identity after the metric trace and Ricci/scalar trace reductions have
-been performed.  This keeps the hard contraction proof as a named producer. -/
+
+
+
 def ContractedBianchiOfSecondAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1288,7 +1288,7 @@ def ContractedBianchiOfSecondAt
   SecondBianchiAt (I := I) nablaRm04 ->
     ContractedBianchiAt (I := I) basis gInv nablaRic dScalar
 
-/-- Section-level version of `ContractedBianchiOfSecondAt`. -/
+
 def ContrOfSecondSec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1475,9 +1475,9 @@ private theorem sum4_kjli
   rw [Fintype.sum_prod_type]
   rw [Fintype.sum_prod_type]
 
-/-- Pure finite-sum contraction of the second Bianchi identity in the
-lowered-curvature convention.  This is the algebraic core of the
-contracted second Bianchi producer. -/
+
+
+
 theorem contractSum
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1601,8 +1601,8 @@ theorem contractSum
     linarith
   linarith
 
-/-- Producer frontier for contracted second Bianchi from second Bianchi plus
-the trace reductions and Riemann symmetries. -/
+
+
 theorem contractOfSecond
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))

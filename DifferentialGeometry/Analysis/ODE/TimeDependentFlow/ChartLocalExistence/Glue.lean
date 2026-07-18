@@ -3,11 +3,6 @@ import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-! # Gluing chart-local flows into a global flow on a closed manifold
-
-From per-base-point chart-local Picard data, assembles a single global candidate
-flow `Φ : ℝ → M → M` on a uniform horizon by gluing the chart-coordinate flows. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -19,50 +14,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-Global manifold flow assembled from chart-α-coord per-base-point Picard data,
-in chart-cover form (parallel to
-`time_dependent_vf_uniform_existence_time_on_closed_mfd`).
-
-Given per-α chart-α-coord local Picard data `hper α : ChartLocalPicardData X α`
-for every base point `α : M`, this theorem builds a single global flow
-`Φ : ℝ → M → M` by:
-
-* extracting a uniform horizon `T > 0` and a finite cover `S ⊆ M` whose
-  chart-α-coord open neighborhoods `{(hper α).U}_{α ∈ S}` cover `M`
-  (via `time_dependent_vf_uniform_existence_time_on_closed_mfd`);
-* choosing, for each `x : M`, a representative `αRep x ∈ S` with
-  `x ∈ (hper (αRep x)).U` (`Classical.choose`);
-* defining `Φ s x` as the pull-back through `(chartAt H (αRep x)).symm ∘ I.symm`
-  of the chart-α-coord flow value
-  `(hper (αRep x)).flow (I ((chartAt H (αRep x)) x)) s`.
-
-The conclusion records, for every `x : M`,
-* the initial-condition identity `Φ 0 x = x` (from `flow_spec.1` together
-  with the chart left-inverse identity), and
-* the chart-α-coord representation of `Φ`: there exists `α ∈ S` with
-  `x ∈ (hper α).U` such that for every time `s : ℝ`, `Φ s x` agrees with
-  the chart-coord pull-back of the per-α chart-coord flow:
-  `Φ s x = (chartAt H α).symm (I.symm ((hper α).flow (I ((chartAt H α) x)) s))`.
-
-Stating the chart-coord ODE in terms of the per-α chart-coord flow
-(via this representation identity together with `flow_spec.2` on
-`UniformExistence`) rather than as a `HasMFDerivWithinAt` on `M`
-deliberately avoids the chart-AT-y vs chart-α convention mismatch that
-obstructs a direct manifold-flow restatement; the headline
-`time_dependent_vf_globalflow_on_closed_mfd` packages this data into a full
-manifold-flow diffeomorphism via the downstream smoothness / bijectivity /
-chart-change layers.
-
-Mathematical content. The global flow `Φ` is concrete and well-typed; the
-representation identity holds definitionally per `αRep x`. The
-initial-condition `Φ 0 x = x` reduces to `flow_spec.1` evaluated at the
-chart-coord image of `x` (which is in the chart-coord open ball by
-membership of `x` in `(hper α).U`) together with the chart and `I`
-left-inverse identities. Independence of the choice on chart overlaps
-(well-definedness of a chart-AT-y form) would require a chart-Lipschitz
-hypothesis on `X` to invoke Grönwall; it is not asserted here.
--/
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_global_flow_glue
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α) :

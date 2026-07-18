@@ -1,67 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSecondOrder
 
-/-!
-# The principal-symbol / remainder split of the second-order DeTurck-correction part
-
-The second-order-in-`h` part `chartDeTurckCorrSecondOrderPart` of the linearized
-DeTurck-correction operator is the chart-derivative combination
-$$[D(\mathcal L_W g)]^{(2)}_{ij}[h] =
-    \sum_k g_{kj}\,\partial_i\bigl[(DW)^k_{\mathrm{principal}}[h]\bigr]
-      + \sum_k g_{ik}\,\partial_j\bigl[(DW)^k_{\mathrm{principal}}[h]\bigr],$$
-with `(DW)^k_{\mathrm{principal}}[h]` the principal part of the linearized DeTurck
-vector field.  Expanding the outer chart derivative by the Leibniz product rule
-(`partialDeriv_chartLinearizedDeTurckVFPrincipal`) and then expanding the principal
-linearized Christoffel part it contains (`partialDeriv_chartLinearizedChristoffelPrincipal`),
-the outer derivative `∂_d[(DW)^k_{\mathrm{principal}}]` splits into:
-
-* a branch where `∂_d` lands on a derivative of a component field of `h` — this
-  carries the **second** chart derivative of `h` and is the principal-symbol
-  content;
-* the complementary branches where `∂_d` lands on an inverse-Gram factor `G^{ab}`
-  or `G^{kl}` — these carry only **one** chart derivative of `h` and are genuinely
-  first order.
-
-This file isolates the two pieces.
-
-## Index-block abbreviations
-
-Two per-direction, per-index abbreviations keep the nested sums shallow:
-
-* `chartDeTurckCorrHessBlock g α h d a b k` is the `∂²h` block
-  `½∑_l G^{kl}·(∂_d∂_a h_{lb} + ∂_d∂_b h_{la} − ∂_d∂_l h_{ab})` — the content of
-  `∂_d[(DΓ)^k{}_{ab}[h]]` carrying a second chart derivative of `h`;
-* `chartDeTurckCorrGramDerivBlock g α h d a b k` is the `(∂G)(∂h)` block
-  `½∑_l(∂_d G^{kl})·(∂_a h_{lb} + ∂_b h_{la} − ∂_l h_{ab})` — the content of
-  `∂_d[(DΓ)^k{}_{ab}[h]]` where the outer derivative lands on the internal
-  inverse-Gram factor `G^{kl}`.
-
-## Contents
-
-* `chartDeTurckCorrPrincipalSymbolExpr` — the pure `∂²h` expression: the
-  principal-symbol content of `chartDeTurckCorrSecondOrderPart`, with every
-  inverse-Gram and Gram factor frozen as a coefficient.
-* `chartDeTurckCorrFirstOrderRemainder` — the complementary terms, each carrying
-  **exactly one** chart derivative of a component field of `h`.
-* `chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder` — the rigorous
-  split `chartDeTurckCorrSecondOrderPart = chartDeTurckCorrPrincipalSymbolExpr
-  + chartDeTurckCorrFirstOrderRemainder`, valid at chart-interior points, and its
-  chart-source wrapper
-  `chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`
-  under `[I.Boundaryless]`.
-* `chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum` — the explicit exhibition
-  of the remainder as a finite sum of terms each of the syntactic shape
-  `(coefficient)·partialDeriv _ (h _ _) _`, making precise that it carries at most
-  one chart derivative of `h`.
-* `h`-linearity (`_add`, `_smul`, `_zero`) of `chartDeTurckCorrPrincipalSymbolExpr`
-  and `chartDeTurckCorrFirstOrderRemainder`.
-* `chartDeTurckCorrPrincipalSymbolExpr_symm` — the `(i, j)`-symmetry of the
-  principal-symbol expression.
-
-The `∂_a∂_b ↦ ξ_aξ_b` substitution applied to `chartDeTurckCorrPrincipalSymbolExpr`
-recovers the principal symbol of the linearized DeTurck-correction operator; the
-remainder, carrying only first derivatives of `h`, is invisible to that second-order
-symbol.
--/
 
 noncomputable section
 
@@ -83,18 +21,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedVariables false in
-/-- The **`∂²h` index block** of the double Leibniz expansion: for the outer
-chart-derivative direction `d`, the lower index pair `(a, b)`, the upper index `k`,
-$$[\sigma]^k{}_{ab}[h](d)(y) = \tfrac12\sum_l G^{kl}(y)\,
-    \bigl(\partial_d\partial_a h_{lb} + \partial_d\partial_b h_{la}
-        - \partial_d\partial_l h_{ab}\bigr)(y),$$
-the content of `∂_d[(DΓ)^k{}_{ab}[h]]` carrying a second chart derivative of `h`,
-with the internal inverse-Gram factor `G^{kl}` frozen.
 
-The background-metric parameter `g'` is retained for signature uniformity with the
-public objects; it does not appear in the body. -/
-def chartDeTurckCorrHessBlock (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrHessBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     chartInvGramOnE (I := I) g α k l y *
@@ -102,6 +30,7 @@ def chartDeTurckCorrHessBlock (g g' : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
        partialDeriv (E := E) d (partialDeriv (E := E) l (h a b)) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrHessBlock_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -112,18 +41,8 @@ def chartDeTurckCorrHessBlock (g g' : SmoothRiemannianMetric I M) (α : M)
            partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
            partialDeriv (E := E) d (partialDeriv (E := E) l (h a b)) y) := rfl
 
-set_option linter.unusedVariables false in
-/-- The **`(∂G)(∂h)` index block** of the double Leibniz expansion: for the outer
-chart-derivative direction `d`, the lower index pair `(a, b)`, the upper index `k`,
-$$[\rho]^k{}_{ab}[h](d)(y) = \tfrac12\sum_l(\partial_d G^{kl})(y)\,
-    \bigl(\partial_a h_{lb} + \partial_b h_{la} - \partial_l h_{ab}\bigr)(y),$$
-the content of `∂_d[(DΓ)^k{}_{ab}[h]]` where the outer derivative lands on the
-internal inverse-Gram factor `G^{kl}`.  It carries exactly one chart derivative of a
-component field of `h`.
 
-The background-metric parameter `g'` is retained for signature uniformity with the
-public objects; it does not appear in the body. -/
-def chartDeTurckCorrGramDerivBlock (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrGramDerivBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     partialDeriv (E := E) d (chartInvGramOnE (I := I) g α k l) y *
@@ -131,6 +50,7 @@ def chartDeTurckCorrGramDerivBlock (g g' : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) b (h l a) y -
        partialDeriv (E := E) l (h a b) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrGramDerivBlock_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -141,23 +61,6 @@ def chartDeTurckCorrGramDerivBlock (g g' : SmoothRiemannianMetric I M) (α : M)
            partialDeriv (E := E) b (h l a) y -
            partialDeriv (E := E) l (h a b) y) := rfl
 
-/-- The **pure `∂²h` principal-symbol expression** of the second-order part of the
-linearized DeTurck-correction operator, in the chart at `α`, in the perturbation
-direction `h`, evaluated at the chart-coordinate point `y ∈ E`.
-
-It is the content of `chartDeTurckCorrSecondOrderPart` carrying two chart derivatives
-of a component field of `h`: every chart Gram factor `g_{kj}`, `g_{ik}`, every
-inverse-Gram trace factor `G^{ab}`, and every internal inverse-Gram factor `G^{kl}`
-of the principal linearized Christoffel part (inside the `∂²h` index block
-`chartDeTurckCorrHessBlock`) is a frozen coefficient.  Concretely
-$$[D(\mathcal L_W g)]^{\sigma}_{ij}[h](y) =
-    \sum_k g_{kj}(y)\,\sum_{a,b} G^{ab}(y)\,[\sigma]^k{}_{ab}[h](i)(y)
-  + \sum_k g_{ik}(y)\,\sum_{a,b} G^{ab}(y)\,[\sigma]^k{}_{ab}[h](j)(y),$$
-where `[σ]^k{}_{ab}[h](d) = chartDeTurckCorrHessBlock g g' α h d a b k` is the `∂²h`
-index block `½∑_l G^{kl}·(∂_d∂_a h_{lb} + ∂_d∂_b h_{la} − ∂_d∂_l h_{ab})`.
-
-Substituting `∂_d∂_a ↦ ξ_dξ_a` here gives the principal symbol of the linearized
-DeTurck-correction operator. -/
 def chartDeTurckCorrPrincipalSymbolExpr (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
@@ -171,6 +74,7 @@ def chartDeTurckCorrPrincipalSymbolExpr (g g' : SmoothRiemannianMetric I M) (α 
           chartInvGramOnE (I := I) g α a b y *
             chartDeTurckCorrHessBlock (I := I) g g' α h j a b k y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -186,10 +90,7 @@ def chartDeTurckCorrPrincipalSymbolExpr (g g' : SmoothRiemannianMetric I M) (α 
               chartInvGramOnE (I := I) g α a b y *
                 chartDeTurckCorrHessBlock (I := I) g g' α h j a b k y) := rfl
 
-/-- The fully explicit `∂²h` form of the principal-symbol expression, with the `∂²h`
-index block `chartDeTurckCorrHessBlock` unfolded.  Every occurrence of `h` is under an
-iterated `partialDeriv`, with all chart Gram and inverse-Gram factors as frozen
-coefficients. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrPrincipalSymbolExpr_eq_explicit
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -215,28 +116,6 @@ lemma chartDeTurckCorrPrincipalSymbolExpr_eq_explicit
   rw [chartDeTurckCorrPrincipalSymbolExpr_def]
   simp only [chartDeTurckCorrHessBlock_def]
 
-/-- The **genuinely-first-order remainder** of the second-order part of the linearized
-DeTurck-correction operator.  Once the pure `∂²h` principal-symbol expression
-`chartDeTurckCorrPrincipalSymbolExpr` is extracted from
-`chartDeTurckCorrSecondOrderPart`, the complementary terms are the inverse-Gram
-branches of the double Leibniz expansion of `∂_d[(DW)^k_{\mathrm{principal}}]`.
-
-In the chart at `α`, in the perturbation direction `h`, at the chart-coordinate point
-`y ∈ E`:
-$$[D(\mathcal L_W g)]^{\rho}_{ij}[h](y) =
-    \sum_k g_{kj}(y)\,\Bigl[
-      \sum_{a,b}(\partial_i G^{ab})(y)\,(D\Gamma)^k{}_{ab}[h](y)
-        + \sum_{a,b} G^{ab}(y)\,[\rho]^k{}_{ab}[h](i)(y)\Bigr]
-  + \sum_k g_{ik}(y)\,\Bigl[
-      \sum_{a,b}(\partial_j G^{ab})(y)\,(D\Gamma)^k{}_{ab}[h](y)
-        + \sum_{a,b} G^{ab}(y)\,[\rho]^k{}_{ab}[h](j)(y)\Bigr],$$
-where `(DΓ)^k{}_{ab}[h] = chartLinearizedChristoffelPrincipal g α h a b k` is the
-principal linearized Christoffel part and `[ρ]^k{}_{ab}[h](d) =
-chartDeTurckCorrGramDerivBlock g g' α h d a b k` is the `(∂G)(∂h)` index block.
-
-Each term carries exactly one chart derivative of a component field of `h` — this is
-the content of `chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum`, which
-justifies the remainder being invisible to the second-order principal symbol. -/
 def chartDeTurckCorrFirstOrderRemainder (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
@@ -256,6 +135,7 @@ def chartDeTurckCorrFirstOrderRemainder (g g' : SmoothRiemannianMetric I M) (α 
             chartInvGramOnE (I := I) g α a b y *
               chartDeTurckCorrGramDerivBlock (I := I) g g' α h j a b k y)))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -277,13 +157,7 @@ def chartDeTurckCorrFirstOrderRemainder (g g' : SmoothRiemannianMetric I M) (α 
                 chartInvGramOnE (I := I) g α a b y *
                   chartDeTurckCorrGramDerivBlock (I := I) g g' α h j a b k y))) := rfl
 
-/-- **The fully-expanded outer chart derivative of the principal part of the
-linearized DeTurck vector field.**  Leibniz-expanding `∂_d[(DW)^k_{\mathrm{principal}}]`
-across the metric-`g` trace and then across the principal linearized Christoffel part,
-each `(a, b)` summand splits into the `(∂_d G^{ab})·(DΓ)^k{}_{ab}[h]` term, the
-`G^{ab}·[ρ]^k{}_{ab}[h](d)` term (with `[ρ]` the `(∂G)(∂h)` index block), and the
-`G^{ab}·[σ]^k{}_{ab}[h](d)` term (with `[σ]` the `∂²h` index block).  Valid at
-chart-interior points. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k d : Fin (Module.finrank ℝ E)) {y : E}
@@ -348,17 +222,7 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
     rw [Finset.sum_add_distrib, mul_add]]
   ring
 
-/-- **The principal-symbol / remainder split of the second-order DeTurck-correction
-part.**  At chart-interior points, the literal chart-derivative combination
-`chartDeTurckCorrSecondOrderPart` splits as the pure `∂²h` principal-symbol expression
-`chartDeTurckCorrPrincipalSymbolExpr` plus the genuinely-first-order remainder
-`chartDeTurckCorrFirstOrderRemainder`.
-
-The principal-symbol expression collects the branch of the double Leibniz expansion
-where both chart derivatives fall on a component field of `h`; the remainder collects
-the two inverse-Gram branches.  Under `[I.Boundaryless]` the chart-interior hypothesis
-is automatic for `y = extChartAt I α x` with `x` in the chart source — see
-`chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -428,10 +292,7 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
   rw [hsum1, hsum2]
   ring
 
-/-- **The principal-symbol / remainder split on the chart source under
-`[I.Boundaryless]`.**  At chart-image points `y = extChartAt I α x` with `x` in the
-chart source, the chart-interior hypothesis of
-`chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder` is automatic. -/
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     [I.Boundaryless]
     (g g' : SmoothRiemannianMetric I M) (α : M)
@@ -449,16 +310,7 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_
   exact chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     (I := I) g g' α h i j hx_int
 
-/-- **The first-order remainder, exhibited as a sum of first-order terms.**  The
-remainder `chartDeTurckCorrFirstOrderRemainder` is a finite sum of terms, each a
-product of a coefficient not involving `h` with a single `partialDeriv` of a component
-field of `h`.
-
-Each contribution is `g`- or `G`-weighted; the principal linearized Christoffel part
-of the inverse-Gram-trace branch and the `(∂G)(∂h)` index block are unfolded to their
-explicit `½∑_l (·)·(∂h)` formulas, so no term carries a second chart derivative of
-`h`.  This is the formal content of "the remainder carries at most one chart
-derivative of `h`". -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -549,7 +401,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
 
 section BlockLinearity
 
-/-- An iterated partial derivative of a zero component field vanishes. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_zero
     (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p
@@ -561,15 +413,14 @@ private lemma partialDeriv_partialDeriv_zero
     rw [hconst, partialDeriv_const]
   rw [hinner, partialDeriv_const]
 
-/-- A first partial derivative of a zero component field vanishes. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_zero_apply
     (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((0 : ChartMetricPerturbation E) a b) y = 0 := by
   have hconst : ((0 : ChartMetricPerturbation E) a b) = fun _ : E => (0 : ℝ) := rfl
   rw [hconst, partialDeriv_const]
 
-/-- A perturbation component field of a pointwise sum splits the iterated partial
-derivative additively. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((h₁ + h₂) a b)) y =
@@ -587,8 +438,7 @@ private lemma partialDeriv_partialDeriv_add_apply
         (partialDeriv_perturbation_differentiableAt h₁ q a b y)
         (partialDeriv_perturbation_differentiableAt h₂ q a b y)]
 
-/-- A perturbation component field of a pointwise sum splits the first partial
-derivative additively. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((h₁ + h₂) a b) y =
@@ -597,8 +447,7 @@ private lemma partialDeriv_add_apply
   rw [heq, partialDeriv_add (E := E) (h₁ a b) (h₂ a b)
         (h₁.differentiableAt a b y) (h₂.differentiableAt a b y)]
 
-/-- A perturbation component field of a scalar multiple scales the iterated partial
-derivative. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((c • h) a b)) y =
@@ -612,8 +461,7 @@ private lemma partialDeriv_partialDeriv_smul_apply
         (partialDeriv (E := E) q (h a b))
         (partialDeriv_perturbation_differentiableAt h q a b y), smul_eq_mul]
 
-/-- A perturbation component field of a scalar multiple scales the first partial
-derivative. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((c • h) a b) y =
@@ -622,7 +470,7 @@ private lemma partialDeriv_smul_apply
   rw [heq, partialDeriv_const_smul (E := E) c (h a b) (h.differentiableAt a b y),
     smul_eq_mul]
 
-/-- The `∂²h` index block vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrHessBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -645,7 +493,7 @@ private lemma partialDeriv_smul_apply
     ring
   rw [hzero, mul_zero]
 
-/-- **Additivity** of the `∂²h` index block in the perturbation direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -662,7 +510,7 @@ lemma chartDeTurckCorrHessBlock_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ d l a b y]
   ring
 
-/-- **Scalar homogeneity** of the `∂²h` index block in the perturbation direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -688,7 +536,7 @@ lemma chartDeTurckCorrHessBlock_smul
     ring]
   ring
 
-/-- The `(∂G)(∂h)` index block vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrGramDerivBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -707,7 +555,7 @@ lemma chartDeTurckCorrHessBlock_smul
     ring
   rw [hzero, mul_zero]
 
-/-- **Additivity** of the `(∂G)(∂h)` index block in the perturbation direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -723,8 +571,7 @@ lemma chartDeTurckCorrGramDerivBlock_add
     partialDeriv_add_apply h₁ h₂ l a b y]
   ring
 
-/-- **Scalar homogeneity** of the `(∂G)(∂h)` index block in the perturbation
-direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -751,7 +598,7 @@ lemma chartDeTurckCorrGramDerivBlock_smul
 
 end BlockLinearity
 
-/-- The pure `∂²h` principal-symbol expression vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -771,8 +618,7 @@ end BlockLinearity
   rw [Finset.sum_eq_zero (fun k _ => by rw [hzero i k, mul_zero]),
     Finset.sum_eq_zero (fun k _ => by rw [hzero j k, mul_zero]), add_zero]
 
-/-- **Additivity** of the pure `∂²h` principal-symbol expression in the perturbation
-direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -837,8 +683,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_add
     rw [hsplit j k, mul_add]]
   ring
 
-/-- **Scalar homogeneity** of the pure `∂²h` principal-symbol expression in the
-perturbation direction. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -889,7 +734,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     rw [hscale j k]; ring]
   ring
 
-/-- The first-order remainder vanishes on the zero perturbation. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -918,7 +763,6 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_smul
   rw [Finset.sum_eq_zero (fun k _ => by rw [hbranchA i k, hbranchB i k]; ring),
     Finset.sum_eq_zero (fun k _ => by rw [hbranchA j k, hbranchB j k]; ring), add_zero]
 
-/-- **Additivity** of the first-order remainder in the perturbation direction. -/
 theorem chartDeTurckCorrFirstOrderRemainder_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -1018,8 +862,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_add
     rw [hA j k, hB j k]; ring]
   ring
 
-/-- **Scalar homogeneity** of the first-order remainder in the perturbation
-direction. -/
 theorem chartDeTurckCorrFirstOrderRemainder_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -1096,11 +938,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     rw [hA j k, hB j k]; ring]
   ring
 
-/-- **Symmetry of the pure `∂²h` principal-symbol expression** in the index pair
-`(i, j)`.  Swapping `i ↔ j` interchanges the two `k`-sums of
-`chartDeTurckCorrPrincipalSymbolExpr`; the chart Gram factors `g_{kj}`, `g_{ik}` agree
-after `g_{kj} = g_{jk}`, `g_{ik} = g_{ki}` (`chartGramOnE_symm`), so the expression is
-invariant. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_symm
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :

@@ -9,29 +9,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.VectorBundle.Riemannian
 
-/-!
-# Continuity of the metric inner product on `(r, s)`-tensor sections
-
-Given a smooth Riemannian metric `g` on a manifold `M`, this file establishes
-continuity of the pointwise inner product `tensorInnerPointwise g r s b T S` on
-mixed `(r, s)`-tensor sections via reduction to the covariant `(0, r + s)` case.
-
-The reduction follows the definitional decomposition
-`tensorInnerPointwise g r s b T S =
-  tensorInnerPointwise_0s (r + s) g b
-    (lowerAllUpperIndices g r s b T)
-    (lowerAllUpperIndices g r s b S)`
-already provided in `Integral.L2.PointwiseInner.Defs`.
-
-Composing the lowering with the chart-trivialisation `chartJinv α b` of the
-tangent bundle on each of the `r + s` slots, we obtain a chart-α-trivialised
-fully-covariant model tensor whose pointwise inner product is computed via
-`chartTensorInnerPointwise_0s` on the chart-Gram matrix. The continuity hypothesis
-on each chart α is therefore phrased on this composed object.
-
-The main public theorem is `TensorRSBundle.continuous_inner_of_smooth_sections`,
-mirroring the corresponding `(0, s)`-statement.
--/
 
 noncomputable section
 
@@ -48,33 +25,16 @@ open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Chart-α version of the `(r, s)` pointwise inner product
-
-The mixed `(r, s)` pointwise inner product is defined via index-lowering followed
-by the covariant `(0, r + s)` inner product. We define the chart-α analog by
-applying the same lowering and replacing `tensorInnerPointwise_0s` with
-`chartTensorInnerPointwise_0s` (which uses `chartGramMatrix g α b` in place of
-`gramMatrixAt g b`).
-
-For the chart bridge identity, the natural pairing arises from also composing the
-lowered tensor with the chart-trivialisation `chartJinv α b` on each of the
-`r + s` slots: this transforms the model basis into the chart-α basis and matches
-the (0, r + s) bridge identity. -/
-
-/-- Composed lowering: lower the `r` upper indices via `g.inner b`, then compose
-with `chartJinv α b` on each of the resulting `r + s` slots. The result is the
-fully-covariant model `(0, r + s)`-tensor whose chart-α-basis evaluation matches
-the chart-α-trivialised image. -/
 noncomputable def loweredCompose
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T : TensorRSModel r s ℝ E) : Tensor0SModel (r + s) ℝ E :=
   (lowerAllUpperIndices (I := I) (M := M) g r s b T).compContinuousLinearMap
     (fun _ : Fin (r + s) =>
-      DifferentialGeometry.Tensor.Tensor0SRiemannian.chartJinv
+      DifferentialGeometry.Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
         (I := I) (M := M) α b)
 
 @[simp] lemma loweredCompose_apply
@@ -83,13 +43,11 @@ noncomputable def loweredCompose
     loweredCompose (I := I) (M := M) g r s α b T v =
       lowerAllUpperIndices (I := I) (M := M) g r s b T
         (fun i =>
-          DifferentialGeometry.Tensor.Tensor0SRiemannian.chartJinv
+          DifferentialGeometry.Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
             (I := I) (M := M) α b (v i)) := by
   unfold loweredCompose
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
 
-/-- The composed-lowering map is linear in `T`: it sends sums of mixed tensors
-to sums of the corresponding lowered+composed model `(0, r + s)`-tensors. -/
 lemma loweredCompose_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -100,7 +58,6 @@ lemma loweredCompose_add
   rw [ContinuousLinearMap.map_add]
   rfl
 
-/-- The composed-lowering map is `ℝ`-homogeneous in `T`. -/
 lemma loweredCompose_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (c : ℝ) (T : TensorRSModel r s ℝ E) :
@@ -110,8 +67,6 @@ lemma loweredCompose_smul
   rw [ContinuousLinearMap.map_smul]
   rfl
 
-/-- The composed-lowering map sends the zero `(r, s)`-tensor to the zero
-`(0, r + s)`-tensor. -/
 lemma loweredCompose_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M) :
     loweredCompose (I := I) (M := M) g r s α b (0 : TensorRSModel r s ℝ E) =
@@ -120,13 +75,6 @@ lemma loweredCompose_zero
   rw [ContinuousLinearMap.map_zero]
   rfl
 
-/-- The chart-α version of `tensorInnerPointwise` on `(r, s)`-tensors. We
-implement it by lowering the `r` upper indices, composing with the chart-α
-trivialisation `chartJinv α b`, and pairing the resulting `(0, r + s)`-tensors
-through `chartTensorInnerPointwise_0s g α (r + s) b`.
-
-This mirrors how `chartTensorInnerPointwise_0s` mirrors `tensorInnerPointwise_0s`
-in `Tensor0SRiemannian`. -/
 noncomputable def chartTensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) : ℝ :=
@@ -142,13 +90,6 @@ noncomputable def chartTensorInnerPointwise
         (loweredCompose (I := I) (M := M) g r s α b T)
         (loweredCompose (I := I) (M := M) g r s α b S) := rfl
 
-/-! ### Algebraic properties of `chartTensorInnerPointwise`
-
-The chart-α `(r, s)` inner product is bilinear and symmetric, inheriting these
-properties from the underlying `chartTensorInnerPointwise_0s` together with
-linearity of the composed-lowering map. -/
-
-/-- Left additivity of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_add_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T₁ T₂ S : TensorRSModel r s ℝ E) :
@@ -160,7 +101,6 @@ lemma chartTensorInnerPointwise_add_left
   exact chartTensorInnerPointwise_0s_add_left
     (I := I) (M := M) g α b (r + s) _ _ _
 
-/-- Right additivity of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_add_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T S₁ S₂ : TensorRSModel r s ℝ E) :
@@ -172,7 +112,6 @@ lemma chartTensorInnerPointwise_add_right
   exact chartTensorInnerPointwise_0s_add_right
     (I := I) (M := M) g α b (r + s) _ _ _
 
-/-- Left `ℝ`-homogeneity of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_smul_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -183,7 +122,6 @@ lemma chartTensorInnerPointwise_smul_left
   exact chartTensorInnerPointwise_0s_smul_left
     (I := I) (M := M) g α b (r + s) c _ _
 
-/-- Right `ℝ`-homogeneity of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_smul_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -194,14 +132,12 @@ lemma chartTensorInnerPointwise_smul_right
   exact chartTensorInnerPointwise_0s_smul_right
     (I := I) (M := M) g α b (r + s) c _ _
 
-/-- Left zero of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_zero_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (S : TensorRSModel r s ℝ E) :
     chartTensorInnerPointwise (I := I) (M := M) g α r s b 0 S = 0 := by
   rw [chartTensorInnerPointwise_apply, loweredCompose_zero]
-  -- Reduces to: chartTensorInnerPointwise_0s ... 0 (loweredCompose ...) = 0.
-  -- This uses left-additivity on `0 + 0 = 0`.
+
   have h := chartTensorInnerPointwise_0s_add_left
     (I := I) (M := M) g α b (r + s) (0 : Tensor0SModel (r + s) ℝ E) 0
     (loweredCompose (I := I) (M := M) g r s α b S)
@@ -209,7 +145,6 @@ lemma chartTensorInnerPointwise_zero_left
   rw [h₀] at h
   linarith
 
-/-- Right zero of the chart-α `(r, s)` inner product. -/
 lemma chartTensorInnerPointwise_zero_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -223,18 +158,6 @@ lemma chartTensorInnerPointwise_zero_right
   rw [h₀] at h
   linarith
 
-/-! ## Bridge identity for the `(r, s)` inner product
-
-The bridge identity relates the model-basis `(r, s)` inner product
-`tensorInnerPointwise` to its chart-α counterpart `chartTensorInnerPointwise`,
-on points `b` in the chart base set. The proof reduces to the `(0, r + s)`
-bridge identity already proven in `Tensor0SRiemannian`. -/
-
-/-- **The bridge identity**, formal version.
-
-For any pair of model `(r, s)`-tensors `T, S` and any base point `b` in the
-trivialisation base set at `α`, the model-basis pointwise inner product agrees
-with its chart-α counterpart. -/
 theorem tensorInnerPointwise_bridge_identity
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -245,8 +168,6 @@ theorem tensorInnerPointwise_bridge_identity
   exact tensorInnerPointwise_0s_bridge_identity
     (I := I) (M := M) g α (r + s) hb _ _
 
-/-- Symmetry of the chart-α `(r, s)` inner product on the trivialisation base set:
-follows from the bridge identity and the symmetry of `tensorInnerPointwise`. -/
 lemma chartTensorInnerPointwise_symm
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -257,19 +178,6 @@ lemma chartTensorInnerPointwise_symm
     ← tensorInnerPointwise_bridge_identity (I := I) (M := M) g α r s hb S T]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b T S
 
-/-! ## Continuity of the chart-α `(r, s)` inner product on continuous arguments
-
-The chart-α `(r, s)` inner product, applied to two continuous functions
-`T, S : M → TensorRSModel r s ℝ E` of the model fibre, is continuous on the
-chart base set provided the lowered+composed images
-`loweredCompose g r s α b (T b)` and similarly for `S` are continuous on the
-chart base set.
-
-The proof reduces to the `(0, r + s)` chart-local continuity lemma
-`chartTensorInnerPointwise_0s_continuousOn_smooth_args`. -/
-
-/-- The chart-α `(r, s)` inner product is continuous in `b` when its inputs
-admit continuous lowered+composed representatives. -/
 theorem chartTensorInnerPointwise_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (T S : M → TensorRSModel r s ℝ E)
@@ -295,17 +203,6 @@ theorem chartTensorInnerPointwise_continuousOn
       (fun b => loweredCompose (I := I) (M := M) g r s α b (S b)) hT hS
   exact hcont
 
-/-! ## Chart-local continuity of the `(r, s)` inner product on smooth sections
-
-Given two `C^∞` `(r, s)`-tensor sections `T, S`, the bridge identity reduces
-chart-local continuity of the inner product to the chart-α inner product, which
-in turn reduces to the `(0, r + s)` chart-local statement. The hypothesis on the
-caller's side is the continuity of the lowered+composed model-fibre
-representations. -/
-
-/-- Chart-local continuity of the `(r, s)` pointwise inner product on tensor
-sections, given the continuity hypothesis on the chart-trivialised lowered
-representations. -/
 theorem chartLocal_continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y) (α : M)
@@ -331,8 +228,7 @@ theorem chartLocal_continuous_inner_of_smooth_sections
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b)
             (S b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- Use the bridge identity to convert to `chartTensorInnerPointwise`, then
-  -- apply `chartTensorInnerPointwise_continuousOn`.
+
   have hbridge : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       tensorInnerPointwise (I := I) (M := M) g r s b
         (TensorRSSpace.toModel
@@ -366,12 +262,6 @@ end TensorRSRiemannian
 end Tensor
 end DifferentialGeometry
 
-/-! ## Public theorem on the `(r, s)`-tensor bundle
-
-The chart-local continuity statement is glued into a global continuity
-statement via the chart cover, mirroring the `(0, s)`-statement
-`Tensor0SBundle.continuous_inner_of_smooth_sections`. -/
-
 namespace TensorRSBundle
 
 open scoped Manifold Topology Bundle BigOperators
@@ -381,13 +271,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Global continuity of the pointwise inner product on `(r, s)`-tensor
-sections. The hypothesis at each `α : M` is the continuity of the
-lowered+composed model-fibre representation on the chart base set at `α`. -/
 theorem continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y)

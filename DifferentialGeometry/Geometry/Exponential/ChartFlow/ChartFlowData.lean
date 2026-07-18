@@ -5,39 +5,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Unified chart-flow packaging for the manifold-side identification
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the V.4 chart-pushed flow
-`Φ : (E × E) × ℝ → E × E` supplies a host of properties that downstream
-manifold-side arguments consume one by one:
-
-* joint `C^1` regularity on `ball ((x₀, 0)) ρ × Ioo (-T) T`;
-* the initial condition `Φ((x₀, 0), 0) = (x₀, 0)`;
-* uniform chart-target-interior confinement on `Icc (-T) T` for every
-  `v ∈ ball (0 : E) ρ`;
-* uniform genuine chart-phase ODE on `Ioo (-T) T` for every such `v`;
-* the manifold-side integral-curve property of `chartFlowOrbitLift Φ p v`
-  on the entire open interval `Ioo (-T) T`;
-* zero-section orbit constancy: `Φ((x₀, 0), s) = (x₀, 0)` on a
-  (sub-)interval `Ioo (-T_match) T_match`.
-
-Existing infrastructure threads several of these properties through
-separate existential statements, each of which extracts its own
-`Φ` via `Classical.choose`. The downstream final assembly needs a single
-`Φ` that simultaneously witnesses all of them. This file folds the chain
-of choices into one, by extracting `Φ` from the combined V.4 packaging
-exactly once and then deriving every property on that specific `Φ`.
-
-## Main result
-
-* `exists_unified_chartFlow_data` — a single existential packaging
-  supplying one chart-pushed flow `Φ` together with uniform radii
-  `(ρ, T, T_match)` and the full set of properties listed above.
--/
 
 noncomputable section
 
@@ -50,7 +18,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -62,30 +30,6 @@ section UnifiedPackaging
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Unified V.4 + R.D.3.a packaging.** A single chart-pushed flow
-`Φ : (E × E) × ℝ → E × E` simultaneously supplies, on uniform radii
-`(ρ, T)`:
-
-* joint `C^1` regularity on `ball ((x₀, 0)) ρ × Ioo (-T) T`;
-* the zero-section initial condition `Φ((x₀, 0), 0) = (x₀, 0)`;
-* per-`v` initial conditions `Φ((x₀, v), 0) = (x₀, v)` for every
-  `v ∈ ball (0 : E) ρ`;
-* chart-target-interior confinement
-  `Φ((x₀, v), s) ∈ (interior (extChartAt I p).target) ×ˢ univ`
-  on `Icc (-T) T` for every such `v`;
-* the genuine chart-phase ODE
-  `HasDerivAt (s' ↦ Φ((x₀, v), s')) (chartPhaseVF g p (Φ((x₀, v), s))) s`
-  on `Ioo (-T) T` for every such `v`;
-* zero-section orbit constancy
-  `Φ((x₀, 0), s) = (x₀, 0)` on `Ioo (-T_match) T_match`, where
-  `0 < T_match ≤ T`;
-* the manifold-lift integral-curve property
-  `IsMIntegralCurveOn (chartFlowOrbitLift Φ p v) (geodesicVectorFieldChart g p)
-    (Ioo (-T) T)` for every `v ∈ ball (0 : E) ρ`.
-
-Here `x₀ := extChartAt I p p`. The crucial point is that the same `Φ`
-witnesses every conjunct, so downstream identifications across the
-chart side and the manifold side can be carried out on a fixed flow. -/
 theorem exists_unified_chartFlow_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -124,7 +68,7 @@ theorem exists_unified_chartFlow_data
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V4, hT₀_lt_V4, h_orbit_in⟩ :=
-    exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
+    exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd_V4 hΦ_init0

@@ -2,66 +2,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform bound on the intrinsic Riemannian fiber norm of a smooth tensor section
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, the intrinsic Riemannian
-fiber norm-squared `riemannianFiberNormSq g r s b (S.toSection b)` is bounded
-above by a single nonnegative constant `K`, uniformly over all base points
-`b : M`.
-
-## Why this is the correct route
-
-The intrinsic fiber norm `riemannianFiberNormSq` is a finite sum of squared
-evaluations of the tensor on a `g`-orthonormal frame. A naive control via the
-model-fibre operator norm `‖·‖` of the tensor times the ambient `E`-norm of the
-`g`-orthonormal frame fails on multi-chart manifolds: the ambient `E`-norm of a
-`g`-orthonormal frame (equivalently, the model operator norm of the chart
-trivialisation) is genuinely *unbounded* on compact sets as soon as the manifold
-needs more than one chart, because the tangent-bundle trivialisation jumps
-between chart sources. The correct, chart-locality-free route bounds the intrinsic
-fiber norm directly in terms of the *raw chart-frame scalar components* of the
-section, which are smooth — hence continuous and bounded on the compact closed
-support of each partition-of-unity weight.
-
-## Strategy
-
-On the closed support of the chart-atlas partition-of-unity weight at `α`:
-
-1. `riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport` bounds the
-   intrinsic fiber norm by a uniform constant times the chart-`α`-frame
-   fiber-norm-squared summand sum (intrinsic forward-Gram Rayleigh route, no
-   model norm).
-2. `fiberNormSqSummand_chartAlpha_le_raw_components_sq` bounds each chart-`α`
-   summand by a uniform constant times the sum of squared raw chart-`α`
-   components `tensorChartComponentRaw`.
-3. The raw chart components are smooth on the chart source
-   (`tensorChartComponentRaw_contMDiffOn_chart_source`), hence continuous on the
-   compact closed POU support (which is contained in the chart source); the
-   continuous nonnegative sum of squares attains a finite supremum there.
-
-Finally, on a compact manifold the partition of unity has finite nonempty
-support `chartAtlasPOU_finset`; every base point lies in the support — hence the
-closed support — of at least one weight in that finite set
-(`SmoothPartitionOfUnity.exists_pos_of_mem`). Taking the maximum of the
-per-`α` bounds over the finite set gives the global uniform constant `K`.
-
-## Main results
-
-* `exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport` — on the
-  closed POU support at `α`, the sum of squared raw chart-`α` components of a
-  smooth section is bounded above by a nonnegative constant.
-* `exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport` — the
-  per-`α` uniform bound on `riemannianFiberNormSq` over the closed POU support.
-* `exists_bound_riemannianFiberNormSq_smoothCcTensor` — the global uniform bound
-  on a closed manifold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -81,9 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The finite sum of squared raw chart-`α` scalar components of a smooth section
-is continuous on the closed support of the chart-atlas partition-of-unity weight
-at `α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -115,11 +56,7 @@ lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx).continuousOn
   exact h_raw.pow 2
 
-/-- **Uniform bound on the raw chart-component sum-of-squares over the closed POU
-support.** For a smooth section `S : SmoothCcTensor g r s` and chart base point
-`α`, the finite sum of squared raw chart-`α` scalar components is bounded above by
-a nonnegative constant on the closed support of the chart-atlas partition-of-unity
-weight at `α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -157,11 +94,7 @@ lemma exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
     intro b hb
     exact hb₀_max hb
 
-/-- **Per-`α` uniform bound on `riemannianFiberNormSq` over the closed POU support.**
-For a closed Riemannian manifold `(M, g)`, smooth section `S : SmoothCcTensor g r s`,
-and chart base point `α`, the intrinsic Riemannian fiber norm-squared of `S.toSection b`
-is bounded above by a single nonnegative constant for every point `b` in the closed
-support of the chart-atlas partition-of-unity weight at `α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -237,20 +170,7 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
             refine mul_le_mul_of_nonneg_left ?_ hNpair_nonneg
             exact mul_le_mul_of_nonneg_left hC hC₂_nonneg
 
-/-- **Uniform bound on the intrinsic Riemannian fiber norm of a smooth tensor
-section.** Let `g` be a smooth Riemannian metric on a closed manifold `M`, and let
-`S : SmoothCcTensor g r s` be a smooth compactly-supported `(r, s)`-tensor section.
-Then there is a single nonnegative constant `K` such that for every `b : M`,
-
-```
-riemannianFiberNormSq g r s b (S.toSection b) ≤ K.
-```
-
-The bound is stated entirely in the intrinsic Riemannian fiber norm; the proof uses
-only chart-locality-free ingredients (the forward-Gram Rayleigh route + smoothness of
-raw chart components on the compact partition-of-unity supports), never the
-model-fibre operator norm of the chart trivialisation (which is genuinely unbounded
-on multi-chart manifolds). -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannianFiberNormSq_smoothCcTensor
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

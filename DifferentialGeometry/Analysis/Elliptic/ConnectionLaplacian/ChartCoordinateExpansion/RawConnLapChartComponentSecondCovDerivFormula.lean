@@ -5,64 +5,10 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentEuclidSkExtExpansion
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 
-/-!
-# Chart-α `(Idx, Jdx)` raw component of the tensor connection Laplacian as a
-finite linear combination of second Euclidean partials of the raw chart
-component with smooth coefficients.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a
-chart base point `α : M`, component multi-indices `(Idx, Jdx)`, and a base
-point `b₀ : M` in the chart-α partition-of-unity tsupport intersected with the
-chart-α Levi-Civita good set, this file ships the identity
-
-```
-tensorChartComponentRaw g r s (rawTensorConnLapSmooth g r s T₀) α Idx Jdx b
-  = Σ_{k, l} weightedInvGramEuclid g α k l (toEuclidean (chart_α b))
-      · ∂_l ∂_k (chartPushedRaw I α
-                  (tensorChartComponentRaw g r s T₀ α Idx Jdx))
-                (toEuclidean (chart_α b))
-    + Coeff_LO (toEuclidean (chart_α b))
-```
-
-on an open neighbourhood `U ∋ b₀` contained in the chart-α Levi-Civita good
-set, where `weightedInvGramEuclid g α k l` and `Coeff_LO` are `ContDiffOn ℝ ∞`
-on the Euclidean chart target.
-
-The identity is unconditional in the chart atlas: no chart-locality predicate
-is required. It is the natural composition of:
-
-* the chart-α `(Idx, Jdx)`-projection of the chart-frame trace identity for
-  the raw tensor connection Laplacian
-  (`tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum`);
-* the coordinate-basis expansion of the chart-α globally smooth orthonormal
-  frame
-  (`chartFrameNormGlobalSmooth_eq_coordMatrix_sum`,
-   `chartFrameNormGlobalSmoothCoordMatrix_orthonormality`);
-* the chart-α `(Idx, Jdx)`-projection of the bundle-level second covariant
-  derivative `(∇²T₀)(B_k, B_l)` via the global smooth extension `S_k_ext`
-  (`chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext`); and
-* the expansion of `covDerivComponentEuclid S_k_ext l` in terms of the second
-  Euclidean partial of the raw chart component of `T₀` plus a smooth
-  lower-order correction
-  (`covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder`).
-
-The lower-order correction `Coeff_LO` is constructed directly as the difference
-between the (smooth) Euclidean chart-target evaluation of the chart-α raw
-component of `rawTensorConnLapSmooth g r s T₀` and the principal `Σ_{k, l}`
-sum. Both terms are `ContDiffOn ℝ ∞` on the Euclidean chart target — the
-former is the chart-pushed raw component of a globally smooth section (which
-is `ContDiffOn ℝ ∞` by `chartPushedRaw_tensorChartComponentRaw_contDiffOn`),
-the latter is a finite product of `ContDiffOn ℝ ∞` factors. Hence `Coeff_LO`
-is itself `ContDiffOn ℝ ∞`, and on the chart-α Levi-Civita good set the
-identity holds by definition (using the chart left-inverse
-`chartPushedRaw_apply_of_mem`).
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -90,10 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The principal second-derivative sum on the Euclidean chart target: a
-finite double sum of products of the volume-weighted inverse Gram coefficient
-and the mixed second Euclidean partial of the chart-pushed raw component of
-`T₀`. -/
 private noncomputable def principalSecondDerivSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -108,8 +50,7 @@ private noncomputable def principalSecondDerivSum
             (chartPushedRaw I α
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y
 
-/-- The principal second-derivative sum is `ContDiffOn ℝ ∞` on the Euclidean
-chart target: each summand is a product of two `ContDiffOn ℝ ∞` factors. -/
+omit [BoundarylessManifold I M] in
 private lemma principalSecondDerivSum_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -198,8 +139,6 @@ private lemma principalSecondDerivSum_contDiffOn
     ContDiffOn.sum (fun l _ => hsum_pair k l)
   exact ContDiffOn.sum (fun k _ => hsum_inner k)
 
-/-- The chart-α `(Idx, Jdx)` raw component of `rawTensorConnLapSmooth g r s T₀`,
-chart-pushed to the Euclidean chart target. -/
 private noncomputable def chartPushed_rawConnLapComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -210,8 +149,6 @@ private noncomputable def chartPushed_rawConnLapComponent
     (tensorChartComponentRaw (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx)
 
-/-- The chart-pushed raw component of `rawTensorConnLapSmooth T₀` is
-`ContDiffOn ℝ ∞` on the Euclidean chart target. -/
 private lemma chartPushed_rawConnLapComponent_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -223,7 +160,6 @@ private lemma chartPushed_rawConnLapComponent_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s
     (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx
 
-/-- The lower-order correction on the Euclidean chart target. -/
 private noncomputable def lowerOrderCorrection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -234,8 +170,6 @@ private noncomputable def lowerOrderCorrection
     chartPushed_rawConnLapComponent (I := I) (M := M) g r s α T₀ Idx Jdx y -
       principalSecondDerivSum (I := I) (M := M) g r s α T₀ Idx Jdx y
 
-/-- The lower-order correction is `ContDiffOn ℝ ∞` on the Euclidean chart
-target. -/
 private lemma lowerOrderCorrection_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -248,8 +182,7 @@ private lemma lowerOrderCorrection_contDiffOn
     Idx Jdx).sub
     (principalSecondDerivSum_contDiffOn (I := I) (M := M) g r s α T₀ Idx Jdx)
 
-/-- The defining identity for the lower-order correction at every point of the
-Euclidean chart target. -/
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushed_rawConnLapComponent_eq_principal_add_LO
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -262,6 +195,7 @@ private lemma chartPushed_rawConnLapComponent_eq_principal_add_LO
   unfold lowerOrderCorrection
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushed_rawConnLapComponent_apply_of_good
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -291,28 +225,6 @@ private lemma chartPushed_rawConnLapComponent_apply_of_good
     (extChartAt I α).left_inv hb_src
   rw [hsymm_te, hleft_inv]
 
-/-- **Chart-α `(Idx, Jdx)` raw component of the tensor connection Laplacian as
-a finite linear combination of second Euclidean partials with smooth
-coefficients.** For any base point `b₀` in the chart-α partition-of-unity
-tsupport intersected with the chart-α Levi-Civita good set, there exists an
-open neighbourhood `U` of `b₀` inside the chart-α Levi-Civita good set, and
-`ContDiffOn ℝ ∞` coefficient families `Coeff_2 k l, Coeff_LO` on the Euclidean
-chart target, such that for every `b ∈ U`,
-
-```
-tensorChartComponentRaw g r s (rawTensorConnLapSmooth g r s T₀) α Idx Jdx b =
-  Σ_{k, l} Coeff_2 k l (toEuclidean (chart_α b))
-    · ∂_l ∂_k (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α Idx Jdx))
-              (toEuclidean (chart_α b))
-  + Coeff_LO (toEuclidean (chart_α b)).
-```
-
-The coefficient `Coeff_2 k l = weightedInvGramEuclid g α k l` is the
-volume-weighted inverse Gram matrix in chart-Euclidean coordinates (the
-principal-part coefficient of the chart-coordinate metric trace). The
-correction `Coeff_LO` is `ContDiffOn ℝ ∞` on the chart target and aggregates
-all the lower-order corrections from the chart-frame trace identity for the
-raw tensor connection Laplacian. -/
 theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

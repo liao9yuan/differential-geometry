@@ -3,47 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed
 
-/-!
-# Lichnerowicz inequality at the spectral level
-
-For a closed Riemannian manifold `(M, g)` of dimension `n ≥ 2` satisfying
-`Ric ≥ (n - 1) K g` with `K > 0`, every strictly positive eigenvalue of the
-variational Laplacian satisfies `λ ≥ n K`. The user-facing theorem accepts a
-generic basis index `i = ⟨μ, k⟩` for the spectral eigenbasis assembled in
-`Analysis/Spectral/Scalar/EigenBasis.lean`, with no smoothness hypothesis
-on the eigenfunctions.
-
-The proof composes two ingredients:
-
-1. **Smooth representative.** For each spectral basis vector
-   `b_i := resolventEigenbasisSigma g i`, the unconditional smoothing endpoint
-   of the heat semigroup (`heatSemigroup_smooth_representative_of_closed`)
-   furnishes a smooth function on `M` whose `Lp` class equals `b_i`. The
-   heat-semigroup action on basis vectors is multiplication by a nonzero
-   exponential factor, so rescaling produces a smooth representative `f` with
-   `(b_i : M → ℝ) =ᵐ f` and `Δ_g f = -lam * f` pointwise (where
-   `lam = (1 - μ) / μ` is the Laplacian eigenvalue associated with
-   `μ = i.1.val`).
-2. **The classical Lichnerowicz inequality.** Applied to `f`, the smooth
-   theorem `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` yields `n K ≤ lam`.
-
-## Main results
-
-* `laplacianEigenfunction_smooth_representative`: a smooth `f : M → ℝ` with
-  `(b_i : M → ℝ) =ᵐ f` and `Δ_g f = -lam * f` pointwise.
-* `lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed`: the spectral form
-  `n K ≤ laplacianEigenvalueOf i.1.val` for every basis index whose
-  Laplacian eigenvalue is strictly positive.
-
-## Sign convention
-
-Geometer convention `Δ_g = div_g ∘ grad_g`. The variational operator on
-`laplacianDomain g` is `laplacianOp g`, acting as
-`laplacianOp b_i_lift = -lam • b_i` (negative spectrum on a closed manifold).
-The resolvent `(1 - Δ_g)⁻¹` has spectrum in `(0, 1]`; the corresponding
-Laplacian eigenvalue `lam = (1 - μ) / μ` is non-negative.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -72,7 +31,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 set_option maxHeartbeats 6400000 in
-/-- `H1ComplToLp` is injective on the variational-Laplacian domain. -/
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_inj_on_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u v : laplacianDomain (I := I) (M := M) g}
@@ -107,8 +67,6 @@ theorem H1ComplToLp_inj_on_laplacianDomain
     exact h_inj h_eq_L2
   rw [h_u_res, h_v_res, h_pre_eq]
 
-/-- The Lp coercion of the spectral basis vector at index `i`, named for
-elaboration efficiency in downstream statements. -/
 private def spectralBasisFun
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -117,30 +75,7 @@ private def spectralBasisFun
   fun x => (resolventEigenbasisSigma (I := I) (M := M) g i) x
 
 set_option maxHeartbeats 6400000 in
-/-- **Smooth pointwise eigenfunction at every nonzero spectral eigenvalue.**
 
-For a closed Riemannian manifold `(M, g)` and an index `i = ⟨μ, k⟩` of the
-spectral eigenbasis, there exists a smooth `s : SmoothScalar g` whose `Lp`
-class equals `b_i := resolventEigenbasisSigma g i` and which satisfies the
-eigenfunction equation `Δ_g s = -lam * s` pointwise on `M`, where
-`lam := laplacianEigenvalueOf μ`.
-
-The proof:
-
-* Apply the unconditional spatial smoothing of the heat semigroup at `t = 1`
-  to obtain a smooth `u_smooth` with `heatSemigroup g 1 b_i =ᵐ u_smooth`.
-* Use `heatSemigroup_apply_basis` to identify
-  `heatSemigroup g 1 b_i = Real.exp (-lam) • b_i` as `Lp` classes, hence
-  `Real.exp (-lam) • b_i =ᵐ u_smooth`.
-* Set `f := Real.exp lam • u_smooth`; then `f` is smooth and
-  `(b_i : M → ℝ) =ᵐ f`.
-* Wrap `f` as a `SmoothScalar g` and identify its H¹ lift with the
-  spectral eigenfunction lift `laplacianEigenfunction g i` via the injectivity
-  of `H1ComplToLp` on `laplacianDomain g`.
-* Apply `laplacianOp_smoothToH1Compl` and `laplacianOp_laplacianEigenfunction`
-  to conclude `Δ_g f =ᵐ -lam * f`, then upgrade the a.e. equality to the
-  pointwise equation using `Continuous.ae_eq_iff_eq` on the positive-on-opens
-  Riemannian volume measure. -/
 theorem laplacianEigenfunction_smooth_representative
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -327,8 +262,7 @@ theorem laplacianEigenfunction_smooth_representative
   · intro x
     exact congrFun h_Δf_eq_neg_lam_f x
 
-/-- For a nonzero resolvent eigenvalue with `μ < 1`, the Laplacian eigenvalue
-`lam = (1 - μ) / μ` is strictly positive. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma laplacianEigenvalueOf_pos_of_lt_one
     (g : SmoothRiemannianMetric I M)
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g)
@@ -340,26 +274,7 @@ private lemma laplacianEigenvalueOf_pos_of_lt_one
   exact div_pos h_num_pos h_pos
 
 set_option maxHeartbeats 800000 in
-/-- **Lichnerowicz's eigenvalue inequality at the spectral level.**
 
-On a closed Riemannian manifold `(M, g)` of dimension `n := finrank ℝ E ≥ 2`
-satisfying the Ricci lower bound `Ric ≥ (n - 1) K g` with `K > 0`, every
-spectral eigenbasis index `i` whose associated Laplacian eigenvalue
-`lam = laplacianEigenvalueOf i.1.val` is strictly positive satisfies the
-lower bound `n K ≤ lam`.
-
-Here `i = ⟨μ, k⟩` ranges over the spectral basis of the variational Laplacian
-(`resolventEigenbasisSigma`), `μ` being a nonzero resolvent eigenvalue and
-`lam = (1 - μ) / μ` the corresponding Laplacian eigenvalue. The
-strict-positivity hypothesis `0 < lam` excludes the trivial eigenspace at
-`μ = 1` (`lam = 0`); since `n K > 0`, it is a necessary condition for the
-inequality, equivalently `μ < 1`. No smoothness hypothesis is placed on the
-basis vectors.
-
-The proof composes `laplacianEigenfunction_smooth_representative`, which
-produces a smooth representative `f` of the basis vector with
-`Δ_g f = -lam * f` pointwise and L²-norm one, with the smooth Lichnerowicz
-inequality `lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed` applied to `f`. -/
 theorem lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed
     (g : SmoothRiemannianMetric I M)
     (hn_ge_two : 2 ≤ Module.finrank ℝ E)

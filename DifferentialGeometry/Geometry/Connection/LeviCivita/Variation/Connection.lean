@@ -40,15 +40,15 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-!
-# Levi-Civita Variation Connection
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Variation`.
--/
+
+
+
+
 
 variable {u : Set M}
 
-/-- Difference of two time-slice connections evaluated on a fixed local frame. -/
+
 def connDiffVec
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -56,7 +56,7 @@ def connDiffVec
   (G.connection var (frame j) x) (frame i x) -
     (G.connection base (frame j) x) (frame i x)
 
-/-- Lowered connection difference with an explicitly chosen metric time. -/
+
 def connDiffLow
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -78,9 +78,9 @@ def connDiffLow
     connDiffLow (I := I) G frame metricTime base base x i j l = 0 := by
   simp [connDiffLow]
 
-/-- Fixed-base covariant derivative of the metric components of `g_var`.
 
-The connection is frozen at `base`, while the metric is evaluated at `var`. -/
+
+
 def metricCovAtBase
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -93,8 +93,8 @@ def metricCovAtBase
     (G.metric var).inner x (frame a x)
       ((G.connection base (frame b) x) (frame d x))
 
-/-- The lowered metric-variation RHS
-`1/2 (nabla_i v_jl + nabla_j v_il - nabla_l v_ij)`. -/
+
+
 def metricVarLowerRHS
     (metricCovDerivDt : M -> Idx -> Idx -> Idx -> Real)
     (x : M) (i j l : Idx) : Real :=
@@ -102,24 +102,24 @@ def metricVarLowerRHS
     (metricCovDerivDt x i j l + metricCovDerivDt x j i l -
       metricCovDerivDt x l i j)
 
-/-- The raised Christoffel metric-variation RHS
-`1/2 g^{kl} (nabla_i v_jl + nabla_j v_il - nabla_l v_ij)`. -/
+
+
 def metricVarGammaRHS
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricCovDerivDt : M -> Idx -> Idx -> Idx -> Real)
     (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv x k l * metricVarLowerRHS metricCovDerivDt x i j l
 
-/-- Metric trace of the fixed-base covariant derivative of the metric
-variation: `nabla_j V = g^{pl} nabla_j v_pl`. -/
+
+
 def metricTraceCovAt
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricCovDerivDt : M -> Idx -> Idx -> Idx -> Real)
     (x : M) (j : Idx) : Real :=
   ∑ p : Idx, ∑ l : Idx, gInv x p l * metricCovDerivDt x j p l
 
-/-- Local derivative package for the fixed-base covariant derivative of the
-metric components. -/
+
+
 def metricCovVarOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -131,8 +131,8 @@ def metricCovVarOn
       (metricCovDerivDt x d a b)
       base
 
-/-- The fixed-base covariant derivative of a symmetric metric remains
-symmetric in the two metric slots. -/
+
+
 theorem metricCovAtBase_symm
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -152,8 +152,8 @@ theorem metricCovAtBase_symm
     (frame b x) ((G.connection base (frame a) x) (frame d x))]
   ring
 
-/-- The supplied derivative of the fixed-base metric covariant derivative is
-symmetric in the two metric slots. -/
+
+
 theorem metricCovVar_symm
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -173,7 +173,7 @@ theorem metricCovVar_symm
       metricCovAtBase_symm (I := I) G frame base s x d a b
   exact h₁.unique (h₂.congr_of_eventuallyEq hEq)
 
-/-- Local derivative package for raw metric components `g_s(e_a,e_b)`. -/
+
 def metricVarOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -185,7 +185,7 @@ def metricVarOn
       (metricDot x a b)
       base
 
-/-- Components of the metric-variation tensor in a fixed frame. -/
+
 def metricDotFrame
     (metricVariation :
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -195,8 +195,8 @@ def metricDotFrame
   DifferentialGeometry.Integral.Connection.metricVariationComponent (I := I) metricVariation x
     (frame a x) (frame b x)
 
-/-- An admissible metric-potential variation path gives the raw fixed-frame
-metric-component derivative. -/
+
+
 theorem metricVar_path
     {g : SmoothRiemannianMetric I M} {potential : M -> Real}
     (path : DifferentialGeometry.Integral.Connection.MetricPotentialVariationPath (I := I) g potential)
@@ -215,9 +215,9 @@ theorem metricVar_path
   simpa [metricDotFrame] using
     hpath.metric_deriv x (frame a x) (frame b x)
 
-/-- Mixed regularity for an arbitrary metric variation: differentiating the
-fixed-frame spatial derivative of a metric component in time gives the spatial
-derivative of the metric variation component. -/
+
+
+
 def metricExtDtOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -232,12 +232,12 @@ def metricExtDtOn
       (extDerivFun (I := I) (fun y : M => metricDot y a b) x (frame d x))
       base
 
-/-- Fixed-base mixed derivative rules for all metric components produce the
-`metricExtDtOn` package.
 
-This is a genuine producer from the generic mixed-derivative API in
-`VectorBundle.PartialMfderiv`: the analytic content is that
-`∂_s ∂_d g_ab = ∂_d v_ab` in the fixed frame. -/
+
+
+
+
+
 theorem metricExtDt_of_fixedBase
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -255,9 +255,9 @@ theorem metricExtDt_of_fixedBase
       (t := base) (x := x) hx (frame d x)
   simpa using h
 
-/-- Regular-time version of `metricExtDt_of_fixedBase`.  This is the version
-suited to one-base-time variations: the derivative is only required at
-`base`, while the time-domain can still be a larger set. -/
+
+
+
 theorem metricExtDt_of_fixedBaseRegular
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -277,8 +277,8 @@ theorem metricExtDt_of_fixedBaseRegular
       (h := hmix a b) (t := base) ht (x := x) hx (frame d x)
   simpa using h
 
-/-- Fixed-frame covariant derivative components of an arbitrary metric
-variation tensor. -/
+
+
 def dotCovAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -410,8 +410,8 @@ private theorem metricVarConnRight
     simp [map_sum, Γ]
   simpa [hEq, Γ] using hsum
 
-/-- The derivative of the fixed-base metric-covariant component is the
-fixed-base covariant derivative of the metric variation component. -/
+
+
 theorem covDtEqDotCov
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -480,11 +480,11 @@ theorem covDtEqDotCov
       simp [metricCovAtBase, Ca, Cb]
   exact (hmetric x hx d a b).unique hDeriv'
 
-/-- The fixed-base covariant derivative of the metric path varies by the
-covariant derivative of the metric variation tensor.
 
-This is the general arbitrary-variation version of the Ricci-flow
-metric-covariant derivative bridge. -/
+
+
+
+
 theorem metricCovVar_ext
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -597,9 +597,9 @@ private theorem connDiffLow_symm
   unfold connDiffLow
   rw [connDiffVec_symm (I := I) G hLC frame hframe hu hx base var i j]
 
-/-- Metric compatibility rewrites `(nabla^base_d g_var)_{ab}` as the two
-connection-difference terms produced by changing the Levi-Civita connection
-from `base` to `var`. -/
+
+
+
 theorem metricCovAtBase_eq_connDiff
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -635,8 +635,8 @@ theorem metricCovAtBase_eq_connDiff
   simp
   ring
 
-/-- Finite-difference Koszul formula for two Levi-Civita connections in the
-same fixed local frame. -/
+
+
 theorem finiteDiffKoszul
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -671,8 +671,8 @@ theorem finiteDiffKoszul
   rw [hji, hli, hlj, hsym1]
   ring
 
-/-- Variable-metric lowered connection difference expressed by Christoffel
-component differences in the fixed local frame. -/
+
+
 theorem connDiffLow_eq_sum_gammaSub [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -773,12 +773,12 @@ theorem connDiffLow_eq_sum_gammaSub [DecidableEq Idx]
           refine Finset.sum_congr rfl fun k _ => ?_
           rw [(G.metric metricTime).symm x (frame l x) (frame k x)]
 
-/-- Fixed-base covariant derivative of a metric expressed by the Christoffel
-component difference between two Levi-Civita connections.
 
-This is the component identity behind the line
-`nabla_a h_bc = h_eb (Gamma_h)^e_ac - h_eb Gamma^e_ac
-  + h_ec (Gamma_h)^e_ab - h_ec Gamma^e_ab` in MSM135 Lemma 3.11. -/
+
+
+
+
+
 theorem metricCov_gammaSub [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -815,12 +815,12 @@ theorem metricCov_gammaSub [DecidableEq Idx]
   rw [connDiffLow_eq_sum_gammaSub
     (I := I) G frame hframe hx var base var d b a]
 
-/-- Raised finite-difference Koszul formula for two Levi-Civita connections.
 
-This is MSM135 Lemma 3.11, equation (3.7), in local-frame components:
-contracting the three-term fixed-base covariant derivative of the varied
-metric with the varied inverse metric recovers twice the Christoffel component
-difference. -/
+
+
+
+
+
 theorem covCombo_gammaSub [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -935,8 +935,8 @@ theorem covCombo_gammaSub [DecidableEq Idx]
     _ = 2 * D e := by
           simp [D]
 
-/-- Squared `l^2` component size of a three-index array.  This is a local
-orthonormal-frame bookkeeping device, not an invariant tensor norm by itself. -/
+
+
 def componentL2Sq3 (A : Idx -> Idx -> Idx -> Real) : Real :=
   ∑ p : Idx × Idx × Idx, (A p.1 p.2.1 p.2.2) ^ 2
 
@@ -947,8 +947,8 @@ theorem componentL2Sq3_nonneg
   unfold componentL2Sq3
   exact Finset.sum_nonneg fun p _ => sq_nonneg _
 
-/-- Expand `componentL2Sq3` into the direct nested sum over its three
-component indices. -/
+
+
 theorem componentL2Sq3_eq_sum
     (A : Idx -> Idx -> Idx -> Real) :
     componentL2Sq3 A =
@@ -960,8 +960,8 @@ theorem componentL2Sq3_eq_sum
   intro i _
   rw [Fintype.sum_prod_type]
 
-/-- Expand `componentL2Sq3` in the order used by the mixed `(1,2)` tensor norm:
-upper index first, then the two lower indices. -/
+
+
 theorem componentL2Sq3_eq_sum_upper_first
     (A : Idx -> Idx -> Idx -> Real) :
     componentL2Sq3 A =
@@ -977,8 +977,8 @@ theorem componentL2Sq3_eq_sum_upper_first
     _ = ∑ k : Idx, ∑ i : Idx, ∑ j : Idx, (A i j k) ^ 2 := by
           rw [Finset.sum_comm]
 
-/-- Convert an orthonormal-frame component realization of a `(0,3)` tensor into
-the `componentL2Sq3` squared norm used by the local Christoffel estimates. -/
+
+
 theorem normSq0S_three_eq_componentL2Sq3_of_components [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1098,9 +1098,9 @@ private theorem componentL2Sq3_swap23
         rcases p with ⟨a, b, c⟩
         rfl)
 
-/-- MSM135 Lemma 3.11, equation (3.8), in squared orthonormal-frame component
-form.  If `2D_abe = A_abe + A_bae - A_eab`, then summing the squared component
-triangle inequality gives `4 |D|^2 <= 9 |A|^2`. -/
+
+
+
 theorem gammaSub_l2Sq_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1142,7 +1142,7 @@ theorem gammaSub_l2Sq_le
           rw [componentL2Sq3_swap12, componentL2Sq3_cyc]
     _ = 9 * componentL2Sq3 A := by ring
 
-/-- Unsquared component form of MSM135 Lemma 3.11, equation (3.8). -/
+
 theorem gammaSub_l2_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1164,11 +1164,11 @@ theorem gammaSub_l2_le
   have habs := (sq_le_sq.mp hsquares)
   simpa [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg hrhs_nonneg] using habs
 
-/-- Squared component estimate for the Ricci-flow Christoffel variation RHS.
 
-If `D_abe = -A_abe - A_bae + A_eab`, then the same three-term triangle
-estimate used for (3.8) gives `|D|^2 <= 9 |A|^2`.  This is the component
-algebra behind the estimate `|∂ₜ Γ| <= 3 |∇ Ric|` in MSM135 Lemma 3.11. -/
+
+
+
+
 theorem gammaEvol_l2Sq_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1222,8 +1222,8 @@ theorem gammaEvol_l2Sq_le
           rw [componentL2Sq3_swap12, componentL2Sq3_cyc]
     _ = 9 * componentL2Sq3 A := by ring
 
-/-- Unsquared component form of the Ricci-flow Christoffel variation RHS
-estimate `|∂ₜ Γ| <= 3 |∇ Ric|`. -/
+
+
 theorem gammaEvol_l2_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1248,9 +1248,9 @@ private theorem two_sq_le (x y : Real) :
     (x + y) ^ 2 <= 2 * (x ^ 2 + y ^ 2) := by
   nlinarith [sq_nonneg (x - y)]
 
-/-- MSM135 Lemma 3.11, equation (3.9), in squared orthonormal-frame component
-form.  If `A_abc = D_abc + D_acb`, then summing the squared component triangle
-inequality gives `|A|^2 <= 4 |D|^2`. -/
+
+
+
 theorem metricCov_l2Sq_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1292,7 +1292,7 @@ theorem metricCov_l2Sq_le
           rw [componentL2Sq3_swap23]
     _ = 4 * componentL2Sq3 D := by ring
 
-/-- Unsquared component form of MSM135 Lemma 3.11, equation (3.9). -/
+
 theorem metricCov_l2_le
     (A D : Idx -> Idx -> Idx -> Real)
     (hcombo :
@@ -1313,10 +1313,10 @@ theorem metricCov_l2_le
   have habs := (sq_le_sq.mp hsquares)
   simpa [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg hrhs_nonneg] using habs
 
-/-- MSM135 Lemma 3.11, equation (3.8), specialized to components in a
-`g_var`-orthonormal local frame.  The identity inverse-metric components turn
-`covCombo_gammaSub` into the three-term component identity consumed by
-`gammaSub_l2_le`. -/
+
+
+
+
 theorem covCombo_l2_le [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -1357,8 +1357,8 @@ theorem covCombo_l2_le [DecidableEq Idx]
     simp [hinv_id]
   exact h37.symm.trans hleft
 
-/-- MSM135 Lemma 3.11, equation (3.9), specialized to components in a
-`g_var`-orthonormal local frame. -/
+
+
 theorem metricCovGeom_l2_le [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -1387,9 +1387,9 @@ theorem metricCovGeom_l2_le [DecidableEq Idx]
   simpa [hmetric_id] using
     metricCov_gammaSub (I := I) G hLC frame hframe hu hx base var a b c
 
-/-- In a `G.metric var`-orthonormal frame, the invariant norm of the
-connection-difference tensor is the component `l^2` size of the Christoffel
-difference used in the MSM135 Lemma 3.11 estimates. -/
+
+
+
 theorem normSqRS_connDiff_eq_componentL2Sq3 [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -1436,12 +1436,12 @@ theorem normSqRS_connDiff_eq_componentL2Sq3 [DecidableEq Idx]
     (I := I) (G.connection var) (G.connection base) frame hframe i j k
     ((hframe.contMDiffAt hu hx j).mdifferentiableAt one_ne_zero)
 
-/-- Component-level equivalence between the background covariant derivative of
-the varied metric and the connection difference.
 
-The covariant derivative here is `metricCovAtBase`, i.e. the `base` connection
-applied to the metric at `var`.  It is not the Levi-Civita derivative of
-`G.metric var`, which vanishes by metric compatibility. -/
+
+
+
+
+
 theorem covGamma_l2_equiv [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -1490,7 +1490,7 @@ theorem covGamma_l2_equiv [DecidableEq Idx]
       metricCovGeom_l2_le (I := I) G hLC frame hframe hu hx base var
         hmetric_id
 
-/-- Local derivative package for Christoffel components in a fixed frame. -/
+
 def gammaDerivOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -1505,8 +1505,8 @@ def gammaDerivOn
       (gammaDot x k i j)
       base
 
-/-- Product-rule bridge: the variable-metric lowered connection difference has
-derivative obtained by lowering `gammaDot` with the base metric. -/
+
+
 theorem varLowDeriv [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -1565,7 +1565,7 @@ theorem varLowDeriv [DecidableEq Idx]
         connDiffLow_eq_sum_gammaSub (I := I) G frame hframe hx s base s i j l
   exact hsum.congr_of_eventuallyEq hEq
 
-/-- Local arbitrary metric-variation Christoffel formula in a fixed frame. -/
+
 def gammaVarEqOn
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricCovDerivDt gammaDot : M -> Idx -> Idx -> Idx -> Real)
@@ -1574,8 +1574,8 @@ def gammaVarEqOn
     gammaDot x k i j =
       metricVarGammaRHS gInv metricCovDerivDt x i j k
 
-/-- Trace of the raised Christoffel variation:
-`delta Gamma^p_pj = 1/2 * nabla_j V`. -/
+
+
 theorem gammaTraceVar
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricCovDerivDt gammaDot : M -> Idx -> Idx -> Idx -> Real)
@@ -1642,8 +1642,8 @@ theorem gammaTraceVar
     _ = (1 / 2 : Real) * metricTraceCovAt gInv metricCovDerivDt x j := by
         simp [B, metricTraceCovAt, Finset.mul_sum, mul_comm, mul_assoc]
 
-/-- A static frame coefficient is obtained by raising the frozen metric
-pairings with inverse metric components. -/
+
+
 theorem coeff_invMetric [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -1695,9 +1695,9 @@ theorem coeff_invMetric [DecidableEq Idx]
     _ = ∑ l : Idx, gInv x k l * g.inner x (frame l x) V := by
       simpa [basis, IsLocalFrameOn.toBasisAt_coe] using hcoord
 
-/-- Derivative package for the frozen-metric lowered connection-variation
-pairing.  The metric in the pairing is fixed at `base`; only the connection
-varies. -/
+
+
+
 def lowerPairDerivOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -1711,15 +1711,15 @@ def lowerPairDerivOn
       (lowerDot x i j l)
       base
 
-/-- Raise a supplied lowered connection-variation pairing. -/
+
 def gammaFromLower
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (lowerDot : M -> Idx -> Idx -> Idx -> Real)
     (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv x k l * lowerDot x i j l
 
-/-- A lowered pairing derivative gives the derivative of the Christoffel
-components after raising with the frozen inverse metric. -/
+
+
 theorem gammaDerivOfLower [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -1764,8 +1764,8 @@ theorem gammaDerivOfLower [DecidableEq Idx]
           ((G.connection s (frame j) x) (frame i x))
   simpa [gammaFromLower, pair] using hsum.congr_of_eventuallyEq hEq
 
-/-- Uniqueness of one-dimensional derivatives turns a produced Christoffel
-derivative into the component formula for a supplied `gammaDot`. -/
+
+
 theorem gammaEqOfDeriv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -1783,12 +1783,12 @@ theorem gammaEqOfDeriv
   have huniq := (hformula x hx i j k).unique (hgamma x hx i j k)
   simpa [metricVarGammaRHS, gammaFromLower] using huniq.symm
 
-/-- Arbitrary Levi-Civita metric-variation producer for Christoffel symbols.
 
-This is the non-Ricci-flow version of the calculation used in the connection
-evolution file.  The proof should be extracted from the finite-difference
-Koszul route there, replacing `SolutionOn` and `partial_t g = -2 Ric` by the
-plain hypotheses below. -/
+
+
+
+
+
 theorem lcGammaVar [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -1915,7 +1915,7 @@ theorem lcGammaVar [DecidableEq Idx]
     _ = metricVarGammaRHS gInv metricCovDerivDt x i j k := by
       rfl
 
-/-- Trace form of `lcGammaVar`: `delta Gamma^p_pj = 1/2 nabla_j V`. -/
+
 theorem gammaTraceVar_of_lcGammaVar [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -1955,7 +1955,7 @@ theorem gammaTraceVar_of_lcGammaVar [DecidableEq Idx]
   exact gammaTraceVar gInv metricCovDerivDt gammaDot u
     hgInv_symm hmetric_symm hgammaEq
 
-/-! ## Coordinate Ricci variation from Christoffel variation -/
+
 
 
 end DifferentialGeometry.Integral.Connection

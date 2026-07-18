@@ -22,11 +22,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-!
-# Levi-Civita Variation Ricci Coordinate
 
-Split-out component of `DifferentialGeometry.Integral.Connection.Variation`.
--/
+
+
+
+
 
 section RicciCoordVariation
 
@@ -34,15 +34,15 @@ open DifferentialGeometry.Tensor.Coordinates
 
 variable [DecidableEq (CoordinateIdx (𝕜 := Real) E)]
 
-/-- Finite trace contraction of a two-index object against inverse-metric
-components.  This is the scalar trace algebra used when contracting the
-variation of `Ric + Hess f`. -/
+
+
+
 def trace2
     {ι : Type*} [Fintype ι]
     (gInv T : ι -> ι -> Real) : Real :=
   ∑ i : ι, ∑ j : ι, gInv i j * T i j
 
-/-- Product rule for the finite trace contraction `trace2`. -/
+
 theorem trace2_deriv
     {ι : Type*} [Fintype ι]
     {timeSet : Set Real} {base : Real}
@@ -69,10 +69,10 @@ theorem trace2_deriv
   intro j _
   simpa [mul_add] using (hgInv i j).mul (hT i j)
 
-/-- Algebraic normalization of the inverse-metric part of a traced variation.
-If `metricVariation` is the contravariant metric variation, i.e.
-`gInvDot = -metricVariation`, then the `gInvDot` contraction contributes
-`-trace2 metricVariation T`. -/
+
+
+
+
 theorem trace2_neg
     {ι : Type*} [Fintype ι]
     (gInvDot metricVariation T U : ι -> ι -> Real)
@@ -157,8 +157,8 @@ private theorem curvVarAlg
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib, hleft, hright, hmid]
   ring
 
-/-- Time derivative package for coordinate Christoffel components at a fixed
-coordinate center.  The supplied `gammaDot x k i j` is `d/ds Gamma^k_ij`. -/
+
+
 def gammaCoordDerivAt
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -173,8 +173,8 @@ def gammaCoordDerivAt
       timeSet
       base
 
-/-- Mixed time/spatial derivative package for coordinate Christoffel
-components at a fixed coordinate center. -/
+
+
 def gammaMixedCoordAt
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -191,8 +191,8 @@ def gammaMixedCoordAt
       timeSet
       base
 
-/-- Coordinate covariant derivative of a Christoffel variation tensor
-`A^k_ij = gammaDot x k i j`. -/
+
+
 def gammaCovCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -212,7 +212,7 @@ def gammaCovCoordAt
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 dir j a *
         gammaDot x0 k i a)
 
-/-- Fixed-coordinate expression for `nabla_i (delta Gamma^p_pj)`. -/
+
 def gammaTraceCovAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -222,7 +222,7 @@ def gammaTraceCovAt
   ∑ p : CoordinateIdx (𝕜 := Real) E,
     gammaCovCoordAt (I := I) cov gammaDot x0 dir p p j
 
-/-- Coordinate RHS of `delta Ric_ij = nabla_p A^p_ij - nabla_i A^p_pj`. -/
+
 def ricciVarCoordRHS
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -379,8 +379,8 @@ private theorem curvVarCoord
   simpa [Gamma, A, dA, gammaCovCoordAt, covDGamma] using
     (curvVarAlg Gamma A dA hGammaSymm i k j m)
 
-/-- Coordinate-frame Ricci variation from a supplied Christoffel variation:
-`d Ric_ij / ds = nabla_p A^p_ij - nabla_i A^p_pj`. -/
+
+
 theorem lcRicciVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -416,27 +416,27 @@ theorem lcRicciVarCoord
   refine hsum.congr_deriv ?_
   simp [ricciVarCoordRHS, gammaTraceCovAt, Finset.sum_sub_distrib]
 
-/-- First coordinate derivative of a scalar in the fixed coordinate frame. -/
+
 def scalarCoordDerivAt
     (f : M -> Real) (x0 : M) (i : CoordinateIdx (𝕜 := Real) E) : Real :=
   extDerivFun (I := I) f x0 (coordinateFrameAt (I := I) x0 i x0)
 
-/-- First coordinate derivative as a scalar function near a fixed coordinate
-center. -/
+
+
 def scalarCoordDerivFun
     (f : M -> Real) (x0 : M) (j : CoordinateIdx (𝕜 := Real) E)
     (x : M) : Real :=
   extDerivFun (I := I) f x (coordinateFrameAt (I := I) x0 j x)
 
-/-- Second coordinate derivative of a scalar in the fixed coordinate frame. -/
+
 def scalarCoordSecondAt
     (f : M -> Real) (x0 : M)
     (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   extDerivFun (I := I) (scalarCoordDerivFun (I := I) f x0 j) x0
     (coordinateFrameAt (I := I) x0 i x0)
 
-/-- Exterior derivative is invariant under local equality near the evaluation
-point. -/
+
+
 private theorem extDerivFun_congr_eventually_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -446,8 +446,8 @@ private theorem extDerivFun_congr_eventually_real
   unfold extDerivFun
   rw [hmf, hx]
 
-/-- Directional derivative of the finite trace
-`sum_p delta Gamma^p_pj`. -/
+
+
 theorem traceExtSum
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
@@ -482,8 +482,8 @@ theorem traceExtSum
   rw [← hfun]
   simpa [t, F] using hsum.symm
 
-/-- Pointwise trace of `delta Gamma`, after the metric trace derivative has
-been identified. -/
+
+
 theorem gammaTracePoint
     (gInv :
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
@@ -502,9 +502,9 @@ theorem gammaTracePoint
       (1 / 2 : Real) * scalarCoordDerivAt (I := I) metricTrace x0 a := by
   rw [hgammaTrace, hmetricTrace]
 
-/-- Derivative of the metric trace from the raw product rule, the contracted
-inverse-metric covariant derivative cancellation, and the supplied covariant
-derivative components of the metric variation. -/
+
+
+
 theorem metricTraceCov_eq_deriv
     (gInv :
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
@@ -595,8 +595,8 @@ theorem metricTraceCov_eq_deriv
           rw [htrace_deriv]
           simp [Finset.sum_add_distrib]
 
-/-- Product-rule derivative of the metric trace
-`V = gInv^{pl} metricDot_pl` in a fixed frame direction. -/
+
+
 theorem traceDerivAt
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -815,8 +815,8 @@ private theorem traceCancelAlg
            (∑ a : ι, Γ l a * V p a)) := by
         simp [Finset.sum_add_distrib, mul_add]
 
-/-- Contracting `nabla gInv = 0` with the metric variation gives the inverse
-metric cancellation needed by the trace derivative. -/
+
+
 theorem gInvTraceCancel
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -858,8 +858,8 @@ theorem gInvTraceCancel
     linarith
   simpa [DU, G, V, Γ] using traceCancelAlg G V DU Γ hDU
 
-/-- The covariant trace of the metric variation equals the directional
-derivative of the scalar metric trace. -/
+
+
 theorem traceCovEqDeriv
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -925,8 +925,8 @@ theorem traceCovEqDeriv
           simp [Finset.sum_add_distrib]
     _ = extDerivFun (I := I) metricTrace x (frame d x) := htraceDeriv.symm
 
-/-- Spatial derivative of the traced Christoffel variation from its local
-identification with half the scalar trace derivative. -/
+
+
 theorem gammaTraceDeriv
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->

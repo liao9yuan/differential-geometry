@@ -1,23 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.SolutionOperator
 
-/-!
-# Global existence for the parametric linear ODE on an open interval
-
-Extending the short-interval Picard step (`exists_linearODE_solution_of_short`) to the whole
-open interval `Ioo a b` by iterated continuation and gluing.
-
-## Main results
-
-* `hasLinearODESolution_of_continuousOn` — discharges the per-parameter existence predicate
-  `HasLinearODESolution` from joint continuity of `A` on `U ×ˢ Ioo a b` and `x ∈ U`.  The
-  construction iterates the short Picard step finitely many times to cover each closed
-  sub-interval `Icc α β ⊂ Ioo a b`, then exhausts `Ioo a b` by a countable family of such
-  sub-intervals.
-* `linearODESolution_hasDerivAt` — wrapped ODE clause combining
-  `hasLinearODESolution_of_continuousOn` and `linearODESolution_hasDerivAt_of_hasSolution`.
-
-`[CompleteSpace G]` is required for Picard–Lindelöf on the state space.
--/
 
 noncomputable section
 
@@ -33,14 +15,6 @@ section GlobalExistence
 
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/-- **One Picard step** at a non-centered base time `c`.  Given a continuous,
-operator-norm-bounded coefficient `A` on a closed interval `[c - T, c + T]`
-with `M · T < 1`, the linear ODE `Z'(t) = A(t) Z(t),  Z(c) = Y_c` has a
-solution on `[c - T, c + T]`.
-
-This is `exists_linearODE_solution_of_short` re-stated with the initial time
-`c` named separately so it can be used in an inductive Picard-extension
-argument. -/
 theorem exists_linearODE_solution_of_short_at
     {A : ℝ → (G →L[ℝ] G)} {c T M : ℝ}
     (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
@@ -53,12 +27,7 @@ theorem exists_linearODE_solution_of_short_at
   exists_linearODE_solution_of_short (A := A) (h₀ := c) (T := T) (M := M)
     hT hM hMT hA_cont hA_bd Y_c
 
-/-- **Glue two Picard-style segments** sharing the time `t₁` into a single
-function defined on `Icc α β = Icc α t₁ ∪ Icc t₁ β` (when `α ≤ t₁ ≤ β`).
-
-The hypothesis is that two functions `f, g` satisfy the ODE on their
-respective closed intervals and agree at the shared endpoint `t₁`.  We use
-`f` on `(-∞, t₁]` and `g` on `(t₁, ∞)`, patched via `if t ≤ t₁ then f t else g t`. -/
+omit [CompleteSpace G] in
 private theorem hasDerivWithinAt_glue_Icc_at_pt
     {f g : ℝ → G} {A : ℝ → (G →L[ℝ] G)} {α t₁ β : ℝ}
     (hα_le : α ≤ t₁) (hβ_ge : t₁ ≤ β)
@@ -161,12 +130,6 @@ private theorem hasDerivWithinAt_glue_Icc_at_pt
       rw [HasDerivWithinAt, h_nhds_eq.symm] at hZg_at_t
       exact hZg_at_t
 
-/-- **Right-extension** of a linear-ODE solution by iterated Picard.
-
-Given a continuous, operator-norm-bounded coefficient `A` on `Icc h₀ (h₀ + B)`
-with `‖A‖ ≤ M` there and `M · T < 1`, for any natural number `n` with
-`h₀ + n · T ≤ h₀ + B` (equivalently `n · T ≤ B`), there exists a function
-`Z : ℝ → G` with `Z h₀ = Y₀` and satisfying the ODE on `Icc h₀ (h₀ + n · T)`. -/
 private theorem exists_linearODE_solution_right_iterated
     {A : ℝ → (G →L[ℝ] G)} {h₀ M T B : ℝ}
     (hT_pos : 0 < T) (hM_nn : 0 ≤ M) (hMT : M * T < 1)
@@ -279,8 +242,6 @@ private theorem exists_linearODE_solution_right_iterated
     rw [hset_eq] at hd
     exact hd
 
-/-- **Left-extension** of a linear-ODE solution by iterated Picard (the
-mirror of `exists_linearODE_solution_right_iterated`). -/
 private theorem exists_linearODE_solution_left_iterated
     {A : ℝ → (G →L[ℝ] G)} {h₀ M T B : ℝ}
     (hT_pos : 0 < T) (hM_nn : 0 ≤ M) (hMT : M * T < 1)
@@ -376,10 +337,6 @@ private theorem exists_linearODE_solution_left_iterated
     rw [hset_eq] at hd
     exact hd
 
-/-- **Solution on an arbitrary closed sub-interval** `Icc α β ⊂ Ioo a b`,
-constructed by combining `exists_linearODE_solution_left_iterated` (leftward
-from `h₀`) and `exists_linearODE_solution_right_iterated` (rightward from
-`h₀`) and patching at `h₀`. -/
 private theorem exists_linearODE_solution_on_Icc_subset
     {A : ℝ → (G →L[ℝ] G)} {a b α β h₀ : ℝ}
     (hα_lt : a < α) (hβ_lt : β < b)
@@ -547,16 +504,9 @@ private theorem exists_linearODE_solution_on_Icc_subset
   have hd := hZ_LR_deriv t ht'
   exact hd.mono h_Icc_sub
 
-/-- **Monotonic sub-interval sequence** `αₙ ↘ a`, `βₙ ↗ b` strictly inside
-`Ioo a b`, with `h₀ ∈ Ioo (αₙ n) (βₙ n)` for every `n`. -/
 private def subIntervalSeq (a h₀ b : ℝ) (n : ℕ) : ℝ × ℝ :=
   (a + (h₀ - a) / ((n : ℝ) + 2), b - (b - h₀) / ((n : ℝ) + 2))
 
-/-- **Discharge of the per-parameter existence predicate** from joint
-continuity of `A` on `U ×ˢ Ioo a b`.
-
-For any `x` in the open parameter set `U` and any `h₀ ∈ Ioo a b`, the linear
-ODE `Z'(t) = A(x, t) Z(t),  Z(h₀) = Z₀(x)` has a solution on `Ioo a b`. -/
 theorem hasLinearODESolution_of_continuousOn
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
@@ -752,11 +702,6 @@ theorem hasLinearODESolution_of_continuousOn
     rw [h_Z_t_eq]
     exact hd.congr_of_eventuallyEq h_Z_eq_eventually
 
-/-- **Wrapped ODE clause** for `linearODESolution`.
-
-Combines `hasLinearODESolution_of_continuousOn` (existence) and
-`linearODESolution_hasDerivAt_of_hasSolution` (extraction of the ODE clause)
-to give the ODE clause directly from joint continuity. -/
 theorem linearODESolution_hasDerivAt
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]

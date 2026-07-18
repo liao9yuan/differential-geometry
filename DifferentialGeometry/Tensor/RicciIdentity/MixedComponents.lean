@@ -13,13 +13,13 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Mixed tensor Ricci identity component algebra
 
-This file contains the component-level mixed `(r,s)` Ricci identity algebra
-and the coordinate contraction product-rule bridge.  It keeps the finite
-upper-slot contraction machinery out of the main invariant Ricci identity file.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,21 +36,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section MixedComponentAlgebra
 
-/-- Elementary multi-index probe.  It is the Kronecker delta at `L`. -/
+
 def deltaMulti {Idx : Type*} {r : ℕ} [DecidableEq Idx]
     (L A : Fin r -> Idx) : Real :=
   if A = L then 1 else 0
 
-/-- Covariant curvature action on a component array.  The convention is
-`R i j a b = R^a_{ijb}`, so covariant slots carry the negative sign. -/
+
+
 def covariantCurvAction {Idx : Type*} [Fintype Idx] {n : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
     (A : (Fin n -> Idx) -> Real) (K : Fin n -> Idx) : Real :=
   -∑ q : Fin n, ∑ m : Idx,
     R i j m (K q) * A (Function.update K q m)
 
-/-- Pointwise component expansion of mixed-tensor evaluation, in the
-`contractUpper` notation used by the mixed Ricci-identity algebra. -/
+
+
 theorem contractUpper_components_eq_component_applyInput
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -257,10 +257,10 @@ private lemma contractUpper_covariantCurvAction_deltaMulti
             intro q
             exact sum_delta_update_pair R i j L q beta K
 
-/-- Pure component algebra behind Remark 14.13.  Contract a mixed tensor
-against an elementary covariant probe, use the covariant curvature action on
-the contraction and on the probe, and the upper-slot curvature terms appear
-with the opposite sign. -/
+
+
+
+
 theorem contract_covariantCurvAction_deltaMulti_eq_mixedCurvAction
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
@@ -281,9 +281,9 @@ theorem contract_covariantCurvAction_deltaMulti_eq_mixedCurvAction
   simp_rw [contractUpper_deltaMulti]
   ring
 
-/-- Curvature action on mixed `(r,s)` components.  The convention is
-`R i j a b = R^a_{ijb}`.  Upper slots have the positive sign and lower slots
-have the covariant negative sign. -/
+
+
+
 def mixedCurvAction {Idx : Type*} [Fintype Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
     (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
@@ -293,20 +293,20 @@ def mixedCurvAction {Idx : Type*} [Fintype Idx] {r s : ℕ}
   (∑ q : Fin s, ∑ m : Idx,
     R i j m (K q) * beta L (Function.update K q m))
 
-/-- Component form of the mixed `(r,s)` Ricci identity for a precomputed
-commutator component array. -/
+
+
 def MixedRicciIdentityCoord {Idx : Type*} [Fintype Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
     (commBeta beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real) : Prop :=
   ∀ L K, commBeta L K = mixedCurvAction R i j beta L K
 
-/-- Derive the mixed component Ricci identity from the covariant identity
-applied to an elementary probe contraction and to the probe itself.
 
-The input `hcontract` is the product rule for the commutator acting on
-`contractUpper (deltaMulti L) beta`; `hcontractCov` and `hprobeCov` are the
-already-known covariant Ricci identities for the contracted `(0,s)` tensor and
-the probe `(0,r)` tensor. -/
+
+
+
+
+
+
 theorem mixedRicciIdentityCoord_of_contract_probe_identities
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
@@ -344,12 +344,12 @@ theorem mixedRicciIdentityCoord_of_contract_probe_identities
   rw [hcomm, mixedCurvAction]
   exact contract_covariantCurvAction_deltaMulti_eq_mixedCurvAction R i j L K beta
 
-/-- Component-level mixed Ricci identity from second-product-rule identities.
 
-This packages the previous theorem into the input shape expected by
-`mixedRicciIdentityCoord_of_contract_probe_identities`.  The remaining
-geometric frontier is to supply the second-product-rule expansions for the
-actual contraction of a probe tensor against a mixed tensor. -/
+
+
+
+
+
 theorem mixedRicciIdentityCoord_of_second_product_identities
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
@@ -418,8 +418,8 @@ theorem mixedRicciIdentityCoord_of_second_product_identities
           refine Finset.sum_congr rfl fun A _ => ?_
           rw [hcommProbe L A]
 
-/-- Coordinate first-product rule for upper-slot contraction in the
-`contractUpper` notation used by the mixed Ricci-identity component algebra. -/
+
+
 theorem coordDeriv_applyInput_eq_contractUpper
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I (∞ : WithTop ℕ∞) M]
@@ -455,15 +455,15 @@ theorem coordDeriv_applyInput_eq_contractUpper
   rw [DifferentialGeometry.Tensor.Coordinates.coordDeriv0SAt_applyInput_eq_sum (I := I) X T theta x₀ K]
   rfl
 
-/-- Component-level mixed Ricci identity from coordinate second-product data.
 
-This is the next producer after
-`mixedRicciIdentityCoord_of_second_product_identities`: instead of asking for
-the four-term second-product formulas directly, it asks for the two
-first-product-rule pieces that arise after differentiating
-`theta_j ⋅ beta + theta ⋅ beta_j`, and similarly in the swapped order.  The
-remaining geometric frontier is to prove these first-product pieces from the
-actual coordinate derivative API for tensor evaluation/contraction. -/
+
+
+
+
+
+
+
+
 theorem mixedRicciIdentityCoord_of_coordinate_second_product
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
     (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)

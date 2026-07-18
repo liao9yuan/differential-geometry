@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 
-/-!
-# Closed-manifold Rellich-Kondrachov: subsequence extraction in `L^p(M, μ_g)`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`,
-a uniformly chart-Sobolev-bounded sequence in `MemWkpChart g 1 p` admits a
-subsequence converging in `L^p(M, μ_g)`.
-
-The headline theorem is `rellich_kondrachov_chart_seq`. The proof
-proceeds by chart-localizing each member of the sequence via the chart-atlas
-partition of unity, applying the Euclidean Rellich-Kondrachov compact
-embedding on a bounded open neighbourhood of the chart-pushed support,
-performing a finite diagonal extraction over the partition-of-unity
-support set, and bridging the chart-side `L^p` convergence back to
-manifold-side convergence via the uniform-in-`u` chart bridges established
-in `MeasureBridgeUniform`.
--/
 
 noncomputable section
 
@@ -40,8 +24,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- The compact carrier set in the chart-target Euclidean image: the
-`toEuclidean` image of `(extChartAt I α) '' (tsupport ρ_α)`. -/
 private noncomputable def chartCompactM (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean ''
@@ -49,6 +31,7 @@ private noncomputable def chartCompactM (α : M) :
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
+omit [I.Boundaryless] in
 private lemma extChartAt_image_tsupport_pou_compact_subset_target_aux (α : M) :
     IsCompact ((extChartAt I α) ''
         (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -70,12 +53,14 @@ private lemma extChartAt_image_tsupport_pou_compact_subset_target_aux (α : M) :
       : M → ℝ))
     (α := α) hsupp_sub
 
+omit [I.Boundaryless] in
 private lemma chartCompactM_isCompact (α : M) :
     IsCompact (chartCompactM (I := I) (M := M) α) := by
   unfold chartCompactM
   exact (extChartAt_image_tsupport_pou_compact_subset_target_aux
     (I := I) (M := M) α).1.image (toEuclidean (E := E)).continuous
 
+omit [I.Boundaryless] in
 private lemma chartCompactM_subset_chartTargetEuclid (α : M) :
     chartCompactM (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α := by
   unfold chartCompactM chartTargetEuclid
@@ -84,8 +69,6 @@ private lemma chartCompactM_subset_chartTargetEuclid (α : M) :
   exact (extChartAt_image_tsupport_pou_compact_subset_target_aux
     (I := I) (M := M) α).2 hz
 
-/-- A choice of positive thickening radius `δ_α` such that
-`Metric.thickening δ_α (chartCompactM α) ⊆ chartTargetEuclid α`. -/
 private noncomputable def chartThickeningRadiusM (α : M) : ℝ :=
   ((chartCompactM_isCompact (I := I) (M := M) α).exists_thickening_subset_open
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
@@ -105,8 +88,6 @@ private lemma chartThickeningRadiusM_subset (α : M) :
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (chartCompactM_subset_chartTargetEuclid (I := I) (M := M) α)).choose_spec.2
 
-/-- The bounded open neighbourhood of `chartCompactM α` inside
-`chartTargetEuclid α`. -/
 private noncomputable def chartNbhdM (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   Metric.thickening (chartThickeningRadiusM (I := I) (M := M) α)
@@ -130,7 +111,7 @@ private lemma chartCompactM_subset_chartNbhdM (α : M) :
     (chartThickeningRadiusM_pos (I := I) (M := M) α)
     (chartCompactM (I := I) (M := M) α)
 
-/-- The raw chart-push of `ρ_α · u` is zero off `chartCompactM α`. -/
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
     (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -170,8 +151,6 @@ private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
     exact hsmul hx_supp
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy_target
 
-/-- The raw chart-push of `ρ_α · u` has `tsupport` contained in
-`chartNbhdM α`. -/
 private lemma chartPushedRaw_pou_mul_tsupport_subset_chartNbhdM
     (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -199,7 +178,7 @@ private lemma chartPushedRaw_pou_mul_tsupport_subset_chartNbhdM
     exact h_compact_closed.closure_subset_iff.mpr h_supp_sub
   exact h_tsupp_sub.trans (chartCompactM_subset_chartNbhdM (I := I) (M := M) α)
 
-/-- The raw chart-push of `ρ_α · u` has compact support. -/
+omit [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_hasCompactSupport_aux
     (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -497,12 +476,12 @@ private lemma exists_chart_rellich_subseq_aux_M
               (chartTargetEuclid (I := I) (M := M) α)) (ENNReal.ofReal p)
             ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
               (chartTargetEuclid (I := I) (M := M) α)) ≤
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α (u (ψ n)))
             (chartTargetEuclid (I := I) (M := M) α) := by
-      unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       refine le_trans ?_ le_add_self
       let hEquiv : (Fin 1 → Fin (Module.finrank ℝ E)) ≃ Fin (Module.finrank ℝ E) := {
@@ -638,7 +617,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-omit [I.Boundaryless] in
 private lemma chartAtlasPOU_measurable_aux (α : M) :
     Measurable
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -646,14 +624,12 @@ private lemma chartAtlasPOU_measurable_aux (α : M) :
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
 
-omit [I.Boundaryless] in
 private lemma pou_mul_measurable_aux (α : M) {u : M → ℝ} (hu : Measurable u) :
     Measurable (fun x : M =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) :=
   (chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu
 
-omit [I.Boundaryless] in
 private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
     (hu : Measurable u) (hv : Measurable v) :
     Measurable (fun x : M =>
@@ -664,7 +640,6 @@ private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
   ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu).sub
     ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hv)
 
-omit [I.Boundaryless] in
 private lemma tsupport_pou_mul_subset_tsupport_pou_aux
     (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -682,7 +657,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_aux
   rw [h_eq]
   exact tsupport_smul_subset_left _ _
 
-omit [I.Boundaryless] in
 private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
     (α : M) (u v : M → ℝ) :
     tsupport (fun x : M =>
@@ -1203,11 +1177,7 @@ private lemma exists_riemannianMeasure_limit_pou_mul
   exact h_eLp_tendsto
 
 set_option maxHeartbeats 1000000 in
-/-- Rellich-Kondrachov on a closed Riemannian manifold, in subsequence form: if
-`1 < p` and a sequence `u : ℕ → M → ℝ` has chart Sobolev `W^{1,p}` norms
-(`wkpNormChart`) uniformly bounded by `R`, then some subsequence `u ∘ φ` converges
-in `L^p` of the Riemannian measure (built from the chart partition-of-unity atlas)
-to a limit `u_lim ∈ L^p`. Here `M` is compact and boundaryless (hence closed). -/
+
 theorem rellich_kondrachov_chart_seq
     {E H : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]

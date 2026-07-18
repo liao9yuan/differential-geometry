@@ -2,43 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1Lipsc
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
-/-!
-# Chart-pushed weak partial: identification on plain Lebesgue volume
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and a
-coordinate direction `j`, this file establishes that the chart-pushed weak
-partial `chartPushedWeakPartialLp g α j (canonical) u_h` (constructed in
-`H1ComplWeakPartialLimit` from the H¹-Lipschitz extension of the
-chart-pushed-partial map) is a `DeGiorgi.HasWeakPartialDeriv`-style weak
-partial of the chart-pushed L² class
-`chartPushed POU α (H1ComplToLp u_h)` on every open subset compactly
-contained in the chart-target image `chartTargetEuclid α`, in the **plain
-Lebesgue volume** sense.
-
-The chart-pushed weak partial is constructed via the chart-pulled weighted
-measure `(chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-The weighted measure agrees with the plain volume up to multiplication by
-the smooth, strictly positive density `densityOnEuclid g α`. On any compact
-subset of the chart target the density is bounded above and below by
-positive constants, so L² norms in either measure are equivalent on compact
-sets.
-
-## Main results
-
-* `eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact`:
-  conversion of L² norms from the chart-pulled weighted measure to the plain
-  volume on compact subsets of the chart target.
-* `chartPushedWeakPartialLp_smoothToH1Compl_eq_partial`: the smooth-case
-  agreement, identifying the chart-pushed weak partial of a smooth scalar
-  with the classical chart-pushed Fréchet partial.
-* `hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact`: the
-  chart-pushed weak partial satisfies the integration-by-parts identity
-  that defines a `DeGiorgi.HasWeakPartialDeriv` weak partial on every open
-  subset compactly contained in `chartTargetEuclid α`.
-* `chartPushedWeakPartialLp_locally_memLp`: the chart-pushed weak partial
-  is in `MemLp 2` of the plain volume restricted to any compact subset of
-  the chart target.
--/
 
 noncomputable section
 
@@ -78,15 +41,12 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- A globally Borel-measurable extension of `(extChartAt I α).symm` taking a
-fixed default value (here `α : M`) outside the chart target. -/
 private noncomputable def extChartAtSymmExt (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [I.Boundaryless] [CompactSpace M] in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -96,7 +56,6 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [I.Boundaryless] [CompactSpace M] in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -107,8 +66,6 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-/-- Existence of a positive lower bound on the chart-pulled density over a
-compact subset of the chart target. -/
 private lemma exists_density_inf_pos_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -129,10 +86,6 @@ private lemma exists_density_inf_pos_on_compact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
-/-- The plain volume measure restricted to a compact subset of the chart
-target is dominated by `(1/c)` times the chart-pulled weighted measure
-restricted to the same subset, where `c > 0` is the infimum of the
-chart-pulled density on the compact set. -/
 private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -179,10 +132,6 @@ private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
           ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y)
             ∂(volume : Measure EuclN) := by gcongr
 
-/-- The L² norm of a function against the plain volume restricted to a
-compact subset of the chart target is bounded by a constant times the L²
-norm against the chart-pulled weighted measure restricted to the entire
-chart target. The constant depends on `g`, `α`, and `K`. -/
 theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -233,6 +182,7 @@ theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
   rw [h_pow_eq, smul_eq_mul]
   exact mul_le_mul' (le_refl _) h_mono_target
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -268,9 +218,6 @@ private lemma memLp_of_chartPulledWeighted_on_compact
   refine lt_of_le_of_lt (hC_bd f) ?_
   exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hf_memLp.2
 
-/-- The Lp class `chartPushedWeakPartialLp g α j _ u_h`, viewed as a
-function on `EuclN`, lies in `MemLp 2` of the plain volume restricted to any
-compact subset of the chart target. -/
 theorem chartPushedWeakPartialLp_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -293,6 +240,7 @@ theorem chartPushedWeakPartialLp_locally_memLp
   exact memLp_of_chartPulledWeighted_on_compact (I := I) (M := M) g α
     hK_compact hK_in hf_strong.aestronglyMeasurable hf_memLp_weighted
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smoothApprox_seq
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     ∃ v : ℕ → SmoothScalar g,
@@ -437,6 +385,7 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
   exact chartPushed_tendsto_chartPulledWeightedMeasure (I := I) (M := M) g α
     hu_meas hu_lim_meas h_diff_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -648,8 +597,7 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     funext h_eLpNorm_funeq
   rw [← h_funeq2]; exact h_lp_eLpNorm_tendsto
 
-/-- Smooth chart-pushed function agrees with `smoothChartExt` on the chart
-target. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartPushed_eqOn_chartTarget_smoothChartExt
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     Set.EqOn (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun)
@@ -666,9 +614,7 @@ private lemma chartPushed_eqOn_chartTarget_smoothChartExt
   unfold chartPushed
   rfl
 
-/-- For a smooth scalar `v`, the classical chart-pushed partial
-`chartPushedPartial g α j v` is a `DeGiorgi.HasWeakPartialDeriv` weak partial
-of `chartPushed POU α v.toFun` on any open subset of the chart target. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -723,9 +669,6 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
   unfold smoothChartExtPartial
   exact h_identity
 
-/-- For any open `Ω ⊆ K ⊆ chartTargetEuclid α` with `K` compact, the
-chart-pushed weak partial is a `DeGiorgi.HasWeakPartialDeriv` of the
-chart-pushed L² class on `Ω`. -/
 theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

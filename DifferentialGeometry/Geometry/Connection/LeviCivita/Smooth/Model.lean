@@ -21,19 +21,19 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Fixed-chart metric model calculus
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Smooth` API.
--/
 
-/-! ## Fixed-chart metric flat map
 
-The inverse metric components should be proved smooth by applying
-`ContinuousLinearMap.inverse` to this fixed-chart flat map.  This keeps the
-argument over an arbitrary finite-dimensional complete model space `E`, rather
-than choosing `E = Real^n`.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable def metricFlatContinuousEquiv
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -48,8 +48,8 @@ theorem metricFlatContinuousEquiv_apply
   change ((metricFlatEquiv (I := I) g x₀) v) w = g.inner x₀ v w
   rw [metricFlatEquiv_apply]
 
-/-- The metric flat map represented in the tangent trivialization centered at
-`x₀`, viewed over the model chart target. -/
+
+
 noncomputable def metricFlatModelInChart
     (g : SmoothRiemannianMetric I M) (x₀ : M) (y : E) :
     E →L[Real] E →L[Real] Real :=
@@ -107,7 +107,7 @@ theorem metricFlatModelInChart_center_isInvertible
   rw [metricFlatModelInChart_center_eq (I := I) g x₀]
   exact ContinuousLinearMap.isInvertible_equiv
 
-/-- The fixed-chart metric flat map is smooth on the model chart at the center. -/
+
 theorem metricFlatModelInChart_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContDiffWithinAt Real ∞
@@ -127,7 +127,7 @@ theorem metricFlatModelInChart_contDiffWithinAt
     (g.contMDiff.contMDiffAt (x := x₀)).of_le (by simp)
   have hcoord :
       ContMDiffAt I 𝓘(Real, E →L[Real] E →L[Real] Real) ∞
-        (fun p : M => (e ⟨p, g.inner p⟩).2) x₀ := 
+        (fun p : M => (e ⟨p, g.inner p⟩).2) x₀ :=
     by
       rw [contMDiffAt_totalSpace] at hg
       simpa [e] using hg.2
@@ -153,8 +153,8 @@ theorem metricFlatModelInChart_contDiffWithinAt
       (x := extChartAt I x₀ x₀) hsymm
   exact hcomp.contDiffWithinAt
 
-/-- Pointwise fixed-chart compatibility for the metric flat map on the chart
-target. -/
+
+
 theorem metricFlatModelInChart_apply_of_target
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) (v w : E) :
@@ -188,7 +188,7 @@ theorem metricFlatModelInChart_apply_of_target
   rw [ContinuousLinearMap.inCoordinates_eq hpT hpDual]
   simp [hom_trivializationAt, Trivialization.continuousLinearMap_apply]
 
-/-- The inverse metric flat map is smooth in the fixed model chart. -/
+
 theorem inverseMetricFlatModelInChart_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContDiffWithinAt Real ∞
@@ -202,8 +202,8 @@ theorem inverseMetricFlatModelInChart_contDiffWithinAt
         (x := extChartAt I x₀ x₀)
         (metricFlatModelInChart_contDiffWithinAt (I := I) g x₀)
 
-/-- The fixed-chart metric flat map is smooth at every point of the fixed
-chart target. -/
+
+
 theorem metricFlatModelInChart_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) :
@@ -256,7 +256,7 @@ theorem metricFlatModelInChart_contDiffWithinAt_of_mem
   exact hcomp.contDiffWithinAt.congr_of_eventuallyEq heq
     (heq.self_of_nhdsWithin (extChartAt_target_subset_range x₀ hy))
 
-/-- Fixed-chart inverse metric coefficients are smooth model functions. -/
+
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (k l : CoordinateIdx (𝕜 := Real) E) :
@@ -440,9 +440,9 @@ theorem inverseMetricFlatModelInChart_metricInverseInBasis_center
               simp [hij, hji]
   · exact hsecond i j
 
-/-! ## Smooth Christoffel formula RHS in a fixed chart -/
 
-/-- Fixed-chart metric coefficients as model functions. -/
+
+
 noncomputable def metricFlatModelInChart_component
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) (y : E) : Real :=

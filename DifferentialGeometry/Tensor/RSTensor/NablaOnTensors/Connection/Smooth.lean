@@ -8,24 +8,24 @@ import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
-/-!
-# Tangent-connection chart representatives
 
-This module contains smooth-connection predicates, tangent-field chart representatives, and the
-extracted local connection endomorphism used by tensor covariant derivatives.
--/
+
+
+
+
+
 namespace CovariantDerivative
 
 open Bundle
 open scoped Manifold ContDiff
 
-/-- Local smoothness interface for a covariant derivative.
 
-Mathlib's bundled `ContMDiffCovariantDerivative` tests only globally smooth
-sections. For generic scalar fields this does not give the local chart/frame
-coefficient smoothness needed for tensor-nabla regularity, because there is no
-generic bump-function extension theorem. This predicate records the local
-version directly. -/
+
+
+
+
+
+
 def ContMDiffCovariantDerivativeLocally
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -36,12 +36,12 @@ def ContMDiffCovariantDerivativeLocally
     (k : WithTop ℕ∞) : Prop :=
   ∀ ⦃u : Set M⦄, IsOpen u → ContMDiffCovariantDerivativeOn E k cov.toFun u
 
-/-- A smooth tangent-bundle connection already gives a smooth tangent section
-`p ↦ (∇_{X p} Y)_p` for smooth vector fields `X` and `Y`.
 
-This is the vector-field regularity fact supplied by mathlib's
-`ContMDiffCovariantDerivative`; it should be used before trying to reprove
-vector-field smoothness from chart formulas. -/
+
+
+
+
+
 theorem ContMDiffCovariantDerivative.contMDiff_apply
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]

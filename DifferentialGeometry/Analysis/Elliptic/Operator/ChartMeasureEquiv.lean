@@ -9,69 +9,6 @@ import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Measure.Haar.Unique
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
-/-!
-# Chart-pulled equivalence between the Riemannian volume measure and Lebesgue
-with the chart density
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` and a chart point
-`α : M`, this file packages the existing chart-local measure infrastructure
-into clean public Bochner integral identities of the form
-
-```
-∫_M f x dμ_g(x)
-  = ∫ y in (extChartAt I α).target,
-      chartDensity g α (symm y) * f (symm y) ∂modelHaar
-```
-
-valid for any continuous `f : M → ℝ` whose topological support lies inside
-`(chartAt H α).source`.
-
-The identity is the Bochner-integral form of the chart-pulled equivalence
-between `riemannianVolumeMeasure g` and the canonical Haar measure on the
-model space `E`, weighted by the chart-local volume density.
-
-Two parallel forms are delivered:
-
-* a *model-space form* using `modelHaar : Measure E` and
-  `(extChartAt I α).target ⊆ E`, which is the form that the
-  chart-local measure infrastructure naturally produces;
-* an *Euclidean form* using the Haar measure on
-  `EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`, accessed as the pushforward
-  `Measure.map toEuclidean modelHaar` to keep the statement free of any
-  external scaling constant; the integration set is `chartTargetEuclid α`,
-  the inverse-chart composition is `(extChartAt I α).symm ∘ toEuclidean.symm`,
-  and the volume density is `densityOnEuclid g α` (both reused from
-  `MetricExtension.lean`).
-
-## Setting
-
-Throughout we work in the boundaryless closed-manifold setting with
-`[I.Boundaryless]`, `[T2Space M]`, `[SigmaCompactSpace M]`, `[CompactSpace M]`.
-The model fibre is a finite-dimensional real inner-product space `E`.
-
-## Main results
-
-* `integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget`: model-space form
-  of the chart-pulled identity, expressed against `modelHaar` over
-  `(extChartAt I α).target`.
-* `integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator`: same
-  identity with the integration domain folded into a `Set.indicator` factor,
-  i.e., the integral runs over all of `E` with an explicit indicator.
-* `integral_riemannianVolumeMeasure_eq_euclidean_chartTarget`: the
-  `EuclideanSpace`-form of the identity, against
-  `Measure.map toEuclidean modelHaar`. The integrand uses `densityOnEuclid` and
-  the chart-target image `chartTargetEuclid α` (both from
-  `MetricExtension.lean`).
-* `integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator`: same
-  identity with the integration domain folded into a `Set.indicator` factor,
-  matching the form most convenient for downstream chart-based analysis.
-
-The identities reduce the global Bochner integral against the Riemannian
-volume measure to a Bochner integral on the model side via the inverse chart
-and the chart density, in the form requested by downstream chart-based
-analysis (Sobolev embeddings, elliptic-regularity bridges, etc.).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -98,19 +35,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Chart-pulled volume identity (model-space form).**
-
-For a continuous scalar function `f : M → ℝ` whose topological support sits
-inside the chart source `(chartAt H α).source`, the Bochner integral of `f`
-against the canonical Riemannian volume measure equals the Bochner integral
-on the chart target `(extChartAt I α).target ⊆ E` of the chart-pulled
-density-weighted function
-
-```
-y ↦ chartDensity g α ((extChartAt I α).symm y) * f ((extChartAt I α).symm y)
-```
-
-against the canonical Haar measure `modelHaar` on `E`. -/
 theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -128,12 +52,6 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
   rw [h_step1]
   exact integral_chartLocalMeasure (I := I) (M := M) g α f hf_cont.measurable
 
-/-- **Chart-pulled volume identity (model-space form, indicator variant).**
-
-The same identity as `integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget`,
-with the chart-target restriction expressed as a multiplication by
-`Set.indicator (extChartAt I α).target 1`. The integrand vanishes off the
-chart target so the integral runs over all of `E` against `modelHaar`. -/
 theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -168,24 +86,18 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
   · rw [Set.indicator_of_mem hy, Set.indicator_of_mem hy, mul_one]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy, mul_zero]
 
-/-- The canonical `MeasurableEquiv` underlying `toEuclidean`, used for
-applying `MeasureTheory.integral_map_equiv` below. -/
 private def toEuclideanMeasurableEquiv :
     E ≃ᵐ EuclN :=
   (toEuclidean (E := E)).toHomeomorph.toMeasurableEquiv
 
-/-- The canonical `MeasurableEquiv` evaluates as `toEuclidean`. -/
 @[simp] private lemma toEuclideanMeasurableEquiv_apply (y : E) :
     toEuclideanMeasurableEquiv (E := E) y = toEuclidean y := rfl
 
-/-- The canonical `MeasurableEquiv`'s symmetric inverse evaluates as
-`toEuclidean.symm`. -/
 @[simp] private lemma toEuclideanMeasurableEquiv_symm_apply (y : EuclN) :
     (toEuclideanMeasurableEquiv (E := E)).symm y = (toEuclidean (E := E)).symm y := rfl
 
 omit [IsManifold I ∞ M] in
-/-- Membership identification: `toEuclidean y ∈ chartTargetEuclid α`
-iff `y ∈ (extChartAt I α).target`. -/
+
 private lemma toEuclidean_mem_chartTargetEuclid_iff
     (α : M) (y : E) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α ↔
@@ -196,7 +108,7 @@ private lemma toEuclidean_mem_chartTargetEuclid_iff
     rw [hyz]; exact hz_target
   · exact ⟨y, hy, rfl⟩
 
-/-- The chart-target image (under `toEuclidean`) is Borel-measurable. -/
+omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_measurableSet (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) := by
   have htarget_meas : MeasurableSet (extChartAt I α).target :=
@@ -205,23 +117,6 @@ private lemma chartTargetEuclid_measurableSet (α : M) :
   exact (toEuclideanMeasurableEquiv (E := E)).measurableEmbedding.measurableSet_image.mpr
     htarget_meas
 
-/-- **Chart-pulled volume identity (Euclidean form).**
-
-For a continuous scalar function `f : M → ℝ` whose topological support sits
-inside `(chartAt H α).source`, the Bochner integral of `f` against the
-canonical Riemannian volume measure equals the Bochner integral on the
-chart-target image `chartTargetEuclid α ⊆ EuclideanSpace ℝ (Fin (finrank ℝ E))`
-of the chart-pulled density-weighted function
-
-```
-y ↦ densityOnEuclid g α y * f ((extChartAt I α).symm (toEuclidean.symm y))
-```
-
-against the pushforward measure `Measure.map toEuclidean modelHaar`.
-
-The pushforward `Measure.map toEuclidean modelHaar` is itself an additive Haar
-measure on `EuclideanSpace ℝ (Fin (finrank ℝ E))`; using it keeps the identity
-free of any external scaling constant. -/
 theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -317,13 +212,6 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
             densityOnEuclid (I := I) g α y''' *
               f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'''))) y'')
 
-/-- **Chart-pulled volume identity (Euclidean form, indicator variant).**
-
-The same identity as `integral_riemannianVolumeMeasure_eq_euclidean_chartTarget`,
-with the chart-target restriction expressed as a multiplication by
-`Set.indicator (chartTargetEuclid α) 1`. The integrand vanishes outside the
-chart-target image, so the integral runs over all of
-`EuclideanSpace ℝ (Fin (finrank ℝ E))`. -/
 theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
-/-!
-# Second covariant derivatives and curvature
 
-This file records the vector-field computation behind Remark 14.8.  The
-torsion-free curvature formula is exposed as a corollary of the general
-torsion-correction identity.
--/
+
+
+
+
+
+
 
 suppress_compilation
 
@@ -30,9 +30,9 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The second covariant derivative of a vector field in two vector-field
-directions:
-`(nabla^2 Z)(X,Y) = nabla_X (nabla_Y Z) - nabla_{nabla_X Y} Z`. -/
+
+
+
 def nabla2VectorField
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z : RawTangentField (I := I) (M := M)) :
@@ -50,8 +50,8 @@ theorem nabla2VectorField_apply
         (cov Z x) ((cov Y x) (X x)) :=
   rfl
 
-/-- Skewing the second covariant derivative gives curvature with the standard
-torsion correction. -/
+
+
 theorem nabla2VectorField_skew_eq_curvature_sub_torsion
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -65,8 +65,8 @@ theorem nabla2VectorField_skew_eq_curvature_sub_torsion
   simp [sub_eq_add_neg, map_add, add_assoc, add_left_comm, add_comm]
   abel
 
-/-- Corrected Remark 14.8: for a torsion-free pair of directions at `x`,
-curvature is the skew of the second covariant derivative. -/
+
+
 theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -81,8 +81,8 @@ theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zer
   rw [htor, map_zero, sub_zero] at h
   exact h.symm
 
-/-- The same torsion-free formula stated for the auxiliary Riemann operator used
-to construct the pointwise curvature tensor. -/
+
+
 theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -95,9 +95,9 @@ theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
   exact connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (I := I) cov hX hY htor
 
-/-- Levi-Civita specialization: curvature is the skew of the second covariant
-derivative, with the torsion correction discharged by the constructed
-Levi-Civita connection. -/
+
+
+
 theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -119,4 +119,3 @@ theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
   simp
 
 end DifferentialGeometry.Integral.Connection
-

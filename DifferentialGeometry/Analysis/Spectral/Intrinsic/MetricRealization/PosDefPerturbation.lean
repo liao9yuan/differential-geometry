@@ -1,46 +1,11 @@
 import DifferentialGeometry.Geometry.Metric.Basic
-import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
-/-!
-# Positive-definiteness of a small symmetric perturbation of a metric
-
-On a closed Riemannian manifold `(M, g)`, a symmetric `(0,2)`-fibre field
-`h` that is uniformly small relative to the metric `g` produces, when added
-to `g`, an honest smooth Riemannian metric `g + h`.
-
-The smallness condition is expressed in the **`g`-Riemannian fibre norm**: a
-bilinear form `h x : TₓM →L[ℝ] TₓM →L[ℝ] ℝ` is controlled by `δ` when
-
-  `|h x v w| ≤ δ · √(g x v v) · √(g x w w)`   for all `v, w`,
-
-i.e. its operator norm with respect to the `g`-inner product on each tangent
-space is at most `δ`. (This is *not* the model operator norm `‖h x‖`; it is
-intrinsic to `g`.)
-
-If `δ < 1` uniformly, then for `v ≠ 0`,
-
-  `(g + h) x v v ≥ (1 - δ) · g x v v > 0`,
-
-so `g + h` is fibrewise positive-definite, von-Neumann bounded on each fibre
-(its unit ball is contained in a scaled copy of the `g`-unit ball), symmetric,
-and smooth (a sum of two smooth Hom-bundle sections). It therefore assembles
-into a `SmoothRiemannianMetric I M`.
-
-## Main results
-
-* `perturbedInner` — the fibrewise sum `g.inner x + h x`.
-* `perturbedInner_pos_of_gOpBound` — fibrewise positive-definiteness under
-  the `g`-operator-norm smallness bound with `δ < 1`.
-* `perturbedMetric` — the assembled `SmoothRiemannianMetric`.
-* `exists_posDef_perturbation_radius` — the headline existence statement:
-  there is `δ > 0` (namely `δ = 1`) such that every symmetric smooth `h`
-  whose `g`-operator norm is `< δ` everywhere yields a `SmoothRiemannianMetric`.
--/
 
 noncomputable section
 
@@ -58,24 +23,17 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- `gFibreOpBound g h δ` says the symmetric `(0,2)`-fibre field `h` is
-controlled, uniformly over `M`, by `δ` in the `g`-Riemannian fibre norm:
-`|h x v w| ≤ δ · √(g x v v) · √(g x w w)` for all base points `x` and all
-tangent vectors `v, w`. This is the operator norm of `h x` with respect to
-the inner product `g x` on `TₓM`, *not* the model operator norm. -/
-def gFibreOpBound
+def metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (δ : ℝ) : Prop :=
   ∀ (x : M) (v w : TangentSpace I x),
     |h x v w| ≤ δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
 
-/-- The fibrewise sum `g.inner x + h x` as a continuous bilinear form on
-`TₓM`. -/
 noncomputable def perturbedInner
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -83,6 +41,7 @@ noncomputable def perturbedInner
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   g.inner x + h x
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma perturbedInner_apply
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -90,7 +49,6 @@ noncomputable def perturbedInner
     perturbedInner g h x v w = g.inner x v w + h x v w := by
   simp only [perturbedInner, ContinuousLinearMap.add_apply]
 
-/-- Symmetry of the perturbed inner product, given symmetry of `h`. -/
 theorem perturbedInner_symm
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -99,12 +57,10 @@ theorem perturbedInner_symm
     perturbedInner g h x v w = perturbedInner g h x w v := by
   rw [perturbedInner_apply, perturbedInner_apply, g.symm x v w, hsymm x v w]
 
-/-- Diagonal control: under the `g`-operator-norm bound `δ`, the perturbation
-satisfies `|h x v v| ≤ δ · g x v v`. -/
 private lemma abs_h_diag_le
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     |h x v v| ≤ δ * g.inner x v v := by
   have hnn : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g x v
@@ -116,11 +72,10 @@ private lemma abs_h_diag_le
     _ = δ * (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x v v)) := by ring
     _ = δ * g.inner x v v := by rw [hsq]
 
-/-- The perturbed quadratic form is bounded below by `(1 - δ) · g x v v`. -/
 theorem perturbedInner_self_lower_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     (1 - δ) * g.inner x v v ≤ perturbedInner g h x v v := by
   have hdiag := abs_h_diag_le (I := I) (M := M) g h hδ x v
@@ -129,12 +84,10 @@ theorem perturbedInner_self_lower_bound
   rw [perturbedInner_apply]
   nlinarith [hge]
 
-/-- **Fibrewise positive-definiteness of the perturbed metric** under the
-`g`-operator-norm smallness bound with `δ < 1`. -/
-theorem perturbedInner_pos_of_gOpBound
+theorem perturbedInner_pos_of_metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < perturbedInner g h x v v := by
   have hg_pos : 0 < g.inner x v v := g.pos x v hv
@@ -143,9 +96,7 @@ theorem perturbedInner_pos_of_gOpBound
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
 
-/-- A scaled `g`-sublevel set `{v | g x v v < r}` (for `r > 0`) is von-Neumann
-bounded: it is the image of the `g`-unit ball `{v | g x v v < 1}` (von-Neumann
-bounded by the metric structure) under scalar multiplication by `√r`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma gSublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (x : M) {r : ℝ} (hr : 0 < r) :
     Bornology.IsVonNBounded ℝ
@@ -195,13 +146,10 @@ private lemma gSublevel_isVonNBounded
   rw [hset_eq]
   exact himg
 
-/-- **von-Neumann boundedness of the perturbed unit ball.** Under the
-`g`-operator-norm bound with `δ < 1`, the set `{v | (g+h) x v v < 1}` is
-von-Neumann bounded. -/
 theorem perturbedInner_isVonNBounded
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ)
     (x : M) :
     Bornology.IsVonNBounded ℝ
       {v : TangentSpace I x | perturbedInner g h x v v < 1} := by
@@ -219,15 +167,6 @@ theorem perturbedInner_isVonNBounded
     exact h1
   exact (gSublevel_isVonNBounded (I := I) (M := M) g x hr_pos).subset hsub
 
-/-- **Smoothness of the perturbed inner-product section.** If the perturbation
-`h` is a smooth section of the bundle of bilinear forms, then so is
-`x ↦ g.inner x + h x`. This is the `contMDiff` field of the assembled metric.
-
-The argument descends through `cotangentCov_clmSection_smooth_aux` twice (once
-per tensor slot) to a scalar statement, where the perturbed value is the sum
-of two smooth scalars `g.inner x (Y x) (W x)` and `h x (Y x) (W x)`, each
-obtained by applying a smooth Hom-bundle section to two smooth tangent
-sections. -/
 theorem perturbedInner_contMDiff
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
@@ -305,11 +244,6 @@ theorem perturbedInner_contMDiff
       ⟨y, perturbedInner g h y (Y y) (W y)⟩).2
   rfl
 
-/-- **The perturbed metric `g + h`.** Given a symmetric smooth perturbation
-`h` whose `g`-operator norm is bounded by `δ < 1` everywhere, the fibrewise
-sum `g.inner x + h x` is symmetric, fibrewise positive-definite, has a
-von-Neumann bounded unit ball on every fibre, and varies smoothly, hence
-assembles into an honest `SmoothRiemannianMetric I M`. -/
 noncomputable def perturbedMetric
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
@@ -320,11 +254,11 @@ noncomputable def perturbedMetric
         (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         b (h b)))
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ) :
     SmoothRiemannianMetric I M where
   inner x := perturbedInner g h x
   symm x v w := perturbedInner_symm (I := I) (M := M) g h hsymm x v w
-  pos x v hv := perturbedInner_pos_of_gOpBound (I := I) (M := M) g h hδ_lt hδ x v hv
+  pos x v hv := perturbedInner_pos_of_metricCauchySchwarzBound (I := I) (M := M) g h hδ_lt hδ x v hv
   isVonNBounded x := perturbedInner_isVonNBounded (I := I) (M := M) g h hδ_lt hδ x
   contMDiff := perturbedInner_contMDiff (I := I) (M := M) g h hsmooth
 
@@ -338,22 +272,10 @@ noncomputable def perturbedMetric
         (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         b (h b)))
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ) (x : M) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ) (x : M) :
     (perturbedMetric g h hsymm hsmooth hδ_lt hδ).inner x = perturbedInner g h x :=
   rfl
 
-/-- **Positive-definiteness radius for metric perturbations.**
-
-On a closed Riemannian manifold `(M, g)`, there is a strictly positive radius
-`δ` (namely `δ = 1`) such that *every* symmetric smooth `(0,2)`-fibre field
-`h` whose `g`-Riemannian fibre (operator) norm is bounded by some `δ' < δ`
-uniformly over `M` produces an honest `SmoothRiemannianMetric I M`, equal
-fibrewise to `g + h`.
-
-The smallness is measured in the `g`-induced fibre norm:
-`|h x v w| ≤ δ' · √(g x v v) · √(g x w w)`, i.e. the operator norm of `h x`
-with respect to the inner product `g x` on `TₓM`. The resulting metric's
-quadratic form is bounded below by `(1 - δ') · g x v v > 0`. -/
 theorem exists_posDef_perturbation_radius
     [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -366,7 +288,7 @@ theorem exists_posDef_perturbation_radius
             (E →L[ℝ] E →L[ℝ] ℝ)
             (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
             b (h b))) →
-        ∀ δ' : ℝ, δ' < δ → gFibreOpBound g h δ' →
+        ∀ δ' : ℝ, δ' < δ → metricCauchySchwarzBound g h δ' →
           ∃ g' : SmoothRiemannianMetric I M,
             ∀ (x : M) (v w : TangentSpace I x),
               g'.inner x v w = g.inner x v w + h x v w := by

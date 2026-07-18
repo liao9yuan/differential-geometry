@@ -14,14 +14,14 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Levi-Civita Hessian symmetry
 
-This file proves the Levi-Civita Hessian symmetry endpoint used by the
-Levi-Civita scalar-Bochner wrapper.  The intended route is direct: use the
-realized `∇ du` and `∇ (∇ du)` interfaces, the scalar bracket formula for
-`du`, and torsion-freeness of `leviCivitaConnectionOfMetric`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -40,7 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Intrinsic one-form derivation formula for smooth moving slots. -/
+
 private theorem nabla0SFun_one_eval_smooth_slots
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -92,7 +92,7 @@ private theorem nabla0SFun_one_eval_smooth_slots
     simp
   simpa [V, hupdate] using h
 
-/-- Pointwise symmetry of the Levi-Civita Hessian section `∇ du`. -/
+
 private theorem leviCivita_nablaDuSec_pointwise_symm_direct
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -197,13 +197,13 @@ private theorem leviCivita_nablaDuSec_pointwise_symm_direct
   rw [hleft, hright, hleft_eval, hright_eval]
   linarith
 
-/-- Coordinate-frame component symmetry of the Hessian section `∇ du`.
 
-This is the mathematical core of Hessian symmetry:
-`(∇_X du)(Y) - (∇_Y du)(X) = du([X,Y] - (∇_X Y - ∇_Y X))`, and the right-hand
-side vanishes for the Levi-Civita connection by the scalar bracket formula and
-torsion-freeness.
--/
+
+
+
+
+
+
 private theorem leviCivita_nablaDuSec_coordFrame_symm
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -225,8 +225,8 @@ private theorem leviCivita_nablaDuSec_coordFrame_symm
     (coordinateFrameAt_toBasis (I := I) x i)
     (coordinateFrameAt_toBasis (I := I) x j)
 
-/-- Pointwise symmetry of the realized Levi-Civita Hessian section, obtained
-from the coordinate-frame Hessian symmetry by tensor extensionality. -/
+
+
 private theorem leviCivita_nablaDuSec_pointwise_symm
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -248,8 +248,8 @@ private theorem leviCivita_nablaDuSec_pointwise_symm
     leviCivita_nablaDuSec_coordFrame_symm
       (I := I) g u hu duSec nablaDuSec hnabla hdu x i j
 
-/-- The canonical Levi-Civita Hessian section of a smooth scalar function is
-symmetric. -/
+
+
 theorem hessSymm
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -278,8 +278,8 @@ theorem hessSymm
     leviCivita_nablaDuSec_pointwise_symm
       (I := I) g u hu du Hess hnabla hdu x U V
 
-/-- Levi-Civita Hessian symmetry for a function, expressed as trailing-slot
-symmetry of the second covariant derivative of `du`. -/
+
+
 theorem oneFormLastTwoSymmAt_of_leviCivita_du
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)

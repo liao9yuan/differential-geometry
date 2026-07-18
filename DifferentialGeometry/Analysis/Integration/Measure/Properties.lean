@@ -11,37 +11,6 @@ import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-!
-# Standard measure-theoretic properties of the Riemannian volume measure
-
-This file establishes standard properties of the chart-local measure
-`chartLocalMeasure g x₀` and of the glued global Riemannian measure
-`riemannianMeasure g ρ` (and its canonical form `riemannianVolumeMeasure g`)
-constructed in `ChartDensity.lean`, `RiemannianMeasure.lean` and `Invariance.lean`.
-
-## Main results
-
-* `chartLocalMeasure_compact_lt_top` : every compact subset of a chart source has
-  finite chart-local measure.
-* `riemannianMeasure_compact_lt_top` : every compact set has finite glued measure.
-* `riemannianMeasure_isFiniteMeasureOnCompacts`,
-  `riemannianVolumeMeasure_isFiniteMeasureOnCompacts` : `IsFiniteMeasureOnCompacts`.
-* `riemannianMeasure_isLocallyFiniteMeasure`,
-  `riemannianVolumeMeasure_isLocallyFiniteMeasure` : `IsLocallyFiniteMeasure`.
-* `riemannianMeasure_sigmaFinite`, `riemannianVolumeMeasure_sigmaFinite` : σ-finiteness
-  (under `[SigmaCompactSpace M]`).
-* `riemannianMeasure_isFiniteMeasure_of_compactSpace`,
-  `riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace` : finiteness under
-  `[CompactSpace M]`.
-* `riemannianMeasure_isOpenPosMeasure`,
-  `riemannianVolumeMeasure_isOpenPosMeasure` : nonempty open sets have positive
-  glued measure (automatic, since the canonical Haar measure is open-positive).
-* `riemannianMeasure_regular`, `riemannianVolumeMeasure_regular` : Mathlib
-  `Regular` (Radon, i.e. inner-regular on open sets by compacts plus outer-regular
-  by opens together with finiteness on compacts). Derived from
-  `Manifold.metrizableSpace` together with local finiteness, via
-  `MeasureTheory.Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure`.
--/
 
 noncomputable section
 
@@ -53,7 +22,7 @@ namespace Integral
 namespace Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -62,14 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The chart-local measure of a compact subset of the base chart source is finite.
-
-Using `chartLocalMeasure_lintegral`, the measure of `K` equals the integral over
-`(extChartAt I x₀).target` of `ofReal(chartDensity ∘ symm) · 1_{symm⁻¹ K}` against
-the canonical Haar measure on `E`. Because `K ⊆ source`, the integrand vanishes
-off `extChartAt I x₀ '' K` (which is compact). The density is continuous on the
-source, so bounded on the compact set `K`, and the Haar measure is finite on
-compacts. -/
 theorem chartLocalMeasure_compact_lt_top
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -169,8 +130,6 @@ theorem chartLocalMeasure_compact_lt_top
       _ < (⊤ : ℝ≥0∞) := by
           exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hKE_compact.measure_lt_top
 
-/-- If a compact set `K ⊆ M` does not meet `tsupport (ρ α)`, the `α`-contribution
-to the glued measure of `K` vanishes. -/
 private lemma pou_term_zero_of_tsupport_disjoint
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -190,8 +149,6 @@ private lemma pou_term_zero_of_tsupport_disjoint
     exact hxK_ts (subset_tsupport _ hne)
   simp [this]
 
-/-- Bound the `α`-contribution to the glued measure of `K` by the `α`-th chart-local
-measure of `K ∩ tsupport (ρ α)`. -/
 private lemma pou_term_le_chartLocalMeasure
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -229,7 +186,6 @@ private lemma pou_term_le_chartLocalMeasure
           rw [lintegral_indicator htsup_meas, Measure.restrict_restrict htsup_meas,
               setLIntegral_const, one_mul, Set.inter_comm]
 
-/-- The glued Riemannian measure is finite on compact sets. -/
 theorem riemannianMeasure_compact_lt_top
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -278,7 +234,6 @@ theorem riemannianMeasure_compact_lt_top
   exact lt_of_le_of_lt hbound
     (chartLocalMeasure_compact_lt_top (I := I) (M := M) g α hKts_compact hKts_sub)
 
-/-- The glued Riemannian measure is finite on compact sets. -/
 theorem riemannianMeasure_isFiniteMeasureOnCompacts
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -287,7 +242,6 @@ theorem riemannianMeasure_isFiniteMeasureOnCompacts
     IsFiniteMeasureOnCompacts (riemannianMeasure (I := I) g ρ) :=
   ⟨fun _K hK => riemannianMeasure_compact_lt_top (I := I) (M := M) g ρ hρ hK⟩
 
-/-- The canonical Riemannian volume measure is finite on compact sets. -/
 theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -296,12 +250,9 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts
   exact riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-- `M` is a locally compact topological space. Under `[FiniteDimensional ℝ E]`
-(hence `ProperSpace E` and `LocallyCompactSpace E`) this follows from
-`I.locallyCompactSpace` and `ChartedSpace.locallyCompactSpace`. -/
 theorem locallyCompactSpace_of_chartedSpace
     (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     (H : Type*) [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
     (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] :
     LocallyCompactSpace M := by
@@ -309,7 +260,6 @@ theorem locallyCompactSpace_of_chartedSpace
   have _hH : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
-/-- The glued Riemannian measure is locally finite. -/
 theorem riemannianMeasure_isLocallyFiniteMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -322,7 +272,6 @@ theorem riemannianMeasure_isLocallyFiniteMeasure
     locallyCompactSpace_of_chartedSpace E H I M
   inferInstance
 
-/-- The canonical Riemannian volume measure is locally finite. -/
 theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -331,7 +280,6 @@ theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
   exact riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-- The glued Riemannian measure is σ-finite. -/
 theorem riemannianMeasure_sigmaFinite
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -342,7 +290,6 @@ theorem riemannianMeasure_sigmaFinite
     riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g ρ hρ
   SigmaFinite.of_isFiniteMeasureOnCompacts _
 
-/-- The canonical Riemannian volume measure is σ-finite. -/
 theorem riemannianVolumeMeasure_sigmaFinite
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -351,7 +298,6 @@ theorem riemannianVolumeMeasure_sigmaFinite
   exact riemannianMeasure_sigmaFinite (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-- On a compact manifold, the glued Riemannian measure is a finite measure. -/
 theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -362,7 +308,6 @@ theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
     riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g ρ hρ
   infer_instance
 
-/-- On a compact manifold, the canonical Riemannian volume measure is finite. -/
 theorem riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -371,15 +316,7 @@ theorem riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
   exact riemannianMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-- The set of manifold-interior points (those `x : M` whose extended-chart image at
-`x` lies in the topological interior of `range I`) is dense in `M`.
-
-Density follows from the fact that `range I = closure (interior (range I))`
-(`ModelWithCorners.range_eq_closure_interior`), combined with the fact that for
-each `x : M` and each open nbhd `V` of `x`, the image `extChartAt I x '' (V ∩
-(chartAt H x).source)` is a relative neighborhood of `extChartAt I x x` in
-`range I` (`map_extChartAt_nhds`). Thus this image meets `interior (range I)`,
-giving an interior point in `V`. -/
+omit [Module.Finite ℝ E] in
 private lemma interior_isInteriorPoint_dense :
     Dense ({x : M | I.IsInteriorPoint x} : Set M) := by
   rw [dense_iff_inter_open]
@@ -421,15 +358,6 @@ private lemma interior_isInteriorPoint_dense :
   exact (I.isInteriorPoint_iff_of_mem_atlas hntop (chart_mem_atlas H x) hy_chartSrc).mpr
     hp_inExtTarget
 
-/-- Strict positivity of the chart-local measure on a nonempty open set `V` whose
-closure is contained in the chart source, picking any point `x₁ ∈ V` whose image
-`extChartAt I α x₁` lies in the topological interior of `range I`. The strategy:
-express the chart-local measure of `V` as a lintegral of the density against the
-canonical Haar measure on `E` over `(extChartAt I α) '' V`; the image contains an
-open neighbourhood of `(extChartAt I α) x₁` in `E` (using
-`extChartAt_image_nhds_mem_nhds_of_mem_interior_range` instantiated at `x₁`), which
-has positive Haar-measure, so the lintegral is positive because the density is
-strictly positive on the chart source. -/
 private lemma chartLocalMeasure_open_pos_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) {x₁ : M} (hx₁V : x₁ ∈ V)
@@ -561,9 +489,7 @@ private lemma chartLocalMeasure_open_pos_of_mem
     exact measure_eq_zero_iff_ae_notMem.mpr hyNotW
   exact (ne_of_gt hW_pos) hW_full_empty
 
-/-- Given a point `x` with `ρ α x > 0`, there exists a nonempty open `V` with
-`V ⊆ U`, `V ⊆ (chartAt H α).source`, `x ∈ V`, and a uniform lower bound `c > 0` on
-`ρ α` over `V`. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma exists_open_nbhd_pou_pos
     (ρ : SmoothPartitionOfUnity M I M univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -589,7 +515,6 @@ private lemma exists_open_nbhd_pou_pos
   · intro y hy; exact hy.1.2
   · intro y hy; exact le_of_lt hy.2
 
-/-- The glued Riemannian measure is positive on nonempty open sets. -/
 theorem riemannianMeasure_isOpenPosMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -642,7 +567,6 @@ theorem riemannianMeasure_isOpenPosMeasure
     measure_mono hVU
   exact ne_of_gt (lt_of_lt_of_le hpos (hle_g.trans hle_g'))
 
-/-- The canonical Riemannian volume measure is positive on nonempty open sets. -/
 theorem riemannianVolumeMeasure_isOpenPosMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -651,7 +575,6 @@ theorem riemannianVolumeMeasure_isOpenPosMeasure
   exact riemannianMeasure_isOpenPosMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-- The glued Riemannian measure is Regular (Radon). -/
 theorem riemannianMeasure_regular
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -663,7 +586,6 @@ theorem riemannianMeasure_regular
     riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g ρ hρ
   exact MeasureTheory.Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure _
 
-/-- The canonical Riemannian volume measure is Regular (Radon). -/
 theorem riemannianVolumeMeasure_regular
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :

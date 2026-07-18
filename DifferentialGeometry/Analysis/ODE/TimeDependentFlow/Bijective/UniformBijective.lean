@@ -1,10 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ChartCoverBijective
 
-/-! # Two-sided bijectivity of the chart-cover flow on a uniform horizon
-
-Extraction of a single uniform time horizon from the open-cover-local bijectivity
-data on a compact manifold, giving two-sided bijectivity of the chart-cover flow. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -17,17 +12,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] in
-/--
-**Uniform horizon extraction from open-cover-local properties on a compact
-space.** Given a property `P : ℝ → M → Prop` that is witnessed on an open
-cover of a compact `M` by per-element positive time horizons, compactness
-extracts a single positive `T` that works for all `x : M` simultaneously.
 
-Concretely, for each `α : M` there is an open neighborhood `U α ∋ α` and
-a positive horizon `S α` such that `P s x` holds for all `x ∈ U α` and
-`s ∈ [0, S α)`. Compactness of `M` yields a finite subcover; `T` is the
-minimum of the finitely many `S α` values.
--/
 theorem compact_uniform_horizon_extraction
     (U : M → Set M) (S : M → ℝ) (P : ℝ → M → Prop)
     (hU_open : ∀ α : M, IsOpen (U α))
@@ -64,28 +49,7 @@ theorem compact_uniform_horizon_extraction
       ⟨hs.1, lt_of_lt_of_le hs.2 (hTmin_le α hαS)⟩
     exact hP α x hxU s hs_α
 
-/--
-**Uniform two-sided bijectivity of the chart-cover flow on a compact manifold.**
-
-Given chart-local Picard data for `X` and for `-X` at every base point,
-together with global flows `Φ` (for `X`) and `Ψ` (for `-X`) satisfying
-chart-α-coord representation identities, and per-chart manifold-level
-two-sided composition identities on positive time horizons, compactness
-of `M` extracts a single uniform positive `T` on which the two-sided
-invertibility `Ψ s ∘ Φ s = id` and `Φ s ∘ Ψ s = id` holds simultaneously
-for all `x : M` and all `s ∈ [0, T)`.
-
-The per-chart bijectivity hypothesis `hBijPerChart` is the genuine
-mathematical content: for each chart base point `α`, there exists a positive
-horizon `S_α` such that the composition identities `Ψ s (Φ s x) = x` and
-`Φ s (Ψ s x) = x` hold for all `x` in the chart neighborhood
-`(hper α).U ∩ (hperNeg α).U` and all `s ∈ [0, S_α)`. This is supplied by
-a downstream Grönwall uniqueness argument combining
-`chart_cover_flow_bijective_two_sided_on_short_time` with chart-overlap
-uniqueness for the global flows. The present theorem performs the purely
-topological compactness extraction step: finite subcover of M by the chart
-neighborhoods, minimum of the finitely many horizons S_α.
--/
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem chart_cover_flow_bijective_two_sided_uniform_horizon
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)

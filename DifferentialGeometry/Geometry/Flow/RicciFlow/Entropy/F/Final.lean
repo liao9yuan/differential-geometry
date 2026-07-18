@@ -15,19 +15,19 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-/-!
-# Perelman F final wrappers
 
-Split-out component of the Perelman `F`-functional layer
-(`DifferentialGeometry.PDE.RicciFlow.Entropy.F`).
 
-These are the measure-theory glue endpoints: given the pointwise first-variation
-integrand identification, the `deriv`-based first variation of the
-`F`-functional agrees with the formula-5.10 integral.
--/
 
-/-- Final assembly adapter for formula 5.10 once the previous producer chain has
-identified the first-variation integrand pointwise. -/
+
+
+
+
+
+
+
+
+
+
 theorem formula510_of_steps [MeasurableSpace M]
     {weightedMeasure : Measure M}
     {firstVariation : Real}
@@ -50,8 +50,8 @@ theorem formula510_of_steps [MeasurableSpace M]
   apply integral_congr_ae
   exact Filter.Eventually.of_forall hpoint
 
-/-- If formula 5.10 has been proved for the first variation value, then the
-`deriv`-based first variation agrees with the formula 5.10 integral. -/
+
+
 theorem fFunctionalFirstVariation_eq_formula510_of_hasFirstVariationAt
     [MeasurableSpace M]
     {muPath : Real -> Measure M}

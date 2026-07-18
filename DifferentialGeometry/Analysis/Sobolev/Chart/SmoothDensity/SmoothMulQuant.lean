@@ -1,35 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Quantitative bound for multiplication by smooth bounded functions on the
-# chart-based Sobolev space
-
-For a smooth function `φ : M → ℝ` on a closed smooth Riemannian manifold and
-any `u : M → ℝ` in the chart-based Sobolev space `MemWkpChart g k p u`, the
-qualitative closure statement `MemWkpChart g k p (φ · u)` is upgraded to a
-quantitative bilinear bound
-
-  `wkpNormChart g k p (φ · u) ≤ ENNReal.ofReal C · wkpNormChart g k p u`
-
-for some constant `C = C(φ, g, k) > 0` that depends only on `φ`, the metric,
-and the order `k`.
-
-The construction reuses the chart-side machinery from `SmoothMul.lean`:
-
-* `Λ_α := smoothExtensionScalar α (b_α · φ)` is a globally smooth, compactly
-  supported function on `EuclN` with uniform `C^k` bound, where `b_α` is a
-  smooth manifold cutoff equal to `1` on `tsupport ρ_α`.
-* `chartPushed POU α (φ · u) =ᵃᵉ Λ_α · chartPushed POU α u` on `chartTargetEuclid α`.
-* On a closed (`CompactSpace M`) manifold the partition of unity supports
-  finitely many indices, so the per-chart constants `K(α, φ)` produced by the
-  quantitative Euclidean Leibniz bound `wkpNorm_smul_smooth_bounded_le` admit a
-  finite maximum over the supporting indices.
-
-The headline `wkpNormChart_smooth_mul_le` packages these into a single
-quantitative bound.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -52,14 +23,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Per-chart quantitative bound.** For a fixed chart `α : M` on a closed
-manifold and a smooth global function `φ : M → ℝ`, there is a positive constant
-`K = K(α, φ, k)` so that whenever `chartPushed POU α u ∈ W^{k,p}` on
-`chartTargetEuclid α`, the chart-pushed product `chartPushed POU α (φ · u)`
-satisfies
-
-  `wkpNorm k p (chartPushed POU α (φ · u)) ≤ K · wkpNorm k p (chartPushed POU α u)`.
--/
 theorem MemWkpChart_smooth_mul_per_chart_quant
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -71,14 +34,14 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -128,12 +91,12 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
       (I := I) (M := M) (α := α) (b := b) (φ := (φ : M → ℝ)) (u := u)
       hb_one_on_tsupp hy
   have h_norm_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x)) Ω =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y : EuclN => Λ y *
             chartPushed (I := I) (M := M)
@@ -143,16 +106,6 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
   rw [h_norm_eq]
   exact hK_bound hu
 
-/-- **Quantitative bound for multiplication by a smooth bounded function on
-`W^{k,p}_chart(M)`.** For a smooth global function `φ : M → ℝ` on a closed
-manifold there is a positive constant `C = C(φ, g, k, p)` so that for every
-`u ∈ W^{k,p}_chart(M)`,
-
-  `wkpNormChart g k p (φ · u) ≤ ENNReal.ofReal C · wkpNormChart g k p u`.
-
-The constant is constructed as the maximum of the per-chart constants
-`K(α, φ, k)` over the finite POU support (locally finite POU + compact `M`
-yields finitely many supporting indices). -/
 theorem wkpNormChart_smooth_mul_le
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -172,14 +125,14 @@ theorem wkpNormChart_smooth_mul_le
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -193,14 +146,14 @@ theorem wkpNormChart_smooth_mul_le
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal (Kα α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -234,7 +187,7 @@ theorem wkpNormChart_smooth_mul_le
       rw [hS_empty]
       exact Finset.notMem_empty α
     have h_per_α_zero : ∀ α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -245,7 +198,7 @@ theorem wkpNormChart_smooth_mul_le
         (d := Module.finrank ℝ E) hp_one
         (chartTargetEuclid_isOpen (I := I) (M := M) α)
     have h_per_α_zero_φu : ∀ α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -280,21 +233,21 @@ theorem wkpNormChart_smooth_mul_le
   refine ENNReal.tsum_le_tsum ?_
   intro α
   by_cases hαS : α ∈ S
-  · calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  · calc DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal (Kα α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) :=
           hKα_bound α (hu α)
       _ ≤ ENNReal.ofReal K_max *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -323,7 +276,7 @@ theorem wkpNormChart_smooth_mul_le
       rw [h_zero_pou]
       ring
     rw [h_chartPushed_φu, h_chartPushed_u]
-    have h_zero_norm : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    have h_zero_norm : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun _ : EuclN => (0 : ℝ))
         (chartTargetEuclid (I := I) (M := M) α) = 0 :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero

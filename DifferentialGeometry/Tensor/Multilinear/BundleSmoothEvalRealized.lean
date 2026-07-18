@@ -5,38 +5,38 @@ import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 
-/-!
-# Multilinear bundle evaluation: continuity and smoothness
 
-For a smooth manifold `M` modelled on `(E, H)` with model `I`, given a continuous section
-of the `(0, n)`-tensor bundle `T : ∀ b, Tensor0SSpace n I b` and `n` continuous tangent
-sections `v_1, ..., v_n`, the pointwise evaluation
-`b ↦ Tensor0SSpace.toModel (T b) (fun i => v i b) : M → 𝕜` is continuous as a scalar
-function on `M`. The same statement holds with `ContMDiff` in place of `Continuous`.
 
-## Strategy
 
-The proof is by induction on `n`.
 
-* **Base case `n = 0`.** A `0`-ary continuous multilinear map on `E` is canonically a scalar
-  `𝕜` via `continuousMultilinearCurryFin0`. The trivialization at the chosen base point reduces
-  this to a scalar function.
 
-* **Inductive step `n + 1`.** The fiberwise CLE
-  `tensor0S_curry n b : Tensor0SSpace (n + 1) I b ≃L[𝕜] TangentSpace I b →L[𝕜] Tensor0SSpace n I b`
-  identifies the `(0, n + 1)`-tensor fiber with the `Hom`-bundle fiber. The bundle-topology
-  trivialization fibers are related through the smooth CLE
-  `continuousMultilinearCurryLeftEquiv 𝕜 (fun _ : Fin (n + 1) => E) 𝕜`. Hence the curried
-  bundle section has the same topological/smoothness properties as the original section.
-  Applying `Continuous.clm_bundle_apply` (resp. `ContMDiff.clm_bundle_apply`) of the curried
-  section to the tangent section `v_0` yields a section of the `(0, n)`-tensor bundle, and the
-  inductive hypothesis on `v_1, ..., v_n` finishes the argument.
 
-## Main results
 
-* `TensorMultilinear.continuous_section_apply_gen` — continuity version.
-* `TensorMultilinear.contMDiff_section_apply_gen` — smoothness version.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -56,12 +56,12 @@ variable
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-!
-## Algebraic helper: `compContinuousLinearMap` collapses for `Fin 0`
--/
 
-/-- For a `0`-ary continuous multilinear map `f` and any `Fin 0`-indexed family `g`,
-composing `f` with `g` gives the constant-extension multilinear map with value `f 0`. -/
+
+
+
+
+
 private theorem compContinuousLinearMap_isEmpty
     {F₁ F₂ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
     [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
@@ -78,12 +78,12 @@ private theorem compContinuousLinearMap_isEmpty
   congr 1
   exact Subsingleton.elim _ _
 
-/-!
-## Trivialization-fibre identities
--/
 
-/-- At `n + 1`, the `(0, n + 1)`-tensor bundle trivialization fibre at `⟨b, T b⟩` equals
-`(T b).compContinuousLinearMap (fun _ => e_TM.symmL 𝕜 b)`. -/
+
+
+
+
+
 private theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel (n + 1) 𝕜 E)
@@ -91,8 +91,8 @@ private theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T b).compContinuousLinearMap
       (fun _ : Fin (n + 1) => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 b) := rfl
 
-/-- At `n = 0`, the `(0, 0)`-tensor bundle trivialization fibre at `⟨b, T b⟩` equals the
-constant-extension multilinear map with value `(T b) 0`. -/
+
+
 theorem trivializationAt_tensor0SBundle_zero_fibre_gen
     (T : ∀ b : M, Tensor0SSpace 0 I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel 0 𝕜 E)
@@ -104,7 +104,7 @@ theorem trivializationAt_tensor0SBundle_zero_fibre_gen
     ContinuousMultilinearMap.constOfIsEmpty 𝕜 _ ((T b) 0)
   rw [compContinuousLinearMap_isEmpty]
 
-/-- The `Hom(TM, Tensor0SSpace n)` bundle trivialization fibre at `⟨b, ϕ b⟩`. -/
+
 private theorem trivializationAt_homBundle_fibre {n : ℕ}
     (ϕ : ∀ b : M, TangentSpace I b →L[𝕜] Tensor0SSpace n I b) (x₀ b : M) :
     (trivializationAt (E →L[𝕜] Tensor0SModel n 𝕜 E)
@@ -115,9 +115,9 @@ private theorem trivializationAt_homBundle_fibre {n : ℕ}
       ((ϕ b).comp
         ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜 b)) := rfl
 
-/-- Applying the linear-map-at component of the `(0, n)`-tensor trivialization to the
-inverse-CLE-coerced model element equals composing with `symmL`, on the trivialization base
-set. -/
+
+
+
 private theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
       (fun x : M => Tensor0SSpace n I x) x₀).baseSet)
@@ -148,16 +148,16 @@ private theorem tensor0SBundle_linearMapAt_apply_tensor {n : ℕ} (x₀ b : M)
   simpa using tensor0SBundle_linearMapAt_apply_of_mem (I := I) (M := M) x₀ b hb
     (Tensor0SSpace.toModel B) v
 
-/-- Curried section: applying the fiberwise CLE `tensor0S_curry n b` to a section `T` of
-the `(0, n + 1)`-tensor bundle gives a section of `Hom(TM, Tensor0SSpace n)`. -/
+
+
 @[reducible]
 def curriedSection_gen {n : ℕ} (T : ∀ b : M, Tensor0SSpace (n + 1) I b) :
     ∀ b : M, TangentSpace I b →L[𝕜] Tensor0SSpace n I b :=
   fun b => tensor0S_curry (I := I) (M := M) n b (T b)
 
-/-- The Hom-bundle trivialization fibre at the curried section equals the image under
-`continuousMultilinearCurryLeftEquiv` of the `(0, n + 1)`-tensor trivialization fibre, on
-the relevant base set. -/
+
+
+
 theorem trivializationAt_homBundle_curriedSection_eq_gen {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
@@ -190,12 +190,12 @@ theorem trivializationAt_homBundle_curriedSection_eq_gen {n : ℕ}
   · intro k
     simp [Fin.cons_succ]
 
-/-!
-## Continuity bridge: section ↔ curried section
--/
 
-/-- Continuity transfers from a `(0, n + 1)`-tensor section to the curried `Hom`-bundle
-section. -/
+
+
+
+
+
 private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : Continuous (fun b : M =>
@@ -240,12 +240,12 @@ private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
       ⟨b, curriedSection_gen T b⟩).2
   exact (trivializationAt_homBundle_curriedSection_eq_gen (I := I) (M := M) T x b hb).symm
 
-/-!
-## Smoothness bridge: section ↔ curried section
--/
 
-/-- Smoothness transfers from a `(0, n + 1)`-tensor section to the curried `Hom`-bundle
-section. -/
+
+
+
+
+
 private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E)) ∞
@@ -257,6 +257,7 @@ private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
         TotalSpace.mk' (E →L[𝕜] Tensor0SModel n 𝕜 E)
           (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y) b
           (curriedSection_gen T b)) := by
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n + 1)
   intro x
   rw [Bundle.contMDiffAt_section (F := E →L[𝕜] Tensor0SModel n 𝕜 E)
     (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y)]
@@ -281,32 +282,32 @@ private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
         (fun y : M => Tensor0SSpace (n + 1) I y) x ⟨b, T b⟩).2)
   exact trivializationAt_homBundle_curriedSection_eq_gen (I := I) (M := M) T x b hb
 
-/-!
-## Pointwise evaluation identity
--/
 
-/-- Evaluating the curry image at `(v_0, v_1, ..., v_n)` equals evaluating the original
-multilinear `(n + 1)`-tensor at the `cons` tuple. -/
+
+
+
+
+
 theorem tensor0S_curry_apply_eval_gen {n : ℕ} {b : M}
     (T : Tensor0SSpace (n + 1) I b)
     (v0 : E) (vs : Fin n → E) :
     Tensor0SSpace.toModel (tensor0S_curry (I := I) (M := M) n b T v0) vs =
     Tensor0SSpace.toModel T (Fin.cons v0 vs) := by
-  -- The underlying carrier of `Tensor0SSpace.toModel` is the identity (the CLE
-  -- `tensor0SSpace_continuousLinearEquiv` has `toFun = id`); both sides reduce to evaluating
-  -- the curry CLE at `v0` then at `vs`, which equals evaluating `T` at `Fin.cons v0 vs`.
+
+
+
   change (((continuousMultilinearCurryLeftEquiv 𝕜 (fun _ : Fin (n + 1) => E) 𝕜)
         ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (n + 1) b) T) v0)) vs =
       ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (n + 1) b) T) (Fin.cons v0 vs)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
-/-!
-## Inductive core lemmas
 
-These are the actual recursive proofs, stated with `Continuous` / `ContMDiff` predicates as
-their conclusions. The publicly-named theorems below wrap them with the trailing equational
-form requested by the public API.
--/
+
+
+
+
+
+
 
 private theorem continuous_section_apply_aux : ∀ (n : ℕ)
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -348,7 +349,7 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
         (fun _ : Fin 0 => E) ((T b) 0)) 0 = (T b) 0
       rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     rw [hev]
-    -- Goal: `(T b) 0 = Tensor0SSpace.toModel (T b) (fun i : Fin 0 => v i b)`
+
     have huniq : (fun i : Fin 0 => v i b) = (0 : Fin 0 → E) := Subsingleton.elim _ _
     rw [huniq]
     rfl
@@ -371,8 +372,8 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
       (fun (i : Fin n) (b : M) => v i.succ b)
       (fun i => hv i.succ)
     refine hRec.congr (fun b => ?_)
-    -- `Continuous.congr (h : Continuous f) (h' : ∀ x, f x = g x) : Continuous g` —
-    -- so the goal is `curried b = original b`.
+
+
     change Tensor0SSpace.toModel ((curriedSection_gen T b) (v 0 b))
         (fun i : Fin n => v i.succ b) =
       Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b)
@@ -632,8 +633,8 @@ private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
       (fun (i : Fin n) (b : M) => v i.succ b)
       (fun i => hv i.succ)
     refine hRec.congr (fun b => ?_)
-    -- `ContMDiff.congr (h : ContMDiff f) (h₁ : ∀ y, f₁ y = f y) : ContMDiff f₁` —
-    -- so the goal is `original b = curried b`.
+
+
     change Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b) =
       Tensor0SSpace.toModel ((curriedSection_gen T b) (v 0 b))
         (fun i : Fin n => v i.succ b)
@@ -645,14 +646,14 @@ private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-/-!
-## Main public results
--/
 
-/-- **Continuity of multilinear bundle evaluation.**
-For a continuous section `T` of the `(0, n)`-tensor bundle and continuous tangent sections
-`v_1, ..., v_n`, the pointwise evaluation
-`b ↦ Tensor0SSpace.toModel (T b) (fun i => v i b)` is continuous as a scalar function on `M`. -/
+
+
+
+
+
+
+
 theorem continuous_section_apply_gen
     {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -666,10 +667,10 @@ theorem continuous_section_apply_gen
       Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) :=
   continuous_section_apply_aux n T hT v hv
 
-/-- **Continuity of multilinear bundle evaluation over an arbitrary base map.**
-For a continuous family of `(0,n)` tensors over `b : P → M` and continuous
-tangent vectors over the same base map, pointwise tensor evaluation is
-continuous on `P`. -/
+
+
+
+
 theorem continuous_section_apply_base
     {P : Type*} [TopologicalSpace P] {n : ℕ}
     (b : P → M) (hb : Continuous b)
@@ -684,10 +685,10 @@ theorem continuous_section_apply_base
       Tensor0SSpace.toModel (T p) (fun i : Fin n => v i p)) :=
   continuous_section_apply_base_aux n b hb T hT v hv
 
-/-- **Smoothness of multilinear bundle evaluation.**
-For a smooth section `T` of the `(0, n)`-tensor bundle and smooth tangent sections
-`v_1, ..., v_n`, the pointwise evaluation
-`b ↦ Tensor0SSpace.toModel (T b) (fun i => v i b)` is smooth as a scalar function on `M`. -/
+
+
+
+
 theorem contMDiff_section_apply_gen
     {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -703,11 +704,11 @@ theorem contMDiff_section_apply_gen
       (fun b : M => Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) :=
   contMDiff_section_apply_aux n T hT v hv
 
-/-- Smooth tensor-field evaluation on smooth vector fields.
 
-This is a section-level wrapper around `contMDiff_section_apply_gen`: if `T` is a
-smooth `(0,n)` tensor field and all input slots are smooth tangent sections,
-then the scalar evaluation `p ↦ T_p(v₁(p), ..., v_n(p))` is smooth. -/
+
+
+
+
 theorem contMDiff_tensor0SField_apply
     {n : ℕ}
     (T : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -724,17 +725,17 @@ theorem contMDiff_tensor0SField_apply
     (T := fun b : M => T b) T.contMDiff (fun i b => v i b) hv
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
-/-!
-## Pointwise (`ContMDiffAt`) version of multilinear bundle evaluation
 
-The `ContMDiffAt`-version of `contMDiff_section_apply_gen`, useful when the input section and
-tangent fields are only smooth in a neighborhood of a single point (not globally). The
-proof is by induction on `n`, mirroring the global version but carrying a fixed point `x₀`
-through the recursion. -/
 
-/-- Smoothness transfers from a `(0, n + 1)`-tensor section to the curried `Hom`-bundle
-section, at a single point. (`ContMDiffAt`-version of
-`contMDiff_curriedSection_of_contMDiff_section`.) -/
+
+
+
+
+
+
+
+
+
 theorem contMDiffAt_curriedSection_of_contMDiffAt_section_gen {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E)) ∞
@@ -746,6 +747,7 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section_gen {n : ℕ}
         TotalSpace.mk' (E →L[𝕜] Tensor0SModel n 𝕜 E)
           (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y) b
           (curriedSection_gen T b)) x₀ := by
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n + 1)
   rw [Bundle.contMDiffAt_section (F := E →L[𝕜] Tensor0SModel n 𝕜 E)
     (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y)]
   have hT_at := (Bundle.contMDiffAt_section (F := Tensor0SModel (n + 1) 𝕜 E)
@@ -769,9 +771,9 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section_gen {n : ℕ}
         (fun y : M => Tensor0SSpace (n + 1) I y) x₀ ⟨b, T b⟩).2)
   exact trivializationAt_homBundle_curriedSection_eq_gen (I := I) (M := M) T x₀ b hb
 
-/-- Pointwise (`ContMDiffAt`) version of the multilinear-bundle-evaluation lemma.
-Proved by induction on `n`, mirroring the structure of the global version
-`contMDiff_section_apply_aux`. -/
+
+
+
 private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel n 𝕜 E)) ∞
@@ -833,9 +835,9 @@ private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
       (fun i => hv i.succ)
     refine hRec.congr_of_eventuallyEq ?_
     filter_upwards with b
-    -- Goal: original = curried (eventually), i.e.
-    --   Tensor0SSpace.toModel (T b) (fun i => v i b)
-    --     = Tensor0SSpace.toModel ((curriedSection_gen T b) (v 0 b)) (fun i => v i.succ b).
+
+
+
     show Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b) =
       Tensor0SSpace.toModel ((curriedSection_gen T b) (v 0 b))
         (fun i : Fin n => v i.succ b)
@@ -847,10 +849,10 @@ private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-/-- **Pointwise smoothness of multilinear bundle evaluation.**
-For a `ContMDiffAt`-section `T` of the `(0, n)`-tensor bundle and `ContMDiffAt`-tangent
-sections `v_1, ..., v_n`, all at `x₀`, the pointwise evaluation
-`b ↦ Tensor0SSpace.toModel (T b) (fun i => v i b)` is `ContMDiffAt` at `x₀`. -/
+
+
+
+
 theorem contMDiffAt_section_apply_gen
     {n : ℕ} {x₀ : M}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -866,7 +868,7 @@ theorem contMDiffAt_section_apply_gen
       (fun b : M => Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) x₀ :=
   contMDiffAt_section_apply_aux n x₀ T hT v hv
 
-/-- `C¹` version of `contMDiffAt_curriedSection_of_contMDiffAt_section_gen`. -/
+
 theorem contMDiffAt_curriedSection_of_contMDiffAt_section_one {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E))
@@ -880,6 +882,7 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section_one {n : ℕ}
         TotalSpace.mk' (E →L[𝕜] Tensor0SModel n 𝕜 E)
           (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y) b
           (curriedSection_gen T b)) x₀ := by
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n + 1)
   rw [Bundle.contMDiffAt_section (F := E →L[𝕜] Tensor0SModel n 𝕜 E)
     (E := fun y : M => TangentSpace I y →L[𝕜] Tensor0SSpace n I y)]
   have hT_at := (Bundle.contMDiffAt_section (F := Tensor0SModel (n + 1) 𝕜 E)
@@ -908,7 +911,7 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section_one {n : ℕ}
         (fun y : M => Tensor0SSpace (n + 1) I y) x₀ ⟨b, T b⟩).2)
   exact trivializationAt_homBundle_curriedSection_eq_gen (I := I) (M := M) T x₀ b hb
 
-/-- Pointwise `C¹` multilinear bundle evaluation. -/
+
 private theorem contMDiffAt_section_apply_one_aux : ∀ (n : ℕ) (x₀ : M)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel n 𝕜 E))
@@ -988,7 +991,7 @@ private theorem contMDiffAt_section_apply_one_aux : ∀ (n : ℕ) (x₀ : M)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-/-- Pointwise `C¹` smoothness of multilinear bundle evaluation. -/
+
 theorem contMDiffAt_section_apply_one
     {n : ℕ} {x₀ : M}
     (T : ∀ b : M, Tensor0SSpace n I b)

@@ -1,71 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzTruncation
 
-/-!
-# Time-`L²` modulus of continuity at `t = 0` of the subcritical Duhamel field
-
-The locally-Lipschitz small-time cutoff
-`de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_of_compact_resolvent`
-(`MaxRegLocalLipschitz`) carries one genuine analytic hypothesis — that the
-constructed `H^{a+1}`-view solution field stays, for a.e. time, in the closed
-ball `closedBall (ι u₀) R` on which the nonlinearity `N` is Lipschitz.  This
-file proves the quantitative smallness statement that underlies that
-hypothesis: in the time-`L²` norm of `L²([0,T]; H^{a+1})` the field
-
-  `maxRegDuhamelSolFieldHa1 … u₀ gforce`
-
-converges to the constant-in-time field `t ↦ ι u₀` as the horizon `T → 0+`.
-
-## The two contributions
-
-The `H^{a+1}`-view Duhamel field splits as
-
-  `field = (homogeneous heat flow) + (Duhamel integral of the forcing)`,
-
-with the two summands measured against `ι u₀` separately.
-
-* **Homogeneous part.**  Its `i`-th eigen-coordinate is the scalar decay
-  `t ↦ e^{−λᵢ t} · cᵢ`, with `cᵢ = u₀.coeff i`.  The defect against the
-  constant `cᵢ` is `t ↦ (e^{−λᵢ t} − 1) · cᵢ`.  The kernel bound
-  `0 ≤ 1 − e^{−λᵢ t} ≤ 1` on `[0,T]` gives the per-mode `L²(0,T)` estimate
-  `‖(e^{−λᵢ ·} − 1) cᵢ‖² ≤ T · cᵢ²`, hence — assembled over the eigen-modes at
-  the `H^{a+1}` scale —
-
-    `‖(homogeneous part) − const (ι u₀)‖_{L²([0,T];H^{a+1})} ≤ √T · ‖ι u₀‖`.
-
-* **Duhamel part.**  Bounded by the committed one-derivative-gain `√T`-decay
-  estimate `maximalRegularitySolFieldHa1_norm_le`:
-
-    `‖(Duhamel part)‖_{L²([0,T];H^{a+1})} ≤ 2√T · ‖gforce‖`.
-
-Both vanish as `T → 0+`, so
-
-  `‖field − const (ι u₀)‖_{L²([0,T];H^{a+1})} ≤ √T · (‖ι u₀‖ + 2‖gforce‖) → 0`.
-
-## Main results
-
-* `maxRegHomogeneousSolFieldHa1_sub_const_norm_le` — the homogeneous-part
-  time-`L²` defect bound `√T · ‖ι u₀‖`.
-* `maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact` — the full field
-  time-`L²` defect bound `√T · ‖ι u₀‖ + 2√T · ‖gforce‖`.
-* `maxRegDuhamelSolFieldHa1_tendsto_const_ofCompact` — the continuity-at-`0`
-  statement: as `T → 0+` along nonnegative horizons, the field defect in the
-  `L²([0,T]; H^{a+1})` norm tends to `0`.
-
-## Relation to the stays-in-ball hypothesis
-
-The hypothesis `hstay` of the cutoff is the *pointwise-a.e.-in-time* membership
-`field t ∈ closedBall (ι u₀) R`.  The results here establish the corresponding
-*time-`L²`* smallness `∫₀ᵀ ‖field t − ι u₀‖² dt → 0`.  Upgrading the time-`L²`
-modulus to the pointwise-a.e. one requires a *continuous-in-time `H^{a+1}`*
-representative of the field — the field is currently a pure
-`L²([0,T]; H^{a+1})` element synthesised by `timeL2OfModes`, and the continuous
-representative carried by the solution space (`TimeSobolev.timeH1.toFun`,
-`continuousOn_toFun`) lives one Sobolev order lower, at the scale `a`.  The
-quantitative input recorded here is exactly the smallness half of that
-argument; the missing half is the lift of the continuous representative to the
-scale `a + 1`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -98,11 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- The `i`-th time-mode coordinate of the constant field `const T (ι u₀)` is
-the constant scalar field `const T cᵢ`, `cᵢ = u₀.coeff i`: the inclusion
-`H^{a+2} ↪ H^{a+1}` preserves the eigen-coordinates, and the time-mode
-coordinate of a constant tensor field is the constant scalar field of that
-coordinate. -/
 theorem timeModeCoeff_const_inclusion
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -124,21 +53,18 @@ theorem timeModeCoeff_const_inclusion
   filter_upwards [hlhs, hconst, hrhs] with t htlhs htconst htrhs
   rw [htlhs, htconst, htrhs, tensorHsInclusion_coeff_apply]
 
-/-- The `i`-th time-mode coordinate of the homogeneous-defect field
-`maxRegHomogeneousSolFieldHa1 − const (ι u₀)` is represented a.e. by the scalar
-function `t ↦ (e^{−λᵢ t} − 1) · cᵢ`. -/
 theorem timeModeCoeff_homog_sub_const_coeFn
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ⇑(timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i) =ᵐ[timeMeasure T]
       fun t => (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1) *
         u₀.coeff i := by
   have hhom : timeModeCoeff (I := I) (M := M)
-      (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀) i =
+      (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀) i =
         homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
     maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M) (a := a) hT u₀ i
   have hneg : timeModeCoeff (I := I) (M := M)
@@ -154,11 +80,11 @@ theorem timeModeCoeff_homog_sub_const_coeFn
             (show (a + 1) ≤ a + 2 by linarith) u₀) by rw [neg_one_smul],
       timeModeCoeff_smul (I := I) (M := M),
       timeModeCoeff_const_inclusion (I := I) (M := M) u₀ i, neg_one_smul]
-  rw [show (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+  rw [show (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
         TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)) =
-      maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ +
+      maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ +
         (-TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)) from by rw [sub_eq_add_neg],
@@ -175,14 +101,11 @@ theorem timeModeCoeff_homog_sub_const_coeFn
   rw [htadd, Pi.add_apply, htmode, htnegc, Pi.neg_apply, htconst]
   ring
 
-/-- The per-mode `L²(0,T)` defect of the homogeneous flow against the constant
-`cᵢ` is bounded by `√T · |cᵢ|`: on `[0,T]` the kernel defect satisfies
-`|e^{−λᵢ t} − 1| ≤ 1`, so `∫₀ᵀ ((e^{−λᵢ t} − 1) cᵢ)² ≤ T · cᵢ²`. -/
 theorem norm_timeModeCoeff_homog_sub_const_sq_le
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i‖ ^ 2 ≤
@@ -193,7 +116,7 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
   have hcont : Continuous fdiff := by rw [hfdiff_def]; fun_prop
   have hae := timeModeCoeff_homog_sub_const_coeFn (I := I) (M := M) u₀ hT i
   have heq : timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i =
@@ -229,20 +152,11 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
       ≤ (Real.sqrt T * |u₀.coeff i|) ^ 2 := hsq
     _ = T * (u₀.coeff i) ^ 2 := by rw [mul_pow, Real.sq_sqrt hT, sq_abs]
 
-/-- **The homogeneous-part time-`L²` defect bound.**  In the `L²([0,T]; H^{a+1})`
-norm the homogeneous heat flow `e^{tΔ_∇} u₀` differs from the constant-in-time
-field `t ↦ ι u₀` by at most `√T · ‖ι u₀‖`:
-
-  `‖maxRegHomogeneousSolFieldHa1 … u₀ − const (ι u₀)‖ ≤ √T · ‖ι u₀‖`.
-
-The factor `√T` **vanishes as `T → 0`**: at `t = 0` the homogeneous flow is the
-identity, and the per-mode kernel defect `e^{−λᵢ t} − 1` is uniformly bounded by
-`1`. -/
 theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T) :
-    ‖maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+    ‖maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
         TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)‖ ≤
@@ -269,17 +183,6 @@ theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
   rw [one_pow, one_mul, hconst_norm]
   exact mul_le_mul_of_nonneg_left hdefect hw_nonneg
 
-/-- **The full `H^{a+1}`-view Duhamel field time-`L²` defect bound.**  For the
-forcing `gforce ∈ L²([0,T]; Hᵃ)`, in the `L²([0,T]; H^{a+1})` norm the Duhamel
-field differs from the constant-in-time field `t ↦ ι u₀` by at most
-
-  `√T · ‖ι u₀‖ + 2√T · ‖gforce‖`,
-
-the sum of the homogeneous-part defect `√T · ‖ι u₀‖`
-(`maxRegHomogeneousSolFieldHa1_sub_const_norm_le`) and the Duhamel-part bound
-`2√T · ‖gforce‖` (the one-derivative-gain `√T`-decay
-`maximalRegularitySolFieldHa1_norm_le`).  Both contributions vanish as
-`T → 0`. -/
 theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -297,7 +200,7 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hιu₀
   have hsplit : maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
         TimeSobolev.const T ιu₀ =
-      (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+      (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T ιu₀) +
         maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 gforce := by
     rw [maxRegDuhamelSolFieldHa1]; abel
@@ -309,20 +212,7 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
     (h_compact := h_compact) (a := a) hT hT1 gforce
   exact add_le_add hhom hduh
 
-/-- **Time-`L²` continuity of the subcritical Duhamel field at `T = 0`.**  As the
-horizon `T → 0+` (through nonnegative values), the `H^{a+1}`-view Duhamel field
-converges, in the `L²([0,T]; H^{a+1})` norm, to the constant-in-time field
-`t ↦ ι u₀`.  Concretely: for every `ε > 0` there is `T₀ > 0` such that for every
-horizon `0 < T ≤ T₀` (with `T ≤ 1`) and every forcing `gforce` with
-`‖gforce‖ ≤ B`,
-
-  `‖maxRegDuhamelSolFieldHa1 … u₀ gforce − const (ι u₀)‖ ≤ ε`.
-
-This is the quantitative smallness underlying the stays-in-ball requirement of
-the locally-Lipschitz small-time cutoff: the field starts (in the time-`L²`
-sense) at `ι u₀` and stays `√T`-close to it on a short interval, uniformly over
-forcings of bounded norm. -/
-theorem maxRegDuhamelSolFieldHa1_tendsto_const_ofCompact
+theorem maxRegDuhamelSolFieldTraceScale_tendsto_const_ofCompact
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (B : ℝ) {ε : ℝ} (hε : 0 < ε) :

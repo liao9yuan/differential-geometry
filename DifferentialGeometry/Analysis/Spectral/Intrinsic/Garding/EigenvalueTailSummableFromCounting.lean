@@ -1,32 +1,32 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralChartRegularityAnyOrder
 
-/-!
-# Eigenvalue-tail summability from a polynomial counting bound
 
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
-on a finite-dimensional real inner-product space `E`, the predicate
-`EigenvalueTailSummable g r s` asks for *some* exponent `p > 0` making the family
-`i ↦ (1 + λᵢ)^{-p}` over the tensor eigen-index set summable.
 
-This file provides the **counting → summability** converter: the standard
-real-analytic fact that a polynomial bound on the eigenvalue-counting function
-`N(Λ) = #{i : 1 + λᵢ < Λ}` forces eigenvalue-tail summability. Concretely, if for
-every dyadic threshold `2^{n+1}` the shell `{i : 1 + λᵢ < 2^{n+1}}` is contained
-in a finite family of cardinality at most `A · 2^{(n+1)·q}`, then `i ↦ (1 + λᵢ)^{-p}`
-is summable at the explicit exponent `p = q + 2 > 0`.
 
-The argument is the textbook dyadic decomposition. Partition the index set by the
-shell index `m(i) = ⌊log₂ ⌊1 + λᵢ⌋⌋`, so that `2^{m(i)} ≤ 1 + λᵢ < 2^{m(i)+1}`.
-On shell `m` the summand is bounded by `2^{-m·p}`, the shell has at most `A·2^{(m+1)q}`
-elements (by the counting hypothesis, since membership in the shell forces `1 + λᵢ`
-below `2^{m+1}`), so the shell contributes at most `A·2^q·2^{-2m}`, and summing the
-geometric series in `m` gives a uniform bound on every finite partial sum. The
-conclusion follows from `summable_of_sum_le`.
 
-This isolates the purely analytic counting → summability step from the geometric
-local-Weyl counting bound itself (the local reproducing-kernel diagonal estimate),
-which is supplied separately.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,16 +38,16 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-/-- **Dyadic counting ⟹ summability.**
 
-Let `w : ι → ℝ` with `w i ≥ 1`. Suppose there is a family of finsets `count n`
-such that every index with `w i < 2^{n+1}` lies in `count n`, and
-`#(count n) ≤ A · 2^{(n+1)·q}` (a polynomial-in-`2^n` counting bound of degree
-`q`). Then `i ↦ (w i)^{-(q+2)}` is summable.
 
-This is the standard "Weyl counting ⟹ Schatten" step: a polynomial bound of degree
-`q` on the dyadic counting function forces summability of `(w i)^{-p}` for the
-explicit exponent `p = q + 2`. -/
+
+
+
+
+
+
+
+
 theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 ≤ w i)
     (q : ℕ) (A : ℝ) (hA : 0 ≤ A)
     (count : ℕ → Finset ι)
@@ -170,20 +170,20 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- A polynomial dyadic counting bound on the tensor Laplacian spectrum gives
-`EigenvalueTailSummable g r s`.
 
-The hypotheses say that for every `n` the dyadic shell `{i : 1 + λᵢ < 2^{n+1}}` is
-contained in a finite family `count n` with `#(count n) ≤ A · 2^{(n+1)·q}` (with
-`A ≥ 0`). The conclusion is the existential predicate `EigenvalueTailSummable g r s`,
-which is realized here at the explicit exponent `p = q + 2 > 0`: the family
-`i ↦ (1 + λᵢ)^{-(q+2)}` is summable.
 
-This is the geometric specialization of the abstract dyadic converter
-`counting_summable_dyadic` to the tensor eigen-index set, taking the weight
-`w i = 1 + λᵢ ≥ 1` (using `tensor_lambda_nonneg`). It supplies the Schatten-type
-eigenvalue-tail summability that the spectral smooth-representative gate consumes;
-the polynomial counting bound itself (a local Weyl law) is provided separately. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem eigenvalueTailSummable_of_polynomial_counting_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (q : ℕ) (A : ℝ) (hA : 0 ≤ A)

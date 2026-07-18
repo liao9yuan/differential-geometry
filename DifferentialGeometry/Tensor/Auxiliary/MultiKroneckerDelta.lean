@@ -5,25 +5,12 @@ open Equiv.Perm
 
 namespace Fin
 
-/-!
-## Multi-index Kronecker delta
--/
-
-/-- The generalized Kronecker delta for multi-indices `I J : Fin k → Fin n`.
-
-This is the determinant of the `k × k` matrix whose `(i, j)` entry is `1` if `I i = J j`
-and `0` otherwise.
-
-When `I = J ∘ σ` for some permutation `σ : Equiv.Perm (Fin k)`, this equals `Equiv.Perm.sign σ`.
-If no such permutation exists, it equals `0`. -/
 noncomputable def multiKroneckerDelta {R : Type*} [CommRing R] {k n : ℕ}
     (I J : Fin k → Fin n) : R :=
   Matrix.det (fun i j : Fin k => if I i = J j then 1 else 0)
 
 variable {R : Type*} [CommRing R] {k n : ℕ}
 
-/-- If `J` is injective and `I = J ∘ σ` for a permutation `σ`, then the generalized
-Kronecker delta equals the sign of `σ`. -/
 theorem multiKroneckerDelta_comp_perm
     {J : Fin k → Fin n} (hJ : Function.Injective J)
     (σ : Equiv.Perm (Fin k)) :
@@ -35,8 +22,6 @@ theorem multiKroneckerDelta_comp_perm
     ext i j; simp [Matrix.submatrix_apply, Matrix.one_apply]]
   rw [Matrix.det_permute, Matrix.det_one, mul_one]
 
-/-- If `I` is not injective (has a repeated index), the generalized
-Kronecker delta is zero. -/
 theorem multiKroneckerDelta_eq_zero_of_not_injective_left
     {I J : Fin k → Fin n} (hI : ¬Function.Injective I) :
     multiKroneckerDelta (R := R) I J = 0 := by
@@ -44,8 +29,6 @@ theorem multiKroneckerDelta_eq_zero_of_not_injective_left
   obtain ⟨i₁, i₂, heq, hne⟩ := Function.not_injective_iff.mp hI
   exact Matrix.det_zero_of_row_eq hne (funext fun j => by rw [heq])
 
-/-- If `J` is not injective (has a repeated index), the generalized
-Kronecker delta is zero. -/
 theorem multiKroneckerDelta_eq_zero_of_not_injective_right
     {I J : Fin k → Fin n} (hJ : ¬Function.Injective J) :
     multiKroneckerDelta (R := R) I J = 0 := by
@@ -53,18 +36,15 @@ theorem multiKroneckerDelta_eq_zero_of_not_injective_right
   obtain ⟨j₁, j₂, heq, hne⟩ := Function.not_injective_iff.mp hJ
   exact Matrix.det_zero_of_column_eq hne (fun r => by rw [heq])
 
-/-- If no permutation `σ` satisfies `I = J ∘ σ`, then the generalized
-Kronecker delta is zero. -/
 theorem multiKroneckerDelta_eq_zero
     {I J : Fin k → Fin n}
     (h : ∀ σ : Equiv.Perm (Fin k), I ≠ J ∘ ⇑σ) :
     multiKroneckerDelta (R := R) I J = 0 := by
   by_cases hI : Function.Injective I
   · by_cases hJ : Function.Injective J
-    · -- Both injective but no perm relates them; some row must be all zeros.
-      have ⟨i, hi⟩ : ∃ i, ∀ j, I i ≠ J j := by
+    · have ⟨i, hi⟩ : ∃ i, ∀ j, I i ≠ J j := by
         by_contra hall
-        push_neg at hall
+        push Not at hall
         choose f hf using hall
         have hf_inj : Function.Injective f :=
           fun a b hab => hI (by rw [hf a, hf b, hab])
@@ -76,9 +56,6 @@ theorem multiKroneckerDelta_eq_zero
     · exact multiKroneckerDelta_eq_zero_of_not_injective_right hJ
   · exact multiKroneckerDelta_eq_zero_of_not_injective_left hI
 
-/-- The generalized Kronecker delta is symmetric:
-`multiKroneckerDelta I J = multiKroneckerDelta J I`.
-This follows from `det M = det Mᵀ`. -/
 theorem multiKroneckerDelta_symm (I J : Fin k → Fin n) :
     multiKroneckerDelta (R := R) I J = multiKroneckerDelta J I := by
   unfold multiKroneckerDelta
@@ -86,8 +63,6 @@ theorem multiKroneckerDelta_symm (I J : Fin k → Fin n) :
   congr 1; ext i j
   simp [Matrix.transpose_apply, eq_comm]
 
-/-- Permuting the first argument of `multiKroneckerDelta` by `σ` multiplies by `sign σ`.
-This follows from `Matrix.det_permute` (row permutation of determinant). -/
 theorem multiKroneckerDelta_comp_perm_left
     (I : Fin k → Fin n) (J : Fin k → Fin n) (σ : Equiv.Perm (Fin k)) :
     multiKroneckerDelta (R := R) (I ∘ ⇑σ) J =
@@ -98,8 +73,6 @@ theorem multiKroneckerDelta_comp_perm_left
     ext i j; simp [Matrix.submatrix_apply, M]
   rw [this, Matrix.det_permute]
 
-/-- Swapping the two blocks in `addCases` and reindexing by `finAddCongr`
-multiplies the generalized Kronecker delta by `(-1)^(m*n)`. -/
 theorem multiKroneckerDelta_addCases_comm
     {d m n : ℕ} (I : Fin m → Fin d) (J : Fin n → Fin d)
     (v : Fin (m + n) → Fin d) :
@@ -139,12 +112,6 @@ theorem multiKroneckerDelta_addCases_comm
     rfl
   rw [h_sign]
 
-/-!
-## Cauchy-Binet identity for multiKroneckerDelta
--/
-
-/-- The `multiKroneckerDelta` of `addCases I (addCases J K)` reindexed by `finAssoc.symm`
-equals `multiKroneckerDelta` of `addCases (addCases I J) K`. -/
 theorem multiKroneckerDelta_addCases_assoc
     {d m n p : ℕ} (I : Fin m → Fin d) (J : Fin n → Fin d) (K : Fin p → Fin d)
     (v : Fin (m + n + p) → Fin d) :
@@ -165,16 +132,7 @@ theorem multiKroneckerDelta_addCases_assoc
 variable {𝕜 : Type*} [Field 𝕜]
 
 open Classical in
-/-- The Cauchy-Binet identity for multiKroneckerDelta:
-`(m! * p!)⁻¹ • ∑ σ, sign σ • δ(I, v∘σ∘castAdd) * δ(J, v∘σ∘natAdd) = δ(addCases I J, v)`.
 
-The proof proceeds by:
-1. Expanding all `multiKroneckerDelta`s as `Matrix.det` (Leibniz formula).
-2. Distributing the product of sums and exchanging summation order.
-3. For each fixed `(α, β)`, applying `inner_sum_eq_det` to evaluate the inner sum
-   over `σ` as `sign(α) * sign(β) * det M`.
-4. Observing that `sign(α)² * sign(β)² = 1`, so each `(α, β)` contributes `det M`.
-5. Summing `m! * p!` copies of `det M` and cancelling with `(m! * p!)⁻¹`. -/
 theorem multiKroneckerDelta_cauchyBinet [CharZero 𝕜]
     {d m p : ℕ} (I : Fin m → Fin d) (J : Fin p → Fin d) (v : Fin (m + p) → Fin d) :
     ((↑(m.factorial * p.factorial) : 𝕜))⁻¹ •
@@ -262,6 +220,5 @@ theorem multiKroneckerDelta_cauchyBinet [CharZero 𝕜]
       simp [Units.smul_def, zsmul_eq_mul, hM_def]]
   simp only [Finset.smul_sum, nsmul_eq_mul, Nat.cast_mul]
   congr 1; ext σ; ring
-
 
 end Fin

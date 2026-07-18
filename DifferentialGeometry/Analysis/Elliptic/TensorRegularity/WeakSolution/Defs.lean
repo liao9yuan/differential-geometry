@@ -1,64 +1,11 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 
-/-!
-# Per-component scalar weak solutions of the tensor connection Laplacian
-
-For a smooth Riemannian metric `g` on a closed manifold `(M, g)`, a chart center
-`α : M`, tensor ranks `(r, s)`, and a component multi-index `P₀`, this file
-performs the final assembly step of the chart-local elliptic-regularity analysis
-of the connection Laplacian on `(r, s)`-tensor sections: it routes the chart
-scalar component of an `(r, s)`-tensor section into the Euclidean
-divergence-form weak-solution predicate
-`SmoothEllipticBilinearForm.IsSmoothWeakSolution`.
-
-## The chart scalar component as a Euclidean function
-
-The chart-coordinate covariant derivative — and hence the `H^1` Dirichlet form
-of the connection Laplacian — is computed from the *raw* chart-frame scalar
-components `tensorChartComponentRaw g r s T α Idx Jdx` (no partition-of-unity
-weight). The Euclidean object on which the chart-local divergence-form analysis
-runs is therefore the Euclidean push-forward of this raw chart component,
-`tensorComponentEuclid g r s T α P₀` — the `(r, s)`-tensor analogue of the
-scalar chart pull-back `chartPullback`. When the section `T` is supported inside
-the chart source, this push-forward is globally `C^∞` (extension by zero across
-the closed-off complement of the chart target).
-
-## The principal-part bilinear form
-
-The component-diagonal principal part of the connection Laplacian's chart
-Dirichlet form is the scalar Laplace–Beltrami principal part, packaged as the
-`SmoothEllipticBilinearForm` `tensorPrincipalForm g α hK hK_target` for a chosen
-compact `K ⊆ chartTargetEuclid α`. Its zeroth-order coefficient vanishes, and on
-`K` its principal coefficient matrix is the volume-weighted inverse Gram matrix.
-
-## Main definitions
-
-* `tensorComponentEuclid g r s T α P₀` — the Euclidean push-forward of the raw
-  chart-frame scalar component of `T` at the component multi-index `P₀`.
-
-## Main results
-
-* `tensorComponentEuclid_contDiffOn` — the push-forward is `ContDiffOn ℝ ∞` on
-  the Euclidean chart target.
-* `tensorComponentEuclid_contDiff` — for a section `T` supported inside the
-  chart source, the push-forward is globally `C^∞`.
-* `tensorComponentEuclid_tsupport_subset` — for a chart-supported section the
-  push-forward has compact support inside a compact subset of the Euclidean
-  chart target.
-* `tensorComponent_isSmoothWeakSolution_of_chartIdentity` — the headline
-  (hypothesis-bearing form): given the chart-pulled scalar bilinear identity
-  for the principal-part form `tensorPrincipalForm`, the Euclidean chart
-  component `tensorComponentEuclid g r s T α P₀` is a smooth weak solution of
-  `tensorPrincipalForm` with the supplied right-hand side.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -91,16 +38,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **The Euclidean chart component of an `(r, s)`-tensor section.** For a chart
-center `α` and a component multi-index `P₀ : CompIdx E r s`, this is the
-Euclidean push-forward `chartPushedRaw I α` of the raw chart-frame scalar
-component `tensorChartComponentRaw g r s T α P₀.1 P₀.2`: a function
-`EuclN → ℝ`, equal on the chart target to the raw chart component read at the
-chart-source preimage, and `0` off the chart target.
-
-It is the tensor analogue of the scalar chart pull-back `chartPullback`: it is
-the function on which the chart-local divergence-form elliptic analysis of the
-connection Laplacian's component-diagonal principal part operates. -/
 noncomputable def tensorComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -108,7 +45,7 @@ noncomputable def tensorComponentEuclid
   chartPushedRaw I α
     (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
 
-/-- Unfolding lemma for `tensorComponentEuclid`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -117,9 +54,7 @@ lemma tensorComponentEuclid_def
       chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2) := rfl
 
-/-- On the Euclidean chart target the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀` equals the raw chart-frame scalar component
-read at the chart-source preimage of the point. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -131,7 +66,7 @@ lemma tensorComponentEuclid_apply_of_mem
   rw [tensorComponentEuclid_def]
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
-/-- Off the Euclidean chart target the Euclidean chart component vanishes. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -141,9 +76,7 @@ lemma tensorComponentEuclid_apply_of_notMem
   rw [tensorComponentEuclid_def]
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
-/-- The Euclidean chart component `tensorComponentEuclid g r s T α P₀` is
-`ContDiffOn ℝ ∞` on the Euclidean chart target — a restatement of
-`chartPushedRaw_tensorChartComponentRaw_contDiffOn`. -/
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -153,10 +86,6 @@ theorem tensorComponentEuclid_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α P₀.1 P₀.2
 
-/-- The raw chart-frame scalar component of a section vanishes wherever the
-underlying section vanishes: it is the chart-frame component projection of the
-trivialization projection of `T.toSection`, both continuous-linear, so a zero
-input produces a zero output. -/
 private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -169,9 +98,7 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
   unfold tensorTrivProj
   rw [hx, map_zero, map_zero]
 
-/-- The topological support of the raw chart-frame scalar component is contained
-in the topological support of `T.toFun`: the component vanishes wherever
-`T.toSection` (equivalently `T.toFun`) vanishes. -/
+omit [CompleteSpace E] in
 lemma tensorChartComponentRaw_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -193,8 +120,7 @@ lemma tensorChartComponentRaw_tsupport_subset
   exact hx (tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (I := I) (M := M) g r s T α Idx Jdx hsec)
 
-/-- For a section `T` supported inside the chart source, the raw chart-frame
-scalar component is supported inside the chart source. -/
+omit [CompleteSpace E] in
 private lemma tensorChartComponentRaw_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -206,14 +132,7 @@ private lemma tensorChartComponentRaw_tsupport_subset_chart_source
   (tensorChartComponentRaw_tsupport_subset (I := I) (M := M) g r s T α Idx Jdx).trans
     hT_supp
 
-/-- For a section `T` supported inside the chart source, the Euclidean chart
-component `tensorComponentEuclid g r s T α P₀` is globally `C^∞`.
-
-The raw chart component is `C^∞` on the chart source and supported there
-(`tensorChartComponentRaw_tsupport_subset_chart_source`); the Euclidean
-push-forward `chartPushedRaw I α` of such a function is `ContDiffOn ℝ ∞` on the
-open chart target and vanishes off a compact subset of it, so it is globally
-`C^∞` by the extension-by-zero argument. -/
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -259,10 +178,7 @@ theorem tensorComponentEuclid_contDiff
     · exact tensorComponentEuclid_apply_of_notMem
         (I := I) (M := M) g r s T α P₀ hzT
 
-/-- For a section `T` supported inside the chart source, the Euclidean chart
-component `tensorComponentEuclid g r s T α P₀` has compact support inside the
-compact Euclidean image of the raw chart component's support, which lies inside
-the open Euclidean chart target. -/
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -304,10 +220,7 @@ theorem tensorComponentEuclid_tsupport_subset
         (I := I) (M := M) g r s T α P₀ hyT)
   exact (closure_minimal hsupp hK_compact.isClosed).trans hK_target
 
-/-- For a section `T` supported inside the chart source, the Euclidean chart
-component `tensorComponentEuclid g r s T α P₀` has compact support: its
-`Function.support` is contained in the compact Euclidean image of the raw chart
-component's support. -/
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -348,32 +261,7 @@ theorem tensorComponentEuclid_hasCompactSupport
         (I := I) (M := M) g r s T α P₀ hyT)
   exact HasCompactSupport.of_support_subset_isCompact hK_compact hsupp
 
-/-- **Per-component scalar weak solution of the connection Laplacian
-(hypothesis-bearing form).**
-
-Let `g` be a smooth Riemannian metric on a closed (compact, boundaryless)
-smooth manifold `M`, let `α : M` be a chart center, and let `T` be a smooth
-compactly-supported `(r, s)`-tensor section supported inside the chart source.
-Let `K ⊆ chartTargetEuclid α` be compact, and `P₀ : CompIdx E r s` a component
-multi-index.
-
-If, for every smooth compactly-supported Euclidean test function `φ`, the
-chart-pulled scalar bilinear identity
-```
-(tensorPrincipalForm g α hK hK_target).bilin (tensorComponentEuclid g r s T α P₀) φ
-  = ∫ y, f y * φ y
-```
-holds, then the Euclidean chart component `tensorComponentEuclid g r s T α P₀`
-is a smooth weak solution of the principal-part elliptic bilinear form
-`tensorPrincipalForm g α hK hK_target` with right-hand side `f`.
-
-The role of the hypothesis: in applications the manifold-side global `H^1` weak
-equation `∫_M ⟨∇T, ∇v⟩ dμ_g = ∫_M ⟨F, v⟩ dμ_g` of the connection Laplacian is
-chart-pulled and the inverse-Gram-rotated test section `rotatedTestSection`
-substituted; the principal part collapses (`covPrincipalIntegrand_rotated_collapse`)
-to the scalar elliptic principal integrand of `tensorPrincipalForm`
-(`weightedInvGram_principalIntegrand_eq`), and the lower-order remainder and
-the source pairing are collected into the right-hand side `f`. -/
+omit [CompleteSpace E] in
 theorem tensorComponent_isSmoothWeakSolution_of_chartIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

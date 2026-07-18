@@ -2,45 +2,12 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
-/-!
-# Scaffolding CLEs and norm-topology bridges for (0,s) tensor sections
-
-This file provides the foundational scaffolding for the construction of the covariant
-derivative on `(0, s)`-tensor bundles: the canonical fiberwise continuous linear
-equivalences, the scalar / curried repackagings of sections, and the bundle/norm-topology
-bridges used to transfer smoothness and differentiability between the bundle topology on
-`Tensor0SSpace s I x` and the norm topology on
-`ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ`.
-
-The fiber `Tensor0SSpace s I x` carries the bundle topology coming from
-`Bundle.continuousMultilinearMap`, but it is continuously linearly equivalent (`id` on the
-underlying data) to the norm-topology space
-`ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ` through
-`tensor0SSpace_continuousLinearEquiv s x`.
-
-## Main results
-
-* `tensor0Iso` : the canonical fiberwise CLE `Tensor0SSpace 0 I x ≃L[ℝ] ℝ`.
-* `scalarFn`, `curriedSection` : the scalar / curried repackagings of sections, with their
-  additive and `ℝ`-action linearity lemmas.
-* `compContinuousLinearMap_fin0` : for a 0-ary CMM, composition with any `Fin 0`-indexed
-  family of CLMs is the constant-extension of `f 0`.
-* `mdifferentiableAt_MLF0_iff_scalar` : MLF-0-diff'ty ↔ scalar diff'ty via curryFin0.
-* `contMDiffAt_MLF0_iff_scalar` : MLF-0-smoothness ↔ scalar smoothness via curryFin0.
-* `contMDiff_scalarFn_iff_section` : s=0 bundle-topology section smoothness ↔ scalar smoothness.
-* `mdifferentiableAt_scalarFn_iff_section` : s=0 bundle-topology section diff'ty ↔ scalar diff'ty.
-* `contMDiff_curriedSection_iff_section` : s+1 bundle-topology section smoothness bridges to the
-  curried Hom-bundle section smoothness via `tensor0S_curry`.
-* `mdifferentiableAt_curriedSection_iff_section` : analogous bridge at `MDifferentiableAt`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
@@ -55,26 +22,19 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ### Base case: `s = 0`
-
-`Tensor0SSpace 0 I x` is the space of continuous multilinear maps from `Fin 0 → E` to `ℝ`,
-which is canonically `≃L[ℝ] ℝ` via `continuousMultilinearCurryFin0`. Sections of
-`fun x => Tensor0SSpace 0 I x` correspond bijectively to scalar functions `M → ℝ`. -/
-
-/-- The canonical fiberwise CLE `Tensor0SSpace 0 I x ≃L[ℝ] ℝ`, factoring through the
-bundle/norm bridge and `continuousMultilinearCurryFin0`. -/
 noncomputable def tensor0Iso (x : M) :
     Tensor0SSpace 0 I x ≃L[ℝ] ℝ :=
   (tensor0SSpace_continuousLinearEquiv (I := I) 0 x).trans
     (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv
 
-/-- The scalar function corresponding to a (0,0)-tensor section. -/
 noncomputable def scalarFn (T : Π x : M, Tensor0SSpace 0 I x) : M → ℝ :=
   fun x => tensor0Iso I M x (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem scalarFn_apply (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = tensor0Iso I M x (T x) := rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_add (T₁ T₂ : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (T₁ + T₂) = scalarFn I M T₁ + scalarFn I M T₂ := by
   funext x
@@ -83,6 +43,7 @@ theorem scalarFn_add (T₁ T₂ : Π x : M, Tensor0SSpace 0 I x) :
   change tensor0Iso I M x (T₁ x + T₂ x) = _
   exact map_add (tensor0Iso I M x) (T₁ x) (T₂ x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_smul (g : M → ℝ) (T : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (g • T) = g • scalarFn I M T := by
   funext x
@@ -90,6 +51,7 @@ theorem scalarFn_smul (g : M → ℝ) (T : Π x : M, Tensor0SSpace 0 I x) :
   change tensor0Iso I M x (g x • T x) = _
   exact map_smul (tensor0Iso I M x) (g x) (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_zero :
     scalarFn I M (0 : Π x : M, Tensor0SSpace 0 I x) = 0 := by
   funext x
@@ -97,39 +59,29 @@ theorem scalarFn_zero :
   change tensor0Iso I M x (0 : Tensor0SSpace 0 I x) = 0
   exact map_zero (tensor0Iso I M x)
 
-/-- The fiberwise inverse iso `(tensor0Iso x).symm` sends `scalarFn T x` back to `T x`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tensor0Iso_symm_scalarFn (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     (tensor0Iso I M x).symm ((scalarFn I M T) x) = T x := by
   change (tensor0Iso I M x).symm (tensor0Iso I M x (T x)) = T x
   exact (tensor0Iso I M x).symm_apply_apply (T x)
 
-/-- The `(tensor0Iso x).symm` inverse CLE sends a scalar `a • scalarFn T x` to
-`a • T x`. -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0Iso_symm_smul (T : Π x : M, Tensor0SSpace 0 I x)
     (a : ℝ) (x : M) :
     (tensor0Iso I M x).symm (a • scalarFn I M T x) = a • T x := by
   rw [map_smul]
   exact congr_arg (a • ·) (tensor0Iso_symm_scalarFn I M T x)
 
-/-! ### Successor case scaffolding
-
-For the recursive step, the fiberwise iso `tensor0S_curry s x` (from `Tensor.RSTensor.Defs`)
-identifies `Tensor0SSpace (s+1) I x` with `TangentSpace I x →L[ℝ] Tensor0SSpace s I x`.
-Given a covariant derivative `cov_s` on the (0,s)-tensor bundle, we can apply
-`homBundleCovariantDerivative cov_TM cov_s` to a curried section, obtaining a CLM into
-the bi-Hom space. Post-composing with `(tensor0S_curry s x).symm` repackages this as a
-CLM into `Tensor0SSpace (s+1) I x`. -/
-
-/-- The "curried" section of `Hom(TM, Tensor0SSpace s)` corresponding to a section `T` of
-`Tensor0SSpace (s+1)`. -/
 noncomputable def curriedSection {s : ℕ} (T : Π x : M, Tensor0SSpace (s+1) I x) :
     Π x : M, TangentSpace I x →L[ℝ] Tensor0SSpace s I x :=
   fun x => tensor0S_curry (I := I) (M := M) s x (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem curriedSection_apply {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x : M) :
     curriedSection I M T x = tensor0S_curry (I := I) (M := M) s x (T x) := rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_add {s : ℕ} (T₁ T₂ : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (T₁ + T₂) = curriedSection I M T₁ + curriedSection I M T₂ := by
   funext x
@@ -139,6 +91,7 @@ theorem curriedSection_add {s : ℕ} (T₁ T₂ : Π x : M, Tensor0SSpace (s+1) 
   change tensor0S_curry (I := I) (M := M) s x (T₁ x + T₂ x) = _
   exact map_add (tensor0S_curry (I := I) (M := M) s x) (T₁ x) (T₂ x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_smul {s : ℕ} (g : M → ℝ) (T : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (g • T) = g • curriedSection I M T := by
   funext x
@@ -147,6 +100,7 @@ theorem curriedSection_smul {s : ℕ} (g : M → ℝ) (T : Π x : M, Tensor0SSpa
   change tensor0S_curry (I := I) (M := M) s x (g x • T x) = _
   exact map_smul (tensor0S_curry (I := I) (M := M) s x) (g x) (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_zero {s : ℕ} :
     curriedSection I M (0 : Π x : M, Tensor0SSpace (s+1) I x) = 0 := by
   funext x
@@ -154,14 +108,6 @@ theorem curriedSection_zero {s : ℕ} :
   change tensor0S_curry (I := I) (M := M) s x (0 : Tensor0SSpace (s+1) I x) = 0
   exact map_zero (tensor0S_curry (I := I) (M := M) s x)
 
-/-! ### Trivialization formula at `s = 0`
-
-For the multilinear bundle with `s = 0`, the trivialization acts as the identity on the
-fiber: composing a 0-ary continuous multilinear map with any family of continuous linear
-maps indexed by `Fin 0` gives back (as a multilinear map) the same multilinear map. -/
-
-/-- For a 0-ary continuous multilinear map `f`, composing with any `Fin 0`-indexed family
-of continuous linear maps gives the constant-extension multilinear map with value `f 0`. -/
 theorem compContinuousLinearMap_fin0
     {F₁ F₂ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁]
     [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
@@ -178,22 +124,12 @@ theorem compContinuousLinearMap_fin0
   congr 1
   exact Subsingleton.elim _ _
 
-/-! ### Base case `s = 0` scalar/`MLF 0` bridges
-
-The CLE `continuousMultilinearCurryFin0 ℝ E ℝ : MLF 0 ≃L[ℝ] ℝ` sends `f ↦ f 0`. We use
-it to bridge between MLF-0-valued differentiability/smoothness and scalar
-differentiability/smoothness.
--/
-
-/-- Unfolded formula for `scalarFn`: it equals `(T x) 0` (evaluation at the unique empty
-input). -/
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_eq_apply_zero (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = (T x) 0 := by
   rfl
 
-/-- A function `M → MLF 0` is `MDifferentiableAt` iff its scalar value `fun y => f y 0`
-is `MDifferentiableAt`. Used to transfer differentiability through
-`continuousMultilinearCurryFin0`. -/
+omit [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_MLF0_iff_scalar
     (f : M → ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) (x : M) :
     MDifferentiableAt I 𝓘(ℝ, ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) f x ↔
@@ -221,8 +157,7 @@ theorem mdifferentiableAt_MLF0_iff_scalar
     filter_upwards with y
     exact ((continuousMultilinearCurryFin0 ℝ E ℝ).symm_apply_apply (f y)).symm
 
-/-- A function `M → MLF 0` is `ContMDiffAt n` iff its scalar value `fun y => f y 0` is
-`ContMDiffAt n`. Used to transfer smoothness through `continuousMultilinearCurryFin0`. -/
+omit [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffAt_MLF0_iff_scalar
     (n : WithTop ℕ∞)
     (f : M → ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) (x : M) :
@@ -251,22 +186,7 @@ theorem contMDiffAt_MLF0_iff_scalar
     filter_upwards with y
     exact ((continuousMultilinearCurryFin0 ℝ E ℝ).symm_apply_apply (f y)).symm
 
-/-! ### Bundle-topology bridges for `s = 0` sections
-
-These bridges transfer differentiability and smoothness of a section of the (0,0)-tensor
-bundle in the *bundle* topology to the corresponding scalar function `scalarFn T`.
-
-The key observation is that the bundle trivialization at `s = 0` simplifies drastically:
-`(trivializationAt x₀ ⟨x, T x⟩).2 = (T x).compContinuousLinearMap (fun _ => e.symmL ℝ x)`
-which, by `compContinuousLinearMap_fin0`, equals the constant-extension multilinear map
-with value `(T x) 0`. Hence the trivialized fiber equals
-`(continuousMultilinearCurryFin0 ℝ E ℝ).symm ((T y) 0) = (curryFin0).symm (scalarFn T y)`.
-Composing with the smooth CLE `curryFin0` (and its inverse) transfers differentiability /
-smoothness between the trivialized bundle section and the scalar function. -/
-
-/-- At `s = 0`, the trivialization fiber component at a point `y` equals the constant-extension
-multilinear map whose value at `0` is `(T y) 0 = scalarFn T y`, which is the image of
-`scalarFn T y` under `(continuousMultilinearCurryFin0 ℝ E ℝ).symm`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_tensor0SBundle_zero_eq_scalarFn
     (T : Π x : M, Tensor0SSpace 0 I x) (x₀ y : M) :
     (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -278,8 +198,7 @@ private theorem trivializationAt_tensor0SBundle_zero_eq_scalarFn
   rw [compContinuousLinearMap_fin0]
   rfl
 
-/-- **B1 (smoothness).** The bundle-topology section `y ↦ ⟨y, T y⟩` for a (0,0)-tensor is
-smooth iff its scalar function `scalarFn T` is smooth. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_scalarFn_iff_section
     (T : Π x : M, Tensor0SSpace 0 I x) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (scalarFn I M T) ↔
@@ -317,8 +236,7 @@ theorem contMDiff_scalarFn_iff_section
     rw [trivializationAt_tensor0SBundle_zero_eq_scalarFn (I := I) (M := M) T x y]
     exact (continuousMultilinearCurryFin0 ℝ E ℝ).apply_symm_apply (scalarFn I M T y)
 
-/-- **B1 (differentiability).** The bundle-topology section `y ↦ ⟨y, T y⟩` for a (0,0)-tensor
-is `MDifferentiableAt x` iff its scalar function `scalarFn T` is `MDifferentiableAt x`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_scalarFn_iff_section
     (T : Π x : M, Tensor0SSpace 0 I x) {x : M} :
     MDifferentiableAt I 𝓘(ℝ, ℝ) (scalarFn I M T) x ↔
@@ -356,25 +274,7 @@ theorem mdifferentiableAt_scalarFn_iff_section
     rw [trivializationAt_tensor0SBundle_zero_eq_scalarFn (I := I) (M := M) T x y]
     exact (continuousMultilinearCurryFin0 ℝ E ℝ).apply_symm_apply (scalarFn I M T y)
 
-/-! ### Bundle-topology bridges for `s+1` sections via `tensor0S_curry`
-
-The fiberwise iso `tensor0S_curry s x` relates bundle-topology sections of
-`Tensor0SSpace (s+1) I` with bundle-topology sections of the Hom-bundle
-`Hom(TM, Tensor0SSpace s I)`. We transfer smoothness / differentiability by observing that
-the trivialized fiber values for the two bundles are related by the *smooth* CLE
-`continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s+1) => E) ℝ`.
-
-Specifically, the Hom-bundle trivialization fiber
-`(Hom-trivAt x₀ ⟨y, curriedSection T y⟩).2 : E →L[ℝ] MLF s` evaluated at `w : E` equals the
-`curry`-image of the `Tensor0SSpace (s+1)` trivialization fiber at `⟨y, T y⟩` evaluated at `w`:
-```
-(Hom-trivAt x₀ ⟨y, curriedSection T y⟩).2 = continuousMultilinearCurryLeftEquiv _
-  ((Tensor0S(s+1)-trivAt x₀ ⟨y, T y⟩).2)
-``` -/
-
-/-- At `s+1`, the `Tensor0SSpace (s+1)` bundle trivialization fiber at `⟨y, T y⟩` equals the
-CMM `(T y).compContinuousLinearMap (fun _ => e.symmL ℝ y)` where `e` is the tangent-bundle
-trivialization at `x₀`. This is just `rfl`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_tensor0SBundle_succ_fiber_eq {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M) :
     (trivializationAt (Tensor0SModel (s+1) ℝ E)
@@ -382,10 +282,7 @@ private theorem trivializationAt_tensor0SBundle_succ_fiber_eq {s : ℕ}
     (T y).compContinuousLinearMap
       (fun _ : Fin (s+1) => (trivializationAt E (TangentSpace I) x₀).symmL ℝ y) := rfl
 
-/-- At `s+1`, the Hom-bundle trivialization fiber at `⟨y, curriedSection T y⟩` is the CLM
-obtained by trivializing both the source (via tangent-bundle trivialization) and the target
-(via the `Tensor0SSpace s` bundle trivialization), i.e. the trivialization-fiber of the Hom
-bundle. This is just `rfl`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_homBundle_curriedSection_fiber_eq {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M) :
     (trivializationAt (E →L[ℝ] Tensor0SModel s ℝ E)
@@ -396,8 +293,7 @@ private theorem trivializationAt_homBundle_curriedSection_fiber_eq {s : ℕ}
       ((curriedSection I M T y).comp
         ((trivializationAt E (TangentSpace I) x₀).symmL ℝ y)) := rfl
 
-/-- Helper: applying `(Tensor0S s).linearMapAt y` to the inverse-CLE-coerced element
-equals composing with `symmL`, provided that `y` is in the trivialization's base set. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0SBundle_linearMapAt_apply_of_mem {s : ℕ} (x₀ y : M)
     (hy : y ∈ (trivializationAt (Tensor0SModel s ℝ E)
       (fun x : M => Tensor0SSpace s I x) x₀).baseSet)
@@ -417,9 +313,7 @@ private theorem tensor0SBundle_linearMapAt_apply_of_mem {s : ℕ} (x₀ y : M)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rfl
 
-/-- Key identity: the Hom-bundle trivialization fiber of the curried section equals the
-curry of the `Tensor0SSpace (s+1)` trivialization fiber, provided that the point `y` is in
-the base sets of the relevant trivializations. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_homBundle_curriedSection_eq_curry_of_mem {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M)
     (hy : y ∈ (trivializationAt (Tensor0SModel s ℝ E)
@@ -451,8 +345,7 @@ private theorem trivializationAt_homBundle_curriedSection_eq_curry_of_mem {s : �
   · intro k
     simp [Fin.cons_succ]
 
-/-- **B2 (smoothness).** The bundle-topology section `y ↦ ⟨y, T y⟩` for a (0,s+1)-tensor is
-smooth iff the curried Hom-bundle section is smooth. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_curriedSection_iff_section {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s+1) ℝ E)) ∞
@@ -513,8 +406,7 @@ theorem contMDiff_curriedSection_iff_section {s : ℕ}
     exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s+1) => E) ℝ
       ).symm_apply_apply _).symm
 
-/-- **B2 (differentiability).** The bundle-topology section `y ↦ ⟨y, T y⟩` for a (0,s+1)-tensor
-is `MDifferentiableAt x` iff the curried Hom-bundle section is `MDifferentiableAt x`. -/
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_curriedSection_iff_section {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) {x : M} :
     MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel (s+1) ℝ E))

@@ -1,45 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.EigenvectorChartWeightedMemLp
 
-/-!
-# Explicit-norm bound for a `C^∞`-coefficient weighted-`L²` product
-
-The qualitative lemma `memLp_weighted_contDiffOn_mul` establishes that, for a
-coefficient `c : EuclN → ℝ` that is `C^∞` on the open chart target and an `L²`
-function `w` supported (almost everywhere, for the chart-pulled weighted measure)
-in a compact subset `K` of the chart target, the product `fun y => c y * w y` is
-again `MemLp 2` with respect to the chart-pulled weighted measure restricted to
-`chartTargetEuclid α`.
-
-Its proof internally extracts a sup bound `∃ C ≥ 0, ∀ y ∈ K, ‖c y‖ ≤ C` for the
-coefficient on the compact set `K` — via `IsCompact.bddAbove_image` — but then
-discards that constant, recording only the membership conclusion.
-
-This file records the quantitative twin. The same sup bound `C` controls the
-`eLpNorm` of the product:
-
-```
-eLpNorm (fun y => c y * w y) 2 μw ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`. On
-`K` the pointwise bound `‖c y‖ ≤ C` gives `‖c y * w y‖ ≤ ‖C • w y‖`; off `K` the
-function `w` vanishes almost everywhere, so both sides vanish. Monotonicity of
-`eLpNorm` under an almost-everywhere norm domination, together with the
-homogeneity `eLpNorm (C • w) 2 μw = ‖C‖ₑ * eLpNorm w 2 μw` and the conversion
-`‖C‖ₑ = ENNReal.ofReal C` for `C ≥ 0`, yields the stated estimate.
-
-## Main result
-
-* `eLpNorm_weighted_contDiffOn_mul_le` — the directly-usable quantitative form:
-  the `eLpNorm` of the `C^∞`-coefficient product is bounded by an explicit
-  constant (the coefficient's sup over `K`) times the `eLpNorm` of `w`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -75,43 +35,15 @@ section ExplicitNormBound
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false
 
-/-- **Explicit-norm bound for a `C^∞`-coefficient weighted-`L²` product.** Let
-`c : EuclN → ℝ` be `C^∞` on the open chart target `chartTargetEuclid α`, let
-`w : EuclN → ℝ` be `MemLp 2` with respect to the chart-pulled weighted measure
-restricted to `chartTargetEuclid α`, and suppose `w` vanishes almost everywhere
-(with respect to that weighted restricted measure) off a compact subset
-`K ⊆ chartTargetEuclid α`. Then there is a nonnegative constant `C` with
-
-```
-eLpNorm (fun y => c y * w y) 2 μw ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-The constant `C` is the sup of `‖c‖` over the compact set `K`. On `K` the
-pointwise bound `‖c y‖ ≤ C` gives `‖c y * w y‖ ≤ ‖C • w y‖`; off `K` the function
-`w` vanishes almost everywhere, so both `c y * w y` and `C • w y` vanish.
-Monotonicity of `eLpNorm` under an almost-everywhere norm domination, the
-homogeneity `eLpNorm (C • w) 2 μw = ‖C‖ₑ * eLpNorm w 2 μw`, and the conversion
-`‖C‖ₑ = ENNReal.ofReal C` for `C ≥ 0` give the estimate.
-
-This is the quantitative twin of `memLp_weighted_contDiffOn_mul`: that lemma
-records only the `MemLp` membership of the product; this lemma exposes the
-explicit constant controlling its `eLpNorm`. The signature deliberately mirrors
-that companion (same hypothesis block `hc`, `hK_*`, `hw`, `hw_zero`); the
-measurability hypothesis `hK_meas` and the membership hypothesis `hw` are kept
-for that parity even though the `eLpNorm` estimate, established by pointwise
-domination, does not consume them. -/
 theorem eLpNorm_weighted_contDiffOn_mul_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
-    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    {K : Set EuclN} (hK_compact : IsCompact K) (_hK_meas : MeasurableSet K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {w : EuclN → ℝ}
-    (hw : MemLp w 2
+    (_hw : MemLp w 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)))
     (hw_zero : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -161,29 +93,11 @@ theorem eLpNorm_weighted_contDiffOn_mul_le
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw := h_mono
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
-/-- **Uniform-constant explicit-norm bound for a `C^∞`-coefficient weighted-`L²`
-product.** Let `c : EuclN → ℝ` be `C^∞` on the open chart target
-`chartTargetEuclid α` and let `K ⊆ chartTargetEuclid α` be compact. Then there is
-a single nonnegative constant `C` — the sup of `‖c‖` over `K`, depending only on
-`c` and `K` — such that for *every* `w : EuclN → ℝ` that is `MemLp 2` with
-respect to the chart-pulled weighted measure restricted to `chartTargetEuclid α`
-and vanishes almost everywhere (for that measure) off `K`,
-
-```
-eLpNorm (fun y => c y * w y) 2 μw ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
-```
-
-where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-This is the constant-uniform form of `eLpNorm_weighted_contDiffOn_mul_le`: the
-constant of that per-`w` bound is the coefficient's sup over the compact set `K`,
-which does not depend on `w`, so it can be exhibited once, before the
-universally quantified `w`. -/
 theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
-    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    {K : Set EuclN} (hK_compact : IsCompact K) (_hK_meas : MeasurableSet K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ w : EuclN → ℝ,

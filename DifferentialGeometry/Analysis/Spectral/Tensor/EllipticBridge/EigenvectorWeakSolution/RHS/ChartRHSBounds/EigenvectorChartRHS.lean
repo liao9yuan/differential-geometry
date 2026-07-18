@@ -4,56 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorChartTestDecoupling
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDiv
 
-/-!
-# The chart right-hand side of the eigenvector weak-solution assembly
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, the per-component
-elliptic-regularity analysis realises the chart `P₀`-component of the abstract
-connection-Laplacian eigenvector as a chart-local weak elliptic solution.
-
-The variational-identity assembly applies the source-free per-approximant chart
-bilinear identity to the partition-of-unity-weighted smooth approximants; its
-Dirichlet term splits, by the covariant Leibniz rule, into a genuine-gradient
-main-Dirichlet term corrected by two cross terms. This file packages the
-chart-Euclidean right-hand side of the limiting variational identity.
-
-## The chart right-hand side
-
-`eigenvectorChartRHS g r s i α P₀` is the chart-Euclidean
-right-hand side of the limiting per-component variational identity: the explicit
-`densityOnEuclid`-and-`C^∞`-coefficient-weighted finite combination of the
-chart-component limit objects produced by the companion files of this campaign —
-
-* the canonical eigenvector chart component `u_chart` (the chart `P₀`-component
-  of the eigenvector);
-* the cross-Leibniz limit objects `crossLeftLimitComponent`,
-  `crossRightLimitComponent`;
-* the lower-order coefficient limits `covPrincipalRotationCoeffLimit`,
-  `covLowerOrderRotationValueCoeffLimit`,
-  `weightedGradCoeffDivLimit`.
-
-Each limit object is, by its companion-file lemma, `MemLp 2` with respect to the
-chart-pulled weighted measure restricted to `chartTargetEuclid α`; each multiplying
-`C^∞` coefficient is bounded on the compact kernel where the limit object is
-supported. The chart-Euclidean right-hand side is therefore again `MemLp 2` with
-respect to the chart-pulled weighted measure
-(`eigenvectorChartRHS_memLp_weighted`) — the `f_chart` membership of
-the chart-bilinear divergence-form data structure.
-
-## Main results
-
-* `eigenvectorChartRHS` — the chart-Euclidean right-hand side of the
-  limiting per-component variational identity.
-* `eigenvectorChartRHS_memLp_weighted` —
-  `eigenvectorChartRHS` is `MemLp 2` with respect to the
-  chart-pulled weighted measure restricted to `chartTargetEuclid α`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
 
 noncomputable section
 
@@ -90,9 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The chart-Euclidean right-hand side of the eigenvector weak-solution
-assembly (chart-locality-free).** Keyed onto the unconditional eigenvector chart
-component and the unconditional cross- and lower-order limit objects. -/
+
 noncomputable def eigenvectorChartRHS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -131,10 +79,6 @@ noncomputable def eigenvectorChartRHS
             crossRightGradCoeffDivLimit (I := I) (M := M)
               g r s i α P₀ y)
 
-/-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
-open Euclidean chart target: the chart density is `C^∞`
-(`densityOnEuclid_contDiffOn`) and strictly positive (`densityOnEuclid_pos`)
-there, so the quotient `1 / densityOnEuclid g α` is `C^∞`. -/
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -142,10 +86,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
-/-- The cross-right gradient-divergence limit vanishes pointwise off the compact
-partition-of-unity kernel `chartPouKernel α` (chart-locality-free). Every summand
-of its explicit finite-sum definition carries an `indicator (chartPouKernel α)`
-factor. -/
+omit [CompleteSpace E] in
 lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -163,11 +104,6 @@ lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
         rw [Set.indicator_of_notMem hy, zero_mul]))),
     add_zero]
 
-/-- **Weighted-`L²` membership of the cross-right gradient-divergence limit
-(chart-locality-free).** The limit is
-`MemLp 2 (chartL2Measure α)` by `crossRightGradCoeffDivLimit_memLp`,
-vanishes pointwise — hence a.e. — off the compact partition-of-unity kernel, and
-the weighted-measure upgrade lemma delivers weighted `MemLp`. -/
 private lemma crossRightGradCoeffDivLimit_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -194,17 +130,7 @@ private lemma crossRightGradCoeffDivLimit_memLp_weighted
     h_plain
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **Weighted-`L²` membership of the chart-Euclidean right-hand side
-(chart-locality-free).** The chart-Euclidean right-hand side
-`eigenvectorChartRHS g r s i α P₀` is `MemLp 2` with respect to the
-chart-pulled weighted measure `(chartPulledWeightedMeasure g α).restrict
-(chartTargetEuclid α)`.
 
-Keyed onto the unconditional eigenvector chart component, the unconditional
-cross- and lower-order limit objects, and their chart-locality-free
-`…_memLp_weighted_unconditional` lemmas. The product helper
-`memLp_weighted_contDiffOn_mul` and finite-sum closure of `MemLp` deliver the
-membership. -/
 theorem eigenvectorChartRHS_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

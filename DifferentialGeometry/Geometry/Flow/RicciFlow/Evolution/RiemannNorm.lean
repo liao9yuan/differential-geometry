@@ -6,15 +6,15 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Riemann Curvature Norm Evolution
 
-This file records the fixed-frame component norm of the lowered Riemann tensor
-and the finite-sum product-rule evolution of that norm.  The genuinely
-geometric simplification from the raw product-rule derivative to the usual
-heat equation is kept as an explicit frontier, matching the existing
-Ricci-norm architecture.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,8 +37,8 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- Raise all four indices of a lowered Riemann component family:
-`Rm^{abcd} = g^{ap} g^{bq} g^{cr} g^{ds} Rm_pqrs`. -/
+
+
 def raisedRm04CompInFrame
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -59,8 +59,8 @@ def raisedRm04CompInFrame
           DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s := by
   rfl
 
-/-- Fixed-frame squared norm of the lowered Riemann tensor:
-`|Rm|^2 = Rm_abcd Rm^{abcd}`. -/
+
+
 def rm04NormSqInFrame
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -82,15 +82,15 @@ def rm04NormSqInFrame
           raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d := by
   rfl
 
-/-- Nested product-rule RHS for five scalar factors.  The shape is chosen to
-match four successive uses of `HasDerivWithinAt.mul`. -/
+
+
 private def derivProduct5RHS
     (u v w y z du dv dw dy dz : Real) : Real :=
   ((((du * v + u * dv) * w + (u * v) * dw) * y + ((u * v) * w) * dy) * z +
     (((u * v) * w) * y) * dz)
 
-/-- Product-rule RHS for differentiating `Rm^{abcd}`.  The nested shape
-intentionally matches repeated uses of `HasDerivWithinAt.mul`. -/
+
+
 def raisedRm04DerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -112,7 +112,7 @@ def raisedRm04DerivRHSInFrame
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x d s)
       (rm04Dt t x p q r s)
 
-/-- Product-rule RHS for differentiating `|Rm|^2 = Rm_abcd Rm^{abcd}`. -/
+
 def rm04NormDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -128,9 +128,9 @@ def rm04NormDerivRHSInFrame
         raisedRm04DerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
           t x a b c d)
 
-/-- The raw product-rule derivative equation for the fixed-frame Riemann norm
-square.  This is the narrow finite-sum frontier left after the norm and raw
-RHS have been formulated. -/
+
+
+
 def Rm04NormRawDerivativeEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -146,7 +146,7 @@ def Rm04NormRawDerivativeEquationOn
       D.carrier
       (t : Real)
 
-/-- Coordinate inner product `<roughDelta Rm, Rm>`. -/
+
 def roughLapRm04InnerInFrame
     (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
@@ -158,7 +158,7 @@ def roughLapRm04InnerInFrame
       roughLapRm04 t x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d
 
-/-- Coordinate squared norm of `nabla Rm` for lowered Riemann components. -/
+
 def nablaRm04NormSqInFrame
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
@@ -171,10 +171,10 @@ def nablaRm04NormSqInFrame
         gInv t x i p * gInv t x j q * gInv t x k r * gInv t x l s *
           nablaRm04 t x a i j k l * nablaRm04 t x b p q r s
 
-/-- The raw product-rule derivative has simplified to
-`2 <roughDelta Rm, Rm> + reaction`.  The reaction term is deliberately
-external here because its normal form depends on the chosen Riemann evolution
-formula and curvature symmetries. -/
+
+
+
+
 def Rm04NormDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -188,7 +188,7 @@ def Rm04NormDerivativeSimplifiesInFrame
         (t : Real) x =
       2 * roughLapInner (t : Real) x + reaction (t : Real) x
 
-/-- Time-derivative component identity for `|Rm|^2`. -/
+
 def Rm04NormTimeDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (rmNormSq roughLapInner reaction : Real -> M -> Real) : Prop :=
@@ -199,8 +199,8 @@ def Rm04NormTimeDerivativeComponentsOn
       D.carrier
       (t : Real)
 
-/-- The time derivative of `|Rm|^2`, reduced to the raw product-rule
-derivative and the remaining finite contraction simplification. -/
+
+
 theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -219,15 +219,15 @@ theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
   intro t x
   simpa [h_simplify t x] using h_raw t x
 
-/-- Laplacian component identity for `|Rm|^2`:
-`Delta |Rm|^2 = 2 <roughDelta Rm, Rm> + 2 |nabla Rm|^2`. -/
+
+
 def Rm04NormLaplacianComponentsOn
     (rmNormLap roughLapInner nablaRmNormSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
     rmNormLap t x = 2 * roughLapInner t x + 2 * nablaRmNormSq t x
 
-/-- Heat-equation form for a supplied Riemann norm reaction:
-`partial_t |Rm|^2 = Delta |Rm|^2 - 2 |nabla Rm|^2 + reaction`. -/
+
+
 def Rm04NormHeatEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (rmNormSq rmNormLap nablaRmNormSq reaction : Real -> M -> Real) : Prop :=
@@ -239,8 +239,8 @@ def Rm04NormHeatEquationOn
       D.carrier
       (t : Real)
 
-/-- Algebraic assembly of the Riemann norm heat equation from the
-time-derivative and Laplacian component identities. -/
+
+
 theorem rm04NormHeatEquationOn_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (rmNormSq rmNormLap roughLapInner nablaRmNormSq reaction : Real -> M -> Real)
@@ -260,8 +260,8 @@ theorem rm04NormHeatEquationOn_of_components
   rw [hvalue]
   exact h_dt t x
 
-/-- Riemann norm heat equation assembled from the raw norm derivative, finite
-contraction simplification, and the Bochner Laplacian identity for `|Rm|^2`. -/
+
+
 theorem rm04NormHeatEquationOn_of_rawDerivative
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

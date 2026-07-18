@@ -2,75 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Iterate
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapStep
 
-/-!
-# All-orders interior elliptic-system regularity of connection-Laplacian tensor
-# weak solutions
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`, ranks
-`(r, s)`, a chart center `α : M`, a component multi-index `P₀`, and a pair of
-chart-supported smooth compactly-supported `(r, s)`-tensor sections `T` (the
-solution) and `F` (the source) satisfying the global `H¹` weak equation
-`∫_M ⟨∇T, ∇v⟩ dμ_g = ⟨F, v⟩_{L²}` of the connection Laplacian, this file ships
-the **unconditional, all-orders** interior Sobolev regularity of the Euclidean
-chart component `tensorComponentEuclid g r s T α P₀`: it lies in `MemWkp (2k+2) 2`
-on every precompact interior subdomain `Ω''`, for *every* order `k : ℕ`, with no
-chart-selection / uniform-atlas hypothesis (`HasLocallyConstantChartAt` or any
-analog) anywhere in the file.
-
-## The elliptic-system coupling, handled honestly
-
-The connection Laplacian `Δ_∇` on an `(r, s)`-tensor is **not** the scalar
-Laplacian applied component-by-component. In a chart, the Weitzenböck / Bochner
-expansion writes `(Δ_∇ T)`'s frame components as the scalar (metric) Laplacian
-of the component plus a **lower-order** coupling among all the components
-(Christoffel- and curvature-weighted first- and zeroth-order terms). The chart
-components therefore solve an elliptic **system** with lower-order coupling, not
-a decoupled family of scalar equations.
-
-The infrastructure that captures this coupling without any approximation is the
-chain
-```
-  tensorComponent_isSmoothWeakSolution           (WeakSolutionHeadline.lean)
-  tensorComponent_iterated_partial_isSmoothWeakSolution   (BootstrapMixed.lean)
-```
-The first exhibits each Euclidean chart component as a smooth weak solution of
-the **principal-part** scalar elliptic form `tensorPrincipalForm g α …` against
-the explicit right-hand side `tensorComponentWeakRHS …`, into which the
-component-coupled lower-order Weitzenböck terms are folded. The second iterates
-this: every classical mixed partial `iterClassicalPartial m idx (component)` is
-itself a smooth weak solution of the *same* principal form, against the iterated
-perturbed source `iteratedPerturbedSource (tensorPrincipalForm …) m … idx` —
-which is again smooth, with the coupling having been transported one order down
-at each differentiation step. Because the principal part is identical at every
-order, the scalar interior `H²` engine `smooth_cc_h2_loc_memWkp_two` applies
-verbatim to every iterated partial, and the order-by-order assembly is the
-generic Sobolev arithmetic of `memWkp_of_iterClassicalPartial_memWkp_two` below.
-
-## Main results
-
-* `memWkp_succ_of_classicalPartial_memWkp` — generic scalar order-raiser: a
-  smooth `u ∈ L²(Ω)` all of whose classical partials `∂_l u` lie in `W^{k,2}(Ω)`
-  lies in `W^{k+1,2}(Ω)`.
-* `memWkp_of_iterClassicalPartial_memWkp_two` — generic scalar bootstrap: a
-  smooth `u ∈ W^{m,2}(Ω)` all of whose `m`-fold classical partials lie in
-  `W^{2,2}(Ω)` lies in `W^{m+2,2}(Ω)`.
-* `iterClassicalPartial_memWkp_two_of_weakSolution` — every iterated chart
-  partial of a connection-Laplacian weak-solution component lies in `W^{2,2}`
-  on a precompact interior subdomain (the scalar interior `H²` engine applied to
-  the iterated weak-solution identity).
-* `tensorComponent_memWkp_allOrders_interior` — the **all-orders headline**: the
-  Euclidean chart component lies in `MemWkp (2k+2) 2 Ω''` for every `k : ℕ`, on
-  every precompact interior subdomain, unconditionally.
-
-## Sign convention
-
-Geometer Laplacian `Δ_∇ = -∇*∇`, spectrum `⊆ (-∞, 0]`; the resolvent is
-`(1 - Δ_∇)⁻¹`.
--/
-
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators ENNReal NNReal
@@ -94,16 +27,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-/-- **Generic scalar order-raiser.** For a smooth function `u` on an open set
-`Ω ⊆ EuclideanSpace ℝ (Fin d)` that lies in `L²(Ω)` and all of whose classical
-partials `∂_l u` lie in `W^{k,2}(Ω)`, `u` lies in `W^{k+1,2}(Ω)`.
-
-The proof unfolds `MemWkp (k+1)` to its recursive characterisation `MemW1p u ∧
-∀ l, chosenWeakPartial l u ∈ W^{k,2}`. For smooth `u`, the chosen weak partial
-agrees a.e. with the classical partial `∂_l u`, so the hypothesis on the
-classical partials transfers; the `MemW1p` part follows from the `L²` membership
-of `u` (the classical partials are weak partials of the smooth `u`, lying in
-`L²` since they lie in `W^{k,2} ⊆ L²`). -/
+omit [NeZero d] in
 theorem memWkp_succ_of_classicalPartial_memWkp
     (k : ℕ) {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {u : EE → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -126,18 +50,7 @@ theorem memWkp_succ_of_classicalPartial_memWkp
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
     (h_partial i)
 
-/-- **Generic scalar all-orders bootstrap.** For a smooth function `u` on an open
-set `Ω ⊆ EuclideanSpace ℝ (Fin d)` that already lies in `W^{m,2}(Ω)` and *all* of
-whose `m`-fold iterated classical partials `iterClassicalPartial m idx u` lie in
-`W^{2,2}(Ω)`, `u` lies in `W^{m+2,2}(Ω)`.
-
-The proof is induction on `m`. The `m = 0` case is the hypothesis at the empty
-multi-index. The step uses the order-raiser `memWkp_succ_of_classicalPartial_memWkp`:
-each classical partial `∂_l u` is smooth, lies in `W^{m,2}(Ω)` (as
-`u ∈ W^{m+1,2}(Ω)`), and its `m`-fold partials are the `(m+1)`-fold partials of
-`u` (with `l` prepended), so the induction hypothesis gives
-`∂_l u ∈ W^{m+2,2}(Ω)` for every `l`; the order-raiser, with `u ∈ L²(Ω)`, then
-promotes `u` to `W^{m+3,2}(Ω)`. -/
+omit [NeZero d] in
 theorem memWkp_of_iterClassicalPartial_memWkp_two
     (m : ℕ) {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {u : EE → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -190,22 +103,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Each iterated chart partial of a weak-solution component lies in `W^{2,2}`
-on a precompact interior subdomain.**
-
-For a connection-Laplacian weak-solution pair `(T, F)` of chart-supported smooth
-sections with the chart component supported inside `K`, the `m`-fold iterated
-classical partial of the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀` lies in `MemWkp 2 2` on every precompact
-interior subdomain `Ω''` (with `closure Ω''` compact and `Ω'' ⊆ chartTargetEuclid
-α` providing the geometric room for the scalar interior `H²` engine).
-
-The iterated partial is, by `tensorComponent_iterated_partial_isSmoothWeakSolution`,
-a smooth weak solution of the *same* principal form `tensorPrincipalForm g α …`
-against the smooth, compactly-supported iterated perturbed source — into which
-the Weitzenböck lower-order coupling has been folded one order at a time. The
-scalar interior `H²` engine `smooth_cc_h2_loc_memWkp_two` then delivers the
-`W^{2,2}` membership. -/
 theorem iterClassicalPartial_memWkp_two_of_weakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -270,24 +167,6 @@ theorem iterClassicalPartial_memWkp_two_of_weakSolution
       hΩ''_compact_closure
   exact (h_engine h_weak_sol h_w_cpt h_s_cd h_s_cpt).1
 
-/-- **All-orders interior tensor elliptic-system regularity (unconditional).**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P₀`, and a connection-Laplacian weak-solution
-pair `(T, F)` of chart-supported smooth sections with the chart component
-supported inside `K`, the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀` lies in `MemWkp (2k+2) 2` on every
-precompact interior subdomain `Ω''`, for *every* order `k : ℕ`.
-
-This is the all-orders, `HasLocallyConstantChartAt`-free tensor analog of the
-scalar interior bootstrap. The Weitzenböck lower-order coupling among the chart
-components is handled honestly through the iterated weak-solution identity
-(`iterClassicalPartial_memWkp_two_of_weakSolution`), and the order-by-order
-assembly is the generic scalar bootstrap `memWkp_of_iterClassicalPartial_memWkp_two`:
-every `2k`-fold mixed partial of the chart component lies in `W^{2,2}` on `Ω''`,
-hence (since the chart component lies in `W^{2k,2}` by the same chain at the
-lower order, anchoring the bootstrap's `W^{m,2}` hypothesis) the chart component
-lies in `W^{2k+2,2}`. -/
 theorem tensorComponent_memWkp_allOrders_interior
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

@@ -4,63 +4,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
-/-!
-# `L^2` integration of the chart-twist-inverted covariant-derivative norm sum
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart base
-point `α : M`, this file integrates the pointwise sum-over-directions bound
-on the chart-twist-inverted covariant derivative (the headline of the
-companion module `CovTrivProjNormBound`) against the Riemannian volume
-measure on `M`. The resulting `L^2` estimate controls the partition-of-unity-
-weighted Euclidean norm of the sum-over-directions by the `H^1` seminorm of
-the underlying smooth compactly-supported tensor section.
-
-## Strategy
-
-The pointwise bound from `CovTrivProjNormBound` gives, for every smooth
-compactly-supported `(r, s)`-tensor section `S` and every `b ∈ tsupport ρ_α`
-(the chart-atlas partition-of-unity weight at `α`):
-
-```
-∑ i, ‖chartRSTwistInv α b r s (toModel (∇S(b)(e_i' b)))‖^2 ≤
-  C · tensorCovDerivPointwiseInner g r s S S b,
-```
-
-where `e_i' b := chartBasisVecFiber α i b`. Off `tsupport ρ_α`, the partition-
-of-unity weight `ρ_α(b)` vanishes, so multiplying the LHS by `ρ_α(b)` gives a
-globally valid pointwise estimate, using `0 ≤ ρ_α ≤ 1`:
-
-```
-(ρ_α(b) · √(∑ i, ‖chartRSTwistInv α b r s (toModel (∇S(b)(e_i' b)))‖^2))^2 ≤
-  C · tensorCovDerivPointwiseInner g r s S S b   (∀ b ∈ M).
-```
-
-Integrating this pointwise inequality against `riemannianVolumeMeasure g`
-and using
-
-```
-∫ tensorCovDerivPointwiseInner g r s S S ≤
-  tensorL2Inner g r s S.toFun S.toFun +
-    ∫ tensorCovDerivPointwiseInner g r s S S =
-  tensorH1Inner g r s S S = ‖S‖^2
-```
-
-(for `S : SmoothCcTensorH1 g r s`) gives the squared `L^2` bound by
-`C · ‖S‖^2`. Taking the square root in `ENNReal` produces the headline
-`eLpNorm (..) 2 (riemannianVolumeMeasure g) ≤ ENNReal.ofReal (√C) · ‖S‖₊`.
-
-## Public theorems
-
-* `exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm`
-  — uniform-in-`S` `L^2` bound for the partition-of-unity-weighted
-  Euclidean norm of the chart-twist-inverted covariant-derivative
-  sum-over-directions, controlled by the `H^1` seminorm of `S`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1200000
 
@@ -77,7 +24,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -338,25 +285,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
     exact mul_le_mul_of_nonneg_left h_int_le hC_nn
   exact h_lint_le.trans h_RHS_le
 
-/-- **Headline `L²` integration of the chart-twist-inverted covariant
-derivative norm sum, for an arbitrary `[0, 1]`-valued chart-supported weight.**
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart base point
-`α : M`, and a `[0, 1]`-valued weight `w : M → ℝ` whose topological support is
-contained in a compact subset `K_M` of the chart-`α` base set, there is a
-non-negative real constant `C` (depending only on `(g, r, s, α, w, K_M)`) such
-that for every smooth compactly-supported `H^1` tensor section
-`S : SmoothCcTensorH1 g r s`,
-
-```
-eLpNorm
-    (fun b => w(b) * √(∑_i ‖chartRSTwistInv α b r s
-                          (toModel (∇S(b)(e_i' b)))‖²))
-    2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊,
-```
-
-where `e_i' b := chartBasisVecFiber α i b` is the chart-`α` basis fibre at
-`b`. The constant `C` is independent of `S`. -/
 theorem exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (w : M → ℝ) (hw_nn : ∀ x, 0 ≤ w x) (hw_le_one : ∀ x, w x ≤ 1)
@@ -401,27 +329,6 @@ theorem exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_c
     (coe_nnnorm_eq_ofReal_norm S).symm] at h_eLpNorm_le
   exact h_eLpNorm_le
 
-/-- **Headline `L²` integration of the chart-twist-inverted covariant
-derivative norm sum.** For a closed Riemannian manifold `(M, g)`, ranks
-`(r, s)`, and a chart base point `α : M`, there is a non-negative real
-constant `C` (depending only on `(g, r, s, α)`) such that for every smooth
-compactly-supported `H^1` tensor section `S : SmoothCcTensorH1 g r s`,
-
-```
-eLpNorm
-    (fun b => ρ_α(b) * √(∑_i ‖chartRSTwistInv α b r s
-                          (toModel (∇S(b)(e_i' b)))‖²))
-    2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊,
-```
-
-where `e_i' b := chartBasisVecFiber α i b` is the chart-`α` basis fibre at
-`b` and `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The
-constant `C` is independent of `S`.
-
-This is the specialisation of
-`exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm`
-to the chart-atlas partition-of-unity weight at `α`. -/
 theorem exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

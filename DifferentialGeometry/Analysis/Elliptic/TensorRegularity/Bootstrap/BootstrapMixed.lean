@@ -1,59 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapStep
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Sobolev-order arithmetic and the mixed-partial inner induction of the bootstrap
-
-The interior elliptic-regularity bootstrap raises the regularity of the chart
-component of a tensor weak solution one derivative at a time. Each single step
-is handled by the differentiated weak-solution identity
-`partial_smooth_weak_solution`: a partial `∂_l u` of a smooth weak solution `u`
-of a uniformly elliptic divergence-form equation `B(u, ·) = ⟨f, ·⟩` is again a
-smooth weak solution of the **same** elliptic bilinear form `B`, against the
-explicitly-constructed perturbed source `perturbedSource B u f l`.
-
-This file — the second of a three-file `Bootstrap` sub-phase — supplies the two
-pieces the headline outer induction needs:
-
-* the **Sobolev-order arithmetic**: the perturbed source loses exactly one
-  derivative relative to `f` and two relative to `u`. Concretely, if
-  `f ∈ W^{m+1,2}` and `u ∈ W^{m+2,2}` then `perturbedSource B u f l ∈ W^{m,2}`,
-  with an explicit constant in the quantitative estimate;
-
-* the **mixed-partial inner induction**: iterating the single-step identity
-  along a multi-index `idx : Fin m → Fin d` exhibits the iterated chart partial
-  `∂_{idx}(tensorComponentEuclid …)` as a smooth weak solution of the *same*
-  principal-part bilinear form `tensorPrincipalForm`, against the iterated
-  perturbed source.
-
-## Main results
-
-* `perturbedSource_memWkp_of_source_memWkp` — for any
-  `SmoothEllipticBilinearForm B`, smooth `u ∈ W^{m+2,2}(Ω)` of compact support,
-  smooth `f ∈ W^{m+1,2}(Ω)`, and precompact open `Ω`, the perturbed source
-  `perturbedSource B u f l` lies in `W^{m,2}(Ω)`, with an explicit `K ≥ 0` and
-  `wkpNorm m 2 (perturbedSource B u f l) Ω ≤
-    ENNReal.ofReal K · (wkpNorm (m+1) 2 f Ω + wkpNorm (m+2) 2 u Ω)`.
-
-* `iteratedPerturbedSource` — the `m`-fold perturbed source, a plain
-  `def : E → ℝ`, obtained by folding `perturbedSource B · ·` along the
-  multi-index `idx`.
-
-* `tensorComponent_iterated_partial_isSmoothWeakSolution` — the iterated chart
-  partial `iterClassicalPartial m idx (tensorComponentEuclid …)` is a smooth
-  weak solution of `tensorPrincipalForm g α hK hK_target` with right-hand side
-  `iteratedPerturbedSource …`.
-
-## The zeroth-order term
-
-`perturbedSource B u f l` contains the term `(∂_l B.c) · u`. For the tensor
-principal form `tensorPrincipalForm` the zeroth-order coefficient `B.c` is
-identically `0` (`tensorPrincipalForm_c`), so this term vanishes; nevertheless
-`perturbedSource_memWkp_of_source_memWkp` is proved for a *general*
-`SmoothEllipticBilinearForm B`, handling `(∂_l B.c) · u` with the same
-smooth-coefficient multiplication estimate as the principal divergence term.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter MeasureTheory Topology Function
@@ -94,8 +41,7 @@ variable {d : ℕ} [NeZero d]
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- For a smooth function `η : EE → ℝ` and a compact set `S`, the iterated
-derivatives of `η` up to any finite order `m` are uniformly bounded on `S`. -/
+
 private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
     {η : EE → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     {S : Set EE} (hS : IsCompact S) (m : ℕ) :
@@ -129,8 +75,7 @@ private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
   exact le_trans (hCj_bound j x hx) (hC_ge j hj_mem)
 
 omit [NeZero d] in
-/-- For a smooth `η` and a precompact open `Ω`, the iterated derivatives of `η`
-up to order `m` are uniformly bounded on `Ω`. -/
+
 private theorem exists_uniform_iteratedFDeriv_bound_on_precompact_open
     {η : EE → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     {Ω : Set EE} (hΩ_compact_closure : IsCompact (closure Ω)) (m : ℕ) :
@@ -143,7 +88,7 @@ private theorem exists_uniform_iteratedFDeriv_bound_on_precompact_open
   exact hC_bound x (subset_closure hx) j hj
 
 omit [NeZero d] in
-/-- A finite sum of `W^{k,2}` functions is again in `W^{k,2}`. -/
+
 theorem memWkp_finset_sum
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
@@ -170,17 +115,15 @@ theorem memWkp_finset_sum
       rwa [h_eq] at h_add
 
 omit [NeZero d] in
-/-- The `W^{k,2}` triangle inequality for a finite sum: if each summand obeys
-`wkpNorm k 2 (F a) Ω ≤ ENNReal.ofReal (κ a) · D`, then the sum obeys
-`wkpNorm k 2 (∑ F) Ω ≤ ENNReal.ofReal (∑ κ) · D`. -/
+
 theorem wkpNorm_finset_sum_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
     (hF : ∀ a ∈ S, MemWkp (d := d) k 2 (F a) Ω)
     (κ : ι → ℝ) (hκ_nn : ∀ a ∈ S, 0 ≤ κ a) (D : ℝ≥0∞)
     (hbound : ∀ a ∈ S,
-      wkpNorm (d := d) k 2 (F a) Ω ≤ ENNReal.ofReal (κ a) * D) :
-    wkpNorm (d := d) k 2 (fun x => ∑ a ∈ S, F a x) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k 2 (F a) Ω ≤ ENNReal.ofReal (κ a) * D) :
+    iteratedWeakSobolevNorm (d := d) k 2 (fun x => ∑ a ∈ S, F a x) Ω ≤
       ENNReal.ofReal (∑ a ∈ S, κ a) * D := by
   classical
   induction S using Finset.induction with
@@ -196,7 +139,7 @@ theorem wkpNorm_finset_sum_le
       have hκ_S : ∀ b ∈ S, 0 ≤ κ b :=
         fun b hb => hκ_nn b (Finset.mem_insert_of_mem hb)
       have hbound_S : ∀ b ∈ S,
-          wkpNorm (d := d) k 2 (F b) Ω ≤ ENNReal.ofReal (κ b) * D :=
+          iteratedWeakSobolevNorm (d := d) k 2 (F b) Ω ≤ ENNReal.ofReal (κ b) * D :=
         fun b hb => hbound b (Finset.mem_insert_of_mem hb)
       have h_sum_mem : MemWkp (d := d) k 2 (fun x => ∑ b ∈ S, F b x) Ω :=
         memWkp_finset_sum (d := d) hΩ S F hF_S
@@ -211,8 +154,8 @@ theorem wkpNorm_finset_sum_le
         wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hF_a h_sum_mem
       refine h_tri.trans ?_
       have h_terms :
-          wkpNorm (d := d) k 2 (F a) Ω +
-              wkpNorm (d := d) k 2 (fun x => ∑ b ∈ S, F b x) Ω ≤
+          iteratedWeakSobolevNorm (d := d) k 2 (F a) Ω +
+              iteratedWeakSobolevNorm (d := d) k 2 (fun x => ∑ b ∈ S, F b x) Ω ≤
             ENNReal.ofReal (κ a) * D + ENNReal.ofReal (∑ b ∈ S, κ b) * D :=
         add_le_add (hbound a (Finset.mem_insert_self a S)) h_ih
       refine h_terms.trans ?_
@@ -221,8 +164,7 @@ theorem wkpNorm_finset_sum_le
           (Finset.sum_nonneg hκ_S),
         add_mul]
 
-/-- For a smooth `ψ` with `ψ ∈ W^{k+1,2}(Ω)` on an open `Ω`, the classical
-partial `∂_l ψ` lies in `W^{k,2}(Ω)`. -/
+omit [NeZero d] in
 theorem classicalPartial_memWkp_of_memWkp_succ
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -238,15 +180,14 @@ theorem classicalPartial_memWkp_of_memWkp_succ
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mp
     h_chosen_mem
 
-/-- For a smooth `ψ` with `ψ ∈ W^{k+1,2}(Ω)` on an open `Ω`, the `W^{k,2}` norm
-of the classical partial `∂_l ψ` is bounded by the `W^{k+1,2}` norm of `ψ`. -/
+omit [NeZero d] in
 theorem wkpNorm_classicalPartial_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ : MemWkp (d := d) (k + 1) 2 ψ Ω) (l : Fin d) :
-    wkpNorm (d := d) k 2
+    iteratedWeakSobolevNorm (d := d) k 2
         (fun x => (fderiv ℝ ψ x) (EuclideanSpace.single l 1)) Ω ≤
-      wkpNorm (d := d) (k + 1) 2 ψ Ω := by
+      iteratedWeakSobolevNorm (d := d) (k + 1) 2 ψ Ω := by
   classical
   have hψ_W1 : DeGiorgi.MemW1p (d := d) 2 ψ Ω := hψ.memW1p
   have h_ae := chosenWeakPartial_smooth_ae_eq (d := d)
@@ -254,17 +195,14 @@ theorem wkpNorm_classicalPartial_le
   rw [← wkpNorm_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae]
   exact wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d) k hΩ ψ l
 
-/-- For a smooth `η` on a precompact open `Ω` and any `k`, there is a constant
-`K ≥ 0` such that every `u ∈ W^{k,2}(Ω)` has `η · u ∈ W^{k,2}(Ω)` with
-`wkpNorm k 2 (η · u) Ω ≤ ENNReal.ofReal K · wkpNorm k 2 u Ω`. -/
 private theorem exists_wkpNorm_smul_smooth_le_on_precompact
     (k : ℕ) {Ω : Set EE} (hΩ_open : IsOpen Ω)
     (hΩ_compact_closure : IsCompact (closure Ω))
     {η : EE → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ {u : EE → ℝ}, MemWkp (d := d) k 2 u Ω →
       MemWkp (d := d) k 2 (fun x => η x * u x) Ω ∧
-        wkpNorm (d := d) k 2 (fun x => η x * u x) Ω ≤
-          ENNReal.ofReal K * wkpNorm (d := d) k 2 u Ω := by
+        iteratedWeakSobolevNorm (d := d) k 2 (fun x => η x * u x) Ω ≤
+          ENNReal.ofReal K * iteratedWeakSobolevNorm (d := d) k 2 u Ω := by
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_on_precompact_open (d := d) hη_smooth
       hΩ_compact_closure k
@@ -285,24 +223,7 @@ variable {d : ℕ} [NeZero d]
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
 set_option maxHeartbeats 1600000 in
-/-- **Sobolev-order arithmetic for the perturbed source.**
 
-For a `SmoothEllipticBilinearForm B` over `EuclideanSpace ℝ (Fin d)`, an order
-`m`, a precompact open `Ω`, and a direction `l`, there is a constant `K ≥ 0` —
-depending only on `B`, `m`, `Ω`, `l` — such that for **every** smooth compactly
-supported `u` with `MemWkp (m+2) 2 u Ω` and smooth `f` with `MemWkp (m+1) 2 f
-Ω`, the perturbed source `perturbedSource B u f l` lies in `W^{m,2}(Ω)` and
-satisfies
-
-`wkpNorm m 2 (perturbedSource B u f l) Ω ≤
-  ENNReal.ofReal K · (wkpNorm (m+1) 2 f Ω + wkpNorm (m+2) 2 u Ω)`.
-
-The quantitative constant `K` is quantified before `u` and `f`: it is uniform in
-the solution and the source, depending only on the coefficients of `B` (which
-are bounded on the precompact `closure Ω`) and the order `m`. The
-compact-support hypothesis on `u` is part of the bootstrap interface but is not
-load-bearing for this arithmetic step: the coefficient bounds of `B` come from
-the precompactness of `Ω`, not from the support of `u`. -/
 theorem perturbedSource_memWkp_of_source_memWkp
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ)
     {Ω : Set EE} (hΩ_open : IsOpen Ω) (hΩ_compact_closure : IsCompact (closure Ω))
@@ -312,10 +233,10 @@ theorem perturbedSource_memWkp_of_source_memWkp
       ContDiff ℝ (⊤ : ℕ∞) f →
       MemWkp (d := d) (m + 2) 2 u Ω → MemWkp (d := d) (m + 1) 2 f Ω →
       MemWkp (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ∧
-        wkpNorm (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ≤
+        iteratedWeakSobolevNorm (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ≤
           ENNReal.ofReal K *
-            (wkpNorm (d := d) (m + 1) 2 f Ω +
-              wkpNorm (d := d) (m + 2) 2 u Ω) := by
+            (iteratedWeakSobolevNorm (d := d) (m + 1) 2 f Ω +
+              iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω) := by
   classical
   set dlc : EE → ℝ :=
     fun x => (fderiv ℝ B.c x) (EuclideanSpace.single l 1) with hdlc_def
@@ -333,10 +254,10 @@ theorem perturbedSource_memWkp_of_source_memWkp
         MemWkp (d := d) (m + 1) 2
             (fun y : EE => (fderiv ℝ (fun z : EE => B.a z i j) y)
               (EuclideanSpace.single l 1) * w y) Ω ∧
-          wkpNorm (d := d) (m + 1) 2
+          iteratedWeakSobolevNorm (d := d) (m + 1) 2
               (fun y : EE => (fderiv ℝ (fun z : EE => B.a z i j) y)
                 (EuclideanSpace.single l 1) * w y) Ω ≤
-            ENNReal.ofReal K' * wkpNorm (d := d) (m + 1) 2 w Ω := fun i j =>
+            ENNReal.ofReal K' * iteratedWeakSobolevNorm (d := d) (m + 1) 2 w Ω := fun i j =>
     exists_wkpNorm_smul_smooth_le_on_precompact (d := d) (m + 1) hΩ_open
       hΩ_compact_closure (h_dla_smooth i j)
   choose K_pair hK_pair_nn hK_pair_bound using h_pair_data
@@ -347,13 +268,13 @@ theorem perturbedSource_memWkp_of_source_memWkp
   refine ⟨K_c + K_div + 1, by positivity, ?_⟩
   intro u f hu_smooth _hu_cpt hf_smooth hu_memWkp hf_memWkp
   set D : ℝ≥0∞ :=
-    wkpNorm (d := d) (m + 1) 2 f Ω + wkpNorm (d := d) (m + 2) 2 u Ω with hD_def
+    iteratedWeakSobolevNorm (d := d) (m + 1) 2 f Ω + iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω with hD_def
   set termA : EE → ℝ :=
     fun x => (fderiv ℝ f x) (EuclideanSpace.single l 1) with hA_def
   have hA_mem : MemWkp (d := d) m 2 termA Ω :=
     classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open hf_smooth
       hf_memWkp l
-  have hA_norm : wkpNorm (d := d) m 2 termA Ω ≤ D := by
+  have hA_norm : iteratedWeakSobolevNorm (d := d) m 2 termA Ω ≤ D := by
     have h := wkpNorm_classicalPartial_le (d := d) hΩ_open hf_smooth hf_memWkp l
     exact h.trans le_self_add
   set termB : EE → ℝ := fun x => dlc x * u x with hB_def
@@ -361,10 +282,10 @@ theorem perturbedSource_memWkp_of_source_memWkp
     MemWkp.le_of_le (by omega) hu_memWkp
   have hB_mem : MemWkp (d := d) m 2 termB Ω := (hK_c_bound hu_m).1
   have hB_norm :
-      wkpNorm (d := d) m 2 termB Ω ≤ ENNReal.ofReal K_c * D := by
+      iteratedWeakSobolevNorm (d := d) m 2 termB Ω ≤ ENNReal.ofReal K_c * D := by
     refine (hK_c_bound hu_m).2.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-    have h_mono : wkpNorm (d := d) m 2 u Ω ≤ wkpNorm (d := d) (m + 2) 2 u Ω :=
+    have h_mono : iteratedWeakSobolevNorm (d := d) m 2 u Ω ≤ iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω :=
       wkpNorm_mono_order (d := d) (by omega) u Ω
     exact h_mono.trans le_add_self
   have h_diu_mem : ∀ i : Fin d, MemWkp (d := d) (m + 1) 2
@@ -372,9 +293,9 @@ theorem perturbedSource_memWkp_of_source_memWkp
     classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open hu_smooth
       hu_memWkp i
   have h_diu_norm : ∀ i : Fin d,
-      wkpNorm (d := d) (m + 1) 2
+      iteratedWeakSobolevNorm (d := d) (m + 1) 2
           (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) Ω ≤
-        wkpNorm (d := d) (m + 2) 2 u Ω := fun i =>
+        iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω := fun i =>
     wkpNorm_classicalPartial_le (d := d) hΩ_open hu_smooth hu_memWkp i
   have h_pair_mem : ∀ i j : Fin d, MemWkp (d := d) (m + 1) 2
       (fun y : EE =>
@@ -382,12 +303,12 @@ theorem perturbedSource_memWkp_of_source_memWkp
           (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω :=
     fun i j => (hK_pair_bound i j (h_diu_mem i)).1
   have h_pair_norm : ∀ i j : Fin d,
-      wkpNorm (d := d) (m + 1) 2
+      iteratedWeakSobolevNorm (d := d) (m + 1) 2
           (fun y : EE =>
             (fderiv ℝ (fun z : EE => B.a z i j) y)
                 (EuclideanSpace.single l 1) *
               (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω ≤
-        ENNReal.ofReal (K_pair i j) * wkpNorm (d := d) (m + 2) 2 u Ω := by
+        ENNReal.ofReal (K_pair i j) * iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω := by
     intro i j
     refine (hK_pair_bound i j (h_diu_mem i)).2.trans ?_
     exact mul_le_mul_of_nonneg_left (h_diu_norm i) (by positivity)
@@ -407,8 +328,8 @@ theorem perturbedSource_memWkp_of_source_memWkp
     exact classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open
       h_prod_smooth (h_pair_mem i j) j
   have hCsum_norm : ∀ i j : Fin d,
-      wkpNorm (d := d) m 2 (termC_summand i j) Ω ≤
-        ENNReal.ofReal (K_pair i j) * wkpNorm (d := d) (m + 2) 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) m 2 (termC_summand i j) Ω ≤
+        ENNReal.ofReal (K_pair i j) * iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω := by
     intro i j
     have h_prod_smooth : ContDiff ℝ (⊤ : ℕ∞)
         (fun y : EE =>
@@ -424,24 +345,24 @@ theorem perturbedSource_memWkp_of_source_memWkp
     memWkp_finset_sum (d := d) hΩ_open Finset.univ (termC_summand i)
       (fun j _ => hCsum_mem i j)
   have hCrow_norm : ∀ i : Fin d,
-      wkpNorm (d := d) m 2 (termC_row i) Ω ≤
+      iteratedWeakSobolevNorm (d := d) m 2 (termC_row i) Ω ≤
         ENNReal.ofReal (∑ j : Fin d, K_pair i j) *
-          wkpNorm (d := d) (m + 2) 2 u Ω := fun i =>
+          iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω := fun i =>
     wkpNorm_finset_sum_le (d := d) hΩ_open Finset.univ (termC_summand i)
       (fun j _ => hCsum_mem i j) (fun j => K_pair i j)
-      (fun j _ => hK_pair_nn i j) (wkpNorm (d := d) (m + 2) 2 u Ω)
+      (fun j _ => hK_pair_nn i j) (iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω)
       (fun j _ => hCsum_norm i j)
   set termC : EE → ℝ := fun x => ∑ i : Fin d, termC_row i x with hC_def
   have hC_mem : MemWkp (d := d) m 2 termC Ω :=
     memWkp_finset_sum (d := d) hΩ_open Finset.univ termC_row
       (fun i _ => hCrow_mem i)
   have hC_norm :
-      wkpNorm (d := d) m 2 termC Ω ≤
-        ENNReal.ofReal K_div * wkpNorm (d := d) (m + 2) 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) m 2 termC Ω ≤
+        ENNReal.ofReal K_div * iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω := by
     have h := wkpNorm_finset_sum_le (d := d) hΩ_open Finset.univ termC_row
       (fun i _ => hCrow_mem i) (fun i => ∑ j : Fin d, K_pair i j)
       (fun i _ => Finset.sum_nonneg (fun j _ => hK_pair_nn i j))
-      (wkpNorm (d := d) (m + 2) 2 u Ω) (fun i _ => hCrow_norm i)
+      (iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω) (fun i _ => hCrow_norm i)
     rwa [hKdiv_def]
   have h_pert_eq :
       perturbedSource (d := d) B u f l =
@@ -466,8 +387,8 @@ theorem perturbedSource_memWkp_of_source_memWkp
   have hnegB_mem : MemWkp (d := d) m 2 (fun y => - termB y) Ω :=
     MemWkp.neg (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hB_mem
   have h_negB_norm :
-      wkpNorm (d := d) m 2 (fun y => - termB y) Ω =
-        wkpNorm (d := d) m 2 termB Ω := by
+      iteratedWeakSobolevNorm (d := d) m 2 (fun y => - termB y) Ω =
+        iteratedWeakSobolevNorm (d := d) m 2 termB Ω := by
     have h_neg_eq : (fun y => - termB y) = (fun y => (-1 : ℝ) * termB y) := by
       funext y; ring
     rw [h_neg_eq,
@@ -475,27 +396,27 @@ theorem perturbedSource_memWkp_of_source_memWkp
         hB_mem (-1)]
     simp
   have h_tri₂ :
-      wkpNorm (d := d) m 2 (fun x => termA x - termB x) Ω ≤
-        wkpNorm (d := d) m 2 termA Ω + wkpNorm (d := d) m 2 termB Ω := by
+      iteratedWeakSobolevNorm (d := d) m 2 (fun x => termA x - termB x) Ω ≤
+        iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω := by
     have h := wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
       hA_mem hnegB_mem
     rw [← h_AB_eq, h_negB_norm] at h
     exact h
   have h_combine :
-      wkpNorm (d := d) m 2 (fun x => (termA x - termB x) + termC x) Ω ≤
-        (wkpNorm (d := d) m 2 termA Ω + wkpNorm (d := d) m 2 termB Ω) +
-          wkpNorm (d := d) m 2 termC Ω :=
+      iteratedWeakSobolevNorm (d := d) m 2 (fun x => (termA x - termB x) + termC x) Ω ≤
+        (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω) +
+          iteratedWeakSobolevNorm (d := d) m 2 termC Ω :=
     h_tri₁.trans (add_le_add h_tri₂ le_rfl)
   refine h_combine.trans ?_
-  have hA_final : wkpNorm (d := d) m 2 termA Ω ≤ ENNReal.ofReal 1 * D := by
+  have hA_final : iteratedWeakSobolevNorm (d := d) m 2 termA Ω ≤ ENNReal.ofReal 1 * D := by
     rw [ENNReal.ofReal_one, one_mul]; exact hA_norm
-  have hC_final : wkpNorm (d := d) m 2 termC Ω ≤ ENNReal.ofReal K_div * D := by
+  have hC_final : iteratedWeakSobolevNorm (d := d) m 2 termC Ω ≤ ENNReal.ofReal K_div * D := by
     refine hC_norm.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
     rw [hD_def]; exact le_add_self
   have h_sum_le :
-      (wkpNorm (d := d) m 2 termA Ω + wkpNorm (d := d) m 2 termB Ω) +
-          wkpNorm (d := d) m 2 termC Ω ≤
+      (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω) +
+          iteratedWeakSobolevNorm (d := d) m 2 termC Ω ≤
         (ENNReal.ofReal 1 * D + ENNReal.ofReal K_c * D) +
           ENNReal.ofReal K_div * D :=
     add_le_add (add_le_add hA_final hB_norm) hC_final
@@ -515,12 +436,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-/-- The `m`-fold perturbed source of `(u, f)` against the bilinear form `B`,
-folded along the multi-index `idx : Fin m → Fin d`. The recursion differentiates
-by the head `idx 0` first — matching the head-first recursion of
-`iterClassicalPartial` for the solution function — and recurses on the tail with
-the differentiated solution `∂_{idx 0} u` and the once-perturbed source
-`perturbedSource B u f (idx 0)`. -/
 noncomputable def iteratedPerturbedSource
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) :
     ∀ (m : ℕ), (EE → ℝ) → (EE → ℝ) → (Fin m → Fin d) → EE → ℝ
@@ -531,13 +446,11 @@ noncomputable def iteratedPerturbedSource
         (perturbedSource (d := d) B u f (idx 0))
         (fun i : Fin m => idx i.succ)
 
-/-- Definitional unfolding of `iteratedPerturbedSource` at `m = 0`. -/
 @[simp] theorem iteratedPerturbedSource_zero
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     (u f : EE → ℝ) (idx : Fin 0 → Fin d) :
     iteratedPerturbedSource (d := d) B 0 u f idx = f := rfl
 
-/-- Definitional unfolding of `iteratedPerturbedSource` at `m + 1`. -/
 theorem iteratedPerturbedSource_succ
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     (m : ℕ) (u f : EE → ℝ) (idx : Fin (m + 1) → Fin d) :
@@ -547,8 +460,6 @@ theorem iteratedPerturbedSource_succ
         (perturbedSource (d := d) B u f (idx 0))
         (fun i : Fin m => idx i.succ) := rfl
 
-/-- For smooth `u` and `f`, the perturbed source `perturbedSource B u f l` is
-`C^∞` (the coefficients of `B` are smooth by hypothesis). -/
 theorem contDiff_perturbedSource'
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     {u f : EE → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -578,13 +489,6 @@ theorem contDiff_perturbedSource'
     contDiff_partial_eta (d := d) hu i
   exact contDiff_partial_eta (d := d) (h_dla.mul h_diu) j
 
-/-- **Iterated differentiated weak-solution identity.** For a smooth weak
-solution `(u, f)` of a `SmoothEllipticBilinearForm B` on `Set.univ` with smooth
-source `f`, the iterated classical partial `iterClassicalPartial m idx u` is
-again a smooth weak solution of the *same* `B`, against the iterated perturbed
-source `iteratedPerturbedSource B m u f idx`. The proof folds the single-step
-identity `partial_smooth_weak_solution` along `idx`; the smoothness of `f` is
-threaded through each step via `contDiff_perturbedSource'`. -/
 theorem iterated_partial_isSmoothWeakSolution
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     (m : ℕ) :
@@ -618,17 +522,6 @@ section TensorMixed
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **Iterated chart-component weak-solution identity.** The iterated classical
-partial `iterClassicalPartial m idx (tensorComponentEuclid g r s T α P₀)` of the
-chart component of an `(r, s)`-tensor weak solution is itself a smooth weak
-solution of the principal-part elliptic bilinear form
-`tensorPrincipalForm g α hK hK_target`, against the iterated perturbed source
-`iteratedPerturbedSource (tensorPrincipalForm …) m (tensorComponentEuclid …)
-(tensorComponentWeakRHS …) idx`.
-
-Because the principal-part form is the **same** at every differentiation step,
-this is the inner induction that bootstraps the chart component's interior
-elliptic regularity to arbitrary order. -/
 theorem tensorComponent_iterated_partial_isSmoothWeakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

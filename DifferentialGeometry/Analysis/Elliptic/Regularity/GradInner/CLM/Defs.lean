@@ -1,37 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclusion
-import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# The pointwise gradient-inner-product CLM `H1Compl g →L[ℝ] Lp ℝ 2 μ_g`
-
-For a closed Riemannian manifold `(M, g)` and a fixed smooth function
-`ρα : C^∞⟮I, M; ℝ⟯`, the pointwise gradient inner product
-`x ↦ g(grad ρα x, grad v x)` of `ρα` against a smooth real-valued function
-`v` defines a continuous linear functional on `SmoothScalar g`, taking
-values in the Lebesgue space `Lp ℝ 2 μ_g`.
-
-This file packages the construction in three steps.
-
-* `gradInnerSmooth g ρα v` — the L²-class of `x ↦ g(grad ρα x, grad v x)`,
-  defined for smooth `v : SmoothScalar g`. Both gradients are smooth, the
-  product is continuous on a compact manifold, hence in every `Lp` space.
-
-* `gradInnerCLMOnSmooth g ρα` — the assembly of `gradInnerSmooth` as a
-  continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. The Lipschitz
-  bound follows from the pointwise Cauchy–Schwarz inequality combined with
-  the supremum bound on `|grad ρα|_g` (continuous on a compact manifold).
-
-* `gradInnerCLM g ρα` — the unique continuous linear extension of
-  `gradInnerCLMOnSmooth` along the dense embedding
-  `smoothToH1Compl : SmoothScalar g →L[ℝ] H1Compl g` to a CLM
-  `H1Compl g →L[ℝ] Lp ℝ 2 μ_g`.
-
-The compatibility lemma `gradInnerCLM_smoothToH1Compl` certifies that on
-the dense range of smooth lifts the extended CLM agrees with the smooth
-construction.
--/
 
 noncomputable section
 
@@ -44,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -58,9 +29,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Continuity of the pointwise gradient inner product
-`x ↦ g.inner x (gradFun g ρα x) (gradFun g v.toFun x)` for smooth `ρα`
-and smooth `v`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_continuous
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -77,8 +47,7 @@ lemma gradInnerSmooth_continuous
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)
   rw [grad_g_apply, grad_g_apply]
 
-/-- The pointwise gradient inner product is `MemLp 2` on a closed Riemannian
-manifold. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_memLp_two
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -90,23 +59,20 @@ lemma gradInnerSmooth_memLp_two
   exact (gradInnerSmooth_continuous (I := I) (M := M) g ρα v).memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The L²-class of the pointwise gradient inner product
-`x ↦ g.inner x (gradFun g ρα x) (gradFun g v.toFun x)` for smooth `ρα`
-and smooth `v`. -/
 noncomputable def gradInnerSmooth
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmooth_def
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerSmooth (I := I) (M := M) g ρα v =
       (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _ := rfl
 
-/-- A.e. unfolding identity: `gradInnerSmooth g ρα v` represents the pointwise
-gradient inner product as an L²-class. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_coeFn
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -117,7 +83,8 @@ lemma gradInnerSmooth_coeFn
         (gradFun (I := I) g v.toFun x)) :=
   MemLp.coeFn_toLp _
 
-/-- Pointwise additivity of the gradient inner product in the second slot. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) (x : M) :
@@ -133,7 +100,7 @@ lemma gradInnerSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) x)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
-/-- Pointwise homogeneity of the gradient inner product in the second slot. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (x : M) :
@@ -148,7 +115,7 @@ lemma gradInnerSmooth_pt_smul
   rw [hgrad_smul]
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
-/-- Additivity of `gradInnerSmooth` in the second argument. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_add
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) :
@@ -168,7 +135,7 @@ theorem gradInnerSmooth_add
   rw [h_sum, Pi.add_apply, h_v_eq, h_w_eq]
   exact (gradInnerSmooth_pt_add (I := I) (M := M) g ρα v w x).symm
 
-/-- Homogeneity of `gradInnerSmooth` in the second argument. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -185,7 +152,6 @@ theorem gradInnerSmooth_smul
   rw [h_smul, Pi.smul_apply, h_v_eq, smul_eq_mul]
   exact (gradInnerSmooth_pt_smul (I := I) (M := M) g ρα c v x).symm
 
-/-- The `gradInnerSmooth` map packaged as a linear map. -/
 noncomputable def gradInnerSmoothLin
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →ₗ[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) where
@@ -193,14 +159,15 @@ noncomputable def gradInnerSmoothLin
   map_add' v w := gradInnerSmooth_add (I := I) (M := M) g ρα v w
   map_smul' c v := gradInnerSmooth_smul (I := I) (M := M) g ρα c v
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmoothLin_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerSmoothLin (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
 
-/-- Existence of a non-negative sup bound on the metric `g`-norm of the
-gradient of `ρα`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma exists_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M,
@@ -220,20 +187,20 @@ private lemma exists_gradSupBound
     hC₀ ⟨x, Set.mem_univ _, rfl⟩
   exact hxC.trans (le_max_left _ _)
 
-/-- The supremum bound on the metric `g`-norm of the gradient of `ρα`,
-equal to a continuous-function supremum on the compact manifold `M`. We take
-the maximum with `0` to ensure non-negativity in all degenerate cases. -/
 noncomputable def gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Classical.choose (exists_gradSupBound (I := I) (M := M) g ρα)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 lemma gradSupBound_nonneg
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     0 ≤ gradSupBound (I := I) (M := M) g ρα :=
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).1
 
-/-- Pointwise: `√(g(grad ρα, grad ρα)) x ≤ gradSupBound g ρα`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 lemma sqrt_inner_grad_self_le_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
     Real.sqrt (g.inner x (gradFun (I := I) g ρα x)
@@ -241,8 +208,8 @@ lemma sqrt_inner_grad_self_le_gradSupBound
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).2 x
 
-/-- Pointwise Cauchy–Schwarz for the metric inner product:
-`|g(grad ρα x, grad v x)| ≤ √g(grad ρα, grad ρα) · √g(grad v, grad v)`. -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma abs_gradInner_le_sqrt_mul_sqrt
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -253,8 +220,7 @@ lemma abs_gradInner_le_sqrt_mul_sqrt
           (gradFun (I := I) g v.toFun x)) :=
   abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g x _ _
 
-/-- Pointwise: the gradient inner product against `ρα` is bounded by
-`gradSupBound · √g(grad v, grad v)`. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma abs_gradInner_le_gradSupBound_mul_sqrt
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -268,8 +234,7 @@ lemma abs_gradInner_le_gradSupBound_mul_sqrt
       (gradFun (I := I) g v.toFun x)) := Real.sqrt_nonneg _
   exact h1.trans (mul_le_mul_of_nonneg_right h2 h_sqrt_v_nn)
 
-/-- The squared `Lp ℝ 2` norm of `gradInnerSmooth ρα v` equals
-`∫ |g(grad ρα, grad v)|² dμ_g`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma norm_gradInnerSmooth_sq
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -302,8 +267,7 @@ lemma norm_gradInnerSmooth_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-/-- Pointwise bound on the squared integrand:
-`(g(grad ρα, grad v))² ≤ gradSupBound² · g(grad v, grad v)`. -/
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma sq_gradInner_le_gradSupBound_sq_mul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -349,8 +313,7 @@ lemma sq_gradInner_le_gradSupBound_sq_mul
   rw [h_rhs_sq] at h_sq
   exact h_sq
 
-/-- The squared L² norm of `gradInnerSmooth ρα v` is bounded by
-`gradSupBound² · ∫ g(grad v, grad v) dμ_g`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -399,11 +362,7 @@ lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
   rw [integral_const_mul] at h_int_le
   exact h_int_le
 
-/-- The L² self-integral of `f.toFun` on the riemannian volume measure equals
-the squared seminorm of `smoothToLpLin g f`. We restate the existing lemma
-`SmoothScalar.norm_smoothToLp_sq` with the gradient-sided form needed here:
-the integral of `g(grad v, grad v)` is bounded by `‖v‖²` (the H¹ pre-norm
-squared). -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma integral_inner_grad_self_le_h1_norm_sq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     (∫ x, g.inner x (gradFun (I := I) g v.toFun x)
@@ -428,8 +387,7 @@ lemma integral_inner_grad_self_le_h1_norm_sq
     rfl
   linarith [h_grad_eq]
 
-/-- The Lipschitz bound on `gradInnerSmooth`:
-`‖gradInnerSmooth ρα v‖ ≤ gradSupBound g ρα · ‖v‖`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_gradInnerSmooth_le
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -454,8 +412,7 @@ theorem norm_gradInnerSmooth_le
     mul_nonneg (gradSupBound_nonneg (I := I) (M := M) g ρα) (norm_nonneg _)
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-/-- The existence form of the Lipschitz bound: there is a non-negative `C`
-that bounds `‖gradInnerSmooth g ρα v‖ ≤ C · ‖v‖` uniformly in `v`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_norm_le
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (v : SmoothScalar g),
@@ -464,8 +421,6 @@ theorem gradInnerSmooth_norm_le
     gradSupBound_nonneg (I := I) (M := M) g ρα,
     norm_gradInnerSmooth_le (I := I) (M := M) g ρα⟩
 
-/-- The pointwise gradient inner product against `ρα`, packaged as a
-continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/
 noncomputable def gradInnerCLMOnSmooth
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -473,13 +428,14 @@ noncomputable def gradInnerCLMOnSmooth
     (gradSupBound (I := I) (M := M) g ρα)
     (fun v => norm_gradInnerSmooth_le (I := I) (M := M) g ρα v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerCLMOnSmooth_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerCLMOnSmooth (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
 
-/-- The smooth-inclusion `toComplL` has dense range. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL :
@@ -489,7 +445,7 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- The smooth-inclusion `toComplL` is uniform-inducing. -/
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -500,10 +456,6 @@ private lemma isUniformInducing_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
 
-/-- The continuous linear extension of `gradInnerCLMOnSmooth` along the
-dense embedding `smoothToH1Compl` to the H¹ completion. The `Lp ℝ 2 μ_g`
-codomain is complete (a Banach space), so the extension exists and is
-unique. -/
 noncomputable def gradInnerCLM
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -511,8 +463,7 @@ noncomputable def gradInnerCLM
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
-/-- Compatibility on smooth scalars: the extension agrees with the smooth
-construction on the dense range of `smoothToH1Compl`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem gradInnerCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

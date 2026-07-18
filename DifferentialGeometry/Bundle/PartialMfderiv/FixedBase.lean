@@ -4,11 +4,11 @@ import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.MeanValue
 
-/-!
-# Fixed-base time derivative producers
 
-Chart-based fixed-base derivative predicates and local producers for time-dependent scalar functions.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -17,8 +17,8 @@ open scoped Topology Manifold ContDiff
 
 namespace DifferentialGeometry
 
-/-- For real-valued scalar functions, `extDerivFun` is just `mfderiv` applied to
-the supplied tangent vector. -/
+
+
 theorem extDerivFun_real_eq_mfderiv
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners Real E H)
@@ -28,12 +28,29 @@ theorem extDerivFun_real_eq_mfderiv
       mfderiv I 𝓘(Real, Real) f x V := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
 
-/-- A scalar chart expression is differentiable at a target point whenever the
-original scalar is manifold-differentiable at the corresponding source point.
 
-The boundaryless hypothesis removes the model-with-corners range from the local
-calculus statement, so the chart representative has an ordinary Frechet
-derivative on the model space. -/
+theorem extDerivFun_comp_diffeomorph
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ M]
+    (f : N -> Real) (Phi : M ≃ₘ⟮I, I⟯ N) (x : M)
+    (v : TangentSpace I x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f (Phi x)) :
+    extDerivFun (I := I) (fun y : M => f (Phi y)) x v =
+      extDerivFun (I := I) f (Phi x) (mfderiv I I (Phi : M -> N) x v) := by
+  have hPhi : MDifferentiableAt I I (Phi : M -> N) x :=
+    Phi.mdifferentiable (by decide : (∞ : WithTop ℕ∞) ≠ 0) x
+  rw [extDerivFun_real_eq_mfderiv, extDerivFun_real_eq_mfderiv]
+  simpa [Function.comp_def] using
+    mfderiv_comp_apply (I := I) (I' := I) (I'' := 𝓘(Real, Real)) x hf hPhi v
+
+
+
+
+
+
+
 theorem writtenInExtChartAt_diffAt
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -64,8 +81,8 @@ theorem writtenInExtChartAt_diffAt
   rw [hpoint] at hdiff_within
   exact hdiff_within.differentiableAt hrange
 
-/-- The scalar exterior derivative applied to the chart-constant tangent vector
-is the model Frechet derivative of the scalar chart representative. -/
+
+
 theorem extDerivFun_tangentConstInChart_eq_fderiv
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -134,8 +151,8 @@ theorem extDerivFun_tangentConstInChart_eq_fderiv
   rw [extDerivFun_real_eq_mfderiv, hfield]
   exact hchain_apply.symm.trans hwithin_to_fderiv
 
-/-- A scalar with zero manifold Frechet derivative everywhere is locally
-constant on a boundaryless manifold. -/
+
+
 theorem isLocallyConstant_of_mfderiv_eq_zero
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -193,9 +210,9 @@ theorem isLocallyConstant_of_mfderiv_eq_zero
   change f (e.symm (e y)) = f (e.symm (e x)) at hFy
   simpa [hsymm_y, hsymm_x] using hFy
 
-/-- If a scalar function has a chart representative near the base point, then
-its exterior derivative at the base point is the model `fderiv` of that
-representative. -/
+
+
+
 theorem extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -227,16 +244,16 @@ theorem extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
     _ = fderiv Real φ z₀ V := by
           rw [hφ.fderiv_eq]
 
-/-- Fixed-base time derivative of a spatial exterior derivative.
 
-This is the scalar mixed-partial frontier used by the Ricci-flow Christoffel
-calculation.  It deliberately freezes the spatial base point and tangent vector:
-the only varying parameter is the real time parameter.
 
-The model-space analytic core is `fixedBaseFDerivTimeDerivativeAt_of_contDiff`.
-To construct this predicate from manifold-level spacetime smoothness, the
-remaining chart-local lemma should rewrite `extDerivFun` in a chart as the
-model derivative and then apply that model-space theorem. -/
+
+
+
+
+
+
+
+
 def FixedBaseExtDerivTimeDerivativeOn
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -251,11 +268,11 @@ def FixedBaseExtDerivTimeDerivativeOn
       timeSet
       t
 
-/-- Regular-time version of `FixedBaseExtDerivTimeDerivativeOn`.
 
-This is the version suited to Ricci-flow intervals: the derivative is still
-within the full time carrier, but it is required only at regular evolution
-times. -/
+
+
+
+
 def FixedBaseExtDerivTimeDerivativeOnRegular
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -286,7 +303,7 @@ theorem fixedBaseExtDerivTimeDerivativeOn_apply
       t :=
   h t x hx V
 
-/-- Pointwise use of the regular-time fixed-base mixed derivative predicate. -/
+
 theorem fixedBaseExtDerivTimeDerivativeOnRegular_apply
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -305,7 +322,7 @@ theorem fixedBaseExtDerivTimeDerivativeOnRegular_apply
       t :=
   h t ht x hx V
 
-/-- The all-times predicate immediately implies the regular-time predicate. -/
+
 theorem FixedBaseExtDerivTimeDerivativeOn.toRegular
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -318,12 +335,12 @@ theorem FixedBaseExtDerivTimeDerivativeOn.toRegular
   intro t _ht x hx V
   exact h t x hx V
 
-/-- Chart-level constructor for fixed-base mixed derivatives on a singleton.
 
-The model-space scalar family `Φ` supplies the jointly `C²` chart expression.
-The two eventual-equality hypotheses identify the manifold scalar families
-`F` and `Ft` with `Φ` and with the time derivative of `Φ`, respectively, near
-the chart center. -/
+
+
+
+
+
 theorem fixedBaseExtDerivTimeDerivativeOn_singleton_of_chart_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -380,9 +397,9 @@ theorem fixedBaseExtDerivTimeDerivativeOn_singleton_of_chart_contDiff
       (fun s _hs => hleft s)
       (hleft t)).congr_deriv hright.symm
 
-/-- Chart-level constructor for regular-time fixed-base mixed derivatives on a
-singleton.  This currently reuses the all-times chart constructor and then
-restricts it to regular times. -/
+
+
+
 theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -414,9 +431,9 @@ theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiff
       hΦ hFdiff hFchart hFtdiff hFtchart).toRegular
       (I := I) (regularSet := regularSet)
 
-/-- Chart-level constructor for regular-time fixed-base mixed derivatives on a
-singleton, with chart equalities required only on the time carrier and regular
-times. -/
+
+
+
 theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTime
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -477,12 +494,12 @@ theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTi
       (fun s hs => hleft s hs)
       (hleft t (hregular_subset ht))).congr_deriv hright.symm
 
-/-- Model-space time-derivative identification for a smooth spacetime chart
-representative.
 
-If the slice derivative of `Φ` in the time variable is supplied as `Ψ`, and the
-time set is a neighborhood of the regular time, then `Ψ` agrees locally with the
-full Frechet derivative of `Φ` applied to the time direction `(1, 0)`. -/
+
+
+
+
+
 theorem eventuallyEq_timeFDeriv
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {timeSet : Set Real}
@@ -520,13 +537,13 @@ theorem eventuallyEq_timeFDeriv
     hy_deriv.hasDerivAt htime
   exact htime_deriv.unique hchart
 
-/-- Pointwise chart-level constructor for regular-time fixed-base mixed
-derivatives on a singleton.
 
-This is the local version of
-`fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTime`:
-the chart representative only needs to be `C²` at the regular spacetime point
-where the derivative is evaluated. -/
+
+
+
+
+
+
 theorem fixedBaseAtReg
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -596,8 +613,8 @@ theorem fixedBaseAtReg
       (fun s hs => hleft s hs)
       (hleft t (hregular_subset ht))).congr_deriv hright.symm
 
-/-- Chart expression of scalar spacetime smoothness on `Real × M`, centered at
-the given spatial point. -/
+
+
 theorem contDiffAt_prodChart
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -624,12 +641,12 @@ theorem contDiffAt_prodChart
       simp [hp]
   simpa [contDiffWithinAt_univ] using hsrc'
 
-/-- Build regular-time fixed-base spatial derivative commutation from ordinary
-time derivatives of the scalar slices and spacetime smoothness.
 
-This is the manifold-level bridge from a Ricci-flow metric equation
-`∂ₜ F = Ft` to the fixed-base derivative predicate used by the Christoffel
-variation calculation. -/
+
+
+
+
+
 theorem fixedBaseOnReg_of_timeDerivWithin
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -726,11 +743,11 @@ theorem fixedBaseOnReg_of_timeDerivWithin
       exact hFt_raw.trans hraw
   exact hsingle t ht x (by simp) V
 
-/-- Local-domain version of `fixedBaseOnReg_of_timeDerivWithin`.
 
-This is the form needed for local-frame component equations: the supplied time
-derivative is only known on an open spatial domain, but the chart points near a
-base point in that domain remain in the domain. -/
+
+
+
+
 theorem fixedBaseOnRegLocal
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -837,6 +854,88 @@ theorem fixedBaseOnRegLocal
         simp [writtenInExtChartAt, extChartAt]
       exact hFt_raw.trans hraw
   exact hsingle t ht x (by simp) V
+
+
+
+
+
+
+theorem fixedBaseOnRegSmooth
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {timeSet regularSet : Set Real} {u : Set M}
+    {F Ft : Real -> M -> Real}
+    (hu : IsOpen u)
+    (hregular_open : IsOpen regularSet)
+    (hregular_nhds : ∀ {t : Real}, t ∈ regularSet -> timeSet ∈ nhds t)
+    (hSmooth :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        ContMDiffAt
+          ((modelWithCornersSelf Real Real).prod I)
+          (modelWithCornersSelf Real Real) 2
+          (fun p : Real × M => F p.1 p.2)
+          (t, x))
+    (hTime :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        HasDerivWithinAt
+          (fun s : Real => F s x)
+          (Ft t x)
+          timeSet
+          t) :
+    FixedBaseExtDerivTimeDerivativeOnRegular
+      (I := I) timeSet regularSet u F Ft := by
+  have hFdiff :
+      ∀ s, s ∈ regularSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I (modelWithCornersSelf Real Real) (F s) x := by
+    intro s hs x hx
+    have hslice :
+        ContMDiffAt I ((modelWithCornersSelf Real Real).prod I) 1
+          (fun y : M => (s, y)) x :=
+      contMDiffAt_const.prodMk contMDiffAt_id
+    have hcomp := (hSmooth s hs x hx).of_le
+      (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+    have hsliceComp := hcomp.comp x hslice
+    simpa [Function.comp_def] using hsliceComp.mdifferentiableAt (by norm_num)
+  have hFtdiff :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I (modelWithCornersSelf Real Real) (Ft t) x := by
+    intro t ht x hx
+    have hpartialJoint :
+        ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+          (modelWithCornersSelf Real Real) 1
+          (fun p : Real × M => deriv (fun s => F s p.2) p.1) (t, x) :=
+      timeDeriv_smoothAt (hSmooth t ht x hx)
+        (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
+    have hslice :
+        ContMDiffAt I ((modelWithCornersSelf Real Real).prod I) 1
+          (fun y : M => (t, y)) x :=
+      contMDiffAt_const.prodMk contMDiffAt_id
+    have hpartialSpace :
+        MDifferentiableAt I (modelWithCornersSelf Real Real)
+          (fun y : M => deriv (fun s => F s y) t) x := by
+      have hcomp := hpartialJoint.comp x hslice
+      simpa [Function.comp_def] using hcomp.mdifferentiableAt (by norm_num)
+    have heq :
+        (fun y : M => Ft t y) =ᶠ[nhds x]
+          fun y : M => deriv (fun s => F s y) t := by
+      filter_upwards [hu.mem_nhds hx] with y hy
+      exact ((hTime t ht y hy).hasDerivAt (hregular_nhds ht)).deriv.symm
+    exact hpartialSpace.congr_of_eventuallyEq heq
+  have hTimeReg :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        HasDerivWithinAt (fun s : Real => F s x) (Ft t x) regularSet t := by
+    intro t ht x hx
+    exact ((hTime t ht x hx).hasDerivAt (hregular_nhds ht)).hasDerivWithinAt
+  have hswapReg :
+      FixedBaseExtDerivTimeDerivativeOnRegular
+        (I := I) regularSet regularSet u F Ft :=
+    fixedBaseOnRegLocal (I := I) hu (Set.Subset.rfl)
+      (fun ht => hregular_open.mem_nhds ht) hSmooth hFdiff hFtdiff hTimeReg
+  intro t ht x hx V
+  exact ((hswapReg t ht x hx V).hasDerivAt
+    (hregular_open.mem_nhds ht)).hasDerivWithinAt
 
 
 end DifferentialGeometry

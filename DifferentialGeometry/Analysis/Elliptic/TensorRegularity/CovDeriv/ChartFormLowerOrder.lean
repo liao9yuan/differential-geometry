@@ -1,60 +1,11 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
-/-!
-# Chart-coordinate lower-order remainder of the tensor `H^1` Dirichlet integrand
-
-This file completes the chart-coordinate decomposition of the pointwise
-integrand of the `H^1` Dirichlet form on `(r, s)`-tensor sections, begun in
-`CovDerivChartForm.lean`. There the (component-coupled) principal part
-`covPrincipalIntegrand` was built; here the lower-order remainder
-`covLowerOrderIntegrand` is assembled and the headline coupled identity is
-proved.
-
-The covariant-derivative chart-component formula
-`covDerivComponent_eq_euclidPartial_add_lowerOrder` expresses the raw
-chart-scalar component of the chart-coordinate covariant derivative as
-`euclidPartial + covDerivLowerOrderTerm` — a plain chart-Euclidean partial
-derivative plus a zeroth-order Christoffel correction. The product of two such
-sums splits into four groups:
-
-```
-(∂S + LO_S) · (∂T + LO_T)
-  = ∂S · ∂T                    (principal — covPrincipalIntegrand)
-  + ∂S · LO_T + LO_S · ∂T + LO_S · LO_T   (lower order — covLowerOrderIntegrand)
-```
-
-The lower-order remainder collects the three non-principal groups, weighted by
-the same component-coupled chart-frame tensor-metric Gram `covChartMetricGram`
-and un-weighted inverse Gram `chartInvGramEuclid` prefactor as the principal
-part.
-
-## Main definitions
-
-* `covLowerOrderIntegrand g r s S T α` — the component-coupled lower-order
-  remainder of the chart-coordinate Dirichlet integrand.
-
-## Main results
-
-* `tensorCovDerivPointwiseInner_chart_eq` — the headline coupled identity: in
-  chart-Euclidean coordinates the pointwise `H^1` Dirichlet integrand
-  `tensorCovDerivPointwiseInner g r s S T = ⟨∇S, ∇T⟩` equals
-  `covPrincipalIntegrand + covLowerOrderIntegrand`.
-* `covLowerOrderIntegrand_contDiffOn` — the lower-order remainder is `C^∞` on
-  the Euclidean chart target.
-* `covLowerOrderIntegrand_eqOn` — the lower-order remainder agrees, on the
-  Euclidean chart target, with the genuine integrand minus the principal part;
-  the principal/lower-order split is exact.
-* `covLowerOrderIntegrand_symm` — symmetry of the lower-order remainder under
-  the `(S, T)` swap.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -78,13 +29,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The component-coupled lower-order remainder of the chart-coordinate
-Dirichlet integrand.** Same `covChartMetricGram` / `chartInvGramEuclid`
-prefactor as `covPrincipalIntegrand`, but the inner factor is the sum of the
-three non-principal product groups: `∂S · LO_T`, `LO_S · ∂T`, `LO_S · LO_T`,
-where `∂` denotes the chart-Euclidean partial derivative of the Euclidean
-push-forward of a raw chart component and `LO` denotes the zeroth-order
-Christoffel correction `covDerivLowerOrderTerm`. -/
 noncomputable def covLowerOrderIntegrand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -115,7 +59,7 @@ noncomputable def covLowerOrderIntegrand
                       covDerivLowerOrderTerm (I := I) (M := M)
                         g r s T α l Q.1 Q.2 y)
 
-/-- Unfolding lemma for `covLowerOrderIntegrand`. -/
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covLowerOrderIntegrand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -146,16 +90,6 @@ lemma covLowerOrderIntegrand_def
                         covDerivLowerOrderTerm (I := I) (M := M)
                           g r s T α l Q.1 Q.2 y) := rfl
 
-/-- **The chart-coordinate decomposition of the tensor `H^1` Dirichlet
-integrand.** For `y` in the Euclidean chart target `chartTargetEuclid α`, set
-`b := (extChartAt I α).symm (toEuclidean.symm y)`. The pointwise integrand
-`tensorCovDerivPointwiseInner g r s S T b = ⟨∇S, ∇T⟩` of the `H^1` Dirichlet
-form decomposes, in chart-Euclidean coordinates, as the component-coupled
-principal part `covPrincipalIntegrand` plus the component-coupled lower-order
-remainder `covLowerOrderIntegrand`.
-
-The principal part is **component-coupled**: the chart-frame tensor metric
-`covChartMetricGram` is not diagonal. -/
 theorem tensorCovDerivPointwiseInner_chart_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -181,9 +115,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-/-- The Euclidean push-forward `chartPushedRaw I α (tensorChartComponentRaw …)`
-of a raw chart component of a smooth compactly-supported tensor section is
-`ContDiffOn ℝ ∞` on the Euclidean chart target. -/
 theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -232,8 +163,7 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hz
 
-/-- The `k`-th chart-Euclidean partial derivative of the Euclidean push-forward
-of a raw chart component is `ContDiffOn ℝ ∞` on the Euclidean chart target. -/
+omit [CompleteSpace E] in
 theorem euclidPartial_chartPushedRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -275,11 +205,6 @@ theorem euclidPartial_chartPushedRaw_contDiffOn
   rw [hu_def]
   rfl
 
-/-- **The lower-order remainder is `C^∞` on the Euclidean chart target.** A
-finite sum and product of `C^∞` functions: the prefactors `covChartMetricGram`
-and `chartInvGramEuclid` are `C^∞`, the chart-Euclidean partials of the raw
-component push-forwards are `C^∞`, and the lower-order corrections
-`covDerivLowerOrderTerm` are `C^∞`. -/
 theorem covLowerOrderIntegrand_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -440,11 +365,6 @@ theorem covLowerOrderIntegrand_contDiffOn
     ContDiffOn.sum (fun P _ => ContDiffOn.sum (fun Q _ => hsummand P Q))
   exact hsum
 
-/-- **The principal/lower-order split is exact.** On the Euclidean chart target
-`chartTargetEuclid α`, the lower-order remainder `covLowerOrderIntegrand`
-equals the genuine chart-coordinate Dirichlet integrand
-`tensorCovDerivPointwiseInner g r s S T ((extChartAt I α).symm (toEuclidean.symm ·))`
-minus the principal part `covPrincipalIntegrand`. -/
 theorem covLowerOrderIntegrand_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -463,7 +383,7 @@ theorem covLowerOrderIntegrand_eqOn
   rw [h]
   ring
 
-/-- **Symmetry of the lower-order remainder under the `(S, T)` swap.** -/
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covLowerOrderIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

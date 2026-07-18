@@ -1,32 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 
-/-!
-# Global `L²` Cauchy–Schwarz inequality and triangle inequality
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`. Building on the
-algebraic and `MemL2`-closure machinery from `Pairing.Algebra`,
-this file proves the global `L²` Cauchy–Schwarz inequality and its
-absolute-value form, together with the triangle inequality for the
-global `L²` norm.
-
-The natural hypotheses are diagonal `MemL2` for both sections plus
-integrability of the cross pointwise pairing — the same pattern as the
-linearity statements in the companion file.
-
-* `tensorL2Inner_sq_le_mul` — squared form
-  `(∫ ⟨S, T⟩)² ≤ (∫ ⟨S, S⟩) (∫ ⟨T, T⟩)`;
-* `abs_tensorL2Inner_le` — absolute-value form
-  `|∫ ⟨S, T⟩| ≤ ‖S‖_{L²} ‖T‖_{L²}`;
-* `tensorL2Norm_add_le` — triangle inequality
-  `‖S + T‖_{L²} ≤ ‖S‖_{L²} + ‖T‖_{L²}`.
-
-The squared form is established by the standard "discriminant" argument:
-the real quadratic
-`q(t) = ⟨S + t • T, S + t • T⟩_{L²} = a + 2 t b + t² c ≥ 0`
-is non-negative for all `t : ℝ`, where `a = ⟨S, S⟩, b = ⟨S, T⟩,
-c = ⟨T, T⟩`. Case analysis on `c = 0` vs `c > 0` then yields `b² ≤ a c`.
--/
 
 noncomputable section
 
@@ -40,7 +13,7 @@ namespace L2
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -49,12 +22,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
-/-- **Cauchy–Schwarz** for the global metric-induced `L²` inner product on
-mixed `(r, s)`-tensor section fields, in squared form: the squared `L²`
-inner product is bounded by the product of the diagonal `L²` inner
-products. The hypotheses are diagonal `MemL2` of both sections plus
-integrability of the cross pointwise pairing. -/
+
 theorem tensorL2Inner_sq_le_mul
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -216,10 +184,7 @@ theorem tensorL2Inner_sq_le_mul
     rw [hb_zero, hc_eq, mul_zero]
     simp
 
-set_option linter.unusedSectionVars false in
-/-- **Cauchy–Schwarz** for the global metric-induced `L²` inner product, in
-absolute-value form: the absolute value of the `L²` inner product is
-bounded by the product of the `L²` norms. -/
+
 theorem abs_tensorL2Inner_le
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -256,10 +221,7 @@ theorem abs_tensorL2Inner_le
   rw [h2] at h1
   exact h1
 
-set_option linter.unusedSectionVars false in
-/-- **Triangle inequality** for the global metric-induced `L²` norm. The
-`L²` norm of the sum is bounded by the sum of the `L²` norms, under the
-natural integrability hypotheses needed to expand the squared norm. -/
+
 theorem tensorL2Norm_add_le
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -5,14 +5,14 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Metric compatibility in local-frame components
 
-This file contains coordinate/local-frame consequences of metric compatibility
-that are independent of Ricci-flow time evolution.  In particular it exposes
-the component form of `nabla gInv = 0` for an arbitrary smooth metric and a
-metric-compatible connection.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 

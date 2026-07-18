@@ -1,10 +1,6 @@
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-! # Chart-cover stitching of smoothness into a manifold `ContMDiff` map
-
-Promotes per-chart smoothness of a chart-coordinate flow to `ContMDiff` of the
-manifold self-map by a finite chart-cover stitch. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -17,30 +13,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-A self-map `f : M → M` that is `C^∞` when read through every chart of an
-atlas is globally `C^∞` on `M`. This is the chart-glue step used to lift
-chart-local smooth-in-IC of the Picard-Lindelöf flow to manifold-level
-smoothness of the time-dependent vector field's spatial flow slice.
-
-Signature shape: from chart-local smoothness of `f` at every point of `M`,
-in the sense of `ContMDiffAt I I ∞ f x`, conclude `ContMDiff I I ∞ f`.
--/
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem chart_glue_smooth_of_chart_local_smooth
     (f : M → M)
     (h : ∀ x : M, ContMDiffAt I I ∞ f x) :
     ContMDiff I I ∞ f := h
 
-/--
-**Chart-cover finite-stitch `ContMDiff`.** A self-map `f : M → M` that
-admits, at every point `x : M`, an open neighborhood `U` of `x` on which
-`f` is `ContMDiffAt` everywhere is globally `ContMDiff I I ∞`.
-
-In Mathlib, `ContMDiff I I' n f` unfolds to `∀ x, ContMDiffAt I I' n f x`,
-so the existence of an open neighborhood with pointwise smoothness on `U`
-is reduced to extracting the smoothness at the specific point `x` from
-the localized data.
--/
 theorem chart_cover_stitch_contMDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E]
@@ -55,27 +33,6 @@ theorem chart_cover_stitch_contMDiff
   obtain ⟨U, _hUopen, hxU, hU⟩ := h x
   exact hU x hxU
 
-/--
-**Chart-coord flow lifts to manifold `ContMDiffAt`.** If a chart-α-local
-smooth flow `flow : E → ℝ → E` is `C^∞` jointly in space-and-time on
-`Metric.ball (I (chartAt H α α)) ρ ×ˢ Ioo 0 T`, and a candidate flow
-`Φ : ℝ → M → M` agrees with the chart-conjugated formula
-`(chartAt H α).symm ∘ I.symm ∘ flow (I (chartAt H α y)) s` for every
-chart-source point `y` whose chart-coordinate sits in the ball, then at
-any fixed time `t ∈ Ioo 0 T` and any chart-source point `x` whose
-chart-coordinate sits in the ball, the spatial slice `Φ t` is
-`ContMDiffAt I I ∞` at `x`.
-
-The hypothesis `hflow_in_target` is mathematically necessary: the
-chart-coordinate image `I.symm (flow (I (chartAt H α x)) t)` must live
-in `(chartAt H α).target` for `(chartAt H α).symm` to be smooth there
-(its `ContMDiffOn` domain is exactly `target`).
-
-The `[I.Boundaryless]` hypothesis is mathematically necessary so that
-`I.symm : E → H` is globally smooth as a model-with-corners section; for
-non-boundaryless models, the corresponding statement holds only on
-`range I`.
--/
 theorem manifold_contMDiffAt_of_chart_smooth_flow
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E]

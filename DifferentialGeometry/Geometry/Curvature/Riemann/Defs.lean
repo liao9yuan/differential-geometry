@@ -1,49 +1,5 @@
 import DifferentialGeometry.Geometry.Operator.Hessian
 
-/-!
-# Pointwise Ricci curvature of a Riemannian metric
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, the Riemann
-curvature tensor is the `(1, 3)`-tensor expressed in chart coordinates by the
-Christoffel-symbol formula
-$$R^l{}_{ijk}(\alpha, x) =
-    \partial_j \Gamma^l{}_{ik}(\alpha, x)
-  - \partial_k \Gamma^l{}_{ij}(\alpha, x)
-  + \sum_m \bigl(\Gamma^l{}_{jm}(\alpha, x)\,\Gamma^m{}_{ik}(\alpha, x)
-                 - \Gamma^l{}_{km}(\alpha, x)\,\Gamma^m{}_{ij}(\alpha, x)\bigr).$$
-Contracting `j = l` produces the Ricci tensor
-$$\operatorname{Rc}_{ik}(\alpha, x) = \sum_j R^j{}_{ijk}(\alpha, x).$$
-
-This file packages those chart-coordinate formulas and a `pointwiseBilin`
-glueing the chart-Ricci entries to a real-valued bilinear form on each
-tangent space, computed using the chart at the point itself.
-
-## Main definitions
-
-* `chartRiemannTensor g α i j k l y`: chart-coordinate component
-  `R^l{}_{ijk}(α, y)` of the Riemann curvature tensor, written in terms of
-  `chartChristoffel` and `partialDeriv`.
-* `chartRicciTensor g α i k y`: chart-coordinate component
-  `Rc_{ik}(α, y) = ∑ j, R^j{}_{ijk}(α, y)` of the Ricci tensor.
-* `ricciFun g`: the pointwise Ricci tensor on the tangent bundle, packaged
-  as a `pointwiseBilin`. At each point `x`, the bilinear form sends
-  `(v, w)` to `∑ i k, v^i · w^k · Rc_{ik}(x, ϕ_x x)` where the components
-  `v^i, w^k` are read off in the canonical model basis.
-
-## Main results
-
-* `ricciFun_apply`: pointwise expansion of `ricciFun g x v w` in terms of
-  the chart Ricci entries and the basis components of `v, w`.
-* `ricciFun_basis_apply`: evaluating `ricciFun g x` on canonical basis
-  vectors `b i, b k` returns the chart Ricci entry `Rc_{ik}(x, ϕ_x x)`.
-* `ricciFun_symm_of_chartRicciTensor_symm`: hypothesis-bearing symmetry of
-  the pointwise Ricci form. The standard symmetry of the Ricci tensor as a
-  `(0, 2)`-tensor follows from the algebraic identities of the Levi-Civita
-  Riemann tensor (the first Bianchi identity together with metric
-  compatibility), expressed at the chart-coordinate level by the symmetry
-  `Rc_{ik}(x, ϕ_x x) = Rc_{ki}(x, ϕ_x x)`. Once a downstream client supplies
-  this chart-level symmetry, the bilinear form is pointwise symmetric.
--/
 
 noncomputable section
 
@@ -55,25 +11,12 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The chart-coordinate Riemann curvature tensor `R^l{}_{ijk}(α, y)`.
-
-This is the pointwise scalar combining the Christoffel symbols of the chart
-at `α` and their `partialDeriv`-style first partials in `E`:
-$$R^l{}_{ijk}(\alpha, y) =
-    \partial_j \Gamma^l{}_{ik}(\alpha, y)
-  - \partial_k \Gamma^l{}_{ij}(\alpha, y)
-  + \sum_m \bigl(\Gamma^l{}_{jm}(\alpha, y) \Gamma^m{}_{ik}(\alpha, y)
-                 - \Gamma^l{}_{km}(\alpha, y) \Gamma^m{}_{ij}(\alpha, y)\bigr).$$
-
-The lower-index ordering follows `(i, j, k)`: `i` is the "vector" index,
-`j` is the differentiation direction, `k` is the second lower index of the
-Christoffel symbol contracted by the alternating second-partial term. -/
 def chartRiemannTensor (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   partialDeriv (E := E) j (chartChristoffel (I := I) g α i k l) y -
@@ -96,9 +39,6 @@ def chartRiemannTensor (g : SmoothRiemannianMetric I M) (α : M)
             chartChristoffel (I := I) g α k m l y *
               chartChristoffel (I := I) g α i j m y)) := rfl
 
-/-- **Antisymmetry of the chart Riemann tensor in the differentiation
-indices.** Interchanging `j ↔ k` flips the sign of every term in the
-chart formula. -/
 theorem chartRiemannTensor_antisymm_jk
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -124,9 +64,6 @@ theorem chartRiemannTensor_antisymm_jk
   rw [hsum]
   ring
 
-/-- The chart-coordinate Ricci tensor `Rc_{ik}(α, y) = ∑ j, R^j{}_{ijk}(α, y)`,
-obtained by contracting the upper index of `chartRiemannTensor` against the
-second lower index. -/
 def chartRicciTensor (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ j : Fin (Module.finrank ℝ E),
@@ -139,14 +76,6 @@ def chartRicciTensor (g : SmoothRiemannianMetric I M) (α : M)
       ∑ j : Fin (Module.finrank ℝ E),
         chartRiemannTensor (I := I) g α i j k j y := rfl
 
-/-- The pointwise Ricci tensor of a smooth Riemannian metric `g`, packaged as
-a `pointwiseBilin` (a real bilinear form on each `TangentSpace I x`). At each
-point `x` the form is evaluated in the chart at `x`: the input tangent vectors
-`v, w` are expanded in the canonical model basis `chartModelBasis E`, and the
-resulting coordinates are contracted against the `chartRicciTensor` entries at
-the chart center `extChartAt I x x`:
-$$\operatorname{Rc}(g)(x)(v, w) =
-    \sum_{i, k} v^i\,w^k \cdot \operatorname{Rc}_{ik}(x, \varphi_x(x)).$$ -/
 def ricciFun (g : SmoothRiemannianMetric I M) :
     pointwiseBilin (M := M) I :=
   fun x => LinearMap.mk₂ ℝ
@@ -213,9 +142,6 @@ def ricciFun (g : SmoothRiemannianMetric I M) :
       intro k _
       ring)
 
-/-- Pointwise expansion of `ricciFun`: applied to two tangent vectors, it
-sums the chart Ricci tensor entries weighted by the model-basis
-coordinates. -/
 lemma ricciFun_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciFun (I := I) g x v w =
@@ -226,9 +152,6 @@ lemma ricciFun_apply (g : SmoothRiemannianMetric I M) (x : M)
             chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
   rfl
 
-/-- The bilinear form `ricciFun g x` evaluated on the canonical basis
-vectors `b i, b k` returns the chart Ricci tensor entry
-`Rc_{ik}(x, ϕ_x x)`. -/
 lemma ricciFun_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -266,9 +189,6 @@ lemma ricciFun_basis_apply
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-/-- **Hypothesis-bearing pointwise symmetry of `ricciFun`.** Given chart-level
-symmetry of `chartRicciTensor` at every point `x` evaluated in the chart at
-`x` itself, the pointwise Ricci form is symmetric. -/
 theorem ricciFun_symm_of_chartRicciTensor_symm
     (g : SmoothRiemannianMetric I M)
     (h_chart_symm : ∀ x : M, ∀ i k : Fin (Module.finrank ℝ E),

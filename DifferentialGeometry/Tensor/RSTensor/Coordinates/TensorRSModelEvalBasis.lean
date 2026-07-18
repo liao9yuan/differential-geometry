@@ -10,43 +10,10 @@ import Mathlib.Analysis.Normed.Operator.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Constructions
 
-/-!
-# Evaluation-at-basis equivalence for the `(r, s)`-tensor model fibre
-
-For a finite-dimensional real inner-product model space `E` (with
-`n := Module.finrank ℝ E`), this file constructs the continuous-linear
-equivalence
-
-  `TensorRSModel r s ℝ E  ≃L[ℝ]  ((Fin r → Fin n) × (Fin s → Fin n)) → ℝ`
-
-sending a `(r, s)`-tensor model element `T` to its scalar components
-against the fixed model-fibre basis `chartModelBasis E`. It mirrors the
-existing scalar-side construction `evalAtBasisCLELocal` for
-`Tensor0SModel n ℝ E` (see `Variational/Continuity.lean`) and packages an
-equivalent smoothness characterisation: a map into `TensorRSModel r s ℝ E`
-is smooth iff every scalar component is smooth.
-
-## Main contents
-
-* `evalAtBasisLinear_TensorRSModel r s` — the bare `LinearMap` extracting
-  scalar components.
-* `evalAtBasisCLE_TensorRSModel r s` — the continuous-linear equivalence.
-* `contMDiffOn_into_tensorRSModel_of_eval_basis` — `ContMDiffOn` into
-  `TensorRSModel r s ℝ E` is equivalent to `ContMDiffOn` of each scalar
-  component.
-
-The construction proceeds by composing the existing `Tensor0SModel`
-basis-evaluation equivalences on the domain and codomain of the
-`TensorRSModel` definition (which unfolds to
-`Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`), then transporting the
-resulting `((Fin r → Fin n) → ℝ) →L[ℝ] ((Fin s → Fin n) → ℝ)` to the
-finite-dimensional Pi-space of matrix entries.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -60,14 +27,8 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold Topology ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
 
-/-- Linear "evaluation at a model-basis tuple" map on `Tensor0SModel n ℝ E`,
-sending `Φ` to the function `φ ↦ Φ (chartModelBasis E ∘ φ)`.
-
-This is the same map as `evalAtBasisLinearLocal` of
-`Variational/Continuity.lean` and the `MetricLowering` sister; re-stated here so the
-present file is self-contained. -/
 noncomputable def eval0SLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
@@ -85,8 +46,6 @@ noncomputable def eval0SLinear (n : ℕ) :
     eval0SLinear (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- `eval0SLinear` is injective: two model multilinear forms agreeing on
-every model-basis tuple are equal. -/
 private lemma eval0SLinear_injective (n : ℕ) :
     Function.Injective (eval0SLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -95,7 +54,6 @@ private lemma eval0SLinear_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
-/-- Dimension of the model fibre `Tensor0SModel n ℝ E`. -/
 private lemma finrank_tensor0SModel_loc (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -118,6 +76,7 @@ private lemma finrank_tensor0SModel_loc (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
+omit [Module.Finite ℝ E] in
 private lemma finrank_basis_pi_loc (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
@@ -133,8 +92,6 @@ private lemma eval0SLinear_bijective (n : ℕ) :
     rw [finrank_tensor0SModel_loc, finrank_basis_pi_loc]
   exact (LinearMap.injective_iff_surjective_of_finrank_eq_finrank h_eq).mp h_inj
 
-/-- Linear equivalence between `Tensor0SModel n ℝ E` and the Pi-type of
-its scalar components against the model basis. -/
 noncomputable def eval0SLinearEquiv (n : ℕ) :
     Tensor0SModel n ℝ E ≃ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
@@ -147,9 +104,6 @@ noncomputable def eval0SLinearEquiv (n : ℕ) :
     eval0SLinearEquiv (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- The continuous-linear version of `eval0SLinearEquiv`: since both
-modules are finite-dimensional Hausdorff TVS, every linear equivalence is
-already a topological isomorphism. -/
 noncomputable def eval0SCLE (n : ℕ) :
     Tensor0SModel n ℝ E ≃L[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
@@ -161,16 +115,6 @@ noncomputable def eval0SCLE (n : ℕ) :
     eval0SCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- Linear "evaluation at a pair of model-basis tuples" map on
-`TensorRSModel r s ℝ E`. Sends `T : Tensor0SModel r ℝ E →L Tensor0SModel s ℝ E`
-to the function
-
-  `(Idx, Jdx) ↦ (T (Tensor0SModel-basis at Idx)) (chartModelBasis E ∘ Jdx)`,
-
-where the "`Tensor0SModel`-basis at `Idx`" is the unique element of
-`Tensor0SModel r ℝ E` whose scalar components against the model-basis
-tuples coincide with `Pi.single Idx 1` in
-`(Fin r → Fin (Module.finrank ℝ E)) → ℝ`. -/
 noncomputable def evalAtBasisLinear_TensorRSModel (r s : ℕ) :
     TensorRSModel r s ℝ E →ₗ[ℝ]
       ((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -193,9 +137,6 @@ noncomputable def evalAtBasisLinear_TensorRSModel (r s : ℕ) :
       (T ((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))))
         (fun k : Fin s => (chartModelBasis E) (Jdx k)) := rfl
 
-/-- Injectivity of `evalAtBasisLinear_TensorRSModel`: a continuous linear
-map between two `Tensor0SModel`s is determined by its scalar components
-against the model basis on both sides. -/
 private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     Function.Injective (evalAtBasisLinear_TensorRSModel (E := E) r s) := by
   intro T₁ T₂ h
@@ -248,6 +189,7 @@ private lemma finrank_tensorRSModel_loc (r s : ℕ) :
     finrank_tensor0SModel_loc (E := E) r,
     finrank_tensor0SModel_loc (E := E) s, ← pow_add]
 
+omit [Module.Finite ℝ E] in
 private lemma finrank_basis_pair_pi_loc (r s : ℕ) :
     Module.finrank ℝ
       (((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -269,21 +211,6 @@ private lemma evalAtBasisLinear_TensorRSModel_bijective (r s : ℕ) :
     rw [finrank_tensorRSModel_loc, finrank_basis_pair_pi_loc]
   exact (LinearMap.injective_iff_surjective_of_finrank_eq_finrank h_eq).mp h_inj
 
-/-- The continuous-linear equivalence between the `(r, s)`-tensor model
-fibre and the finite-dimensional Pi-space of matrix entries indexed by
-`(Fin r → Fin n) × (Fin s → Fin n)`, where `n := Module.finrank ℝ E`.
-
-Mirrors `evalAtBasisCLELocal` for `Tensor0SModel`. The forward direction
-sends `T : Tensor0SModel r ℝ E →L Tensor0SModel s ℝ E` to its scalar
-components
-
-  `(Idx, Jdx) ↦ (T ((eval0SCLE r).symm (Pi.single Idx 1))) (chartModelBasis ∘ Jdx)`.
-
-The construction goes through the bare `LinearEquiv` built from
-`evalAtBasisLinear_TensorRSModel`, then promoted to a continuous-linear
-equivalence using the standard finite-dimensional fact that every linear
-equivalence between Hausdorff finite-dimensional real TVS is automatically
-a topological isomorphism. -/
 noncomputable def evalAtBasisCLE_TensorRSModel (r s : ℕ) :
     TensorRSModel r s ℝ E ≃L[ℝ]
       ((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -305,14 +232,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- `ContMDiffOn` into `TensorRSModel r s ℝ E` is equivalent to
-`ContMDiffOn` of each scalar component against the model-basis pair.
-
-Because `TensorRSModel r s ℝ E` is a `@[reducible] def` unfolding to a
-continuous-linear-map space whose normed structure is the one inherited
-from `ContinuousLinearMap`, the statement uses the unfolded form to avoid
-normed-space typeclass diamonds.  Reducibility makes this interchangeable
-with `TensorRSModel` at call sites. -/
+omit [IsManifold I ∞ M] in
 theorem contMDiffOn_into_tensorRSModel_of_eval_basis
     {r s : ℕ}
     {f : M → (ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ →L[ℝ]

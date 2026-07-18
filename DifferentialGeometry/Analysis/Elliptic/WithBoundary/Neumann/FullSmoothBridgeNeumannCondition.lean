@@ -3,60 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullSmoothBri
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenFull
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.SurfaceIntegralIdentification
 
-/-!
-# Smooth bridge for the full Neumann variational Laplacian
-(with-boundary, half-space model, full-scope Neumann variant on
-arbitrary smooth scalars satisfying the Neumann boundary condition)
-
-This file connects the full Neumann variational Laplacian via Lax–Milgram
-(`resolventFullNeumann`) to the classical Laplace–Beltrami operator
-`Δ_g_classical` for smooth scalars `u : FullSmoothScalar g` satisfying the
-**Neumann boundary condition** `g(ν, ∇u) = 0` on `∂M`. The bridge identity
-expresses the H¹-completion lift of `u` as the resolvent of the L² class of
-`(u - Δ_g_classical u)` evaluated on the full Neumann test space.
-
-## Comparison to interior-supported variant
-
-The interior-supported variant in `FullSmoothBridge.lean` covers the case
-where `tsupport u.toFun ⊆ (I_half n).interior M`, in which the formal
-Neumann condition `g(ν, ∇u) = 0` holds *automatically* because the
-gradient section vanishes on a neighbourhood of the entire boundary. The
-current file generalises to arbitrary smooth `u` whose gradient may extend
-to the boundary, provided the Neumann condition `g(ν, ∇u) = 0` holds
-pointwise on `∂M`.
-
-## Strategy
-
-For smooth `u, v : FullSmoothScalar g` with the Neumann condition on `u`:
-
-1. Apply `green_first_eq_boundary_surface_integral` (the with-boundary Green's first identity in
-   full smooth form) with `f := v.toFun` and `h := u.toFun`, obtaining
-   $$
-   \int \langle \nabla v, \nabla u\rangle\,d\mu_g
-      + \int v \cdot \Delta_g\,u\,d\mu_g
-    = \int_{\partial M} v \cdot g(\nu, \nabla u)\,dS.
-   $$
-
-2. Under the Neumann hypothesis `g(ν, ∇u) = 0`, the boundary integrand
-   vanishes pointwise, hence the boundary integral on the right vanishes.
-
-3. Adding `∫ u·v` to both sides gives
-   $$\langle u, v\rangle_{H^1}
-      = \int v \cdot (u - \Delta_g\,u)\,d\mu_g.$$
-
-4. The L² class of `(u - Δ_g_classical u)` is built independently of any
-   support hypothesis on `u`. Although `Δ_g_classical g u.smooth` may not
-   be globally continuous on a manifold-with-boundary, it equals
-   a.e. (against the canonical Riemannian volume measure) the
-   partition-of-unity sum
-   `∑_α (localDivergenceWithin g α (∇u)) · ρ_α`, which is continuous on
-   the entire compact manifold. The L² class is taken via this continuous
-   representative.
-
-5. The smooth-test variational identity is promoted to the H¹ completion
-   by density of the smooth inclusion, and the conclusion follows from
-   the uniqueness of `resolventFullNeumann`.
--/
 
 noncomputable section
 
@@ -85,18 +31,13 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The chart-α local-divergence summand
-`x ↦ localDivergenceWithin g α X x · ((chartAtlasPOU I M) α : M → ℝ) x`,
-extended by zero outside the chart source. Continuous on `M`: continuous
-on the chart source (where the local divergence is continuous), and
-locally constantly zero outside the tsupport of `ρ_α`. -/
+omit [CompactSpace M] in
 private lemma localDivergenceWithin_mul_pou_continuous
     (g : SmoothRiemannianMetric (I_half n) M) (α : M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -139,9 +80,6 @@ private lemma localDivergenceWithin_mul_pou_continuous
       rw [hρy, mul_zero]
     exact (continuousAt_const (y := (0 : ℝ))).congr hev.symm
 
-/-- The partition-of-unity sum representing the with-boundary divergence.
-Continuous on `M` because each summand is continuous and the sum is
-finite. -/
 noncomputable def divergence_g_with_boundary_pou
     (g : SmoothRiemannianMetric (I_half n) M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -150,7 +88,6 @@ noncomputable def divergence_g_with_boundary_pou
     localDivergenceWithin (I := I_half n) g α X x *
       ((chartAtlasPOU (I_half n) M) α : M → ℝ) x
 
-/-- The partition-of-unity divergence representative is continuous on `M`. -/
 lemma divergence_g_with_boundary_pou_continuous
     (g : SmoothRiemannianMetric (I_half n) M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -161,10 +98,7 @@ lemma divergence_g_with_boundary_pou_continuous
   exact continuous_finset_sum _ (fun α _ =>
     localDivergenceWithin_mul_pou_continuous (n := n) (M := M) g α X)
 
-/-- Per-α a.e. equality of `divergence_g_with_boundary g X · ρ_α` with
-`localDivergenceWithin g α X · ρ_α` against `chartLocalMeasure g α`. The
-exception set is contained in the chart-α boundary, which has
-`chartLocalMeasure α`-measure zero. -/
+omit [CompactSpace M] in
 private lemma divergence_g_with_boundary_mul_pou_chart_local_ae
     (g : SmoothRiemannianMetric (I_half n) M) (α : M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -210,10 +144,6 @@ private lemma divergence_g_with_boundary_mul_pou_chart_local_ae
       exact hx_nots (subset_tsupport _ hne)
     rw [hρ_zero, mul_zero, mul_zero]
 
-/-- A.e. equality of `divergence_g_with_boundary g X` with its
-partition-of-unity representative `divergence_g_with_boundary_pou g X`,
-against the canonical Riemannian volume measure on a closed
-half-space-modelled manifold-with-boundary. -/
 lemma divergence_g_with_boundary_ae_pou
     (g : SmoothRiemannianMetric (I_half n) M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -329,14 +259,12 @@ lemma divergence_g_with_boundary_ae_pou
     rw [hρ_zero]
     simp
 
-/-- The continuous representative of `u - Δ_g_classical u`. -/
 noncomputable def FullSmoothScalar.oneSubLapClassicalRep
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) : M → ℝ :=
   fun x => u.toFun x -
     divergence_g_with_boundary_pou (n := n) (M := M) g
       (grad_g_full_section (M := M) (n := n) g u.smooth) x
 
-/-- Continuity of the representative. -/
 lemma FullSmoothScalar.oneSubLapClassicalRep_continuous
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) :
     Continuous (u.oneSubLapClassicalRep) := by
@@ -345,7 +273,6 @@ lemma FullSmoothScalar.oneSubLapClassicalRep_continuous
     (divergence_g_with_boundary_pou_continuous (n := n) (M := M) g
       (grad_g_full_section (M := M) (n := n) g u.smooth))
 
-/-- L²-membership of the representative on a closed manifold-with-boundary. -/
 lemma FullSmoothScalar.oneSubLapClassicalRep_memLp
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) :
     MemLp u.oneSubLapClassicalRep 2
@@ -356,17 +283,11 @@ lemma FullSmoothScalar.oneSubLapClassicalRep_memLp
   exact u.oneSubLapClassicalRep_continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The L² class of `(u - Δ_g_classical u)` for an arbitrary full smooth
-scalar `u : FullSmoothScalar g`, defined via the continuous
-partition-of-unity representative. The class agrees a.e. with
-`x ↦ u.toFun x - Δ_g_classical g u.smooth x`. -/
 noncomputable def FullSmoothScalar.oneSubLapClassicalLp
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   u.oneSubLapClassicalRep_memLp.toLp _
 
-/-- A.e. coercion of `oneSubLapClassicalLp` to its underlying continuous
-representative. -/
 lemma FullSmoothScalar.coeFn_oneSubLapClassicalLp
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) :
     (u.oneSubLapClassicalLp :
@@ -375,8 +296,6 @@ lemma FullSmoothScalar.coeFn_oneSubLapClassicalLp
       u.oneSubLapClassicalRep :=
   MemLp.coeFn_toLp u.oneSubLapClassicalRep_memLp
 
-/-- The Lp class is a.e. equal to the canonical
-`u.toFun - Δ_g_classical g u.smooth`. -/
 lemma FullSmoothScalar.oneSubLapClassicalLp_ae_oneSubLap
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g) :
     (u.oneSubLapClassicalLp :
@@ -397,9 +316,6 @@ lemma FullSmoothScalar.oneSubLapClassicalLp_ae_oneSubLap
         (grad_g_full_section (M := M) (n := n) g u.smooth) x from rfl]
   rw [hpou_x]
 
-/-- The Green-identity computation for full smooth `v` against a full
-smooth `u` satisfying the Neumann boundary condition `g(ν, ∇u) = 0` on
-`∂M`. -/
 theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -537,8 +453,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
   rw [h_grad_eq]
   ring
 
-/-- Reformulation as an L² inner product: the H¹ inner product at smooth
-inputs equals the L² inner product against `oneSubLapClassicalLp u`. -/
 theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLapClassical_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -590,8 +504,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLapClassical_neumann
       from RCLike.inner_apply _ _]
   ring
 
-/-- The variational identity at smooth test functions, under the Neumann
-condition on `u`. -/
 theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -629,15 +541,6 @@ theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_neumann
     H1ComplFullNeumannToLp_smoothToH1ComplFullNeumann]
   exact real_inner_comm _ _
 
-/-- The bilinear form on the smooth lift of `u : FullSmoothScalar g` with
-the Neumann condition agrees with the L² functional of
-`(u - Δ_g_classical u)`, evaluated on *every* element of the H¹
-completion (not just smooth lifts). The proof extends the smooth-lift
-identity by density.
-
-The smooth-test hypotheses `h_chart_iden` and `h_int` are the per-chart
-identification predicates from the Green's-identity API (`green_first_eq_boundary_surface_integral`),
-delivered as explicit hypotheses from the surface-identification work. -/
 theorem smoothToH1ComplFullNeumann_bilin_eq_lpFunctional_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : FullSmoothScalar g)
@@ -685,15 +588,6 @@ theorem smoothToH1ComplFullNeumann_bilin_eq_lpFunctional_neumann
     ((denseRange_smoothToH1ComplFullNeumann g).equalizer hL_cont hR_cont
       hLR_smooth) w
 
-/-- **Smooth bridge (full Neumann, with the Neumann boundary condition).**
-For a full smooth scalar `u : FullSmoothScalar g` satisfying the Neumann
-boundary condition `g(ν, ∇u) = 0` pointwise on `∂M`, the H¹-completion
-lift of `u` is the resolvent of `(1 - Δ_g)` applied to the L² class of
-`(u - Δ_g_classical u)`.
-
-The smooth-test hypotheses `h_chart_iden` and `h_int` are passed in
-explicitly: they are the per-chart identification predicates from the
-Green's-identity API delivered by `green_first_eq_boundary_surface_integral`. -/
 theorem smoothToH1ComplFullNeumann_eq_resolventFullNeumann_oneSubLap_neumann
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : FullSmoothScalar g)

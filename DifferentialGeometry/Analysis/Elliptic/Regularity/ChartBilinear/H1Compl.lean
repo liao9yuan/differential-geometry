@@ -1,50 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.Smooth
 
-/-!
-# Chart-bilinear identity for non-smooth elements of `H1Compl g`
-
-This module packages the chart-pulled variational identity for a possibly
-non-smooth element of `H1Compl g`. The data structure
-`ChartBilinearH1ComplData` records:
-
-* a chart-pulled scalar `u_chart : EuclN → ℝ`,
-* explicit weak partial derivatives `weak_partial i` of `u_chart` (in the
-  DeGiorgi sense, against plain Lebesgue volume on
-  `chartTargetEuclid α`),
-* a chart-pulled right-hand side `f_chart : EuclN → ℝ`,
-* membership of `u_chart`, `weak_partial i`, and `f_chart` in `L²` of the
-  chart-pulled measure `volume.withDensity (densityOnEuclid g α)`,
-* and the natural density-weighted variational identity
-
-```
-∫_{chartTarget} ∑_{i, j} weightedInvGramOnEuclid · (weak_partial i) · ∂_j ψ
-  + ∫_{chartTarget} densityOnEuclid · u_chart · ψ
-  = ∫_{chartTarget} densityOnEuclid · f_chart · ψ
-```
-for every smooth test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`.
-
-The data structure is **non-vacuous** for non-smooth `u_chart`: the principal
-integrand uses the explicit weak partial derivative, not the classical Fréchet
-derivative (which would vanish a.e. for non-smooth `u_chart`).
-
-The natural reference measure is `volume.withDensity densityOnEuclid g α`
-(restricted to `chartTargetEuclid α`). This is the chart-pull of the
-Riemannian volume measure `μ_g` to Euclidean coordinates, and is finite
-when restricted to the chart source. This formulation is robust to
-non-precompact charts (e.g., stereographic projection).
-
-## Main definitions
-
-* `ChartBilinearH1ComplData`: packaged data for a non-smooth chart-bilinear
-  identity on a closed Riemannian manifold.
-* `chartPulledWeightedMeasure g α`: the chart-pulled volume measure on
-  `EuclideanSpace ℝ (Fin n)`.
-
-## Main results
-
-* `chart_bilinear_identity_h1Compl`: hypothesis-bearing form of the
-  non-smooth chart-bilinear identity, expressed via the data structure.
--/
 
 noncomputable section
 
@@ -76,88 +31,40 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart-pulled weighted measure on `EuclideanSpace ℝ (Fin n)`:
-`volume` weighted by `densityOnEuclid g α`. This is the natural Euclidean
-counterpart of the Riemannian volume measure `μ_g` on the chart source,
-restricted to the chart-target image `chartTargetEuclid α`.
-
-Because `densityOnEuclid g α` is positive on `chartTargetEuclid α`, this
-measure is mutually absolutely continuous with `volume.restrict
-(chartTargetEuclid α)` on the chart-target image. Outside `chartTargetEuclid α`
-the density vanishes (junk values), so the measure has effective support
-inside `chartTargetEuclid α`. -/
 def chartPulledWeightedMeasure (g : SmoothRiemannianMetric I M) (α : M) :
     Measure EuclN :=
   (volume : Measure EuclN).withDensity
     (fun y => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
 
-/-- Data describing a non-smooth chart-bilinear identity on
-`chartTargetEuclid α`. The hypotheses encode:
-
-(1) a chart-pulled scalar `u_chart : EuclN → ℝ` together with explicit weak
-partial derivatives `weak_partial i : EuclN → ℝ`, all in `L²` of the
-chart-pulled weighted measure restricted to `chartTargetEuclid α`;
-
-(2) a chart-pulled `L²` right-hand side `f_chart : EuclN → ℝ`;
-
-(3) the density-weighted variational identity
-```
-∫ ∑_{i,j} (√det g · g^{ij}) · (weak_partial i) · ∂_j ψ
-  + ∫ √det g · u_chart · ψ = ∫ √det g · f_chart · ψ
-```
-on `chartTargetEuclid α`, for every smooth test ψ with
-`tsupport ψ ⊆ chartTargetEuclid α`.
-
-The principal integrand uses the EXPLICIT weak partial `weak_partial i`,
-not the classical Fréchet derivative `fderiv ℝ u_chart`. This is essential
-for the identity to be non-vacuous when `u_chart` is non-smooth (in which
-case `fderiv ℝ u_chart` vanishes a.e.). -/
 structure ChartBilinearH1ComplData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) where
-  /-- The chart-pulled `H¹` function. -/
+
   u_chart : EuclN → ℝ
-  /-- The chart-pulled `L²` right-hand-side data. -/
+
   f_chart : EuclN → ℝ
-  /-- Explicit weak partial derivatives of `u_chart`. -/
+
   weak_partial : Fin (Module.finrank ℝ E) → EuclN → ℝ
-  /-- `u_chart` is `MemLp 2` w.r.t. the chart-pulled weighted measure
-  restricted to `chartTargetEuclid α`. -/
+
   u_chart_memLp_weighted :
     MemLp u_chart 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
-  /-- `f_chart` is `MemLp 2` w.r.t. the chart-pulled weighted measure
-  restricted to `chartTargetEuclid α`. -/
+
   f_chart_memLp_weighted :
     MemLp f_chart 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
-  /-- Each weak partial derivative is locally `MemLp 2` (with respect to
-  plain Lebesgue volume) on every compact subset of `chartTargetEuclid α`.
 
-  Local L² is the natural integrability for chart-pulled gradients. The
-  principal integrand of the variational identity is integrated against
-  test functions of compact support, so only local L² is needed for the
-  variational identity to make sense.
-
-  In the constructor `chartBilinearH1ComplData_of_laplacianDomain`, the
-  partials in fact satisfy the stronger bound `MemLp 2` w.r.t. the
-  chart-pulled weighted measure restricted to `chartTargetEuclid α`
-  (since the chart-pulled Gram matrix has uniformly bounded eigenvalues
-  on a closed manifold). The local statement here is the minimum
-  needed for the variational identity to make sense and for the consumer
-  `chart_loc_of_uniform_bound` to extract `H²` regularity. -/
   weak_partial_locally_memLp :
     ∀ i, ∀ K : Set EuclN, IsCompact K → K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp (weak_partial i) 2 ((volume : Measure EuclN).restrict K)
-  /-- Each weak partial derivative is in fact a weak partial of `u_chart`
-  on `chartTargetEuclid α` (DeGiorgi sense, against plain volume). -/
+
   weak_partial_isWeakPartial :
     ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (weak_partial i) u_chart
       (chartTargetEuclid (I := I) (M := M) α)
-  /-- The variational identity in density-weighted form. -/
+
   variational_identity :
     ∀ ψ : EuclN → ℝ, ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α →
@@ -175,15 +82,7 @@ structure ChartBilinearH1ComplData
         densityOnEuclid (I := I) g α y * f_chart y * ψ y
         ∂(volume : Measure EuclN)
 
-/-- Headline form of the chart-bilinear identity for a non-smooth element of
-`H1Compl g`: given the data `D`, the variational identity
-```
-∫ ∑_{i,j} (√det g · g^{ij}) · (weak_partial i) · ∂_j ψ
-  + ∫ √det g · u_chart · ψ = ∫ √det g · f_chart · ψ
-```
-on `chartTargetEuclid α` holds for every smooth test function `ψ` with
-`tsupport ψ ⊆ chartTargetEuclid α`. This is a re-export of
-`D.variational_identity` for ergonomics. -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1Compl
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -206,8 +105,7 @@ theorem chart_bilinear_identity_h1Compl
       ∂(volume : Measure EuclN) :=
   D.variational_identity ψ hψ hψ_cs hψ_supp
 
-/-- The density `densityOnEuclid g α` is bounded above and below by positive
-constants on any compact subset of `chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -241,23 +139,13 @@ lemma densityOnEuclid_bounded_on_compact
   intro y hy
   refine ⟨h_min_eq hy, h_max_eq hy⟩
 
-/-- The continuity of `densityOnEuclid g α` on the open chart-target image. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_continuousOn (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
 
-/-- For a measurable subset `K ⊆ chartTargetEuclid α` (in particular any
-compact subset), the plain volume `volume.restrict K` is dominated by a
-positive scalar multiple of the chart-pulled weighted measure restricted to
-`chartTargetEuclid α`:
-
-```
-volume.restrict K ≤ ENNReal.ofReal (1 / c_min) •
-  (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)
-```
-
-where `c_min > 0` is the lower bound for `densityOnEuclid g α` on `K`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma volume_restrict_compact_le_chartPulledWeightedMeasure
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -310,8 +198,7 @@ lemma volume_restrict_compact_le_chartPulledWeightedMeasure
   gcongr
   exact le_trans (le_of_eq h_const_eval.symm) (h_pointwise_bd.trans h_setmono)
 
-/-- Conversion: weighted `MemLp 2` on `chartTargetEuclid α` implies plain
-`MemLp 2` on any compact subset `K ⊆ chartTargetEuclid α`. -/
+omit [NeZero (Module.finrank ℝ E)] in
 lemma memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}

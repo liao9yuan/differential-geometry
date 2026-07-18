@@ -1,52 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHsExt
 import DifferentialGeometry.Analysis.Sobolev.Hs.FiniteSupport
 
-/-!
-# Strong continuity of the scalar spectral heat semigroup on `[0, ∞)`
-
-For a closed Riemannian manifold `(M, g)` and a spectral Sobolev exponent
-`σ`, the extended heat semigroup
-`heatSemigroupHsExt g σ : ℝ → scalarHs g σ →L[ℝ] scalarHs g σ`
-is strongly continuous on the non-negative half-line: for every
-`u : scalarHs g σ`, the map `t ↦ heatSemigroupHsExt g σ t u` is
-continuous on `Set.Ici 0`. This is the last structural property needed to
-package the semigroup as a `BoundedC0Semigroup` (the packaging itself
-lives in `…QuasiLinear.ScalarInstance`).
-
-## Strategy
-
-The proof follows the standard contractive-comparison pattern. The key
-ingredients are:
-
-* the operator-norm contraction
-  `‖heatSemigroupHsExt g σ t‖ ≤ 1` for `t ≥ 0`
-  (`heatSemigroupHsExt_opNorm_le_one`), and
-* the semigroup law on `t, s ≥ 0`
-  (`heatSemigroupHsExt_add`),
-
-which together yield, for any `t, t₀ ≥ 0`,
-
-  `‖heatSemigroupHsExt g σ t u − heatSemigroupHsExt g σ t₀ u‖`
-  `  ≤ ‖heatSemigroupHsExt g σ |t − t₀| u − u‖`.
-
-Hence strong continuity at every `t₀ ≥ 0` reduces to right-continuity at
-`0`, i.e. `heatSemigroupHsExt g σ τ u → u` as `τ ↓ 0`. Right-continuity
-at `0` is proved by a three-term `ε/3` argument:
-
-1. approximate `u` by a finitely-supported `u'` (using density of
-   `finiteSupportSubmodule`),
-2. control the residual `u − u'` by contractivity,
-3. handle the finite-rank piece `heatSemigroupHsExt g σ τ u' − u'`
-   directly: its coordinates are a finite linear combination of
-   `(exp(−λᵢ τ) − 1) · u'.coeff i` weighted by the spectral basis, each
-   factor tending to `0` as `τ → 0`.
-
-## Main result
-
-* `heatSemigroupHsExt_continuousOn` — strong continuity of the heat
-  semigroup on `[0, ∞)`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -198,9 +152,6 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
       _ = ‖heatSemigroupHsExt
               (I := I) (M := M) g σ |t - t₀| u - u‖ := by rw [h_abs]
 
-/-- For a finitely-supported `u'`, the squared norm of the difference
-`heatSemigroupHsExt g σ τ u' − u'` is a finite sum of squared spectral
-terms. -/
 private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {τ : ℝ} (hτ : 0 ≤ τ)
@@ -250,8 +201,6 @@ private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
   rw [h_zero]
   ring
 
-/-- For a finitely-supported `u'`, the map
-`τ ↦ heatSemigroupHsExt g σ τ u'` is continuous at `0` within `Ici 0`. -/
 private lemma tendsto_heatSemigroupHsExt_of_finite
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {u' : scalarHs (I := I) (M := M) g σ}
@@ -492,9 +441,6 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
   rw [h_sum_eq] at h_lt
   simpa [Real.dist_eq, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] using h_lt
 
-/-- **Strong continuity of the scalar spectral heat semigroup on
-`[0, ∞)`.** For every `u : scalarHs g σ`, the map
-`t ↦ heatSemigroupHsExt g σ t u` is continuous on `Set.Ici 0`. -/
 theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
     (σ : ℝ) (u : scalarHs (I := I) (M := M) g σ) :
     ContinuousOn (fun t : ℝ =>

@@ -3,54 +3,7 @@ import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Uniform-in-parameter chart-coordinate ODE uniqueness on `Ioo (-T) T`
-
-The eventually-equal form `chartPhaseVF_orbit_uniqueness` (from
-`ChartFlow/ChartFlowGeodesicLink.lean`)
-gives ODE uniqueness on a neighbourhood of `0` whose size depends on the
-input curves. For a uniform-in-parameter statement — agreement on a
-**fixed** open interval `Ioo (-T) T` — we need an explicit Lipschitz
-constant for the chart-coordinate phase-space vector field on a compact
-spatial set `K`, then a single application of Mathlib's
-`ODE_solution_unique_of_mem_Ioo`.
-
-## Strategy
-
-1. `chartPhaseVF g α` is `C^∞` on the open product
-   `interior (extChartAt I α).target ×ˢ univ` (from
-   `chartPhaseVF_contDiffOn`), hence locally Lipschitz at every point of
-   that open product.
-
-2. For any compact `K` contained in that open product, `chartPhaseVF g α`
-   is locally Lipschitz on `K`. By
-   `LocallyLipschitzOn.exists_lipschitzOnWith_of_compact`, there is a
-   global Lipschitz constant `L` such that
-   `LipschitzOnWith L (chartPhaseVF g α) K`.
-
-3. Apply `ODE_solution_unique_of_mem_Ioo` with that constant, the
-   constant set function `s t := K`, and the constant vector field
-   `v t := chartPhaseVF g α`.
-
-## Main result
-
-* `chartPhaseVF_orbit_uniqueness_uniform_Ioo` — if two parameterised
-  chart-phase ODE solutions agree at `0` and both stay in a compact set
-  `K ⊆ interior (extChartAt I α).target ×ˢ univ` throughout
-  `Ioo (-T) T`, then they agree on all of `Ioo (-T) T`.
-
-## Supporting lemmas
-
-* `chartPhaseVF_locallyLipschitzOn_of_compact` — `chartPhaseVF g α` is
-  locally Lipschitz on any compact subset of the chart-target interior
-  product.
-
-* `chartPhaseVF_lipschitzOnWith_of_compact` — `chartPhaseVF g α` is
-  globally Lipschitz on any such compact subset, with an existential
-  Lipschitz constant.
--/
 
 noncomputable section
 
@@ -63,7 +16,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -74,11 +27,6 @@ section LipschitzOnCompact
 
 variable [I.Boundaryless]
 
-/-- **Local Lipschitz property at a point of the chart-target interior product.**
-At any point `z` of `interior (extChartAt I α).target ×ˢ univ`, the chart-
-phase vector field `chartPhaseVF g α` is Lipschitz on a (full) neighbourhood
-of `z`. This is a direct consequence of `ContDiffAt.exists_lipschitzOnWith`
-applied to the `C^∞` regularity provided by `chartPhaseVF_contDiffOn`. -/
 lemma chartPhaseVF_exists_lipschitzOnWith_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {z : E × E} (hz : z ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
@@ -93,13 +41,6 @@ lemma chartPhaseVF_exists_lipschitzOnWith_at
     hC1.contDiffAt (hopen.mem_nhds hz)
   exact hC1_at.exists_lipschitzOnWith
 
-/-- **Local Lipschitz property on a compact subset of the chart-target interior
-product.** If `K` is contained in the open set
-`interior (extChartAt I α).target ×ˢ univ`, then `chartPhaseVF g α`
-is locally Lipschitz on `K` (in the sense of
-`LocallyLipschitzOn`). The neighbourhoods produced are full
-neighbourhoods (not within `K`), which trivially induce within-`K`
-neighbourhoods. -/
 lemma chartPhaseVF_locallyLipschitzOn_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -111,10 +52,6 @@ lemma chartPhaseVF_locallyLipschitzOn_of_compact
   refine ⟨L, t, ?_, hL⟩
   exact mem_nhdsWithin_of_mem_nhds ht
 
-/-- **Existence of a global Lipschitz constant on a compact spatial set.**
-If `K ⊆ interior (extChartAt I α).target ×ˢ univ` is compact, then there
-exists a single Lipschitz constant `L` such that `chartPhaseVF g α` is
-`L`-Lipschitz on `K`. -/
 theorem chartPhaseVF_lipschitzOnWith_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -130,15 +67,6 @@ section UniformUniqueness
 
 variable [I.Boundaryless]
 
-/-- **Uniform-in-parameter chart-coordinate ODE uniqueness on
-`Ioo (-T) T`.** If two curves `c₁, c₂ : ℝ → E × E` satisfy the chart-phase
-geodesic ODE on the open interval `Ioo (-T) T`, take values inside a
-compact set `K ⊆ interior (extChartAt I α).target ×ˢ univ`, and agree at
-`0`, then they agree on the **entire** open interval `Ioo (-T) T`.
-
-This is the **uniform** form needed for parameter families: the
-agreement interval `Ioo (-T) T` is fixed independently of the curves,
-and depends only on the compact set `K` and the time horizon `T`. -/
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -183,11 +111,6 @@ section UniformAgainstFlow
 
 variable [I.Boundaryless]
 
-/-- **Uniform agreement of a chart-phase solution with the chart-pushed
-flow orbit on `Ioo (-T) T`.** If `c : ℝ → E × E` and the orbit
-`t ↦ Φ((x₀, v_chart), t)` both satisfy the chart-phase ODE on
-`Ioo (-T) T`, match at `0`, and stay in a compact set `K` contained in
-the chart-target interior product, then they agree on `Ioo (-T) T`. -/
 theorem chartPhaseVF_solution_eq_chartFlowOrbit_on_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -215,10 +138,6 @@ section UniformOnClosedBall
 
 variable [I.Boundaryless]
 
-/-- **Uniform-in-parameter ODE uniqueness on a closed ball.** Specialised
-form of `chartPhaseVF_orbit_uniqueness_uniform_Ioo` with `K` taken to be
-a closed metric ball around a base point `z₀` whose closed ball is
-contained in the chart-target interior product. -/
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     {z₀ : E × E} {r : ℝ}

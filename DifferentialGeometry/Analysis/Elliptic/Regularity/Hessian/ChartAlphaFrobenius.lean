@@ -1,56 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaMatrix
 
-/-!
-# Unconditional chart-α Frobenius invariance
-
-This module discharges `chartFrobeniusInvariance g α f x` (defined in
-`HessianChartInvariance`) unconditionally on the chart-α source, by porting the
-matrix-algebra infrastructure from `Integral/Connection/Bochner.lean` and
-`BochnerConcrete.lean` to the chart-α basis at a manifold point `x`.
-
-## Strategy
-
-Let `α, x : M` with `x ∈ (chartAt H α).source`, and let `f : M → ℝ` be smooth.
-Define:
-
-* `B_i_α := chartBasisVecFiber α i x` — the chart-α basis at `x`, transported
-  from the model basis via the trivialization at `α`.
-* `B_i_x := chartBasisVecFiber x i x = (chartModelBasis E) i` — the chart-x
-  basis at `x`.
-* `P_{ij} := (chartModelBasis E).repr (B_i_α) j` — the change-of-basis matrix
-  from chart-α to chart-x basis at `x`.
-
-Both bases span `T_x M`. The Gram matrices satisfy
-`G_α = P G_x P^T` (gram expansion), hence `G_α^{-1} = (P^T)^{-1} G_x^{-1} P^{-1}`,
-equivalently `P^T G_α^{-1} P = G_x^{-1}`.
-
-Using the chart-α matrix identity (`chartAlphaMatrixIdentity_holds`),
-`H_{ij,α} = abstractHessian g f x (B_i_α) (B_j_α) = ∑_{ab} P_{ia} P_{jb} H_{ab,x}`
-where `H_{ij,x} = chartHessianTensor g x f i j x` (by the chart-x matrix
-identity at `x`).
-
-Substituting into the chart-α Frobenius squared:
-```
-∑_{ijkl} G_α^{ik} G_α^{jl} H_{ij,α} H_{kl,α}
-  = ∑_{abcd} (∑_{ik} P_{ia} G_α^{ik} P_{kc}) (∑_{jl} P_{jb} G_α^{jl} P_{ld}) H_{ab,x} H_{cd,x}
-  = ∑_{abcd} G_x^{ac} G_x^{bd} H_{ab,x} H_{cd,x}
-  = chartHessFrobeniusSq g f x.
-```
-
-This is the chart-α Frobenius invariance.
-
-## Main results
-
-* `chartFrobeniusInvariance_holds` — the chart-α Frobenius invariance Prop
-  holds unconditionally for `x ∈ (chartAt H α).source`.
-
-* `chartFrobeniusSqHSBridge_holds` — the chart-α HS bridge Prop holds
-  unconditionally for `x ∈ (chartAt H α).source`.
-
-* `smoothTensorPairingChart_eq_hessPairingChart_pullback` — the chart-α tensor
-  pairing on `EuclN` equals the chart-invariant pairing on `M` at the pulled-back
-  point, unconditionally on the chart target.
--/
 
 noncomputable section
 
@@ -92,9 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Change-of-basis matrix from the chart-α basis at `x` (vectors
-`chartBasisVecFiber α i x ∈ T_x M`) to the chart-x basis at `x` (the model basis
-`(chartModelBasis E)` via `chartBasisVecFiber_self`). -/
 private noncomputable def chartAlphaCoBchange
     (α : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -102,14 +48,14 @@ private noncomputable def chartAlphaCoBchange
     (chartModelBasis E).repr
       ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma chartAlphaCoBchange_apply
     (α : M) (x : M) (i k : Fin (Module.finrank ℝ E)) :
     chartAlphaCoBchange (I := I) α x i k =
       (chartModelBasis E).repr
         ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k := rfl
 
-/-- `B_i_α = ∑_k P_{ik} • (chartModelBasis E) k` (as a tangent vector in `T_x M`,
-identified with the model space `E` via the chart-x trivialization at `x`). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_decompose_in_modelBasis
     (α : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x) =
@@ -121,10 +67,7 @@ private lemma chartBasisVecFiber_decompose_in_modelBasis
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x)
   exact h.symm
 
-/-- Helper: the bilinear expansion of a CLM-bilinear pairing against two finite sums.
-For any continuous bilinear `Hb : T_x M →L T_x M →L ℝ`, coefficient sequences
-`c_i, d_j : Fin n → ℝ`, and tangent vectors `u, w : Fin n → T_x M`,
-`Hb (∑ i c_i • u i) (∑ j d_j • w j) = ∑ i j, c_i * d_j * Hb (u i) (w j)`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma clm_bilinear_expand_two_sums
     {x : M} (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (n : ℕ)
@@ -158,7 +101,7 @@ private lemma clm_bilinear_expand_two_sums
   intro j _
   ring
 
-/-- Specialisation to `g.inner x`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_bilinear_expand_two_sums
     (g : SmoothRiemannianMetric I M) (x : M)
     (n : ℕ)
@@ -169,9 +112,6 @@ private lemma g_inner_bilinear_expand_two_sums
         c i * d j * g.inner x (u i) (w j) :=
   clm_bilinear_expand_two_sums (I := I) (g.inner x) n c d u w
 
-/-- The chart-α Gram matrix at `x` admits a P-expansion against the chart-x
-Gram matrix at `x`:
-`chartGramMatrix g α x i j = ∑_{kl} P_{ik} P_{jl} chartGramMatrix g x x k l`. -/
 private lemma chartGramMatrix_alpha_eq_PGPt
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -210,8 +150,6 @@ private lemma chartGramMatrix_alpha_eq_PGPt
     rw [chartBasisVecFiber_self (I := I) x l]
   rw [h_inner]
 
-/-- The matrix identity `G_α(x) = P G_x P^T`, where `P` is the chart-α
-change-of-basis matrix. -/
 private lemma chartGramMatrix_alpha_eq_PGPt_matrix
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -247,7 +185,7 @@ private lemma chartGramMatrix_alpha_eq_PGPt_matrix
   intro k _
   ring
 
-/-- For `x ∈ (chartAt H α).source`, the chart-α Gram matrix at `x` is invertible. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -258,8 +196,7 @@ private lemma chartGramMatrix_alpha_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g α hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
-/-- For any `x : M`, the chart-x Gram matrix at `x` is invertible (since
-`x ∈ baseSet x` always). -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrix_x_isUnit
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsUnit (chartGramMatrix (I := I) g x x).det := by
@@ -268,8 +205,6 @@ private lemma chartGramMatrix_x_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g x hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
-/-- The chart-α change-of-basis matrix at `x` (for `x ∈ (chartAt H α).source`)
-is invertible, with determinant nonzero. We derive this from `G_α = P G_x P^T`. -/
 private lemma chartAlphaCoBchange_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -300,11 +235,6 @@ private lemma chartAlphaCoBchange_isUnit
     ring
   exact isUnit_iff_ne_zero.mpr hAne
 
-/-- The key matrix identity: in chart-α basis, the inverse Gram of `g_α` pulled
-back by `P` equals the inverse Gram of `g_x`:
-`P^T G_α^{-1} P = G_x^{-1}`.
-
-This follows from `G_α = P G_x P^T` by inverting both sides. -/
 private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -364,8 +294,6 @@ private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
   rw [h_inv]
   rfl
 
-/-- For each `a, c`, `∑_{ik} P_{ia} G_α^{ik} P_{kc} = G_x^{ac}`. This is the
-entry-by-entry form of `P^T G_α^{-1} P = G_x^{-1}`. -/
 private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :
@@ -413,14 +341,7 @@ private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
   rw [Finset.sum_comm] at h_entry
   exact h_entry
 
-/-- The chart-α Hessian tensor admits a P-expansion against the chart-x Hessian
-tensor at `x`:
-`H_{ij,α}(x) = ∑_{ab} P_{ia}(x) P_{jb}(x) H_{ab,x}(x)`.
-
-This follows from the chart-α matrix identity (`chartAlphaMatrixIdentity_holds`),
-the chart-x matrix identity (`chartHessianMatrixIdentity_holds`), and bilinearity
-of `abstractHessian` together with the model-basis decomposition of the chart-α
-basis vectors. -/
+omit [CompactSpace M] in
 private lemma chartHessianTensor_alpha_eq_P_chartHessianTensor_x
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M} (hx : x ∈ (chartAt H α).source)
@@ -462,7 +383,6 @@ private lemma chartHessianTensor_alpha_eq_P_chartHessianTensor_x
   intro b _
   rw [hM_x a b]
 
-/-- Helper: an eightfold sum reordering from (i, j, k, l, a, b, c, d) to (a, b, c, d, i, k, j, l). -/
 private lemma nested_sum_perm
     {n : ℕ} (f : Fin n → Fin n → Fin n → Fin n → Fin n → Fin n → Fin n → Fin n → ℝ) :
     (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
@@ -692,15 +612,6 @@ private lemma nested_sum_perm
   intro i _
   rw [Finset.sum_comm]
 
-/-- **Chart-α Frobenius invariance (unconditional on the chart-α source).**
-For `f : M → ℝ` smooth and `x ∈ (chartAt H α).source`, the chart-α tensor
-Frobenius squared equals the chart-x Frobenius squared.
-
-The proof strategy:
-- Substitute `H_{ij,α} = ∑_{ab} P_{ia} P_{jb} H_{ab,x}` in the chart-α Frobenius squared.
-- Reorganize the resulting eightfold sum using `nested_sum_perm`.
-- Factor as `(∑_{ik} P_{ia} G_α^{ik} P_{kc})(∑_{jl} P_{jb} G_α^{jl} P_{ld}) H_{ab,x} H_{cd,x}`.
-- Apply the inverse-Gram identity to get `G_x^{ac} G_x^{bd}`. -/
 theorem chartFrobeniusInvariance_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -867,13 +778,11 @@ theorem chartFrobeniusInvariance_holds
   rw [h_factor]
   rw [h_inverse a c, h_inverse b d]
 
-/-- **Chart-α HS bridge Prop holds.** For `f : M → ℝ` smooth and
-`x ∈ (chartAt H α).source`, the chart-α HS bridge Prop holds. -/
 theorem chartFrobeniusSqHSBridge_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
     (hx : x ∈ (chartAt H α).source) :
-    chartFrobeniusSqHSBridge (I := I) (M := M) g α f x := by
+    chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α f x := by
   classical
   rw [chartFrobeniusSqHSBridge_def]
   have h_inv := chartFrobeniusInvariance_holds (I := I) g α hf hx
@@ -881,10 +790,6 @@ theorem chartFrobeniusSqHSBridge_holds
   rw [h_inv]
   exact (frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x).symm
 
-/-- **Unconditional bridge: chart-α tensor pairing equals chart-invariant pairing.**
-For smooth `φ : C^∞⟮I, M; ℝ⟯` and `v : SmoothScalar g`, and `y ∈ chartTargetEuclid α`,
-the chart-α tensor pairing on `EuclN` equals the chart-invariant Hess pairing on
-`M` at the pulled-back point. -/
 theorem smoothTensorPairingChart_eq_hessPairingChart_pullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -902,12 +807,12 @@ theorem smoothTensorPairingChart_eq_hessPairingChart_pullback
       rw [hx_y_def]
       exact (extChartAt I α).map_target hy_target
     rwa [extChartAt_source_eq_chartAt_source] at hx_y_source_ext
-  have h_HS_add : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+  have h_HS_add : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z + v.toFun z) x_y := by
     have hf_add : ContMDiff I 𝓘(ℝ) ∞ (fun z : M => (φ : M → ℝ) z + v.toFun z) :=
       φ.contMDiff.add v.smooth
     exact chartFrobeniusSqHSBridge_holds (I := I) g α hf_add hx_y_chart
-  have h_HS_sub : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+  have h_HS_sub : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z - v.toFun z) x_y := by
     have hf_sub : ContMDiff I 𝓘(ℝ) ∞ (fun z : M => (φ : M → ℝ) z - v.toFun z) :=
       φ.contMDiff.sub v.smooth

@@ -12,75 +12,10 @@ import Mathlib.Topology.FiberBundle.Trivialization
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
-/-!
-# Chart-local continuity blocks for the `(r, s)`-tensor inner product
-
-For a smooth manifold `M` modelled on `(E, H)` with model `I` and a smooth
-Riemannian metric `g`, this file packages a partial proof tree towards
-pointwise basepoint continuity of the `(r, s)`-tensor inner product. The
-deliverables are the early chart-Jacobian building blocks; they appear as
-named theorems usable directly by downstream chart-local arguments.
-
-## Delivered results
-
-* `chartJ_apply_chartBasisVecFiber_continuousOn` — the forward chart-Jacobian
-  applied to a chart-`α` basis fibre is the constant model basis vector, and
-  hence trivially continuous on the chart-`α` base set.
-* `metric_inner_chartBasisFibers_continuousOn` — the metric pairing of two
-  chart-`α` basis fibres is continuous on the chart-`α` base set; this is
-  the `ContinuousOn` projection of `chartGramMatrix_entry_contMDiffOn`.
-* `separableFormAt_chartBasisFibers_eval_continuousOn` — the separable
-  `(0, r)`-form built on chart-`α` basis fibres, evaluated on another
-  chart-`α` basis-fibre tuple, is continuous on the chart-`α` base set;
-  reduces to a finite product of `metric_inner_chartBasisFibers_continuousOn`
-  terms.
-
-## Bundle-section continuity (Steps 5 to 7)
-
-We deliver three additional building blocks that work entirely with
-continuous bundle sections (total-space-valued) and never extract an
-`M → E` function from such a section.
-
-* `triv_symm_apply_const_continuousOn_baseSet` — for any fixed model
-  vector `v : E`, the symm-image section
-  `b ↦ TotalSpace.mk' E b ((triv α).symm b v)` is continuous on the
-  chart-`α` base set. This follows from `Trivialization.continuousOn_symm`
-  composed with the continuous map `b ↦ (b, v)`.
-* `chartBasisVec_continuousOn_baseSet` — the chart-`α` basis section
-  `chartBasisVec α k` is continuous on the chart-`α` base set. Special
-  case of the above with `v = (chartModelBasis E) k`.
-* `metric_inner_section_const_continuousOn` — for any two continuous
-  bundle sections produced as `(triv α).symm b · v` images, the metric
-  pairing `g.inner b (X b) (Y b)` is continuous on the chart-`α` base set.
-  Delivered through `ContinuousOn.inner_bundle` with the diamond between
-  the project's `tangentSpace_normedAddCommGroup`/`tangentSpace_normedSpace`
-  and Mathlib's `RiemannianBundle (TangentSpace I)`-derived instances
-  resolved by a local `attribute [-instance]` scope, mirroring the
-  `Continuous`-variant in `Geometry/Metric/TensorInner/TangentRiemannian.lean`.
-
-## Remaining technical gap
-
-The headline target `tensorInnerPointwise_continuousOn_baseSet` for fixed
-model tensors `T₀, T₁ : TensorRSModel r s ℝ E` is not delivered here. Any
-expansion of the bilinear form in a fixed basis of the model fibre
-introduces evaluations of the form `g.inner b X(b) v` for `X` a
-continuous bundle section and `v : E` a constant model vector. The
-constant section `b ↦ TotalSpace.mk' E b v` is not a continuous bundle
-section in general (its trivialised projection is
-`b ↦ tangentCoordChange I b α b v`, whose `b`-continuity is not delivered
-by `continuousOn_tangentCoordChange`), so `ContinuousOn.inner_bundle` is
-not directly applicable. Closing the gap requires operator-norm
-continuity of the bare `b ↦ (triv α).symmL ℝ b ∈ E →L[ℝ] E` on the base
-set, of which only the wrapped form (continuous at the centre by
-`chartJinv_wrapped_continuousAt`) is currently delivered. The bundle-
-section continuity facts shipped below are precisely the building blocks
-any closure of the gap will need.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -99,33 +34,26 @@ open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The forward chart-Jacobian `chartJ α b` applied to the chart-`α` basis
-fibre `chartBasisVecFiber α i b` is the constant model basis vector
-`chartModelBasis E i` on the chart-`α` base set; hence trivially continuous
-in `b`. -/
 theorem chartJ_apply_chartBasisVecFiber_continuousOn
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContinuousOn
-      (fun b : M => chartJ (I := I) (M := M) α b
+      (fun b : M => chartTrivializationLinearMap (I := I) (M := M) α b
         (chartBasisVecFiber (I := I) α i b))
       (trivializationAt E (TangentSpace I) α).baseSet := by
   have heq : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
-      chartJ (I := I) (M := M) α b
+      chartTrivializationLinearMap (I := I) (M := M) α b
           (chartBasisVecFiber (I := I) α i b) = (chartModelBasis E) i := by
     intro b hb
-    unfold chartJ chartBasisVecFiber
+    unfold chartTrivializationLinearMap chartBasisVecFiber
     exact (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL hb
       ((chartModelBasis E) i)
   refine ContinuousOn.congr ?_ (fun b hb => heq b hb)
   exact continuousOn_const
 
-/-- The metric pairing of two chart-`α` basis fibres is continuous on the
-chart-`α` base set. This is the `ContinuousOn` projection of the chart-Gram
-matrix entry smoothness `chartGramMatrix_entry_contMDiffOn`. -/
 theorem metric_inner_chartBasisFibers_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -146,11 +74,6 @@ theorem metric_inner_chartBasisFibers_continuousOn
   intro b _
   exact (chartGramMatrix_apply g α b i j).symm
 
-/-- The separable `(0, r)`-form built on chart-`α` basis fibres, evaluated
-on another chart-`α` basis-fibre tuple, is continuous on the chart-`α` base
-set. This is a finite product of metric inner products on chart-`α` basis
-fibres, each continuous on the base set by
-`metric_inner_chartBasisFibers_continuousOn`. -/
 theorem separableFormAt_chartBasisFibers_eval_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (r : ℕ)
     (Idx Jdx : Fin r → Fin (Module.finrank ℝ E)) :
@@ -174,11 +97,7 @@ theorem separableFormAt_chartBasisFibers_eval_continuousOn
   exact metric_inner_chartBasisFibers_continuousOn (I := I) (M := M) g α
     (Idx k) (Jdx k)
 
-/-- For any fixed model vector `v : E`, the symm-image section
-`b ↦ TotalSpace.mk' E b ((triv α).symm b v)` is continuous on the
-chart-`α` base set, as a total-space-valued function. This follows from
-`Trivialization.continuousOn_symm` composed with the continuous map
-`b ↦ (b, v) : M → M × E`. -/
+omit [Module.Finite ℝ E] in
 theorem triv_symm_apply_const_continuousOn_baseSet
     (α : M) (v : E) :
     ContinuousOn
@@ -201,11 +120,6 @@ theorem triv_symm_apply_const_continuousOn_baseSet
     exact ⟨hb, Set.mem_univ _⟩
   exact hsymm.comp hcomp.continuousOn hmaps
 
-/-- The chart-`α` basis section `chartBasisVec α k` is continuous on the
-chart-`α` base set, as a total-space-valued function. Special case of
-`triv_symm_apply_const_continuousOn_baseSet` with `v = (chartModelBasis E) k`,
-unfolding the definition `chartBasisVec α k b = TotalSpace.mk' E b
-((triv α).symm b ((chartModelBasis E) k))`. -/
 theorem chartBasisVec_continuousOn_baseSet
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     ContinuousOn (chartBasisVec (I := I) α k)
@@ -216,6 +130,7 @@ theorem chartBasisVec_continuousOn_baseSet
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [Module.Finite ℝ E] in
 private lemma continuousOn_g_inner_aux
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x} {s : Set M}
@@ -235,10 +150,7 @@ private lemma continuousOn_g_inner_aux
   intro b _
   rfl
 
-/-- Public `ContinuousOn` version: the metric pairing of two continuous
-bundle sections (total-space-valued) is continuous on any set on which
-both sections are continuous. The result is a scalar `M → ℝ` function and
-is independent of the diamond-handling internals. -/
+omit [Module.Finite ℝ E] in
 theorem metric_inner_sections_continuousOn
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x} {s : Set M}
@@ -249,8 +161,6 @@ theorem metric_inner_sections_continuousOn
     ContinuousOn (fun b : M => g.inner b (v b) (w b)) s :=
   continuousOn_g_inner_aux (I := I) (M := M) g hv hw
 
-/-- The metric pairing of the chart-`α` basis fibre and the symm-image of a
-constant model vector is continuous on the chart-`α` base set. -/
 theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (v : E) :
@@ -274,8 +184,7 @@ theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
     (s := (trivializationAt E (TangentSpace I) α).baseSet) hX hY
   exact h
 
-/-- The metric pairing of two symm-image fibres of constant model vectors
-is continuous on the chart-`α` base set. -/
+omit [Module.Finite ℝ E] in
 theorem metric_inner_trivSymm_trivSymm_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) :
     ContinuousOn
@@ -304,12 +213,7 @@ section HeadlineNormComparison
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- Rescaling form of the uniform lower bound: on a compact subset `K_M` of the
-chart base set, `‖T‖² ≤ ε⁻¹ · chartTensorInnerPointwise_rs_model g r s α b T T`
-for every `T : TensorRSModel r s ℝ E`, with the same `ε > 0` produced by the
-unit-sphere lower bound. The case `T = 0` is handled separately; the non-zero
-case rescales by `‖T‖` and uses bilinearity of the chart-frame quadratic form
-together with the unit-sphere bound on the unit vector `‖T‖⁻¹ • T`. -/
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M}
@@ -413,14 +317,6 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
       rw [div_eq_inv_mul]]
     exact (le_div_iff₀ hε).mpr (by linarith [h_mul])
 
-/-- **Headline pointwise norm comparison (chart-frame form) on an arbitrary
-compact subset of the chart base set.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, ranks
-`(r, s)`, and a compact set `K_M` contained in the chart-`α` base set, there is
-a non-negative constant `K` such that the Euclidean square norm of a model
-`(r, s)`-tensor is bounded above by `K` times the chart-frame diagonal
-quadratic form, uniformly on `K_M`. -/
 theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -439,17 +335,6 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
   exact sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (I := I) (M := M) g r s α hK_M_sub_baseSet hε_pos h_lb
 
-/-- **Headline pointwise norm comparison (chart-frame form).**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
-`(r, s)`, there is a non-negative constant `K` such that the Euclidean square
-norm of a model `(r, s)`-tensor is bounded above by `K` times the chart-frame
-diagonal quadratic form, uniformly on the closed support of the chart-atlas
-partition-of-unity weight at `α`.
-
-This is the specialisation of
-`chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact`
-to the compact closed support of the chart-atlas partition-of-unity weight. -/
 theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -464,14 +349,6 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
-/-- **Headline pointwise norm comparison (bundle-inner form, via the twist) on
-an arbitrary compact subset of the chart base set.**
-
-For a compact set `K_M` contained in the chart-`α` base set, the model-tensor
-Euclidean square norm is bounded by `K` times the bundle-fibre
-`(r, s)`-inner product on the chart-`(α, b)`-twisted tensor, uniformly on
-`K_M`. This is the chart-frame form composed with the bridge identity
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise`. -/
 theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -496,16 +373,6 @@ theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_o
       (I := I) (M := M) g r s α hb_base T T] at h
   exact h
 
-/-- **Headline pointwise norm comparison (bundle-inner form, via the twist).**
-
-The model-tensor Euclidean square norm is bounded by `K` times the
-bundle-fibre `(r, s)`-inner product on the chart-`(α, b)`-twisted tensor,
-uniformly on `tsupport(POU_α)`. This is the chart-frame form composed with
-the bridge identity `chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise`.
-
-This is the specialisation of
-`chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact`
-to the compact closed support of the chart-atlas partition-of-unity weight. -/
 theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

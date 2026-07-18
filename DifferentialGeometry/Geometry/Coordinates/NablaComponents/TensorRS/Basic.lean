@@ -5,12 +5,12 @@ import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TensorRS
 
-/-!
-# Basic mixed tensor coordinate derivative data
 
-Definitions and scalar derivative helpers used by the mixed `(r,s)` coordinate
-component formula.
--/
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -34,10 +34,10 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-- Directional derivative of a mixed tensor coordinate-frame component.
 
-The Hom-input tensor is kept constant in the chart centered at `x₀`; this avoids
-the moving-center component derivative. -/
+
+
+
 def coordDerivRSAt {r s : ℕ}
     (X : (x : M) -> TangentSpace I x) (x₀ : M)
     (T : (x : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) r s x)
@@ -54,7 +54,7 @@ def coordDerivRSAt {r s : ℕ}
         (fun b : Fin s => coordinateFrameAt (I := I) x₀ (lower b) y))
     x₀ (X x₀)
 
-/-- The chart-model derivative term appearing definitionally in `nablaRSFun`. -/
+
 def modelDerivRSAt {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -75,8 +75,8 @@ def modelDerivRSAt {r s : ℕ}
     β₀)
     (fun b : Fin s => (Module.finBasis 𝕜 E) (lower b))
 
-/-- Predicate recording that the fixed-chart model derivative agrees with the
-manifold scalar derivative of mixed tensor coordinate components. -/
+
+
 def ModelDerivEqCoordDerivRSAt {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)

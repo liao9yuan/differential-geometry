@@ -7,14 +7,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Improved pinching estimate
 
-This file contains the native Section 10 estimate layer following Hamilton's
-Lemma 10.6.  The theorem here is domain-aware on the Ricci-flow time carrier;
-the all-real display functions are only carrier extensions used by high-level
-Hamilton endpoint wrappers.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,21 +31,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Section 10 display weight `R^{-epsilon}`. -/
+
 def pinchWeight (scalar : Real -> M -> Real) (epsilon : Real) :
     Real -> M -> Real :=
   fun t x => scalar t x ^ (-epsilon)
 
-/-- Domain-aware form of Hamilton's improved pinching estimate. -/
+
 def PinchEstimateOn
     (tracefreeRicciNormSq scalar weight : Real -> M -> Real)
     (C : Real) (U : Set Real) : Prop :=
   ∀ t : Real, t ∈ U -> ∀ x : M,
     tracefreeRicciNormSq t x / scalar t x ^ 2 ≤ C * weight t x
 
-/-- Hamilton's Section 10 quotient
-`P_epsilon = |Ric^0|^2 / R^(2 - epsilon)` in the stable negative-power
-normal form used by Lemma 10.5. -/
+
+
+
 def pinchQuotient
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -55,7 +55,7 @@ def pinchQuotient
     (tfRicNormSq S.scalar (ricciNorm (I := I) S))
     S.scalar (1 : Real) (2 - epsilon)
 
-/-- Drift vector field for the scalar maximum-principle form of Lemma 10.6. -/
+
 def pinchDriftVector
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar : Real -> M -> Real) (epsilon : Real) :
@@ -64,7 +64,7 @@ def pinchDriftVector
     (2 * (1 - epsilon) / scalar t x) •
       DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x
 
-/-- The Hamilton drift term is the drift-vector pairing with `grad P`. -/
+
 theorem pinchDriftTerm_eq_inner_drift
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
@@ -77,8 +77,8 @@ theorem pinchDriftTerm_eq_inner_drift
             scalar (1 : Real) (2 - epsilon) t) x) := by
   simp [pinchDriftTerm, pinchDriftVector]
 
-/-- A bound for Hamilton's quotient `P_epsilon` is exactly the display
-pinching estimate after multiplying by `R^{-epsilon}`. -/
+
+
 theorem pinchEstimateOn_of_pinchQuotient_bound
     {tracefreeRicciNormSq scalar : Real -> M -> Real}
     {epsilon C : Real} {U : Set Real}
@@ -113,7 +113,7 @@ theorem pinchEstimateOn_of_pinchQuotient_bound
     simp [div_eq_mul_inv]
   simpa [PinchEstimateOn, pinchWeight, hquot] using hmul
 
-/-- The negative square term in Lemma 10.6 is nonpositive. -/
+
 theorem pinchSquareTerm_nonpos
     (scalar coupleSq : Real -> M -> Real) (epsilon t : Real) (x : M)
     (hR : 0 < scalar t x) (hcouple : 0 <= coupleSq t x) :
@@ -125,8 +125,8 @@ theorem pinchSquareTerm_nonpos
   simpa [pinchSquareTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hcouple
 
-/-- The extra scalar-gradient term in Lemma 10.6 is nonpositive for
-`0 < epsilon < 1`. -/
+
+
 theorem pinchGradTerm_nonpos
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -158,8 +158,8 @@ theorem pinchGradTerm_nonpos
   rw [hterm]
   exact hmain
 
-/-- The reaction term in Lemma 10.6 is nonpositive once Lemma 10.8 gives the
-reaction bracket sign. -/
+
+
 theorem pinchReactTerm_nonpos
     (scalar ricciNormSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -175,8 +175,8 @@ theorem pinchReactTerm_nonpos
   simpa [pinchReactTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hreact
 
-/-- Section 9 pinching plus Lemma 10.8 gives the reaction bracket sign used
-in the scalar estimate. -/
+
+
 theorem cubicQ_sub_nonneg_of_section9
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -204,7 +204,7 @@ theorem cubicQ_sub_nonneg_of_section9
     (hdim x) hscalar (le_of_lt hdelta0) hepsilon
     (hric t ht x) (hpinch t ht x)
 
-/-- The scalar-gradient square in Lemma 10.6 is nonnegative. -/
+
 theorem scalGradSq_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -218,7 +218,7 @@ theorem scalGradSq_nonneg
   · simp [hv]
   · exact le_of_lt ((S.family.metric t).pos x v hv)
 
-/-- The tensor-square term in Lemma 10.6 is nonnegative. -/
+
 theorem pinchCoupleSol_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -232,8 +232,8 @@ theorem pinchCoupleSol_nonneg
         (ricciNablaSec (I := I) S t x)
         (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (S.scalar t) x))
 
-/-- The Hamilton Lemma 10.6 book RHS is bounded above by its drift term once
-the square, scalar-gradient, and reaction brackets have the expected signs. -/
+
+
 theorem pinchBookRHS_le_drift
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
@@ -258,9 +258,9 @@ theorem pinchBookRHS_le_drift
   unfold pinchBookRHS
   nlinarith
 
-/-- Solution-level version of `pinchBookRHS_le_drift`, using Section 9 for the
-reaction bracket and canonical norm-square nonnegativity for the gradient
-terms. -/
+
+
+
 theorem pinchBookRHS_le_drift_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -300,8 +300,8 @@ theorem pinchBookRHS_le_drift_sol
     (cubicQ_sub_nonneg_of_section9 (I := I) S hdim hR hdelta0
       hepsilon ht hric hpinch)
 
-/-- Lemma 10.6 plus the Section 9/Lemma 10.8 sign package gives the drifted
-scalar subsolution inequality for Hamilton's quotient on a compact slab. -/
+
+
 theorem pinchQuotient_parabolic_nonpos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -381,7 +381,7 @@ theorem pinchQuotient_parabolic_nonpos
   rw [hderiv, hheat]
   linarith
 
-/-- Fixed-time continuity of Hamilton's quotient at the initial time. -/
+
 theorem pinchQuotient_initial_continuous
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -407,7 +407,7 @@ theorem pinchQuotient_initial_continuous
     hscalarAt.rpow_const (Or.inl (ne_of_gt (hscalar0 x)))
   simpa [pinchQuotient, quotField] using htf.mul hpow
 
-/-- A continuous function on compact `M` has a nonnegative upper bound. -/
+
 theorem compact_nonneg_upper_bound
     [CompactSpace M] (f : M -> Real) (hf : Continuous f) :
     ∃ C : Real, 0 <= C ∧ ∀ x : M, f x <= C := by
@@ -425,7 +425,7 @@ theorem compact_nonneg_upper_bound
     intro x
     exact False.elim (hne ⟨x⟩)
 
-/-- Compact initial upper bound for Hamilton's quotient. -/
+
 theorem pinchQuotient_initial_bound
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
@@ -526,7 +526,7 @@ private theorem ricciNorm_coordCont
       ContinuousOn (fun p : Real × M => gInv p.1 p.2 i j) U := by
     intro i j
     simpa [gInv, U] using
-      (coordInvSmooth (I := I) S hS.isSolution x0 i j).continuousOn
+      coordInvContOn (I := I) S hS.isSolution x0 i j
   have hRic : ∀ i j : Idx,
       ContinuousOn (fun p : Real × M =>
         ricciCompInFrame (I := I) S frame p.1 p.2 i j) U := by
@@ -594,8 +594,8 @@ private theorem ricciNorm_slabCont
       exact ⟨hslab'.1.1, lt_of_le_of_lt hslab'.1.2 hTω⟩
     · exact hu_space
 
-/-- Slab continuity of `C - P_epsilon` from scalar positivity and joint
-spacetime continuity of the canonical Ricci norm. -/
+
+
 theorem pinchQuotient_slab_continuous_of_ricciNorm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -616,7 +616,11 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
     simpa [DifferentialGeometry.Integral.Connection.spacetimeSlab] using
       (SolutionOn.scalar_continuousOn (I := I) (M := M) S
-        hS.isSolution hS.scalarSTCont T)
+        hS.isSolution hS.scalarSTCont T
+        (by
+          intro t ht
+          rw [hD]
+          exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩))
   have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T ->
       S.scalar p.1 p.2 ≠ 0 ∨ 0 ≤ -(2 - epsilon) := by
     intro p hp
@@ -643,7 +647,7 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
     simpa [pinchQuotient, quotField] using htf_cont.mul hpow_cont
   exact continuousOn_const.sub hquot_cont
 
-/-- Positive-time spatial differentiability of Hamilton's quotient. -/
+
 theorem pinchQuotient_space_pos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -677,7 +681,7 @@ theorem pinchQuotient_space_pos
   funext y
   simp [pinchQuotient, quotField, p]
 
-/-- Positive-time gradient-field regularity of Hamilton's quotient. -/
+
 theorem pinchQuotient_grad_pos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -751,13 +755,13 @@ theorem pinchQuotient_grad_pos
   rw [hgrad_eq]
   exact hsum
 
-/-- Scalar WMP slab bound for Hamilton's quotient.
 
-The parabolic inequality and time differentiability are produced here from
-Lemma 10.6, Section 9 pinching, and the checked reaction-sign algebra.  The
-explicit continuity input is the WMP regularity of `C - P_epsilon`; the
-linear sign-change identity for the drifted parabolic operator is proved
-inside the theorem. -/
+
+
+
+
+
+
 theorem pinchQuot_slab_bound
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
@@ -936,22 +940,22 @@ theorem pinchQuot_slab_bound
     (pinchQuotient (I := I) S epsilon) C
     hw_cont hw_time hw_mdiff hw_grad hinit hsub hoperator_neg
 
-/-- Extend a scalar field by zero away from the flow carrier. -/
+
 def carrierZeroExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (f : Real -> M -> Real) :
     Real -> M -> Real := by
   classical
   exact fun t x => if t ∈ D.carrier then f t x else 0
 
-/-- Extend scalar curvature by one away from the flow carrier, so display
-denominators outside the solution domain are harmless. -/
+
+
 def carrierScalarExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real) :
     Real -> M -> Real := by
   classical
   exact fun t x => if t ∈ D.carrier then scalar t x else 1
 
-/-- Extend the Hamilton decay weight by zero away from the flow carrier. -/
+
 def carrierWeightExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real := by
@@ -959,8 +963,8 @@ def carrierWeightExt
   exact fun t x =>
     if t ∈ D.carrier then pinchWeight (M := M) scalar epsilon t x else 0
 
-/-- Carrier-extension turns a domain-aware estimate into an all-real display
-estimate. -/
+
+
 theorem pinchEstimate_ext
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {tracefreeRicciNormSq scalar : Real -> M -> Real}
@@ -977,13 +981,13 @@ theorem pinchEstimate_ext
       h t htD x
   · simp [carrierZeroExt, carrierScalarExt, carrierWeightExt, htD]
 
-/-- Native Section 10 improved pinching estimate for a smooth three-dimensional
-Ricci flow.
 
-The proof uses Section 9 Ricci nonnegativity and shifted pinching to obtain the
-Lemma 10.8 reaction sign, applies Lemma 10.6 to get the drifted scalar
-subsolution inequality for Hamilton's quotient, and then applies the scalar WMP
-on compact subintervals. -/
+
+
+
+
+
+
 theorem pinchEstimate_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
@@ -1071,8 +1075,8 @@ theorem pinchEstimate_sol
     subst t
     simpa [pinchQuotient] using hCinit x
 
-/-- All-real display form of `pinchEstimate_sol`, obtained by extending the
-canonical Section 10 fields away from the flow carrier. -/
+
+
 theorem pinchEstimate_display_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]

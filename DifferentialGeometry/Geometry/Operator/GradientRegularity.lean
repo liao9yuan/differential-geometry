@@ -9,12 +9,12 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Gradient regularity for realized scalar operators
 
-This file proves the smooth-section regularity of the realized pointwise
-gradient `gradientFun` from smoothness of the scalar function.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -123,8 +123,8 @@ private theorem gradientFun_contMDiffAt
       (coordinateFrameAt_mem (I := I) x₀)] with y hy
   exact gradientFun_coeff_eq_sum (I := I) g f hy k
 
-/-- A smooth scalar has a smooth realized gradient as a tangent-bundle
-section. -/
+
+
 theorem gradientFun_smooth
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
@@ -133,15 +133,15 @@ theorem gradientFun_smooth
   intro x₀
   exact gradientFun_contMDiffAt (I := I) g hf x₀
 
-/-- Pointwise differentiability of the realized gradient of a smooth scalar. -/
+
 theorem gradientFun_mdiffAt
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
     MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x :=
   (gradientFun_smooth (I := I) g hf).contMDiffAt.mdifferentiableAt (by simp)
 
-/-- If a scalar and its realized gradient are differentiable, then the
-scalar-multiple tangent field `f ∇f` is differentiable. -/
+
+
 theorem scalar_mul_grad_mdiffAt
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (g : SmoothRiemannianMetric I M)
@@ -152,7 +152,7 @@ theorem scalar_mul_grad_mdiffAt
     MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x := by
   simpa using (hf x).smul_section (hgrad x)
 
-/-- Compatibility alias for the scalar-multiple gradient closure. -/
+
 theorem mdiffAt_smul_gradientFun
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (g : SmoothRiemannianMetric I M)
@@ -163,8 +163,8 @@ theorem mdiffAt_smul_gradientFun
     MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x :=
   scalar_mul_grad_mdiffAt (I := I) g hf hgrad
 
-/-- Smooth scaled shifts also have differentiable `u ∇u`, where
-`u = a * (f - c)`. -/
+
+
 theorem mdiffAt_const_mul_sub_const_smul_gradientFun
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (g : SmoothRiemannianMetric I M)

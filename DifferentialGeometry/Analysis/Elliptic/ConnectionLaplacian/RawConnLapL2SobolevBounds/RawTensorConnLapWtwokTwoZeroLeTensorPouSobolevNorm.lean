@@ -3,59 +3,14 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDeriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapWtwokTwoZeroBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIntrinsicL2LePouSobolevNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
-/-!
-# Unconditional chart-Sobolev-zero bound on the raw tensor connection Laplacian
-by the partition-of-unity-weighted chart-Sobolev norm
-
-For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, and a smooth
-compactly-supported `(r, s)`-tensor section `T`, this file ships the
-**unconditional** chart-Sobolev-zero bound
-
-```
-wtwokTwoNorm g 0 (rawTensorConnLapSmooth g r s T)
-    ≤ C * tensorPouSobolevNorm g 1 T
-```
-
-with a finite constant `C : ℝ≥0∞ \ {⊤}` independent of `T` and **no
-chart-locality, chart-source-consistency, or any other auxiliary chart-atlas
-predicate** at the headline.
-
-The argument routes the per-`α`, per-`(Idx, Jdx)` chart-component scalar
-squared `L²` norm through:
-
-* the unconditional pointwise scalar-component squared bound
-  `rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform`
-  (B.3.refine), which controls `(tensorChartComponentRaw α IJ (rawConnLap T) b)²`
-  by a `T₀`-uniform constant times Euclidean-side iterated-Fréchet data of the
-  chart-pushed raw components on `tsupport ρ_α ∩ chartLeviCivitaGoodSet α`;
-
-* the unconditional Euclidean-vs-`E` chain bridges
-  `chartPushedRaw_sq_eq_compositionSq`,
-  `fderiv_chartPushedRaw_sq_le_compFderivSq`, and
-  `iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq` (H.3 bridge), which
-  transfer the Euclidean-side iterated-Fréchet data to the `E`-side iterated
-  derivatives of `(rawComp α T₀ I'J') ∘ (extChartAt I α).symm` at the
-  corresponding `E`-points;
-
-* the `(Σ aᵢ)² ≤ N · Σ aᵢ²` Cauchy–Schwarz finset-sum step over the canonical
-  partition-of-unity finset and the finite component-index sets;
-
-* a pointwise `ρ_α(b)² ≤ ρ_α(b)` reduction (the partition-of-unity weight is
-  bounded above by `1`), bringing the per-`(α, IJ, j)` integrand to the exact
-  shape appearing in `tensorPouSobolevNorm g 1 T`.
-
-The final headline takes a square root through `ENNReal.pow_le_pow_left_iff`.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 6400000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter MeasureTheory
 open scoped Manifold Topology Bundle ContDiff BigOperators ENNReal NNReal
@@ -82,12 +37,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Cauchy–Schwarz in `ℝ≥0∞` for a finset sum:
-`(∑ i ∈ s, f i) ^ 2 ≤ s.card · ∑ i ∈ s, (f i) ^ 2`. -/
 private lemma ennreal_sq_finset_sum_le_card_mul_sq_finset_sum
     {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0∞) :
     (∑ i ∈ s, f i) ^ 2 ≤ (s.card : ℝ≥0∞) * ∑ i ∈ s, (f i) ^ 2 := by
@@ -201,7 +153,6 @@ private lemma ennreal_sq_finset_sum_le_card_mul_sq_finset_sum
     rw [h_double_sum] at h_nn
     nlinarith
 
-/-- `(eLpNorm f 2 μ)² = ∫⁻ x, ENNReal.ofReal (f x ^ 2) ∂μ` for real-valued `f`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ENNReal.ofReal ((f x) ^ 2) ∂μ := by
@@ -228,8 +179,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
-/-- The `tsum` aggregating `tensorPouSobolevNorm g 1 T` squared, written as a
-finite-sum integrand. -/
 private noncomputable def tensorPouSobolevNormSqAgg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) : ℝ≥0∞ :=
@@ -247,7 +196,6 @@ private noncomputable def tensorPouSobolevNormSqAgg
                   ((toEuclidean (E := E)).symm y)‖ ^ 2)
           ∂(volume : Measure EuclN)
 
-/-- `(tensorPouSobolevNorm g 1 T)^2 = tensorPouSobolevNormSqAgg g T`. -/
 private lemma tensorPouSobolevNorm_one_sq_eq_agg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -277,9 +225,7 @@ private lemma tensorPouSobolevNorm_one_sq_eq_agg
     rw [h1]; exact ENNReal.rpow_one BigSum
   rw [h_pow, hBigSum_eq]
 
-/-- The tsum aggregating `tensorPouSobolevNorm g 1 T` squared collapses to a
-finset sum over `chartAtlasPOU_finset` (the per-`α` summand vanishes off this
-finset because the partition-of-unity weight vanishes there). -/
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorPouSobolevNormSqAgg_eq_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -326,9 +272,6 @@ private lemma tensorPouSobolevNormSqAgg_eq_finset_sum
     funext y; exact h_integrand_zero y
   rw [heq]; simp
 
-/-- The chart-aggregating `tsum` defining `wtwokTwoNorm g 0 (rawTensorConnLapSmooth
-g r s T)` collapses to a finset sum over `chartAtlasPOU_finset` of `eLpNorm`s of
-the chart components. -/
 private lemma wtwokTwoNorm_zero_rawTensorConnLap_collapsed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     wtwokTwoNorm (I := I) (M := M) g 0
@@ -350,7 +293,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_collapsed
     (f := fun α : M =>
       ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) 0 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
             (tensorChartComp (I := I) (M := M) g r s
               (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α))]
@@ -386,20 +329,20 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_collapsed
     exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
-/-- The chain operator-norm-to-the-fourth bound from the H.3 bridge, with
-`Lmax := max 1 Lop⁴`. We package the three orders `j = 0, 1, 2` into a single
-uniform factor. -/
 private noncomputable def chainLmax : ℝ :=
   max 1 (‖((toEuclidean (E := E)).symm :
       EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 4)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chainLmax_nonneg : (0 : ℝ) ≤ chainLmax (E := E) := by
   unfold chainLmax
   exact le_trans (by linarith : (0 : ℝ) ≤ 1) (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_le_chainLmax : (1 : ℝ) ≤ chainLmax (E := E) := by
   unfold chainLmax; exact le_max_left _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chain_Lop_two_le_Lmax :
     ‖((toEuclidean (E := E)).symm :
         EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 2 ≤ chainLmax (E := E) := by
@@ -418,24 +361,12 @@ private lemma chain_Lop_two_le_Lmax :
     unfold chainLmax
     exact le_trans h_Lop2_le_Lop4 (le_max_right _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chain_Lop_four_le_Lmax :
     ‖((toEuclidean (E := E)).symm :
         EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 4 ≤ chainLmax (E := E) := by
   unfold chainLmax; exact le_max_right _ _
 
-/-- For each `α : M` and ranks `(r, s)`, there is a non-negative constant `K`
-such that for every smooth compactly-supported `(r, s)`-tensor section `T`,
-every multi-index pair `(Idx, Jdx)`, and every chart-target point `y`,
-
-```
-(tensorChartComp g r s (rawConnLap T) α Idx Jdx y)² ≤
-  K · ρ_α(symm y) · Σ_{Idx' Jdx'} Σ_{j=0,1,2}
-    ‖iteratedFDeriv ℝ j (rawComp α T I'J' ∘ symm) (toEuclidean.symm y)‖²,
-```
-
-uniformly in `T, Idx, Jdx, y`. The constant `K` depends only on `g, r, s, α`
-(via the B.3.refine constant and the H.3 chain factor) and is independent
-of `T`. -/
 theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -1048,10 +979,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     _ ≤ K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := h_step3
     _ = K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := rfl
 
-/-- The per-`α`, per-`(IJ, j)` POU-weighted squared-norm integrand is
-AEMeasurable on the restriction of `volume` to the Euclidean chart target.
-The argument: the integrand is continuous on the open chart target
-`chartTargetEuclid α`, then `ContinuousOn.aemeasurable` applies. -/
 private lemma pouWeightedSummand_aemeasurable_on_chartTarget
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M)
@@ -1150,10 +1077,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
     h_prod_cont.aemeasurable h_meas_set
   exact ENNReal.measurable_ofReal.comp_aemeasurable h_prod_aemeas
 
-/-- Squared-`L²` per-`α`, per-`(Idx, Jdx)` bound. The squared `eLpNorm 2` of the
-chart component of the raw tensor connection Laplacian over the chart target is
-bounded by `ofReal K_max · Σ_IJ' Σ_j (POU-weighted integral)`, where `K_max` is
-the per-α constant from `tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand`. -/
 private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -1442,41 +1365,7 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
       (I := I) (M := M) g r s T α IJ' j
   rw [h_swap_j]
 
-/-- **Unconditional chart-Sobolev-zero bound on the raw tensor connection
-Laplacian by the partition-of-unity-weighted chart-Sobolev norm.**
-
-For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, there exists
-a finite constant `C : ℝ≥0∞` such that for every smooth compactly-supported
-`(r, s)`-tensor section `T`,
-
-```
-wtwokTwoNorm g 0 (rawTensorConnLapSmooth g r s T)
-    ≤ C * tensorPouSobolevNorm g 1 T.
-```
-
-The constant depends only on `g`, `r`, `s`, the chart atlas, and the partition
-of unity; it is uniform in `T`. There are no chart-locality, chart-source
-consistency, or other auxiliary chart-atlas predicates at the headline.
-
-Strategy:
-
-1. Collapse the chart-aggregating `tsum` defining the LHS to a finset sum over
-   `chartAtlasPOU_finset` (via `wtwokTwoNorm_zero_rawTensorConnLap_collapsed`).
-
-2. Apply Cauchy–Schwarz `(∑ a_i)² ≤ N · ∑ a_i²` on the flattened finset to
-   obtain `LHS² ≤ N · ∑_{α∈S} ∑_{Idx,Jdx} (eLpNorm)²`.
-
-3. Use the per-`α`, per-`(Idx, Jdx)` squared-`L²` bound
-   `sq_eLpNorm_tensorChartComp_le_pou_summand`, bounding the inner sum by
-   `ofReal K_α · Σ_IJ' Σ_j (POU-weighted integrand integrated over chart target)`.
-
-4. Sum: the per-`(Idx, Jdx)` factor introduces a multiplicative
-   `n^(r+s) = card((Fin r → Fin n) × (Fin s → Fin n))` and the per-`α` factor
-   collapses into the `tensorPouSobolevNormSqAgg`, which equals
-   `(tensorPouSobolevNorm g 1 T)²` (via `tensorPouSobolevNorm_one_sq_eq_agg`
-   and `tensorPouSobolevNormSqAgg_eq_finset_sum`).
-
-5. Take a square root via `ENNReal.pow_le_pow_left_iff`. -/
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

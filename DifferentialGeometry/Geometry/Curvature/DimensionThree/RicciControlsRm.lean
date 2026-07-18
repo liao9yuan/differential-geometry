@@ -10,13 +10,13 @@ import Mathlib.Tactic
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Three-dimensional Ricci controls curvature algebra
 
-This file contains the pure eigenvalue estimate behind Hamilton's Corollary
-11.4.  The geometric bridge from an actual `Rm04` tensor norm to the sectional
-model below is a separate realization step.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,14 +32,14 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- Diagonal Ricci components in an ordered orthonormal `Fin 3` eigenbasis. -/
+
 def ricciDiag3 (l1 l2 l3 : Real) (i j : Fin 3) : Real :=
   if i = j then
     if i = 0 then l1 else if i = 1 then l2 else l3
   else 0
 
-/-- The standard 3D Riemann-from-Ricci formula specialized to a diagonal Ricci
-matrix with eigenvalues `l1,l2,l3`. -/
+
+
 def stdRmDiag3 (l1 l2 l3 : Real)
     (i j k l : Fin 3) : Real :=
   delta3 i k * ricciDiag3 l1 l2 l3 j l
@@ -49,7 +49,7 @@ def stdRmDiag3 (l1 l2 l3 : Real)
     - (1 / 2 : Real) * ricciEigenScalar3 l1 l2 l3 *
         (delta3 i k * delta3 j l - delta3 i l * delta3 j k)
 
-/-- Squared component norm of a standard-convention `Fin 3` curvature array. -/
+
 def stdRmNormSq3
     (R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real) : Real :=
   ∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
@@ -116,9 +116,9 @@ private theorem sum_delta3_slots4_contract
   intro I0 _
   simp [prod_delta3_slots4_eq_ite, pow_two]
 
-/-- Pointwise statement that a Ricci tensor is diagonal with eigenvalues
-`l1,l2,l3` in the chosen `Fin 3` basis, and that the supplied scalar is its
-trace. -/
+
+
+
 def RicciDiagAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (scalar l1 l2 l3 : Real)
@@ -127,8 +127,8 @@ def RicciDiagAt
     forall i j : Fin 3,
       ricciCompAt (I := I) basis Ric i j = ricciDiag3 l1 l2 l3 i j
 
-/-- Spectral-theorem package for a symmetric Ricci tensor on a
-three-dimensional tangent fiber.  No positivity is needed for diagonalization. -/
+
+
 theorem ricciEigen3
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -211,8 +211,8 @@ theorem ricciEigen3
       fin_cases i <;> fin_cases j <;>
         simpa [ricciCompAt_apply, ricciDiag3, l1, l2, l3, delta3] using hcomp
 
-/-- Spectral-theorem package for a nonnegative symmetric Ricci tensor on a
-three-dimensional tangent fiber. -/
+
+
 theorem ricciEigenBasis3
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -414,8 +414,21 @@ theorem ricciEigenBasis3
     rw [h22] at hnon
     simpa [ricciDiag3, l3] using hnon
 
-/-- The metric trace of a `(0,2)` tensor is the ordinary trace of the
-endomorphism obtained by raising its first slot. -/
+
+
+
+theorem exists_orthonormalBasisAt
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3) :
+    exists basis : Module.Basis (Fin 3) Real (TangentSpace I x),
+      OrthonormalBasisAt (I := I) g x basis := by
+  obtain ⟨basis, _, _, _, horth, _, _, _, _⟩ :=
+    ricciEigenBasis3 (I := I) g (0 : Tensor02At (I := I) (M := M) x) hdim
+      (fun _ _ => rfl) (fun _ => by simp)
+  exact ⟨basis, horth⟩
+
+
+
 theorem metricTrace_eq_ricciEnd
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -442,9 +455,9 @@ theorem metricTrace_eq_ricciEnd
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [ricciEnd_inner (I := I) g Ric (basis i) (basis j)]
 
-/-- Positive diagonal values of a `(0,2)` tensor force its metric trace to be
-strictly positive in dimension three.  No symmetry is needed: the trace only
-sees the diagonal values in an orthonormal basis. -/
+
+
+
 theorem metricTrace_pos_of_posDef
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -526,7 +539,7 @@ private theorem scalar_eq_of_trace_diag
       simp [stdScalar3, h00, h11, h22, ricciEigenScalar3]
     _ = scalar0 := hscalar0.symm
 
-/-- An orthonormal `Fin 3` basis has inverse metric components `delta3`. -/
+
 theorem orthonormal_invBasis3
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -555,26 +568,26 @@ theorem orthonormal_invBasis3
     fin_cases i <;> fin_cases j <;>
       simp [delta3, h00, h01, h02, h10, h11, h12, h20, h21, h22]
 
-/-- Sectional curvature `K_12` in dimension three, written in Ricci eigenvalues. -/
+
 def sec12Ric3 (l1 l2 l3 : Real) : Real :=
   (l1 + l2 - l3) / 2
 
-/-- Sectional curvature `K_13` in dimension three, written in Ricci eigenvalues. -/
+
 def sec13Ric3 (l1 l2 l3 : Real) : Real :=
   (l1 + l3 - l2) / 2
 
-/-- Sectional curvature `K_23` in dimension three, written in Ricci eigenvalues. -/
+
 def sec23Ric3 (l1 l2 l3 : Real) : Real :=
   (l2 + l3 - l1) / 2
 
-/-- A coarse squared norm model for a three-dimensional curvature tensor from
-the three sectional curvatures in an orthonormal basis.  The factor `4` is the
-standard multiplicity factor for the independent sectional components. -/
+
+
+
 def rmSecNormSq3 (K12 K13 K23 : Real) : Real :=
   4 * (K12 ^ 2 + K13 ^ 2 + K23 ^ 2)
 
-/-- In a diagonal Ricci eigenbasis, the standard 3D curvature component norm is
-the sectional norm model used in Corollary 11.4. -/
+
+
 theorem stdRmNormSq3_diag
     (l1 l2 l3 : Real) :
     stdRmNormSq3 (stdRmDiag3 l1 l2 l3) =
@@ -585,8 +598,8 @@ theorem stdRmNormSq3_diag
   simp [Fin.sum_univ_three]
   ring
 
-/-- The realized 3D Riemann-from-Ricci component bridge specializes to the
-diagonal Ricci eigenvalue curvature model. -/
+
+
 theorem stdRmComp_eq_diag
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -627,8 +640,8 @@ theorem stdRmComp_eq_diag
     simp [stdRmDiag3, ricciDiag3, ricciEigenScalar3, delta3, hscalar,
       r00, r01, r02, r10, r11, r12, r20, r21, r22] <;> ring_nf
 
-/-- In a realized orthonormal 3D Riemann-from-Ricci setting with diagonal Ricci,
-the standard curvature component norm reduces to the sectional norm model. -/
+
+
 theorem stdRmNormSq3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -646,9 +659,9 @@ theorem stdRmNormSq3_at
   simp_rw [hcomp]
   exact stdRmNormSq3_diag l1 l2 l3
 
-/-- In an orthonormal `Fin 3` frame, the coordinate contraction formula for
-the squared norm of a `(0,4)` tensor collapses to the standard four-index sum
-of component squares. -/
+
+
+
 theorem coordInner0S_four_delta3_eq_stdRmNormSq3
     {Rm04 : Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)} :
@@ -662,8 +675,8 @@ theorem coordInner0S_four_delta3_eq_stdRmNormSq3
     tensor0SComponent DifferentialGeometry.Integral.Connection.slots4
   simp [Fin.sum_univ_three]
 
-/-- Intrinsic squared norm of a `(0,4)` tensor in an orthonormal `Fin 3` basis,
-identified with the standard component norm. -/
+
+
 theorem normSq0S_four_eq_stdRmNormSq3
     {g : SmoothRiemannianMetric I M}
     {Rm04 : Tensor04At (I := I) (M := M) x}
@@ -684,8 +697,8 @@ private theorem sq_le_of_abs_le {a b : Real} (h : |a| <= b) :
   have hprod : 0 <= (b + a) * (b - a) := mul_nonneg hleft hright
   nlinarith
 
-/-- If the Ricci eigenvalues are nonnegative, each sectional curvature has
-absolute value at most `R / 2`. -/
+
+
 theorem secAbsLe3
     (l1 l2 l3 : Real) (h1 : 0 <= l1) (h2 : 0 <= l2) (h3 : 0 <= l3) :
     |sec12Ric3 l1 l2 l3| <= ricciEigenScalar3 l1 l2 l3 / 2 ∧
@@ -699,11 +712,11 @@ theorem secAbsLe3
   · apply abs_le.mpr
     constructor <;> unfold sec23Ric3 ricciEigenScalar3 <;> nlinarith
 
-/-- Corollary 11.4, pure eigenvalue form: with nonnegative Ricci eigenvalues,
-the squared curvature norm model is bounded by the coarse constant `100^2 R^2`.
 
-This is intentionally stronger than needed for the display constant, and avoids
-choosing a square-root norm at the algebra layer. -/
+
+
+
+
 theorem rmSqLe100ScalSq3
     (l1 l2 l3 : Real) (h1 : 0 <= l1) (h2 : 0 <= l2) (h3 : 0 <= l3) :
     rmSecNormSq3 (sec12Ric3 l1 l2 l3) (sec13Ric3 l1 l2 l3)
@@ -726,9 +739,9 @@ theorem rmSqLe100ScalSq3
     nlinarith [sq_nonneg R]
   exact le_trans hsum hcoarse
 
-/-- Corollary 11.4 in the pointwise component model: if the realized curvature
-comes from a diagonal nonnegative Ricci tensor in an orthonormal three-frame,
-then the standard component norm is bounded by the coarse constant `100`. -/
+
+
+
 theorem stdRmNormSq3_at_le
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -745,8 +758,8 @@ theorem stdRmNormSq3_at_le
   rw [hnorm, hscalar]
   exact rmSqLe100ScalSq3 l1 l2 l3 h1 h2 h3
 
-/-- Intrinsic pointwise Corollary 11.4 bridge under the explicit eigenbasis
-realization assumptions. -/
+
+
 theorem normSq0S_four_at_le
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -761,10 +774,10 @@ theorem normSq0S_four_at_le
   rw [normSq0S_four_eq_stdRmNormSq3 (I := I) htrace.orthonormal]
   exact stdRmNormSq3_at_le (I := I) htrace hdiag h1 h2 h3
 
-/-- Corollary 11.4 pointwise package: nonnegative symmetric Ricci in dimension
-three controls the intrinsic squared norm of the full curvature tensor, once
-the supplied curvature realizes the three-dimensional Riemann-from-Ricci trace
-data in every orthonormal `Fin 3` basis. -/
+
+
+
+
 theorem normSqLeOfRicNonneg
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -788,7 +801,7 @@ theorem normSqLeOfRicNonneg
     exact ⟨hscalar, hric⟩
   exact normSq0S_four_at_le (I := I) htrace_basis hdiag h1 h2 h3
 
-/-- Negating a diagonal Ricci tensor negates the displayed eigenvalues. -/
+
 private theorem ricciDiagAt_neg
     {Ric : Tensor02At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
@@ -801,8 +814,10 @@ private theorem ricciDiagAt_neg
   · rfl
   · intro i j
     have hij := hric i j
-    fin_cases i <;> fin_cases j <;>
-      simpa [ricciCompAt_apply, ricciDiag3] using congrArg Neg.neg hij
+    change -(ricciCompAt (I := I) basis Ric i j) =
+      ricciDiag3 (-l1) (-l2) (-l3) i j
+    rw [hij]
+    fin_cases i <;> fin_cases j <;> simp [ricciDiag3]
 
 private theorem scalar_eq_of_signed_trace_diag
     {g : SmoothRiemannianMetric I M}
@@ -831,11 +846,11 @@ private theorem rmSecNormSq3_neg
   unfold rmSecNormSq3 sec12Ric3 sec13Ric3 sec23Ric3
   ring
 
-/-- Corollary 11.4 with the convention-correct first trace.
 
-The finite 3D algebra package uses the displayed-slot trace convention, so the
-first-trace geometric producer supplies trace data for `-Ric` and `-scalar`.
-This theorem hides that sign bookkeeping from positive-Ricci consumers. -/
+
+
+
+
 theorem normSqLeOfFirstTrace
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -868,12 +883,12 @@ theorem normSqLeOfFirstTrace
   rw [hnorm, rmSecNormSq3_neg, hscalar]
   exact rmSqLe100ScalSq3 l1 l2 l3 h1 h2 h3
 
-/-- Corollary 11.4 from convention-correct first-trace curvature data.
 
-This is the positive-Ricci-facing pointwise wrapper: it consumes the usual
-first-trace realization data, builds the signed displayed-slot
-package internally with `traceDataOfFirst`, and then applies
-`normSqLeOfFirstTrace`. -/
+
+
+
+
+
 theorem normSqLeOfFirstData
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}

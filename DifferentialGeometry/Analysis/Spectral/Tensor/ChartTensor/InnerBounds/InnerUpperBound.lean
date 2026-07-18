@@ -5,47 +5,10 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform upper bound for the chart-frame `(r, s)`-quadratic form
-
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`, the
-chart-frame `(r, s)`-diagonal quadratic form
-`(b, T) ↦ chartTensorInnerPointwise_rs_model g r s α b T T`
-attains a finite maximum on the compact product
-`tsupport (chartAtlasPOU I M α) × unit sphere(TensorRSModel r s ℝ E)`.
-
-This is a uniform-boundedness statement: there is a single non-negative
-constant `C` such that the quadratic form is bounded above by `C * ‖T‖^2`
-for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α` and every model tensor `T`.
-
-## Proof strategy
-
-The argument mirrors the lower-bound companion:
-
-1. The first factor `tsupport (chartAtlasPOU I M α)` is compact in `M`, as a
-   closed subset of the compact ambient manifold.
-2. The second factor `Metric.sphere (0 : TensorRSModel r s ℝ E) 1` is compact
-   in any finite-dimensional normed space (proper space ⇒ closed bounded
-   compact).
-3. The product is compact, the quadratic form is jointly continuous on
-   `baseSet × univ ⊇ tsupport × sphere` (by the joint continuity established
-   earlier).
-4. The extreme-value theorem produces a maximum on the unit sphere.
-5. Homogeneity of the diagonal quadratic form in `T` (`Q(b, c • T, c • T) =
-   c^2 Q(b, T, T)`) rescales the unit-sphere bound to the inequality
-   `Q(b, T, T) ≤ C * ‖T‖^2` for every `T`.
-
-## Main result
-
-* `exists_chartTensorInnerPointwise_rs_model_upper_bound_on_pouTsupport` —
-  the uniform upper bound in homogeneous-degree-two form.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -64,7 +27,7 @@ open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -73,14 +36,6 @@ section UpperBoundUnitSphere
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- **Uniform upper bound for the chart-frame `(r, s)`-diagonal quadratic
-form on `tsupport(POU_α) × unit sphere`.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and
-ranks `(r, s)`, there is a non-negative constant `M_ub` such that
-`chartTensorInnerPointwise_rs_model g r s α b T T ≤ M_ub`
-for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α` and every unit `(r, s)`-model tensor `T`. -/
 private lemma exists_chartTensorInnerPointwise_rs_model_unit_sphere_upper_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ M_ub : ℝ, 0 ≤ M_ub ∧
@@ -153,10 +108,6 @@ section UpperBound
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- Rescaling of the unit-sphere upper bound to the homogeneous-degree-two
-inequality on every model `(r, s)`-tensor `T`. On `tsupport(POU_α)`,
-`chartTensorInnerPointwise_rs_model g r s α b T T ≤ M_ub * ‖T‖^2`
-for every `T`, with the same `M_ub` produced by the unit-sphere maximum. -/
 private lemma chartTensorInnerPointwise_rs_model_le_mul_sq_norm_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {M_ub : ℝ}
@@ -249,14 +200,6 @@ private lemma chartTensorInnerPointwise_rs_model_le_mul_sq_norm_on_pouTsupport
     rw [h_lhs] at h_mul
     exact h_mul
 
-/-- **Uniform upper bound for the chart-frame `(r, s)`-diagonal quadratic
-form on `tsupport(POU_α)` (homogeneous-degree-two form).**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and
-ranks `(r, s)`, there is a non-negative constant `C` such that
-`chartTensorInnerPointwise_rs_model g r s α b T T ≤ C * ‖T‖^2`
-for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α` and every model `(r, s)`-tensor `T`. -/
 theorem exists_chartTensorInnerPointwise_rs_model_upper_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

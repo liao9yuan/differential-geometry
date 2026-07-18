@@ -4,38 +4,12 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SIntrinsicChartCurryFactor
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-/-!
-# Auxiliary bridges for the agreement of the chart-frame `(0, s)`-tensor
-covariant derivative with the abstract one
-
-This file packages the auxiliary lemmas needed for the inductive agreement
-proof between the chart-frame `(0, s)`-tensor covariant derivative
-`chartTensor0SCovariantDerivative g α s T X b` and the abstract bundled
-`(0, s)`-tensor covariant derivative
-`Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita g) T b (X b)`,
-at points `b` of the chart-α Levi-Civita good set.
-
-## Main lemmas
-
-* `chartParallelExtend_mdifferentiableAt` (in
-  `ChartLeviCivitaParallelExtend.lean`): the chart-parallel extension is
-  manifold-differentiable at the basepoint on the chart Levi-Civita good set.
-* `differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt`: bridges
-  the `MDifferentiableAt` total-space form of a `(0, n)`-tensor section to
-  the chart-pullback `DifferentiableAt` form, used by
-  `tensor0SIntrinsicChartCLM_factor_via_partialEval`.
-* `TensorSectionMDiffAt_partialEval`: the partial evaluation of a
-  pointwise-differentiable `(0, s + 1)`-tensor section along the chart-parallel
-  extension is itself pointwise-differentiable at the basepoint.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
@@ -57,8 +31,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
-/-- The pointwise `MDifferentiableAt` predicate for the total-space form of a
-`(0, n)`-tensor section. -/
 def TensorSectionMDiffAt (n : ℕ)
     (T : Π b : M, Tensor0SSpace n I b) (b : M) : Prop :=
   letI _h_top : TopologicalSpace (TotalSpace (Tensor0SModel n ℝ E)
@@ -68,10 +40,6 @@ def TensorSectionMDiffAt (n : ℕ)
     (fun b' : M => TotalSpace.mk' (Tensor0SModel n ℝ E)
       (E := fun x : M => Tensor0SSpace n I x) b' (T b')) b
 
-/-- Auxiliary chart-pullback differentiability: given a raw `(0, n)`-tensor
-function `T` whose total-space form is `MDifferentiableAt` at a chart-α good-set
-point `b`, the chart pullback of its trivialised representation is
-`DifferentiableAt ℝ` at `extChartAt I α b`. -/
 theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
     (n : ℕ) (α : M) (T : Π b : M, Tensor0SSpace n I b)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -144,8 +112,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
 
-/-- Pointwise `MDifferentiableAt` of the curried section is implied by the same
-of `T`. -/
 theorem mdifferentiableAt_curriedSection_of_section
     (s : ℕ) (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M}
     (hT_at : TensorSectionMDiffAt (I := I) (s + 1) T b) :
@@ -155,7 +121,6 @@ theorem mdifferentiableAt_curriedSection_of_section
         b' (curriedSection I M T b')) b :=
   (mdifferentiableAt_curriedSection_iff_section (I := I) (M := M) T).mp hT_at
 
-/-- Pointwise `MDifferentiableAt` of the partial evaluation at `b`. -/
 theorem TensorSectionMDiffAt_partialEval
     (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)

@@ -6,77 +6,7 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 
-set_option linter.unusedSectionVars false
 
-/-!
-# Manifold lift of the chart-pushed flow orbit on the uniform interval
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the chart-pushed flow
-`Φ : (E × E) × ℝ → E × E` produced by the uniform existence interval
-(Exponential/UniformExistence.lean) satisfies, on `Ioo (-T) T` and
-uniformly in `v ∈ ball (0 : E) ρ`, the genuine chart-phase ODE.
-
-This file lifts the chart-coordinate orbit `s ↦ Φ ((x₀, v), s)` to a
-manifold-valued curve
-
-```
-chartFlowOrbitLift Φ p v s :=
-  (extChartAt I.tangent ⟨p, (0 : E)⟩).symm (Φ ((x₀, v), s))
-```
-
-and records its core identification properties on the uniform interval:
-
-* the lift starts at `⟨p, v⟩` at time `0`;
-* its projection on `Icc (-T) T` agrees with
-  `(extChartAt I p).symm` applied to the orbit's first component;
-* the chart-pushed lift (with base time `0`) coincides with the orbit
-  on the entire uniform interval;
-* on a `v`-dependent neighbourhood of `0`, the lift coincides with the
-  R.C per-`v` manifold integral curve `f_v`, so the lift inherits the
-  `IsMIntegralCurveAt … 0`-property.
-
-These identifications are the inputs consumed by the downstream chart-
-coordinate uniform uniqueness step on `Ioo (-T) T`, which in turn (with
-the per-`v` `IsMIntegralCurveAt`-property at `0` recorded here) closes
-out the manifold-side propagation needed for the final assembly.
-
-## Main definitions
-
-* `chartFlowOrbitLift` — the manifold-valued lift of the chart-pushed
-  orbit, defined pointwise as the inverse of the chart of `TM` at
-  `⟨p, 0⟩` applied to the orbit.
-
-## Main results
-
-* `chartFlowOrbitLift_zero` — initial value `F_v 0 = ⟨p, v⟩`.
-
-* `chartFlowOrbitLift_proj` — projection identity:
-  `(F_v s).proj = (extChartAt I p).symm (Φ ((x₀, v), s)).1` on the
-  chart-target-interior domain.
-
-* `chartFlowOrbitLift_proj_mem_chartAt_source` — the projection lies
-  in the chart-`p` source on the chart-target-interior domain.
-
-* `chartFlowOrbitLift_chartPushLift_eq` — chart-pushed lift identity:
-  `chartPushLift F_v 0 s = Φ ((x₀, v), s)` on the chart-target-interior
-  domain.
-
-* `chartFlowOrbitLift_continuousOn` — continuity of the lift on the
-  uniform interval.
-
-* `exists_chartFlowOrbitLift_isMIntegralCurveAt_zero` — the lift is a
-  local integral curve of `geodesicVectorFieldChart g p` at `0`, with
-  initial value `⟨p, v⟩`. Combined with the chart-target-interior
-  confinement, this packages the per-`v` manifold-side ingredient of
-  the chart-flow ↔ tangent-bundle identification on a neighbourhood of
-  `0`.
-
-* `exists_chartFlowOrbitLift_data_uniform` — headline packaging: a
-  chart-pushed flow `Φ` and uniform radii `(ρ, T)` such that, for every
-  `v ∈ ball (0 : E) ρ`, the lift `F_v` enjoys all of the above
-  properties on `Ioo (-T) T`.
--/
 
 noncomputable section
 
@@ -89,7 +19,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -99,14 +29,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 section Definition
 
-/-- The manifold-valued lift of the chart-pushed flow orbit: invert the
-extended chart of `TM` at the zero section `⟨p, 0⟩` applied pointwise to
-the orbit's chart-coordinate value. -/
 def chartFlowOrbitLift (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) :
     ℝ → TangentBundle I M :=
   fun s => (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
     (Φ (((extChartAt I p p, v) : E × E), s))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbitLift_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) (s : ℝ) :
     chartFlowOrbitLift (I := I) Φ p v s =
@@ -119,9 +47,7 @@ section InverseChart
 
 variable [I.Boundaryless]
 
-/-- Membership of the chart-of-`TM`'s extended-chart target. For
-`z ∈ (interior (extChartAt I p).target) ×ˢ univ`, the pair `z` lies in
-`(extChartAt I.tangent ⟨p, 0⟩).target`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_extChartAt_tangent_zero_target
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -140,9 +66,7 @@ lemma mem_extChartAt_tangent_zero_target
       (extChartAt I p).map_target hz1_target
     rwa [extChartAt_source] at hz1_src
 
-/-- The inverse of the chart of `TM` at `⟨p, 0⟩` evaluated at a chart-
-target-interior-product point: its projection is the inverse extended
-chart of the base. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma extChartAt_tangent_zero_symm_proj
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -176,8 +100,7 @@ lemma extChartAt_tangent_zero_symm_proj
     (extChartAt I p).left_inv hq_extsrc_base
   rw [h_z1, hinv]
 
-/-- The chart of `TM` at `⟨p, 0⟩` applied to its inverse at a chart-
-target-interior-product point returns the original point. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma extChartAt_tangent_zero_apply_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -186,9 +109,7 @@ lemma extChartAt_tangent_zero_apply_symm
   (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).right_inv
     (mem_extChartAt_tangent_zero_target (I := I) (p := p) hz)
 
-/-- The inverse of the chart of `TM` at `⟨p, 0⟩`, evaluated at a chart-
-target-interior-product point, returns a `TM`-point whose projection
-lies in the chart-`p` source. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartAt_source_of_extChartAt_tangent_zero_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -212,9 +133,7 @@ section InitialValue
 
 variable [I.Boundaryless]
 
-/-- **Initial value of the lift.** Provided the chart-flow's
-initial-value identity holds at `v`, the lift `F_v` evaluates to
-`⟨p, v⟩` at time `0`. -/
+omit [I.Boundaryless] in
 theorem chartFlowOrbitLift_zero
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E}
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -279,9 +198,7 @@ section ProjectionIdentity
 
 variable [I.Boundaryless]
 
-/-- **Projection identity.** When the orbit lies in the chart-target
-interior product, the lift's projection is the inverse extended chart
-of the orbit's first component. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_proj
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -291,8 +208,7 @@ theorem chartFlowOrbitLift_proj
   unfold chartFlowOrbitLift
   exact extChartAt_tangent_zero_symm_proj (I := I) p hΦ_target
 
-/-- **Chart-source membership of the projection.** The lift's projection
-lies in `(chartAt H p).source`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_proj_mem_chartAt_source
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -307,10 +223,7 @@ section ChartPushLiftIdentification
 
 variable [I.Boundaryless]
 
-/-- **Chart-pushed lift identity.** When the orbit lies in the chart-
-target interior product and the initial value of the lift is `⟨p, v⟩`,
-the chart-pushed lift of `F_v` (base time `0`) at time `s` equals the
-orbit. -/
+omit [I.Boundaryless] in
 theorem chartFlowOrbitLift_chartPushLift_eq
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -338,9 +251,7 @@ section Continuity
 
 variable [I.Boundaryless]
 
-/-- **Continuity of the lift on the uniform interval.** When the orbit
-is continuous on `Ioo (-T) T` and lies in the chart-target interior
-product, the lift `F_v` is continuous on `Ioo (-T) T`. -/
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_continuousOn
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} {T : ℝ}
     (hΦ_cont : ContinuousOn (fun s : ℝ => Φ (((extChartAt I p p, v) : E × E), s))
@@ -369,15 +280,7 @@ section IntegralCurveAtZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- For each `v`, there exists a manifold-valued curve `g_v : ℝ → TM`
-that is a local integral curve of `geodesicVectorFieldChart g p` at `0`,
-starts at `⟨p, v⟩`, and agrees with `chartFlowOrbitLift Φ p v` on a
-neighbourhood of `0`.
-
-The curve `g_v` is the lift produced by Picard-Lindelöf existence on
-the boundaryless tangent bundle (Geodesic/Existence.lean). The agreement
-with `F_v` follows from chart-coordinate ODE uniqueness applied at the
-base point. -/
+omit [T2Space (TangentBundle I M)] in
 theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -489,11 +392,7 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
   rw [← hs_eq]
   exact hleft.symm
 
-/-- **The lift is a local integral curve at `0`.** Under the chart-flow
-hypotheses (initial-value identity, chart-phase ODE near 0,
-chart-target-interior confinement near 0), the manifold lift `F_v` is a
-local integral curve of `geodesicVectorFieldChart g p` at `0` with
-initial value `⟨p, v⟩`. -/
+omit [T2Space (TangentBundle I M)] in
 theorem chartFlowOrbitLift_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -524,26 +423,6 @@ section HeadlineUniform
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Headline R.D.1 — manifold lift on the uniform interval.** There
-exist a chart-pushed flow `Φ : (E × E) × ℝ → E × E` and uniform radii
-`(ρ, T) > 0` such that for every `v ∈ ball (0 : E) ρ`:
-
-* `Φ ((x₀, v), 0) = (x₀, v)` (initial-value identity);
-* `Φ ((x₀, v), s) ∈ (interior (extChartAt I p).target) ×ˢ univ` on
-  `Icc (-T) T` (chart-target-interior confinement);
-* the orbit satisfies the genuine chart-phase ODE on `Ioo (-T) T`
-  uniformly in `v`;
-* the manifold lift `F_v := chartFlowOrbitLift Φ p v` starts at
-  `⟨p, v⟩` at time `0`;
-* on `Icc (-T) T`, `(F_v s).proj = (extChartAt I p).symm (Φ((x₀, v), s)).1`,
-  and `chartPushLift F_v 0 s = Φ((x₀, v), s)`;
-* `F_v` is continuous on `Ioo (-T) T`;
-* `F_v` is a local integral curve of `geodesicVectorFieldChart g p` at
-  `0`, with initial value `⟨p, v⟩`.
-
-This is the per-`v` manifold-side packaging for R.D.2 (uniform chart-
-coordinate uniqueness on `Ioo (-T) T`) and R.D.3 (rescaling smallness
-discharge). -/
 theorem exists_chartFlowOrbitLift_data_uniform
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

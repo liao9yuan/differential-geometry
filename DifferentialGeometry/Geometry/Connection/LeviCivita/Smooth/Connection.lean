@@ -21,11 +21,11 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Smoothness of the Levi-Civita covariant derivative
 
-This submodule is part of the split `DifferentialGeometry.Integral.Connection.Smooth` API.
--/
+
+
+
+
 
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
     {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -45,8 +45,8 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
     (I := I) (leviCivitaConnectionOfMetric (I := I) g) e b hx hσdiff hσ
     (fun i k j => lc_christoffel_contMDiffAt (I := I) e b g hx i j k)
 
-/-- Finite-order version needed by curvature identities: if the input section
-is `C^2`, then the Levi-Civita derivative section is `C^1`. -/
+
+
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -65,8 +65,8 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
     (I := I) (leviCivitaConnectionOfMetric (I := I) g) e b hx hσdiff hσ
     (fun i k j => lc_christoffel_contMDiffAt (I := I) e b g hx i j k)
 
-/-- The Levi-Civita connection of a smooth Riemannian metric is locally smooth as a
-covariant derivative. -/
+
+
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -100,9 +100,19 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
     (leviCivitaConnectionOfMetric_homSection_contMDiffAt
       (I := I) e b g hxBase hσdiff hσAt).contMDiffWithinAt
 
-/-- The finite-order `C^1` local smoothness instance for the Levi-Civita
-connection.  This is the producer needed by curvature identities whose
-realization proofs only require differentiating `C^2` test sections once. -/
+
+
+
+theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
+    (g : SmoothRiemannianMetric I M) :
+    CovariantDerivative.ContMDiffCovariantDerivative
+      (leviCivitaConnectionOfMetric (I := I) g) ∞ :=
+  ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g
+    isOpen_univ⟩
+
+
+
+
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally

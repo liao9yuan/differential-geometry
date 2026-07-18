@@ -6,11 +6,11 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Ricci evolution Bianchi
 
-Split-out component of `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -33,7 +33,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-/-- The rough Laplacian component `g^{ab} (nabla_a nabla_b Ric)_ij`. -/
+
 def roughLapRicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -41,10 +41,10 @@ def roughLapRicInFrame
   ∑ a : Idx, ∑ b : Idx,
     gInv t x a b * nabla2Ric t x a b i j
 
-/-- A component family realizes a supplied second covariant derivative tensor
-of Ricci when it is obtained by evaluating a `(0,4)` tensor section on the
-frame vectors.  The geometric assertion that this tensor is `∇∇Ric` is kept
-separate from the component bookkeeping. -/
+
+
+
+
 def Nabla2RicciTensorComponentsInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2RicTensor : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
@@ -53,8 +53,8 @@ def Nabla2RicciTensorComponentsInFrameOn
     nabla2Ric t x d a i j =
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (nabla2RicTensor t) frame x d a i j
 
-/-- Local version of `Nabla2RicciTensorComponentsInFrameOn`, for local
-frames whose component formulas are only meaningful on their frame domain. -/
+
+
 def Nab2RicLoc
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
@@ -64,12 +64,12 @@ def Nab2RicLoc
     nabla2Ric t x d a i j =
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (nabla2RicTensor t) frame x d a i j
 
-/-- The Ricci variation RHS after substituting the Ricci-flow Christoffel
-variation and expanding the trace
-`nabla_k A^k_ij - nabla_i A^k_kj`.
 
-This is the expression before the contracted-Bianchi/gauge cancellation and
-the curvature-commutator simplification. -/
+
+
+
+
+
 def ricciVariationExpandedRHSInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -85,8 +85,8 @@ def ricciVariationExpandedRHSInFrame
           nabla2Ric t x i j k l +
           nabla2Ric t x i l k j))
 
-/-- Algebraic substitution of the Ricci-flow connection variation into the
-Ricci variation formula. -/
+
+
 theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -98,13 +98,13 @@ theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
   simp [ricciVariationFromConnectionRHSInFrame,
     nablaGammaDtFromNabla2RicInFrame, ricciVariationExpandedRHSInFrame]
 
-/-- Final Lemma 6.3 reduction after expanding the Ricci variation formula.
 
-This is exactly the textbook contracted-Bianchi plus covariant-derivative
-commutator calculation: the gauge/scalar-Hessian terms cancel, and the
-remaining commutator terms become
-`-2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj` in the project
-lowered-curvature convention. -/
+
+
+
+
+
+
 def RicciVariationExpandedRHS_eq_evolutionRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -119,7 +119,7 @@ def RicciVariationExpandedRHS_eq_evolutionRHS
         (roughLapRicInFrame (M := M) gInv nabla2Ric)
         (t : Real) x i j
 
-/-- The term `∇^k ∇_i Ric_jk` in the proof of Lemma 6.3. -/
+
 def contractedNabla2RicLeftInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -127,7 +127,7 @@ def contractedNabla2RicLeftInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x k i j l
 
-/-- The term `∇^k ∇_j Ric_ik` in the proof of Lemma 6.3. -/
+
 def contractedNabla2RicRightInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -135,8 +135,8 @@ def contractedNabla2RicRightInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x k j i l
 
-/-- The scalar-Hessian trace `∇_i ∇_j R` as it appears before the Hessian
-cancellation in the component proof. -/
+
+
 def scalarHessianFromNabla2RicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -144,7 +144,7 @@ def scalarHessianFromNabla2RicInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i j k l
 
-/-- The divergence trace term `∇_i ∇^k Ric_jk`. -/
+
 def contractedNabla2RicTraceAInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -152,7 +152,7 @@ def contractedNabla2RicTraceAInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i k j l
 
-/-- The divergence trace term `∇_i ∇^l Ric_lj`. -/
+
 def contractedNabla2RicTraceBInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -160,8 +160,8 @@ def contractedNabla2RicTraceBInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i l k j
 
-/-- The natural right trace produced directly by commuting
-`∇^k ∇_j Ric_il` with the Ricci identity: `∇_j ∇^k Ric_ik`. -/
+
+
 def contractedNabla2RicTraceRightNaturalInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -169,12 +169,12 @@ def contractedNabla2RicTraceRightNaturalInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x j k i l
 
-/-- Pointwise contracted Bianchi in the two trace orientations used by the
-differentiated Lemma 6.3 calculation.
 
-The slot order is `nablaRic t x d a b = (∇_d Ric)_{ab}`.  The common
-right-hand side is the frame trace of `∇_j Ric`, i.e. the scalar-gradient
-component represented by the same component family. -/
+
+
+
+
+
 def ContractedBianchiTraceInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -193,10 +193,10 @@ def ContractedBianchiTraceInFrameOnLocal
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l * nablaRic (t : Real) x j k l)
 
-/-- Differentiated contracted Bianchi in the exact component form needed in
-Lemma 6.3: both divergence-trace covariant derivatives are half the traced
-second derivative of Ricci, i.e. half the scalar Hessian represented by
-`nabla2Ric`. -/
+
+
+
+
 def DifferentiatedContractedBianchiInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -213,9 +213,9 @@ def DifferentiatedContractedBianchiInFrame
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j
 
-/-- Symmetry of the scalar Hessian represented by `nabla2Ric`.  This is the
-trace-level scalar Hessian symmetry needed to compare the natural right trace
-with the `traceB` orientation. -/
+
+
+
 def ScalarHessianFromNabla2RicSymmetricInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -226,9 +226,9 @@ def ScalarHessianFromNabla2RicSymmetricInFrame
       scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
         (t : Real) x j i
 
-/-- Differentiated contracted Bianchi plus scalar-Hessian symmetry converts the
-natural right trace to the `traceB` orientation used in the expanded Ricci
-variation formula. -/
+
+
+
 theorem contractedNabla2RicTraceRightNatural_eq_traceB
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -258,7 +258,7 @@ theorem contractedNabla2RicTraceRightNatural_eq_traceB
     _ = contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j := hB.symm
 
-/-- Local differentiated contracted Bianchi, for use with local frames. -/
+
 def DifferentiatedContractedBianchiInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -277,7 +277,7 @@ def DifferentiatedContractedBianchiInFrameOnLocal
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
             (t : Real) x i j
 
-/-- Local scalar-Hessian symmetry for the trace represented by `nabla2Ric`. -/
+
 def HessSymmLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -290,8 +290,8 @@ def HessSymmLoc
         scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
           (t : Real) x j i
 
-/-- Local differentiated contracted Bianchi plus scalar-Hessian symmetry
-converts the natural right trace to the `traceB` orientation. -/
+
+
 theorem traceRightNatLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -589,8 +589,8 @@ theorem differentiatedContractedBianchiInFrameOnLocal_of_regular
     ring
   exact ⟨hA, hB⟩
 
-/-- The raw Ricci-identity commutator step before differentiated contracted
-Bianchi replaces the traced terms by half the scalar Hessian. -/
+
+
 def RicciSecondDerivativeCommutatorsInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -613,8 +613,8 @@ def RicciSecondDerivativeCommutatorsInFrame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
 
-/-- Local raw Ricci-identity commutator step, before differentiated contracted
-Bianchi rewrites the traced terms. -/
+
+
 def RicciSecCommLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -639,8 +639,8 @@ def RicciSecCommLoc
             (t : Real) x i j +
           ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
 
-/-- Curvature commutator part of Lemma 6.3, separated from the differentiated
-contracted-Bianchi trace cancellation. -/
+
+
 def RicciCurvatureCommutatorsInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -665,9 +665,9 @@ def RicciCurvatureCommutatorsInFrame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
 
-/-- Differentiated contracted Bianchi upgrades the raw Ricci-identity
-commutator step to the exact curvature commutator identities used in
-Lemma 6.3. -/
+
+
+
 theorem RicciCurvatureCommutatorsInFrame_of_differentiatedBianchi_and_secondCommutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

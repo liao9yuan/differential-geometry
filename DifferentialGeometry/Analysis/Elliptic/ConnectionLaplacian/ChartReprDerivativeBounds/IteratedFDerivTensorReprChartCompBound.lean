@@ -1,46 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledTensorReprChartCompBound
 
-/-!
-# Second-order Fréchet-derivative bound for the chart-pulled tensor
-representation by its chart-frame scalar components
-
-This file ships the second-order analogue of
-`fderiv_tensorRepr_opNorm_le_sum_fderiv_components` (which lives in
-`ChartPulledTensorReprChartCompBound.lean`).
-
-For a smooth Riemannian manifold `(M, g)` modelled on `(E, H)`, a
-chart-centre `α : M`, and a smooth compactly-supported
-`(r, s)`-tensor section `T`, the iterated Fréchet derivative of the
-chart-pulled chart-α-trivialised representation is bounded by
-
-  `‖iteratedFDeriv ℝ 2
-      (tensorRSChartE_section_repr r s α T.toFun ∘ (extChartAt I α).symm) y‖
-      ≤ K * Σ_{Idx, Jdx}
-          ‖iteratedFDeriv ℝ 2
-            (tensorChartComponentRaw g r s T α Idx Jdx ∘
-              (extChartAt I α).symm) y‖`
-
-with `K` depending only on `r`, `s`, and `E` (the ambient model space);
-in particular `K` is independent of `T`, `α`, `y`, and the metric `g`.
-
-## Strategy
-
-We mirror the first-order proof. The chart-pulled representation is
-rewritten as a finite sum
-
-  `Σ_{Idx, Jdx} (component_Idx_Jdx ∘ symm) y • basis_Idx_Jdx`,
-
-and we use `iteratedFDeriv_fun_sum_apply` together with
-`iteratedFDeriv_smul_const_apply` to peel off the basis vectors and
-land on a sum of constant-multiplied iterated derivatives of each
-scalar component. The constant absorbed is the basis-element norm
-constant.
--/
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -65,9 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Each chart-frame scalar component pulled back by `(extChartAt I α).symm`
-is `C^∞` (in particular `C^2`) at the chart-coord image of any chart-source
-point. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRepr_chart_pulled_component_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -110,9 +71,7 @@ lemma tensorRepr_chart_pulled_component_contDiffAt
     WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)
   exact hcd_at_inf.of_le h2_le
 
-/-- Norm bound on a single summand `(component_Idx_Jdx ∘ symm) y • basis`
-obtained from `iteratedFDeriv_smul_const_apply` and the bilinearity of
-`smulRight`. -/
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedFDeriv_two_smul_const_norm_le
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (f : E → ℝ) (v : F) {y : E}
@@ -131,12 +90,7 @@ private lemma iteratedFDeriv_two_smul_const_norm_le
             ContinuousLinearMap.norm_id, one_mul]
     _ = ‖iteratedFDeriv ℝ 2 f y‖ * ‖v‖ := by rw [mul_comm]
 
-/-- The chart-coordinate second iterated Fréchet derivative of the
-chart-pulled chart-α-trivialised representation of `T.toSection` at the
-chart-coord point `extChartAt I α b` has operator norm bounded by
-
-  `Σ_{Idx, Jdx} ‖iteratedFDeriv ℝ 2 (component_Idx_Jdx ∘ symm) (extChartAt b)‖
-                  * ‖basis-elt(Idx, Jdx)‖`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}
@@ -217,19 +171,7 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
   intro Jdx _
   exact iteratedFDeriv_two_smul_const_norm_le _ _ (hcd_each Idx Jdx)
 
-/-- **Headline bound.** For a smooth Riemannian manifold `(M, g)`, a
-chart-centre `α : M`, and a smooth compactly-supported
-`(r, s)`-tensor section `T`, the operator norm of the second iterated
-chart-coordinate Fréchet derivative of the chart-α-trivialised
-representation of `T` at every chart-coord point is bounded by a
-constant times the sum, over the multi-index pairs
-`(Idx, Jdx) : (Fin r → Fin n) × (Fin s → Fin n)`, of the operator
-norm of the second iterated chart-coordinate Fréchet derivative of
-the corresponding chart-pulled scalar component.
-
-The constant `K` depends only on the ranks `r`, `s`, and the ambient
-model space `E`; it is independent of `T`, `α`, the chart-coord
-point, and `g`. -/
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem iteratedFDeriv_two_tensorRSChartE_section_repr_opNorm_le_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :

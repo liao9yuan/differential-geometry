@@ -1,61 +1,24 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Alternating.Comp
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-/-!
-# The vector bundle of continuous multilinear maps
-
-We define the (topological) vector bundle of continuous multilinear maps from a vector bundle
-to the scalar field.
-
-Given a bundle `E : B → Type*` with model fiber `F`, and `s : ℕ`, we define
-`Bundle.continuousMultilinearMap 𝕜 s F E x` to be a type synonym for
-`ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜`, the continuous `s`-multilinear maps
-on the fiber `E x` valued in `𝕜`. If `E` is a vector bundle with model fiber `F`, then this
-is a vector bundle with model fiber `ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜`.
-
-The topology is constructed from the trivializations for `E` and the norm-topology on the
-model fiber using the `VectorPrebundle` construction, following the pattern of
-`Bundle.continuousAlternatingMap`.
-
-## Main Definitions
-
-* `Bundle.continuousMultilinearMap.vectorBundle`: continuous multilinear maps on a
-  vector bundle form a vector bundle.
-
-## Tags
-
-multilinear map, vector bundle, tensor bundle
--/
 
 noncomputable section
 
 open Bundle Set
 
-/-! ## Type definition and algebraic instances -/
-
 section defs
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] (s : ℕ)
 variable {B : Type*}
 
-set_option linter.unusedVariables false in
-/-- The bundle of continuous `s`-slot multilinear maps from a topological vector bundle `E`
-to the scalar field `𝕜`. At each point `x : B`, the fiber is
-`ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜`.
-We intentionally include `F` as a (phantom) argument so that typeclass instances on
-this type can refer to it.
 
-Marked `@[reducible]` so the type is transparent during instance synthesis. This
-collapses the topology diamond between the bundle topology
-(`instTopologicalSpaceContinuousMultilinearMap`) and the standard `ContinuousMultilinearMap`
-topology, enabling section-level lifts of fiberwise iso constructions. -/
 @[reducible]
-protected def Bundle.continuousMultilinearMap (F : Type*) (E : B → Type*)
+protected def Bundle.continuousMultilinearMap (_F : Type*) (E : B → Type*)
     [Π x, AddCommMonoid (E x)] [Π x, Module 𝕜 (E x)] [Π x, TopologicalSpace (E x)]
     (x : B) : Type _ :=
   ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜
@@ -73,15 +36,12 @@ instance Bundle.continuousMultilinearMap.instModule (x : B) :
 
 end defs
 
-/-! ## Pretrivialization -/
-
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] (s : ℕ)
 variable {B : Type*} [TopologicalSpace B]
 variable (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   (E : B → Type*) [Π x, AddCommMonoid (E x)] [Π x, Module 𝕜 (E x)]
   [TopologicalSpace (TotalSpace F E)]
 
-/-- Abbreviation for the model fiber of the multilinear bundle. -/
 local notation "MLF" => ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜
 
 variable {F E}
@@ -91,16 +51,11 @@ namespace Pretrivialization
 
 variable [e.IsLinear 𝕜] [e'.IsLinear 𝕜]
 
-/-- The coordinate change function between two pretrivializations of the multilinear-maps bundle.
-Given trivializations `e` and `e'` of `E`, the coordinate change precomposes each argument
-with `e'.coordChangeL 𝕜 e b`. -/
 def continuousMultilinearMapCoordChange (b : B) : MLF →L[𝕜] MLF :=
   ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : Fin s => e'.coordChangeL 𝕜 e b)
 
 variable [∀ x, TopologicalSpace (E x)] [FiberBundle F E]
 
-/-- The coordinate change function between two pretrivializations of the multilinear-maps bundle
-is continuous on the intersection of their base sets. -/
 theorem continuousOn_continuousMultilinearMapCoordChange
     [VectorBundle 𝕜 F E] [MemTrivializationAtlas e] [MemTrivializationAtlas e'] :
     ContinuousOn (continuousMultilinearMapCoordChange 𝕜 s e e')
@@ -121,10 +76,6 @@ theorem continuousOn_continuousMultilinearMapCoordChange
     exact h_bound.comp (continuous_pi fun _ => continuous_id)
   exact hcomp.comp_continuousOn hg
 
-/-- Given a trivialization `e` for a vector bundle `E` over a base `B`,
-`Pretrivialization.continuousMultilinearMap 𝕜 s e` is the induced pretrivialization for the
-continuous `s`-multilinear maps from `E` to `𝕜`. The pretrivialization acts by precomposing
-each argument with the inverse of the trivialization. -/
 def continuousMultilinearMap : Pretrivialization MLF
     (π MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) where
   toFun p := ⟨p.1, p.2.compContinuousLinearMap (fun _ => e.symmL 𝕜 p.1)⟩
@@ -155,7 +106,6 @@ def continuousMultilinearMap : Pretrivialization MLF
   target_eq := rfl
   proj_toFun _ _ := rfl
 
-/-- The pretrivialization is fiberwise linear. -/
 instance continuousMultilinearMap.isLinear :
     (Pretrivialization.continuousMultilinearMap 𝕜 s e).IsLinear 𝕜 where
   linear _ _ :=
@@ -184,8 +134,6 @@ theorem continuousMultilinearMap_symm_apply' {b : B} (hb : b ∈ e.baseSet) (L :
   · rfl
   exact hb
 
-/-- The coordinate change function agrees with applying pretrivialization `e'` to the
-image of `(b, L)` under the inverse pretrivialization `e`. -/
 theorem continuousMultilinearMapCoordChange_apply (b : B)
     (hb : b ∈ e.baseSet ∩ e'.baseSet) (L : MLF) :
     continuousMultilinearMapCoordChange 𝕜 s e e' b L =
@@ -202,21 +150,16 @@ theorem continuousMultilinearMapCoordChange_apply (b : B)
 
 end Pretrivialization
 
-/-! ## Vector prebundle and bundle instances -/
-
 open Pretrivialization
 variable (F E)
 variable [Π x : B, TopologicalSpace (E x)] [FiberBundle F E] [VectorBundle 𝕜 F E]
 
-/-- Topology on the continuous `s`-multilinear maps at each point, induced by the trivialization. -/
 instance (x : B) : TopologicalSpace (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
   TopologicalSpace.induced
     ((Pretrivialization.continuousMultilinearMap 𝕜 s
       (trivializationAt F E x)) ∘ TotalSpace.mk' MLF x)
     inferInstance
 
-/-- The continuous `s`-multilinear maps from a topological vector bundle to `𝕜` form a
-`VectorPrebundle`. -/
 def _root_.Bundle.continuousMultilinearMap.vectorPrebundle :
     VectorPrebundle 𝕜 MLF (Bundle.continuousMultilinearMap 𝕜 s F E) where
   pretrivializationAtlas :=
@@ -239,25 +182,20 @@ def _root_.Bundle.continuousMultilinearMap.vectorPrebundle :
       continuousMultilinearMapCoordChange_apply 𝕜 s e e'⟩
   totalSpaceMk_isInducing x := ⟨rfl⟩
 
-/-- Topology on the total space of the continuous `s`-multilinear maps bundle. -/
 instance Bundle.continuousMultilinearMap.topologicalSpace_totalSpace :
     TopologicalSpace (TotalSpace MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) :=
   (Bundle.continuousMultilinearMap.vectorPrebundle 𝕜 s F E).totalSpaceTopology
 
-/-- The continuous `s`-multilinear maps from a vector bundle to `𝕜` form a fiber bundle. -/
 instance _root_.Bundle.continuousMultilinearMap.fiberBundle :
     FiberBundle MLF (Bundle.continuousMultilinearMap 𝕜 s F E) :=
   (Bundle.continuousMultilinearMap.vectorPrebundle 𝕜 s F E).toFiberBundle
 
-/-- The continuous `s`-multilinear maps from a vector bundle to `𝕜` form a vector bundle. -/
 instance _root_.Bundle.continuousMultilinearMap.vectorBundle :
     VectorBundle 𝕜 MLF (Bundle.continuousMultilinearMap 𝕜 s F E) :=
   (Bundle.continuousMultilinearMap.vectorPrebundle 𝕜 s F E).toVectorBundle
 
 variable [he : MemTrivializationAtlas e] {F E}
 
-/-- Given a trivialization `e` in the atlas for vector bundle `E`, the induced trivialization
-for the continuous `s`-multilinear maps from `E` to `𝕜`. -/
 def Bundle.Trivialization.continuousMultilinearMap :
     Trivialization MLF (π MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) :=
   VectorPrebundle.trivializationOfMemPretrivializationAtlas _ ⟨e, he, rfl⟩
@@ -278,8 +216,6 @@ theorem Bundle.Trivialization.continuousMultilinearMap_apply
   rfl
 
 end
-
-/-! ## Smoothness -/
 
 section smooth
 
@@ -303,8 +239,8 @@ variable {𝕜 B F : Type*} {E : B → Type*} (s : ℕ)
 
 local notation "MLF" => ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜
 
-set_option linter.unusedSectionVars false in
-/-- The coordinate change function for the multilinear-maps bundle is `C^n`. -/
+
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 theorem contMDiffOn_continuousMultilinearMapCoordChange
     [ContMDiffVectorBundle n F E IB]
     [MemTrivializationAtlas e] [MemTrivializationAtlas e'] :
@@ -324,7 +260,6 @@ theorem contMDiffOn_continuousMultilinearMapCoordChange
 
 variable [ContMDiffVectorBundle n F E IB]
 
-/-- The vector prebundle of continuous multilinear maps is `C^n`. -/
 instance Bundle.continuousMultilinearMap.vectorPrebundle.isSmooth :
     (Bundle.continuousMultilinearMap.vectorPrebundle 𝕜 s F E).IsContMDiff IB n where
   exists_contMDiffCoordChange := by
@@ -335,8 +270,6 @@ instance Bundle.continuousMultilinearMap.vectorPrebundle.isSmooth :
     rintro b hb v
     exact continuousMultilinearMapCoordChange_apply 𝕜 s e e' b hb v
 
-/-- If `E` is a `C^n` vector bundle, then the bundle of continuous `s`-multilinear maps
-from `E` to `𝕜` is also a `C^n` vector bundle. -/
 instance SmoothVectorBundle.continuousMultilinearMap :
     ContMDiffVectorBundle n MLF (Bundle.continuousMultilinearMap 𝕜 s F E) IB :=
   (Bundle.continuousMultilinearMap.vectorPrebundle 𝕜 s F E).contMDiffVectorBundle IB

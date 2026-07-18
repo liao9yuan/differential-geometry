@@ -5,14 +5,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Realized Tensor Operators
 
-This file provides direct tensor-valued heat and drift operators for realized
-metric families.  The operators consume supplied covariant-derivative tensors;
-coordinate and frame realization predicates should bridge into these direct
-objects rather than act as the primary operator definitions.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -48,10 +48,10 @@ private theorem metricTraceFirstTwo0SAt_zero
     tail]
   simp [metricTrace0S2InBasis]
 
-/-- Tensor-valued heat operator from a supplied second covariant derivative
-and a single Riemannian metric.
 
-This is the rough Laplacian trace of the first two covariant slots. -/
+
+
+
 def tensorHeat0SMetricAt
     (g : SmoothRiemannianMetric I M)
     {x : M} {s : ℕ}
@@ -71,10 +71,10 @@ theorem tensorHeat0SMetricAt_apply
       metricTraceFirstTwo0SAt (I := I) g nabla2A tail := by
   exact roughLap0STensor_apply (I := I) g nabla2A tail
 
-/-- Tensor-valued heat operator from a supplied second covariant derivative.
 
-This is the rough Laplacian trace of the first two covariant slots, using the
-metric stored in the realized family at time `t`. -/
+
+
+
 def tensorHeat0SAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {x : M} {s : ℕ}
@@ -94,10 +94,10 @@ theorem tensorHeat0SAt_apply
       metricTraceFirstTwo0SAt (I := I) (G.metric t) nabla2A tail := by
   exact tensorHeat0SMetricAt_apply (I := I) (G.metric t) nabla2A tail
 
-/-- Tensor drift term from a supplied first covariant derivative.
 
-It fixes the first covariant derivative slot to the vector field value `X x`,
-leaving the original tensor slots as the output tensor arguments. -/
+
+
+
 def tensorDrift0SAt
     (X : (x : M) -> TangentSpace I x)
     {x : M} {s : ℕ}
@@ -127,8 +127,8 @@ theorem tensorDrift0SAt_apply
         (Fin.cons (X x) tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
-/-- Tensor heat operator with drift for a single metric, from supplied first
-and second covariant derivative tensors. -/
+
+
 def tensorHeatWithDrift0SMetricAt
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -155,8 +155,8 @@ theorem tensorHeatWithDrift0SMetricAt_apply
         nablaA (Fin.cons (X x) tail) := by
   simp [tensorHeatWithDrift0SMetricAt]
 
-/-- Tensor heat operator with drift, from supplied first and second covariant
-derivative tensors. -/
+
+
 def tensorHeatWithDrift0SAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -183,7 +183,7 @@ theorem tensorHeatWithDrift0SAt_apply
         nablaA (Fin.cons (X x) tail) := by
   exact tensorHeatWithDrift0SMetricAt_apply (I := I) (G.metric t) X nabla2A nablaA tail
 
-/-- Two-tensor specialization of the metric-level tensor heat-with-drift operator. -/
+
 def tensorHeatWithDrift2MetricAt
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -210,7 +210,7 @@ theorem tensorHeatWithDrift2MetricAt_apply
         nablaA (Fin.cons (X x) v) := by
   simp [tensorHeatWithDrift2MetricAt]
 
-/-- Two-tensor specialization of the tensor heat-with-drift operator. -/
+
 def tensorHeatWithDrift2At
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -237,7 +237,7 @@ theorem tensorHeatWithDrift2At_apply
         nablaA (Fin.cons (X x) v) := by
   exact tensorHeatWithDrift2MetricAt_apply (I := I) (G.metric t) X nabla2A nablaA v
 
-/-- Quadratic evaluation of the metric-level two-tensor heat-with-drift operator. -/
+
 def tensorHeatWithDrift2QuadMetricAt
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -264,8 +264,8 @@ theorem tensorHeatWithDrift2QuadMetricAt_eq
         nablaA (Fin.cons (X x) (vec2 v v)) := by
   simp [tensorHeatWithDrift2QuadMetricAt]
 
-/-- Zero-drift specialization of the metric-level quadratic tensor heat
-operator. -/
+
+
 @[simp]
 theorem tensorHeatWithDrift2QuadMetricAt_zero_drift
     (g : SmoothRiemannianMetric I M)
@@ -290,8 +290,8 @@ theorem tensorHeatWithDrift2QuadMetricAt_zero_drift
         (0 : Fin 3)
   simpa using hzero
 
-/-- Assemble the quadratic heat-with-drift value from separately identified
-Laplacian and drift scalar values. -/
+
+
 theorem heatQuad_eq_parts
     (g : SmoothRiemannianMetric I M)
     (X : (x : M) -> TangentSpace I x)
@@ -324,7 +324,7 @@ theorem tensorHeatWithDrift2QuadMetricAt_zero
   rw [metricTraceFirstTwo0SAt_zero]
   simp
 
-/-- Quadratic evaluation of the two-tensor heat-with-drift operator. -/
+
 def tensorHeatWithDrift2QuadAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)

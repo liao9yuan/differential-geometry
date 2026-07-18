@@ -5,12 +5,12 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Scalar/Ricci Producer Bridges
 
-This file contains producer bridges that need both the Ricci evolution component
-API and the scalar-curvature heat-operator API.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -52,8 +52,8 @@ private theorem sum_swap_four
             _ = ∑ l : Idx, ∑ i : Idx, ∑ j : Idx, F i j k l := by
                   rw [Finset.sum_comm]
 
-/-- The two metric traces of the Ricci second covariant derivative agree after
-swapping the two traced index pairs. -/
+
+
 theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -88,12 +88,12 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
               gInv t x k l * nabla2Ric t x k l i j) := by
           simp [Finset.mul_sum]
 
-/-- Ricci-specific heat-operator producer for the canonical scalar Laplacian.
 
-The scalar Hessian supplied by the Hessian-trace API is allowed to be the
-`scalarHessianFromNabla2RicInFrame` trace of `nabla2Ric`.  The target rough
-Ricci Laplacian uses `roughLapRicInFrame`; the equality between the two scalar
-Laplacian traces is the finite-sum swap above. -/
+
+
+
+
+
 @[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

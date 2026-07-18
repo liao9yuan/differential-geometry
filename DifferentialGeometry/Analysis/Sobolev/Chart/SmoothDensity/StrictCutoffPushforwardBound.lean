@@ -1,30 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkpHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoff
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 
-/-!
-# Chart-α raw pushforward of the strict-cutoff product
-
-For a closed Riemannian manifold `(M, g)` and a chart-atlas index `α : M`, the
-smooth strict cutoff `chartStrictCutoff α : M → ℝ` (see `Chart/StrictCutoff.lean`)
-has topological support inside `(chartAt H α).source` and equals `1` on the
-topological support of the partition-of-unity weight `ρ_α`.
-
-This file proves: for every `v : M → ℝ` with `MemWkpChart g k p v`, the chart-α
-*raw* pushforward of the product `chartStrictCutoff α · v` is bounded in
-`W^{k,p}` on the chart-α Euclidean target by a constant (depending only on
-`g`, `α`, `k`, `p`) times the chart-based `W^{k,p}` norm of `v`.
-
-The argument uses the partition-of-unity decomposition
-`chartStrictCutoff α · v = Σ_{γ} ρ_γ · chartStrictCutoff α · v` on `M` (only
-finitely many indices `γ` contribute because the partition of unity is locally
-finite and `M` is compact), and applies a per-pair cross-chart bound to each
-summand, using that
-`tsupport ρ_γ ∩ tsupport (chartStrictCutoff α)` is a compact subset of the
-overlap `(chartAt H γ).source ∩ (chartAt H α).source`.
--/
 
 noncomputable section
 
@@ -48,7 +27,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Abbreviation for the partition-of-unity weight `ρ_γ : M → ℝ` at index `γ`. -/
 private noncomputable def pou
     [T2Space M] [SigmaCompactSpace M] (γ : M) : M → ℝ :=
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
@@ -70,14 +48,11 @@ private lemma pou_hasCompactSupport
     HasCompactSupport (pou (I := I) (M := M) γ) :=
   (isClosed_tsupport _).isCompact
 
-/-- `chartStrictCutoff α` has compact support on a compact manifold. -/
 private lemma hasCompactSupport_chartStrictCutoff
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] (α : M) :
     HasCompactSupport (chartStrictCutoff (I := I) (M := M) α) :=
   (isClosed_tsupport _).isCompact
 
-/-- The product `pou γ · chartStrictCutoff α · v` vanishes outside
-`tsupport (pou γ) ∩ tsupport (chartStrictCutoff α)`. -/
 private lemma prod_pou_strictCutoff_v_eq_zero_off
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (γ α : M) (v : M → ℝ) {x : M}
@@ -95,8 +70,6 @@ private lemma prod_pou_strictCutoff_v_eq_zero_off
       image_eq_zero_of_notMem_tsupport hx_cut
     rw [h0]; ring
 
-/-- On `M`, the strict cutoff times `v` decomposes as a finite POU-weighted
-sum. -/
 private lemma strictCutoff_mul_v_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (α : M) (v : M → ℝ) (x : M) :
@@ -125,8 +98,6 @@ private lemma strictCutoff_mul_v_eq_finset_sum
             (chartStrictCutoff (I := I) (M := M) α x * v x) := by
       rw [Finset.sum_mul]
 
-/-- The chart-α raw pushforward of `chartStrictCutoff α · v` equals the
-chart-α raw pushforward of the finite POU-weighted sum, pointwise on `EuclN`. -/
 private lemma chartPushedRaw_strictCutoff_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (α : M) (v : M → ℝ) (y : EuclN) :
@@ -160,8 +131,6 @@ private lemma chartPushedRaw_strictCutoff_eq_finset_sum
       exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
     rw [Finset.sum_eq_zero (fun γ _ => h_zero γ)]
 
-/-- If `tsupport (pou γ) ∩ tsupport (chartStrictCutoff α) = ∅`, then the chart-α
-raw pushforward of `pou γ · chartStrictCutoff α · v` is identically zero. -/
 private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (γ α : M) (v : M → ℝ)
@@ -184,15 +153,6 @@ private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
     exact prod_pou_strictCutoff_v_eq_zero_off (I := I) (M := M) γ α v hx_not_in
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
-/-- **Per-pair joint result**: For a pair of chart points `γ, α : M` and a
-function `v` with `MemWkpChart g k p v`, there exists a positive constant
-`C_γα` such that:
-
-(1) the chart-α raw pushforward of `pou γ · chartStrictCutoff α · v` is in
-    `MemWkp k p` on `chartTargetEuclid α`, with compact support inside
-    `chartTargetEuclid α`;
-(2) its `wkpNorm k p` is bounded by `C_γα` times the `wkpNorm k p` of
-    `chartPushed γ v` on `chartTargetEuclid γ`. -/
 private theorem cross_chart_strictCutoff_pushedRaw_joint
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -215,14 +175,14 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           (fun x => pou (I := I) (M := M) γ x *
             (chartStrictCutoff (I := I) (M := M) α x * v x))) ⊆
         chartTargetEuclid (I := I) (M := M) α ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x => pou (I := I) (M := M) γ x *
             (chartStrictCutoff (I := I) (M := M) α x * v x)))
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)
@@ -347,7 +307,7 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     fun y hy => (hη_γ_loc_supp hy).1
   have hη_γ_loc_supp_target : tsupport η_γ_loc ⊆ Ωγ_target :=
     fun y hy => (hη_γ_loc_supp hy).2
-  set η_α_E : EuclN → ℝ := etaEuclid (I := I) (M := M) α
+  set η_α_E : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α
     (chartStrictCutoff (I := I) (M := M) α) with hη_α_E_def
   have hη_α_E_smooth : ContDiff ℝ (⊤ : ℕ∞) η_α_E :=
     contDiff_etaEuclid (I := I) (M := M) α
@@ -467,9 +427,9 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
   have hψ_γ_loc_mem_Ωγ : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k p ψ_γ_loc Ω_γ := hψ_γ_loc_pair_Ωγ.1
   have hψ_γ_loc_norm_target_eq_Ωγ :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ω_γ := hψ_γ_loc_pair_Ωγ.2
   set ψ_total : EuclN → ℝ := fun y => η_combined_α y * ψ_γ_loc (Φ.toFun y) with hψ_total_def
   have hψ_total_supp_in_η_combined_α : tsupport ψ_total ⊆ tsupport η_combined_α := by
@@ -710,63 +670,63 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) hp_one hΩα_target_open h_ae_eq]
   have h_bridge_α :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_total Ωα_target ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_total Ω_α :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_le_of_tsupport_subset_mem_small_general
       (d := Module.finrank ℝ E) k hp_one hΩα_target_open hΩα_open
       hΩα_subset_target hψ_total_mem_Ωα hψ_total_supp_Ωα
   refine h_bridge_α.trans ?_
-  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p ψ_total Ω_α ≤
       ENNReal.ofReal K_leib_α *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α :=
     hK_leib_α_bound h_ψγ_loc_comp_mem
   refine h_leib_step.trans ?_
   have h_chain_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α ≤
       ENNReal.ofReal K_chain *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p ψ_γ_loc Ω_γ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       hp_one hp_top hΩα_open hΩγ_open Φ k (le_refl k)
       hψ_γ_loc_mem_Ωγ hψ_γ_loc_cpt hψ_γ_loc_supp_in_Ωγ
   have h_chain_step_target :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α ≤
       ENNReal.ofReal K_chain *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target := by
     refine h_chain_step.trans ?_
     rw [hψ_γ_loc_norm_target_eq_Ωγ]
   have h_leib_γ_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target ≤
       ENNReal.ofReal K_leib_γ *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p chartPushedγV Ωγ_target := by
     have h_eq : ψ_γ_loc = (fun y => η_γ_loc y * chartPushedγV y) := rfl
     rw [h_eq]
     exact hK_leib_γ_bound hchartPushedγV_mem
   have h_chain_combined :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α ≤
       ENNReal.ofReal K_chain *
         (ENNReal.ofReal K_leib_γ *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p chartPushedγV Ωγ_target) := by
     refine h_chain_step_target.trans ?_
     exact mul_le_mul_of_nonneg_left h_leib_γ_step (zero_le _)
   refine (mul_le_mul_of_nonneg_left h_chain_combined (zero_le _)).trans ?_
   have h_K_eq : ENNReal.ofReal K_leib_α *
       (ENNReal.ofReal K_chain * (ENNReal.ofReal K_leib_γ *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p chartPushedγV Ωγ_target)) =
       ENNReal.ofReal K_total *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p chartPushedγV Ωγ_target := by
     rw [hKtotal_def]
     rw [ENNReal.ofReal_mul (mul_pos hK_leib_α_pos hK_chain_pos).le]
@@ -774,8 +734,7 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     ring
   exact h_K_eq ▸ le_refl _
 
-/-- A finite-`Finset` sum of `MemWkp k p` functions on an open set is also
-`MemWkp k p`. -/
+omit [FiniteDimensional ℝ E] [TopologicalSpace M] in
 theorem memWkp_finset_sum
     [NeZero (Module.finrank ℝ E)]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -810,8 +769,7 @@ theorem memWkp_finset_sum
       exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add
         (d := Module.finrank ℝ E) hp_one hΩ hf_δ_mem h_sumT_mem
 
-/-- Triangle inequality for `wkpNorm` over a finite indexed sum on the chart-α
-target. -/
+omit [IsManifold I ∞ M] in
 theorem wkpNorm_finset_sum_le_chartTarget
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -820,11 +778,11 @@ theorem wkpNorm_finset_sum_le_chartTarget
     (hf_mem : ∀ γ ∈ S,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p (f γ) (chartTargetEuclid (I := I) (M := M) α)) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p (fun y => ∑ γ ∈ S, f γ y)
       (chartTargetEuclid (I := I) (M := M) α) ≤
       ∑ γ ∈ S,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (f γ) (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -854,40 +812,34 @@ theorem wkpNorm_finset_sum_le_chartTarget
           (d := Module.finrank ℝ E) hp_one hΩ_open hf_γ_mem h_sumS_mem
       have h_ih := ih h_S_mem
       have h_RHS_eq : ∑ δ ∈ insert γ S,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p (f δ) Ω =
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p (f γ) Ω +
             ∑ δ ∈ S,
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) k p (f δ) Ω := by
         rw [Finset.sum_insert hγ]
       rw [h_RHS_eq]
-      have h_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      have h_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (f γ) Ω +
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p (fun y => ∑ δ ∈ S, f δ y) Ω ≤
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p (f γ) Ω +
             ∑ δ ∈ S,
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) k p (f δ) Ω := by
         exact add_le_add le_rfl h_ih
       exact h_triangle.trans h_step
 
-/-- **Headline**: For a closed Riemannian manifold `(M, g)`, a chart-atlas
-index `α : M`, an order `k : ℕ`, and an exponent `1 ≤ p < ∞`, there exists a
-positive constant `C` such that for every `v : M → ℝ` with
-`MemWkpChart g k p v`, the chart-α raw pushforward of
-`chartStrictCutoff α · v` is bounded in `W^{k,p}` on the chart-α Euclidean
-target by `C` times the chart-based `W^{k,p}` norm of `v`. -/
 theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
     ∃ C : ℝ, 0 < C ∧ ∀ {v : M → ℝ}, MemWkpChart (I := I) (M := M) g k p v →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x => chartStrictCutoff (I := I) (M := M) α x * v x))
@@ -915,14 +867,14 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
             (fun x => pou (I := I) (M := M) γ x *
               (chartStrictCutoff (I := I) (M := M) α x * v x))) ⊆
           chartTargetEuclid (I := I) (M := M) α ∧
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushedRaw (I := I) (M := M) α
             (fun x => pou (I := I) (M := M) γ x *
               (chartStrictCutoff (I := I) (M := M) α x * v x)))
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal Cγ *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)
@@ -938,14 +890,14 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
             (chartStrictCutoff (I := I) (M := M) α x * v x)))
         (chartTargetEuclid (I := I) (M := M) α) ∧
       HasCompactSupport _ ∧ tsupport _ ⊆ _ ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x => pou (I := I) (M := M) γ x *
             (chartStrictCutoff (I := I) (M := M) α x * v x)))
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal (Cγ γ) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)
@@ -999,14 +951,14 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
           (chartStrictCutoff (I := I) (M := M) α x * v x)) y) h_per_γ_mem
   refine h_triangle.trans ?_
   have h_bound_each : ∀ γ ∈ S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x => pou (I := I) (M := M) γ x *
             (chartStrictCutoff (I := I) (M := M) α x * v x)))
         Ωα_target ≤
       ENNReal.ofReal Cmax *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)
@@ -1017,7 +969,7 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
       ENNReal.ofReal_le_ofReal (hCmax_ge γ hγ)
     exact mul_le_mul_of_nonneg_right h_ofReal_le (zero_le _)
   have h_sum_bound : ∑ γ ∈ S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x => pou (I := I) (M := M) γ x *
@@ -1025,7 +977,7 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
         Ωα_target ≤
       ∑ γ ∈ S,
         ENNReal.ofReal Cmax *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)

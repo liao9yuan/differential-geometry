@@ -10,11 +10,11 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Scalar curvature heat interface
 
-Book-facing scalar curvature evolution predicates and heat-operator realization wrappers.
--/
+
+
+
+
 
 noncomputable section
 
@@ -43,8 +43,8 @@ def ScalarPreBianchiEvolutionEquationOn
       D.carrier
       (t : Real)
 
-/-- The contracted-Bianchi simplification used in MSM110 Chapter 6, Section 1:
-`2 ΔR - 2 Q = ΔR`. -/
+
+
 def ScalarContractedBianchiReductionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real) : Prop :=
@@ -53,8 +53,8 @@ def ScalarContractedBianchiReductionOn
         2 * contractedRicciHessian (t : Real) x =
       scalarLap (t : Real) x
 
-/-- Contracted second-Bianchi identity in the scalar-curvature calculation:
-the twice-contracted Ricci Hessian term is half the scalar Laplacian. -/
+
+
 def ScalarSecondDerivativeContractedBianchiOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real) : Prop :=
@@ -62,8 +62,8 @@ def ScalarSecondDerivativeContractedBianchiOn
     contractedRicciHessian (t : Real) x =
       (1 / 2 : Real) * scalarLap (t : Real) x
 
-/-- The scalar contracted-Bianchi identity supplies the algebraic reduction
-`2 ΔR - 2 Q = ΔR` used in MSM110 Chapter 6.1. -/
+
+
 theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real)
@@ -75,10 +75,10 @@ theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
   rw [hbianchi t x]
   ring
 
-/-- MSM110 Chapter 6, Section 1, equation `eq:scalar_curv_evolu`.
 
-The scalar curvature heat equation follows from the pre-Bianchi scalar
-evolution and the contracted-Bianchi reduction. -/
+
+
+
 theorem scalarEvolutionEquationOn_of_contractedBianchi
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
@@ -91,8 +91,8 @@ theorem scalarEvolutionEquationOn_of_contractedBianchi
   exact (hpre t x).congr_deriv (by
     rw [hbianchi t x])
 
-/-- Book-facing name for MSM110 Chapter 6, Section 1,
-`eq:scalar_curv_evolu`. -/
+
+
 theorem msm110_ch6_1_scalar_curvature_evolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
@@ -104,13 +104,13 @@ theorem msm110_ch6_1_scalar_curvature_evolution
   scalarEvolutionEquationOn_of_contractedBianchi
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
 
-/-- Intrinsic scalar-curvature evolution supplied by a smooth Ricci-flow
-solution package.
 
-This is the canonical equation-side version used by global applications: the
-scalar is `S.scalar`, the Laplacian is the intrinsic `laplacianAt` for any
-realized family agreeing with `S.family` at regular times, and the reaction term
-is the intrinsic Ricci norm squared. -/
+
+
+
+
+
+
 theorem scalarEvolOfSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -128,10 +128,10 @@ theorem scalarEvolOfSmooth
   intro t x
   exact hS.scalarEvolution G hmetric hconnection t x
 
-/-! ## Heat-operator realization interface -/
 
-/-- The scalar Laplacian realization needed to turn scalar evolution into the
-parabolic WMP inequality with zero drift. -/
+
+
+
 def ScalarLaplacianRealizesHeatOperatorOn
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap : Real -> M -> Real) : Prop :=

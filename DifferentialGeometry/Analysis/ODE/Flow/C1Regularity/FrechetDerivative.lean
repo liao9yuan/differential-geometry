@@ -1,31 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.VariationalSolutionOperator
 import Mathlib.Analysis.Calculus.MeanValue
 
-/-!
-# Fréchet differentiability of the flow in the initial condition
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, jointly `C^1` in
-`(t, x)`, and a local Picard–Lindelöf flow `Φ : E × ℝ → E` packaged by `IsLocalFlow`, this
-file establishes Fréchet differentiability of `x ↦ Φ ⟨x, t⟩` at the centre point `x₀`, with
-derivative equal to the variational linear map of the previous file.
-
-The argument is a Grönwall difference estimate.  Let
-
-* `α_h (s) := Φ ⟨x₀ + h, s⟩` be the orbit through `x₀ + h`;
-* `y_h (s)` the variational solution along the central orbit `Φ ⟨x₀, ·⟩` with initial value `h`;
-* `β_h (s) := Φ ⟨x₀, s⟩ + y_h (s)` the *linear prediction* of `α_h (s)`.
-
-Then `α_h` solves the ODE `α' = f(t, α)` exactly, while `β_h` solves it approximately with
-residual `‖β_h' - f(t, β_h)‖ ≤ ω(‖h‖) · ‖y_h‖`, where `ω(‖h‖) → 0` as `h → 0` by uniform
-continuity of the partial Fréchet derivative `(t, x) ↦ D_x f(t, x)` on a compact graph around
-the central orbit.  Both `α_h (t₀) = β_h (t₀) = x₀ + h`, so the initial distance is zero.
-Grönwall's inequality (`dist_le_of_approx_trajectories_ODE_of_mem`) on each half-interval
-`[t₀, t₀+T]` and `[t₀-T, t₀]` (via time reflection) then yields a residual bound that is
-`o(‖h‖)`, hence the Fréchet differentiability.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is *not*
-used.  No manifold or tensor file is imported.
--/
 
 noncomputable section
 
@@ -41,7 +16,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 
 section GronwallBoundEstimate
 
-/-- For `K > 0`, `ε ≥ 0`, `x ≥ 0`, `gronwallBound 0 K ε x ≤ ε · x · exp (K · x)`. -/
 lemma gronwallBound_zero_le {K ε x : ℝ} (hK : 0 < K) (hε : 0 ≤ ε) (hx : 0 ≤ x) :
     gronwallBound 0 K ε x ≤ ε * x * exp (K * x) := by
   have hKne : K ≠ 0 := ne_of_gt hK
@@ -79,10 +53,7 @@ section ResidualEstimate
 
 variable {f : ℝ → E → E}
 
-/-- Mean-value residual estimate: for `f t` `C^1` on a convex set `S`, the difference
-`f t (x + v) - f t x - A v` (with `A := fderiv ℝ (f t) x`) is bounded in norm by
-`C · ‖v‖`, provided the segment from `x` to `x + v` lies in `S` and the variation of
-`fderiv ℝ (f t)` against `A` is bounded by `C` on `S`. -/
+omit [CompleteSpace E] in
 lemma norm_residual_le_of_diffOn
     (t : ℝ) (x v : E) {S : Set E} (hS : Convex ℝ S)
     (hf_diff : ∀ z ∈ S, DifferentiableAt ℝ (f t) z)
@@ -106,10 +77,7 @@ section UniformPartial
 
 variable {f : ℝ → E → E}
 
-/-- Uniform-continuity-at-a-compact-set statement, packaged in metric terms.  We work
-without an explicit "tube" since in an infinite-dimensional Banach space closed balls need
-not be compact.  Instead we use the standard result that a continuous function is uniformly
-continuous *at* a compact subset. -/
+omit [CompleteSpace E] in
 lemma exists_uniform_partial_fderiv_of_contDiffOn_univ
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     {a b : ℝ} (α : ℝ → E) (hα : ContinuousOn α (Icc a b))
@@ -165,14 +133,7 @@ section MainTheorem
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 1200000 in
-/-- **The Fréchet derivative of the flow at the central initial condition.**
 
-Given a local flow `Φ` of a jointly `C^1` time-dependent vector field `f`, a uniform-interval
-`Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax` on which the operator norm of the linearization along
-the central orbit is bounded by `M` with `M · T < 1`, and `0 < r` so we have a closed ball of
-positive radius around `x₀` inside the flow's spatial domain, the partial map
-`x ↦ Φ ⟨x, t⟩` is Fréchet differentiable at `x₀` for every `t` in this uniform interval.
-Its derivative is the variational linear map. -/
 theorem hasFDerivAt_flow_at_initial_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

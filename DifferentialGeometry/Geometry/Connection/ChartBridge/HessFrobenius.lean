@@ -1,54 +1,11 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
-/-!
-# Bridge between the chart Hessian Frobenius square and the abstract-Hessian Frobenius
-square
-
-This file packages the identity between the chart-coordinate metric Frobenius norm
-squared `chartHessFrobeniusSq g f x = ∑_{ijkl} G^{ik}(x, x) G^{jl}(x, x) H_{ij}(x, x)
-H_{kl}(x, x)` (where `H = chartHessianTensor g x f` and `G^{ij} = chartInvGramMatrix
-g x x`) and the basis-naive Frobenius square `frobeniusSqFun (abstractHessianBilin g
-f) x = ∑_{ij} (abstractHessian g f x e_i e_j)²` of the abstract Hessian carrier.
-
-The chart-Frobenius `chartHessFrobeniusSq` is a basis-independent geometric quantity:
-it uses the inverse Gram matrix `G^{ij}(x, x)` to raise both index pairs of the Hessian
-matrix `H_{ij}` and contract. The basis-naive `frobeniusSqFun` instead computes the sum
-of squares of the matrix entries against the canonical model basis `Module.finBasis ℝ E`,
-without using the metric.
-
-The two quantities coincide pointwise at `x` precisely when the canonical chart at `x`,
-evaluated at `x` itself, is `g`-orthonormal — equivalently, when `chartInvGramMatrix g x
-x i j = δ^{ij}`. Under this orthonormality assumption, the chain `chartHessFrobeniusSq
-g f x = frobeniusSqFun (hessFun g f) x = frobeniusSqFun (abstractHessianBilin g f) x`
-links the chart Hessian to the abstract Hessian through the unconditional matrix identity
-`chartHessianMatrixIdentity_holds`.
-
-## Main theorems
-
-* `chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal` — the chart Hessian
-  metric Frobenius square equals the basis-naive Frobenius square of `hessFun g f`,
-  under the orthonormality hypothesis.
-* `chartHessFrobeniusSq_eq_metric_hessian_norm_sq` — the chart Hessian metric Frobenius
-  square equals the basis-naive Frobenius square of the abstract Hessian carrier
-  `abstractHessianBilin g f`, under the same orthonormality hypothesis.
-
-## Strategy
-
-Since the BochnerIdentity development that originally exposed
-`chartHessFrobeniusSq_eq_frobeniusSqFun_of_orthonormal` is presently unavailable, the
-orthonormality form of the chart-Frobenius / basis-Frobenius identification is reproved
-locally in this file. The proof unfolds both sides into their explicit chart-coordinate
-sums, reduces the inverse Gram matrix to Kronecker deltas via the orthonormality
-hypothesis, and collapses the two redundant indices in the standard way.
-
-The bridge to the abstract Hessian carrier then follows from the unconditional matrix
-identity `chartHessianMatrixIdentity_holds`, packaged on the Frobenius norm by
-`frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity`.
--/
 
 noncomputable section
 
-open Bundle Manifold Set FiberBundle
+open Bundle Manifold Set FiberBundle Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
@@ -56,7 +13,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -64,11 +21,151 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Tensor.Coordinates
 
-/-- **Chart Frobenius equals basis-naive Frobenius of `hessFun` under orthonormality.**
-Conditional on the chart at `x` being `g`-orthonormal at `x` (i.e. the inverse Gram
-matrix at `x` is the identity), the chart Hessian metric Frobenius square equals the
-basis-naive Frobenius square of `hessFun g f` at `x`. -/
+
+noncomputable def leviHessSec
+    (g : SmoothRiemannianMetric I M)
+    (f : M -> Real) (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    TwoTensorSection (I := I) (M := M) :=
+  hessianSec (I := I)
+    (leviCivitaConnectionOfMetric (I := I) g)
+    (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g)
+    f hf
+
+
+
+private theorem hessSec_abs
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
+    (x : M) (v w : TangentSpace I x) :
+    leviHessSec (I := I) g f hf x (vec2 (I := I) v w) =
+      abstractHessian (I := I) g f x v w := by
+  classical
+  change hessianSec (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g)
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) g)
+      f hf x (vec2 (I := I) v w) = _
+  let cov := leviCivitaConnectionOfMetric (I := I) g
+  let hcov :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g
+  obtain ⟨X, hX⟩ :=
+    ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x v
+  obtain ⟨Y, hY⟩ :=
+    ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x w
+  have hsec := (hessianSec_nabla (I := I) cov hcov f hf) x X (Y x)
+  have heval := nabla0SFun_one_eval_smooth_slots
+    (I := I) cov X Y (duSec (I := I) f hf) x
+  have htheta : MDiffAtCotangent (extDerivFun (I := I) f) x :=
+    ((cotangentCov_extDerivFun_smooth (I := I) hf) x).mdifferentiableAt (by simp)
+  have hYmd : MDiffAt (T% (fun p : M => Y p)) x :=
+    Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hpair := cotangentCov_dualPairing cov htheta hYmd (X x)
+  have hdufun :
+      (fun p : M => duSec (I := I) f hf p (fun _ : Fin 1 => Y p)) =
+        fun p : M => extDerivFun (I := I) f p (Y p) := by
+    funext p
+    rw [duSec_apply]
+    exact differential1FormFun_apply_eq_extDerivFun (I := I) f p (Y p)
+  rw [← hX, ← hY]
+  rw [hsec]
+  change
+    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 cov X (duSec (I := I) f hf) x) (fun _ : Fin 1 => Y x) = _
+  rw [heval, hdufun, duSec_apply,
+    differential1FormFun_apply_eq_extDerivFun]
+  change
+    extDerivFun (I := I) (fun p : M => extDerivFun (I := I) f p (Y p)) x (X x) -
+        extDerivFun (I := I) f x ((cov (fun p : M => Y p) x) (X x)) =
+      ((cotangentCov cov).toFun (extDerivFun (I := I) f) x (X x)) (Y x)
+  linarith
+
+
+
+private theorem hessSec_chart_comp
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
+    (x : M) (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
+    (i j : Fin (Module.finrank Real E)) :
+    leviHessSec (I := I) g f hf x
+        (fun a : Fin 2 => if a = 0 then
+          chartBasisFamily (I := I) x hx i else
+            chartBasisFamily (I := I) x hx j) =
+      chartHessianTensor (I := I) g x f i j x := by
+  have hslots :
+      (fun a : Fin 2 => if a = 0 then
+        chartBasisFamily (I := I) x hx i else
+          chartBasisFamily (I := I) x hx j) =
+        vec2 (I := I) (chartBasisFamily (I := I) x hx i)
+          (chartBasisFamily (I := I) x hx j) := by
+    funext a
+    fin_cases a <;> simp [vec2]
+  rw [hslots, hessSec_abs (I := I) g hf]
+  rw [show chartBasisFamily (I := I) x hx i = (chartModelBasis E) i by
+      simp only [chartBasisFamily_apply, chartBasisVecFiber_self],
+    show chartBasisFamily (I := I) x hx j = (chartModelBasis E) j by
+      simp only [chartBasisFamily_apply, chartBasisVecFiber_self]]
+  exact chartHessianMatrixIdentity_holds (I := I) g hf x i j
+
+omit [NeZero (Module.finrank Real E)] in
+
+private theorem hessSec_norm_coord
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
+    (x : M) (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
+    normSq0S (I := I) g x 2 (leviHessSec (I := I) g f hf x) =
+      ∑ i : Fin (Module.finrank Real E),
+      ∑ j : Fin (Module.finrank Real E),
+      ∑ k : Fin (Module.finrank Real E),
+      ∑ l : Fin (Module.finrank Real E),
+        chartInvGramMatrix (I := I) g x x i k *
+          chartInvGramMatrix (I := I) g x x j l *
+            leviHessSec (I := I) g f hf x
+              (fun a : Fin 2 => if a = 0 then
+                chartBasisFamily (I := I) x hx i else
+                  chartBasisFamily (I := I) x hx j) *
+            leviHessSec (I := I) g f hf x
+              (fun a : Fin 2 => if a = 0 then
+                chartBasisFamily (I := I) x hx k else
+                  chartBasisFamily (I := I) x hx l) := by
+  have hinv : MetricInverseInBasis (I := I) g x
+      (chartBasisFamily (I := I) x hx)
+      (fun i j => chartInvGramMatrix (I := I) g x x i j) := by
+    intro i j
+    refine ⟨?_, ?_⟩
+    · have hmul := chartInvGramMatrix_mul_chartGramMatrix (I := I) g x hx
+      have hentry :
+          (chartInvGramMatrix (I := I) g x x *
+            chartGramMatrix (I := I) g x x) i j =
+              (1 : Matrix _ _ Real) i j := by
+        rw [hmul]
+      rw [Matrix.mul_apply, Matrix.one_apply] at hentry
+      rw [← hentry]
+      exact Finset.sum_congr rfl fun k _ => by
+        rw [chartGramMatrix_apply, chartBasisFamily_apply, chartBasisFamily_apply]
+    · have hmul := chartGramMatrix_mul_chartInvGramMatrix (I := I) g x hx
+      have hentry :
+          (chartGramMatrix (I := I) g x x *
+            chartInvGramMatrix (I := I) g x x) i j =
+              (1 : Matrix _ _ Real) i j := by
+        rw [hmul]
+      rw [Matrix.mul_apply, Matrix.one_apply] at hentry
+      rw [← hentry]
+      exact Finset.sum_congr rfl fun k _ => by
+        rw [chartGramMatrix_apply, chartBasisFamily_apply, chartBasisFamily_apply]
+  exact normSq0S_two_eq_coord (I := I) g x
+    (chartBasisFamily (I := I) x hx)
+    (fun i j => chartInvGramMatrix (I := I) g x x i j)
+    hinv (leviHessSec (I := I) g f hf x)
+
+
 theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -143,15 +240,6 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-/-- **Chart Hessian Frobenius square equals abstract Hessian Frobenius square — under
-orthonormality.** Conditional on the chart at `x` being `g`-orthonormal at `x`, the
-chart Hessian metric Frobenius square equals the basis-naive Frobenius square of the
-abstract Hessian carrier `abstractHessianBilin g f` at `x`.
-
-The proof chains: (1) Step 1 above bridges the chart Frobenius to the basis-naive
-Frobenius of `hessFun g f`; (2) the unconditional matrix identity (packaged on the
-Frobenius norm by `frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity`)
-bridges to `abstractHessianBilin g f`. -/
 theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
@@ -171,6 +259,29 @@ theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity
       (I := I) g f x hM
   exact h1.trans h2
+
+
+
+theorem hessSec_normSq [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
+    normSq0S (I := I) g x 2 (leviHessSec (I := I) g f hf x) =
+      chartHessFrobeniusSq (I := I) g f x := by
+  classical
+  let hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    mem_baseSet_trivializationAt E (TangentSpace I) x
+  rw [hessSec_norm_coord (I := I) g hf x hx]
+  rw [chartHessFrobeniusSq_def]
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  apply Finset.sum_congr rfl
+  intro k _
+  apply Finset.sum_congr rfl
+  intro l _
+  rw [hessSec_chart_comp (I := I) g hf x hx i j,
+    hessSec_chart_comp (I := I) g hf x hx k l]
 
 end Connection
 end Integral

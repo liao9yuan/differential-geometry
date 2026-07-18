@@ -1,51 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.WeightedCoeffMulENormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 
-/-!
-# Explicit-norm `eLpNorm` bounds for two lower-order eigenvector chart limits
-
-The chart-Euclidean right-hand side of the connection-Laplacian eigenvector's
-weak-solution assembly is, summand by summand, a finite sum of
-`C^∞`-coefficient-weighted lower-order limit objects. Two of those objects are
-
-* `covLowerOrderRotationValueCoeffLimit g r s i α P₀` — a four-fold
-  sum of the kernel-cut `C^∞` factor `valuePartialFactor` against the chart-partial
-  atom `partialLpLimit`, plus a five-fold sum of the kernel-cut
-  `C^∞` factor `valueComponentFactor` against the chart-component atom
-  `componentLpLimit`;
-* `weightedGradCoeffDivLimit g r s i α P₀ l` — a four-fold sum of
-  the kernel-cut chart-Euclidean partial of the `C^∞` factor `weightedGradFactor`
-  against `componentLpLimit`, plus a four-fold sum of the kernel-cut
-  `weightedGradFactor` against `partialLpLimit`.
-
-This file records, for each of these two objects, an explicit-constant
-`eLpNorm` bound for the chart-pulled weighted measure: the `eLpNorm` of the
-limit object is bounded by a nonnegative constant times the sum, over the
-*distinct* chart-component / chart-partial atoms, of the atoms' `eLpNorm`.
-
-The proof is the same for both objects. Each summand carries an
-`indicator (chartPouKernel α)` cut of a `C^∞`-on-the-chart-target factor; the
-accompanying atom vanishes almost everywhere — for the weighted measure — off
-the compact partition-of-unity kernel `chartPouKernel α`, so the indicator-cut
-summand agrees almost everywhere with the *uncut* `C^∞`-factor product. The
-explicit-norm bound `eLpNorm_weighted_contDiffOn_mul_le` of the foundational
-file then controls that product's `eLpNorm` by an explicit constant — the
-`C^∞` factor's sup over the compact kernel — times the atom's `eLpNorm`. The
-triangle inequality `eLpNorm_sum_le` over the nested finite sums and the two
-groups assembles the per-summand bounds; every summation multiplicity and every
-per-coefficient sup constant is folded into the single headline constant.
-
-## Main results
-
-* `eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional`
-* `eLpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional`
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -82,12 +37,6 @@ section LowerOrderENormBounds
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-/-- For a `C^∞`-on-the-chart-target coefficient `c` and a function `G` that is
-weighted-`MemLp` and vanishes almost everywhere — for the chart-pulled weighted
-measure restricted to the chart target — off the compact partition-of-unity
-kernel, the indicator-cut summand `(chartPouKernel α).indicator c · G` is
-weighted-`MemLp` and its `eLpNorm` is bounded by an explicit nonnegative
-constant times the `eLpNorm` of `G`. -/
 private lemma eLpNorm_indicatorFactor_mul_atom_le
     (g : SmoothRiemannianMetric I M) (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -135,8 +84,7 @@ private lemma eLpNorm_indicatorFactor_mul_atom_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Triangle inequality for `eLpNorm` over a finite sum, with each summand
-weighted-`MemLp`. -/
+
 private lemma eLpNorm_finsetSum_le
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     (s : Finset ι) (F : ι → EuclN → ℝ)
@@ -158,11 +106,7 @@ private lemma eLpNorm_finsetSum_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A finite indexed family of summands, each weighted-`MemLp` and each
-`eLpNorm`-bounded by `ENNReal.ofReal C` times the `eLpNorm` of an atom selected
-by a projection `proj`, has its summed `eLpNorm` bounded by `ENNReal.ofReal` of
-an explicit constant times the sum, over the distinct atoms, of the atoms'
-`eLpNorm`. -/
+
 private lemma eLpNorm_finsetSum_le_const_mul_atomSum
     {ι κ : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     (s : Finset ι) (t : Finset κ) (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ)
@@ -243,12 +187,6 @@ section LowerOrderENormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
-/-- A constant-uniform form of the per-summand bound: for a `C^∞`-on-the-chart-
-target coefficient `c`, a single nonnegative constant `C` controls the `eLpNorm`
-of the indicator-cut product `(chartPouKernel α).indicator c · G` for *every*
-weighted-`MemLp` function `G` that vanishes almost everywhere (weighted) off the
-compact partition-of-unity kernel. The constant is the coefficient's sup over
-the kernel, independent of `G`. -/
 private lemma eLpNorm_indicatorFactor_mul_atom_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :
@@ -300,14 +238,6 @@ section LowerOrderENormBoundsUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
-/-- **Chart-locality-free weighted off-kernel vanishing of the chart-partial atom.**
-The chart-partial atom `partialLpLimit g r s i α P k` vanishes
-almost everywhere — for the chart-pulled weighted measure restricted to the chart
-target — off the compact partition-of-unity kernel `chartPouKernel α`. The atom is
-`i.fst.val` times the chart-locality-free weak chart partial
-`eigenvectorChartWeakPartial`, which is a.e. zero on the open
-complement of the kernel inside the chart target
-(`eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel`). -/
 lemma partialLpLimit_ae_zero_off_chartPouKernel_weighted
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
@@ -366,13 +296,6 @@ lemma partialLpLimit_ae_zero_off_chartPouKernel_weighted
   filter_upwards [h_smul_w, h_weak_w] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-/-- **Chart-locality-free weighted-`L²` membership of the chart-partial atom.**
-The chart-partial atom `partialLpLimit g r s i α P k` is `MemLp 2` for the chart-pulled
-weighted measure restricted to the chart target. It is an
-`Lp ℝ 2 (chartL2Measure α)` element (hence `MemLp 2` of the plain restricted
-volume) that vanishes almost everywhere off the compact partition-of-unity kernel,
-so `memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact`
-applies. -/
 lemma partialLpLimit_memLp_weighted
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
@@ -428,18 +351,6 @@ lemma partialLpLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     h_atom_zero h_plain
 
-/-- **Chart-locality-free uniform-constant `eLpNorm` bound for the lower-order
-rotation value coefficient limit.** Chart-locality-free twin of
-`eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform`: a single nonnegative
-constant `C` serves every eigenbasis index `i`, with every chart-partial /
-chart-component atom re-keyed onto the intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-through the `_unconditional` limit object
-`covLowerOrderRotationValueCoeffLimit`. The per-`i` bound's constant
-is the larger of two finite sums of the per-summand sup constants of the `i`-free
-`C^∞` factors `valuePartialFactor` / `valueComponentFactor` over the compact
-partition-of-unity kernel; that constant does not depend on `i` and is hoisted
-before the `∀ i`. -/
 theorem eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -769,18 +680,6 @@ theorem eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                   μw)) := by
       rw [mul_add]
 
-/-- **Chart-locality-free uniform-constant `eLpNorm` bound for the
-chart-density-weighted lower-order gradient divergence coefficient limit.**
-Chart-locality-free twin of `eLpNorm_weightedGradCoeffDivLimit_le_uniform`: a
-single nonnegative constant `C` serves every eigenbasis index `i`, with every
-chart-component / chart-partial atom re-keyed onto the intrinsic-compactness
-eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`,
-through the `_unconditional` limit object `weightedGradCoeffDivLimit`.
-The per-`i` bound's constant is the larger of two finite sums of the per-summand
-sup constants of the `i`-free `C^∞` factor `weightedGradFactor` (or its
-chart-Euclidean partial) over the compact partition-of-unity kernel; that constant
-does not depend on `i` and is hoisted before the `∀ i`. -/
 theorem eLpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :

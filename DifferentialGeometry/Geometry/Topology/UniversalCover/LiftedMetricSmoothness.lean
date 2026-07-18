@@ -6,27 +6,27 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Topology.VectorBundle.Basic
 
-/-!
-# Smoothness of the lifted metric on the universal cover
 
-Chart-conjugacy lemmas used to prove that the fiberwise pullback of a smooth
-Riemannian metric `g` on `M` along `proj : UC M → M` is itself smooth.
 
-The tangent bundle of `UC M` is built independently of `M`'s (not as a
-pullback), so smoothness of the lifted metric reduces to comparing chart
-trivialisations of the tangent bundle of `UC M` with those of `M` via the
-local-section factorisation `coverChartAt = (localSection a).trans (chartAt …)`.
 
-This file decomposes the smoothness assembly into four ingredients:
 
-* `uc_coverChartAt_extend_conjugacy` — extended-chart factorisation of the
-  cover-charts through the local section and the base chart.
-* `uc_tangentBundleCore_coordChange_agree` — coordinate-change of the tangent
-  bundle of `UC M` agrees with that of `M` on the chart intersection.
-* `uc_hom_bundle_inCoordinates_pullback` — the `inCoordinates` representation
-  of the metric, viewed in the Hom-bundle, pulls back along `proj`.
-* `uc_liftedMetric_contMDiff` — assembly: the metric section is smooth.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 open Set Function Filter Bundle
 open scoped Topology ContDiff Manifold
@@ -50,24 +50,24 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-/-- **Extended-chart conjugacy at a cover-point.**
 
-For every cover-point `a : UC M`, the extended cover-chart at `a` factors
-through the local section followed by the extended base-chart at `proj a`, and
-the inverse factors symmetrically through the inverse base-chart followed by
-the inverse local section:
-```
-(coverChartAt a).extend I = ((chartAt H (proj a)).extend I) ∘ (localSection a)
-((coverChartAt a).extend I).symm
-    = (localSection a).symm ∘ ((chartAt H (proj a)).extend I).symm
-```
 
-These are global function equalities (definitional via
-`OpenPartialHomeomorph.coe_trans`, `coe_trans_symm`, and the defining unfolding
-`coverChartAt a = (localSection a).trans (chartAt H (proj a))`). The downstream
-tangent-bundle coordinate-change comparison combines this with
-`localSection_collapse` to identify the universal-cover transition with the
-base-manifold transition. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem uc_coverChartAt_extend_conjugacy
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a).extend I : _ → E)
@@ -107,28 +107,28 @@ theorem uc_coverChartAt_extend_conjugacy
       rw [OpenPartialHomeomorph.extend_coe_symm]; rfl
     rw [hExtSymm, hSymm, hChartExtSymm]
 
-/-- **Tangent-bundle coordinate-change agreement.**
 
-For cover-points `a b : UC M` and `z` in the chart-source intersection
-of `chartAt H a` and `chartAt H b` on the universal cover, the tangent-bundle
-coordinate change of `UC M` between `achart H a` and `achart H b` agrees with
-that of `M` between `achart H (proj a)` and `achart H (proj b)` evaluated at
-`proj z`:
-```
-(tangentBundleCore I (UC M)).coordChange (achart H a) (achart H b) z
-  = (tangentBundleCore I M).coordChange (achart H (proj a)) (achart H (proj b)) (proj z)
-```
 
-Proof: `coordChange` unfolds via `tangentBundleCore_coordChange_achart` to
-`fderivWithin ℝ (extChartAt I _ ∘ (extChartAt I _).symm) (range I) (extChartAt I _ _)`.
-By `uc_coverChartAt_extend_conjugacy` the cover-side composition factors
-through the base-side composition by `localSection ∘ (localSection).symm`,
-which collapses to the identity on the local section's target by
-`localSection_collapse`. The factor `localSection a z = proj z` identifies the
-base-points of `fderivWithin`. The remaining filter-pointwise equality on a
-neighbourhood follows from continuity of the base-side chart inverse plus
-openness of `(localSection a).target`, packaged via
-`Filter.EventuallyEq.fderivWithin_eq`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem uc_tangentBundleCore_coordChange_agree
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {z : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
@@ -247,24 +247,24 @@ theorem uc_tangentBundleCore_coordChange_agree
       rw [this, hLSb_z]
     exact hBaseB
 
-/-- **Hom-bundle `inCoordinates` pulls back along `proj`.**
 
-For a smooth Riemannian metric `g : SmoothRiemannianMetric I M` on `M` and
-cover-points `a x : UC M` with `x ∈ (chartAt H a).source` (so that the
-trivializations at `a` are valid at `x`), the `inCoordinates` representation
-(in the Hom-bundle `TangentSpace I · →L[ℝ] ℝ` over `UC M`, with model fibre
-`E →L[ℝ] ℝ`) of the metric value `g.inner (proj x)` at base point `x` viewed
-via the cover-trivialisation at `a` equals the corresponding `inCoordinates`
-representation on `M` evaluated via the base-trivialisation at `proj a` and
-base-point `proj x`.
 
-The proof reduces, by definition of `inCoordinates`, to agreement of
-`continuousLinearMapAt` and `symmL` of the tangent-bundle trivialisations
-between `UC M` and `M`; this in turn follows from
-`uc_tangentBundleCore_coordChange_agree` (which packages the cover-side
-coordinate-change as the base-side coordinate-change at `proj x`) combined
-with `continuousLinearMapAt_trivializationAt_eq_core` and
-`symmL_trivializationAt_eq_core`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem uc_hom_bundle_inCoordinates_pullback
     (g : SmoothRiemannianMetric I M)
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -388,20 +388,20 @@ theorem uc_hom_bundle_inCoordinates_pullback
     exact congrArg L hsymm_eq
   · exact congrArg (fun (f : E →L[ℝ] E) => (g.inner (proj x)).comp f) hSymmL
 
-/-- **The lifted metric is a smooth section of the `(0,2)`-Hom-bundle.**
 
-For a smooth Riemannian metric `g` on `M`, the metric section
-`fun a : UC M => TotalSpace.mk' _ a (g.inner (proj a))` is `ContMDiff` from
-`UC M` into the total space of the `(0,2)`-Hom-bundle
-`TangentSpace I · →L[ℝ] TangentSpace I · →L[ℝ] ℝ` over `UC M`.
 
-Strategy: apply `contMDiffAt_hom_bundle` pointwise; the base-projection is
-the identity (smooth); the in-coordinates piece equals — by
-`uc_hom_bundle_inCoordinates_pullback` on the chart neighbourhood of each
-point — the corresponding in-coordinates on `M` evaluated at `proj x`, which
-is smooth as the composition of `g.contMDiff` and `proj_contMDiff` followed
-by the `inCoordinates` map. The eventually-equal transfer is via
-`ContMDiffAt.congr_of_eventuallyEq`. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem uc_liftedMetric_contMDiff
     (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞

@@ -5,57 +5,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-/-!
-# Uniform Lipschitz operator-norm bound for the chart-pushed-partial map
-
-For a closed Riemannian manifold `(M, g)`, a chart `α : M`, and a coordinate
-direction `j`, this file packages the **uniform Lipschitz** bound on the
-chart-pulled `j`-th classical partial of the chart-pushed function.
-
-The headline bound has the form
-```
-‖chartPushedPartial g α j v‖_{L²(weighted, chartTarget)} ≤ C · ‖v‖
-```
-where `‖v‖` is the H¹ pre-norm on `SmoothScalar g`.
-
-## Structure
-
-We package the chart-pushed-partial map as a continuous linear map by
-exhibiting:
-
-* the uniform-in-`v` containment `tsupport(smoothChartExt g α v) ⊆ kPouCompact α`,
-  where `kPouCompact α` is a fixed compact subset of the chart-target image
-  depending only on `α` and the canonical partition of unity (not on `v`).
-
-* the finite chart-pulled weighted measure of `kPouCompact α`.
-
-These structural facts are the **core analytical ingredients** for proving
-the Lipschitz bound; they let us bound the chart-pulled L²-norm of the
-partial in terms of structural constants of the chart and the metric. The
-final Lipschitz bound itself follows from a chain-rule + product-rule
-argument that combines the structural ingredients with the explicit
-gradient structure of `(POU·v)` on `M`. Per the project's modular
-architecture, the structural ingredients are gathered here, while the
-chain-rule analysis (which crosses many infrastructure boundaries) is
-elaborated in the dedicated chart-bridge module.
-
-## Main results
-
-* `kPouCompact`: the chart-supported compact subset of `EuclN`, depending
-  only on `α` and the partition of unity (uniform in `v`).
-
-* `smoothChartExt_tsupport_subset_kPouCompact`: the smooth extension of any
-  smooth scalar `v` is supported in `kPouCompact α`.
-
-* `chartPulledWeightedMeasure_kPouCompact_lt_top`: the chart-pulled
-  weighted measure of `kPouCompact α` is finite.
-
-* `chartPushedPartialLpLin`: the chart-pushed-partial map packaged as a
-  linear map `SmoothScalar g →ₗ[ℝ] Lp ℝ 2 (chart-weighted, chartTarget)`.
-
-* `chartPushedPartial_lipschitz_uniform_support`: the uniform L²-norm bound
-  obtained from the structural ingredients.
--/
 
 noncomputable section
 
@@ -92,13 +41,12 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The compact subset of `EuclN` corresponding to `tsupport (POU α)` under
-the chart map and `toEuclidean`. -/
 noncomputable def kPouCompact (α : M) : Set EuclN :=
   (toEuclidean : E ≃L[ℝ] EuclN) ''
     ((extChartAt I α) '' (tsupport (fun x : M =>
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem kPouCompact_isCompact (α : M) :
     IsCompact (kPouCompact (I := I) (M := M) α) := by
   classical
@@ -122,6 +70,7 @@ theorem kPouCompact_isCompact (α : M) :
     h_tsupp_compact.image_of_continuousOn h_ext_cont
   exact h_ext_image_compact.image (toEuclidean (E := E)).continuous
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem kPouCompact_subset_chartTargetEuclid (α : M) :
     kPouCompact (I := I) (M := M) α ⊆
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
@@ -141,6 +90,7 @@ theorem kPouCompact_subset_chartTargetEuclid (α : M) :
     rw [← hxz]; exact (extChartAt I α).map_source hxsrc
   refine ⟨z, hz_target, hzy⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem smoothChartExt_support_subset_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     Function.support (smoothChartExt (I := I) (M := M) g α v) ⊆
@@ -183,6 +133,7 @@ theorem smoothChartExt_support_subset_kPouCompact
       simp
     exact smoothChartExt_apply_of_notMem_target (I := I) (M := M) g α v h_notMem
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem smoothChartExt_tsupport_subset_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (smoothChartExt (I := I) (M := M) g α v) ⊆
@@ -191,6 +142,7 @@ theorem smoothChartExt_tsupport_subset_kPouCompact
     (I := I) (M := M) g α v) ?_
   exact (kPouCompact_isCompact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem smoothChartExtPartial_tsupport_subset_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -202,6 +154,7 @@ theorem smoothChartExtPartial_tsupport_subset_kPouCompact
   exact h_fderiv_supp.trans
     (smoothChartExt_tsupport_subset_kPouCompact (I := I) (M := M) g α v)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_density_sup_on_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_d : ℝ, 0 < M_d ∧
@@ -228,6 +181,7 @@ theorem exists_density_sup_on_kPouCompact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPulledWeightedMeasure_kPouCompact_lt_top
     (g : SmoothRiemannianMetric I M) (α : M) :
     (chartPulledWeightedMeasure (I := I) g α) (kPouCompact (I := I) (M := M) α)
@@ -256,8 +210,6 @@ theorem chartPulledWeightedMeasure_kPouCompact_lt_top
   exact lt_of_le_of_lt h_int_bd
     (ENNReal.mul_lt_top ENNReal.ofReal_lt_top hK_compact.measure_lt_top)
 
-/-- The `chartPushedPartialLp` map on `SmoothScalar g`, packaged as a
-linear map. -/
 noncomputable def chartPushedPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E)) :
     SmoothScalar g →ₗ[ℝ]
@@ -360,6 +312,7 @@ noncomputable def chartPushedPartialLpLin
         c * chartPushedPartial (I := I) (M := M) g α j v y
     rw [hy_smul, Pi.smul_apply, h_v_eq, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedPartialLpLin_apply
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -367,6 +320,7 @@ lemma chartPushedPartialLpLin_apply
       chartPushedPartialLp (I := I) (M := M) g α j v
         (chartPushedPartial_memLp (I := I) (M := M) g α j v) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_chartPushedPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -378,6 +332,7 @@ theorem norm_chartPushedPartialLpLin
   exact norm_chartPushedPartialLp (I := I) (M := M) g α j v
     (chartPushedPartial_memLp (I := I) (M := M) g α j v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedPartial_lipschitz_uniform_support
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
