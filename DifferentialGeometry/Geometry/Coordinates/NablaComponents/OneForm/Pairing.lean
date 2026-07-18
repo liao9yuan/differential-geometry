@@ -1,10 +1,10 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Basic
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -78,12 +78,12 @@ theorem oneForm_pair_coordFrame_eventually
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [hupdate]
 
-/-- Product rule for the scalar pairing `p ↦ α_p (Z_p)` in the coordinate
-frame.  This is the previously external `hpair` input for the moving-slot
-one-form formula.  The remaining hypotheses only say that the coordinate
-coefficient functions and fixed-slot tensor components are differentiable at
-the base point, and identify `dz` with the directional derivatives of the
-coefficients of `Z`. -/
+
+
+
+
+
+
 theorem oneForm_pair_coordFrame_product_rule
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)

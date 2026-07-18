@@ -622,6 +622,24 @@ theorem exists_iteratedCovGrad_rawConnLap_covDivergence_commutator_l2_le
     exact Finset.range_subset_range.mpr (by omega)
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hterm) (hcc_nn p)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
+set_option backward.isDefEq.respectTransparency false in
+
+theorem covDiv_appCc (g₀ : SmoothRiemannianMetric I M)
+    (Φ : SmoothCcTensor g₀ 1 1) (W : SmoothCcTensor g₀ 0 1) :
+    covDivergence (I := I) (M := M) g₀ 0
+        (operatorFieldApply (I := I) (M := M) g₀ 1 1 Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ 1 0
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 1 2 0
+            (cometricDoubleTraceField (I := I) g₀ 0)
+            (covGrad (I := I) (M := M) g₀ 1 1 Φ)) W +
+        operatorFieldApply (I := I) (M := M) g₀ 2 0
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 0
+            (cometricDoubleTraceField (I := I) g₀ 0)
+            (slotExtend (I := I) (M := M) g₀ 1 1 Φ))
+          (covGrad (I := I) (M := M) g₀ 0 1 W) := by
+  rw [covDivergence_eq_cometricDoubleTrace_apply_covGrad, covGrad_operatorFieldApply_eq, appCc_add_right]
+  rw [appCc_assoc, appCc_assoc]
+
 
 end Connection
 end Integral

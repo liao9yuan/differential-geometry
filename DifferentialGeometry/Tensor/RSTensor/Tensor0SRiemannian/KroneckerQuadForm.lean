@@ -3,23 +3,23 @@ import Mathlib.Analysis.Matrix.Spectrum
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.PosDef
 
-/-!
-# Kronecker-power quadratic-form bound (brick 2 of `ric_bound`)
 
-Pure linear algebra.  The endpoint is `quadForm_id_le_pow`: for any index function
-family `c : (Fin s → Idx) → ℝ` and a symmetric `Q : Idx → Idx → ℝ` bounded below
-by `(1/C)` (as a quadratic form), the raw `ℓ²` sum `∑_I c_I²` is bounded by `C^s`
-times the `Q`-contracted `s`-fold form `∑_{I,J} (∏_a Q (I a) (J a)) c_I c_J`.
 
-This is the non-diagonal generalization of
-`coordInner0S_diagonal_le_pow_identity`; `coordInner0S` unfolds to exactly the
-`∑_{I,J} (∏ Q) c c` form, so this lemma converts an intrinsic `gRef`-norm into the
-raw frame-component `ℓ²` once the frame Gram's inverse-eigenvalues are bounded
-below.
 
-The crux is the PSD-pairing inequality `sum_posSemidef_mul_posSemidef_nonneg`,
-proved by the spectral decomposition of one factor.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.HCGCompactness
 
@@ -28,8 +28,8 @@ open Matrix
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- Spectral entry formula for a real Hermitian matrix:
-`A i j = ∑ k, U i k * λ k * U j k`. -/
+
+
 private lemma isHermitian_entry
     {A : Matrix n n ℝ} (hA : A.IsHermitian) (i j : n) :
     A i j = ∑ k : n,
@@ -64,8 +64,8 @@ private lemma isHermitian_entry
     exact absurd (Finset.mem_univ k) hk
 
 omit [DecidableEq n] in
-/-- **PSD-pairing.** For positive semi-definite real matrices `M` and `G`, the
-contracted sum `∑ i j, M i j * G i j` is non-negative. -/
+
+
 theorem sum_posSemidef_mul_posSemidef_nonneg
     {M G : Matrix n n ℝ} (hM : M.PosSemidef) (hG : G.PosSemidef) :
     0 ≤ ∑ i, ∑ j, M i j * G i j := by
@@ -106,14 +106,14 @@ theorem sum_posSemidef_mul_posSemidef_nonneg
   rw [hquad]
   exact hG.dotProduct_mulVec_nonneg _
 
-/-! ## The Kronecker-power quadratic-form bound -/
+
 
 section KroneckerPow
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 omit [DecidableEq Idx] in
-/-- Reindex a sum over `(Fin (s+1) → Idx)` by head and tail. -/
+
 private lemma sum_fin_succ_fun {R : Type*} [AddCommMonoid R] (s : ℕ)
     (f : (Fin (s + 1) → Idx) → R) :
     (∑ I : Fin (s + 1) → Idx, f I)
@@ -128,7 +128,7 @@ private lemma sum_fin_succ_fun {R : Type*} [AddCommMonoid R] (s : ℕ)
         rfl
 
 omit [DecidableEq Idx] in
-/-- Double version of `sum_fin_succ_fun`. -/
+
 private lemma sum_fin_succ_fun₂ {R : Type*} [AddCommMonoid R] (s : ℕ)
     (f : (Fin (s + 1) → Idx) → (Fin (s + 1) → Idx) → R) :
     (∑ I : Fin (s + 1) → Idx, ∑ J : Fin (s + 1) → Idx, f I J)
@@ -139,7 +139,7 @@ private lemma sum_fin_succ_fun₂ {R : Type*} [AddCommMonoid R] (s : ℕ)
     sum_fin_succ_fun (s := s) (f := fun J => f (Fin.cons k I) J)
 
 omit [Fintype Idx] [DecidableEq Idx] in
-/-- Product split after writing tuples as `Fin.cons head tail`. -/
+
 private lemma prod_fin_succ_Q (s : ℕ) (Q : Idx → Idx → ℝ)
     (k l : Idx) (I J : Fin s → Idx) :
     (∏ a : Fin (s + 1),
@@ -149,7 +149,7 @@ private lemma prod_fin_succ_Q (s : ℕ) (Q : Idx → Idx → ℝ)
   rw [Fin.prod_univ_succ]
   simp
 
-/-- Diagonal contraction of the scaled identity kernel. -/
+
 private lemma diag_pairing {ι : Type*} [Fintype ι] [DecidableEq ι]
     (α : ℝ) (G : ι → ι → ℝ) :
     (∑ i : ι, ∑ j : ι, (α * (if i = j then (1 : ℝ) else 0)) * G i j)
@@ -163,7 +163,7 @@ private lemma diag_pairing {ι : Type*} [Fintype ι] [DecidableEq ι]
   · intro h
     exact absurd (Finset.mem_univ i) h
 
-/-- A symmetric real kernel with nonnegative quadratic form is PSD. -/
+
 private lemma matrix_posSemidef_of_quad_nonneg {ι : Type*} [Fintype ι]
     (A : ι → ι → ℝ)
     (hsymm : ∀ i j, A i j = A j i)
@@ -181,7 +181,7 @@ private lemma matrix_posSemidef_of_quad_nonneg {ι : Type*} [Fintype ι]
     rw [hstar, hexp]
     exact hquad x
 
-/-- If `Q ≥ α·Id` as a quadratic form (and `Q` is symmetric), `Q - α·Id` is PSD. -/
+
 private lemma shifted_posSemidef
     (Q : Idx → Idx → ℝ) (α : ℝ)
     (hQsymm : ∀ i j, Q i j = Q j i)
@@ -220,7 +220,7 @@ private lemma shifted_posSemidef
     exact sub_nonneg.mpr (hQlb x)
 
 omit [DecidableEq Idx] in
-/-- The induction hypothesis makes the `s`-fold product kernel PSD. -/
+
 private lemma kron_kernel_posSemidef_of_ih (s : ℕ) (Q : Idx → Idx → ℝ) (α : ℝ)
     (hαnonneg : 0 ≤ α)
     (hQsymm : ∀ i j, Q i j = Q j i)
@@ -239,7 +239,7 @@ private lemma kron_kernel_posSemidef_of_ih (s : ℕ) (Q : Idx → Idx → ℝ) (
         (Finset.sum_nonneg fun I _ => sq_nonneg (w I)))
       (ih w)
 
-/-- Entries of the sandwich `Vᴴ * P * V` over `ℝ`. -/
+
 private lemma sandwich_entry {ι κ : Type*} [Fintype ι]
     (P : Matrix ι ι ℝ) (V : Matrix ι κ ℝ) (k l : κ) :
     (Vᴴ * P * V) k l = ∑ I : ι, ∑ J : ι, P I J * (V I k * V J l) := by
@@ -255,12 +255,12 @@ private lemma sandwich_entry {ι κ : Type*} [Fintype ι]
     _ = ∑ I : ι, ∑ J : ι, P I J * (V I k * V J l) := Finset.sum_comm
 
 omit [DecidableEq Idx] in
-/-- **The Kronecker-power quadratic-form bound** (brick 2 capstone).  If the
-symmetric kernel `Q` dominates `(1/C)·Id` as a quadratic form, then its `s`-fold
-product kernel dominates `(1/C)^s · Id`: for every component family `c`,
-`(1/C)^s ∑_I c_I² ≤ ∑_{I,J} (∏_a Q(I_a,J_a)) c_I c_J`.  Applied with `Q` the
-inverse Gram of a frame, this converts the intrinsic `(0,s)`-tensor norm into the
-raw frame-component `ℓ²` under a bounded-below Gram. -/
+
+
+
+
+
+
 theorem quadForm_id_le_pow
     (Q : Idx → Idx → ℝ) (C : ℝ) (hC : 0 < C)
     (hQsymm : ∀ i j, Q i j = Q j i)
@@ -300,7 +300,7 @@ theorem quadForm_id_le_pow
         refine Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => ?_
         rw [hP, hW]
         simp only [Matrix.of_apply]
-      -- the PSD pairing isolates the diagonal: `(1/C)·∑ S kk ≤ ∑∑ Q kl S kl`
+
       have hexpand : (∑ i : Idx, ∑ j : Idx,
             (Matrix.of fun i j : Idx =>
               Q i j - 1 / C * (if i = j then (1 : ℝ) else 0)) i j * S i j)
@@ -328,7 +328,7 @@ theorem quadForm_id_le_pow
         have h0 := sum_posSemidef_mul_posSemidef_nonneg hMpsd hSpsd
         rw [hexpand] at h0
         linarith
-      -- the inductive bound on each diagonal entry
+
       have hdiagIH : ∀ k : Idx,
           (1 / C) ^ s * ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2 ≤ S k k := by
         intro k
@@ -367,12 +367,12 @@ theorem quadForm_id_le_pow
         _ = ∑ I0 : Fin (s + 1) → Idx, ∑ J0 : Fin (s + 1) → Idx,
               (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0) := hRHS.symm
 
-/-- **Quadratic-form lower bound for a kernel entrywise near the identity.**
-If every entry of `Q` is within `ε` of the identity kernel and
-`card·ε ≤ 1/2`, the quadratic form of `Q` dominates `(1/2)·Id`.  This is the
-elementary producer of `quadForm_id_le_pow`'s lower-bound hypothesis near a
-point where the frame is orthonormal (inverse Gram = Id at the centre,
-entrywise continuity nearby) — no eigenvalue analysis needed. -/
+
+
+
+
+
+
 theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
     (Q : ι → ι → ℝ) (ε : ℝ) (hε0 : 0 ≤ ε)
     (hnear : ∀ i j, |Q i j - (if i = j then (1 : ℝ) else 0)| ≤ ε)
@@ -381,7 +381,7 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
   intro w
   have hsq_nonneg : (0 : ℝ) ≤ ∑ i, w i ^ 2 :=
     Finset.sum_nonneg fun i _ => sq_nonneg (w i)
-  -- split off the identity part
+
   have hsplit : (∑ i, ∑ j, Q i j * (w i * w j))
       = (∑ i, w i ^ 2)
         + ∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j) := by
@@ -404,7 +404,7 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [hid, one_mul]
           congr 1
           exact Finset.sum_congr rfl fun i _ => (pow_two (w i)).symm
-  -- bound the error term by `ε·(∑|w|)²`
+
   have herr : |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
       ≤ ε * ((∑ i, |w i|) * (∑ j, |w j|)) := by
     calc |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
@@ -421,7 +421,7 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [Finset.sum_mul_sum, Finset.mul_sum]
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [Finset.mul_sum]
-  -- Cauchy–Schwarz, card form
+
   have hCS : ((∑ i, |w i|) * (∑ j, |w j|)) ≤ (Fintype.card ι : ℝ) * ∑ i, w i ^ 2 := by
     have h := sq_sum_le_card_mul_sum_sq (s := (Finset.univ : Finset ι))
       (f := fun i => |w i|)
@@ -432,7 +432,7 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [Finset.card_univ]
           congr 1
           exact Finset.sum_congr rfl fun i _ => sq_abs (w i)
-  -- assemble
+
   have hEbound : ε * ((∑ i, |w i|) * (∑ j, |w j|))
       ≤ (1 / 2) * ∑ i, w i ^ 2 := by
     calc ε * ((∑ i, |w i|) * (∑ j, |w j|))
@@ -445,10 +445,10 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [hsplit]
   linarith
 
-/-- **Quadratic-form upper bound for a kernel entrywise near the identity**
-(the mirror of `quad_lb_of_near_id`, in the `s`-fold Kronecker form).  If every
-entry of `Q` is within `ε` of the identity kernel, the `s`-fold `Q`-form is
-bounded by `((1+ε)·card)^s` times the raw `ℓ²`. -/
+
+
+
+
 theorem quad_ub_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
     (Q : ι → ι → ℝ) (ε : ℝ) (hε0 : 0 ≤ ε)
     (hnear : ∀ i j, |Q i j - (if i = j then (1 : ℝ) else 0)| ≤ ε)

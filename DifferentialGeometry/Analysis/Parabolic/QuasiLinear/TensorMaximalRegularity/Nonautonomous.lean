@@ -1,22 +1,22 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SubcriticalSmallTime
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 
-/-!
-# Bounded non-autonomous perturbations in maximal regularity
 
-This file combines the critical `H^{a+2} -> H^a` maximal-regularity estimate
-with the small-time `H^{a+1} -> H^a` estimate.  For strongly measurable,
-uniformly bounded operator families `A2(t)` and `A1(t)`, the forcing-space map
 
-`f |-> A2(t) u_f(t) + A1(t) u_f(t)`
 
-is a contraction whenever
 
-`C2 * (1 + T) + C1 * (2 * sqrt T) < 1`.
 
-The resulting fixed point is a strong solution for the fixed reference heat
-operator plus these two time-dependent bounded perturbations.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -50,9 +50,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : Nat}
 variable {a T : Real}
 
-/-- The forcing-space map for a bounded time-dependent top-order perturbation
-`A2(t) : H^{a+2} -> H^a` and lower-order perturbation
-`A1(t) : H^{a+1} -> H^a`. -/
+
+
+
 def nonautMap (a : Real) {T : Real} (hT : 0 < T) (hT1 : T ≤ 1)
     (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
     (A2 : Real → tensorHs (I := I) (M := M) g r s (a + 2) →L[Real]
@@ -71,7 +71,7 @@ def nonautMap (a : Real) {T : Real} (hT : 0 < T) (hT1 : T ≤ 1)
       timeOp A1 hA1 C1 hC1
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force)
 
-/-- Evaluation of the combined non-autonomous forcing map. -/
+
 theorem nonautMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
     (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
     (A2 : Real → tensorHs (I := I) (M := M) g r s (a + 2) →L[Real]
@@ -91,8 +91,8 @@ theorem nonautMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
           (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force) :=
   rfl
 
-/-- The combined forcing map has Lipschitz constant at most
-`C2 * (1 + T) + C1 * (2 * sqrt T)`. -/
+
+
 theorem nonautMap_dist_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -208,8 +208,8 @@ theorem nonautMap_dist_le
     _ = ((C2 : Real) * (1 + T) + (C1 : Real) * (2 * Real.sqrt T)) *
           ‖force - force'‖ := by ring
 
-/-- Under the transparent combined smallness condition, the non-autonomous
-forcing map is a contraction. -/
+
+
 theorem nonautMap_contract
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -241,9 +241,9 @@ theorem nonautMap_contract
       A2 hA2 C2 hC2 A1 hA1 C1 hC1 force force'
     simpa only [NNReal.coe_mk] using h
 
-/-- Strong existence for the fixed reference tensor heat equation with a
-bounded non-autonomous `H^{a+2} -> H^a` perturbation and a bounded
-`H^{a+1} -> H^a` perturbation, under the combined contraction bound. -/
+
+
+
 theorem nonaut_strong_exists
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

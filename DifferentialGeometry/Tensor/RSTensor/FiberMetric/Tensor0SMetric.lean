@@ -22,7 +22,7 @@ namespace MetricFiberData
 
 variable {V W : Type*}
 
-private def realFlatLinear : Real →ₗ[Real] Module.Dual Real Real where
+def realFlatLinear : Real →ₗ[Real] Module.Dual Real Real where
   toFun := fun a =>
     { toFun := fun b => a * b
       map_add' := by
@@ -1298,6 +1298,12 @@ theorem coord_normSq0S_eq_coord
       coordInner0S (I := I) (x := x) s gInv₂ A A basis₂ := by
   rw [← normSq0S_eq_coord (I := I) g x s basis₁ gInv₁ hinv₁ A,
     ← normSq0S_eq_coord (I := I) g x s basis₂ gInv₂ hinv₂ A]
+theorem normSq0S_nonneg
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (A : Tensor0SSpace s I x) :
+    0 <= normSq0S (I := I) g x s A := by
+  exact (tensor0SMetricData (I := I) g x s).nonneg A
+
 
 end
 

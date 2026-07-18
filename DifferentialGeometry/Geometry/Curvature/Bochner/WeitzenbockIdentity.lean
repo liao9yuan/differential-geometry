@@ -1423,6 +1423,23 @@ theorem bochner_pointwise_abstract_of_smooth [I.Boundaryless]
   bochner_pointwise_abstract (I := I) g hf x
     (leibnizTraceIdentity_holds (I := I) g hf x)
     (heartOfBochnerInner_holds (I := I) g hf x)
+theorem laplacian_inner_self [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {V : Π b : M, TangentSpace I b}
+    (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V))
+    (hgVV : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => g.inner b (V b) (V b)))
+    (x : M)
+    (hLeibniz :
+      Δ_g (I := I) g hgVV x =
+        2 * g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
+          2 * frobeniusSq_grad_vector (I := I) g V x) :
+    Δ_g (I := I) g hgVV x =
+      2 * g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
+        2 * frobeniusSq_grad_vector (I := I) g V x := by
+  have h := connLaplacian_inner_self_of_trace (I := I) g hV hgVV x hLeibniz
+  rw [connLaplacian_function_def] at h
+  exact h
+
 
 end Connection
 end Integral

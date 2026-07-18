@@ -6,13 +6,13 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unnecessarySimpa false
 
-/-!
-# Realized curvature tensor wrappers
 
-This file keeps realization predicates and compatibility wrappers for bundled
-curvature tensors.  The tensor aliases, pointwise trace, vector-slot helpers,
-and bundled curvature data live in `DifferentialGeometry.Integral.Connection.Tensor`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -30,13 +30,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 abbrev SmoothTangentSection :=
   ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)
 
-/-- A bundled `(1,3)` tensor realizes the connection curvature operator after
-pairing the output with a covector, on smooth tangent sections.
 
-The smooth-section restriction is essential: Mathlib's covariant-derivative
-axioms only control differentiable sections.  Raw dependent functions
-`(x : M) -> TangentSpace I x` are not a valid realization interface for
-connection curvature. -/
+
+
+
+
+
+
 def Rm13RealizesConnection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M)) : Prop :=
@@ -47,8 +47,8 @@ def Rm13RealizesConnection
           ((connectionRiemannCurvatureField (I := I) cov
             (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p)) x)
 
-/-- A bundled lowered Riemann tensor realizes `g(R(X,Y)Z,W)` on smooth tangent
-sections. -/
+
+
 def Rm04RealizesConnection
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -58,7 +58,7 @@ def Rm04RealizesConnection
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov
         (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p)) x)
 
-/-- Two lowered Riemann sections realizing the same metric connection agree. -/
+
 theorem rm04_eq_of_realizes [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -83,13 +83,13 @@ theorem rm04_eq_of_realizes [T2Space M]
     fin_cases i <;> simp_all [vec4]
   rw [hv, hA X Y Z W x, hB X Y Z W x]
 
-/-- A bundled Ricci tensor is the trace contraction of bundled `(1,3)` Riemann. -/
+
 def RicciTensorRealizesRm13Trace
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm13 : Tensor13Section (I := I) (M := M)) : Prop :=
   forall x : M, Ric x = ricciFromRm13At (I := I) (M := M) (Rm13 x)
 
-/-- A bundled Ricci tensor is the frame metric trace of bundled lowered Riemann. -/
+
 def RicciTensorRealizesRm04TraceInFrame
     {Idx : Type*} [Fintype Idx]
     (Ric : Tensor02Section (I := I) (M := M))
@@ -99,7 +99,7 @@ def RicciTensorRealizesRm04TraceInFrame
   DifferentialGeometry.Integral.Connection.RicciRealizesRm04TraceInFrame (I := I)
     (tensor02ToField (I := I) Ric) (tensor04ToField (I := I) Rm04) gInv frame
 
-/-- A scalar curvature function is the frame metric trace of bundled Ricci. -/
+
 def ScalarSectionRealizesRicciTraceInFrame
     {Idx : Type*} [Fintype Idx]
     (scalar : M -> Real)

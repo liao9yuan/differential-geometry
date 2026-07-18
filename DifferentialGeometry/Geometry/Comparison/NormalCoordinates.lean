@@ -13,7 +13,7 @@ namespace Riemannian
 namespace NormalCoordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -26,17 +26,23 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 def expMapDiffeo (g : SmoothRiemannianMetric I M) (p : M) :
     PartialDiffeomorph 𝓘(ℝ, E) I E M 1 :=
-  Classical.choose (exists_open_nhds_expMap_diffeoOn (I := I) g p)
+  Classical.choose (exists_exp_pd_chart (I := I) g p)
 
 lemma zero_mem_expMapDiffeo_source (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (expMapDiffeo (I := I) g p).source :=
-  (Classical.choose_spec (exists_open_nhds_expMap_diffeoOn (I := I) g p)).1
+  (Classical.choose_spec (exists_exp_pd_chart (I := I) g p)).1
 
 lemma expMapDiffeo_apply_eq (g : SmoothRiemannianMetric I M) (p : M)
     {v : E} (hv : v ∈ (expMapDiffeo (I := I) g p).source) :
     expMapDiffeo (I := I) g p v =
       (expMap (I := I) g p (show TangentSpace I p from v) : M) :=
-  (Classical.choose_spec (exists_open_nhds_expMap_diffeoOn (I := I) g p)).2 v hv
+  (Classical.choose_spec (exists_exp_pd_chart (I := I) g p)).2.1 v hv
+
+
+
+lemma exp_target_sub_chart (g : SmoothRiemannianMetric I M) (p : M) :
+    (expMapDiffeo (I := I) g p).target ⊆ (chartAt H p).source :=
+  (Classical.choose_spec (exists_exp_pd_chart (I := I) g p)).2.2
 
 lemma expMapDiffeo_zero (g : SmoothRiemannianMetric I M) (p : M) :
     expMapDiffeo (I := I) g p (0 : E) = p := by
@@ -236,6 +242,14 @@ theorem normalChartAt_metric_pullback_at_origin
   rw [mfderiv_normalChartAt_symm_zero (I := I) g p]
   rfl
 
+theorem normalChartAt_metric_at_origin
+    (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
+    g.inner p
+        (mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) v)
+        (mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) w) =
+      g.inner p v w :=
+  normalChartAt_metric_pullback_at_origin (I := I) g p v w
+
 theorem normalChartAt_expMap_smul
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (s : ℝ)
     (hsv : s • v ∈ (normalChartAt (I := I) g p).target) :
@@ -334,7 +348,12 @@ theorem radialChartCurve_secondDeriv_zero
   have h_const : HasDerivAt (fun _ : ℝ => v) (0 : E) (0 : ℝ) := hasDerivAt_const 0 v
   exact h_const.congr_of_eventuallyEq h_deriv_eq
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+theorem normalChartAt_radial_secondDeriv_zero
+    (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
+    HasDerivAt (fun s : ℝ => deriv (radialChartCurve (I := I) g p v) s)
+      (0 : E) (0 : ℝ) :=
+  radialChartCurve_secondDeriv_zero (I := I) g p v
+
 theorem polarization_of_symm_quadratic_eventually_zero
     {F : Type*} [AddCommGroup F] [Module ℝ F]
     (B : E →ₗ[ℝ] E →ₗ[ℝ] F)

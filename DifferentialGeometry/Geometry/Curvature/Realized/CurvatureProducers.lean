@@ -8,16 +8,16 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Curvature Section Producer Interfaces
 
-The curvature tensor layer is data-first: `Tensor13Section`, `Tensor04Section`,
-and `Tensor02Section` are ordinary tensor sections, and separate predicates say
-that they realize connection curvature, metric lowering, and trace contraction.
 
-This file packages the producer output expected from the future tensoriality
-and smoothness proof.  It does not construct curvature sections by choice.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,9 +32,9 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [T2Space M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Output package of the curvature-section producer for a static metric and
-connection.  Constructing this package from connection laws is the tensoriality
-frontier; consuming it is safe and definition-free. -/
+
+
+
 structure CurvatureSectionProducerData
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) where
@@ -70,17 +70,17 @@ theorem ricci_from_rm13
 
 end CurvatureSectionProducerData
 
-/-! ## Intrinsic Riemann-section producers
 
-The intrinsic Riemann layer constructs pointwise tensors and bundled sections
-from a locally smooth connection.  The realization statements below are the
-remaining tensoriality frontiers: they say that those bundled sections evaluate
-on arbitrary smooth vector-field slots as the curvature operator
-`R(X,Y)Z`, not only on the tangent-constant representatives used in the
-pointwise constructor.
--/
 
-/-- The intrinsic `(1,3)` Riemann section realizes connection curvature. -/
+
+
+
+
+
+
+
+
+
 theorem rm13Section_realizes
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
@@ -91,8 +91,8 @@ theorem rm13Section_realizes
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section_apply_smooth
       (I := I) (M := M) cov hcov X Y Z alpha
 
-/-- The intrinsic lowered `(0,4)` Riemann section realizes metric-lowered
-connection curvature. -/
+
+
 theorem rm04Section_realizes
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

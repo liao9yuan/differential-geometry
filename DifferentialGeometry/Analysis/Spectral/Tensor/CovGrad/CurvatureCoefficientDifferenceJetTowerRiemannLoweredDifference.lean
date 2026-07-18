@@ -178,6 +178,8 @@ private lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
     rw [ricMixedSharpEndoFib_apply]
     exact inner_metricSharp (I := I) g₀ x (ricciTensor (I := I) g₁ x v).toLinearMap w
   rw [hβ, ricEndoRaisedFib_apply]
+  exact (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_eq_connectionMetricSharp
+    (I := I) g₁ x (ricciTensor (I := I) g₁ x v).toLinearMap).symm
 
 set_option backward.isDefEq.respectTransparency false in
 theorem slotInsertEndoCc_zero_ricEndoBackgroundDifference_telescope

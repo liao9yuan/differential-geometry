@@ -5,27 +5,27 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 set_option autoImplicit false
 
-/-!
-# Smooth bounded clamps
 
-`exists_smooth_clamp`: for `a < 0 < b` there is a `C^∞` function `ψ : ℝ → ℝ` that
-is the identity on `[a, b]` and globally bounded by `b - a + 2`.  Construction:
-`ψ t = ∫ u in 0..t, χ u` for a smooth bump `χ` that equals `1` on `[a, b]` and
-vanishes outside `[a - 1, b + 1]`.
 
-This is the clamp used to globalise locally defined geometric variations (e.g.
-radial `expMap` variations) into globally smooth ones: composing the variation
-parameters with `ψ` keeps the launch data inside a fixed ball while leaving the
-variation unchanged on the window where `ψ` is the identity.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 
 open Set MeasureTheory intervalIntegral
 open scoped ContDiff
 
-/-- **Smooth bounded clamp.** For `a < 0 < b` there is a `C^∞` map `ψ : ℝ → ℝ`
-with `ψ t = t` on `[a, b]` and `|ψ t| ≤ b - a + 2` everywhere. -/
+
+
 theorem exists_smooth_clamp (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     ∃ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ ∧ (∀ t ∈ Set.Icc a b, ψ t = t) ∧
       ∀ t : ℝ, |ψ t| ≤ b - a + 2 := by
@@ -78,7 +78,7 @@ theorem exists_smooth_clamp (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     refine contDiff_infty_iff_deriv.mpr ⟨hψ_diff, ?_⟩
     rw [hψ_deriv]
     exact χb.contDiff
-  -- the identity on `[a, b]`
+
   have hψ_id : ∀ t ∈ Set.Icc a b, ψ t = t := by
     intro t ht
     have hsub : Set.uIcc (0 : ℝ) t ⊆ Set.Icc a b :=
@@ -89,7 +89,7 @@ theorem exists_smooth_clamp (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     simp only
     rw [intervalIntegral.integral_congr hcongr]
     simp
-  -- upper bound `ψ t ≤ b + 1`
+
   have hψ_le_pos : ∀ t : ℝ, 0 ≤ t → ψ t ≤ t := by
     intro t ht
     have hmono := intervalIntegral.integral_mono_on (μ := volume) ht (hχ_int 0 t) (h1_int 0 t)

@@ -7,27 +7,27 @@ import Mathlib.Topology.Subpath
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
-/-!
-# Polygonal-loop reduction for countability of the fundamental group
 
-This file decomposes the classical Hatcher §1.3 / Spanier §2.4 polygonal
-reduction into reusable sublemmas, culminating in a surjection from a
-countable indexing set onto `FundamentalGroup X x` for second-countable
-connected locally-path-connected semi-locally-simply-connected spaces.
 
-The five declarations:
 
-* `uc_pi1_countable_basis_refinement` — refine a countable basis to
-  path-connected opens with null-homotopic ambient loops.
-* `uc_pi1_countable_anchors` — choose an anchor point in each nonempty
-  pairwise intersection.
-* `uc_pi1_countable_lebesgue_subdivision` — Lebesgue-number subdivision
-  of `[0,1]` adapted to a loop's pullback cover.
-* `uc_pi1_countable_piece_homotopy` — homotopy uniqueness of paths
-  inside a single basis element with matching endpoints.
-* `fundamentalGroup_countable_surjection_of_nullHomotopic_basis` — the headline countable
-  surjection onto the fundamental group.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 open Set Function
 
@@ -39,14 +39,14 @@ namespace Riemannian
 namespace Topology
 namespace UniversalCover
 
-/-- **Basis refinement.** Any second-countable, locally-path-connected,
-semi-locally-simply-connected space admits a countable basis of
-open path-connected sets each of whose ambient loops are null-homotopic
-in the whole space.
 
-The `[Nonempty X]` hypothesis is mathematically necessary: the conclusion
-demands `∀ n, IsPathConnected (B n)`, which forces every `B n` to be
-nonempty. Downstream consumers always have it (via `[ConnectedSpace X]`). -/
+
+
+
+
+
+
+
 theorem uc_pi1_countable_basis_refinement
     (X : Type*) [TopologicalSpace X] [Nonempty X]
     [SecondCountableTopology X]
@@ -233,9 +233,9 @@ theorem uc_pi1_countable_basis_refinement
     exact hGood_null (B n) hBnGood x hxBn γ hγ
   · rw [← hBrange]; exact hs_basis
 
-/-- **Countable anchors.** Given a countable basis `B`, choose, for every
-ordered pair of indices `(m, n)` whose corresponding basis sets meet,
-a point of `B m ∩ B n`. -/
+
+
+
 theorem uc_pi1_countable_anchors
     (X : Type*) [TopologicalSpace X] [Nonempty X]
     (B : ℕ → Set X) :
@@ -248,11 +248,11 @@ theorem uc_pi1_countable_anchors
   simp only [hp, dif_pos]
   exact hp.choose_spec
 
-/-- **Lebesgue subdivision for a loop.** Given a (continuous) loop
-`γ : Path x x` in a space covered by `{B n}`, the pullback cover
-`{γ⁻¹(B n)}` of `[0,1]` admits a finite subdivision `0 = t₀ < … < t_k = 1`
-together with an index map `j : Fin k → ℕ` such that
-`γ '' Icc tⱼ tⱼ₊₁ ⊆ B (j idx)`. -/
+
+
+
+
+
 theorem uc_pi1_countable_lebesgue_subdivision
     (X : Type*) [TopologicalSpace X]
     (B : ℕ → Set X) (hBopen : ∀ n, IsOpen (B n))
@@ -346,9 +346,9 @@ theorem uc_pi1_countable_lebesgue_subdivision
     apply div_le_div_of_nonneg_right _ hkR.le
     · exact_mod_cast Nat.le_succ _
 
-/-- **Piece homotopy.** Two paths inside the same basis element `B n`
-that share endpoints are homotopic in the ambient space, by the
-semi-local condition refining the basis. -/
+
+
+
 theorem uc_pi1_countable_piece_homotopy
     (X : Type*) [TopologicalSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
@@ -444,10 +444,10 @@ theorem uc_pi1_countable_piece_homotopy
           (_root_.Path.Homotopic.Quotient.refl a) Bq := by rw [hkey]
     _ = Bq := _root_.Path.Homotopic.Quotient.refl_trans Bq
 
-/-- **Congruence under `Path.concat`.** Two `Path.concat` constructions over
-the same vertex sequence agree in the homotopy quotient whenever their
-segments agree in the quotient. This is the quotient-level lift of Mathlib's
-`Path.Homotopic.concat_hcomp`. -/
+
+
+
+
 lemma uc_pi1_countable_concat_quot_congr
     {Y : Type*} [TopologicalSpace Y] {n : ℕ} {p : Fin (n + 1) → Y}
     (F G : (i : Fin n) → _root_.Path (p i.castSucc) (p i.succ))
@@ -464,15 +464,15 @@ lemma uc_pi1_countable_concat_quot_congr
   exact Quotient.sound
     (_root_.Path.Homotopic.concat_hcomp (n := n) p F G hH)
 
-/-- **Telescoping of two concatenations under a connector family.** Given two
-vertex sequences `p, q : Fin (k+1) → Y`, segment families
-`F i : Path (p i.castSucc) (p i.succ)` and `G i : Path (q i.castSucc) (q i.succ)`,
-and a family of connectors `c i : Path (p i) (q i)` satisfying the per-segment
-commuting-square identity at the quotient level
-`⟦F i⟧ · ⟦c i.succ⟧ = ⟦c i.castSucc⟧ · ⟦G i⟧`, one obtains the global
-telescoping identity
-`⟦c 0⟧ · ⟦concat q G⟧ = ⟦concat p F⟧ · ⟦c (Fin.last k)⟧`
-in the homotopy quotient. Proved by induction on `k` through `Path.concat_succ`. -/
+
+
+
+
+
+
+
+
+
 lemma uc_pi1_countable_telescope
     {Y : Type*} [TopologicalSpace Y] :
     ∀ {k : ℕ} (p q : Fin (k + 1) → Y)
@@ -590,28 +590,28 @@ lemma uc_pi1_countable_telescope
       (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧)
       (⟦F (Fin.last n)⟧) (⟦c (Fin.last n).succ⟧)).symm
 
-/-- Given a countable open basis `B : ℕ → Set X` whose sets are
-path-connected, whose ambient loops are null-homotopic, and whose pairwise
-intersections are path-connected, the fundamental group `FundamentalGroup X x`
-of a second-countable connected locally-path-connected
-semi-locally-simply-connected space is the surjective image of a countable
-indexing type: there exist a countable `S` and a surjection
-`f : S → FundamentalGroup X x`.
 
-The good basis is a supplied hypothesis here (`hBopen`, `hBpc`, `hBnull`,
-`hBbasis`, `hpcInter`); it is produced for an arbitrary such space by
-`uc_pi1_countable_basis_refinement`.
 
-Argument (classical Hatcher §1.3 / Spanier §2.4 polygonal reduction). Using
-the countable anchors of `uc_pi1_countable_anchors`, the indexing type is
-`S := Σ k : ℕ, Fin k → ℕ` (a sequence of basis indices, one per segment),
-which is countable, and `f s` is the class of the polygonal loop whose
-vertices are the chosen anchors. Surjectivity: an arbitrary loop is
-Lebesgue-subdivided (`uc_pi1_countable_lebesgue_subdivision`) into truncations
-each lying inside a single basis set `B (idx i)`; each truncation is replaced
-by the canonical anchor-to-anchor segment in `B (idx i)` using the homotopy
-uniqueness of `uc_pi1_countable_piece_homotopy` together with
-`Path.trans_truncate_homotopic`, so the loop's class equals `f ⟨k, idx⟩`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X] [ConnectedSpace X] [LocPathConnectedSpace X]

@@ -5,25 +5,25 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# The Koszul formula for the difference of connections
 
-For a metric `g`, its (metric-compatible, torsion-free) connection `cov`, and ANY
-torsion-free reference connection `cov'`, the `g`-lowered connection difference is
-the Koszul combination of the `cov'`-covariant derivative of `g`:
 
-`g(D Y X, Z) = ½ [∇'g(X;Y,Z) + ∇'g(Y;X,Z) − ∇'g(Z;X,Y)]`,
 
-where `D = CovariantDerivative.difference cov cov'` (so `D Y X = ∇_X Y − ∇'_X Y`).
-Ingredients: the difference of torsion-free connections is symmetric
-(`difference_symm_at`), and `∇'g` expands through the difference acting on each
-slot (`nabla_metric_two_term`, from `nabla0SFun_sub_cov_two` + `nabla_metric_zero`).
 
-This is the intrinsic source of the frame-component `hkoszul` input of the
-`ric_bound` Claim 1 (`AkMFold.claim1`) and of the Lemma 4.5 engine
-(`HCGCompactness/Lemma45Engine.lean`): evaluating on local-frame vectors yields
-the lowered-Koszul field identity in any frame.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -42,9 +42,9 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 variable [T2Space M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M]
 
-/-- **The difference of two torsion-free connections is symmetric** (evaluated on
-smooth-section values): `D(Y x)(X x) = D(X x)(Y x)` — the Lie-bracket terms of the
-two torsion identities cancel. -/
+
+
+
 theorem difference_symm_at
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     {x : M}
@@ -90,9 +90,9 @@ theorem difference_symm_at
   rw [h1, h2]
   linear_combination (norm := module) ht' - ht
 
-/-- **The two-term expansion of `∇'g`** through the connection difference: for `cov`
-metric-compatible with `g` and any `cov'`,
-`∇'g(X;Y,Z) = g(D(Y)(X), Z) + g(Y, D(Z)(X))` with `D = difference cov cov'`. -/
+
+
+
 theorem nabla_metric_two_term
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -117,9 +117,9 @@ theorem nabla_metric_two_term
     show ((1 : Fin 2) = 0) = False from by simp, if_false] at hsub
   exact neg_injective hsub
 
-/-- **The Koszul formula for the connection difference**: for `cov`
-metric-compatible with `g` and BOTH connections torsion-free at `x`,
-`g(D(Y)(X), Z) = ½[∇'g(X;Y,Z) + ∇'g(Y;X,Z) − ∇'g(Z;X,Y)]`. -/
+
+
+
 theorem koszul_difference
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -141,13 +141,13 @@ theorem koszul_difference
   have h1 := nabla_metric_two_term (I := I) cov cov' g hmc X Y Z x
   have h2 := nabla_metric_two_term (I := I) cov cov' g hmc Y X Z x
   have h3 := nabla_metric_two_term (I := I) cov cov' g hmc Z X Y x
-  -- symmetry of the difference (torsion-freeness)
+
   have hsymm1 := difference_symm_at (I := I) cov cov' htf htf' X Y
   have hsymm2 := difference_symm_at (I := I) cov cov' htf htf' X Z
   have hsymm3 := difference_symm_at (I := I) cov cov' htf htf' Y Z
   rw [← hsymm1, hsymm3] at h2
   rw [← hsymm2] at h3
-  -- symmetry of the metric on the mixed term
+
   have hg1 := g.symm x (Y x)
     (((CovariantDerivative.difference cov cov' x) (Z x)) (X x))
   linarith [h1, h2, h3, hg1]

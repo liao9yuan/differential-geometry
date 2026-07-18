@@ -1,24 +1,24 @@
-/-
-Cross-model pullback of a smooth Riemannian metric along a diffeomorphism, in
-native form.
 
-This is the cross-model companion of `DifferentialGeometry.Geometry.Metric.Pullback`.
-There the diffeomorphism `Φ : M ≃ₘ⟮I,I⟯ N` is between two manifolds on the *same*
-model `I`; here `Φ : M ≃ₘ⟮I,J⟯ N` is between manifolds on *different* models: `M`
-over `I` (fiber `E`) and `N` over `J` (fiber `F`).
 
-The construction is identical to the same-model case: it pulls a metric on `N`
-back to `M` along `Φ`, composing the inner product `g.inner (Φ x)` on the
-`J`-side tangent space with the manifold derivative `mfderiv I J Φ x` in both
-slots.  The resulting form is a bilinear form on `T_x M` (fiber `E`, model `I`),
-so the M-side total-space smoothness bridge
-`DifferentialGeometry.cotangentCov_clmSection_smooth_aux` applies unchanged.
 
-The Mathlib primitives used (`Diffeomorph.mfderivToContinuousLinearEquiv`,
-`Diffeomorph.mfderivToContinuousLinearEquiv_coe`,
-`ContMDiff.contMDiff_tangentMap`, `ContMDiff.clm_bundle_apply₂`) are all genuinely
-cross-model.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Metric.MetricBallMonotone
 import DifferentialGeometry.Geometry.Metric.Basic
@@ -49,14 +49,14 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N
 
 private lemma infty_ne_zero_cross : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Fiberwise cross-model pullback of the inner product along a diffeomorphism
-`Φ : M ≃ₘ⟮I,J⟯ N`.  As a continuous bilinear form on `T_x M`, this is the
-composition of the inner product `g.inner (Φ x)` at the image with the manifold
-derivative `mfderiv I J Φ x` in both slots.
 
-The construction uses `ContinuousLinearMap.comp` and
-`ContinuousLinearMap.precomp` to avoid the `SeminormedAddCommGroup`
-hypotheses that `ContinuousLinearMap.bilinearComp` would require. -/
+
+
+
+
+
+
+
 noncomputable def Diffeomorph.pullbackInnerCross
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -94,9 +94,9 @@ theorem Diffeomorph.pullbackInnerCross_pos
     rw [← h2]; exact fun h => h1 (by simpa [hcoe] using h)
   exact g.pos (Φ x) _ hvImg
 
-/-- The fiberwise inner product `g.inner` of the metric on `N`, pulled back along the
-cross-model diffeomorphism `Φ` (i.e. evaluated at `Φ x`), is a smooth section over `M`
-of the bundle of continuous bilinear forms on `F`. -/
+
+
+
 theorem inner_comp_smooth_along_diffeoCross
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
     ContMDiff I (J.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
@@ -118,8 +118,8 @@ private theorem mfderiv_eq_mfderivCLE_applyCross
   have h := Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ) (x := x) infty_ne_zero_cross
   exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace J (Φ x) => f v) h
 
-/-- For each base point `x`, the set `{v ∈ T_x M | pullbackInnerCross g Φ x v v < 1}`
-is von-Neumann-bounded. -/
+
+
 theorem Diffeomorph.pullbackInnerCross_isVonNBounded
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
     ∀ x : M, Bornology.IsVonNBounded ℝ
@@ -155,10 +155,10 @@ theorem Diffeomorph.pullbackInnerCross_isVonNBounded
   rw [hseteq]
   exact himg
 
-/-- For a smooth cross-model diffeomorphism `Φ : M ≃ₘ⟮I,J⟯ N` and a smooth tangent section
-`Y` on `M`, the section `x ↦ ⟨Φ x, mfderiv I J Φ x (Y x)⟩` of `TN` (with base map `Φ`)
-is smooth.  Obtained from `tangentMap I J Φ` smoothness composed with the smooth tangent
-section `Y`. -/
+
+
+
+
 private theorem mfderiv_apply_section_smooth_along_diffeoCross
     (Φ : M ≃ₘ⟮I, J⟯ N)
     (Y : ∀ x : M, TangentSpace I x)
@@ -172,8 +172,8 @@ private theorem mfderiv_apply_section_smooth_along_diffeoCross
   have h := h_tangentMap.comp hY
   exact h
 
-/-- The cross-model pullback of a smooth Riemannian metric on `N` along a diffeomorphism
-`Φ : M ≃ₘ⟮I,J⟯ N`, a smooth Riemannian metric on `M`. -/
+
+
 noncomputable def Diffeomorph.pullbackMetricCross
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
@@ -239,16 +239,16 @@ noncomputable def Diffeomorph.pullbackMetricCross
         ⟨y, Diffeomorph.pullbackInnerCross g Φ y (Y y) (W y)⟩).2
     rfl
 
-/-- The cross-model pullback metric exists: it is `Diffeomorph.pullbackMetricCross g Φ`. -/
+
 theorem diffeomorph_pullback_metric_existsCross
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
     ∃ g' : SmoothRiemannianMetric I M, g' = Diffeomorph.pullbackMetricCross g Φ :=
   ⟨Diffeomorph.pullbackMetricCross g Φ, rfl⟩
 
-/-- Evaluation of the cross-model pullback metric: `(pullbackMetricCross g Φ).inner x v w`
-is `g` evaluated at `Φ x` on the pushed-forward vectors. This exhibits `dΦ_x` as a linear
-isometry `(T_x M, pullback) → (T_{Φ x} N, g)`. -/
+
+
+
 theorem Diffeomorph.pullbackMetricCross_inner
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) (x : M) (v w : TangentSpace I x) :
@@ -256,8 +256,8 @@ theorem Diffeomorph.pullbackMetricCross_inner
       = g.inner (Φ x) (mfderiv I J Φ x v) (mfderiv I J Φ x w) :=
   pullbackInnerCross_eval g Φ x v w
 
-/-- Smoothness of the cross-model pullback inner-product section over `M`.
-This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetricCross g Φ`. -/
+
+
 theorem Diffeomorph.pullbackInnerCross_contMDiff
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
@@ -266,8 +266,8 @@ theorem Diffeomorph.pullbackInnerCross_contMDiff
         ((Diffeomorph.pullbackInnerCross g Φ x : E →L[ℝ] E →L[ℝ] ℝ))) :=
   (Diffeomorph.pullbackMetricCross g Φ).contMDiff
 
-/-- A cross-model diffeomorphism is smooth as a map `M → N`. This is the smoothness
-witness carried by the `Diffeomorph` structure. -/
+
+
 theorem Diffeomorph.mfderiv_contMDiffCross
     (Φ : M ≃ₘ⟮I, J⟯ N) :
     ContMDiff I J ∞ (Φ : M → N) :=

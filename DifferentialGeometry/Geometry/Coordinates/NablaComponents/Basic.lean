@@ -5,16 +5,16 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Coordinate components of realized covariant derivatives
 
-This file bridges the model-level tensor covariant derivative formulas in
-`Tensor.RSTensor.NablaOnTensors` to the chart-induced coordinate frame.
 
-The purely algebraic Christoffel correction identities live in
-`NablaOnTensors.lean`; this file only identifies the model coefficients and
-coordinate derivative terms used by the coordinate-frame component statements.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,7 +33,7 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Directional derivative of a coordinate-frame covariant tensor component. -/
+
 def coordDeriv0SAt {s : ℕ}
     (X : (x : M) -> TangentSpace I x) (x₀ : M)
     (α : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) s x)
@@ -42,7 +42,7 @@ def coordDeriv0SAt {s : ℕ}
     (fun y : M => α y (fun a => coordinateFrameAt (I := I) x₀ (slots a) y))
     x₀ (X x₀)
 
-/-- The chart-model derivative term that appears definitionally in `nabla0SFun`. -/
+
 def modelDeriv0SAt {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -58,9 +58,9 @@ def modelDeriv0SAt {s : ℕ}
     (extChartAt I x₀ x₀) (X' (extChartAt I x₀ x₀))
     (fun a => (Module.finBasis 𝕜 E) (slots a))
 
-/-- Predicate recording that the chart-model derivative term agrees with the
-scalar directional derivative of coordinate-frame components. This is the
-remaining analytic/chart-identification bridge. -/
+
+
+
 def ModelDerivEqCoordDeriv0SAt {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -69,8 +69,8 @@ def ModelDerivEqCoordDeriv0SAt {s : ℕ}
     modelDeriv0SAt (I := I) X x₀ α slots =
       coordDeriv0SAt (I := I) (fun x => X x) x₀ α slots
 
-/-- At the base point of a coordinate chart, model components in the
-multilinear-bundle trivialization agree with coordinate-frame components. -/
+
+
 theorem tensor0SModelAt_coordComponent0SAt {s : ℕ} (x₀ : M)
     (A : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x₀)
     (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
@@ -136,15 +136,15 @@ private theorem model_component_eq_coord_component_comp_eventually {s : ℕ}
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The tensor-bundle chart derivative used by `nabla0SFun` agrees with the manifold
-directional derivative of the corresponding coordinate-frame component.
 
-The proved helper `model_component_eq_coord_component_comp_eventually` gives the
-local equality of the scalar component functions.  The remaining proof is the
-standard scalar derivative bridge: rewrite `mfderiv` through `writtenInExtChartAt`,
-compose the `fderivWithin` of the multilinear-map-valued chart field with
-evaluation at fixed basis vectors, and identify the pulled-back direction
-`mpullbackWithin (extChartAt I x₀).symm X` at the chart center with `X x₀`. -/
+
+
+
+
+
+
+
+
 theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -262,13 +262,13 @@ theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
   rw [hS]
   rfl
 
-/-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
-valence, with the derivative term kept in the chart-model form used by
-`nabla0SFun`.
 
-This is the rank-generic source for the one-form and `(0,2)` model-coordinate
-component formulas.  Rank-specific files should specialize this theorem rather
-than re-proving the model algebra. -/
+
+
+
+
+
+
 theorem nabla0S_model_coordFrame_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -335,12 +335,12 @@ theorem nabla0S_model_coordFrame_slots {s : ℕ}
     simp
   · simp [Function.update, hb]
 
-/-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
-valence.
 
-This is the all-slot version of the one-form and `(0,2)` Christoffel component
-formulas.  It is the preferred reusable theorem when a downstream proof only
-needs coordinate components of the canonical raw tensor derivative. -/
+
+
+
+
+
 theorem nabla0S_coordFrame_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -360,9 +360,9 @@ theorem nabla0S_coordFrame_slots {s : ℕ}
             coordComponent0SAt (I := I) (α x₀) (Function.update slots a k) := by
   rw [nabla0S_model_coordFrame_slots (I := I) cov X α x₀ slots, hderiv slots]
 
-/-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
-valence, with the chart/model derivative bridge discharged from smoothness of
-the tensor field. -/
+
+
+
 theorem nabla0S_coordFrame_slots_of_smooth {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

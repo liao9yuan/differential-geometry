@@ -353,17 +353,25 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
 
 instance tensor0S_isContinuousRiemannianBundle
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
-    letI : Bundle.RiemannianBundle (Tensor0SSpace s I (M := M)) :=
+    letI rb : Bundle.RiemannianBundle (fun b : M => Tensor0SSpace s I b) :=
       Tensor0SBundle.tensor0S_riemannianBundle (I := I) (M := M) g s
+    letI nag : ∀ b : M, NormedAddCommGroup (Tensor0SSpace s I b) :=
+      fun b => Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+        (E := fun b : M => Tensor0SSpace s I b) b
+    letI : ∀ b : M, @InnerProductSpace ℝ (Tensor0SSpace s I b) _ (nag b).toSeminormedAddCommGroup :=
+      fun b => @Bundle.instInnerProductSpaceReal M (fun b : M => Tensor0SSpace s I b)
+        _ _ _ rb (fun _ => inferInstance) (fun _ => inferInstance) b
     IsContinuousRiemannianBundle (Tensor0SModel s ℝ E)
       (Tensor0SSpace s I (M := M)) := by
-  letI : Bundle.RiemannianBundle (Tensor0SSpace s I (M := M)) :=
+  letI rb : Bundle.RiemannianBundle (fun b : M => Tensor0SSpace s I b) :=
     Tensor0SBundle.tensor0S_riemannianBundle (I := I) (M := M) g s
-  refine ⟨?_⟩
-  refine ⟨fun b => tensor0SRiemannianInnerCLM (I := I) (M := M) g s b, ?_, ?_⟩
-  · exact innerBundleCLM_continuous (I := I) (M := M) g s
-  · intros b v w
-    rfl
+  letI nag : ∀ b : M, NormedAddCommGroup (Tensor0SSpace s I b) :=
+    fun b => Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+      (E := fun b : M => Tensor0SSpace s I b) b
+  letI : ∀ b : M, @InnerProductSpace ℝ (Tensor0SSpace s I b) _ (nag b).toSeminormedAddCommGroup :=
+    fun b => @Bundle.instInnerProductSpaceReal M (fun b : M => Tensor0SSpace s I b)
+      _ _ _ rb (fun _ => inferInstance) (fun _ => inferInstance) b
+  exact ⟨isContinuousRiemannianBundle_data (I := I) (M := M) g s⟩
 
 end Tensor0SInnerSectionContinuity
 end Tensor

@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Basic
 
-/-!
-# First block of the zeroth-order DeTurck normal form
 
-This module expands the derivative and insertion terms in the first lower-order
-block.  Twelve generated reindexing proofs are factored through four generic
-finite-sum identities.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -79,7 +79,7 @@ private lemma four_left {n : ℕ} (ig f : Fin n → Fin n → ℝ)
     Finset.sum_congr rfl (fun c _ => Finset.sum_congr rfl (fun d _ => ?_))))
   ring
 
-/-- The first lower-order block has its twelve-term scalar normal form. -/
+
 theorem nf_p1 {n : ℕ} (ig f : Fin n → Fin n → ℝ)
     (dig ga0 ga1 : Fin n → Fin n → Fin n → ℝ)
     (dga0 dga1 : Fin n → Fin n → Fin n → Fin n → ℝ)

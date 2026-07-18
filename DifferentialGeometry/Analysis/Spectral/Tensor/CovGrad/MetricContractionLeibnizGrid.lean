@@ -459,6 +459,12 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le_at
   intro r W j
   have hgrid := rfns_iteratedCovGrad_grid_at op hcovGrad_op kappa kappa_nonneg x₀ hrfns_at j 0 r W
   simpa only [Nat.add_zero, Nat.zero_add] using hgrid
+@[simp] theorem norm_castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ)
+    {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) :
+    ‖castCcTensorRank g r h W‖ = ‖W‖ := by
+  subst h
+  rfl
+
 
 end DiffBilinOp
 

@@ -39,19 +39,19 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Joint-smoothness keystone
 
-The three smoothness targets below all reduce, via the chart-coordinate bridge
-`deTurckVF_apply_eq_chartDeTurckVFComp_sum` and the bundle-section characterisation
-`Bundle.contMDiffWithinAt_totalSpace`, to a single joint-`(s, y)` smoothness fact for
-the *scalar* chart component `chartDeTurckVFComp (g_DT s) g_bg α p (extChartAt I α ·)`.
 
-This section builds that keystone (`chartDeTurckVFComp_joint_contMDiffOn`) from the
-node's own joint chart-Gram hypothesis, by assembling the joint Cramer inverse, the
-joint chart-Christoffel symbol, and joint spatial partial derivatives. Each step is
-the joint-`(s, y)` analogue of the on-disk single-metric facts in
-`Geometry/Operator/HessianTrace.lean` and
-`Analysis/Parabolic/DeTurckLinearization/ChartVectorField.lean`. -/
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DeTurckVFSmoothnessKeystone
 
@@ -65,8 +65,8 @@ private abbrev Idx (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- Joint smoothness of the determinant of a matrix family with jointly-`C^∞`
-entries. -/
+
+
 private lemma contDiffOn_jointDet {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s) :
@@ -81,8 +81,8 @@ private lemma contDiffOn_jointDet {s : Set (ℝ × E)}
   refine (contDiffOn_const).mul ?_
   exact contDiffOn_prod (fun i _ => hA (σ i) i)
 
-/-- Joint smoothness of an adjugate entry of a matrix family with jointly-`C^∞`
-entries. -/
+
+
 private lemma contDiffOn_jointAdjugate {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s) (a b : n) :
@@ -106,8 +106,8 @@ private lemma contDiffOn_jointAdjugate {s : Set (ℝ × E)}
       funext p; rw [Matrix.updateRow_ne hij]
     rw [hcongr]; exact hA i j
 
-/-- Joint smoothness of an inverse entry of a matrix family with jointly-`C^∞`
-entries and nowhere-vanishing determinant. -/
+
+
 private lemma contDiffOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s)
@@ -184,8 +184,8 @@ private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- On `interior (extChartAt I α).target`, the inverse-image manifold point lies in
-the trivialization base set, so the chart Gram matrix is positive-definite there. -/
+
+
 private lemma symm_mem_baseSet_of_mem_interior {α : M} {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -196,16 +196,16 @@ private lemma symm_mem_baseSet_of_mem_interior {α : M} {y : E}
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hsource
 
-/-- The matrix `Matrix.of (fun i j => chartGramOnE g α i j y)` equals
-`chartGramMatrix g α ((extChartAt I α).symm y)`; in particular its inverse entries
-are the `chartInvGramOnE` values. -/
+
+
+
 private lemma gramOnE_matrix_eq (g : SmoothRiemannianMetric I M) (α : M) (y : E) :
     (Matrix.of fun i j => chartGramOnE (I := I) g α i j y)
       = chartGramMatrix (I := I) g α ((extChartAt I α).symm y) := by
   ext i j; rfl
 
-/-- The inverse chart Gram entry equals the matrix inverse entry of the joint
-`chartGramOnE` matrix. -/
+
+
 private lemma chartInvGramOnE_eq_matrixInv
     (g : SmoothRiemannianMetric I M) (α : M) (a b : Fin (Module.finrank ℝ E)) (y : E) :
     chartInvGramOnE (I := I) g α a b y
@@ -213,9 +213,9 @@ private lemma chartInvGramOnE_eq_matrixInv
   rw [chartInvGramOnE_def, gramOnE_matrix_eq (I := I) g α y]
   rfl
 
-/-- **Joint smoothness of the inverse chart Gram entry.** From the joint chart-Gram
-smoothness on the chart-target interior, the inverse Gram entry of `g_DT s` is jointly
-`C^∞`. -/
+
+
+
 private lemma chartInvGramOnE_joint_contDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram_E : ∀ i j : Fin (Module.finrank ℝ E),
@@ -246,9 +246,9 @@ private lemma chartInvGramOnE_joint_contDiffOn
       exact chartGramMatrix_det_pos (I := I) (g_DT p.1) α hbase
     exact ne_of_gt hpos
 
-/-- **Joint smoothness of the chart-Christoffel symbol of `g_DT s`.** Assembled from
-the joint inverse Gram entry and joint spatial partial derivatives of the chart-Gram
-entries, exactly as in `chartChristoffel_contDiffOn_interior`. -/
+
+
+
 private lemma chartChristoffel_joint_contDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram_E : ∀ i j : Fin (Module.finrank ℝ E),
@@ -290,8 +290,8 @@ private lemma chartChristoffel_joint_contDiffOn
   refine ContDiffOn.mul (chartInvGramOnE_joint_contDiffOn (I := I) g_DT α T h_gram_E k l) ?_
   exact ((hpd i l j).add (hpd j l i)).sub (hpd l i j)
 
-/-- A `y`-only chart field that is `C^∞` on `interior (target)` is jointly `C^∞`
-on the product with any time interval (it ignores the time coordinate). -/
+
+
 private lemma contDiffOn_snd_of_contDiffOn_interior {α : M} (T : ℝ)
     {F : E → ℝ} (hF : ContDiffOn ℝ ∞ F (interior (extChartAt I α).target)) :
     ContDiffOn ℝ ∞ (fun p : ℝ × E => F p.2)
@@ -302,10 +302,10 @@ private lemma contDiffOn_snd_of_contDiffOn_interior {α : M} (T : ℝ)
   refine hF.comp hsnd ?_
   intro p hp; exact hp.2
 
-/-- **Joint smoothness of the chart DeTurck-VF component (chart-target interior).**
-This is the joint-`(s, y)` analogue of `chartDeTurckVFComp_contDiffOn_interior`:
-assembled from the joint inverse Gram entry and joint chart-Christoffel of `g_DT s`
-together with the `y`-only background Christoffel. -/
+
+
+
+
 private lemma chartDeTurckVFComp_joint_contDiffOn_E
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -446,7 +446,7 @@ private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- `C⁰` joint determinant. -/
+
 private lemma continuousOn_jointDet {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s) :
@@ -461,7 +461,7 @@ private lemma continuousOn_jointDet {s : Set (ℝ × E)}
   refine (continuousOn_const).mul ?_
   exact continuousOn_finset_prod _ (fun i _ => hA (σ i) i)
 
-/-- `C⁰` joint adjugate entry. -/
+
 private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s) (a b : n) :
@@ -483,7 +483,7 @@ private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
       funext p; rw [Matrix.updateRow_ne hij]
     rw [hcongr]; exact hA i j
 
-/-- `C⁰` joint inverse entry. -/
+
 private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s)
@@ -498,7 +498,7 @@ private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
   rw [hexp]
   exact ((continuousOn_jointDet hA).inv₀ hdet).mul (continuousOn_jointAdjugate hA a b)
 
-/-- `C⁰` joint inverse chart Gram entry on `Icc × interior(target)`. -/
+
 private lemma chartInvGramOnE_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -526,7 +526,7 @@ private lemma chartInvGramOnE_joint_continuousOn
       exact chartGramMatrix_det_pos (I := I) (g_DT p.1) α hbase
     exact ne_of_gt hpos
 
-/-- `C⁰` joint chart Christoffel symbol on `Icc × interior(target)`. -/
+
 private lemma chartChristoffel_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -561,7 +561,7 @@ private lemma chartChristoffel_joint_continuousOn
   refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 k l) ?_
   exact ((h_partial i l j).add (h_partial j l i)).sub (h_partial l i j)
 
-/-- `C⁰` joint chart DeTurck-VF component value on `Icc × interior(target)`. -/
+
 private lemma chartDeTurckVFComp_joint_continuousOn_E
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -598,12 +598,12 @@ private lemma chartDeTurckVFComp_joint_continuousOn_E
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := continuousOn_snd
   exact hbg.comp hsnd (fun p hp => hp.2)
 
-/-- **Manifold-level `C⁰` joint scalar producer.** Composing the `E`-level joint
-continuity of the chart DeTurck-VF component with the chart map
-`q ↦ (q.1, extChartAt I α q.2)` (continuous on the good set, with image in the
-chart-target interior) yields the joint `(t, x)` continuity of the scalar
-chart component on `Icc 0 T ×ˢ chartLeviCivitaGoodSet α`. This is the `C⁰`
-analogue of `chartDeTurckVFComp_joint_contMDiffOn`. -/
+
+
+
+
+
+
 private lemma chartDeTurckVFComp_joint_continuousOn_M
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -643,7 +643,7 @@ private lemma chartDeTurckVFComp_joint_continuousOn_M
   have hcomp := hE.comp hΦ hmaps
   exact hcomp
 
-/-- Leibniz rule for the model-direction partial derivative of a product. -/
+
 private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
@@ -653,8 +653,8 @@ private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
   rw [show (fun x => f x * h x) = f * h from rfl, fderiv_mul hf hh]
   simp [mul_comm, add_comm]
 
-/-- `C⁰` joint continuity of the first spatial partial of the inverse chart Gram
-entry, via the matrix-inverse derivative identity. -/
+
+
 private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -692,13 +692,13 @@ private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
   · exact chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 b p'
   · exact h_partial l a b
 
-/-- `partialDeriv` over a constant multiple. -/
+
 private lemma partialDeriv_const_mul_eq {f : E → ℝ} {y : E} (c : ℝ)
     (l : Fin (Module.finrank ℝ E)) (hf : DifferentiableAt ℝ f y) :
     partialDeriv (E := E) l (fun x => c * f x) y = c * partialDeriv (E := E) l f y := by
   unfold partialDeriv; rw [fderiv_const_mul hf]; simp
 
-/-- `partialDeriv` over a finite sum. -/
+
 private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
     {F : ι → E → ℝ} {y : E} (l : Fin (Module.finrank ℝ E))
     (hF : ∀ i ∈ t, DifferentiableAt ℝ (F i) y) :
@@ -707,7 +707,7 @@ private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
   unfold partialDeriv
   rw [fderiv_fun_sum hF]; simp
 
-/-- `partialDeriv` over a sum/difference (for the Christoffel bracket). -/
+
 private lemma partialDeriv_add_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
@@ -722,9 +722,9 @@ private lemma partialDeriv_sub_eq {f h : E → ℝ} {y : E}
       = partialDeriv (E := E) l f y - partialDeriv (E := E) l h y := by
   unfold partialDeriv; rw [fderiv_fun_sub hf hh]; simp
 
-/-- `C⁰` joint continuity of the first spatial partial of the chart Christoffel
-symbol, via a Leibniz expansion through the inverse Gram and the second partials of
-the chart Gram entries. -/
+
+
+
 private lemma partialDeriv_chartChristoffel_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -835,8 +835,8 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
   · refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 k l) ?_
     exact ((h_partial2 m i l j).add (h_partial2 m j l i)).sub (h_partial2 m l i j)
 
-/-- `C⁰` joint continuity of the first spatial partial of the chart DeTurck-VF
-component, via the Leibniz expansion `partialDeriv_chartDeTurckVFComp_eq`. -/
+
+
 private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -942,9 +942,9 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
         contDiffOn_const).continuousOn
     exact hbg.comp continuousOn_snd (fun p hp => hp.2)
 
-/-- The Fréchet derivative of a scalar field on `E` equals the
-`chartModelBasis`-coordinate sum of its model-direction partials. (This is a pure
-continuous-linear-map decomposition, valid for any `fderiv`.) -/
+
+
+
 private lemma fderiv_eq_partialDeriv_sum (F : E → ℝ) (y : E) :
     fderiv ℝ F y = ∑ m : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) m F y) •
@@ -960,8 +960,8 @@ private lemma fderiv_eq_partialDeriv_sum (F : E → ℝ) (y : E) :
   rw [map_smul, Module.Basis.coord_apply, smul_eq_mul, partialDeriv]
   ring
 
-/-- **Second conjunct producer.** Joint continuity of the spatial Fréchet derivative
-of the chart DeTurck-VF component on `Icc × interior(target)`. -/
+
+
 private lemma fderiv_chartDeTurckVFComp_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -1002,8 +1002,8 @@ private lemma fderiv_chartDeTurckVFComp_joint_continuousOn
   exact partialDeriv_chartDeTurckVFComp_joint_continuousOn
     (I := I) g_DT g₀ α T h_gram0 h_partial h_partial2 m k
 
-/-- The chart change-of-variables `Ψ : (t, y) ↦ (t, (extChartAt I α).symm y)` is continuous
-on `Icc 0 T ×ˢ interior (extChartAt I α).target`, mapping it into `Icc 0 T ×ˢ goodSet α`. -/
+
+
 private lemma psi_continuousOn_Icc (α : M) (T : ℝ) :
     ContinuousOn (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2))
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) ∧
@@ -1023,11 +1023,11 @@ private lemma psi_continuousOn_Icc (α : M) (T : ℝ) :
     · exact symm_mem_baseSet_of_mem_interior (I := I) (α := α) hp.2
     · rw [(extChartAt I α).right_inv hy_tgt]; exact hp.2
 
-/-- **C⁰ joint chart-Gram value on the chart-target interior, from manifold-side joint data.**
-The `C⁰` `Icc`-analogue of `chartGramOnE_joint_contDiffOn_of_manifold`: from the joint `(t, x)`
-continuity of `chartGramOnE (g_DT ·) α i j (extChartAt I α ·)` on `Icc 0 T ×ˢ univ`, the
-`E`-level entry `(t, y) ↦ chartGramOnE (g_DT t) α i j y` is jointly continuous on
-`Icc 0 T ×ˢ interior (extChartAt I α).target`, via the chart change-of-variables `Ψ`. -/
+
+
+
+
+
 private lemma chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ (i j : Fin (Module.finrank ℝ E)),
@@ -1053,12 +1053,12 @@ private lemma chartGramOnE_joint_continuousOn_of_manifold_Icc
   simp only [Function.comp_apply]
   rw [(extChartAt I α).right_inv hy_tgt]
 
-/-- **C⁰ joint chart-Gram iterated jet on the chart-target interior, from manifold-side
-joint data.** Transports the manifold-side joint `(t, x)` continuity of
-`iteratedFDeriv ℝ k (chartGramOnE (g_DT ·) α i j) (extChartAt I α ·)` (on `Icc 0 T ×ˢ goodSet`,
-as produced for `k ≤ 2`) to the `E`-level joint continuity of
-`(t, y) ↦ iteratedFDeriv ℝ k (chartGramOnE (g_DT t) α i j) y` on
-`Icc 0 T ×ˢ interior (extChartAt I α).target`, via the chart change-of-variables `Ψ`. -/
+
+
+
+
+
+
 private lemma iteratedFDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ) (k : ℕ)
     (i j : Fin (Module.finrank ℝ E))
@@ -1081,16 +1081,16 @@ private lemma iteratedFDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
   simp only [Function.comp_apply]
   rw [(extChartAt I α).right_inv hy_tgt]
 
-/-- Pointwise: the directional partial of `chartGramOnE` equals the `iteratedFDeriv 1` on the
-basis direction. -/
+
+
 private lemma partialDeriv_chartGramOnE_eq_iteratedFDeriv_one
     (g : SmoothRiemannianMetric I M) (α : M) (i j l : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y =
       iteratedFDeriv ℝ 1 (chartGramOnE (I := I) g α i j) y ![(chartModelBasis E) l] := by
   rw [iteratedFDeriv_one_apply]; rfl
 
-/-- Pointwise: the second directional partial of `chartGramOnE` equals the `iteratedFDeriv 2`
-on the two basis directions, at a chart-target interior point. -/
+
+
 private lemma partialDeriv2_chartGramOnE_eq_iteratedFDeriv_two
     (g : SmoothRiemannianMetric I M) (α : M) (i j m l : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -1117,8 +1117,8 @@ private lemma partialDeriv2_chartGramOnE_eq_iteratedFDeriv_two
   rw [fderiv_clm_apply hfderiv_diff (differentiableAt_const _)]
   simp [ContinuousLinearMap.flip_apply]
 
-/-- **C⁰ joint first chart-Gram partial on the chart-target interior, from manifold-side
-`iteratedFDeriv 1` data.** -/
+
+
 private lemma partialDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (l i j : Fin (Module.finrank ℝ E))
@@ -1138,8 +1138,8 @@ private lemma partialDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
   simp only [Function.comp_apply, ContinuousMultilinearMap.apply_apply]
   rw [partialDeriv_chartGramOnE_eq_iteratedFDeriv_one (I := I) (g_DT p.1) α i j l p.2]
 
-/-- **C⁰ joint second chart-Gram partial on the chart-target interior, from manifold-side
-`iteratedFDeriv 2` data.** -/
+
+
 private lemma partialDeriv2_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (m l i j : Fin (Module.finrank ℝ E))
@@ -1160,23 +1160,23 @@ private lemma partialDeriv2_chartGramOnE_joint_continuousOn_of_manifold_Icc
   simp only [Function.comp_apply, ContinuousMultilinearMap.apply_apply]
   rw [partialDeriv2_chartGramOnE_eq_iteratedFDeriv_two (I := I) (g_DT p.1) α i j m l hp.2]
 
-/-- **Chart-frame value/derivative continuity of the DeTurck velocity from manifold-side
-chart-Gram jet data.** The producer feeding the `Hcomp`/`Hfderiv` chart-frame inputs of
-`conjugating_flow_pullback_jointGram_data`.
 
-From the manifold-side joint chart-Gram data that the spectral DeTurck endpoint outputs —
-the `0`-jet `h_gram0` (joint `(t, x)` continuity of `chartGramOnE (g_DT ·) α i j (extChartAt I α ·)`
-on `Icc 0 T ×ˢ univ`) and the second-order chart-jet `hC2` (joint `(t, x)` continuity of
-`iteratedFDeriv ℝ k (chartGramOnE (g_DT ·) α i j) (extChartAt I α ·)` on `Icc 0 T ×ˢ goodSet`
-for `k ≤ 2`) — this produces, for every chart centre `α` and component `k`:
 
-* `Hcomp`: joint `(t, y)` continuity of the chart DeTurck-VF component value
-  `chartDeTurckVFComp (g_DT t) g_bg α k y` on `Icc 0 T ×ˢ interior (extChartAt I α).target`;
-* `Hfderiv`: joint `(t, y)` continuity of its spatial Fréchet derivative on the same set.
 
-The chart-target interior data is recovered from the good-set manifold data through the chart
-change-of-variables `Ψ : (t, y) ↦ (t, (extChartAt I α).symm y)` (good-set ↔ interior bijection)
-and the pointwise `iteratedFDeriv`-to-`partialDeriv` identifications. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem deturck_vf_chartFrame_continuity_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ)

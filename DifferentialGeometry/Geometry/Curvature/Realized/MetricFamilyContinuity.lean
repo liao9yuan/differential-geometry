@@ -9,21 +9,21 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Bundle continuity of tensor families from frame components
 
-This file supplies the *converse* of `Tensor0SFamilyContinuousOnSet.eval_continuous`:
-a constructor producing the joint total-space continuity predicate
-`Tensor0SFamilyContinuousOnSet` from the continuity of a tensor family's scalar
-components in a local trivialization frame.
 
-The constructor is the reusable keystone for packaging chart-coordinate
-regularity into bundled tensor-section continuity (`metricTensor_cont`,
-`ricciCont`, `rm04Cont`, ... of `MetricFamilySmoothOn`/`IsSolutionOn`).  It is
-stated in the inner-product-space setting because the model basis
-`chartModelBasis` and the evaluation equivalence `eval0SCLE` are tied to the
-Euclidean structure; the realized Ricci-flow consumers all live there.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -39,20 +39,20 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- **Keystone constructor: bundle continuity from frame-component continuity.**
 
-A time-dependent `(0,s)` tensor family `A` is jointly continuous as a tensor
-section over `{t ∈ K} × M` as soon as, for every base trivialization centre `x₀`,
-its scalar components against the local trivialization frame
-`(trivializationAt E (TangentSpace I) x₀).symmL` applied to the model basis are
-jointly continuous on that trivialization's domain.
 
-This is the converse of `Tensor0SFamilyContinuousOnSet.eval_continuous` (which
-projects a continuous section to continuous components).  The proof runs through
-`FiberBundle.continuousAt_totalSpace` — continuity in the total space is base
-continuity plus fibre-coordinate continuity — and the finite-dimensional
-evaluation homeomorphism `eval0SCLE`, which turns fibre-coordinate continuity
-into the continuity of the basis components. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem tensor0SFamilyContinuousOnSet_of_chartComp
     {s : Nat} {K : Set Real}
     (A : (t : Real) → (x : M) →
@@ -72,17 +72,17 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
   intro q₀
   rw [FiberBundle.continuousAt_totalSpace]
   refine ⟨continuous_snd.continuousAt, ?_⟩
-  -- Normalise the fibre-coordinate goal to the clean form centred at `q₀.2`.
+
   show ContinuousAt
       (fun q : {t : Real // t ∈ K} × M =>
         (trivializationAt (Tensor0SModel s Real E)
           (fun x : M => Tensor0SSpace s I x) q₀.2
             ⟨q.2, A q.1.1 q.2⟩).2) q₀
-  -- The neighbourhood of `q₀` on which the component continuity is supplied.
+
   have hopen : {q : {t : Real // t ∈ K} × M | q.2 ∈ N q₀.2} ∈ nhds q₀ :=
     continuous_snd.continuousAt.preimage_mem_nhds (hN q₀.2)
-  -- Through the evaluation homeomorphism, fibre-coordinate continuity is
-  -- equivalent to the continuity of every basis component.
+
+
   have key : ContinuousAt
       (fun q : {t : Real // t ∈ K} × M =>
         DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eval0SCLE (E := E) s
@@ -112,8 +112,8 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
       rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
     rw [hpt]
     exact (hcomp q₀.2 idx).continuousAt hopen
-  -- Recover the fibre-coordinate continuity from the components by composing
-  -- with the inverse homeomorphism.
+
+
   have hsymm :=
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eval0SCLE (E := E) s).symm.continuous
   have hcongr : (fun q : {t : Real // t ∈ K} × M =>
@@ -129,13 +129,13 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
   rw [hcongr]
   exact hsymm.continuousAt.comp key
 
-/-- Keystone, phrased in the canonical chart-basis frame `chartBasisVecFiber`.
 
-This is the form curvature consumers plug into: the chart-basis frame
-`chartBasisVecFiber x₀ i x = (trivializationAt E (TangentSpace I) x₀).symm x (chartModelBasis i)`
-is definitionally the `symmL` frame used by `tensor0SFamilyContinuousOnSet_of_chartComp`, so
-this is a thin restatement that avoids re-deriving the `symmL`/`symm` identification at every
-call site (metric, Ricci, Riemann). -/
+
+
+
+
+
+
 theorem tensor0SFamilyContinuousOnSet_of_chartBasisComp
     {s : Nat} {K : Set Real}
     (A : (t : Real) → (x : M) →
@@ -168,16 +168,16 @@ theorem tensor0SFamilyContinuousOnSet_of_chartBasisComp
   rw [heq]
   exact hcomp x₀ idx
 
-/-- **First consumer of the keystone: metric bundle continuity from chart-Gram
-continuity.**
 
-For a time-dependent Riemannian metric family `g` whose chart-Gram matrix entries
-are jointly continuous (in `(t, x)`) on each chart trivialization domain, the
-bundled metric tensor family `(t, x) ↦ metricTensorField (g t) x` is jointly
-continuous as a `(0,2)` tensor section over `{t ∈ K} × M`.
 
-This discharges the `metricTensor_cont` field of `MetricFamilySmoothOn` from the
-raw chart-Gram regularity exposed by short-time existence. -/
+
+
+
+
+
+
+
+
 theorem metricTensorCont_of_chartGram
     {K : Set Real} (g : Real → SmoothRiemannianMetric I M)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -215,12 +215,12 @@ variable [NeZero (Module.finrank ℝ E)]
 
 namespace MetricCLMSectionAux
 
-/-- For a metric `g` and a base point `α`, the value of the metric bilinear-CLM section read
-in coordinates at the chart-`α` trivialization (centred at `α`, same base point `x ∈ baseSet`),
-evaluated on two fixed model-space test vectors `v, w : E`, expands as the chart-Gram bilinear
-sum: it is `∑ᵢⱼ (repr v)ᵢ (repr w)ⱼ · chartGramMatrix g α x i j`.  The matrix entries are exactly
-the chart-Gram entries, so a joint-in-`(t, x)` smoothness of `chartGramMatrix (g_DT ·) α · i j`
-transports to joint smoothness of this scalar (with `v, w` fixed). -/
+
+
+
+
+
+
 private lemma inCoordinates_metric_eq_chartGram_sum
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v w : E) :
@@ -269,20 +269,20 @@ private lemma inCoordinates_metric_eq_chartGram_sum
 end MetricCLMSectionAux
 
 set_option linter.unusedVariables false in
-/-- **Joint `(t, b)` smoothness of the metric bilinear-CLM bundle section from chart-Gram data.**
 
-The metric family's bilinear-CLM bundle section `(t, b) ↦ ⟨b, (g_DT t).inner b⟩` — the operator
-section of the `Hom(TM, Hom(TM, ℝ))`-bundle carrying the per-time metric — is jointly `C∞` in
-`(t, b)` on `Ioo 0 T ×ˢ univ`, given that every chart-Gram matrix entry
-`p ↦ chartGramMatrix (g_DT p.1) x₀ p.2 i j` is jointly `C∞` (`hgram_DT`).
 
-This is the converse readoff of `ContMDiffOn.clm_bundle_apply₂`: at each interior point `q₀` the
-Hom-bundle section's smoothness is read in coordinates (`contMDiffAt_hom_bundle`) and reduced via
-`contMDiffAt_clm_of_pointwise` (twice, once per bilinear slot) to the scalar coordinate entries,
-which — by `inCoordinates_metric_eq_chartGram_sum` — are finite `(repr · ·)`-weighted sums of the
-chart-Gram entries `chartGramMatrix (g_DT ·) q₀.2 · i j`, each jointly `C∞` by `hgram_DT` at the
-chart centred at `q₀.2`.  Discharges the `hgInnerBase` hypothesis of
-`metric_clm_section_jointContMDiffOn_along_orbit`. -/
+
+
+
+
+
+
+
+
+
+
+
+
 theorem metricCLMSection_jointContMDiffOn_of_chartGram
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -304,17 +304,17 @@ theorem metricCLMSection_jointContMDiffOn_of_chartGram
       (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
       ((g_DT q.1).inner q.2))) q₀).contMDiffWithinAt
   set α : M := q₀.2 with hα
-  -- A neighbourhood (within the open product) on which `q.2 ∈ baseSet α`.
+
   have hbase0 : α ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
   rw [contMDiffAt_hom_bundle]
   refine ⟨contMDiffAt_snd, ?_⟩
-  -- Reduce the operator-valued `inCoordinates` smoothness to per-slot scalar smoothness.
+
   apply contMDiffAt_clm_of_pointwise (IB := 𝓘(ℝ, ℝ).prod I) (X := ℝ × M)
   intro v
   apply contMDiffAt_clm_of_pointwise (IB := 𝓘(ℝ, ℝ).prod I) (X := ℝ × M)
   intro w
-  -- The scalar `inCoordinates(...)(v)(w)` is, near `q₀`, the chart-Gram bilinear sum.
+
   have hgram_sum : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
@@ -334,7 +334,7 @@ theorem metricCLMSection_jointContMDiffOn_of_chartGram
     refine ContMDiffAt.sum (fun j _ => ?_)
     exact (contMDiffAt_const (c := ((chartModelBasis E).repr v i *
       (chartModelBasis E).repr w j : ℝ))).mul (hgram_sum i j)
-  -- Identify the two functions on a neighbourhood within the open product where `q.2 ∈ baseSet α`.
+
   refine hscalar.congr_of_eventuallyEq ?_
   have hnhds : (trivializationAt E (TangentSpace I) α).baseSet ∈ nhds q₀.2 :=
     (trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hbase0
@@ -349,14 +349,14 @@ end MetricCLMSection
 
 namespace Tensor0SFamilyContinuousOnSet
 
-/-- **Pullback of bundle continuity under a diffeomorphism.**  If a time-dependent `(0,s)` tensor
-family `A` on `N` is jointly continuous, then so is its `Φ`-pullback on `M`,
-`(t, x) ↦ (A t (Φ x)).compContinuousLinearMap (fun _ => dΦₓ)`.
 
-Proved through the component constructor `tensor0SFamilyContinuousOnSet_of_chartBasisComp` on `M`:
-in each `M`-chart, the pullback component on a chart-basis slot is `A` evaluated at `Φ x` on the
-pushed-forward slots `dΦₓ (chartBasisVecFiber …)`, whose continuity is `hA.eval_continuous` with the
-pushed chart-basis section `tangentMap Φ ∘ chartBasisVec` (smooth on the chart, then `Φ.continuous_tangentMap`). -/
+
+
+
+
+
+
+
 theorem pullback
     {s : Nat} {K : Set Real}
     {N : Type*} [TopologicalSpace N] [ChartedSpace H N]
@@ -407,18 +407,18 @@ theorem pullback
   intro p
   rfl
 
-/-- **Restriction of bundle continuity to an open submanifold.**  If a time-dependent `(0,s)`
-tensor family `A` on `M` is jointly continuous, then so is its restriction to an open submanifold
-`U ↪ M`, `(t, x) ↦ A t ↑x`.
 
-Restriction-analog of `Tensor0SFamilyContinuousOnSet.pullback` along the open inclusion
-`Subtype.val : U → M` (a `C∞` local diffeomorphism).  Proved through the component constructor
-`tensor0SFamilyContinuousOnSet_of_chartBasisComp` on `U`: in each `U`-chart, the restricted
-component on a chart-basis slot is `A` evaluated at `↑x` on the pushed-forward slots
-`d(Subtype.val)_x (chartBasisVecFiber …)`, whose continuity is `hA.eval_continuous` with the pushed
-chart-basis section `tangentMap Subtype.val ∘ chartBasisVec` (smooth on the chart, then
-`continuous_tangentMap`); the `mfderiv_subtype_val = id` collapse identifies the composed section
-with `A t ↑x`. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem restrictOpen
     {s : Nat} {K : Set Real}
     (A : (t : Real) → (x : M) →
@@ -435,7 +435,7 @@ theorem restrictOpen
       (FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x₀))
   intro x₀ idx
   rw [continuousOn_iff_continuous_restrict]
-  -- The `U`-chart-basis slot pushed to `M` by `d(Subtype.val)` is a continuous section over `M`.
+
   have hslot : ∀ k : Fin s, Continuous
       (fun p : {q : {t : Real // t ∈ K} × U //
             q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>

@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Defs
 
-/-!
-# Covariant-derivative correction normal form
 
-This module extracts the finite-index normal form of the zeroth-order
-covariant-derivative correction from the settled private DeTurck algebra chain.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -1024,7 +1024,7 @@ private lemma nf_V0_h28 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => Finset.sum_congr rfl (fun c _ => Finset.sum_congr rfl (fun d _ => ?_))))
   ring
 
-/-- The covariant-derivative correction block has its complete scalar normal form. -/
+
 theorem nf_v0 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)

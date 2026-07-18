@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.Basic
 
-/-!
-# Coordinate two-tensor covariant derivative components
 
-This file contains the `(0,2)` coordinate-frame component formulas and the
-arbitrary-slot expansion for `nabla0SFun 2`.
--/
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -26,8 +26,8 @@ variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 
-/-- Evaluate a `(0,2)` tensor on arbitrary tangent vectors by expanding both
-vectors in the coordinate-frame basis at the base point. -/
+
+
 theorem tensor0S_two_eval_coordFrame_sum
     {x₀ : M}
     (Ax : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 2 x₀)
@@ -123,8 +123,8 @@ theorem tensor0S_two_eval_coordFrame_sum
               else coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b, pair]
 
-/-- Promote coordinate-frame symmetry of a `(0,2)` tensor to pointwise
-symmetry. -/
+
+
 theorem tensor0S_two_symm_of_coordFrame
     {Idx : Type*} [Finite Idx]
     {x₀ : M}
@@ -185,9 +185,9 @@ section TopRegularity
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Coordinate-frame component formula for the covariant derivative of a `(0,2)`
-tensor, with the derivative term kept in the chart-model form used by
-`nabla0SFun`. -/
+
+
+
 theorem nabla0S_two_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -228,8 +228,8 @@ theorem nabla0S_two_model_coord
   simp [slots, Fin.sum_univ_two, hupdate0, hupdate1]
   ring_nf
 
-/-- Coordinate-frame component formula for `(0,2)` tensors, after supplying
-the derivative-identification bridge. -/
+
+
 theorem nabla0S_two_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -271,10 +271,10 @@ theorem nabla0S_two_coord
   simp [slots, Fin.sum_univ_two, hupdate0, hupdate1]
   ring_nf
 
-/-- Evaluation form of `nabla0S_two_coord` on coordinate-frame basis vectors.
 
-This is the coordinate-frame bridge from the canonical raw derivative
-`nabla0SFun` to the usual `(0,2)` Christoffel component formula. -/
+
+
+
 theorem nabla0SFun_two_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -311,8 +311,8 @@ theorem nabla0SFun_two_eval_coordFrame
   simpa [coordComponent0SAt, component0S, hslots] using
     nabla0S_two_coord (I := I) cov X A x₀ hderiv j l
 
-/-- Coordinate-frame symmetry preservation for the covariant derivative of a
-pointwise symmetric `(0,2)` tensor field. -/
+
+
 theorem nabla0SFun_two_eval_coordFrame_symm_of_symm
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -416,8 +416,8 @@ theorem nabla0SFun_two_eval_coordFrame_symm_of_symm
   rw [hD, hsum_left, hsum_right]
   ring
 
-/-- Symmetry preservation for the covariant derivative of a pointwise symmetric
-`(0,2)` tensor field. -/
+
+
 theorem nabla0SFun_two_symm_of_symm
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -439,8 +439,8 @@ theorem nabla0SFun_two_symm_of_symm
     nabla0SFun_two_eval_coordFrame_symm_of_symm
       (I := I) cov X A x₀ (modelDeriv_eq_coordDeriv0SAt (I := I) X x₀ A) hsymm j l
 
-/-- Coordinate expansion of `nabla0SFun 2` evaluated on arbitrary tangent
-vectors, obtained from the coordinate-basis formula by multilinearity. -/
+
+
 theorem nabla0SFun_two_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

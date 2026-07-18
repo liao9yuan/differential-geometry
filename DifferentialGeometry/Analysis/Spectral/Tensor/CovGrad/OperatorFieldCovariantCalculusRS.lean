@@ -95,6 +95,21 @@ theorem appCcRS_zero_eq_appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+theorem operatorFieldApply_assoc (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (C : SmoothCcTensor g a b)
+    (W : SmoothCcTensor g 0 a) :
+    operatorFieldApply (I := I) (M := M) g b c Φ
+        (operatorFieldApply (I := I) (M := M) g a b C W) =
+      operatorFieldApply (I := I) (M := M) g a c
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ C) W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCc_toSection, appCc_toSection, appCc_toSection, appCcRS_toSection,
+    ContinuousLinearMap.comp_assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+
 theorem appCcRS_add_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
     ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ + W₂) =
@@ -125,6 +140,28 @@ theorem appCcRS_smul_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
   rw [show ((k • W).toSection x : TensorRSSpace a b I x) = k • W.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.comp_smul]
+
+set_option backward.isDefEq.respectTransparency false in
+
+theorem ccOperatorFieldComp_sub_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ -
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+  calc
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ + (-W₂)) := by
+      rw [sub_eq_add_neg]
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ +
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ (-W₂) :=
+      appCcRS_add_right (I := I) (M := M) g a b c Φ W₁ (-W₂)
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ +
+        -ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+      rw [show -W₂ = (-1 : ℝ) • W₂ by rw [neg_one_smul],
+        appCcRS_smul_right, neg_one_smul]
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ -
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+      rw [sub_eq_add_neg]
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -764,6 +801,41 @@ theorem exists_jet_bound_of_normalFormRS (g : SmoothRiemannianMetric I M) (r : �
       ≤ (p + 1 : ℝ) * ((∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k) :=
         mul_le_mul_of_nonneg_left hCa_le (by positivity)
     _ = (p + 1 : ℝ) * (∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k := by ring
+set_option backward.isDefEq.respectTransparency false in
+
+theorem appCc_assoc (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (C : SmoothCcTensor g a b)
+    (W : SmoothCcTensor g 0 a) :
+    operatorFieldApply (I := I) (M := M) g b c Φ (operatorFieldApply (I := I) (M := M) g a b C W) =
+      operatorFieldApply (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ C) W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCc_toSection, appCc_toSection, appCc_toSection, appCcRS_toSection,
+    ContinuousLinearMap.comp_assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+
+theorem appCcRS_sub_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ -
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+  calc
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ + (-W₂)) := by
+      rw [sub_eq_add_neg]
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ +
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ (-W₂) :=
+      appCcRS_add_right (I := I) (M := M) g a b c Φ W₁ (-W₂)
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ +
+        -ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+      rw [show -W₂ = (-1 : ℝ) • W₂ by rw [neg_one_smul],
+        appCcRS_smul_right, neg_one_smul]
+    _ = ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ -
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
+      rw [sub_eq_add_neg]
+
 
 end Connection
 end Integral

@@ -135,13 +135,13 @@ theorem chartRicciDualNormSq_bdd_on_compact
 
 noncomputable def ricciSharp (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) : TangentSpace I b :=
-  metricSharp (I := I) g b
+  DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap
 
 @[simp] lemma ricciSharp_def (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     ricciSharp (I := I) g φ b =
-      metricSharp (I := I) g b
+      DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
         (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap := rfl
 
 lemma inner_ricciSharp (g : SmoothRiemannianMetric I M)
@@ -149,7 +149,7 @@ lemma inner_ricciSharp (g : SmoothRiemannianMetric I M)
     g.inner b (ricciSharp (I := I) g φ b) w =
       ricciTensor (I := I) g b (gradFun (I := I) g φ b) w := by
   rw [ricciSharp_def]
-  exact inner_metricSharp (I := I) g b
+  exact DifferentialGeometry.Integral.Connection.inner_metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap w
 
 lemma inner_ricciSharp_right (g : SmoothRiemannianMetric I M)
@@ -287,7 +287,7 @@ lemma ricciSharpChartLocal_eq_ricciSharp
     ricciSharpChartLocal (I := I) g α φ b =
       ricciSharp (I := I) g φ b := by
   classical
-  apply metricFlatLinear_injective (I := I) g b
+  apply DifferentialGeometry.Integral.Connection.metricFlatLinear_injective (I := I) g b
   ext v
   change g.inner b (ricciSharpChartLocal (I := I) g α φ b) v =
     g.inner b (ricciSharp (I := I) g φ b) v

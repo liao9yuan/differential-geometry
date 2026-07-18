@@ -15,10 +15,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Restrict the fiberwise inner product of a smooth Riemannian metric to an
-open subtype.  In this project the tangent fibers over `x : U` and `(x : M)`
-are definitionally the same model vector space, so no derivative of the
-inclusion is needed for the basic restricted metric. -/
+
+
+
+
 def SmoothRiemannianMetric.restrictOpenInner
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M) (x : U) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real :=
@@ -51,8 +51,8 @@ theorem SmoothRiemannianMetric.restrictOpenInner_isVonNBounded
   simpa [SmoothRiemannianMetric.restrictOpenInner] using g.isVonNBounded (x : M)
 
 omit [IsManifold I ∞ M] in
-/-- The manifold derivative of the inclusion of an open subtype is the identity
-on the model tangent fiber. -/
+
+
 theorem hasMFDerivAt_subtype_val (U : TopologicalSpace.Opens M) (x : U) :
     HasMFDerivAt I I (Subtype.val : U → M) x (ContinuousLinearMap.id Real E) := by
   constructor
@@ -168,7 +168,7 @@ theorem SmoothRiemannianMetric.restrictOpenInner_contMDiff
   filter_upwards with y
   rfl
 
-/-- A smooth Riemannian metric restricted to an open subtype. -/
+
 noncomputable def SmoothRiemannianMetric.restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] :
@@ -197,8 +197,8 @@ theorem SmoothRiemannianMetric.restrictOpen_inner
     (g.restrictOpen (I := I) U).inner x v w = g.inner (x : M) v w := rfl
 
 omit [IsManifold I ∞ M] [FiniteDimensional Real E] in
-/-- The manifold derivative of the inclusion between two nested open subtypes is the identity on
-the common model tangent fiber. -/
+
+
 @[simp] theorem mfderiv_opens_incl {U V : TopologicalSpace.Opens M} (hVU : V ≤ U) (x : V) :
     mfderiv I I (TopologicalSpace.Opens.inclusion hVU : V → U) x =
       ContinuousLinearMap.id Real E := by
@@ -217,8 +217,8 @@ the common model tangent fiber. -/
     mfderiv_subtype_val (I := I) U (TopologicalSpace.Opens.inclusion hVU x)] at hcomp
   simpa using hcomp.symm
 
-/-- Restrict a metric on an open subtype `U` to a smaller ambient open subtype `V`, without
-introducing a nested subtype carrier. -/
+
+
 noncomputable def SmoothRiemannianMetric.restrictOpenOfSubset
     {U V : TopologicalSpace.Opens M} (g : SmoothRiemannianMetric I U) (hVU : V ≤ U)
     [SigmaCompactSpace V] [T2Space V] : SmoothRiemannianMetric I V where
@@ -282,7 +282,7 @@ noncomputable def SmoothRiemannianMetric.restrictOpenOfSubset
     filter_upwards with y
     rfl
 
-/-- Evaluation of the flat restriction of an open-subtype metric. -/
+
 @[simp] theorem SmoothRiemannianMetric.restrictSubset_inner
     {U V : TopologicalSpace.Opens M} (g : SmoothRiemannianMetric I U) (hVU : V ≤ U)
     [SigmaCompactSpace V] [T2Space V] (x : V) (v w : TangentSpace I x) :
@@ -301,8 +301,8 @@ private theorem metric_eq_inner
   subst hi
   rfl
 
-/-- Restricting an ambient metric to `U` and then flatly to `V ≤ U` agrees with direct
-restriction to `V`. -/
+
+
 @[simp] theorem SmoothRiemannianMetric.restrictOpen_flat
     (g : SmoothRiemannianMetric I M) {U V : TopologicalSpace.Opens M} (hVU : V ≤ U)
     [SigmaCompactSpace U] [T2Space U] [SigmaCompactSpace V] [T2Space V] :

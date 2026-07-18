@@ -16,6 +16,7 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
+set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -32,7 +33,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -46,13 +47,13 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 section LengthBookkeeping
 
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+set_option linter.unusedVariables false in
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hfin : pathELength I γ a b ≠ ⊤)
-    (_hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
+    (hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
     riemannianEDist I (γ s) (γ t) = pathELength I γ s t := by
   set L_left := pathELength I γ a s with hL_left_def
   set L_mid := pathELength I γ s t with hL_mid_def
@@ -124,6 +125,7 @@ section RadialUniqueMinimizer
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+
 private theorem radialDist_endpoint_le_pathELength
     (g : SmoothRiemannianMetric I M) (p : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -135,7 +137,7 @@ private theorem radialDist_endpoint_le_pathELength
     (hbball : ∀ t ∈ Set.Icc a b,
       ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
         expMapC2Radius (I := I) g p)
-    (_hdom : ∀ t ∈ Set.Icc a b,
+    (hdom : ∀ t ∈ Set.Icc a b,
       (show TangentSpace I p from
           NormalCoordinates.normalChartAt (I := I) g p (γ t))
         ∈ expDomain (I := I) g p) :
@@ -316,7 +318,7 @@ private theorem radialDist_endpoint_le_pathELength
       have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
       have hune : ψ (γ x) ≠ 0 := hcx
       have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-        (hsrc x hxIcc) hball hune hev
+        (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
       have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
           (fun s => ψ (γ s)) x (1 : ℝ) := rfl
       have hρ'sq_le : ρ' ^ 2 ≤
@@ -409,14 +411,14 @@ private theorem mfderiv_expMap_injective_of_norm_lt_radius
   rw [hA_eq]
   exact hΦinj
 
-
+set_option linter.unusedVariables false in
 theorem normalBall_radial_length_le_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
-    (hsmall_g : Real.sqrt (g.inner p v v) < metricCoerciveExpRadius (I := I) g p) :
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
       riemannianEDist I p
         (expMap (I := I) g p (show TangentSpace I p from v)) := by
@@ -435,9 +437,9 @@ theorem normalBall_radial_length_le_riemannianEDist
     · exact (g.pos p x h).le
   set nE : E → ℝ := fun w => Real.sqrt (Bp w w) with hnE_def
   have hnE_cont : Continuous nE := (psd_sqrt_lipschitz Bp hBpsym hBpnn).continuous
-  have hnE_to_ball : ∀ {w : E}, nE w < metricCoerciveExpRadius (I := I) g p → ‖w‖ < Rₑ := by
+  have hnE_to_ball : ∀ {w : E}, nE w < expRadiusGp (I := I) g p → ‖w‖ < Rₑ := by
     intro w hw
-    have : Real.sqrt (g.inner p w w) < metricCoerciveExpRadius (I := I) g p := hw
+    have : Real.sqrt (g.inner p w w) < expRadiusGp (I := I) g p := hw
     exact norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p this
   refine le_of_forall_gt (fun r hr => ?_)
   rcases exists_lt_locally_constant_of_riemannianEDist_lt hr
@@ -463,11 +465,11 @@ theorem normalBall_radial_length_le_riemannianEDist
   set D : Set E := {w : E | nE w ≤ δ} with hD_def
   have hD_sub_target : D ⊆ ψ.target := by
     intro w hw
-    have hw' : nE w < metricCoerciveExpRadius (I := I) g p := lt_of_le_of_lt hw hδR
+    have hw' : nE w < expRadiusGp (I := I) g p := lt_of_le_of_lt hw hδR
     rw [hψ_def]
     exact ball_subset_normalChartAt_target (I := I) g p (hnE_to_ball hw')
-  have hcoerc : 0 < metricCoerciveConst (I := I) g p := metricCoerciveConst_pos (I := I) g p
-  set cδ : ℝ := δ / Real.sqrt (metricCoerciveConst (I := I) g p) with hcδ_def
+  have hcoerc : 0 < gpCoerciveConst (I := I) g p := gpCoerciveConst_pos (I := I) g p
+  set cδ : ℝ := δ / Real.sqrt (gpCoerciveConst (I := I) g p) with hcδ_def
   have hcδ_nn : 0 ≤ cδ := div_nonneg hδ_pos.le (Real.sqrt_nonneg _)
   have hbound : ∀ {x : E}, nE x ≤ δ → ‖x‖ ≤ cδ := by
     intro x hx
@@ -477,12 +479,12 @@ theorem normalBall_radial_length_le_riemannianEDist
       calc g.inner p x x = Real.sqrt (g.inner p x x) ^ 2 := h.symm
         _ ≤ δ ^ 2 := by
             apply pow_le_pow_left₀ (Real.sqrt_nonneg _) hsqrt_le
-    have hcx : metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
-      metricCoerciveConst_le (I := I) g p x
+    have hcx : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
+      gpCoerciveConst_le (I := I) g p x
     have hsq : ‖x‖ ^ 2 ≤ cδ ^ 2 := by
       rw [hcδ_def, div_pow, Real.sq_sqrt hcoerc.le, le_div_iff₀ hcoerc]
-      calc ‖x‖ ^ 2 * metricCoerciveConst (I := I) g p
-            = metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 := by ring
+      calc ‖x‖ ^ 2 * gpCoerciveConst (I := I) g p
+            = gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 := by ring
         _ ≤ g.inner p x x := hcx
         _ ≤ δ ^ 2 := hg_le
     exact (sq_le_sq₀ (norm_nonneg x) hcδ_nn).mp hsq
@@ -676,7 +678,7 @@ private theorem minimizer_confined_to_C2_ball
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hsmall_g : Real.sqrt (g.inner p v v) < metricCoerciveExpRadius (I := I) g p)
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
     {γ : ℝ → M} {a b : ℝ}
     (hγ : CMDiff[Set.Icc a b] 1 γ) (hγa : γ a = p)
     (hγ_inBall : ∀ t ∈ Set.Icc a b,
@@ -704,11 +706,11 @@ private theorem minimizer_confined_to_C2_ball
   have hccont : ContinuousOn c (Set.Icc a b) := hψcont.comp hγcont hγ_inBall
   have hρc : ContinuousOn ρ (Set.Icc a b) :=
     ((psd_sqrt_lipschitz B hBsym hBnn).continuous.comp_continuousOn hccont)
-  have hρ_to_ball : ∀ {t : ℝ}, ρ t < metricCoerciveExpRadius (I := I) g p →
+  have hρ_to_ball : ∀ {t : ℝ}, ρ t < expRadiusGp (I := I) g p →
       ‖c t‖ < expMapC2Radius (I := I) g p := by
     intro t ht
     exact norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p ht
-  suffices hbound : ∀ t ∈ Set.Icc a b, ρ t < metricCoerciveExpRadius (I := I) g p by
+  suffices hbound : ∀ t ∈ Set.Icc a b, ρ t < expRadiusGp (I := I) g p by
     intro t ht
     exact hρ_to_ball (hbound t ht)
   obtain ⟨δ, hSδ, hδR⟩ := exists_between hsmall_g
@@ -841,6 +843,9 @@ private theorem radial_minimizer_radiality
       (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)
       (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1))
     with hφ_def
+  have hdom : ∀ t ∈ Set.Icc a b,
+      (show TangentSpace I p from ψ (γ t)) ∈ expDomain (I := I) g p :=
+    fun t ht => mem_expDomain_of_norm_lt_radius (I := I) g p (hbball t ht)
   have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
   have hψcont : ContinuousOn ψ ψ.source :=
     (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn
@@ -1000,7 +1005,7 @@ private theorem radial_minimizer_radiality
       have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
       have hune : ψ (γ x) ≠ 0 := hcx
       have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-        (hsrc x hxIcc) hball hune hev
+        (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
       have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
           (fun s => ψ (γ s)) x (1 : ℝ) := rfl
       have hρ'sq_le : ρ' ^ 2 ≤
@@ -1149,7 +1154,7 @@ private theorem radial_minimizer_radiality
       filter_upwards [hopen] with s hs using hsrc s (Ioo_subset_Icc_self hs)
     have hball : ‖ψ (γ t)‖ < expMapC2Radius (I := I) g p := hbball t htIcc
     have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-      (hsrc t htIcc) hball hne hev
+      (hsrc t htIcc) (hdom t htIcc) hball hne hev
     have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun s => ψ (γ s)) t (1 : ℝ) := rfl
     have hφt_sq : φ t ^ 2 =
         g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
@@ -1191,7 +1196,7 @@ private theorem radial_minimizer_radiality
               (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
               (show TangentSpace I p from cv₂)) := by
       rw [hRHS]; exact htight
-    have hiff := gauss_radial_lower_bound_eq_iff (I := I) g p hball hne cv₂
+    have hiff := gauss_radial_lower_bound_eq_iff (I := I) g p (hdom t htIcc) hball hne cv₂
     have horth_dexp := hiff.mp hgauss_eq
     have hinj := mfderiv_expMap_injective_of_norm_lt_radius (I := I) g p hball
     have horth_zero :
@@ -1203,15 +1208,15 @@ private theorem radial_minimizer_radiality
     rw [hcv₂_eq] at hradial
     exact hradial
 
+set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
-    (hsmall_g : Real.sqrt (g.inner p v v) < metricCoerciveExpRadius (I := I) g p)
+    (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a < b)
     (hγ : CMDiff[Set.Icc a b] 1 γ)
     (hγa : γ a = p)
@@ -1423,7 +1428,7 @@ section LocalRadialIdentification
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-omit [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+
 private lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
@@ -1464,13 +1469,40 @@ private lemma radialCurve_pathELength_eq
   rw [MeasureTheory.setLIntegral_const, Real.volume_Ioo, sub_zero,
     ENNReal.ofReal_one, mul_one]
 
+theorem edist_exp_le_radius
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
+    riemannianEDist I p
+        (expMap (I := I) g p (show TangentSpace I p from a)) ≤
+      ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  set γr : ℝ → M :=
+    fun u : ℝ ↦ (expMap (I := I) g p
+      (show TangentSpace I p from (u • a)) : M) with hγr_def
+  have hγr0 : γr 0 = p := by
+    rw [hγr_def]
+    simp only [zero_smul]
+    exact expMap_zero (I := I) g p
+  have hγr1 : γr 1 =
+      expMap (I := I) g p (show TangentSpace I p from a) := by
+    rw [hγr_def]
+    simp only [one_smul]
+  have hγr_C1 : CMDiff[Set.Icc (0 : ℝ) 1] 1 γr :=
+    radialCurve_contMDiffOn_Icc (I := I) g p a ha
+  have hdist := riemannianEDist_le_pathELength
+    (I := I) (γ := γr) (a := 0) (b := 1) hγr_C1 rfl rfl zero_le_one
+  rw [hγr0, hγr1,
+    radialCurve_pathELength_eq (I := I) g p a hEnorm ha] at hdist
+  exact hdist
+
 private theorem radial_riemannianEDist_eq_radius
     (g : SmoothRiemannianMetric I M) (p : M) {a : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (ha_dom : (show TangentSpace I p from a) ∈ expDomain (I := I) g p)
     (ha_ball : a ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
-    (ha_small : Real.sqrt (g.inner p a a) < metricCoerciveExpRadius (I := I) g p) :
+    (ha_small : Real.sqrt (g.inner p a a) < expRadiusGp (I := I) g p) :
     riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a))
       = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
   classical
@@ -1498,7 +1530,19 @@ private theorem radial_riemannianEDist_eq_radius
     rw [radialCurve_pathELength_eq (I := I) g p a hEnorm ha_eucl]
   exact le_antisymm hle hge
 
-omit [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+theorem edist_exp_eq_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {a : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha_small : Real.sqrt (g.inner p a a) < expRadiusGp (I := I) g p) :
+    riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a))
+      = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  have ha_eucl : ‖a‖ < expMapC2Radius (I := I) g p :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p ha_small
+  exact radial_riemannianEDist_eq_radius (I := I) g p hEnorm
+    (mem_expDomain_of_norm_lt_radius (I := I) g p ha_eucl)
+    (ball_subset_normalChartAt_target (I := I) g p ha_eucl) ha_small
+
 private theorem exists_forward_confinement_to_smallBall
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} {t₀ : ℝ}
     (hγ : CMDiff[Set.Icc a b] 1 γ) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -1510,7 +1554,7 @@ private theorem exists_forward_confinement_to_smallBall
         Real.sqrt (g.inner q
             (NormalCoordinates.normalChartAt (I := I) g q (γ t))
             (NormalCoordinates.normalChartAt (I := I) g q (γ t)))
-          < metricCoerciveExpRadius (I := I) g q) := by
+          < expRadiusGp (I := I) g q) := by
   classical
   set ψ := NormalCoordinates.normalChartAt (I := I) g q with hψ_def
   set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner q with hB_def
@@ -1544,16 +1588,16 @@ private theorem exists_forward_confinement_to_smallBall
         fun t ht => ht.2
       exact (hψcont _ hγt₀_src).comp h1 hmaps
     exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
-  have hR_pos : 0 < metricCoerciveExpRadius (I := I) g q := expRadiusGp_pos (I := I) g q
-  have hρ_small_nhds : {t | ρ t < metricCoerciveExpRadius (I := I) g q} ∈
+  have hR_pos : 0 < expRadiusGp (I := I) g q := expRadiusGp_pos (I := I) g q
+  have hρ_small_nhds : {t | ρ t < expRadiusGp (I := I) g q} ∈
       nhdsWithin t₀ (Set.Icc a b ∩ γ ⁻¹' ψ.source) := by
-    have : Set.Iio (metricCoerciveExpRadius (I := I) g q) ∈ nhds (ρ t₀) := by
+    have : Set.Iio (expRadiusGp (I := I) g q) ∈ nhds (ρ t₀) := by
       rw [hρt₀]; exact isOpen_Iio.mem_nhds hR_pos
     exact hρ_contWithin this
-  have hS_nhds : {t | γ t ∈ ψ.source ∧ ρ t < metricCoerciveExpRadius (I := I) g q} ∈
+  have hS_nhds : {t | γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q} ∈
       nhdsWithin t₀ (Set.Icc a b) := by
     have hpre_nhds' : (γ ⁻¹' ψ.source) ∈ nhdsWithin t₀ (Set.Icc a b) := hpre_nhds
-    have hρ_in_Icc : {t | ρ t < metricCoerciveExpRadius (I := I) g q} ∈
+    have hρ_in_Icc : {t | ρ t < expRadiusGp (I := I) g q} ∈
         nhdsWithin t₀ (Set.Icc a b) := by
       rw [show Set.Icc a b ∩ γ ⁻¹' ψ.source
           = (Set.Icc a b) ∩ (γ ⁻¹' ψ.source) from rfl] at hρ_small_nhds
@@ -1563,7 +1607,7 @@ private theorem exists_forward_confinement_to_smallBall
     exact ⟨htpre, htρ⟩
   have ht₀_lt_b : t₀ < b := ht₀.2
   have hIco_sub : Set.Ico t₀ b ⊆ Set.Icc a b := fun t ht => ⟨ht₀.1.le.trans ht.1, ht.2.le⟩
-  have hS_nhds_right : {t | γ t ∈ ψ.source ∧ ρ t < metricCoerciveExpRadius (I := I) g q} ∈
+  have hS_nhds_right : {t | γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q} ∈
       nhdsWithin t₀ (Set.Ico t₀ b) :=
     nhdsWithin_mono t₀ hIco_sub hS_nhds
   rw [nhdsWithin_Ico_eq_nhdsGE ht₀_lt_b, mem_nhdsGE_iff_exists_Ico_subset] at hS_nhds_right
@@ -1577,7 +1621,7 @@ private theorem exists_forward_confinement_to_smallBall
   have hδ_lt_u : t₀ + δ < u := by
     rw [hδ_def]; have := min_le_left ((u - t₀) / 2) (b - t₀); linarith
   have hmemS : ∀ t ∈ Set.Icc t₀ (t₀ + δ),
-      γ t ∈ ψ.source ∧ ρ t < metricCoerciveExpRadius (I := I) g q := by
+      γ t ∈ ψ.source ∧ ρ t < expRadiusGp (I := I) g q := by
     intro t ht
     have ht_Ico : t ∈ Set.Ico t₀ u := ⟨ht.1, lt_of_le_of_lt ht.2 hδ_lt_u⟩
     exact hu_sub ht_Ico
@@ -1613,7 +1657,7 @@ theorem local_radial_identification_of_minimizer
   have hsub_min : riemannianEDist I (γ t₀) (γ (t₀ + δ)) = pathELength I γ t₀ (t₀ + δ) :=
     subArc_of_minimizer_is_minimizer (I := I) hγ hmin hfin hab ht₀_ge_a
       (by linarith) hδ_le_b
-  have hv_small : Real.sqrt (g.inner q v v) < metricCoerciveExpRadius (I := I) g q := by
+  have hv_small : Real.sqrt (g.inner q v v) < expRadiusGp (I := I) g q := by
     have h := hradial_small (t₀ + δ) hδ_endIcc
     rw [hv_def]; exact h
   have hv_eucl : ‖v‖ < expMapC2Radius (I := I) g q :=
@@ -1659,20 +1703,18 @@ theorem local_radial_identification_of_minimizer
     have := hφ_eq (t₀ + s) hs'
     rw [hq_def]; exact this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
-    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-    [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+
 private lemma norm_le_sqrt_inner_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (c : M) (x : E) :
-    ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (metricCoerciveConst (I := I) g c) := by
-  have hc_pos : 0 < metricCoerciveConst (I := I) g c := metricCoerciveConst_pos (I := I) g c
-  have hsc_pos : 0 < Real.sqrt (metricCoerciveConst (I := I) g c) := Real.sqrt_pos.mpr hc_pos
-  have hcoerc : metricCoerciveConst (I := I) g c * ‖x‖ ^ 2 ≤ g.inner c x x :=
-    metricCoerciveConst_le (I := I) g c x
+    ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (gpCoerciveConst (I := I) g c) := by
+  have hc_pos : 0 < gpCoerciveConst (I := I) g c := gpCoerciveConst_pos (I := I) g c
+  have hsc_pos : 0 < Real.sqrt (gpCoerciveConst (I := I) g c) := Real.sqrt_pos.mpr hc_pos
+  have hcoerc : gpCoerciveConst (I := I) g c * ‖x‖ ^ 2 ≤ g.inner c x x :=
+    gpCoerciveConst_le (I := I) g c x
   have hgnn : 0 ≤ g.inner c x x := le_trans (by positivity) hcoerc
-  have hkey : Real.sqrt (metricCoerciveConst (I := I) g c) * ‖x‖ ≤ Real.sqrt (g.inner c x x) := by
-    have hlhs_eq : Real.sqrt (metricCoerciveConst (I := I) g c) * ‖x‖
-        = Real.sqrt (metricCoerciveConst (I := I) g c * ‖x‖ ^ 2) := by
+  have hkey : Real.sqrt (gpCoerciveConst (I := I) g c) * ‖x‖ ≤ Real.sqrt (g.inner c x x) := by
+    have hlhs_eq : Real.sqrt (gpCoerciveConst (I := I) g c) * ‖x‖
+        = Real.sqrt (gpCoerciveConst (I := I) g c * ‖x‖ ^ 2) := by
       rw [Real.sqrt_mul hc_pos.le, Real.sqrt_sq (norm_nonneg x)]
     rw [hlhs_eq]
     exact Real.sqrt_le_sqrt hcoerc
@@ -1684,17 +1726,17 @@ private theorem path_confined_to_normalBall
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     {γ : ℝ → M} (hγ : CMDiff[Set.Icc (0 : ℝ) 1] 1 γ) (hγ0 : γ 0 = c)
-    (hlen : pathELength I γ 0 1 < ENNReal.ofReal (metricCoerciveExpRadius (I := I) g c)) :
+    (hlen : pathELength I γ 0 1 < ENNReal.ofReal (expRadiusGp (I := I) g c)) :
     ∀ t ∈ Set.Icc (0 : ℝ) 1,
       γ t ∈ (NormalCoordinates.normalChartAt (I := I) g c).source ∧
       Real.sqrt (g.inner c
           (NormalCoordinates.normalChartAt (I := I) g c (γ t))
           (NormalCoordinates.normalChartAt (I := I) g c (γ t)))
-        < metricCoerciveExpRadius (I := I) g c := by
+        < expRadiusGp (I := I) g c := by
   classical
   haveI : T2Space M := gauss_t2Space_base (I := I) (M := M)
   haveI : ProperSpace E := FiniteDimensional.proper_rclike (K := ℝ) (E := E)
-  set R : ℝ := metricCoerciveExpRadius (I := I) g c with hR_def
+  set R : ℝ := expRadiusGp (I := I) g c with hR_def
   have hR_pos : 0 < R := expRadiusGp_pos (I := I) g c
   set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
   set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner c with hB_def
@@ -1776,12 +1818,12 @@ private theorem path_confined_to_normalBall
     exact hreal
   have ht₀S : t₀ ∈ S := by
     refine ⟨ht₀Icc, ?_⟩
-    set sc : ℝ := Real.sqrt (metricCoerciveConst (I := I) g c) with hsc_def
-    have hsc_pos : 0 < sc := Real.sqrt_pos.mpr (metricCoerciveConst_pos (I := I) g c)
+    set sc : ℝ := Real.sqrt (gpCoerciveConst (I := I) g c) with hsc_def
+    have hsc_pos : 0 < sc := Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I) g c)
     set r₀ : ℝ := L₀ / sc with hr₀_def
     have hr₀_nn : 0 ≤ r₀ := div_nonneg hL₀_nn hsc_pos.le
     have hR_factored : R = sc * expMapC2Radius (I := I) g c := by
-      rw [hR_def, metricCoerciveExpRadius, hsc_def]
+      rw [hR_def, expRadiusGp, hsc_def]
     have hC2_eq : expMapC2Radius (I := I) g c = R / sc := by
       rw [hR_factored, mul_comm, mul_div_assoc, div_self (ne_of_gt hsc_pos), mul_one]
     have hr₀_lt : r₀ < expMapC2Radius (I := I) g c := by
@@ -1939,7 +1981,7 @@ theorem metricBall_subset_normalBall
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     {y : M} (hfin : riemannianEDist I c y ≠ ⊤)
-    (hy : (riemannianEDist I c y).toReal < metricCoerciveExpRadius (I := I) g c) :
+    (hy : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c) :
     ∃ v : E, v ∈ (NormalCoordinates.normalChartAt (I := I) g c).target ∧
         (show TangentSpace I c from v) ∈ expDomain (I := I) g c ∧
         Real.sqrt (g.inner c (show TangentSpace I c from v) (show TangentSpace I c from v))
@@ -1947,14 +1989,14 @@ theorem metricBall_subset_normalBall
         y = expMap (I := I) g c v := by
   classical
   set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
-  have hlt : riemannianEDist I c y < ENNReal.ofReal (metricCoerciveExpRadius (I := I) g c) :=
+  have hlt : riemannianEDist I c y < ENNReal.ofReal (expRadiusGp (I := I) g c) :=
     (ENNReal.lt_ofReal_iff_toReal_lt hfin).mpr hy
   obtain ⟨γ, hγ0, hγ1, hγ, hγlen⟩ := exists_lt_of_riemannianEDist_lt hlt
   obtain ⟨hy_src, hy_rad⟩ :=
     path_confined_to_normalBall (I := I) g c hEnorm hγ hγ0 hγlen 1 ⟨zero_le_one, le_rfl⟩
   rw [hγ1] at hy_src hy_rad
   set v : E := ψ y with hv_def
-  have hv_small : Real.sqrt (g.inner c v v) < metricCoerciveExpRadius (I := I) g c := hy_rad
+  have hv_small : Real.sqrt (g.inner c v v) < expRadiusGp (I := I) g c := hy_rad
   have hv_eucl : ‖v‖ < expMapC2Radius (I := I) g c :=
     norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g c hv_small
   have hv_ball : v ∈ ψ.target := by
@@ -1976,6 +2018,28 @@ theorem metricBall_subset_normalBall
   have hdy : riemannianEDist I c y = ENNReal.ofReal (Real.sqrt (g.inner c v v)) := by
     rw [hy_eq]; exact hdist_eq
   rw [hdy, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
+
+theorem memNChartSrcOfDist
+    (g : SmoothRiemannianMetric I M) (c : M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {y : M} (hfin : riemannianEDist I c y ≠ ⊤)
+    (hy : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c) :
+    y ∈ (NormalCoordinates.normalChartAt (I := I) g c).source := by
+  obtain ⟨v, hv_tgt, _hv_dom, _hv_len, hy_eq⟩ :=
+    metricBall_subset_normalBall (I := I) g c hEnorm hfin hy
+  set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
+  have hv_symm_src : v ∈ ψ.symm.source := by
+    rw [hψ_def]
+    exact hv_tgt
+  have hy_symm : ψ.symm v = y := by
+    rw [hy_eq]
+    rw [hψ_def]
+    exact NormalCoordinates.normalChartAt_symm_apply (I := I) g c hv_symm_src
+  have hsrc : ψ.symm v ∈ ψ.source := by
+    exact ψ.symm.map_source hv_symm_src
+  rw [← hy_symm]
+  exact hsrc
 
 end LocalRadialIdentification
 

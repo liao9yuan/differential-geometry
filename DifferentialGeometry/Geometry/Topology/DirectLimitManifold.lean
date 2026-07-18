@@ -13,31 +13,31 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# The direct-limit manifold
 
-The smooth structure on the sequential topological direct limit
-`Geometry/Topology/DirectLimit.lean` (`SeqSystem`, `Lim`, `incl`, …) when the factors
-`A k` are `C^∞` manifolds modelled on `(I, H, E)` and the transition maps `S.F h` are
-`C^∞` diffeomorphisms onto their open images.  This is MSM135 Chapter 4 Step D, D3
-(`lbl408`, the limit manifold `M∞ := dirlim B(O_k, 2^k)`), built purely against the
-abstract `SeqSystem` engine — it carries **no** Step A/B/C imports.
 
-Charts on `S.Lim`: every representative `⟨k, a⟩` supplies an admissible chart
-`chartAt H a ∘ (incl k)⁻¹`, an `OpenPartialHomeomorph S.Lim H` with source
-`incl k '' (chartAt H a).source` (open because `incl k` is an open embedding).
-`ChartedSpace.chartAt` chooses one such representative chart by `Classical.choose`; the
-mathematical content is not literal representative independence, but smooth compatibility of all
-stage charts on overlaps.  The transition between two such charts is the factor-level transition
-`(incl ℓ)⁻¹ ∘ (incl k)` written in the factor charts; on a common later stage `m ≥ k, ℓ` this is
-`Function.invFun (F_{ℓ≤m}) ∘ F_{k≤m}` on the subset where the latter lands in `range (F_{ℓ≤m})`.
-It is smooth because the `S.F` are smooth and have smooth inverses on their open ranges, giving
-`IsManifold I ∞ S.Lim`.
 
-## Layout
-* `SeqSystem.inclHomeo`, `SeqSystem.limChart`, `SeqSystem.instChartedSpaceLim` — D3a.
-* `SmoothSeqSystem` + `IsManifold` — D3b.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -58,8 +58,8 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, Nonempty (A k)]
 variable (S : SeqSystem A)
 
-/-- The stage inclusion `incl k : A k → Lim` as an open partial homeomorphism of `A k`
-onto its open range in `Lim`. -/
+
+
 def inclHomeo (k : ℕ) : OpenPartialHomeomorph (A k) S.Lim :=
   (S.incl_isOpenEmb k).toOpenPartialHomeomorph (S.incl k)
 
@@ -75,10 +75,10 @@ theorem inclHomeo_symm_apply (k : ℕ) (x : A k) :
     (S.inclHomeo k).symm (S.incl k x) = x :=
   (S.incl_isOpenEmb k).toOpenPartialHomeomorph_left_inv (S.incl k)
 
-/-- A stage-supplied chart of `Lim` from stage `k` and factor point `a`: `chartAt H a`
-precomposed with the inverse of the stage inclusion, an `OpenPartialHomeomorph Lim H`.
-All such representative charts enter the atlas; `chartAt` later chooses one, while compatibility
-is proved by chart-transition smoothness. -/
+
+
+
+
 def limChart (k : ℕ) (a : A k) : OpenPartialHomeomorph S.Lim H :=
   (S.inclHomeo k).symm.trans (chartAt H a)
 
@@ -92,21 +92,21 @@ theorem mem_limChart_source (k : ℕ) (a : A k) :
     rw [inclHomeo_symm_apply]
     exact mem_chart_source H a
 
-/-- A representative `⟨k, a⟩` with `incl k a = z`, chosen for the `chartAt`. -/
+
 theorem exists_sigma_incl (z : S.Lim) : ∃ p : Σ k, A k, S.incl p.1 p.2 = z := by
   obtain ⟨k, x, hx⟩ := S.exists_incl_eq z
   exact ⟨⟨k, x⟩, hx⟩
 
-/-- A chosen stage representative of a limit point. -/
+
 def rep (z : S.Lim) : Σ k, A k := (S.exists_sigma_incl z).choose
 
 theorem incl_rep (z : S.Lim) : S.incl (S.rep z).1 (S.rep z).2 = z :=
   (S.exists_sigma_incl z).choose_spec
 
-/-- **D3a: the direct limit of `H`-charted manifold factors is `H`-charted.**
-The atlas contains every stage-supplied chart.  The distinguished `chartAt` uses one chosen
-representative of the quotient point only to inhabit the `ChartedSpace` field; compatibility is
-handled later by overlap transitions, not by making this chosen chart canonical. -/
+
+
+
+
 instance instChartedSpaceLim : ChartedSpace H S.Lim where
   atlas := ⋃ (k : ℕ), ⋃ (a : A k), {S.limChart k a}
   chartAt z := S.limChart (S.rep z).1 (S.rep z).2
@@ -131,19 +131,19 @@ theorem mem_atlas_iff {e : OpenPartialHomeomorph S.Lim H} :
   change e ∈ ⋃ (k : ℕ) (a : A k), {S.limChart k a} ↔ _
   simp only [mem_iUnion, mem_singleton_iff]
 
-/-- **D3c (part): the limit is σ-compact** when the factors are (engine `SeqSystem.sigmaCompact`). -/
+
 instance instSigmaCompactSpaceLim [∀ k, SigmaCompactSpace (A k)] :
     SigmaCompactSpace S.Lim := S.sigmaCompact
 
-/-- **D3c (part): the limit is Hausdorff** when the factors are (engine `SeqSystem.t2Space`). -/
+
 instance instT2SpaceLim [∀ k, T2Space (A k)] : T2Space S.Lim := S.t2Space
 
 instance instNonemptyLim : Nonempty S.Lim :=
   ⟨S.incl 0 (Classical.arbitrary (A 0))⟩
 
-/-- **The limit of preconnected factors is preconnected** (needed by the Step D endpoint's
-`hconn` and the D5 completeness argument): the stage ranges are a monotone union of preconnected
-open sets all containing the stage-`0` points. -/
+
+
+
 instance instPreconnectedLim [∀ k, PreconnectedSpace (A k)] :
     PreconnectedSpace S.Lim := by
   constructor
@@ -161,8 +161,8 @@ instance instConnectedSpaceLim [∀ k, PreconnectedSpace (A k)] :
   toPreconnectedSpace := S.instPreconnectedLim
   toNonempty := S.instNonemptyLim
 
-/-- The factor transition `A k ⇢ A ℓ` through the limit (MSM135 `lbl409`): `(incl ℓ)⁻¹ ∘ (incl k)`,
-an open partial homeomorphism with source `(incl k)⁻¹'(range (incl ℓ))`. -/
+
+
 def transitionHomeo (k ℓ : ℕ) : OpenPartialHomeomorph (A k) (A ℓ) :=
   (S.inclHomeo k).trans (S.inclHomeo ℓ).symm
 
@@ -181,9 +181,9 @@ theorem incl_transitionHomeo {k ℓ : ℕ} {w : A k} (hw : w ∈ (S.transitionHo
     rw [inclHomeo_target]; exact (S.mem_transitionHomeo_source).mp hw
   rw [transitionHomeo_apply, ← inclHomeo_apply, OpenPartialHomeomorph.right_inv _ hmem]
 
-/-- **The Lim-chart transition is the factor transition read in the factor charts.**  The atlas
-transition `(limChart k a)⁻¹ ≫ (limChart ℓ b)` equals `(chartAt a)⁻¹ ≫ (transition A k ⇢ A ℓ) ≫
-(chartAt b)` — the book `lbl409` local expression, on the nose (`trans` is associative). -/
+
+
+
 theorem limChart_symm_trans (k ℓ : ℕ) (a : A k) (b : A ℓ) :
     (S.limChart k a).symm.trans (S.limChart ℓ b)
       = ((chartAt H a).symm.trans (S.transitionHomeo k ℓ)).trans (chartAt H b) := by
@@ -194,24 +194,24 @@ end Charted
 
 end SeqSystem
 
-/-- A `SeqSystem` whose factors are `C^∞` manifolds modelled on the same `(I, H)` and whose
-transition maps are smooth diffeomorphisms onto open images.
 
-The topological half is inherited from `SeqSystem.isOpenEmb`; the two fields below add the smooth
-forward map and the smooth inverse on `range (F h)`.  This is stronger than a merely smooth open
-topological embedding and is the honest data needed for the limit atlas transitions.  Ricci-flow
-side conditions such as finite-dimensionality, Hausdorff/sigma-compact stages, and boundaryless
-metric-distance assumptions are kept on the later consumers that actually need them, not on this
-bare smooth direct-limit structure.
 
-Do not weaken this to `IsOpenEmbedding` plus `ContMDiff`: on `ℝ`, the map `x ↦ x^3` is a smooth
-open topological embedding onto all of `ℝ`, but its inverse is not `C^1` at `0`; the stage charts
-would have a cube-root transition and would not form a smooth atlas.
 
-The use of `Function.invFun` is intentionally range-scoped.  Outside `range (F h)` it is arbitrary,
-so downstream theorems must keep inverse smoothness, continuity, and evaluation facts restricted
-to the range, or package the same data as a partial diffeomorphism/local diffeomorphism onto the
-open image. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 structure SmoothSeqSystem
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type uH} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -222,9 +222,9 @@ structure SmoothSeqSystem
   contMDiffOn_invFun_F : ∀ {k ℓ : ℕ} (h : k ≤ ℓ),
     ContMDiffOn I I ∞ (Function.invFun (toSeqSystem.F h)) (Set.range (toSeqSystem.F h))
 
-/-- **Model-space bridge.**  A partial self-map of the model space `H` that is manifold-`C^∞` on a
-set is `C^∞` in the model chart (where `extChartAt I _ = I`), in exactly the `contDiffPregroupoid`
-form that `isManifold_of_contDiffOn` consumes. -/
+
+
+
 theorem modelSpace_contDiffOn
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type uH} [TopologicalSpace H] [Nonempty H] {I : ModelWithCorners ℝ E H}
@@ -257,7 +257,7 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
 variable (S : SmoothSeqSystem I A)
 
-/-- Adjacent smooth maps have smooth `Nat.leRecOn` composites. -/
+
 theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
     (hf : ∀ k, ContMDiff I I ∞ (f k)) {k ℓ : ℕ} (h : k ≤ ℓ) :
     ContMDiff I I ∞ (SeqSystem.succMap f h) := by
@@ -277,8 +277,8 @@ theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
       rw [hfun]
       exact (hf ℓ).comp ih
 
-/-- The inverse of an adjacent-map composite is smooth on its range when every adjacent inverse
-is smooth on its own range. -/
+
+
 theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
     (hfInv : ∀ k, ContMDiffOn I I ∞ (Function.invFun (f k)) (Set.range (f k)))
@@ -331,8 +331,8 @@ theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
       change Function.invFun (f ℓ ∘ prev) ((f ℓ ∘ prev) x) = x
       exact Function.leftInverse_invFun htotal x
 
-/-- Build a smooth sequential system from adjacent smooth open embeddings whose inverses are
-smooth on their open ranges. -/
+
+
 def ofSucc (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
     (hf : ∀ k, ContMDiff I I ∞ (f k))
@@ -342,7 +342,7 @@ def ofSucc (f : ∀ k, A k → A (k + 1))
   contMDiff_F h := succMap_contMDiff f hf h
   contMDiffOn_invFun_F h := succMap_inv_mdiff f hemb hfInv h
 
-/-- The transition of `ofSucc` from `k` to `k+1` is the supplied adjacent map. -/
+
 @[simp] theorem ofSucc_F_succ (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
     (hf : ∀ k, ContMDiff I I ∞ (f k))
@@ -355,25 +355,25 @@ def ofSucc (f : ∀ k, A k → A (k + 1))
   rw [show Nat.le_succ k = Nat.le.step (Nat.le_refl k) by rfl,
     Nat.leRecOn_succ (Nat.le_refl k) x, Nat.leRecOn_self]
 
-/-- **D3b crux (MSM135 `lbl409`): the factor transition `A k ⇢ A ℓ` is `C^∞` on its domain.**  On the
-overlap it factors through the common stage `m = max k ℓ` as
-`Function.invFun (F_{ℓ≤m}) ∘ F_{k≤m}`, restricted to the subset where `F_{k≤m}` lands in
-`range (F_{ℓ≤m})`. This is the smooth compatibility proof for representative charts, not a
-claim that the chosen `chartAt` is independent of representative. -/
+
+
+
+
+
 theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
     ContMDiffOn I I ∞ (S.toSeqSystem.transitionHomeo k ℓ)
       (S.toSeqSystem.transitionHomeo k ℓ).source := by
   set m := max k ℓ with hm
   have hkm : k ≤ m := le_max_left k ℓ
   have hℓm : ℓ ≤ m := le_max_right k ℓ
-  -- On the overlap `F_{ℓ≤m} (τ w) = F_{k≤m} w`, by `incl`-injectivity at stage `m`.
+
   have hFeq : ∀ w ∈ (S.toSeqSystem.transitionHomeo k ℓ).source,
       S.toSeqSystem.F hℓm (S.toSeqSystem.transitionHomeo k ℓ w) = S.toSeqSystem.F hkm w := by
     intro w hw
     apply S.toSeqSystem.incl_injective m
     rw [S.toSeqSystem.incl_comp hℓm, S.toSeqSystem.incl_comp hkm,
       S.toSeqSystem.incl_transitionHomeo hw]
-  -- Pointwise: `τ w = (F_{ℓ≤m})⁻¹ (F_{k≤m} w)`.
+
   have hpt : ∀ w ∈ (S.toSeqSystem.transitionHomeo k ℓ).source,
       S.toSeqSystem.transitionHomeo k ℓ w
         = (Function.invFun (S.toSeqSystem.F hℓm) ∘ S.toSeqSystem.F hkm) w := by
@@ -382,7 +382,7 @@ theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
       (S.toSeqSystem.F hkm w)
     rw [← hFeq w hw,
       Function.leftInverse_invFun (S.toSeqSystem.isOpenEmb hℓm).injective]
-  -- Range membership for the composition domain.
+
   have hrange : (S.toSeqSystem.transitionHomeo k ℓ).source ⊆
       S.toSeqSystem.F hkm ⁻¹' range (S.toSeqSystem.F hℓm) := by
     intro w hw
@@ -390,11 +390,11 @@ theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
   refine ContMDiffOn.congr ?_ (fun w hw => hpt w hw)
   exact (S.contMDiffOn_invFun_F hℓm).comp ((S.contMDiff_F hkm).contMDiffOn) hrange
 
-/-- **D3b: the direct-limit space is a `C^∞` manifold** (MSM135 `lbl408`).  Each atlas transition
-`(limChart k a)⁻¹ ≫ (limChart ℓ b)` is the factor transition `A k ⇢ A ℓ` written in the factor
-charts (`limChart_symm_trans`); it is `C^∞` because the factor charts are and the factor transition
-is (`transitionHomeo_contMDiffOn`), and the model-space bridge (`modelSpace_contDiffOn`) turns that
-into the `contDiffGroupoid` compatibility that `isManifold_of_contDiffOn` needs. -/
+
+
+
+
+
 instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   haveI : Nonempty H :=
     ⟨chartAt H (Classical.arbitrary (A 0)) (Classical.arbitrary (A 0))⟩
@@ -406,7 +406,7 @@ instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   set T' := ((chartAt H a).symm.trans (S.toSeqSystem.transitionHomeo k ℓ)).trans (chartAt H b)
     with hT'
   apply modelSpace_contDiffOn
-  -- `ContMDiffOn I I ∞ ⇑T' T'.source`, from chart-symm ∘ transition ∘ chart.
+
   have key : ContMDiffOn I I ∞
       (⇑(chartAt H b) ∘ ⇑(S.toSeqSystem.transitionHomeo k ℓ) ∘ ⇑(chartAt H a).symm)
       (((chartAt H a).target ∩ (chartAt H a).symm ⁻¹' (S.toSeqSystem.transitionHomeo k ℓ).source) ∩
@@ -422,10 +422,10 @@ instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   rw [hT']
   simp only [OpenPartialHomeomorph.coe_trans, Function.comp_apply]
 
-/-- **The stage inclusion `incl k : A k → S.Lim` is `C^∞`.**  In the atlas it reads as the identity
-(`limChart k a ∘ incl k = chartAt a`), so it factors locally as `(limChart k a).symm ∘ chartAt a`,
-a composition of `C^∞` (maximal-atlas) charts.  A prerequisite for D3d (metric transport along the
-open embeddings) and D4 (the convergence comparison maps `incl_k⁻¹`). -/
+
+
+
+
 theorem contMDiff_incl (k : ℕ) : ContMDiff I I ∞ (S.toSeqSystem.incl k) := by
   intro a
   have hchart : ContMDiffAt I I ∞ (chartAt H a) a :=
@@ -459,26 +459,26 @@ theorem contMDiff_incl (k : ℕ) : ContMDiff I I ∞ (S.toSeqSystem.incl k) := b
 
 section MetricTransport
 
-/-! ### D3d: metric transport to the limit (MSM135 `lbl408`, the metric `g∞`)
 
-Per-factor smooth Riemannian metrics `g k` satisfying the isometry cocycle `(F h)^* g ℓ = g k`
-(`MetricCocycle`) glue to a smooth Riemannian metric on `S.Lim` with `(incl k)^* g∞ = g k`
-(`limitMetric` / `limitMetric_pullback`).  The cocycle is the real tangent-level statement:
-pointwise equality of inner products after applying the actual differential `mfderiv (F h)` to
-both tangent vectors; set-level or distance-level compatibility would not glue smooth Riemannian
-tensor fields.  The fiberwise definition pulls `g k` back along the
-smooth local inverse `Function.invFun (incl k)` of the open embedding `incl k` (so no derivative
-inverses appear); stage-independence is the cocycle compared through a common later stage (the
-`transitionHomeo` technique of D3b); smoothness of the metric section is the test-section engine
-`cotangentCov_clmSection_smooth_aux` plus `tangentMapWithin` smoothness of the local inverse. -/
+
+
+
+
+
+
+
+
+
+
+
 
 variable [FiniteDimensional ℝ E]
 variable [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
 open Bundle
 
-/-- Chain rule for a one-sided inverse: if `g' ∘ f` agrees with `id` near `x`, the manifold
-derivatives compose to the identity. -/
+
+
 private theorem mfd_comp_id
     {M₁ : Type*} [TopologicalSpace M₁] [ChartedSpace H M₁]
     {M₂ : Type*} [TopologicalSpace M₂] [ChartedSpace H M₂]
@@ -501,15 +501,15 @@ private theorem mfd_comp_id_app
   have h := DFunLike.congr_fun (mfd_comp_id (I := I) hfg hg hf) v
   simpa using h
 
-/-- Transport of an inner product across a propositional equality of base points; the tangent
-spaces are definitionally `E`, so the applied scalars are comparable. -/
+
+
 private theorem inner_base_eq
     {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H M₀] [IsManifold I ∞ M₀]
     (g₀ : SmoothRiemannianMetric I M₀) {x y : M₀} (hxy : x = y) (v w : E) :
     (g₀.inner x : E →L[ℝ] E →L[ℝ] ℝ) v w = (g₀.inner y : E →L[ℝ] E →L[ℝ] ℝ) v w := by
   subst hxy; rfl
 
-/-- Transport of an applied manifold derivative across a propositional equality of base points. -/
+
 private theorem mfd_base_eq
     {M₁ : Type*} [TopologicalSpace M₁] [ChartedSpace H M₁]
     {M₂ : Type*} [TopologicalSpace M₂] [ChartedSpace H M₂]
@@ -517,9 +517,9 @@ private theorem mfd_base_eq
     (mfderiv I I f x : E →L[ℝ] E) v = (mfderiv I I f y : E →L[ℝ] E) v := by
   subst hxy; rfl
 
-/-- **The local inverse of the stage inclusion is `C^∞` on the (open) range.**  On the chart
-source it agrees with `(chartAt H a).symm ∘ limChart k a`.  No smoothness or definitional behavior
-of `Function.invFun (incl k)` is used away from `range (incl k)`. -/
+
+
+
 theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
     ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k)) z := by
@@ -539,7 +539,7 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
   refine (hsymm.comp _ hchart).congr_of_eventuallyEq ?_
   filter_upwards [(S.toSeqSystem.limChart (H := H) k a).open_source.mem_nhds
     (S.toSeqSystem.mem_limChart_source (H := H) k a)] with z' hz'
-  -- decompose `z' ∈ (limChart k a).source`
+
   rw [SeqSystem.limChart, OpenPartialHomeomorph.trans_source] at hz'
   obtain ⟨hz'r, hz'c⟩ := hz'
   rw [OpenPartialHomeomorph.symm_source, S.toSeqSystem.inclHomeo_target] at hz'r
@@ -548,7 +548,7 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
       (by rw [S.toSeqSystem.inclHomeo_target]; exact hz'r)
     rwa [← S.toSeqSystem.inclHomeo_apply]
   have hmem_c : (S.toSeqSystem.inclHomeo k).symm z' ∈ (chartAt H a).source := hz'c
-  -- both sides evaluate to the factor point
+
   rw [← hz'eq, Function.leftInverse_invFun (S.toSeqSystem.incl_injective k)]
   change (S.toSeqSystem.inclHomeo k).symm z'
     = ((chartAt H a).symm ∘ (S.toSeqSystem.limChart k a)) (S.toSeqSystem.incl k _)
@@ -559,11 +559,11 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
     rw [OpenPartialHomeomorph.trans_apply, SeqSystem.inclHomeo_symm_apply]
   simp only [Function.comp_apply, hval, (chartAt H a).left_inv hmem_c]
 
-/-- **The inverse of a stage inclusion, packaged as a `PartialDiffeomorph S.Lim → A k`** with
-source the (open) stage range and target everything (MSM135 Step D4a: the Cheeger–Gromov
-comparison maps `Φ_k := (incl k)⁻¹`).  Forward smoothness is `contMDiffAt_invIncl`, inverse
-smoothness is `contMDiff_incl`.  This is the preferred API when the inverse domain matters:
-the raw `Function.invFun` remains arbitrary off the source. -/
+
+
+
+
+
 noncomputable def inclPartialDiffeo (k : ℕ) :
     PartialDiffeomorph I I S.toSeqSystem.Lim (A k) (∞ : WithTop ℕ∞) where
   toFun := Function.invFun (S.toSeqSystem.incl k)
@@ -585,34 +585,34 @@ noncomputable def inclPartialDiffeo (k : ℕ) :
 @[simp] theorem inclPartialDiffeo_apply (k : ℕ) (z : S.toSeqSystem.Lim) :
     S.inclPartialDiffeo k z = Function.invFun (S.toSeqSystem.incl k) z := rfl
 
-/-- Transport of an earlier-stage point under the comparison map: `(incl k)⁻¹ ∘ incl j = F_{j≤k}`
-pointwise (the D4a basepoint condition). -/
+
+
 theorem invIncl_incl_le {j k : ℕ} (hjk : j ≤ k) (a : A j) :
     Function.invFun (S.toSeqSystem.incl k) (S.toSeqSystem.incl j a)
       = S.toSeqSystem.F hjk a := by
   conv_lhs => rw [← S.toSeqSystem.incl_comp hjk a]
   exact Function.leftInverse_invFun (S.toSeqSystem.incl_injective k) _
 
-/-- **The isometry cocycle (D2c's conclusion shape).**  The transition maps `F h` pull the later
-metric back to the earlier one; this is the hypothesis under which the direct limit carries the
-limit metric `g∞`.
 
-This is the genuine Riemannian cocycle: at every `a : A k`, it compares the two inner products
-after applying the actual manifold differential `mfderiv I I (S.toSeqSystem.F h) a` to both tangent
-vectors.  A statement only about set images, quotient representatives, distances, or ball
-compatibility is not strong enough for the smooth metric gluing below.
 
-Honest-input note: this is a hypothesis of an abstract gluing lemma, not a project axiom.  It is
-mathematically satisfiable at book scale — MSM135 `lbl407` (Step D2c) produces exactly this
-statement for consecutive stages and functoriality (`map_map` + the chain rule) extends it to all
-`h : k ≤ ℓ`; it is discharged by the D2 limit-metric extraction when the Step D lanes are joined. -/
+
+
+
+
+
+
+
+
+
+
+
 def MetricCocycle (g : ∀ k, SmoothRiemannianMetric I (A k)) : Prop :=
   ∀ ⦃k ℓ : ℕ⦄ (h : k ≤ ℓ) (a : A k) (v w : TangentSpace I a),
     (g ℓ).inner (S.toSeqSystem.F h a)
       (mfderiv I I (S.toSeqSystem.F h) a v) (mfderiv I I (S.toSeqSystem.F h) a w)
       = (g k).inner a v w
 
-/-- It suffices to verify the metric cocycle on adjacent transition maps. -/
+
 theorem MetricCocycle.ofSucc (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hstep : ∀ k (a : A k) (v w : TangentSpace I a),
       (g (k + 1)).inner (S.toSeqSystem.F (Nat.le_succ k) a)
@@ -662,8 +662,8 @@ theorem MetricCocycle.ofSucc (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderiv I I (S.toSeqSystem.F hkl) a w)
         _ = (g k).inner a v w := ih a v w
 
-/-- The stage-`k` candidate for the limit inner product at `z`: the pullback of `g k` along the
-local inverse of `incl k` (junk off the range of `incl k`). -/
+
+
 noncomputable def stageInner (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     (z : S.toSeqSystem.Lim) :
     TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] ℝ :=
@@ -751,9 +751,9 @@ theorem stageInner_bounded (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
   rw [hset]
   exact ((g k).isVonNBounded _).image _
 
-/-- **Stage monotonicity (the D3b `transitionHomeo` technique):** below a later stage the two
-pullback candidates agree — `F ∘ (incl k)⁻¹` agrees near the range of `incl k` with `(incl m)⁻¹`,
-and the cocycle transports the inner products. -/
+
+
+
 theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     {k m : ℕ} (hkm : k ≤ m) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
@@ -769,7 +769,7 @@ theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Metr
       = S.toSeqSystem.F hkm a := by
     conv_lhs => rw [← hcomp]
     exact Function.leftInverse_invFun hinjm _
-  -- forward factorization: `F ∘ (incl k)⁻¹ =ᶠ (incl m)⁻¹` near the point
+
   have hev : (S.toSeqSystem.F hkm) ∘ (Function.invFun (S.toSeqSystem.incl k))
       =ᶠ[nhds (S.toSeqSystem.incl k a)] Function.invFun (S.toSeqSystem.incl m) := by
     filter_upwards [(S.toSeqSystem.incl_isOpenEmb k).isOpen_range.mem_nhds ⟨a, rfl⟩] with z' hz'
@@ -781,7 +781,7 @@ theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Metr
     rw [Function.leftInverse_invFun hinjm _]
   have hφk_at : ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k))
       (S.toSeqSystem.incl k a) := S.contMDiffAt_invIncl k ⟨a, rfl⟩
-  -- derivative factorization
+
   have hD : (mfderiv I I (S.toSeqSystem.F hkm)
         (Function.invFun (S.toSeqSystem.incl k) (S.toSeqSystem.incl k a))).comp
       (mfderiv I I (Function.invFun (S.toSeqSystem.incl k)) (S.toSeqSystem.incl k a))
@@ -836,14 +836,14 @@ theorem mem_range_rep (z : S.toSeqSystem.Lim) :
     z ∈ Set.range (S.toSeqSystem.incl (S.toSeqSystem.rep z).1) :=
   ⟨(S.toSeqSystem.rep z).2, S.toSeqSystem.incl_rep z⟩
 
-/-- **D3d — the limit metric `g∞` (MSM135 `lbl408`).**  Per-factor metrics satisfying the isometry
-cocycle glue to a smooth Riemannian metric on the direct limit: at `z` the inner product is the
-pullback of `g k` along the local inverse of any stage inclusion whose range contains `z`
-(stage-independent by `stageInner_congr`).  Smoothness of the metric section is proved through the
-test-section engine (`cotangentCov_clmSection_smooth_aux`) and `tangentMapWithin` smoothness of the
-local inverse on the open range.  This deliberately uses a pointwise representative definition plus
-local formulas on stage ranges, not an abstract sheaf/gluing theorem for smooth metrics.  The
-defining pullback property is `limitMetric_pullback`. -/
+
+
+
+
+
+
+
+
 noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) : SmoothRiemannianMetric I S.toSeqSystem.Lim where
   inner z := S.stageInner g (S.toSeqSystem.rep z).1 z
@@ -860,15 +860,15 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
       (φ := fun z => S.stageInner g (S.toSeqSystem.rep z).1 z (Y z))
     intro W z₀
     rw [Bundle.contMDiffAt_section]
-    -- the trivial-bundle readout is the bare scalar
+
     have hstage : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun z => S.stageInner g (S.toSeqSystem.rep z).1 z (Y z) (W z)) z₀ := by
-      -- localize to the stage of `z₀`
+
       set k₀ := (S.toSeqSystem.rep z₀).1 with hk₀
       have hz₀ : z₀ ∈ Set.range (S.toSeqSystem.incl k₀) := S.mem_range_rep z₀
       have hs_open : IsOpen (Set.range (S.toSeqSystem.incl k₀)) :=
         (S.toSeqSystem.incl_isOpenEmb k₀).isOpen_range
-      -- the stage-`k₀` scalar witness
+
       have hφ : ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k₀)) z₀ :=
         S.contMDiffAt_invIncl k₀ hz₀
       have hg' : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -891,7 +891,7 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
           (Bundle.TotalSpace.proj ⁻¹' (Set.range (S.toSeqSystem.incl k₀)) :
             Set (TangentBundle I S.toSeqSystem.Lim)) :=
         hs_open.preimage (FiberBundle.continuous_proj E (TangentSpace I))
-      -- pulled vector sections: `z ↦ ⟨φ z, dφ_z (Y z)⟩` is smooth at `z₀`
+
       have hsec : ∀ Y' : Cₛ^∞⟮I; E, (TangentSpace I : S.toSeqSystem.Lim → Type _)⟯,
           ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
             (fun z => TotalSpace.mk' E (E := fun b : A k₀ => TangentSpace I b)
@@ -915,7 +915,7 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderivWithin I I (Function.invFun (S.toSeqSystem.incl k₀))
               (Set.range (S.toSeqSystem.incl k₀)) z (Y' z))
         rw [mfderivWithin_of_isOpen hs_open hz]
-      -- combine into the scalar section over the base map `φ`
+
       have h_total : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) ∞
           (fun z => TotalSpace.mk' ℝ (E := Bundle.Trivial (A k₀) ℝ)
             (Function.invFun (S.toSeqSystem.incl k₀) z)
@@ -933,7 +933,7 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderiv I I (Function.invFun (S.toSeqSystem.incl k₀)) z (W z))) z₀ := by
         rw [contMDiffAt_totalSpace] at h_total
         convert h_total.2 using 1
-      -- the limit scalar agrees with the stage-`k₀` scalar on the open range
+
       refine h_scalar.congr_of_eventuallyEq ?_
       filter_upwards [hs_open.mem_nhds hz₀] with z hz
       rw [show S.stageInner g (S.toSeqSystem.rep z).1 z = S.stageInner g k₀ z from
@@ -943,8 +943,8 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
     filter_upwards with y
     rfl
 
-/-- **The defining pullback property `(incl k)^* g∞ = g k`** (MSM135 `lbl408`): under the stage
-inclusion derivative, the limit metric restricts to the stage metric. -/
+
+
 theorem limitMetric_pullback (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) (k : ℕ) (a : A k) (v w : TangentSpace I a) :
     (S.limitMetric g hg).inner (S.toSeqSystem.incl k a)
@@ -970,8 +970,8 @@ theorem limitMetric_pullback (g : ∀ k, SmoothRiemannianMetric I (A k))
   rw [happ v, happ w]
   exact inner_base_eq (g k) hφk v w
 
-/-- On the range of a stage inclusion, the glued metric is the pullback of that stage metric
-along the smooth local inverse of the inclusion. -/
+
+
 theorem limitMetric_of_mem (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) (k : ℕ) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) (v w : TangentSpace I z) :
@@ -986,11 +986,11 @@ theorem limitMetric_of_mem (g : ∀ k, SmoothRiemannianMetric I (A k))
 
 end MetricTransport
 
-/-- **D3c (completed): the tangent bundle of the limit manifold is Hausdorff.**  The general
-`FiberBundle.t2Space_totalSpace` applies — the base `S.Lim` is `T2` (`instT2SpaceLim`) and the fibre
-`E` is a normed space hence `T2`; the tangent bundle's `FiberBundle` structure needs `C¹`, obtained
-by lowering the `C^∞` manifold structure.  This is the field the `PointedRiemannianManifold` bundle
-(D3e) carries as `t2TangentBundle`. -/
+
+
+
+
+
 instance instT2SpaceTangentBundleLim [∀ k, T2Space (A k)] :
     T2Space (TangentBundle I S.toSeqSystem.Lim) := by
   haveI : IsManifold I 1 S.toSeqSystem.Lim :=

@@ -2,13 +2,13 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 
-/-!
-# Local-frame regularity for tensor sections
 
-This module contains tensor-section smoothness utilities that do not depend on
-nabla: chart-constant tensor sections, fixed-chart model representatives, and
-smooth evaluation of tensor and Hom sections on locally smooth slots.
--/
+
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -190,11 +190,11 @@ theorem tensorRS_eval_contMDiffAt {r s : ℕ}
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of a `(0,s)` tensor field evaluated on the chart-constant
-tangent fields from `trivializationAt E (TangentSpace I) x₀`.
 
-This is the tensor-layer replacement for the coordinate-frame coefficient
-smoothness lemma. -/
+
+
+
+
 theorem tensor0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

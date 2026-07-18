@@ -136,11 +136,27 @@ noncomputable def smoothOrthoFrame
 noncomputable def smoothOrthoFrameNbhd (α : M) : Set M :=
   {b : M | (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1}
 
+noncomputable def smoothOrthoOpen (α : M) : Set M :=
+  interior (smoothOrthoFrameNbhd (I := I) (M := M) α)
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+lemma smoothOrthoOpen_open (α : M) :
+    IsOpen (smoothOrthoOpen (I := I) (M := M) α) := by
+  exact isOpen_interior
+
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_mem_nhds (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ∈ 𝓝 α := by
   classical
   exact (chartBumpAt (I := I) (M := M) α).eventuallyEq_one
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+lemma mem_smoothOrthoOpen (α : M) :
+    α ∈ smoothOrthoOpen (I := I) (M := M) α := by
+  exact mem_interior_iff_mem_nhds.mpr
+    (smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) α)
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma mem_smoothOrthoFrameNbhd_self (α : M) :
@@ -685,6 +701,32 @@ theorem smoothOrthoFrame_orthonormal
   exact smoothOrthoFrame_orthonormal_of_chartFrameNorm (I := I) g α hb i j
     (chartFrameNorm_orthonormal (I := I) g α hb_base i j)
 
+private lemma smoothOrtho_li
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) α) :
+    LinearIndependent ℝ (fun i : Fin (Module.finrank ℝ E) =>
+      smoothOrthoFrame (I := I) g α i b) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have hpair :
+      g.inner b (∑ j, c j • smoothOrthoFrame (I := I) g α j b)
+        (smoothOrthoFrame (I := I) g α i b) = 0 := by
+    rw [hc]
+    simp
+  rw [map_sum, ContinuousLinearMap.sum_apply] at hpair
+  rw [Finset.sum_eq_single i] at hpair
+  · rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply,
+      smoothOrthoFrame_orthonormal (I := I) g α hb i i,
+      if_pos rfl, smul_eq_mul, mul_one] at hpair
+    exact hpair
+  · intro j _ hji
+    rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply,
+      smoothOrthoFrame_orthonormal (I := I) g α hb j i,
+      if_neg (by simpa using hji), smul_zero]
+  · intro hi
+    exact absurd (Finset.mem_univ i) hi
+
 theorem bochner_identity_smoothOrthoFrame_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -1101,6 +1143,39 @@ theorem smoothOrthoFrame_smooth
     rfl
   rw [h_eq]
   exact h
+
+theorem smoothOrtho_isLocal
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    IsLocalFrameOn I E (∞ : WithTop ℕ∞)
+      (smoothOrthoFrame (I := I) g α)
+      (smoothOrthoFrameNbhd (I := I) (M := M) α) where
+  linearIndependent hb := smoothOrtho_li (I := I) g α hb
+  generating := by
+    intro b hb
+    have hcard :
+        Fintype.card (Fin (Module.finrank ℝ E)) =
+          Module.finrank ℝ (TangentSpace I b) := by
+      rw [Fintype.card_fin]
+      rfl
+    exact ge_of_eq
+      ((smoothOrtho_li (I := I) g α hb).span_eq_top_of_card_eq_finrank hcard)
+  contMDiffOn i := (smoothOrthoFrame_smooth (I := I) g α i).contMDiffOn
+
+theorem smoothOrtho_local
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    IsLocalFrameOn I E (∞ : WithTop ℕ∞)
+      (smoothOrthoFrame (I := I) g α)
+      (smoothOrthoOpen (I := I) (M := M) α) :=
+  (smoothOrtho_isLocal (I := I) g α).mono interior_subset
+
+theorem smoothOrtho_localOne
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    IsLocalFrameOn I E (1 : WithTop ℕ∞)
+      (smoothOrthoFrame (I := I) g α)
+      (smoothOrthoOpen (I := I) (M := M) α) where
+  linearIndependent hb := (smoothOrtho_local (I := I) g α).linearIndependent hb
+  generating hb := (smoothOrtho_local (I := I) g α).generating hb
+  contMDiffOn i := (smoothOrtho_local (I := I) g α).contMDiffOn i |>.of_le (by simp)
 
 theorem heart_of_bochner_smoothOrthoFrame [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)

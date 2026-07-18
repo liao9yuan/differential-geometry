@@ -5,13 +5,13 @@ import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.FinCases
 
-/-!
-# Slot algebra for tensor calculations
 
-This file contains geometry-free finite-slot identities used by tensor
-covariant-derivative calculations.  It deliberately mentions only finite index
-types, `Fin.cons`, `Function.update`, and finite sums.
--/
+
+
+
+
+
+
 
 open scoped BigOperators
 
@@ -19,7 +19,7 @@ namespace DifferentialGeometry
 namespace Tensor
 namespace SlotAlgebra
 
-/-- Reindex a sum over three finite slots as an explicit triple sum. -/
+
 lemma sum_fin3_fun_eq_triple
     {R ι : Type*} [CommSemiring R] [Fintype ι]
     (A B C : ι -> R) (K : ι -> ι -> ι -> R) :
@@ -283,7 +283,7 @@ lemma sum_update_finCons_raw
       (F := F) (head := head) (dHead := d 0) (tail := tail)
       (dTail := fun q : Fin s => d q.succ)
 
-/-- Rotate a triple finite sum by moving the last index to the front. -/
+
 lemma sum_rotate3
     {ι κ ι' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
     [AddCommMonoid A] (F : ι → κ → ι' → A) :
@@ -298,7 +298,7 @@ lemma sum_rotate3
     _ = ∑ j : ι', ∑ i : ι, ∑ k : κ, F i k j := by
           rw [Finset.sum_comm]
 
-/-- Rotate a quadruple finite sum by moving the last index to the front. -/
+
 lemma sum_rotate4
     {ι κ ι' κ' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
     [Fintype κ'] [AddCommMonoid A] (F : ι → κ → ι' → κ' → A) :
@@ -315,7 +315,7 @@ lemma sum_rotate4
     _ = ∑ m : κ', ∑ i : ι, ∑ k : κ, ∑ l : ι', F i k l m := by
           rw [sum_rotate3]
 
-/-- Rotate a quadruple finite sum by moving the last two indices to the front. -/
+
 lemma sum_rotate4_two
     {ι κ ι' κ' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
     [Fintype κ'] [AddCommMonoid A] (F : ι → κ → ι' → κ' → A) :
@@ -334,7 +334,7 @@ lemma sum_rotate4_two
           intro l _
           rw [sum_rotate3]
 
-/-- Expand an outer right factor through a double sum and rotate indices. -/
+
 lemma sum_mul_right3
     {ι κ ι' R : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
     [Semiring R] (F : ι → κ → ι' → R) (c : ι' → R) :

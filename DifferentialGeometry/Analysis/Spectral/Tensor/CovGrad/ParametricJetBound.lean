@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
 
-/-!
-# Compact-slab bounds for parametric tensor jets
 
-This file turns joint spacetime smoothness of a fixed-background tensor family
-into one fibre-norm envelope for every spatial covariant-derivative order on a
-fixed compact time slab.  The slab is chosen before the derivative order, so a
-single slab can support an entire family of order-dependent constants.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,8 +36,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-/-- The intrinsic squared fibre norm of a jointly smooth fixed-background
-tensor family is jointly continuous on every smaller time set. -/
+
+
 theorem joint_rfns_cont
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}
@@ -106,8 +106,8 @@ theorem joint_rfns_cont
     (I := I) (M := M) g₀ r s x ((Φ t).toSection x),
     DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
 
-/-- Joint smoothness is preserved by every fixed number of spatial covariant
-derivatives with respect to the fixed background metric. -/
+
+
 theorem covGrad_iter_joint
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -129,8 +129,8 @@ theorem covGrad_iter_joint
       exact covGrad_step_jointContMDiffOn (I := I) (M := M) g₀ r (s + j)
         (fun t => iteratedCovGrad (I := I) g₀ r s j (Φ t)) S ih
 
-/-- Every fixed spatial covariant jet of a jointly smooth tensor family has a
-jointly continuous squared fibre norm on a smaller time set. -/
+
+
 theorem joint_jet_rfns
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}
@@ -150,8 +150,8 @@ theorem joint_jet_rfns
     (covGrad_iter_joint (I := I) (M := M) g₀ r s i Φ S hjoint)
 
 omit [T2Space M] [SigmaCompactSpace M] in
-/-- A jointly continuous scalar family that vanishes at one time
-is eventually uniformly small on a compact spatial factor. -/
+
+
 private theorem joint_small
     (f : ℝ → M → ℝ) {S : Set ℝ} {t₀ : ℝ}
     (hS : S ∈ 𝓝 t₀)
@@ -196,9 +196,9 @@ private theorem joint_small
   obtain ⟨x, hxF, hyW⟩ := Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
   exact hloc x t (ht x hxF) y hyW
 
-/-- Finitely many spatial covariant jets of a jointly smooth fixed-background
-tensor family that vanishes at `t₀` become uniformly small on the compact
-manifold as the parameter tends to `t₀`. -/
+
+
+
 theorem joint_jet_small
     (g₀ : SmoothRiemannianMetric I M) (r s p : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S : Set ℝ} {t₀ : ℝ}
@@ -252,9 +252,9 @@ theorem joint_jet_small
   intro i hip x
   exact ht i (by simp only [Finset.mem_range]; omega) x
 
-/-- On one compact time slab, every spatial covariant-derivative order of a
-jointly smooth fixed-background tensor family has an order-dependent uniform
-intrinsic squared fibre-norm bound. -/
+
+
+
 theorem joint_jet_bdd
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}

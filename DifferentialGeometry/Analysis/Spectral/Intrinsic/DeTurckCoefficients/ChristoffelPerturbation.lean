@@ -920,6 +920,570 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
   refine h_pt.trans ?_
   exact mul_le_mul_of_nonneg_right (by linarith) hjet2_nn
 
+private lemma abs_add_sub_le (A B C : ℝ) :
+    |A + B - C| ≤ |A| + |B| + |C| := by
+  calc
+    |A + B - C| = |A + B + (-C)| := by ring_nf
+    _ ≤ |A + B| + |(-C)| := abs_add_le _ _
+    _ ≤ (|A| + |B|) + |(-C)| := by gcongr; exact abs_add_le _ _
+    _ = |A| + |B| + |C| := by rw [abs_neg]
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+
+theorem gramBracket_abs_le
+    (g : SmoothRiemannianMetric I M) (α : M) (y : E) {Q : ℝ}
+    (hQ : ∀ m a c, |partialDeriv (E := E) m
+      (chartGramOnE (I := I) g α a c) y| ≤ Q)
+    (i j l : Fin (Module.finrank ℝ E)) :
+    |gramBracket (I := I) g α i j l y| ≤ 3 * Q := by
+  unfold gramBracket
+  exact (abs_add_sub_le _ _ _).trans <| by
+    calc
+      |partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y| +
+            |partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y| +
+            |partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y|
+          ≤ Q + Q + Q := add_le_add (add_le_add (hQ i l j) (hQ j l i)) (hQ l i j)
+      _ = 3 * Q := by ring
+
+
+
+theorem christoffel_abs_le
+    (g : SmoothRiemannianMetric I M) (α : M) (y : E)
+    (i j k : Fin (Module.finrank ℝ E)) {M_b Q : ℝ}
+    (hMb_nn : 0 ≤ M_b)
+    (hMb : ∀ l : Fin (Module.finrank ℝ E),
+      |chartInvGramOnE (I := I) g α k l y| ≤ M_b)
+    (hQ : ∀ l : Fin (Module.finrank ℝ E),
+      |gramBracket (I := I) g α i j l y| ≤ Q) :
+    |chartChristoffel (I := I) g α i j k y| ≤
+      (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * M_b * Q := by
+  classical
+  rw [chartChristoffel_eq_sum_invGramOnE_bracket, abs_mul,
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
+  have hsum :
+      |∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α k l y * gramBracket (I := I) g α i j l y| ≤
+        ∑ _l : Fin (Module.finrank ℝ E), M_b * Q := by
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    refine Finset.sum_le_sum fun l _ => ?_
+    rw [abs_mul]
+    exact mul_le_mul (hMb l) (hQ l) (abs_nonneg _) hMb_nn
+  calc
+    (1 / 2 : ℝ) *
+        |∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α k l y * gramBracket (I := I) g α i j l y|
+        ≤ (1 / 2 : ℝ) * ∑ _l : Fin (Module.finrank ℝ E), M_b * Q :=
+      mul_le_mul_of_nonneg_left hsum (by norm_num)
+    _ = (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * M_b * Q := by
+      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      ring
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+theorem gramBracketD_abs_le
+    (g : SmoothRiemannianMetric I M) (α : M) (y : E) {Q : ℝ}
+    (hQ : ∀ c m a q, |partialDeriv (E := E) c
+      (partialDeriv (E := E) m (chartGramOnE (I := I) g α a q)) y| ≤ Q)
+    (c i j l : Fin (Module.finrank ℝ E)) :
+    |gramBracketDeriv (I := I) g α c i j l y| ≤ 3 * Q := by
+  unfold gramBracketDeriv
+  exact (abs_add_sub_le _ _ _).trans <| by
+    calc
+      |partialDeriv (E := E) c
+            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y| +
+          |partialDeriv (E := E) c
+            (partialDeriv (E := E) j (chartGramOnE (I := I) g α l i)) y| +
+          |partialDeriv (E := E) c
+            (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j)) y|
+        ≤ Q + Q + Q := add_le_add
+          (add_le_add (hQ c i l j) (hQ c j l i)) (hQ c l i j)
+      _ = 3 * Q := by ring
+
+
+
+
+theorem invGramD_abs_le
+    (g : SmoothRiemannianMetric I M) (α : M) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target)
+    {M_b Q : ℝ} (hMb_nn : 0 ≤ M_b)
+    (hMb : ∀ a c, |chartInvGramOnE (I := I) g α a c y| ≤ M_b)
+    (hQ : ∀ m a c, |partialDeriv (E := E) m
+      (chartGramOnE (I := I) g α a c) y| ≤ Q)
+    (m p q : Fin (Module.finrank ℝ E)) :
+    |partialDeriv (E := E) m (chartInvGramOnE (I := I) g α p q) y| ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * Q := by
+  classical
+  rw [partialDeriv_chartInvGramOnE_eq (I := I) g α y m p q hy, abs_neg]
+  calc
+    |∑ a : Fin (Module.finrank ℝ E),
+        ∑ c : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α p a y *
+            chartInvGramOnE (I := I) g α c q y *
+            partialDeriv (E := E) m (chartGramOnE (I := I) g α a c) y|
+        ≤ ∑ a : Fin (Module.finrank ℝ E),
+            |∑ c : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) g α p a y *
+                chartInvGramOnE (I := I) g α c q y *
+                partialDeriv (E := E) m (chartGramOnE (I := I) g α a c) y| :=
+          Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _a : Fin (Module.finrank ℝ E),
+          ∑ _c : Fin (Module.finrank ℝ E), M_b * M_b * Q := by
+        refine Finset.sum_le_sum fun a _ =>
+          (Finset.abs_sum_le_sum_abs _ _).trans ?_
+        refine Finset.sum_le_sum fun c _ => ?_
+        rw [abs_mul, abs_mul]
+        exact mul_le_mul
+          (mul_le_mul (hMb p a) (hMb c q) (abs_nonneg _) hMb_nn)
+          (hQ m a c) (abs_nonneg _) (mul_nonneg hMb_nn hMb_nn)
+    _ = (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * Q := by
+      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      ring
+
+
+
+
+theorem christoffelD_abs_le
+    (g : SmoothRiemannianMetric I M) (α : M) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target)
+    (m i j k : Fin (Module.finrank ℝ E))
+    {M_b D P R : ℝ} (hMb_nn : 0 ≤ M_b) (hD_nn : 0 ≤ D)
+    (hMb : ∀ l : Fin (Module.finrank ℝ E),
+      |chartInvGramOnE (I := I) g α k l y| ≤ M_b)
+    (hD : ∀ l : Fin (Module.finrank ℝ E),
+      |partialDeriv (E := E) m (chartInvGramOnE (I := I) g α k l) y| ≤ D)
+    (hP : ∀ l : Fin (Module.finrank ℝ E),
+      |gramBracket (I := I) g α i j l y| ≤ P)
+    (hR : ∀ l : Fin (Module.finrank ℝ E),
+      |gramBracketDeriv (I := I) g α m i j l y| ≤ R) :
+    |partialDeriv (E := E) m (chartChristoffel (I := I) g α i j k) y| ≤
+      (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (D * P + M_b * R) := by
+  classical
+  rw [partialDeriv_chartChristoffel_eq (I := I) g α m i j k hy, abs_mul,
+    abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
+  have hsum :
+      |∑ l : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) m (chartInvGramOnE (I := I) g α k l) y *
+              gramBracket (I := I) g α i j l y +
+            chartInvGramOnE (I := I) g α k l y *
+              gramBracketDeriv (I := I) g α m i j l y)| ≤
+        ∑ _l : Fin (Module.finrank ℝ E), (D * P + M_b * R) := by
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    refine Finset.sum_le_sum fun l _ => ?_
+    refine (abs_add_le _ _).trans ?_
+    rw [abs_mul, abs_mul]
+    exact add_le_add
+      (mul_le_mul (hD l) (hP l) (abs_nonneg _) hD_nn)
+      (mul_le_mul (hMb l) (hR l) (abs_nonneg _) hMb_nn)
+  calc
+    (1 / 2 : ℝ) *
+        |∑ l : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) m (chartInvGramOnE (I := I) g α k l) y *
+              gramBracket (I := I) g α i j l y +
+            chartInvGramOnE (I := I) g α k l y *
+              gramBracketDeriv (I := I) g α m i j l y)|
+        ≤ (1 / 2 : ℝ) *
+          ∑ _l : Fin (Module.finrank ℝ E), (D * P + M_b * R) :=
+      mul_le_mul_of_nonneg_left hsum (by norm_num)
+    _ = (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (D * P + M_b * R) := by
+      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      ring
+
+
+
+
+theorem invGramD_pou_lip
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q : ℝ) (hQ_nn : 0 ≤ Q)
+    (hQ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ m p q : Fin (Module.finrank ℝ E),
+            |partialDeriv (E := E) m
+                (chartInvGramOnE (I := I) (gSeq k₁) α p q) (extChartAt I α b) -
+              partialDeriv (E := E) m
+                (chartInvGramOnE (I := I) (gSeq k₂) α p q) (extChartAt I α b)| ≤
+              C * chartMetricJet1DiffSup (I := I) (M := M)
+                (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  obtain ⟨Cinv, hCinv, hInvLip⟩ :=
+    chartInvGram_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let C : ℝ :=
+    (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) + 1
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb m p q
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hy : extChartAt I α b ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hb_source)
+  have hMb1 : ∀ a c, |chartInvGramOnE (I := I) (gSeq k₁) α a c
+      (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₁ b hb a c
+  have hMb2 : ∀ a c, |chartInvGramOnE (I := I) (gSeq k₂) α a c
+      (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₂ b hb a c
+  have hInv : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₁) α a c (extChartAt I α b) -
+        chartInvGramOnE (I := I) (gSeq k₂) α a c (extChartAt I α b)| ≤
+          Cinv * chartGramDiffSup (I := I) (M := M)
+            (gSeq k₁) (gSeq k₂) α ((extChartAt I α).symm (extChartAt I α b)) := by
+    intro a c
+    rw [chartInvGramOnE_def, chartInvGramOnE_def, hleft]
+    exact hInvLip α hα k₁ k₂ b hb a c
+  have hpoint := partialDeriv_chartInvGramOnE_sub_abs_le
+    (I := I) (M := M) (gSeq k₁) (gSeq k₂) α hy hM_b.le hQ_nn hCinv.le
+      hMb1 hMb2 (hQ α hα k₁ b hb) hInv m p q
+  exact hpoint.trans (mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
+    (chartMetricJet1DiffSup_nonneg (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b)))
+
+
+
+
+
+theorem christoffel_pou_bnd
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q : ℝ) (hQ_nn : 0 ≤ Q)
+    (hQ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ i j l : Fin (Module.finrank ℝ E),
+            |chartChristoffel (I := I) (gSeq k) α i j l (extChartAt I α b)| ≤ C := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let C : ℝ := (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * M_b * (3 * Q)
+  have hC_nn : 0 ≤ C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_nn, ?_⟩
+  intro α hα k b hb i j l
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hMbOnE : ∀ q : Fin (Module.finrank ℝ E),
+      |chartInvGramOnE (I := I) (gSeq k) α l q (extChartAt I α b)| ≤ M_b := by
+    intro q
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k b hb l q
+  have hBracket : ∀ q : Fin (Module.finrank ℝ E),
+      |gramBracket (I := I) (gSeq k) α i j q (extChartAt I α b)| ≤ 3 * Q := by
+    intro q
+    exact gramBracket_abs_le (I := I) (M := M) (gSeq k) α (extChartAt I α b)
+      (fun m a c => hQ α hα k b hb m a c) i j q
+  exact christoffel_abs_le (I := I) (M := M) (gSeq k) α (extChartAt I α b)
+    i j l hM_b.le hMbOnE hBracket
+
+
+
+
+theorem christoffelD_pou_bnd
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q₁ : ℝ) (hQ₁_nn : 0 ≤ Q₁)
+    (hQ₁ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q₁)
+    (Q₂ : ℝ) (hQ₂_nn : 0 ≤ Q₂)
+    (hQ₂ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ c m a q : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+            (partialDeriv (E := E) m
+              (chartGramOnE (I := I) (gSeq k) α a q)) (extChartAt I α b)| ≤ Q₂) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ m i j l : Fin (Module.finrank ℝ E),
+            |partialDeriv (E := E) m
+              (chartChristoffel (I := I) (gSeq k) α i j l) (extChartAt I α b)| ≤ C := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let D : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * Q₁
+  let P : ℝ := 3 * Q₁
+  let R : ℝ := 3 * Q₂
+  let C : ℝ := (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (D * P + M_b * R)
+  have hD_nn : 0 ≤ D := by dsimp [D]; positivity
+  have hC_nn : 0 ≤ C := by dsimp [C, D, P, R]; positivity
+  refine ⟨C, hC_nn, ?_⟩
+  intro α hα k b hb m i j l
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hy : extChartAt I α b ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hb_source)
+  have hMbOnE : ∀ q : Fin (Module.finrank ℝ E),
+      |chartInvGramOnE (I := I) (gSeq k) α l q (extChartAt I α b)| ≤ M_b := by
+    intro q
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k b hb l q
+  have hDOnE : ∀ q : Fin (Module.finrank ℝ E),
+      |partialDeriv (E := E) m
+        (chartInvGramOnE (I := I) (gSeq k) α l q) (extChartAt I α b)| ≤ D := by
+    intro q
+    exact invGramD_abs_le (I := I) (M := M) (gSeq k) α hy hM_b.le
+      (fun a c => by
+        rw [chartInvGramOnE_def, hleft]
+        exact hMb α hα k b hb a c)
+      (fun r a c => hQ₁ α hα k b hb r a c) m l q
+  have hP : ∀ q : Fin (Module.finrank ℝ E),
+      |gramBracket (I := I) (gSeq k) α i j q (extChartAt I α b)| ≤ P := by
+    intro q
+    exact gramBracket_abs_le (I := I) (M := M) (gSeq k) α (extChartAt I α b)
+      (fun r a c => hQ₁ α hα k b hb r a c) i j q
+  have hR : ∀ q : Fin (Module.finrank ℝ E),
+      |gramBracketDeriv (I := I) (gSeq k) α m i j q (extChartAt I α b)| ≤ R := by
+    intro q
+    exact gramBracketD_abs_le (I := I) (M := M) (gSeq k) α (extChartAt I α b)
+      (fun r s a c => hQ₂ α hα k b hb r s a c) m i j q
+  exact christoffelD_abs_le (I := I) (M := M) (gSeq k) α hy m i j l
+    hM_b.le hD_nn hMbOnE hDOnE hP hR
+
+
+
+
+theorem christoffel_pou_lip
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q : ℝ) (hQ_nn : 0 ≤ Q)
+    (hQ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ i j k : Fin (Module.finrank ℝ E),
+            |chartChristoffel (I := I) (gSeq k₁) α i j k (extChartAt I α b) -
+              chartChristoffel (I := I) (gSeq k₂) α i j k (extChartAt I α b)| ≤
+                C * chartMetricJet1DiffSup (I := I) (M := M)
+                  (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  obtain ⟨Cinv, hCinv, hInvLip⟩ :=
+    chartInvGram_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let C : ℝ := (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) *
+    (Cinv * (3 * Q) + 3 * M_b) + 1
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb i j k
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hMb2 : ∀ a c, |chartInvGramOnE (I := I) (gSeq k₂) α a c
+      (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₂ b hb a c
+  have hInv : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₁) α a c (extChartAt I α b) -
+        chartInvGramOnE (I := I) (gSeq k₂) α a c (extChartAt I α b)| ≤
+          Cinv * chartGramDiffSup (I := I) (M := M)
+            (gSeq k₁) (gSeq k₂) α ((extChartAt I α).symm (extChartAt I α b)) := by
+    intro a c
+    rw [chartInvGramOnE_def, chartInvGramOnE_def, hleft]
+    exact hInvLip α hα k₁ k₂ b hb a c
+  have hP : ∀ a c l,
+      |gramBracket (I := I) (gSeq k₁) α a c l (extChartAt I α b)| ≤ 3 * Q := by
+    intro a c l
+    exact gramBracket_abs_le (I := I) (M := M) (gSeq k₁) α (extChartAt I α b)
+      (fun m a c => hQ α hα k₁ b hb m a c) a c l
+  have hpoint := chartChristoffel_sub_abs_le
+    (I := I) (M := M) (gSeq k₁) (gSeq k₂) α
+      (mul_nonneg (by norm_num) hQ_nn) hM_b.le hMb2 hP hInv hCinv.le i j k
+  exact hpoint.trans (mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
+    (chartMetricJet1DiffSup_nonneg (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b)))
+
+theorem christoffelD_pou_lip
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q₁ : ℝ) (hQ₁_nn : 0 ≤ Q₁)
+    (hQ₁ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q₁)
+    (Q₂ : ℝ) (hQ₂_nn : 0 ≤ Q₂)
+    (hQ₂ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ c m a q : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+            (partialDeriv (E := E) m
+              (chartGramOnE (I := I) (gSeq k) α a q)) (extChartAt I α b)| ≤ Q₂) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ m i j k : Fin (Module.finrank ℝ E),
+            |partialDeriv (E := E) m
+                (chartChristoffel (I := I) (gSeq k₁) α i j k) (extChartAt I α b) -
+              partialDeriv (E := E) m
+                (chartChristoffel (I := I) (gSeq k₂) α i j k) (extChartAt I α b)| ≤
+              C * chartMetricJet2DiffSup (I := I) (M := M)
+                (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  obtain ⟨Cinv, hCinv, hInvLip⟩ :=
+    chartInvGram_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  obtain ⟨Cd, hCd, hInvDLip⟩ :=
+    invGramD_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv Q₁ hQ₁_nn hQ₁
+  let P : ℝ := 3 * Q₁
+  let D : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * Q₁
+  let R : ℝ := 3 * Q₂
+  let C : ℝ := (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) *
+    (Cd * P + 3 * D + Cinv * R + 3 * M_b) + 1
+  have hP_nn : 0 ≤ P := by dsimp [P]; positivity
+  have hD_nn : 0 ≤ D := by dsimp [D]; positivity
+  have hR_nn : 0 ≤ R := by dsimp [R]; positivity
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb m i j k
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hy : extChartAt I α b ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hb_source)
+  have hMb2 : ∀ a c, |chartInvGramOnE (I := I) (gSeq k₂) α a c
+      (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₂ b hb a c
+  have hInv : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₁) α a c (extChartAt I α b) -
+        chartInvGramOnE (I := I) (gSeq k₂) α a c (extChartAt I α b)| ≤
+          Cinv * chartGramDiffSup (I := I) (M := M)
+            (gSeq k₁) (gSeq k₂) α ((extChartAt I α).symm (extChartAt I α b)) := by
+    intro a c
+    rw [chartInvGramOnE_def, chartInvGramOnE_def, hleft]
+    exact hInvLip α hα k₁ k₂ b hb a c
+  have hP : ∀ a c l,
+      |gramBracket (I := I) (gSeq k₁) α a c l (extChartAt I α b)| ≤ P := by
+    intro a c l
+    exact gramBracket_abs_le (I := I) (M := M) (gSeq k₁) α (extChartAt I α b)
+      (fun r p q => hQ₁ α hα k₁ b hb r p q) a c l
+  have hD : ∀ a c, |partialDeriv (E := E) m
+      (chartInvGramOnE (I := I) (gSeq k₂) α a c) (extChartAt I α b)| ≤ D := by
+    intro a c
+    exact invGramD_abs_le (I := I) (M := M) (gSeq k₂) α hy hM_b.le hMb2
+      (fun r p q => hQ₁ α hα k₂ b hb r p q) m a c
+  have hR : ∀ a c l,
+      |gramBracketDeriv (I := I) (gSeq k₁) α m a c l (extChartAt I α b)| ≤ R := by
+    intro a c l
+    exact gramBracketD_abs_le (I := I) (M := M) (gSeq k₁) α (extChartAt I α b)
+      (fun r s p q => hQ₂ α hα k₁ b hb r s p q) m a c l
+  have hpoint := partialDeriv_chartChristoffel_sub_abs_le
+    (I := I) (M := M) (gSeq k₁) (gSeq k₂) α hy hCd.le hCinv.le hM_b.le
+      hP_nn hD_nn hR_nn m i j k
+      (fun a c => hInvDLip α hα k₁ k₂ b hb m a c) hMb2 hP hD hR hInv
+  exact hpoint.trans (mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
+    (chartMetricJet2DiffSup_nonneg (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b)))
+
 end DeTurckCoefficients
 end IntrinsicSpectral
 end RicciFlow

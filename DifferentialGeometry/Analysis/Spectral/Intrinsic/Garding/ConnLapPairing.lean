@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
 
-/-!
-# Pairing identities for the connection Laplacian
 
-This file collects the generic `L²` pairing algebra for the smooth operator
-`1 - Δ∇` and its iterates.  The results are independent of the DeTurck
-application that first needed them.
--/
+
+
+
+
+
+
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -78,7 +78,7 @@ private theorem l2_sub_right_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
   exact map_sub (pointInnerRight (I := I) (M := M) g r s x (S.toFun x))
     (T₁.toFun x) (T₂.toFun x)
 
-/-- The smooth operator `1 - Δ∇` is self-adjoint in the tensor `L²` pairing. -/
+
 theorem oneMinusConnLapSmooth_l2Inner_selfAdjoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s
@@ -100,8 +100,8 @@ theorem oneMinusConnLapSmooth_l2Inner_selfAdjoint
       (rawTensorConnLapSmooth (I := I) g r s v)]
   rw [rawTensorConnLapSmooth_l2Inner_selfAdjoint (I := I) (M := M) g r s T v]
 
-/-- Pairing `1 - Δ∇` against a smooth tensor equals its `L²` pairing plus
-the `L²` pairing of their covariant gradients. -/
+
+
 theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (A B : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s
@@ -122,7 +122,7 @@ theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
     hgreen]
   ring
 
-/-- An iterate of `1 - Δ∇` commutes with one further application. -/
+
 theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) (v : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s k
@@ -134,7 +134,7 @@ theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
   | succ p ih =>
     rw [oneMinusConnLapSmoothIter_succ, ih, oneMinusConnLapSmoothIter_succ]
 
-/-- Every iterate of `1 - Δ∇` is self-adjoint in the tensor `L²` pairing. -/
+
 theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (n : ℕ)
     (T v : SmoothCcTensor g r s) :
@@ -151,7 +151,7 @@ theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint
     rw [ih (oneMinusConnLapSmooth (I := I) g r s v),
       oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm]
 
-/-- Iterating `1 - Δ∇` through a sum of iteration counts factors as composition. -/
+
 theorem oneMinusConnLapSmoothIter_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -164,7 +164,7 @@ theorem oneMinusConnLapSmoothIter_add
     rw [show k + 1 + b = (k + b) + 1 from by omega, oneMinusConnLapSmoothIter_succ,
       oneMinusConnLapSmoothIter_succ, ih]
 
-/-- A total iterate in the left pairing slot splits symmetrically between both slots. -/
+
 theorem oneMinusConnLapSmoothIter_l2Inner_sym_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -177,8 +177,8 @@ theorem oneMinusConnLapSmoothIter_l2Inner_sym_split
   rw [oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (I := I) (M := M) g r s a
     (oneMinusConnLapSmoothIter (I := I) g r s b A) B]
 
-/-- Pairing an iterate of `1 - Δ∇` expands into the base pairing and the
-finite sum of covariant-gradient pairings. -/
+
+
 theorem oneMinusConnLapSmoothIter_l2Inner_eq_add_sum_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (n : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -200,7 +200,7 @@ theorem oneMinusConnLapSmoothIter_l2Inner_eq_add_sum_covGrad
       ih, Finset.sum_range_succ]
     ring
 
-/-- The smooth rough connection Laplacian preserves addition. -/
+
 theorem rawConnLap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s (A + B) =
@@ -215,7 +215,7 @@ theorem rawConnLap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rawTensorConnLapSmooth_sub (I := I) (M := M) g r s 0 B, h0]
   abel
 
-/-- The smooth operator `1 - Δ∇` preserves addition. -/
+
 theorem oneMinusConn_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmooth (I := I) g r s (A + B) =
@@ -225,7 +225,7 @@ theorem oneMinusConn_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [rawConnLap_add (I := I) (M := M) g r s A B]
   abel
 
-/-- Every iterate of `1 - Δ∇` preserves addition. -/
+
 theorem connLapIter_map_add (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s j (A + B) =
@@ -237,8 +237,8 @@ theorem connLapIter_map_add (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_succ,
       oneMinusConnLapSmoothIter_succ, ih, oneMinusConn_add (I := I) (M := M) g r s]
 
-/-- Commuting one covariant gradient through `1 - Δ∇` produces the
-pointwise curvature commutator. -/
+
+
 theorem covGrad_oneMinus (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) :
     covGrad (I := I) (M := M) g 0 s
@@ -253,15 +253,15 @@ theorem covGrad_oneMinus (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [hcomm]
   abel
 
-/-- The first iterate of `1 - Δ∇` is one application of the operator. -/
+
 theorem connLapIter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 1 S =
       oneMinusConnLapSmooth (I := I) g r s S := by
   rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_zero]
 
-/-- Commuting one covariant gradient through an iterate of `1 - Δ∇`
-expands into the iterated gradient and the finite curvature-commutator sum. -/
+
+
 theorem covGrad_iterL (g : SmoothRiemannianMetric I M) (s j : ℕ) :
     ∀ S : SmoothCcTensor g 0 s,
       covGrad (I := I) (M := M) g 0 s

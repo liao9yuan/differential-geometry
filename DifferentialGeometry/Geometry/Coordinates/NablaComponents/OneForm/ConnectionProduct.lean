@@ -1,10 +1,10 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Pairing
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false

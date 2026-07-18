@@ -1,12 +1,12 @@
 import Mathlib
 
-/-!
-# Curvature blocks in the zeroth-order DeTurck normal form
 
-This module proves the finite-dimensional normal forms for the curvature and
-second-background-covariant-derivative blocks.  It has no geometric regularity
-or Sobolev assumptions.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -19,19 +19,19 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficien
 
 variable {n : ℕ}
 
-/-- The coordinate curvature expression built from a background connection. -/
+
 def rchB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ) (l i j ρ : Fin n) : ℝ :=
   dga0 i l j ρ - dga0 j l i ρ +
     ∑ c, (ga0 i c ρ * ga0 l j c - ga0 j c ρ * ga0 l i c)
 
-/-- The curvature contraction block in the zeroth-order DeTurck expansion. -/
+
 def p5B (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   -(∑ m, ∑ ml, ig m ml * ∑ ρ, rchB ga0 dga0 ml i j ρ * f ρ m)
 
-/-- The curvature contraction expands into its derivative and quadratic connection terms. -/
+
 theorem nf_p5 (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ)
@@ -99,7 +99,7 @@ theorem nf_p5 (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n �
   rw [h1, h2, h3, h4]
   ring
 
-/-- A background second-covariant-derivative coordinate block. -/
+
 def r4F (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)
@@ -113,13 +113,13 @@ def r4F (ga0 : Fin n → Fin n → Fin n → ℝ)
         (- ∑ r, ga0 a d r * (f3 b c r +
           ((- ∑ t, ga0 b c t * f t r) + (- ∑ t, ga0 b r t * f c t))))))
 
-/-- The first-derivative principal part of `r4F`. -/
+
 def r4pfB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (f3 : Fin n → Fin n → Fin n → ℝ) (d a b c : Fin n) : ℝ :=
   - ∑ r, (ga0 a b r * f3 d r c + ga0 a c r * f3 d b r + ga0 d a r * f3 r b c +
       ga0 d b r * f3 a r c + ga0 d c r * f3 a b r)
 
-/-- The lower-order remainder after removing `r4pfB` from `r4F`. -/
+
 def r4hB (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (a b c d : Fin n) : ℝ :=
@@ -131,7 +131,7 @@ def r4hB (ga0 : Fin n → Fin n → Fin n → ℝ)
       (∑ r, ∑ t, ga0 a d r * (ga0 b c t * f t r)) +
       (∑ r, ∑ t, ga0 a d r * (ga0 b r t * f c t)))
 
-/-- The traced symmetrized `r4F` block. -/
+
 def t2F (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)
@@ -139,7 +139,7 @@ def t2F (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
   ∑ k1, ∑ l, ig k1 l * (r4F ga0 dga0 f f3 i l j k1 + r4F ga0 dga0 f f3 j l i k1 -
     r4F ga0 dga0 f f3 i j l k1)
 
-/-- The traced symmetrized principal part of `t2F`. -/
+
 def tpfF (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (f3 : Fin n → Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   ∑ k1, ∑ l, ig k1 l * (r4pfB ga0 f3 i l j k1 + r4pfB ga0 f3 j l i k1 -
@@ -210,7 +210,7 @@ private lemma t2_block (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n →
   rw [r4_split ga0 dga0 f f3 hga0s i l j k1, r4_split ga0 dga0 f f3 hga0s j l i k1,
     r4_split ga0 dga0 f f3 hga0s i j l k1]
 
-/-- The traced second-covariant-derivative remainder has the stated lower-order normal form. -/
+
 theorem nf_t2h (ig : Fin n → Fin n → ℝ) (ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (f3 : Fin n → Fin n → Fin n → ℝ)

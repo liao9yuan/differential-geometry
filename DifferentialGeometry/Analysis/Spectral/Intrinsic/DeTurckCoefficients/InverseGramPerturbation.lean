@@ -235,6 +235,44 @@ theorem exists_chartInvGramMatrix_lipschitz_on_compact
         refine mul_le_mul_of_nonneg_right ?_ h_gram_nn
         linarith
 
+
+
+theorem chartInvGram_pou_lip
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ p q : Fin (Module.finrank ℝ E),
+            |chartInvGramMatrix (I := I) (gSeq k₁) α b p q -
+                chartInvGramMatrix (I := I) (gSeq k₂) α b p q| ≤
+              C * chartGramDiffSup (I := I) (M := M)
+                (gSeq k₁) (gSeq k₂) α b := by
+  obtain ⟨M_b, hM_b, hM⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let C : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 + 1
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb p q
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hpt := chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
+    (I := I) (M := M) (gSeq k₁) (gSeq k₂) α hb_base
+      (hM α hα k₁ b hb) (hM α hα k₂ b hb) p q
+  have hdiff_nonneg : 0 ≤ chartGramDiffSup (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α b := chartGramDiffSup_nonneg _ _ _ _
+  exact hpt.trans (mul_le_mul_of_nonneg_right (by dsimp [C]; linarith) hdiff_nonneg)
+
 end DeTurckCoefficients
 end IntrinsicSpectral
 end RicciFlow

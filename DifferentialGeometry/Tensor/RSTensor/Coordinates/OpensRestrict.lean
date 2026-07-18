@@ -3,18 +3,18 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Open-subtype restriction for `(0,s)`-tensor fields
 
-Reusable locality lemmas for restricting `(0,s)`-tensor data to an open
-submanifold `V : Opens M`: the subtype tangent coordinate changes and
-chart-local tensor readouts agree with the ambient ones at interior points, and
-a smooth `(0,s)`-tensor field restricts to a smooth field on the subtype.
 
-These are the `Opens`-restriction counterparts of the pullback naturality
-layer; they carry no metric or inner-product content, so they live at the
-tensor-coordinate layer.
--/
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,10 +29,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
-/-- **Tangent coordinate changes over an open subtype agree with the ambient ones.**  The
-subtype charts are `subtypeRestr` of the ambient charts, whose extended transitions agree
-with the ambient transitions near any interior point, so the `tangentBundleCore` coordinate
-changes (`fderivWithin` of the transitions) coincide. -/
+
+
+
+
 theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source) :
     (tangentBundleCore I V).coordChange (achart H p) (achart H q) x
@@ -68,12 +68,12 @@ theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hev.eq_of_nhdsWithin ⟨(chartAt H (p : M)) (x : M), rfl⟩)
 
 omit [CompleteSpace E] in
-/-- **Chart-local tensor readouts over an open subtype agree with the ambient ones.**
-`tensor0SModelAt` is precomposition with the tangent trivialization's `symmL`, which reads
-out as a tangent coordinate change; those agree with the ambient ones by
-`tangentCoordChange_opens`, so the tensor readouts agree.  Uses the defeq
-`TangentSpace I x = E` on both sides, in the same way as
-`symmL_trivializationAt_eq_core`. -/
+
+
+
+
+
+
 theorem tensor0SModelAt_opens (s : ℕ) {V : Opens M} [Nonempty V] (p x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source)
     (A : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := V) s x) :
@@ -102,12 +102,12 @@ namespace DifferentialGeometry
 open Bundle Set Topology TopologicalSpace
 open scoped Manifold ContDiff
 set_option backward.isDefEq.respectTransparency false in
-/-- **Opens-restriction of a smooth `(0,s)`-tensor field.**  The values cross the defeq
-fibers bare; smoothness reduces through `Bundle.contMDiffAt_section` on both sides, with
-`tensor0SModelAt_opens` converting the subtype trivialization readout into the ambient one
-near each point.  (Fully explicit binders: the `Tensor0SModel` instances need
-`FiniteDimensional`/`CompleteSpace` during elaboration, which section-variable inclusion
-does not provide inside a `def`.) -/
+
+
+
+
+
+
 noncomputable def restrictOpen0S {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

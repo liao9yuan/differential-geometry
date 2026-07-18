@@ -1,6 +1,6 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 
 noncomputable section

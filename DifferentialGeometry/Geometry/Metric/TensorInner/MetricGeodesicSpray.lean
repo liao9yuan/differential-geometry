@@ -4,13 +4,13 @@ import Mathlib.Analysis.Calculus.FDeriv.Basic
 
 set_option autoImplicit false
 
-/-!
-# The coordinate geodesic spray of a metric field
 
-This file packages the geodesic spray as a total, proof-independent expression.
-Ring inversion makes the definition total; coercivity is used only to identify
-it with the usual Lax--Milgram raised Koszul vector.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -82,8 +82,8 @@ noncomputable local instance sprayTriFiniteDim
     FiniteDimensional Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
   ContinuousLinearMap.finiteDimensional
 
-/-- The Koszul covector followed by Riesz representation, with both vector
-slots retained as a bounded bilinear operator. -/
+
+
 private noncomputable def koszulRieszOp :
     (E →L[Real] E →L[Real] E →L[Real] Real) →L[Real]
       (E →L[Real] E →L[Real] E) :=
@@ -100,7 +100,7 @@ private noncomputable def koszulRieszOp :
   simp [koszulRieszOp]
   rfl
 
-/-- Continuous bilinear postcomposition on vector-valued bilinear maps. -/
+
 private noncomputable def postBilin :
     (E →L[Real] E) →L[Real]
       (E →L[Real] E →L[Real] E) →L[Real]
@@ -108,8 +108,8 @@ private noncomputable def postBilin :
   (ContinuousLinearMap.compL Real E (E →L[Real] E) (E →L[Real] E)).comp
     (ContinuousLinearMap.compL Real E E E)
 
-/-- The canonical Gram construction, regarded as a bounded linear operation on
-bilinear forms. -/
+
+
 private noncomputable def gramCLM :
     (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) :=
   ContinuousLinearMap.compL Real E (E →L[Real] Real) E
@@ -126,7 +126,7 @@ private theorem gramCLM_isUnit
   rw [gramCLM_apply]
   exact ⟨hB.continuousLinearEquivOfBilin.toUnit, rfl⟩
 
-/-- The proof-independent raised Koszul bilinear operator. -/
+
 noncomputable def raisedKoszulOp
     (B : E →L[Real] E →L[Real] Real)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) :
@@ -143,8 +143,8 @@ noncomputable def raisedKoszulOp
         ((InnerProductSpace.toDual Real E).symm (koszulCov D u v)) := by
   rfl
 
-/-- On a coercive metric, the proof-independent operator is the usual raised
-Koszul vector. -/
+
+
 theorem raisedKoszulOp_eq
     {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
@@ -152,14 +152,14 @@ theorem raisedKoszulOp_eq
   rw [raisedKoszulOp_apply, ← hB.sharp_eq_inverse]
   rfl
 
-/-- The total coordinate geodesic spray associated to a metric-coefficient
-field. The second component is minus the raised Koszul contraction. -/
+
+
 noncomputable def metricSpray
     (g : E → E →L[Real] E →L[Real] Real) (z : E × E) : E × E :=
   (z.2, -raisedKoszulOp (g z.1) (fderiv Real g z.1) z.2 z.2)
 
-/-- On the coercive locus, `metricSpray` has the geometric Lax--Milgram
-formula. -/
+
+
 theorem metricSpray_eq
     (g : E → E →L[Real] E →L[Real] Real) (z : E × E)
     (hg : IsCoercive (g z.1)) :
@@ -264,8 +264,8 @@ private theorem raisedOp_smooth
       (invGram_smooth hg_cd hg_co) (koszulRiesz_smooth hU hg_cd)
 
 set_option maxHeartbeats 700000 in
-/-- Compact-open `C∞` convergence of metrics gives convergence of their
-proof-independent raised Koszul operators. -/
+
+
 theorem raisedKoszulOp_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -351,8 +351,8 @@ private theorem raisedDiag_conv
       (fun _ => hdiag.contDiffOn) hdiag.contDiffOn
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
-/-- A smooth coercive metric-coefficient field has a smooth total geodesic
-spray on the corresponding phase domain. -/
+
+
 theorem metricSpray_contDiffOn
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -371,8 +371,8 @@ theorem metricSpray_contDiffOn
   simpa only [metricSpray, R] using contDiffOn_snd.prodMk hdiag.neg
 
 set_option maxHeartbeats 500000 in
-/-- Smooth convergence of metric coefficients on an open coordinate domain
-gives compact-open `C∞` convergence of their total geodesic sprays. -/
+
+
 theorem metricSpray_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)

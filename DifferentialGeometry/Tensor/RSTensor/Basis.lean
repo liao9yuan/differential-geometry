@@ -45,14 +45,14 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-/-!
-# Coordinate bases for realized tensor models
 
-This module collects the coordinate layer for mixed tensor model fibers
-`TensorRSModel r s 𝕜 E = Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E`.
-The coordinates are the natural Hom coordinates: apply to an input `(0,r)`
-basis tensor and then evaluate the output `(0,s)` tensor on basis vectors.
--/
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -75,17 +75,17 @@ variable [NormedAddCommGroup W] [NormedSpace 𝕜 W]
 variable [FiniteDimensional 𝕜 U]
 variable {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq ι]
 
-/-- The finite-dimensional basis of continuous linear maps induced by bases of
-the domain and codomain. The index `(j, i)` records the output-basis coordinate
-`j` of the image of the input-basis vector `i`. -/
+
+
+
 noncomputable def continuousLinearMap_homBasis
     (bU : Module.Basis ι 𝕜 U) (bW : Module.Basis κ 𝕜 W) :
     Module.Basis (κ × ι) 𝕜 (U →L[𝕜] W) :=
   (bU.linearMap bW).map
     (LinearMap.toContinuousLinearMap : (U →ₗ[𝕜] W) ≃ₗ[𝕜] U →L[𝕜] W)
 
-/-- Coordinate formula for `continuousLinearMap_homBasis`: take a basis vector in
-the domain, apply the map, then read the requested output coordinate. -/
+
+
 theorem continuousLinearMap_homBasis_repr
     (bU : Module.Basis ι 𝕜 U) (bW : Module.Basis κ 𝕜 W)
     (A : U →L[𝕜] W) (i : ι) (j : κ) :
@@ -102,9 +102,9 @@ theorem continuousLinearMap_homBasis_repr
 
 end HomBasis
 
-/-- The meaningful coordinate basis for `TensorRSModel r s 𝕜 E`: first choose a
-basis `(0,r)` tensor in the input Hom slot, then a basis coordinate of the
-output `(0,s)` tensor. -/
+
+
+
 noncomputable def tensorRSModel_basis {d : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E) (r s : ℕ) :
     Module.Basis ((Fin r → Fin d) × (Fin s → Fin d)) 𝕜 (TensorRSModel r s 𝕜 E) :=
@@ -113,9 +113,9 @@ noncomputable def tensorRSModel_basis {d : ℕ}
   (continuousLinearMap_homBasis (𝕜 := 𝕜) bR bS).reindex
     (Equiv.prodComm (Fin s → Fin d) (Fin r → Fin d))
 
-/-- Coordinates in `tensorRSModel_basis` are obtained by applying the mixed tensor
-to an input `(0,r)` basis tensor, then evaluating the output `(0,s)` tensor on
-basis vectors. -/
+
+
+
 theorem tensorRSModel_basis_repr {d : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E) (r s : ℕ)
     (A : TensorRSModel r s 𝕜 E)
@@ -134,9 +134,9 @@ section SmoothCriterion
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-- A `TensorRSModel`-valued function is smooth if all Hom coordinates obtained
-by applying input tensor basis vectors and evaluating output tensor coordinates
-are smooth. -/
+
+
+
 theorem contMDiffAt_tensorRSModel_of_apply_basis_eval_basis
     {d r s : ℕ} (bE : Module.Basis (Fin d) 𝕜 E)
     {G : M → TensorRSModel r s 𝕜 E} {x₀ : M} {n : WithTop ℕ∞}
@@ -176,19 +176,19 @@ variable {x₀ x : M}
 
 namespace Tensor0SSpace
 
-/-- The local `(0,s)` tensor section that is constant in the fixed tensor-bundle
-trivialization centered at `x₀`.
 
-This is the tensor analogue of `tangentConstInChart`; it is intentionally just a
-name for the inverse fixed trivialization on fibers. -/
+
+
+
+
 noncomputable def constInChart (s : ℕ) (x₀ : M)
     (β : Tensor0SModel s 𝕜 E) (x : M) : Tensor0SSpace s I x := by
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   exact (trivializationAt (Tensor0SModel s 𝕜 E)
     (fun x => Tensor0SSpace s I x) x₀).symmL 𝕜 x β
 
-/-- Fixed trivialization of a `(0,s)` tensor evaluates by applying the original
-fiber tensor to the tangent slots transported from the fixed model fiber. -/
+
+
 theorem trivializationAt_apply (s : ℕ)
     (_hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -203,9 +203,9 @@ theorem trivializationAt_apply (s : ℕ)
   rw [Bundle.Trivialization.continuousMultilinearMap_apply]
   rfl
 
-/-- The continuous linear equivalence of the fixed trivialization of a `(0,s)`
-tensor evaluates by applying the original fiber tensor to transported tangent
-slots. -/
+
+
+
 theorem continuousLinearEquivAt_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -221,9 +221,9 @@ theorem continuousLinearEquivAt_apply (s : ℕ)
       T (fun i => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x (v i))
   exact trivializationAt_apply (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x) s hx T v
 
-/-- The linear map of the fixed trivialization of a `(0,s)` tensor evaluates by
-applying the original fiber tensor to tangent slots transported from the fixed
-model fiber. -/
+
+
+
 theorem continuousLinearMapAt_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -240,10 +240,10 @@ theorem continuousLinearMapAt_apply (s : ℕ)
       (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
   rfl
 
-/-- Evaluating the fixed-chart constant `(0,s)` tensor section `constInChart` on
-tangent slots transports each slot to the fixed model fiber and applies the model
-tensor. This is the theorem-form apply lemma for `constInChart`; downstream proofs
-should use it instead of unfolding the `symmL` trivialization internals. -/
+
+
+
+
 theorem constInChart_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (β : Tensor0SModel s 𝕜 E) (v : Fin s → TangentSpace I x) :
@@ -271,8 +271,8 @@ end Tensor0SSpace
 
 namespace TensorRSSpace
 
-/-- Fixed trivialization of an `(r,s)` tensor applies by transporting the input
-`(0,r)` tensor and output tangent slots through the same fixed chart. -/
+
+
 theorem trivializationAt_apply (r s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : TensorRSSpace r s I x) (β : Tensor0SModel r 𝕜 E) (v : Fin s → E) :
@@ -309,9 +309,9 @@ theorem trivializationAt_apply (r s : ℕ)
   exact Tensor0SSpace.continuousLinearEquivAt_apply
     (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x) s hx _ v
 
-/-- Basis-coordinate version of `TensorRSSpace.trivializationAt_apply`: an
-`(r,s)` fixed-trivialization coordinate is intrinsic application to the
-corresponding fixed-chart input tensor and fixed-chart output basis slots. -/
+
+
+
 theorem trivializationAt_basis_coord {d r s : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)

@@ -71,12 +71,12 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Pointwise tensor components
 
-This file provides component maps and extensionality for the realized Hom model
-`TensorRSSpace r s I x = Tensor0SSpace r I x ->L Tensor0SSpace s I x`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -133,7 +133,7 @@ theorem component0S_nsmul
       n • component0S (I := I) basis A slots := by
   rfl
 
-/-- Component theorem for the pointwise product of covariant tensors. -/
+
 theorem component0S_product_gen
     (A : Tensor0SSpace s I x) (B : Tensor0SSpace q I x)
     (slots : Fin (s + q) -> Idx) :
@@ -155,10 +155,10 @@ section Mixed
 variable {r s : Nat}
 variable (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
 
-/-- Conventional component of a mixed tensor in the Hom model.
 
-The `upper` indices select the covariant basis tensor used as Hom input; the
-`lower` indices evaluate the covariant output on basis vectors. -/
+
+
+
 def componentRS_gen
     (T : TensorRSSpace r s I x)
     (upper : Fin r -> Idx) (lower : Fin s -> Idx) : 𝕜 :=
@@ -173,8 +173,8 @@ theorem componentRS_apply_gen
         (fun a => basis (lower a)) :=
   rfl
 
-/-- Rewrite the upper/lower slot maps of a mixed component under slot-map equalities, without
-unfolding `componentRS_gen` / `basisTensor0S` / `Fin.cons`. -/
+
+
 theorem componentRS_gen_congr_slots
     (T : TensorRSSpace r s I x)
     {upper upper' : Fin r -> Idx} {lower lower' : Fin s -> Idx}
@@ -183,8 +183,8 @@ theorem componentRS_gen_congr_slots
       componentRS_gen (I := I) basis T upper' lower' := by
   rw [hu, hl]
 
-/-- Expanding the Hom input of a mixed tensor in a basis gives the usual
-component contraction formula. -/
+
+
 theorem componentRS_apply_input_eq_sum
     (T : TensorRSSpace r s I x) (input : Tensor0SSpace r I x)
     (lower : Fin s -> Idx) :
@@ -220,7 +220,7 @@ theorem componentRS_apply_input_eq_sum
           rw [map_sum]
           simp [map_smul]
 
-/-- Extensionality for mixed tensors from equality of all Hom-model components. -/
+
 theorem extRS_basis_gen
     {A B : TensorRSSpace r s I x}
     (h : ∀ upper : Fin r -> Idx, ∀ lower : Fin s -> Idx,

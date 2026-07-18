@@ -198,7 +198,7 @@ theorem mdifferentiableAt_expMapIntrinsic_zero
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem exists_variation_realising_field_via_exp
+theorem exists_expVar_field
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -206,14 +206,14 @@ theorem exists_variation_realising_field_via_exp
     (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
     (hγ : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
     (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
-      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))))
-    (hV0 : V 0 = 0) (hVL : V L = 0) :
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)))) :
     ∃ f : ℝ → ℝ → M,
       IsSmoothVariation (I := I) f ∧
       (∀ t : ℝ, f 0 t = γ t) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
         (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
-      (∀ s : ℝ, f s 0 = γ 0) ∧ (∀ s : ℝ, f s L = γ L) := by
+      (V 0 = 0 → ∀ s : ℝ, f s 0 = γ 0) ∧
+      (V L = 0 → ∀ s : ℝ, f s L = γ L) := by
   classical
   obtain ⟨χ, hχ_cd, hχ_one, hχ_zero, hχ_Icc⟩ := exists_cutoff_one_on_Icc L
   set Vc : ℝ → E := fun t => χ t • V t with hVc_def
@@ -261,8 +261,6 @@ theorem exists_variation_realising_field_via_exp
     refine hδ'_ball ?_
     rw [Metric.mem_ball, Real.dist_eq, sub_zero]
     exact abs_reparam_lt δ' hδ'_pos s
-  have hVc0 : Vc 0 = 0 := by simp only [hVc_def, hV0, smul_zero]
-  have hVcL : Vc L = 0 := by simp only [hVc_def, hVL, smul_zero]
   have hΦη : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ∞)
       (fun p : ℝ × ℝ => (η p.1, p.2)) := by
     have hηM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (8 : ℕ∞) η := by
@@ -342,14 +340,248 @@ theorem exists_variation_realising_field_via_exp
     rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
       ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
     exact hVct
-  · intro s
+  · intro hV0 s
+    have hVc0 : Vc 0 = 0 := by simp only [hVc_def, hV0, smul_zero]
     change expMapIntrinsic (I := I) g hEnorm (γ 0)
       ((η s • (V₀ (0 : ℝ)).snd : E) : TangentSpace I (γ 0)) = γ 0
     have harg : (η s • (V₀ (0 : ℝ)).snd : E) = (0 : E) := by
       rw [hV₀snd, hVc0]; exact smul_zero _
     rw [harg]
     exact expMapIntrinsic_zero (I := I) g hEnorm (γ 0)
-  · intro s
+  · intro hVL s
+    have hVcL : Vc L = 0 := by simp only [hVc_def, hVL, smul_zero]
+    change expMapIntrinsic (I := I) g hEnorm (γ L)
+      ((η s • (V₀ L).snd : E) : TangentSpace I (γ L)) = γ L
+    have harg : (η s • (V₀ L).snd : E) = (0 : E) := by
+      rw [hV₀snd, hVcL]; exact smul_zero _
+    rw [harg]
+    exact expMapIntrinsic_zero (I := I) g hEnorm (γ L)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+theorem exists_expVar_fixEnd
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
+    (hγ : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
+    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))))
+    (hVL : V L = 0) :
+    ∃ f : ℝ → ℝ → M,
+      IsSmoothVariation (I := I) f ∧
+      (∀ t : ℝ, f 0 t = γ t) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L,
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
+      (∀ s : ℝ, f s L = γ L) := by
+  obtain ⟨f, hf, hcentral, hderiv, _hfix0, hfixL⟩ :=
+    exists_expVar_field (I := I) g hEnorm γ V L hγ hVbundle
+  exact ⟨f, hf, hcentral, hderiv, hfixL hVL⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+theorem exists_sqDeriv_field
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoMetricSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
+    (hγsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
+    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t))))
+    (hVL : V L = 0) (hL : 0 < L)
+    (hγ : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      g.inner (γ t)
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 1) :
+    ∃ f : ℝ → ℝ → M,
+      IsSmoothVariation (I := I) f ∧
+      (∀ t : ℝ, f 0 t = γ t) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L,
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
+      (∀ s : ℝ, f s L = γ L) ∧
+      (((fun s : ℝ => dist (f s 0) (γ L)) =ᶠ[nhds (0 : ℝ)]
+          (fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L)) →
+        dist (f 0 0) (γ L) = L →
+        HasDerivAt (fun s : ℝ => (1 / 2 : ℝ) * dist (f s 0) (γ L) ^ 2)
+          (L * (- g.inner (γ 0)
+              (show TangentSpace I (γ 0) from V 0)
+              (mfderiv (𝓘(ℝ, ℝ)) I γ 0 (1 : ℝ)))) 0) := by
+  obtain ⟨f, hf, hcentral, hfield, hfixL⟩ :=
+    exists_expVar_fixEnd (I := I) g hEnorm γ V L hγsmooth hVbundle hVL
+  refine ⟨f, hf, hcentral, hfield, hfixL, ?_⟩
+  intro hdist hdist0
+  have hraw := halfSq_deriv_length (I := I) g γ f L hf hL hγ hcentral hfixL hUnit hdist hdist0
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_rfl, le_of_lt hL⟩
+  have hfield0 :
+      mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s 0) 0 (1 : ℝ) =
+        (show TangentSpace I (γ 0) from V 0) := by
+    change (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s 0) 0 (1 : ℝ) : E) = V 0
+    exact hfield 0 h0mem
+  rwa [hfield0] at hraw
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+theorem exists_variation_realising_field_via_exp
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (γ : ℝ → M) (V : ℝ → E) (L : ℝ)
+    (hγ : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ)
+    (hVbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)))) :
+    ∃ f : ℝ → ℝ → M,
+      IsSmoothVariation (I := I) f ∧
+      (∀ t : ℝ, f 0 t = γ t) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L,
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) = V t) ∧
+      (V 0 = 0 → ∀ s : ℝ, f s 0 = γ 0) ∧
+      (V L = 0 → ∀ s : ℝ, f s L = γ L) := by
+  classical
+  obtain ⟨χ, hχ_cd, hχ_one, hχ_zero, hχ_Icc⟩ := exists_cutoff_one_on_Icc L
+  set Vc : ℝ → E := fun t => χ t • V t with hVc_def
+  have hχ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ := by
+    rw [contMDiff_iff_contDiff]; exact hχ_cd
+  have hVcbundle : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun t : ℝ => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (Vc t))) :=
+    contMDiff_smul_bundleField (I := I) hγ hχ_smooth hVbundle
+  set V₀ : ℝ → TangentBundle I M :=
+    fun t => (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (Vc t)) with hV₀_def
+  have hV₀proj : ∀ t, (V₀ t).proj = γ t := fun t => rfl
+  have hV₀snd : ∀ t, (V₀ t).snd = Vc t := fun t => rfl
+  set F : ℝ × ℝ → M :=
+    fun p => expMapIntrinsic (I := I) g hEnorm (γ p.2)
+      ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2)) with hF_def
+  set U : Set (ℝ × ℝ) :=
+    {p : ℝ × ℝ | ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ∞) F p} with hU_def
+  have hU_open : IsOpen U := by
+    rw [isOpen_iff_mem_nhds]
+    intro p hp
+    have : ∀ᶠ q in 𝓝 p, ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ∞) F q :=
+      (contMDiffAt_iff_contMDiffAt_nhds (by
+        exact_mod_cast (by decide : ((8 : ℕ) : ℕ∞) ≠ (⊤ : ℕ∞)))).1 hp
+    exact this
+  set K : Set ℝ := Set.Icc (-1 : ℝ) (L + 1) with hK_def
+  have hK_compact : IsCompact K := isCompact_Icc
+  have hslice : ({(0 : ℝ)} ×ˢ K) ⊆ U := by
+    rintro ⟨s, t⟩ ⟨hs, ht⟩
+    simp only [Set.mem_singleton_iff] at hs
+    subst hs
+    obtain ⟨δ, hδ_pos, hδ⟩ :=
+      expMapIntrinsic_variation_contMDiffAt_of_smallField (I := I) g hEnorm γ V₀ hγ
+        hVcbundle hV₀proj 8 (by norm_num) t
+    exact hδ 0 (Metric.mem_ball_self hδ_pos)
+  obtain ⟨u, v, hu_open, _hv_open, h0u, hKv, huv⟩ :=
+    generalized_tube_lemma (isCompact_singleton (x := (0 : ℝ))) hK_compact hU_open hslice
+  have h0u' : (0 : ℝ) ∈ u := h0u rfl
+  obtain ⟨δ', hδ'_pos, hδ'_ball⟩ := Metric.isOpen_iff.mp hu_open 0 h0u'
+  have hKsub : K ⊆ v := hKv
+  set η : ℝ → ℝ := reparam δ' with hη_def
+  have hη0 : η 0 = 0 := reparam_zero δ'
+  have hη_cd : ContDiff ℝ (∞ : WithTop ℕ∞) η := contDiff_reparam δ'
+  have hη_bound : ∀ s, η s ∈ u := by
+    intro s
+    refine hδ'_ball ?_
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero]
+    exact abs_reparam_lt δ' hδ'_pos s
+  have hΦη : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ∞)
+      (fun p : ℝ × ℝ => (η p.1, p.2)) := by
+    have hηM : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (8 : ℕ∞) η := by
+      rw [contMDiff_iff_contDiff]; exact hη_cd.of_le (by decide)
+    exact (hηM.comp contMDiff_fst).prodMk contMDiff_snd
+  refine ⟨fun s t => F (η s, t), ?_, ?_, ?_, ?_, ?_⟩
+  · change ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => F (η p.1, p.2))
+    intro p
+    by_cases hpK : p.2 ∈ K
+    · have hmem : (η p.1, p.2) ∈ U := huv ⟨hη_bound p.1, hKsub hpK⟩
+      have hFat : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ∞) F (η p.1, p.2) := hmem
+      have hcomp := hFat.comp p (hΦη p)
+      exact hcomp
+    · have hopen : IsOpen ((Set.Icc (-1 : ℝ) (L + 1))ᶜ) := isClosed_Icc.isOpen_compl
+      have hp2 : p.2 ∈ (Set.Icc (-1 : ℝ) (L + 1))ᶜ := hpK
+      have hsub : (Set.Icc (-1 : ℝ) (L + 1))ᶜ ⊆ (Set.Ioo (-1 : ℝ) (L + 1))ᶜ :=
+        Set.compl_subset_compl.mpr Set.Ioo_subset_Icc_self
+      have heq : (fun q : ℝ × ℝ => F (η q.1, q.2)) =ᶠ[𝓝 p] (fun q : ℝ × ℝ => γ q.2) := by
+        have hnhds : (Set.univ ×ˢ (Set.Icc (-1 : ℝ) (L + 1))ᶜ) ∈ 𝓝 p :=
+          (isOpen_univ.prod hopen).mem_nhds (Set.mem_prod.mpr ⟨Set.mem_univ _, hp2⟩)
+        filter_upwards [hnhds] with q hq
+        have hχq : χ q.2 = 0 := hχ_zero (hsub hq.2)
+        have hVcq : Vc q.2 = 0 := by simp only [hVc_def, hχq, zero_smul]
+        change F (η q.1, q.2) = γ q.2
+        have harg : (η q.1 • (V₀ q.2).snd : E) = (0 : E) := by
+          rw [hV₀snd, hVcq]; exact smul_zero _
+        change expMapIntrinsic (I := I) g hEnorm (γ q.2)
+          ((η q.1 • (V₀ q.2).snd : E) : TangentSpace I (γ q.2)) = γ q.2
+        rw [harg]
+        exact expMapIntrinsic_zero (I := I) g hEnorm (γ q.2)
+      refine ContMDiffAt.congr_of_eventuallyEq ?_ heq
+      exact (hγ.of_le (by decide)).contMDiffAt.comp p contMDiffAt_snd
+  · intro t
+    change expMapIntrinsic (I := I) g hEnorm (γ t)
+      ((η 0 • (V₀ t).snd : E) : TangentSpace I (γ t)) = γ t
+    have harg : (η 0 • (V₀ t).snd : E) = (0 : E) := by rw [hη0]; exact zero_smul _ _
+    rw [harg]
+    exact expMapIntrinsic_zero (I := I) g hEnorm (γ t)
+  · intro t ht
+    have hVct : Vc t = V t := by
+      simp only [hVc_def, hχ_one ht, Pi.one_apply, one_smul]
+    set expFun : E → M :=
+      fun v : E => (expMapIntrinsic (I := I) g hEnorm (γ t) (show TangentSpace I (γ t) from v) : M)
+      with hexpFun_def
+    have hexp_mdiff : MDifferentiableAt 𝓘(ℝ, E) I expFun (0 : E) :=
+      mdifferentiableAt_expMapIntrinsic_zero (I := I) g hEnorm (γ t)
+    have hexp_mfd : HasMFDerivAt 𝓘(ℝ, E) I expFun (0 : E)
+        (ContinuousLinearMap.id ℝ E) := by
+      have hh := hexp_mdiff.hasMFDerivAt
+      rwa [mfderiv_expMapIntrinsic_at_zero (I := I) g hEnorm (γ t)] at hh
+    have hinner_deriv : HasDerivAt (fun s : ℝ => η s • Vc t) (Vc t) 0 := by
+      have hη' : HasDerivAt η 1 0 := hasDerivAt_reparam_zero δ' hδ'_pos
+      have hsc := hη'.smul_const (Vc t)
+      simpa using hsc
+    have hinner_fd : HasFDerivAt (fun s : ℝ => η s • Vc t)
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Vc t)) 0 :=
+      hinner_deriv.hasFDerivAt
+    have hinner_mfd : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun s : ℝ => η s • Vc t) 0
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Vc t)) :=
+      hinner_fd.hasMFDerivAt
+    have hinner0 : (fun s : ℝ => η s • Vc t) 0 = (0 : E) := by
+      simp only [hη0, zero_smul]
+    have hcomp : HasMFDerivAt 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => expFun (η s • Vc t)) 0
+        ((ContinuousLinearMap.id ℝ E).comp
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Vc t))) := by
+      have hcomp0 : HasMFDerivAt 𝓘(ℝ, E) I expFun ((fun s : ℝ => η s • Vc t) 0)
+          (ContinuousLinearMap.id ℝ E) := by rw [hinner0]; exact hexp_mfd
+      exact hcomp0.comp 0 hinner_mfd
+    have hmfderiv := hcomp.mfderiv
+    change mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F (η s, t)) 0 (1 : ℝ) = V t
+    have hfeq : (fun s : ℝ => F (η s, t)) = (fun s : ℝ => expFun (η s • Vc t)) := by
+      funext s; rfl
+    rw [hfeq, hmfderiv]
+    change ((ContinuousLinearMap.id ℝ E).comp
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Vc t))) (1 : ℝ) = V t
+    rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
+      ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
+    exact hVct
+  · intro hV0 s
+    have hVc0 : Vc 0 = 0 := by simp only [hVc_def, hV0, smul_zero]
+    change expMapIntrinsic (I := I) g hEnorm (γ 0)
+      ((η s • (V₀ (0 : ℝ)).snd : E) : TangentSpace I (γ 0)) = γ 0
+    have harg : (η s • (V₀ (0 : ℝ)).snd : E) = (0 : E) := by
+      rw [hV₀snd, hVc0]; exact smul_zero _
+    rw [harg]
+    exact expMapIntrinsic_zero (I := I) g hEnorm (γ 0)
+  · intro hVL s
+    have hVcL : Vc L = 0 := by simp only [hVc_def, hVL, smul_zero]
     change expMapIntrinsic (I := I) g hEnorm (γ L)
       ((η s • (V₀ L).snd : E) : TangentSpace I (γ L)) = γ L
     have harg : (η s • (V₀ L).snd : E) = (0 : E) := by
@@ -383,8 +615,10 @@ theorem indexForm_nonneg_of_minimising_geodesic
     (hV0 : V 0 = 0) (hVL : V L = 0) :
     0 ≤ indexForm (I := I) g γ 0 L V V := by
   classical
-  obtain ⟨f, hf_smooth, hf0, hf_vel, hf_fix0, hf_fixL⟩ :=
-    exists_variation_realising_field_via_exp (I := I) g hEnorm γ V L hγ_smooth hVbundle hV0 hVL
+  obtain ⟨f, hf_smooth, hf0, hf_vel, hf_fix0_if, hf_fixL_if⟩ :=
+    exists_variation_realising_field_via_exp (I := I) g hEnorm γ V L hγ_smooth hVbundle
+  have hf_fix0 : ∀ s : ℝ, f s 0 = γ 0 := hf_fix0_if hV0
+  have hf_fixL : ∀ s : ℝ, f s L = γ L := hf_fixL_if hVL
   set L_arc : ℝ → ℝ := fun s : ℝ => arcLength (I := I) g (fun t : ℝ => f s t) 0 L with hL_arc
   set Vfield : ℝ → E :=
     fun t : ℝ => (mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ => f s t) 0 (1 : ℝ) : E) with hVfield

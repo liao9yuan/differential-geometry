@@ -16,6 +16,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open IntrinsicSobolev
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -565,5 +566,145 @@ lemma exists_zeroContentR_le_fiberNorm_on_compact
         Finset.sum_le_sum (fun q _ => h_each q)
     _ = Npair * Real.sqrt Craw * ‖S.toSection b‖ := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]; ring
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 800000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+
+
+
+lemma rawPullR_jet_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (m k : ℕ)
+    (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
+    {K : Set EuclN} (hK : IsCompact K)
+    (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g r s) (y : EuclN), y ∈ K →
+      ‖iteratedFDeriv ℝ m
+          (tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx) y‖ ≤
+        C * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S‖ := by
+  classical
+  set K_E : Set E := (toEuclidean (E := E)).symm '' K with hK_E_def
+  have hK_E_compact : IsCompact K_E :=
+    hK.image (toEuclidean (E := E)).symm.continuous
+  have hK_E_sub : K_E ⊆ interior (extChartAt I α).target := by
+    rw [hK_E_def]
+    rintro z ⟨y, hy, rfl⟩
+    have hy' := hK_sub hy
+    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy'
+    rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
+    exact hy'
+  set K_M : Set M := (extChartAt I α).symm '' K_E with hK_M_def
+  have hK_M_compact : IsCompact K_M :=
+    hK_E_compact.image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) α).mono
+        (fun z hz => interior_subset (hK_E_sub hz)))
+  have hK_M_sub : K_M ⊆ (chartAt H α).source := by
+    rw [hK_M_def]
+    rintro b ⟨z, hz, rfl⟩
+    have hz' : z ∈ (extChartAt I α).target := interior_subset (hK_E_sub hz)
+    have := (extChartAt I α).map_target hz'
+    rwa [extChartAt_source (I := I)] at this
+  obtain ⟨Cpeel, hCpeel_nn, hpeel⟩ :=
+    iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
+      (I := I) (M := M) g r s α m hK hK_sub m (le_refl m)
+  have hz_per : ∀ i : ℕ, ∃ Cz : ℝ, 0 ≤ Cz ∧
+      ∀ (S : SmoothCcTensor g r s) {b : M}, b ∈ K_M →
+        tensorComponentAbsSum (I := I) (M := M) g r (s + i)
+            (iteratedCovGrad g r s i S) α
+            (toEuclidean (E := E) (extChartAt I α b)) ≤
+          Cz *
+            (letI : Bundle.RiemannianBundle
+                (fun z : M => TensorRSSpace r (s + i) I z) :=
+              Tensor0SBundle.tensorRS_riemannianBundle
+                (I := I) (M := M) g r (s + i)
+             ‖(iteratedCovGrad g r s i S).toSection b‖) := by
+    intro i
+    obtain ⟨Cz, hCz_nn, hCz⟩ :=
+      exists_zeroContentR_le_fiberNorm_on_compact
+        (I := I) (M := M) g r (s + i) α hK_M_compact hK_M_sub
+    exact ⟨Cz, hCz_nn, fun S b hb => hCz (iteratedCovGrad g r s i S) hb⟩
+  choose Czf hCzf_nn hCzf using hz_per
+  set Czmax : ℝ :=
+    (Finset.range (m + 1)).sup'
+      (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero m)) Czf with hCzmax_def
+  have hCzmax_nn : 0 ≤ Czmax := by
+    rw [hCzmax_def]
+    exact le_trans (hCzf_nn 0)
+      (Finset.le_sup' Czf (Finset.mem_range.mpr (Nat.succ_pos m)))
+  have hCz_le : ∀ i ∈ Finset.range (m + 1), Czf i ≤ Czmax :=
+    fun i hi => Finset.le_sup' Czf hi
+  obtain ⟨Cemb, hCemb_pos, hCemb⟩ :=
+    iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
+      (I := I) (M := M) g r s k m h_super
+  refine ⟨Cpeel * (Czmax * Cemb), by positivity, ?_⟩
+  intro S y hy
+  set N : ℝ :=
+    ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S‖ with hN_def
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  have hyE : (toEuclidean (E := E)).symm y ∈ K_E := ⟨y, hy, rfl⟩
+  have hb_mem : b ∈ K_M := ⟨(toEuclidean (E := E)).symm y, hyE, rfl⟩
+  have hy_eq : toEuclidean (E := E) (extChartAt I α b) = y := by
+    rw [hb_def]
+    have hy_target : (toEuclidean (E := E)).symm y ∈
+        (extChartAt I α).target := interior_subset (hK_E_sub hyE)
+    rw [(extChartAt I α).right_inv hy_target,
+      ContinuousLinearEquiv.apply_symm_apply]
+  have hpeel_y := hpeel S m (le_refl m) 0 (by omega) Idx Jdx y hy
+  rw [iteratedCovGrad_zero] at hpeel_y
+  have hsum_fiber :
+      ∑ i ∈ Finset.range (m + 1),
+          tensorComponentAbsSum (I := I) (M := M) g r (s + (0 + i))
+            (iteratedCovGrad g r s (0 + i) S) α y ≤
+        Czmax * ∑ i ∈ Finset.range (m + 1),
+          (letI : Bundle.RiemannianBundle
+              (fun z : M => TensorRSSpace r (s + i) I z) :=
+            Tensor0SBundle.tensorRS_riemannianBundle
+              (I := I) (M := M) g r (s + i)
+           ‖(iteratedCovGrad g r s i S).toSection b‖) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    rw [Nat.zero_add]
+    have hzi := hCzf i S hb_mem
+    rw [hy_eq] at hzi
+    refine hzi.trans ?_
+    letI : Bundle.RiemannianBundle
+        (fun z : M => TensorRSSpace r (s + i) I z) :=
+      Tensor0SBundle.tensorRS_riemannianBundle
+        (I := I) (M := M) g r (s + i)
+    exact mul_le_mul_of_nonneg_right (hCz_le i hi) (norm_nonneg _)
+  have hemb := hCemb S b
+  have hpeel_y' :
+      ‖iteratedFDeriv ℝ m
+          (tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx) y‖ ≤
+        Cpeel * (Czmax * (Cemb * N)) := by
+    refine hpeel_y.trans ?_
+    have hstep : Cpeel * ∑ i ∈ Finset.range (m + 1),
+          tensorComponentAbsSum (I := I) (M := M) g r (s + (0 + i))
+            (iteratedCovGrad g r s (0 + i) S) α y ≤
+        Cpeel * (Czmax * ∑ i ∈ Finset.range (m + 1),
+          (letI : Bundle.RiemannianBundle
+              (fun z : M => TensorRSSpace r (s + i) I z) :=
+            Tensor0SBundle.tensorRS_riemannianBundle
+              (I := I) (M := M) g r (s + i)
+           ‖(iteratedCovGrad g r s i S).toSection b‖)) :=
+      mul_le_mul_of_nonneg_left hsum_fiber hCpeel_nn
+    refine hstep.trans ?_
+    have hfiber_le : ∑ i ∈ Finset.range (m + 1),
+          (letI : Bundle.RiemannianBundle
+              (fun z : M => TensorRSSpace r (s + i) I z) :=
+            Tensor0SBundle.tensorRS_riemannianBundle
+              (I := I) (M := M) g r (s + i)
+           ‖(iteratedCovGrad g r s i S).toSection b‖) ≤ Cemb * N := by
+      simpa only [hN_def] using hCemb S b
+    have hscaled := mul_le_mul_of_nonneg_left hfiber_le hCzmax_nn
+    exact mul_le_mul_of_nonneg_left hscaled hCpeel_nn
+  calc
+    ‖iteratedFDeriv ℝ m
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx) y‖
+        ≤ Cpeel * (Czmax * (Cemb * N)) := hpeel_y'
+    _ = Cpeel * (Czmax * Cemb) * N := by ring
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -4,9 +4,9 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-!
-# Tangent-field chart models and chart-constant fields
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -44,9 +44,9 @@ theorem covariantDeriv_vectorField_contMDiff
     (CovariantDerivative.ContMDiffCovariantDerivative.contMDiff_apply
       (𝕜 := 𝕜) (I := I) (M := M) cov hcov X Y)
 
-/-- `∇_X Y` of `∞`-smooth tangent sections, packaged as an `∞`-smooth section.
-This is the slot-update input of covariant-derivative tower regularity
-inductions. -/
+
+
+
 noncomputable def covSection
     [VectorBundle 𝕜 E (TangentSpace I : M → Type _)]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -67,15 +67,15 @@ noncomputable def covSection
     covSection (I := I) cov hcov X Y p = (cov (fun q : M => Y q) p) (X p) :=
   rfl
 
-/-- Model representative of a tangent vector field in the fixed tangent-bundle
-trivialization centered at `x₀`. -/
+
+
 noncomputable def tangentFieldModelInChart (x₀ : M)
     (V : (x : M) → TangentSpace I x) (y : E) : E :=
   (trivializationAt E (TangentSpace I : M → Type _) x₀).continuousLinearMapAt 𝕜
     ((extChartAt I x₀).symm y) (V ((extChartAt I x₀).symm y))
 
-/-- Fixed-chart constant tangent fields have constant model representatives in
-their defining chart. -/
+
+
 theorem tangentFieldModelInChart_tangentConstInChart_apply_of_mem
     (x₀ : M) {y : E} (hy : y ∈ (extChartAt I x₀).target) (v : E) :
     tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀
@@ -88,9 +88,9 @@ theorem tangentFieldModelInChart_tangentConstInChart_apply_of_mem
   unfold tangentFieldModelInChart tangentConstInChart
   exact e.continuousLinearMapAt_symmL (R := 𝕜) hp_base v
 
-/-- A chart-constant tangent field built from the tangent-trivialization
-coordinate of a vector at the chart center evaluates back to that vector at the
-center. -/
+
+
+
 theorem tangentConstInChart_self_continuousLinearMapAt
     (x : M) (v : TangentSpace I x) :
     tangentConstInChart (𝕜 := 𝕜) (I := I) x
@@ -102,9 +102,9 @@ theorem tangentConstInChart_self_continuousLinearMapAt
   rw [tangentConstInChart_apply]
   exact e.symmL_continuousLinearMapAt (R := 𝕜) hx v
 
-/-- In a fixed tangent-bundle trivialization, every tangent field is locally the
-finite sum of its model-coordinate coefficients times the chart-constant
-fields around any point in the fixed chart domain. -/
+
+
+
 theorem tangentField_eq_sum_modelCoord_tangentConst_eventually_of_mem
     (x₀ : M) (V : (x : M) → TangentSpace I x) {p₀ : M}
     (hp₀ : p₀ ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet) :
@@ -156,9 +156,9 @@ theorem tangentField_eq_sum_modelCoord_tangentConst_eventually_of_mem
           rw [tangentConstInChart_apply]
           rw [hmodel]
 
-/-- In a fixed tangent-bundle trivialization, every tangent field is locally the
-finite sum of its model-coordinate coefficients times the chart-constant
-fields. -/
+
+
+
 theorem tangentField_eq_sum_modelCoord_tangentConst_eventually
     (x₀ : M) (V : (x : M) → TangentSpace I x) :
     V =ᶠ[𝓝 x₀]
@@ -173,8 +173,8 @@ theorem tangentField_eq_sum_modelCoord_tangentConst_eventually
     (𝕜 := 𝕜) (I := I) x₀ V (FiberBundle.mem_baseSet_trivializationAt' x₀)
 
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-/-- The chart-constant tangent field is smooth on the base set of the
-trivialization defining it. -/
+
+
 lemma tangentConstInChart_contMDiffOn_baseSet (x₀ : M) (v : E)
     [IsManifold I (n + 1) M] :
     CMDiff[(trivializationAt E (TangentSpace I) x₀).baseSet] n
@@ -202,8 +202,8 @@ namespace CovariantDerivative
 open Bundle
 open scoped Manifold ContDiff
 
-/-- Local `C¹` regularity of the covariant derivative of two smooth vector
-field sections under a locally `C¹` connection. -/
+
+
 theorem smoothSections_cov_contMDiffAt_one
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -249,12 +249,12 @@ theorem smoothSections_cov_contMDiffAt_one
         exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
   exact (hcovY.clm_bundle_apply hX).contMDiffAt (by simp)
 
-/-- Local smoothness of the covariant derivative of two chart-constant tangent
-fields.
 
-This is the curvature regularity wrapper needed by the Levi-Civita skew
-calculation.  It is now just a consequence of the local smooth-connection
-predicate and the local-frame smoothness API for `tangentConstInChart`. -/
+
+
+
+
+
 theorem tangentConst_cov_mdiffAt
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]

@@ -4,12 +4,12 @@ import Mathlib.Topology.Algebra.Module.Equiv
 
 set_option autoImplicit false
 
-/-!
-# Neumann estimates for weighted continuous-linear-map sums
 
-This file provides the reusable Banach-space facts needed when a finite convex
-combination of continuous linear endomorphisms is uniformly close to `-id`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -19,8 +19,8 @@ namespace ContinuousLinearMap
 
 variable {ι E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- A continuous linear endomorphism at operator-norm distance less than one
-from the identity is invertible. -/
+
+
 theorem invertible_of_id_sub [CompleteSpace E] {T : E →L[ℝ] E}
     (h : ‖ContinuousLinearMap.id ℝ E - T‖ < 1) : T.IsInvertible := by
   have hu : IsUnit T := by
@@ -34,8 +34,8 @@ theorem invertible_of_id_sub [CompleteSpace E] {T : E →L[ℝ] E}
   ext v
   rfl
 
-/-- A finite convex combination of maps uniformly within `η` of `-id` is
-itself within `η` of `-id`. -/
+
+
 theorem sum_near_neg [Fintype ι]
     (μ : ι → ℝ) (A : ι → E →L[ℝ] E) (η : ℝ)
     (hμ : ∀ i, 0 ≤ μ i) (hsum : ∑ i, μ i = 1)
@@ -63,8 +63,8 @@ theorem sum_near_neg [Fintype ι]
     _ = η := by
       rw [← Finset.sum_mul, hsum, one_mul]
 
-/-- A finite convex combination of maps uniformly less than one away from
-`-id` is represented by a continuous linear equivalence. -/
+
+
 theorem sum_near_neg_inv [Fintype ι] [CompleteSpace E]
     (μ : ι → ℝ) (A : ι → E →L[ℝ] E) (η : ℝ)
     (hμ : ∀ i, 0 ≤ μ i) (hsum : ∑ i, μ i = 1)

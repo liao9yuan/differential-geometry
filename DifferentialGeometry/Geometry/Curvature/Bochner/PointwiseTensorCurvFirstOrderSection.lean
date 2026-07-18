@@ -9,7 +9,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
+set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -737,23 +737,23 @@ lemma gradArmDirCLM_frame_independent
       simp only [Tensor0SSpace.toModel_smul,
         ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     rw [hstep, hT]
-    congr 1
+    apply congrArg (fun z : ℝ => tensor00Scalar (I := I) (M := M) x D * z)
     exact toModel_unit_finsum (I := I) (M := M) s x Finset.univ
       (fun i => (2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (F i x) w
             (tensorSlotZeroEvalFib (I := I) (M := M) x s (F i x) Wx) -
           tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx) m
   rw [hredD B, hredD C]
-  congr 1
+  apply congrArg (fun z : ℝ => tensor00Scalar (I := I) (M := M) x D * z)
 
   rw [Finset.sum_congr rfl (fun i _ =>
     gradArmDirCLM_summand_toModel (I := I) (M := M) g s x B w Wx m i),
     Finset.sum_congr rfl (fun i _ =>
     gradArmDirCLM_summand_toModel (I := I) (M := M) g s x C w Wx m i)]
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib]
-  congr 1
+  apply congrArg₂ (fun a b : ℝ => a - b)
   · rw [← Finset.mul_sum, ← Finset.mul_sum]
-    congr 1
+    apply congrArg (fun z : ℝ => 2 * z)
     rw [orthonormal_basis_bilin_trace (I := I) g x (curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m)
         (fun i => B i x) hBorth,
       orthonormal_basis_bilin_trace (I := I) g x (curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m)

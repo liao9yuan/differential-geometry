@@ -52,13 +52,13 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Pointwise tensor coordinates from a tangent basis
 
-This file is the metric-free coordinate core for realized tensor fibers.  The
-primitive algebraic object is a pointwise `Module.Basis` of one tangent fiber;
-local-frame coordinates should pass through `IsLocalFrameOn.toBasisAt`.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -118,8 +118,8 @@ theorem basisTensor0S_apply
   rw [continuousMultilinearMapBasis_apply]
   simp [continuousMultilinearMapBasisElem]
 
-/-- Expanding a covariant tensor in a tangent basis gives the usual component
-contraction formula. -/
+
+
 theorem tensor0S_apply_eq_sum
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :

@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 
-/-!
-# Time derivatives of smooth parametric tensor coefficients
 
-This file packages the fibrewise time derivative of a jointly smooth family
-of compactly supported tensor coefficients.  The public conclusion records
-only the fully applied scalar derivative used by completed Sobolev actions.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -34,8 +34,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [FiniteDimensional ℝ E] [CompactSpace M] in
-/-- The derivative in the second real factor of a jointly smooth map into a
-fixed Banach space loses one differentiability order. -/
+
+
 private theorem timeDeriv2_at
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
     {f : M × ℝ → F} {p₀ : M × ℝ} {m n : WithTop ℕ∞}
@@ -230,8 +230,8 @@ private theorem coord_deriv_eq
   exact hcomp.deriv.symm
 
 omit [CompactSpace M] in
-/-- The fixed-fibre time derivative of a jointly smooth coefficient family is
-again jointly smooth on the same open parameter slab. -/
+
+
 private theorem timeDeriv_joint
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -273,10 +273,10 @@ private theorem timeDeriv_joint
   · exact coord_deriv_eq (I := I) (M := M) g b c Φ hS hjoint p₀.1 p₀ hp₀
       (mem_baseSet_trivializationAt _ _ _)
 
-/-- A jointly smooth parametric tensor coefficient has a jointly smooth
-fixed-fibre time derivative.  After applying the coefficient to an input
-tensor and evaluating all output slots, the packaged field is the ordinary
-real derivative. -/
+
+
+
+
 theorem exists_timeDerivCc
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)

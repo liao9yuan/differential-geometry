@@ -95,6 +95,43 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
       linarith
     rw [hempty]; exact Set.finite_empty
 
+def eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ) :
+    Finset (TensorEigenIdx (I := I) (M := M) g r s) :=
+  (tensorEigenIdx_one_add_lambda_lt_finite
+    (I := I) (M := M) g r s ((n : ℝ) + 1)).toFinset
+
+lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    i ∈ eigenFinset (I := I) (M := M) g r s n ↔
+      1 + TensorEigenIdx.lambda (I := I) (M := M) i < (n : ℝ) + 1 := by
+  unfold eigenFinset
+  rw [Set.Finite.mem_toFinset]
+  rfl
+
+lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Monotone (eigenFinset (I := I) (M := M) g r s) := by
+  intro m n hmn i hi
+  rw [mem_eigenFinset] at hi ⊢
+  have hcast : (m : ℝ) + 1 ≤ (n : ℝ) + 1 := by
+    have hmn' : (m : ℝ) ≤ (n : ℝ) := by exact_mod_cast hmn
+    linarith
+  exact hi.trans_le hcast
+
+lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ∃ n : ℕ, i ∈ eigenFinset (I := I) (M := M) g r s n := by
+  obtain ⟨n, hn⟩ :=
+    exists_nat_gt (1 + TensorEigenIdx.lambda (I := I) (M := M) i)
+  refine ⟨n, ?_⟩
+  rw [mem_eigenFinset]
+  linarith
+
+lemma eigenFinset_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Tendsto (eigenFinset (I := I) (M := M) g r s) atTop atTop :=
+  tendsto_atTop_finset_of_monotone
+    (eigenFinset_mono (I := I) (M := M) g r s)
+    (eigenFinset_exhaust (I := I) (M := M) g r s)
+
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -150,14 +187,13 @@ lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
 
 end tensorHs
 
-theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
-    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
-    (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
+theorem tendsto_of_coeff
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'')
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
     {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
-    (hlow : Tendsto (fun n =>
-      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
-        (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0)) :
+    (hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0)) :
     Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
@@ -305,12 +341,6 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
 
-  have hcoeff0 : ∀ i : ι, Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
-    intro i
-    have h := tensorHs.coeff_tendsto_zero_of_norm_tendsto_zero (I := I) (M := M)
-      (fun n => tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
-        (hσσ'.trans hσ'σ''.le) (d n)) hlow i
-    simpa only [tensorHsInclusion_coeff_apply] using h
   have hfin0 : Tendsto (fun n =>
       ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
       atTop (𝓝 0) := by
@@ -355,6 +385,68 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
   have hnn : 0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
+
+theorem cont_of_coeff
+    {X : Type*} [TopologicalSpace X] [FirstCountableTopology X]
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'') (W : X → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ x, ‖W x‖ ≤ C)
+    (hcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Continuous (fun x => (W x).coeff i)) :
+    Continuous (fun x =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (W x)) := by
+  rw [continuous_iff_seqContinuous]
+  intro x x₀ hx
+  let d : ℕ → tensorHs (I := I) (M := M) g r s σ'' :=
+    fun n => W (x n) - W x₀
+  have hd_bound (n : ℕ) : ‖d n‖ ≤ 2 * C := by
+    calc
+      ‖d n‖ = ‖W (x n) - W x₀‖ := rfl
+      _ ≤ ‖W (x n)‖ + ‖W x₀‖ := norm_sub_le _ _
+      _ ≤ C + C := add_le_add (hCbd _) (hCbd _)
+      _ = 2 * C := by ring
+  have hd_coeff (i : TensorEigenIdx (I := I) (M := M) g r s) :
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
+    have hi := ((hcoeff i).tendsto x₀).comp hx
+    have hi' : Tendsto (fun n => (W (x n)).coeff i - (W x₀).coeff i)
+        atTop (𝓝 0) := tendsto_sub_nhds_zero_iff.mpr hi
+    simpa only [d, sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff,
+      Pi.add_apply, Pi.neg_apply] using hi'
+  have hnorm := tendsto_of_coeff (I := I) (M := M) hσ'σ'' d
+    (mul_nonneg (by norm_num) hC) hd_bound hd_coeff
+  have hzero : Tendsto (fun n =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)) atTop (𝓝 0) :=
+    tendsto_zero_iff_norm_tendsto_zero.mpr hnorm
+  have hsub : Tendsto (fun n =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (W (x n)) -
+        tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (W x₀)) atTop (𝓝 0) := by
+    refine hzero.congr' (Eventually.of_forall fun n => ?_)
+    simp only [d, map_sub]
+  exact tendsto_sub_nhds_zero_iff.mp hsub
+
+theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
+    (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
+    (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
+    (hlow : Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0)) :
+    Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
+  have hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
+    intro i
+    have h := tensorHs.coeff_tendsto_zero_of_norm_tendsto_zero (I := I) (M := M)
+      (fun n => tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        (hσσ'.trans hσ'σ''.le) (d n)) hlow i
+    simpa only [tensorHsInclusion_coeff_apply] using h
+  exact tendsto_of_coeff (I := I) (M := M) hσ'σ'' d hC hCbd hcoeff0
 
 omit [CompleteSpace E] in
 private lemma norm_le_sqrt_of_weightedMass_le

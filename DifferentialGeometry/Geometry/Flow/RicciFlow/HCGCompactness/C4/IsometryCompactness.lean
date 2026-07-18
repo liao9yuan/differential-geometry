@@ -3,24 +3,24 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 
 set_option autoImplicit false
 
-/-!
-# Compactness of a sequence of isometries (MSM135 Chapter 4, `lbl374`)
 
-The corollary to Arzelà–Ascoli (Lemma 3.14) that a sequence of isometries
-`Φₖ : (𝒰, gₖ) → (𝒱, hₖ)` between bounded open sets of `ℝⁿ`, with the `gₖ`/`hₖ`
-uniformly equivalent to the Euclidean metric and all Euclidean covariant derivatives
-bounded, has a subsequence converging in `C^∞` uniformly on compact sets to a `C^∞`
-diffeomorphism `Φ_∞`.
 
-**Honest-input boundary.**  The book derives, from the isometry relation
-`(gₖ)_{ab} = ∂Φₖ^α/∂xᵃ · ∂Φₖ^β/∂xᵇ · (hₖ)_{αβ}` (`lbl375`), that all iterated
-Euclidean derivatives of `Φₖ` are uniformly bounded on compact sets — by expressing
-`∂²Φₖ`, then inductively all `∂ʳΦₖ`, as polynomials in `gₖ, gₖ⁻¹, hₖ, hₖ⁻¹` and their
-first derivatives and `∂Φₖ`.  The book attributes this explicit polynomial recursion to
-§5 of [H6].  We take that conclusion as the honest-input predicate
-`IsometryDerivBounds` and prove the analytic corollary on top of it via the
-Arzelà–Ascoli-for-maps engine `exists_cInf_subseq` (`MapConvergence.lean`).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -31,30 +31,30 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
-/-- **Honest-input (MSM135 `lbl375` → [H6] §5).**  The derivative-bound conclusion of
-the isometry relation: for an isometry sequence between metrics uniformly equivalent to
-the Euclidean metric with bounded Euclidean covariant derivatives, every iterated
-Euclidean derivative `∇ʳΦₖ` is uniformly bounded (over `k`) on each compact set.
 
-This is exactly the hypothesis the Arzelà–Ascoli-for-maps engine consumes; the geometric
-derivation (the polynomial recursion the book cites to §5 of [H6]) is taken as input. -/
+
+
+
+
+
+
 def IsometryDerivBounds (Φ : ℕ → E → F) : Prop :=
   ∀ r : ℕ, ∀ K : Set E, IsCompact K →
     ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDeriv ℝ r (Φ k) x‖ ≤ M
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-/-- A sub-sequence still has the uniform derivative bounds. -/
+
 theorem IsometryDerivBounds.comp_subseq {Φ : ℕ → E → F} (h : IsometryDerivBounds Φ)
     (φ : ℕ → ℕ) : IsometryDerivBounds (fun k => Φ (φ k)) := by
   intro r K hK
   obtain ⟨M, hM⟩ := h r K hK
   exact ⟨M, fun k x hx => hM (φ k) x hx⟩
 
-/-- **MSM135 Corollary "Compactness of a sequence of isometries"** (`lbl374`),
-convergence core.  From the honest-input derivative bounds (`lbl375`/[H6] §5), a
-subsequence of the smooth maps `Φₖ` converges in `C^∞` uniformly on compact sets to a
-smooth limit.  (Pure application of the Arzelà–Ascoli-for-maps engine; the diffeomorphism
-clause is added in `isometry_seq_diffeo`.) -/
+
+
+
+
+
 theorem isometry_seq_cInf
     (Φ : ℕ → E → F) (hΦ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Φ k))
     (hbdd : IsometryDerivBounds Φ) :
@@ -64,11 +64,11 @@ theorem isometry_seq_cInf
   exists_cInf_subseq Φ hΦ hbdd
 
 omit [FiniteDimensional ℝ E] in
-/-- **Invertibility of the limit (the "by symmetry" step of `lbl374`).**  If `Φₖ → Φ_∞`
-and `Ψₖ → Ψ_∞` in `C^∞` uniformly on compacts, `Φ_∞` is continuous, and `Φₖ ∘ Ψₖ = id`,
-then `Φ_∞ ∘ Ψ_∞ = id` pointwise.  Used both ways to make the limit a diffeomorphism;
-proved by the uniform-limit composition rule `TendstoUniformlyOn.tendsto_comp` over a
-compact neighborhood of `Ψ_∞ x`, plus uniqueness of limits. -/
+
+
+
+
+
 theorem comp_eq_id_of_cInf
     {Φ : ℕ → F → E} {Φinf : F → E} {Ψ : ℕ → E → F} {Ψinf : E → F}
     (hΦ : MapCInfConvOnCompacts Set.univ Φ Φinf) (hΦc : Continuous Φinf)
@@ -88,12 +88,12 @@ theorem comp_eq_id_of_cInf
   simp only [hid] at hcomp
   exact (tendsto_nhds_unique tendsto_const_nhds hcomp).symm
 
-/-- **MSM135 Corollary "Compactness of a sequence of isometries"** (`lbl374`), full
-statement.  A sequence of smooth invertible maps `Φₖ : E → F` (with smooth inverses `Ψₖ`)
-whose families `Φₖ`, `Ψₖ` both satisfy the honest-input isometry derivative bounds
-(`lbl375`/[H6] §5) has a subsequence converging in `C^∞` uniformly on compact sets to a
-`C^∞` diffeomorphism: the limit `Φ_∞` has a smooth two-sided inverse `Ψ_∞` obtained as the
-limit of the `Ψₖ`. -/
+
+
+
+
+
+
 theorem isometry_seq_diffeo
     (Φ : ℕ → E → F) (Ψ : ℕ → F → E)
     (hΦ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Φ k)) (hΨ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Ψ k))

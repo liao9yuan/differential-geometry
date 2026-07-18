@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 
+set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -19,13 +20,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 section SliceAtBallPoint
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -57,7 +57,6 @@ private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball
   have hfst : ContDiff ℝ 1 (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp v₁ hslice
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_two
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -89,7 +88,6 @@ private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_two
   have hfst : ContDiff ℝ 2 (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp v₁ hslice
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_nat
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E} (n : ℕ)
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -128,7 +126,6 @@ section CandidateAtBallPoint
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -165,7 +162,6 @@ private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -202,7 +198,6 @@ private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt_nat_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E} (n : ℕ)
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -657,11 +652,11 @@ theorem expMap_contMDiffAt2_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
-private theorem exists_unified_chartFlow_data_nat
-    (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
+private theorem exists_unified_chartFlow_data_inf
+    (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
       0 < ρ ∧ 0 < T ∧ 0 < T_match ∧ T_match ≤ T ∧
-      ContDiffOn ℝ (n : ℕ∞) Φ
+      ContDiffOn ℝ ∞ Φ
         ((Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ) ×ˢ
           Set.Ioo (-T) T) ∧
       Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
@@ -692,14 +687,12 @@ private theorem exists_unified_chartFlow_data_nat
     DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) p hx₀_target
   obtain ⟨b, r, ε, ρ_V4, T_V4, Φ, hr, hε, hρ_V4_pos, hT_V4_pos, hb_sub, hΦ_ILF,
-    hΦ_cd_V4_n, hΦ_init0⟩ :=
-    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_nat
-      (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) n hn hx₀_interior
+    hΦ_cd_V4_inf, hΦ_init0⟩ :=
+    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_inf
+      (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   have hΦ_cd_V4 : ContDiffOn ℝ 1 Φ
-      ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V4) ×ˢ Set.Ioo (-T_V4) T_V4) := by
-    apply hΦ_cd_V4_n.of_le
-    have h1le : (1 : ℕ∞) ≤ (n : ℕ∞) := by exact_mod_cast hn
-    exact_mod_cast h1le
+      ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V4) ×ˢ Set.Ioo (-T_V4) T_V4) :=
+    hΦ_cd_V4_inf.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V4, hT₀_lt_V4, h_orbit_in⟩ :=
     exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
@@ -728,9 +721,9 @@ private theorem exists_unified_chartFlow_data_nat
     have : T = min T₀ (ε / 2) := hT_def
     rw [this]; linarith
   have hT_lt_T_V4 : T < T_V4 := lt_of_le_of_lt hT_le_T₀ hT₀_lt_V4
-  have hΦ_cd : ContDiffOn ℝ (n : ℕ∞) Φ
+  have hΦ_cd : ContDiffOn ℝ ∞ Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
-    apply hΦ_cd_V4_n.mono
+    apply hΦ_cd_V4_inf.mono
     intro w hw
     refine ⟨?_, ?_⟩
     · exact (Metric.ball_subset_ball hρ_le_ρ_V4) hw.1
@@ -820,7 +813,7 @@ private theorem exists_unified_chartFlow_data_nat
       (hΦ_target v hv) (hΦ_phase v hv)
   refine ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · change ContDiffOn ℝ (n : ℕ∞) Φ
+  · change ContDiffOn ℝ ∞ Φ
       ((Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T)
     exact hΦ_cd
   · change Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
@@ -846,16 +839,55 @@ private theorem exists_unified_chartFlow_data_nat
   · intro v hv
     exact hF_int v hv
 
-theorem expMap_contMDiffAtN_of_norm_lt
-    (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
-      ContMDiffAt 𝓘(ℝ, E) I ((n : ℕ∞) : WithTop ℕ∞)
-        (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M))
-        w := by
+private theorem exists_unified_chartFlow_data_nat
+    (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (_hn : 1 ≤ n) :
+    ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
+      0 < ρ ∧ 0 < T ∧ 0 < T_match ∧ T_match ≤ T ∧
+      ContDiffOn ℝ (n : ℕ∞) Φ
+        ((Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ) ×ˢ
+          Set.Ioo (-T) T) ∧
+      Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
+        ((extChartAt I p p, (0 : E)) : E × E) ∧
+      (∀ v ∈ Metric.ball (0 : E) ρ,
+        Φ (((extChartAt I p p, v) : E × E), 0) =
+          ((extChartAt I p p, v) : E × E)) ∧
+      (∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
+        Φ (((extChartAt I p p, v) : E × E), s) ∈
+          (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) ∧
+      (∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Ioo (-T) T,
+        HasDerivAt (fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s'))
+          (chartPhaseVF (I := I) g p
+            (Φ (((extChartAt I p p, v) : E × E), s))) s) ∧
+      (∀ s ∈ Set.Ioo (-T_match) T_match,
+        Φ (((extChartAt I p p, (0 : E)) : E × E), s) =
+          ((extChartAt I p p, (0 : E)) : E × E)) ∧
+      (∀ v ∈ Metric.ball (0 : E) ρ,
+        IsMIntegralCurveOn (chartFlowOrbitLift (I := I) Φ p v)
+          (geodesicVectorFieldChart (I := I) g p) (Set.Ioo (-T) T)) := by
+  obtain ⟨Φ, ρ, T, T_match, hρ, hT, hTm, hTmT, hcd, hinit0, hinitv, htgt, hphase,
+    hconst, hint⟩ := exists_unified_chartFlow_data_inf (I := I) g p
+  exact ⟨Φ, ρ, T, T_match, hρ, hT, hTm, hTmT,
+    hcd.of_le (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)),
+    hinit0, hinitv, htgt, hphase, hconst, hint⟩
+
+private lemma expMap_contMDiffAtN_of_chartData
+    (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ)
+    {Φ : (E × E) × ℝ → E × E} {ρ T T_match : ℝ}
+    (hT_match_pos : 0 < T_match) (hT_match_le_T : T_match ≤ T)
+    (hΦ_cd : ContDiffOn ℝ (n : ℕ∞) Φ
+      ((Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T))
+    (hΦ_init_v : ∀ v ∈ Metric.ball (0 : E) ρ,
+      Φ (((extChartAt I p p, v) : E × E), 0) = ((extChartAt I p p, v) : E × E))
+    (hΦ_target : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
+      Φ (((extChartAt I p p, v) : E × E), s) ∈
+        (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E))
+    (hΦ_phase : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Ioo (-T) T,
+      HasDerivAt (fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s'))
+        (chartPhaseVF (I := I) g p (Φ (((extChartAt I p p, v) : E × E), s))) s)
+    {w : E} (hw : ‖w‖ < (T_match / 2) * ρ) :
+    ContMDiffAt 𝓘(ℝ, E) I ((n : ℕ∞) : WithTop ℕ∞)
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w := by
   classical
-  obtain ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T,
-    hΦ_cd, hΦ_init0, hΦ_init_v, hΦ_target, hΦ_phase, hΦ_const_zero, _hF_int⟩ :=
-    exists_unified_chartFlow_data_nat (I := I) g p n hn
   set t' : ℝ := T_match / 2 with ht'_def
   have ht'_pos : 0 < t' := by rw [ht'_def]; exact half_pos hT_match_pos
   have ht'_lt_T_match : t' < T_match := by
@@ -896,8 +928,6 @@ theorem expMap_contMDiffAtN_of_norm_lt
           (extChartAt I p).symm (Φ (((x₀, v) : E × E), t')).1 := by
       rw [hproj_def, mul_one]
     rw [← hproj1, hproj_def', ← hcand_unfold]
-  refine ⟨t' * ρ, by positivity, ?_⟩
-  intro w hw
   set v₁ : E := (1 / t') • w with hv₁_def
   have hv₁_norm : ‖v₁‖ < ρ := by
     rw [hv₁_def, norm_smul]
@@ -962,9 +992,39 @@ theorem expMap_contMDiffAtN_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
+theorem expMap_contMDiffAtN_of_norm_lt
+    (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
+      ContMDiffAt 𝓘(ℝ, E) I ((n : ℕ∞) : WithTop ℕ∞)
+        (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M))
+        w := by
+  obtain ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T,
+    hΦ_cd, _hΦ_init0, hΦ_init_v, hΦ_target, hΦ_phase, _hΦ_const_zero, _hF_int⟩ :=
+    exists_unified_chartFlow_data_nat (I := I) g p n hn
+  exact ⟨(T_match / 2) * ρ, by positivity, fun w hw =>
+    expMap_contMDiffAtN_of_chartData g p n hT_match_pos hT_match_le_T hΦ_cd
+      hΦ_init_v hΦ_target hΦ_phase hw⟩
+
+theorem expMap_contMDiffAt_infty_of_norm_lt
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
+      ContMDiffAt 𝓘(ℝ, E) I ∞
+        (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M))
+        w := by
+  obtain ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T,
+    hΦ_cd_inf, _hΦ_init0, hΦ_init_v, hΦ_target, hΦ_phase, _hΦ_const_zero, _hF_int⟩ :=
+    exists_unified_chartFlow_data_inf (I := I) g p
+  refine ⟨(T_match / 2) * ρ, by positivity, fun w hw => ?_⟩
+  rw [contMDiffAt_infty]
+  intro n
+  exact expMap_contMDiffAtN_of_chartData g p n hT_match_pos hT_match_le_T
+    (hΦ_cd_inf.of_le (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)))
+    hΦ_init_v hΦ_target hΦ_phase hw
+
 section JointBasepointVector
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+variable [I.Boundaryless] [CompleteSpace E]
+
 private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} {z₁ : E × E} (n : ℕ)
     (hz₁ : z₁ ∈ Metric.ball z₀ ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -988,7 +1048,6 @@ private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
   have hfst : ContDiff ℝ (n : ℕ∞) (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp z₁ hslice
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} (n : ℕ)
     (ht' : t' ∈ Set.Ioo (-T) T)
@@ -1001,7 +1060,6 @@ private lemma contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
     (Φ := Φ) (z₀ := z₀) (ρ := ρ) (T := T) (t' := t') (z₁ := z₁) n
     hz₁ ht' hcd).contDiffWithinAt
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     {b : ContDiffBump ((x₀, (0 : E)) : E × E)}
     {ρ_V T_V : ℝ} (hρ_V_pos : 0 < ρ_V) (hT_V_pos : 0 < T_V)
@@ -1067,12 +1125,11 @@ private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     have hmem : ((z, s) : (E × E) × ℝ) ∈ U ×ˢ V := ⟨hz_U, hs_V⟩
     exact h_subset hmem
 
-omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
-theorem exists_chartExp_jointContDiffOn_nat
-    (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (hn : 1 ≤ n) :
+theorem exists_chartExp_jointContDiffOn_infty
+    (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
       0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
-      ContDiffOn ℝ (n : ℕ∞)
+      ContDiffOn ℝ ∞
         (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
         (Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ∧
       (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
@@ -1085,7 +1142,7 @@ theorem exists_chartExp_jointContDiffOn_nat
         ∀ s ∈ Set.Icc (-T) T,
         Φ ((z, s) : (E × E) × ℝ) ∈
           (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) ∧
-      ContDiffOn ℝ (n : ℕ∞) Φ
+      ContDiffOn ℝ ∞ Φ
         ((Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
   classical
   set x₀ : E := extChartAt I α α with hx₀_def
@@ -1098,13 +1155,12 @@ theorem exists_chartExp_jointContDiffOn_nat
       (I := I) α hx₀_target
   obtain ⟨b, r, ε, ρ_V, T_V, Φ, hr, hε, hρ_V_pos, hT_V_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V, hΦ_init0⟩ :=
-    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_nat
-      (I := I) (g := g) (α := α) (x₀ := x₀) (v₀ := (0 : E)) n hn hx₀_interior
+    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_inf
+      (I := I) (g := g) (α := α) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   have hΦ_cd_V1 : ContDiffOn ℝ 1 Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V) ×ˢ Set.Ioo (-T_V) T_V) := by
-    apply hΦ_cd_V.of_le
-    have h1le : (1 : ℕ∞) ≤ (n : ℕ∞) := by exact_mod_cast hn
-    exact_mod_cast h1le
+    exact hΦ_cd_V.of_le
+      (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V, hT₀_lt_V, h_orbit_in⟩ :=
     exists_phaseBall_orbit_in_inner_ball
       (x₀ := x₀)
@@ -1128,7 +1184,7 @@ theorem exists_chartExp_jointContDiffOn_nat
   have hT_pos : 0 < T := lt_min hT₀_pos (by linarith)
   have hT_le_T₀ : T ≤ T₀ := min_le_left _ _
   have hT_lt_T_V : T < T_V := lt_of_le_of_lt hT_le_T₀ hT₀_lt_V
-  have hΦ_cd : ContDiffOn ℝ (n : ℕ∞) Φ
+  have hΦ_cd : ContDiffOn ℝ ∞ Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
     apply hΦ_cd_V.mono
     intro w hw
@@ -1141,12 +1197,15 @@ theorem exists_chartExp_jointContDiffOn_nat
   have ht'_pos : 0 < t' := by rw [ht'_def]; exact half_pos hT_pos
   have ht'_lt_T : t' < T := by rw [ht'_def]; exact half_lt_self hT_pos
   have ht'_in_Ioo : t' ∈ Set.Ioo (-T) T := ⟨by linarith, ht'_lt_T⟩
-  have hjoint : ContDiffOn ℝ (n : ℕ∞)
+  have hjoint : ContDiffOn ℝ ∞
       (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
-      (Metric.ball ((x₀, (0 : E)) : E × E) ρ) :=
-    contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
+      (Metric.ball ((x₀, (0 : E)) : E × E) ρ) := by
+    rw [contDiffOn_infty]
+    intro n
+    exact contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
       (Φ := Φ) (z₀ := ((x₀, (0 : E)) : E × E)) (ρ := ρ) (T := T) (t' := t') n
-      ht'_in_Ioo hΦ_cd
+      ht'_in_Ioo
+      (hΦ_cd.of_le (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)))
   have hΦ_init_z : ∀ z ∈ Metric.ball ((x₀, (0 : E)) : E × E) ρ,
       Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z := by
     intro z hz
@@ -1228,6 +1287,32 @@ theorem exists_chartExp_jointContDiffOn_nat
     exact hb_sub h_in_outer
   exact ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_in_Ioo, ht'_pos,
     hjoint, hΦ_init_z, hΦ_phase_z, hΦ_target_z, hΦ_cd⟩
+
+theorem exists_chartExp_jointContDiffOn_nat
+    (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (_hn : 1 ≤ n) :
+    ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
+      0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
+      ContDiffOn ℝ (n : ℕ∞)
+        (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
+        (Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Ioo (-T) T,
+        HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
+          (chartPhaseVF (I := I) g α (Φ ((z, s) : (E × E) × ℝ))) s) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Icc (-T) T,
+        Φ ((z, s) : (E × E) × ℝ) ∈
+          (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) ∧
+      ContDiffOn ℝ (n : ℕ∞) Φ
+        ((Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
+  obtain ⟨Φ, ρ, T, t', hρ, hT, ht', ht'pos, hjoint, hinit, hphase, htarget, hΦ⟩ :=
+    exists_chartExp_jointContDiffOn_infty (I := I) g α
+  have hn_inf : ((n : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
+    exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)
+  exact ⟨Φ, ρ, T, t', hρ, hT, ht', ht'pos, hjoint.of_le hn_inf,
+    hinit, hphase, htarget, hΦ.of_le hn_inf⟩
 
 end JointBasepointVector
 

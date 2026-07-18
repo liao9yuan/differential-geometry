@@ -1,6 +1,6 @@
-/-
-Authors: Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Defs
@@ -78,18 +78,18 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 set_option linter.style.longLine false
 
-/-!
-# Riemannian Metric on a Smooth Manifold
 
-We define `RiemannianMetric_gen` on a smooth manifold `M` as a `ContMDiffRiemannianMetric`
-from Mathlib, specialized to the tangent bundle of `M`.
 
-## Main Definitions
 
-* `RiemannianMetric_gen I n M` : a smooth Riemannian metric on `M`, i.e. a smoothly varying
-  family of inner products on the tangent spaces of `M`.
-* `RiemannianMetric_gen.to02Tensor_gen` : convert a Riemannian metric to a smooth (0,2)-tensor field.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -106,8 +106,8 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (n : WithTop ℕ∞)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
-/-- A Riemannian metric on a smooth manifold `M` is a `ContMDiffRiemannianMetric` on the
-tangent bundle, i.e. a smoothly varying family of inner products on the tangent spaces. -/
+
+
 abbrev RiemannianMetric_gen := Bundle.ContMDiffRiemannianMetric I n E (TangentSpace I : M → Type _)
 
 private noncomputable def to02Tensor_eCLM :
@@ -119,8 +119,8 @@ private noncomputable def to02Tensor_uCLM :
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ :=
   (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) ℝ).symm.toContinuousLinearMap
 
-/-- In local coordinates at `x₀`, the `(0,2)`-tensor obtained from a Riemannian metric is
-`uCLM` applied to the local coordinates of the curried inner product section. -/
+
+
 private lemma to02Tensor_trivialization_eq {x₀ x : M}
     (A : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -155,8 +155,8 @@ private lemma to02Tensor_trivialization_eq {x₀ x : M}
   simp [to02Tensor_eCLM, hom_trivializationAt, Trivialization.continuousLinearMap_apply]
   rfl
 
-/-- A jointly smooth family of tangent-space bilinear forms, parametrized by
-`M × ℝ`, gives a jointly smooth family of `(0,2)` tensors by uncurrying. -/
+
+
 theorem joint_to02 [IsManifold I ∞ M] {S : Set ℝ}
     (A : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] TangentSpace I p.1 →L[ℝ] ℝ)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -212,9 +212,9 @@ theorem joint_to02 [IsManifold I ∞ M] {S : Set ℝ}
   · exact to02Tensor_trivialization_eq (I := I) (M := M)
       (A := A p₀) (mem_baseSet_trivializationAt E (TangentSpace I) p₀.1)
 
-/-- Convert a Riemannian metric to a smooth (0,2)-tensor field. At each point `x`, the
-inner product `g.inner x : TₓM →L[ℝ] TₓM →L[ℝ] ℝ` is uncurried into a continuous
-bilinear form `TₓM × TₓM → ℝ`, i.e. a (0,2)-tensor. -/
+
+
+
 def RiemannianMetric_gen.to02Tensor_gen {I : ModelWithCorners ℝ E H} {n : WithTop ℕ∞}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I 1 M] [IsManifold I (n + 1) M]

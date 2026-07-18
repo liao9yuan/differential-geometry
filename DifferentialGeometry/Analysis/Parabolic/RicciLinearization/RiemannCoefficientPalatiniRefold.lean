@@ -1315,15 +1315,18 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
       s •
         ((LeviCivita (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)).toFun
             (fun b : M =>
-              metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+              DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
                 (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
                   (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b))) x (X x)
-          - metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) x
+          - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
               (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) x (Z x)
               (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0))
                 (fun b => X b) (fun b => Y b) x))
-          - metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) x
+          - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
               (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) x
               (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0))
@@ -1352,7 +1355,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
   have hpoint : ∀ (b : M) (u ζ : TangentSpace I b),
       PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (realizedFam (I := I) g₀ T 0 hδ hδZ 0) b u ζ =
-      s • metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+      s • DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
         (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
           (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b u ζ) := by
     intro b u ζ
@@ -1396,7 +1400,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
         (realizedFam (I := I) g₀ T 0 hδ hδZ s) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
         Z.contMDiff Y.contMDiff
     have hΨ_eq : (fun b : M =>
-        metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
             (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b))) =
         (fun b : M => s⁻¹ •
@@ -1406,7 +1411,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
       rw [hpoint b (Z b) (Y b), smul_smul, inv_mul_cancel₀ hs0, one_smul]
     have hΨ_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-          (metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
               (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b)))) := by
       have hsmul' := ContMDiff.smul_section
@@ -1417,7 +1423,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
         contMDiff_const hconn_smooth
       refine hsmul'.congr (fun b => ?_)
       refine congrArg (TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b) ?_
-      change metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+      change DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
             (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b)) =
         s⁻¹ • PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s)
@@ -1425,7 +1432,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
       exact congrFun hΨ_eq b
     have hσ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-          (metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
               (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b)))) x :=
       (hΨ_smooth x).mdifferentiableAt (by simp)
@@ -1433,7 +1441,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
         (LeviCivita (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s))
         (fun b => Y b) (fun b => Z b) =
         s • (fun b : M =>
-          metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+          DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
               (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b))) := by
       funext b
@@ -1443,7 +1452,8 @@ theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
     have hsmul := (LeviCivita (I := I)
       (realizedFam (I := I) g₀ T 0 hδ hδZ 0)).isCovariantDerivativeOnUniv.smul_const
       (σ := fun b : M =>
-        metricSharp (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ 0)
             (realizedVelocityCc (I := I) g₀ T 0 hδ hδZ 0) b (Z b) (Y b)))
       (x := x) s hσ (Set.mem_univ x)

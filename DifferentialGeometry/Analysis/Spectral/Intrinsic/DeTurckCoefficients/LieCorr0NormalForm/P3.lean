@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Basic
 
-/-!
-# Mixed block of the zeroth-order DeTurck normal form
 
-This module expands one mixed connection/background-connection half.  The
-swapped half is obtained by exchanging the two free tensor indices.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -59,7 +59,7 @@ private lemma six_reindex {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   rw [higs r d, higs e c, hBs r e a, hcgs a j]
   ring
 
-/-- One mixed connection/background-connection half has its four-term scalar normal form. -/
+
 theorem nf_p3 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (ga0 ga1 gbg : Fin n → Fin n → Fin n → ℝ)
     (higs : ∀ a b, ig a b = ig b a) (hcgs : ∀ a b, cg a b = cg b a)
@@ -97,7 +97,7 @@ theorem nf_p3 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     six_reindex ig cg f ga0 gbg higs hcgs hgbgs i j]
   ring
 
-/-- The swapped mixed half is the normal form from `nf_p3` with exchanged free indices. -/
+
 theorem nf_p3_swap {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (ga0 ga1 gbg : Fin n → Fin n → Fin n → ℝ)
     (higs : ∀ a b, ig a b = ig b a) (hcgs : ∀ a b, cg a b = cg b a)

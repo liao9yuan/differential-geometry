@@ -3,13 +3,13 @@ import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
 
 set_option autoImplicit false
 
-/-!
-# Time-dependent bounded operators on Bochner L²
 
-This file lifts an almost-everywhere strongly measurable, uniformly bounded
-family of continuous linear maps `A t : X →L[ℝ] Y` to the pointwise operator
-on the project's time-`L²` spaces.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,8 +22,8 @@ variable [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 variable [NormedAddCommGroup Y] [InnerProductSpace ℝ Y]
 variable {T : ℝ}
 
-/-- A strongly measurable, uniformly bounded operator family sends a
-time-`L²` field to a time-`L²` field by pointwise application. -/
+
+
 theorem memLp_timeOp
     (A : ℝ → X →L[ℝ] Y)
     (hA : AEStronglyMeasurable A (timeMeasure T))
@@ -122,8 +122,8 @@ private noncomputable def timeOpLin
   map_add' := timeOpFun_add A hA C hC
   map_smul' := timeOpFun_smul A hA C hC
 
-/-- Pointwise application of a strongly measurable, uniformly bounded
-operator family, as a continuous linear map between time-`L²` spaces. -/
+
+
 noncomputable def timeOp
     (A : ℝ → X →L[ℝ] Y)
     (hA : AEStronglyMeasurable A (timeMeasure T))
@@ -133,8 +133,8 @@ noncomputable def timeOp
   (timeOpLin A hA C hC).mkContinuous (C : ℝ)
     (timeOpFun_norm_le A hA C hC)
 
-/-- The time-operator lift agrees almost everywhere with pointwise
-application of the underlying operator family. -/
+
+
 theorem timeOp_apply_ae
     (A : ℝ → X →L[ℝ] Y)
     (hA : AEStronglyMeasurable A (timeMeasure T))
@@ -144,8 +144,8 @@ theorem timeOp_apply_ae
     timeOp A hA C hC f =ᵐ[timeMeasure T] fun t => A t (f t) :=
   timeOpFun_apply_ae A hA C hC f
 
-/-- The lifted time-dependent operator has norm at most the supplied uniform
-pointwise operator bound. -/
+
+
 theorem timeOp_norm_le
     (A : ℝ → X →L[ℝ] Y)
     (hA : AEStronglyMeasurable A (timeMeasure T))

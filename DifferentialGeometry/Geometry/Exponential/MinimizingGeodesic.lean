@@ -1848,6 +1848,167 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     · rw [hγ_def] at hγr_eq_q; exact hγr_eq_q
     · rw [sqrt_gInner_smul_self (I := I) g p hr_pos.le u, hu_unit, Real.sqrt_one, mul_one]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem intrinsicSphere_isCompact
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (δ : ℝ) :
+    IsCompact
+      ((fun w : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p (δ • w))
+        '' {w : TangentSpace I p | g.inner p w w = 1}) := by
+  have hexp : Continuous (fun v : TangentSpace I p =>
+      expMapIntrinsic (I := I) g hEnorm p v) :=
+    expMapIntrinsic_continuous (I := I) g hEnorm p
+  have hscale : Continuous (fun w : TangentSpace I p => δ • w) :=
+    continuous_const_smul δ
+  have hcomp : Continuous
+      (fun w : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p (δ • w)) :=
+    hexp.comp hscale
+  exact (gUnitSphere_isCompact (I := I) g p).image hcomp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+
+theorem exists_min_riemannianEDist_on_intrinsicSphere
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p q : M) (δ : ℝ) :
+    ∃ u : TangentSpace I p, g.inner p u u = 1 ∧
+      ∀ w : TangentSpace I p, g.inner p w w = 1 →
+        riemannianEDist I (expMapIntrinsic (I := I) g hEnorm p (δ • u)) q ≤
+          riemannianEDist I (expMapIntrinsic (I := I) g hEnorm p (δ • w)) q := by
+  classical
+  set f : TangentSpace I p → M :=
+    fun w => expMapIntrinsic (I := I) g hEnorm p (δ • w) with hf_def
+  set sph : Set (TangentSpace I p) := {w : TangentSpace I p | g.inner p w w = 1}
+    with hsph_def
+  have hsph_ne : sph.Nonempty := by
+    have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+    haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+    obtain ⟨x, hx_ne⟩ : ∃ x : TangentSpace I p, x ≠ 0 :=
+      ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+    have hc_pos : 0 < g.inner p x x := g.pos p x hx_ne
+    have hc_ne : g.inner p x x ≠ 0 := ne_of_gt hc_pos
+    set s : ℝ := Real.sqrt (g.inner p x x)⁻¹ with hs_def
+    have hs_sq : s * s = (g.inner p x x)⁻¹ := by
+      rw [hs_def]
+      exact Real.mul_self_sqrt (inv_nonneg.mpr hc_pos.le)
+    refine ⟨s • x, ?_⟩
+    change g.inner p (s • x) (s • x) = 1
+    rw [gInner_smul_self (I := I) g p s x]
+    rw [show s ^ 2 = s * s by ring, hs_sq, inv_mul_cancel₀ hc_ne]
+  have hcont : Continuous (fun x : M => riemannianEDist I x q) :=
+    continuous_riemannianEDist_to (I := I) q
+  have hfcont : Continuous f := by
+    have hexp : Continuous (fun v : TangentSpace I p =>
+        expMapIntrinsic (I := I) g hEnorm p v) :=
+      expMapIntrinsic_continuous (I := I) g hEnorm p
+    exact hexp.comp (continuous_const_smul δ)
+  have hcompact : IsCompact sph := gUnitSphere_isCompact (I := I) g p
+  have hcontOn : ContinuousOn (fun w : TangentSpace I p =>
+      riemannianEDist I (f w) q) sph :=
+    (hcont.comp hfcont).continuousOn
+  obtain ⟨u, hu_mem, hu_min⟩ :=
+    hcompact.exists_isMinOn hsph_ne hcontOn
+  refine ⟨u, hu_mem, ?_⟩
+  intro w hw
+  exact hu_min (show w ∈ sph from hw)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+
+noncomputable def expDiffeoRadius
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) : ℝ :=
+  min
+    (Classical.choose
+      (exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p))
+    (metricCoerciveExpRadius (I := I) g p)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+theorem expDiffeoRadius_pos
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    0 < expDiffeoRadius (I := I) g hEnorm p := by
+  rw [expDiffeoRadius, lt_min_iff]
+  exact ⟨(Classical.choose_spec
+      (exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p)).1,
+    expRadiusGp_pos (I := I) g p⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+theorem expDiffeo_mem_of_lt
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) {v : TangentSpace I p}
+    (hv : Real.sqrt (g.inner p (v : E) (v : E)) <
+      expDiffeoRadius (I := I) g hEnorm p) :
+    (v : E) ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source := by
+  have hvGp : Real.sqrt (g.inner p (v : E) (v : E)) <
+      metricCoerciveExpRadius (I := I) g p :=
+    lt_of_lt_of_le hv (min_le_right _ _)
+  have hvNorm :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p hvGp
+  exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p hvNorm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+theorem expDiffeo_eq_intr
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) {v : TangentSpace I p}
+    (hv : Real.sqrt (g.inner p (v : E) (v : E)) <
+      expDiffeoRadius (I := I) g hEnorm p) :
+    NormalCoordinates.expMapDiffeo (I := I) g p (v : E) =
+      expMapIntrinsic (I := I) g hEnorm p v := by
+  have hvAgree : Real.sqrt (g.inner p (v : E) (v : E)) <
+      Classical.choose
+        (exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p) :=
+    lt_of_lt_of_le hv (min_le_left _ _)
+  have hvSrc := expDiffeo_mem_of_lt (I := I) g hEnorm p hv
+  rw [NormalCoordinates.expMapDiffeo_apply_eq (I := I) g p hvSrc]
+  exact ((Classical.choose_spec
+    (exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p)).2 hvAgree).symm
+
 end Exponential
 end Riemannian
 end Geometry

@@ -91,7 +91,8 @@ private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
   calc eLpNorm (fderiv ℝ f) p volume
       = eLpNorm (Ω.indicator (fderiv ℝ f)) p volume := by rw [← h_eq]
     _ = eLpNorm (fderiv ℝ f) p (volume.restrict Ω) :=
-        eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
+        eLpNorm_indicator_eq_eLpNorm_restrict
+          (μ := volume) (p := p) (f := fderiv ℝ f) (s := Ω) hΩ_meas
 
 omit [NeZero d] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
@@ -928,10 +929,10 @@ private theorem sobolev_embedding_chart_subcritical_measurable
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
-    {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ))
-    {u : M → ℝ} (hu_meas : Measurable u)
-    (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u) :
+    {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ)) :
     ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u : M → ℝ}, Measurable u →
+        MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u →
       eLpNorm u
         (ENNReal.ofReal
           ((Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)))
@@ -968,6 +969,7 @@ private theorem sobolev_embedding_chart_subcritical_measurable
     exact perChartConst_pStar_ne_top (I := I) (M := M) g hp_one hp_dim α
   refine ⟨max 1 D.toReal, ?_, ?_⟩
   · exact le_trans zero_le_one (le_max_left _ _)
+  intro u hu_meas hu
   have h_eLpNorm_eq :
       eLpNorm u p_star (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
@@ -1046,6 +1048,139 @@ private theorem sobolev_embedding_chart_subcritical_measurable
   rw [hD_eq] at h_max_le
   exact h_max_le
 
+theorem sobolev_closed
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u : M → ℝ}, Measurable u →
+        MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u →
+      eLpNorm u
+        (ENNReal.ofReal
+          ((Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)))
+        (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M))
+      ≤ ENNReal.ofReal C *
+          wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u := by
+  classical
+  set p_real_star : ℝ := (Module.finrank ℝ E : ℝ) * p / ((Module.finrank ℝ E : ℝ) - p)
+    with hp_real_star_def
+  set p_star : ℝ≥0∞ := ENNReal.ofReal p_real_star with hp_star_def
+  set d : ℕ := Module.finrank ℝ E with hd_def
+  have hd_pos : 0 < d := NeZero.pos d
+  have hp_pos : 0 < p := by linarith
+  have hp_star_real_pos : 0 < p_real_star := by
+    rw [hp_real_star_def]
+    apply div_pos (mul_pos (by exact_mod_cast hd_pos) hp_pos)
+    linarith
+  have hp_star_real_ge_p : p ≤ p_real_star := by
+    rw [hp_real_star_def, le_div_iff₀ (by linarith : 0 < (d : ℝ) - p)]
+    nlinarith [hp_pos]
+  have hp_star_real_one : 1 ≤ p_real_star := le_trans hp_one hp_star_real_ge_p
+  have hp_star_one : (1 : ℝ≥0∞) ≤ p_star := by
+    rw [hp_star_def, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp_star_real_one
+  set S : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
+    (I := I) (M := M) with hS_def
+  set D : ℝ≥0∞ :=
+    ∑ α ∈ S, perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α
+    with hD_def
+  have hD_ne_top : D ≠ ⊤ := by
+    rw [hD_def]
+    apply ENNReal.sum_ne_top.mpr
+    intro α _
+    exact perChartConst_pStar_ne_top (I := I) (M := M) g hp_one hp_dim α
+  refine ⟨max 1 D.toReal, ?_, ?_⟩
+  · exact le_trans zero_le_one (le_max_left _ _)
+  intro u hu_meas hu
+  have h_eLpNorm_eq :
+      eLpNorm u p_star (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
+        eLpNorm (∑ α ∈ S, fun x : M =>
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
+          (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
+    refine eLpNorm_congr_ae ?_
+    refine Filter.Eventually.of_forall (fun x => ?_)
+    rw [Finset.sum_apply]
+    change u x = ∑ α ∈ S,
+      (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x
+    exact chartAtlasPOU_pou_decomp_subcritical (I := I) (M := M) u x
+  rw [h_eLpNorm_eq]
+  have h_aesm : ∀ α ∈ S,
+      AEStronglyMeasurable
+        (fun x : M =>
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+            : C^∞⟮I, M; ℝ⟯) x * u x)
+        (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
+    intro α _
+    have h_meas : Measurable (fun x : M =>
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+          : C^∞⟮I, M; ℝ⟯) x * u x) :=
+      measurable_pou_mul_subcrit (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α hu_meas
+    exact h_meas.aestronglyMeasurable
+  have h_minkowski :
+      eLpNorm (∑ α ∈ S, fun x : M =>
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+            : C^∞⟮I, M; ℝ⟯) x * u x) p_star
+        (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) ≤
+        ∑ α ∈ S, eLpNorm
+          (fun x : M =>
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
+          (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) :=
+    eLpNorm_sum_le h_aesm hp_star_one
+  refine h_minkowski.trans ?_
+  have h_each : ∀ α ∈ S,
+      eLpNorm
+          (fun x : M =>
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
+          (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) ≤
+        perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α *
+          wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u := by
+    intro α _
+    exact perChartConst_pStar_bound (I := I) (M := M) g hp_one hp_dim α hu_meas hu
+  have h_sum_le :
+      (∑ α ∈ S, eLpNorm
+          (fun x : M =>
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+              : C^∞⟮I, M; ℝ⟯) x * u x) p_star
+          (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M))) ≤
+        ∑ α ∈ S,
+          perChartConst_pStar (I := I) (M := M) g hp_one hp_dim α *
+            wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u :=
+    Finset.sum_le_sum h_each
+  refine h_sum_le.trans ?_
+  rw [← Finset.sum_mul]
+  change D * wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u ≤
+    ENNReal.ofReal (max 1 D.toReal) *
+      wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u
+  gcongr
+  have hD_eq : ENNReal.ofReal D.toReal = D := ENNReal.ofReal_toReal hD_ne_top
+  have h_max_le :
+      ENNReal.ofReal D.toReal ≤ ENNReal.ofReal (max 1 D.toReal) :=
+    ENNReal.ofReal_le_ofReal (le_max_right _ _)
+  rw [hD_eq] at h_max_le
+  exact h_max_le
+
+
+
+
+
+
+
+
+
+
+
 theorem sobolev_embedding_subcritical_of_closed
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -1064,8 +1199,9 @@ theorem sobolev_embedding_subcritical_of_closed
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M))
       ≤ ENNReal.ofReal C *
           wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u :=
-  sobolev_embedding_chart_subcritical_measurable
-    (I := I) (M := M) g hp_one hp_dim hu_meas hu
+  let ⟨C, hC, hbound⟩ := sobolev_closed
+    (I := I) (M := M) g hp_one hp_dim
+  ⟨C, hC, hbound hu_meas hu⟩
 
 end Chart
 end Sobolev

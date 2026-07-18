@@ -1,23 +1,23 @@
-/-
-Authors: Jack McCarthy (pattern), extended for slot permutation of smooth sections
--/
+
+
+
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
-/-!
-# Slot permutation of smooth multilinear sections
 
-`MultilinearSection.domDomCongr σ α` reindexes the slots of a smooth multilinear
-section `α` by a permutation `σ : Equiv.Perm (Fin s)`.  Smoothness is proved by
-the same coordinate criterion as `MultilinearSection.product`: the trivialized
-basis coordinate of `(α x).domDomCongr σ` at an index tuple `idx` is the
-coordinate of `α x` at the permuted tuple `idx ∘ σ` (`triv_coord_domDomCongr`),
-which is smooth because `α`'s coordinates are.
 
-This is the foundational tensor-slot-permutation tool used by the tensor-product
-Leibniz rule: the second Leibniz term `A ∗ ∇B` carries the new derivative slot
-in the middle, and a `Fin.cycleRange` permutation moves it to the front to match
-`∇(A ∗ B)`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,8 +37,8 @@ variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
 
-/-- The trivialized basis coordinate of a slot-reindexed multilinear bundle fiber
-element is the coordinate of the original at the reindexed tuple. -/
+
+
 theorem triv_coord_domDomCongr {s s' d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F)
     (e : Fin s ≃ Fin s')
@@ -75,8 +75,8 @@ variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
-/-- Reindex the slots of a smooth multilinear section by an equivalence
-`Fin s ≃ Fin s'` (a permutation together with a rank identification). -/
+
+
 noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
     (α : MultilinearSection 𝕜 F IB E n s) :
     MultilinearSection 𝕜 F IB E n s' :=
@@ -95,14 +95,14 @@ noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
     (domDomCongr (IB := IB) n e α) x = ContinuousMultilinearMap.domDomCongr e (α x) :=
   rfl
 
-/-- Reindexing by the identity equivalence leaves a section unchanged. -/
+
 @[simp] theorem domDomCongr_refl {s : ℕ} (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n (Equiv.refl (Fin s)) α = α := by
   refine DFunLike.ext _ _ fun x => ?_
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- Reindexing the zero section is zero. -/
+
 @[simp] theorem domDomCongr_zero {s s' : ℕ} (e : Fin s ≃ Fin s') :
     domDomCongr (IB := IB) n e (0 : MultilinearSection 𝕜 F IB E n s)
       = (0 : MultilinearSection 𝕜 F IB E n s') := by
@@ -111,8 +111,8 @@ noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContMDiffSection.coe_zero]
 
-/-- A value-preserving slot reindexing (`(e i).val = i.val` for all `i`) is the identity
-on sections: `e` is forced to be `Equiv.refl` by `Fin` extensionality. -/
+
+
 theorem domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
     (he : ∀ i, ((e i : Fin s) : ℕ) = (i : ℕ))
     (α : MultilinearSection 𝕜 F IB E n s) :
@@ -120,8 +120,8 @@ theorem domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
   have hee : e = Equiv.refl (Fin s) := Equiv.ext fun i => Fin.ext (he i)
   rw [hee, domDomCongr_refl]
 
-/-- Composition of slot reindexings: reindexing by `e₁` then `e₂` is reindexing by
-`e₁.trans e₂`. -/
+
+
 theorem domDomCongr_trans {s s' s'' : ℕ} (e₁ : Fin s ≃ Fin s') (e₂ : Fin s' ≃ Fin s'')
     (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e₂ (domDomCongr (IB := IB) n e₁ α)
@@ -130,7 +130,7 @@ theorem domDomCongr_trans {s s' s'' : ℕ} (e₁ : Fin s ≃ Fin s') (e₂ : Fin
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply, Function.comp_def]
 
-/-- Slot reindexing is additive. -/
+
 theorem domDomCongr_add {s s' : ℕ} (e : Fin s ≃ Fin s')
     (α β : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e (α + β)
@@ -139,7 +139,7 @@ theorem domDomCongr_add {s s' : ℕ} (e : Fin s ≃ Fin s')
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- Slot reindexing is homogeneous. -/
+
 theorem domDomCongr_smul {s s' : ℕ} (e : Fin s ≃ Fin s') (c : 𝕜)
     (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e (c • α) = c • domDomCongr (IB := IB) n e α := by
@@ -148,8 +148,8 @@ theorem domDomCongr_smul {s s' : ℕ} (e : Fin s ≃ Fin s') (c : 𝕜)
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContMDiffSection.coe_smul]
 
-/-- **Reindexing the left factor of a tensor product** is reindexing the product by the
-left-block extension of `e` (the `finSumFinEquiv`-conjugated `e ⊕ refl`). -/
+
+
 theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
     (α : MultilinearSection 𝕜 F IB E n s) (β : MultilinearSection 𝕜 F IB E n q) :
     product (IB := IB) n (domDomCongr (IB := IB) n e α) β

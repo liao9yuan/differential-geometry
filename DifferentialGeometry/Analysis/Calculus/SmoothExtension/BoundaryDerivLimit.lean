@@ -1,18 +1,18 @@
 import Mathlib.Analysis.Calculus.MeanValue
 
-/-!
-# Derivative-limit theorem at a closed endpoint (boundary-regularity primitive)
 
-The foundational 1-D analytic step toward the parabolic boundary-regularity leverage ("corollary (b)"
-in the Ricci-flow `hglue` route): if `f` is continuous on `[a,b]`, differentiable on the open interval
-`(a,b)`, and its derivative `f'` has a limit `L` as `t → a⁺`, then `f` has right-derivative `L` at `a`.
-This is the classical derivative-limit theorem; Mathlib has only the uniform-limit-of-sequences forms.
 
-Proof: for `a < s < t < b` the mean-value inequality (`norm_image_sub_le_of_norm_deriv_right_le_segment`)
-on `[s,t]` — where `f` is differentiable — bounds `‖f t − f s − (t−s)·L‖ ≤ ε·(t−s)` once `‖f'−L‖ ≤ ε`
-nearby; letting `s → a⁺` (continuity of `f`) gives `‖f t − f a − (t−a)·L‖ ≤ ε·(t−a)`, hence the slope
-tends to `L`.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -20,7 +20,7 @@ open Filter Topology Set
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- **Derivative-limit theorem at a left endpoint.** -/
+
 theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
     {f f' : ℝ → F} {L : F} {a b : ℝ} (hab : a < b)
     (hcont : ContinuousOn f (Icc a b))
@@ -37,7 +37,7 @@ theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
   have hfa : Tendsto f (𝓝[>] a) (𝓝 (f a)) :=
     (hcont.continuousWithinAt (left_mem_Icc.2 hab.le)).tendsto.mono_left
       (nhdsWithin_le_of_mem hIccmem)
-  -- The key boundary estimate.
+
   have key : ∀ ε : ℝ, 0 < ε → ∃ c, a < c ∧
       ∀ t ∈ Ioo a c, ‖f t - f a - (t - a) • L‖ ≤ ε * (t - a) := by
     intro ε hε
@@ -86,7 +86,7 @@ theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
       have := inter_mem_nhdsWithin (Ioi a) (Iio_mem_nhds hta)
       rwa [Set.Ioi_inter_Iio] at this
     filter_upwards [hIoomem] with s hs using hmvt s hs
-  -- Conclude the slope limit.
+
   rw [hasDerivWithinAt_iff_tendsto_slope, Set.Ici_diff_left, Metric.tendsto_nhdsWithin_nhds]
   intro ε hε
   obtain ⟨c, hac, hest⟩ := key (ε / 2) (by linarith)

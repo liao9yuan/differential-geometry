@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-/-!
-# Continuity of integrals for continuous metric families
 
-This file proves continuity of a scalar integral against a continuously varying
-Riemannian volume measure on a compact manifold.  The proof uses the canonical
-finite partition of unity and dominated convergence in each fixed chart.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,8 +26,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Entrywise continuity of a metric family gives continuity of its chart
-density on the same time-space set. -/
+
+
 private lemma density_cont
     {g : Real → SmoothRiemannianMetric I M} {K : Set Real}
     (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -197,9 +197,9 @@ private theorem chart_int_cont
 
 set_option maxHeartbeats 1600000 in
 
-/-- On a compact time set, entrywise joint continuity of a metric family and
-joint continuity of a scalar family imply continuity of the corresponding
-moving Riemannian integral. -/
+
+
+
 theorem integral_family_cont
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : Real → SmoothRiemannianMetric I M}

@@ -5,23 +5,23 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Linearity of the total covariant derivative
 
-The directional covariant derivative `nabla0SFun` is already known to be additive
-and scalar-homogeneous in its tensor argument (`nabla0SFun_add`, `nabla0SFun_smul`).
-This file lifts the scalar-homogeneity to the *total* covariant derivative
-`totalNabla0SFun`, whose output carries the extra leading derivative slot.
 
-The proof is the standard reduction: pick a basis, write any output slot tuple as
-`Fin.cons` of a section value and a remaining tuple, contract the leading slot
-against a section via `totalNabla0SFun_apply_section`, and apply `nabla0SFun_smul`.
 
-This is the generic tensor-algebra backbone behind the `-2` factor in the
-Ricci-flow identity `∂_t (∇^p g) = -2 ∇^p Rc`: the fixed background connection is
-`ℝ`-linear in the tensor field it differentiates, so the constant `-2` factors
-through every covariant-derivative step.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -39,8 +39,8 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [T2Space M]
 
-/-- The total covariant derivative of a covariant tensor field is homogeneous
-under constant scalar multiplication of the tensor argument. -/
+
+
 theorem totalNabla0SFun_smul {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (c : Real)
@@ -77,8 +77,8 @@ theorem totalNabla0SFun_smul {s : ℕ}
     totalNabla0SFun_apply_section, nabla0SFun_smul]
   rw [Tensor0SSpace.smul_apply]
 
-/-- The total covariant derivative of a covariant tensor field is additive in the
-tensor argument. -/
+
+
 theorem totalNabla0SFun_add {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α β : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

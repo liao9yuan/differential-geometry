@@ -7,13 +7,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Levi-Civita Calculus Predicates
 
-This file gives predicates for torsion-freeness and
-Levi-Civita calculus.  Metric compatibility is part of the general connection
-layer, with compatibility aliases kept here for Levi-Civita-facing imports.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -35,7 +35,7 @@ def IsTorsionFreeAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _)) (x : M) : Prop :=
   cov.torsion x = 0
 
-/-- Levi-Civita predicate at a point. -/
+
 def IsLeviCivitaAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
@@ -45,7 +45,7 @@ def IsTorsionFree
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _)) : Prop :=
   forall x : M, IsTorsionFreeAt (I := I) cov x
 
-/-- Levi-Civita predicate for a single metric and connection. -/
+
 def IsLeviCivita
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) : Prop :=
@@ -80,20 +80,20 @@ section Family
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Torsion-freeness for an interval metric family. -/
+
 def IsTorsionFreeFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
     IsTorsionFree (I := I) (G.connectionAt t)
 
-/-- Levi-Civita predicate for an interval family. -/
+
 def IsLeviCivitaFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
   IsMetricCompatibleFamilyOn (I := I) G /\ IsTorsionFreeFamilyOn (I := I) G
 
-/-- Explicit theorem package for Levi-Civita calculus on a time interval. -/
+
 structure LeviCivitaCalculusOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop where

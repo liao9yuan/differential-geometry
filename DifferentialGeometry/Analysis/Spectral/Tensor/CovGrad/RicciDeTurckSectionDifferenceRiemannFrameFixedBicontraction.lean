@@ -105,7 +105,7 @@ theorem riemannBiContrFibFixedFrame_toModel (g₁ : SmoothRiemannianMetric I M)
   classical
   rw [riemannBiContrFibFixedFrame, ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  congr 1
+  apply congrArg (fun z : ℝ => 2 * z)
   rw [ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply, map_sum,
     ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun a _ => ?_)
@@ -461,20 +461,21 @@ def riemannBiContrFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   riemannBiContrFibFixedFrame (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x) x
 
-theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I M) (x₀ : M)
-    {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
-    riemannBiContrFib (I := I) g₁ y =
-      riemannBiContrFibFixedFrame (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x₀) y := by
+private theorem riemannBiContrFibFixedFrame_eq_of_orthonormal
+    (g₁ : SmoothRiemannianMetric I M) (y : M)
+    (B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i j, g₁.inner y (B i y) (B j y) = if i = j then (1 : ℝ) else 0)
+    (hC : ∀ i j, g₁.inner y (C i y) (C j y) = if i = j then (1 : ℝ) else 0) :
+    riemannBiContrFibFixedFrame (I := I) g₁ B y =
+      riemannBiContrFibFixedFrame (I := I) g₁ C y := by
   classical
   apply ContinuousLinearMap.ext
   intro D
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [riemannBiContrFib, riemannBiContrFibFixedFrame_toModel,
-    riemannBiContrFibFixedFrame_toModel]
-
-  congr 1
+  rw [riemannBiContrFibFixedFrame_toModel, riemannBiContrFibFixedFrame_toModel]
+  apply congrArg (fun z : ℝ => 2 * z)
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         g₁.inner y (riemannOp (LeviCivita (I := I) g₁) y (v 0) (Bf a) (Bf b)) (v 1) *
@@ -488,13 +489,19 @@ theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I
     rw [frameRiemannKernel_apply (I := I) g₁ y (v 0) (v 1) (Bf a) (Bf b),
       bilinFormToModel_symm_apply (TangentSpace I y) (Tensor0SSpace.toModel D) (Bf a) (Bf b)]
     rfl
-  rw [hrewrite (fun a => smoothOrthoFrame (I := I) g₁ y a y),
-    hrewrite (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)]
+  rw [hrewrite (fun a => B a y), hrewrite (fun a => C a y)]
   exact double_frame_bilin_trace_indep (I := I) g₁ y
     (frameRiemannKernel (I := I) g₁ y (v 0) (v 1))
     ((bilinFormToModel (TangentSpace I y)).symm (Tensor0SSpace.toModel D))
-    (fun a => smoothOrthoFrame (I := I) g₁ y a y)
-    (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)
+    (fun a => B a y) (fun a => C a y) hB hC
+
+theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I M) (x₀ : M)
+    {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    riemannBiContrFib (I := I) g₁ y =
+      riemannBiContrFibFixedFrame (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x₀) y := by
+  rw [riemannBiContrFib]
+  exact riemannBiContrFibFixedFrame_eq_of_orthonormal (I := I) g₁ y
+    (smoothOrthoFrame (I := I) g₁ y) (smoothOrthoFrame (I := I) g₁ x₀)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 

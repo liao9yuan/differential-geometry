@@ -171,7 +171,7 @@ private lemma koszulPair_eq_smul_dual_linearizedKoszul
   rw [koszulCovGradCovec, hcd]
   have hlm : ((realizedFam (I := I) g₀ T T' hδ hδ' 0).inner b
       (((0 : ℝ) - s) •
-        metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b (Yf b) (Zf b)))).toLinearMap =
       ((0 : ℝ) - s) •
@@ -181,8 +181,8 @@ private lemma koszulPair_eq_smul_dual_linearizedKoszul
     intro z
     rw [LinearMap.smul_apply]
     change ((realizedFam (I := I) g₀ T T' hδ hδ' 0).inner b
-      (((0 : ℝ) - s) • metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b _)) z = _
-    rw [map_smul, ContinuousLinearMap.smul_apply, inner_metricSharp]
+      (((0 : ℝ) - s) • DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b _)) z = _
+    rw [map_smul, ContinuousLinearMap.smul_apply, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [hlm, dualToCotangent_smul_c]
 
 
@@ -287,7 +287,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 private lemma inverseMetricSharpFib_dualToCotangent (g : SmoothRiemannianMetric I M)
     (x : M) (φ : Module.Dual ℝ (TangentSpace I x)) :
     inverseMetricSharpFib (I := I) g x (dualToCotangent (I := I) φ) =
-      metricSharp (I := I) g x φ := by
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g x φ := by
   rw [inverseMetricSharpFib_apply, cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]
 
 
@@ -586,7 +586,7 @@ private lemma lkc_eq_endpoint_flat
       (1 - s) *
         linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b u ζ z := by
-    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, inner_metricSharp]
+    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [LinearMap.smul_apply]
   rw [show (((realizedFam (I := I) g₀ T T' hδ hδ' 1).inner b
       (PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 1)
@@ -665,7 +665,7 @@ private lemma metricSharp_linearizedKoszulCovec_contMDiff
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b (Z b) (Y b)))) := by
   apply metricSharp_contMDiff_total (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -711,7 +711,7 @@ private theorem covDerivLinearizedConn_inner_towers
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (Z y) (Y y))))) =
         (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
-          (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) y
+          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) y
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (Z y) (Y y)))) := by
       funext y
@@ -745,7 +745,7 @@ private theorem covDerivLinearizedConn_inner_towers
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x (Z x)
       (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (fun b => X b) (fun b => Y b) x) =
-    metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
       (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x (Z x)
         (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
@@ -754,12 +754,12 @@ private theorem covDerivLinearizedConn_inner_towers
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x
       (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (fun b => X b) (fun b => Z b) x) (Y x) =
-    metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
       (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x
         (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
           (fun b => X b) (fun b => Z b) x) (Y x)) from rfl]
-  rw [inner_metricSharp, inner_metricSharp]
+  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [linearizedKoszulCovec_apply, linearizedKoszulCovec_apply]
   rw [covApply_apply, covApply_apply]
   ring

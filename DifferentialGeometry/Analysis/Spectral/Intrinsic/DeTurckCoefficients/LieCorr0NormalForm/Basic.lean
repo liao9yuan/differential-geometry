@@ -1,12 +1,12 @@
 import Mathlib
 
-/-!
-# Basic zeroth-order DeTurck normal forms
 
-This module isolates the finite-dimensional scalar algebra used to read the
-zeroth-order DeTurck correction.  It contains no geometric regularity or
-Sobolev hypotheses.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -19,7 +19,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficien
 
 variable {n : ℕ}
 
-/-- The first lower-order block in the zeroth-order DeTurck expansion. -/
+
 def p1B (ig : Fin n → Fin n → ℝ)
     (dig ga1 ga0 : Fin n → Fin n → Fin n → ℝ)
     (dga1 dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -31,13 +31,13 @@ def p1B (ig : Fin n → Fin n → ℝ)
       ig a b * (dga1 j a b ρ - dga0 j a b ρ)) +
     ∑ σ, ga0 j σ ρ * (∑ a, ∑ b, ig a b * (ga1 a b σ - ga0 a b σ))) * f i ρ)
 
-/-- The quadratic connection-difference block in the DeTurck expansion. -/
+
 def p2B (ig : Fin n → Fin n → ℝ) (ga1 ga0 : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   2 * ∑ ρ, ∑ σ, (∑ a, ∑ b, ig a b * (ga1 a b ρ - ga0 a b ρ)) *
     ((ga1 i j σ - ga0 i j σ) * f ρ σ)
 
-/-- The mixed connection/background-connection block in the DeTurck expansion. -/
+
 def p3B (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   2 * (∑ a, ∑ p, ∑ b, ∑ q, ∑ ρ, ∑ k,
@@ -47,7 +47,7 @@ def p3B (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin
       ig a p * (ig b q * ((ga1 j p ρ - ga0 j p ρ) * (f ρ q *
         ((ga1 a b k - gbg a b k) * cg k i)))))
 
-/-- The reanchored connection-difference block in the DeTurck expansion. -/
+
 def p4B (ig : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   (- ∑ m, ∑ ρ, (∑ a, ∑ b, ig a b * (ga1 a b m - gbg a b m)) *
@@ -55,7 +55,7 @@ def p4B (ig : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin n 
   (- ∑ m, ∑ ρ, (∑ a, ∑ b, ig a b * (ga1 a b m - gbg a b m)) *
       ((ga1 m j ρ - ga0 m j ρ) * f i ρ))
 
-/-- The nonsymmetric coefficient before insertion into the two tensor slots. -/
+
 def nscB (ig : Fin n → Fin n → ℝ) (dig ga1 ga0 gbg :
     Fin n → Fin n → Fin n → ℝ)
     (dga1 dga0 : Fin n → Fin n → Fin n → Fin n → ℝ) (i p : Fin n) : ℝ :=
@@ -65,7 +65,7 @@ def nscB (ig : Fin n → Fin n → ℝ) (dig ga1 ga0 gbg :
         ig a b * (dga1 i a b p - dga0 i a b p))) +
       ∑ m, ga1 i m p * (∑ a, ∑ b, ig a b * (ga1 a b m - ga0 a b m)))
 
-/-- The symmetric two-slot insertion of `nscB`. -/
+
 def insertB (ig : Fin n → Fin n → ℝ) (dig ga1 ga0 gbg :
     Fin n → Fin n → Fin n → ℝ)
     (dga1 dga0 : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -84,7 +84,7 @@ private lemma a1_ga1_symm
   rw [hgb, hgb, hdgs a l b, hdgs b l a, hdgs l a b]
   ring
 
-/-- Inserting the nonsymmetric coefficient gives the first and fourth normal-form blocks. -/
+
 theorem stage_a1
     (ig : Fin n → Fin n → ℝ) (dg gb dig ga1 ga0 gbg :
       Fin n → Fin n → Fin n → ℝ)
@@ -145,7 +145,7 @@ theorem stage_a1
   rw [p1B, p4B]
   ring
 
-/-- The contraction block before collapsing the metric/cometric pair. -/
+
 def vbB (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   2 * ∑ k, ∑ l, ig k l *
@@ -171,7 +171,7 @@ private lemma collapse_sum
   · intro h
     exact absurd (Finset.mem_univ c) h
 
-/-- Collapsing the metric/cometric pair identifies `vbB` with the second block. -/
+
 theorem stage_a2
     (ig cg : Fin n → Fin n → ℝ) (dg gb ga1 ga0 : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ)
@@ -239,7 +239,7 @@ theorem stage_a2
   rw [hga1s j i σ, hga0s j i σ]
   ring
 
-/-- One half of the mixed background-connection contraction. -/
+
 def amixHalfB (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   ∑ m, ∑ ml, ig m ml *
@@ -248,14 +248,14 @@ def amixHalfB (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n �
         (f k ml * (∑ c, (ga1 al i c - ga0 al i c) * cg c kl))) *
         (∑ d, (ga1 m a d - gbg m a d) * cg d j)))
 
-/-- The expanded normal form of one mixed background-connection half. -/
+
 def p3HalfB (ig cg : Fin n → Fin n → ℝ) (ga1 ga0 gbg : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ) (i j : Fin n) : ℝ :=
   ∑ a, ∑ p, ∑ b, ∑ q, ∑ ρ, ∑ k,
     ig a p * (ig b q * ((ga1 i p ρ - ga0 i p ρ) * (f ρ q *
       ((ga1 a b k - gbg a b k) * cg k j))))
 
-/-- Collapsing the metric/cometric pairs identifies the mixed half with its expanded form. -/
+
 theorem stage_a3
     (ig cg : Fin n → Fin n → ℝ) (dg gb ga1 ga0 gbg : Fin n → Fin n → Fin n → ℝ)
     (f : Fin n → Fin n → ℝ)

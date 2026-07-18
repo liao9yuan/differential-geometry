@@ -3,16 +3,16 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 
-/-!
-# Commuting a time derivative with a spatial derivative (order 1)
 
-Crux helper for the Ricci-flow time-jet recursion (corollary (a)). For a jointly `C∞` family
-`G : ℝ → E → F`, the spatial Fréchet derivative commutes with the time derivative:
-`fderiv_y (∂ₜ G) = ∂ₜ (fderiv_y G)` at any point. This is the order-1 mixed-partial symmetry for the
-separated variables `(t, y)`, reduced to Mathlib's `ContDiffAt.isSymmSndFDerivAt` for the joint
-function `H = uncurry G`: each separated mixed partial, applied to a vector `u`, equals a component
-`D²H(·)(·)` of the (symmetric) second Fréchet derivative.
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,8 +24,8 @@ namespace Analysis
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- Order-1 commuting of the time derivative `deriv (· at fixed y)` past the spatial Fréchet
-derivative `fderiv (· at fixed s)`, for a jointly `C∞` family. -/
+
+
 theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
     (hG : ContDiff ℝ ∞ (Function.uncurry G)) :
     fderiv ℝ (fun y => deriv (fun s => G s y) t) x
@@ -35,13 +35,13 @@ theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
   have hHdiff : Differentiable ℝ H := hHcd.differentiable (by simp)
   have hHcd1 : ContDiff ℝ ∞ (fderiv ℝ H) := hHcd.fderiv_right (m := ∞) (by simp)
   have hHdiff1 : Differentiable ℝ (fderiv ℝ H) := hHcd1.differentiable (by simp)
-  -- `deriv (fun s => G s y) t = fderiv H (t,y) (1,0)`, as a function of `y`.
+
   have hDs : (fun y => deriv (fun s => G s y) t) = (fun y => fderiv ℝ H (t, y) (1, 0)) := by
     funext y
     have hpair : HasDerivAt (fun s : ℝ => ((s, y) : ℝ × E)) (1, 0) t :=
       (hasDerivAt_id t).prodMk (hasDerivAt_const t y)
     exact ((hHdiff (t, y)).hasFDerivAt.comp_hasDerivAt t hpair).deriv
-  -- `fderiv (fun y => G s y) x = (fderiv H (s,x)).comp inr`, as a function of `s`.
+
   have hFy : (fun s => fderiv ℝ (fun y => G s y) x)
       = (fun s => (fderiv ℝ H (s, x)).comp (ContinuousLinearMap.inr ℝ ℝ E)) := by
     funext s
@@ -49,7 +49,7 @@ theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
       (hasFDerivAt_const (s : ℝ) x).prodMk (hasFDerivAt_id x)
     exact ((hHdiff (s, x)).hasFDerivAt.comp x hpair).fderiv
   rw [hDs, hFy]
-  -- LHS: differentiate `y ↦ fderiv H (t,y) (1,0)` in `y`.
+
   have hLHS : fderiv ℝ (fun y => fderiv ℝ H (t, y) (1, 0)) x
       = ((fderiv ℝ (fderiv ℝ H) (t, x)).comp (ContinuousLinearMap.inr ℝ ℝ E)).flip (1, 0) := by
     have hcomp : HasFDerivAt (fun y : E => fderiv ℝ H (t, y))
@@ -59,7 +59,7 @@ theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
       exact (hHdiff1 (t, x)).hasFDerivAt.comp x hpair
     have happly := (ContinuousLinearMap.apply ℝ F ((1, 0) : ℝ × E)).hasFDerivAt.comp x hcomp
     simpa [ContinuousLinearMap.flip_apply] using happly.fderiv
-  -- RHS: differentiate `s ↦ (fderiv H (s,x)).comp inr` in `s` (post-composition is linear).
+
   have hRHS : deriv (fun s => (fderiv ℝ H (s, x)).comp (ContinuousLinearMap.inr ℝ ℝ E)) t
       = (fderiv ℝ (fderiv ℝ H) (t, x) (1, 0)).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
     have hcomp : HasDerivAt (fun s : ℝ => fderiv ℝ H (s, x))
@@ -76,9 +76,9 @@ theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
   exact second_derivative_symmetric (f := H) (fun y => (hHdiff y).hasFDerivAt)
     ((hHdiff1 (t, x)).hasFDerivAt) (0, u) (1, 0)
 
-/-- Iterated commuting: the spatial Fréchet derivative commutes with the `n`-th time derivative,
-for a jointly `C∞` family. By induction on `n` via `iteratedDeriv_succ'`, applying the order-1
-commute `fderiv_deriv_time_comm` and the induction hypothesis to the transverse partial `∂ₜG`. -/
+
+
+
 theorem fderiv_iteratedDeriv_time_comm {G : ℝ → E → F} (a : ℕ) (t₀ : ℝ) (x : E)
     (hG : ContDiff ℝ ∞ (Function.uncurry G)) :
     fderiv ℝ (fun y => iteratedDeriv a (fun t => G t y) t₀) x
@@ -86,7 +86,7 @@ theorem fderiv_iteratedDeriv_time_comm {G : ℝ → E → F} (a : ℕ) (t₀ : �
   induction a generalizing G with
   | zero => simp only [iteratedDeriv_zero]
   | succ a ih =>
-    -- The transverse partial `G' t y = ∂ₜ G (· y) t` is again jointly `C∞`.
+
     have hHdiff : Differentiable ℝ (Function.uncurry G) := hG.differentiable (by simp)
     have hHcd1 : ContDiff ℝ ∞ (fderiv ℝ (Function.uncurry G)) := hG.fderiv_right (m := ∞) (by simp)
     have hG' : ContDiff ℝ ∞ (Function.uncurry (fun t y => deriv (fun s => G s y) t)) := by
@@ -99,7 +99,7 @@ theorem fderiv_iteratedDeriv_time_comm {G : ℝ → E → F} (a : ℕ) (t₀ : �
         exact ((hHdiff (t, y)).hasFDerivAt.comp_hasDerivAt t hpair).deriv
       rw [heq]
       exact (ContinuousLinearMap.apply ℝ F ((1, 0) : ℝ × E)).contDiff.comp hHcd1
-    -- Peel the inner time derivative on both sides and apply `ih` to `G'`.
+
     have hlhs : (fun y => iteratedDeriv (a + 1) (fun t => G t y) t₀)
         = (fun y => iteratedDeriv a (fun t => deriv (fun s => G s y) t) t₀) := by
       funext y; rw [iteratedDeriv_succ']
@@ -108,10 +108,10 @@ theorem fderiv_iteratedDeriv_time_comm {G : ℝ → E → F} (a : ℕ) (t₀ : �
     funext t
     exact fderiv_deriv_time_comm t x hG
 
-/-- Order-1 commuting, ONE-SIDED in time: for `G` jointly `C∞` on the closed half-slab `sₜ ×ˢ V`
-(`sₜ` a unique-diff set with `t` accumulated from its interior, `V` open), the spatial Fréchet
-derivative commutes with the one-sided time derivative `derivWithin … sₜ`. Within analogue of
-`fderiv_deriv_time_comm`, via `ContDiffWithinAt.isSymmSndFDerivWithinAt` on `uncurry G`. -/
+
+
+
+
 theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hsacc : sₜ ⊆ closure (interior sₜ)) (hV : IsOpen V)
     {t : ℝ} (ht : t ∈ sₜ) {x : E} (hx : x ∈ V)
@@ -129,18 +129,18 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
     rw [closure_prod_eq]
     exact ⟨hsacc hq.1, subset_closure hq.2⟩
   have hmem : (t, x) ∈ S := ⟨ht, hx⟩
-  -- `H` is `C∞` on `S`, and its within-derivative is `C∞` on `S`.
+
   have hHcdOn : ContDiffOn ℝ ∞ H S := hG
   have hHdiffOn : DifferentiableOn ℝ H S := hHcdOn.differentiableOn (by simp)
   have hHcdOn1 : ContDiffOn ℝ ∞ (fderivWithin ℝ H S) S :=
     hHcdOn.fderivWithin hUD (by simp)
   have hHdiffOn1 : DifferentiableOn ℝ (fderivWithin ℝ H S) S := hHcdOn1.differentiableOn (by simp)
-  -- Within second-derivative symmetry of `H` on `S` at `(t, x)`.
+
   have h2le : (minSmoothness ℝ 2 : WithTop ℕ∞) ≤ ∞ := by
     simp only [minSmoothness_of_isRCLikeNormedField]; exact WithTop.coe_le_coe.mpr le_top
   have hsymm : IsSymmSndFDerivWithinAt ℝ H S (t, x) :=
     (hHcdOn.contDiffWithinAt hmem).isSymmSndFDerivWithinAt h2le hUD (hSacc hmem) hmem
-  -- `derivWithin (fun s => G s y) sₜ t = fderivWithin H S (t,y) (1,0)`, for `y ∈ V`.
+
   have hDs : Set.EqOn (fun y => derivWithin (fun s => G s y) sₜ t)
       (fun y => fderivWithin ℝ H S (t, y) (1, 0)) V := by
     intro y hy
@@ -149,7 +149,7 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
       (hasDerivWithinAt_id t sₜ).prodMk (hasDerivWithinAt_const t sₜ y)
     exact ((hHdiffOn (t, y) ⟨ht, hy⟩).hasFDerivWithinAt.comp_hasDerivWithinAt t hpair hmaps).derivWithin
       (hsₜ t ht)
-  -- `fderiv (fun y => G s y) x = (fderivWithin H S (s,x)).comp inr`, for `s ∈ sₜ`.
+
   have hFy : Set.EqOn (fun s => fderiv ℝ (fun y => G s y) x)
       (fun s => (fderivWithin ℝ H S (s, x)).comp (ContinuousLinearMap.inr ℝ ℝ E)) sₜ := by
     intro s hs
@@ -158,10 +158,10 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
       ((hasFDerivAt_const (s : ℝ) x).prodMk (hasFDerivAt_id x)).hasFDerivWithinAt
     exact (((hHdiffOn (s, x) ⟨hs, hx⟩).hasFDerivWithinAt.comp x hpair hmaps).hasFDerivAt
       (hV.mem_nhds hx)).fderiv
-  -- Rewrite both sides via `hDs` (over the open `V`) and `hFy` (over `sₜ`).
+
   rw [(Filter.eventuallyEq_of_mem (hV.mem_nhds hx) hDs).fderiv_eq,
     derivWithin_congr hFy (hFy ht)]
-  -- LHS: differentiate `y ↦ fderivWithin H S (t,y) (1,0)`.
+
   have hLHS : fderiv ℝ (fun y => fderivWithin ℝ H S (t, y) (1, 0)) x
       = ((fderivWithin ℝ (fderivWithin ℝ H S) S (t, x)).comp (ContinuousLinearMap.inr ℝ ℝ E)).flip
           (1, 0) := by
@@ -174,7 +174,7 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
     have happly := (ContinuousLinearMap.apply ℝ F ((1, 0) : ℝ × E)).hasFDerivAt.comp_hasFDerivWithinAt
       x hcomp
     simpa [ContinuousLinearMap.flip_apply] using (happly.hasFDerivAt (hV.mem_nhds hx)).fderiv
-  -- RHS: differentiate `s ↦ (fderivWithin H S (s,x)).comp inr`.
+
   have hRHS : derivWithin (fun s => (fderivWithin ℝ H S (s, x)).comp (ContinuousLinearMap.inr ℝ ℝ E))
         sₜ t
       = (fderivWithin ℝ (fderivWithin ℝ H S) S (t, x) (1, 0)).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
@@ -193,10 +193,10 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
     ContinuousLinearMap.inr_apply]
   exact hsymm.eq (0, u) (1, 0)
 
-/-- Iterated commuting, ONE-SIDED in time: the spatial Fréchet derivative commutes with the `n`-th
-one-sided time derivative `iteratedDerivWithin … sₜ`, for `G` jointly `C∞` on `sₜ ×ˢ V`. Within
-analogue of `fderiv_iteratedDeriv_time_comm`; induction on `n` via `iteratedDerivWithin_succ'` and the
-order-1 within commute `fderiv_derivWithin_time_comm` applied to the transverse partial `∂ₜG`. -/
+
+
+
+
 theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hsacc : sₜ ⊆ closure (interior sₜ)) (hV : IsOpen V)
     (a : ℕ) {t₀ : ℝ} (ht₀ : t₀ ∈ sₜ) {x : E} (hx : x ∈ V)
@@ -208,7 +208,7 @@ theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set �
   | succ a ih =>
     set S : Set (ℝ × E) := sₜ ×ˢ V with hSdef
     have hUD : UniqueDiffOn ℝ S := UniqueDiffOn.prod hsₜ hV.uniqueDiffOn
-    -- The transverse partial `G' t y = ∂ₜ G (· y)|sₜ t` is `C∞` on `sₜ ×ˢ V`.
+
     have hG' : ContDiffOn ℝ ∞
         (Function.uncurry (fun t y => derivWithin (fun s => G s y) sₜ t)) S := by
       have hHcdOn1 : ContDiffOn ℝ ∞ (fderivWithin ℝ (Function.uncurry G) S) S :=
@@ -223,7 +223,7 @@ theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set �
           t' hpair hmaps).derivWithin (hsₜ t' ht') |>.symm
       exact (((ContinuousLinearMap.apply ℝ F ((1, 0) : ℝ × E)).contDiff.comp_contDiffOn
         hHcdOn1)).congr (fun p hp => (heq hp).symm)
-    -- Peel the inner one-sided time derivative and apply `ih` to `G'`.
+
     have hlhs : (fun y => iteratedDerivWithin (a + 1) (fun t => G t y) sₜ t₀)
         = (fun y => iteratedDerivWithin a (fun t => derivWithin (fun s => G s y) sₜ t) sₜ t₀) := by
       funext y; rw [iteratedDerivWithin_succ']
@@ -231,11 +231,11 @@ theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set �
     refine iteratedDerivWithin_congr (fun t ht => ?_) ht₀
     exact fderiv_derivWithin_time_comm hsₜ hsacc hV ht hx hG
 
-/-- The spatial Fréchet derivative of a jointly-`C∞` family is again jointly `C∞`: if `uncurry G` is
-`C∞` on `sₜ ×ˢ V` (`V` open), then `(t, y) ↦ fderiv ℝ (G t) y` is `C∞` on `sₜ ×ˢ V`. Lets the
-time/space commute be iterated to second spatial order (the `fderiv²` slot of the 2-jet match). The
-spatial partial is read off as `(fderivWithin (uncurry G) S ·).comp inr`, a `C∞` post-composition of
-the (jointly-`C∞`) full within-derivative. -/
+
+
+
+
+
 theorem spatialFDeriv_contDiffOn {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hV : IsOpen V)
     (hG : ContDiffOn ℝ ∞ (Function.uncurry G) (sₜ ×ˢ V)) :

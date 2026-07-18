@@ -58,7 +58,8 @@ theorem inverseMetricSharpFib_g0FlatY_contMDiff
         (inverseMetricSharpFib (I := I) g₁ b (g0FlatCLM (I := I) g₀ b (Y b)))) := by
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (metricSharp (I := I) g₁ b ((g₀.inner b (Y b)).toLinearMap))) := by
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (I := I) g₁ b ((g₀.inner b (Y b)).toLinearMap))) := by
     apply metricSharp_contMDiff_total (I := I) g₁
     intro γ j
     exact metricFlat_chartComponent_contMDiffOn (I := I) g₀ Y γ j

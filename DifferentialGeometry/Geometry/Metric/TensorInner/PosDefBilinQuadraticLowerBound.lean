@@ -2,23 +2,23 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.PosDefBilinBoundedUnitBa
 
 set_option autoImplicit false
 
-/-!
-# Quadratic lower bound of a positive-definite bilinear form
 
-On a finite-dimensional normed space, a continuous symmetric positive-definite
-bilinear form `B` satisfies `c·‖v‖² ≤ B(v,v)` for a positive constant `c` (the
-minimum of `B` over the unit sphere, positive by positive-definiteness and
-attained by compactness). This is the per-fibre core behind the lower metric
-comparison `c·gInf(v,v) ≤ h(v,v)` used to extract `MetricUniformEquivalentOn`
-from Cheeger–Gromov convergence (the "head" terms of the sequence).
--/
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
 open Bornology Metric
 
-/-- A continuous positive-definite bilinear form on a finite-dimensional space
-admits a positive quadratic lower bound `c·‖v‖² ≤ B(v,v)`. -/
+
+
 theorem posDef_bilin_quadratic_lower_bound
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
     (B : F →L[ℝ] F →L[ℝ] ℝ)

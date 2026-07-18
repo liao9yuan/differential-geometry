@@ -7,11 +7,11 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.VectorField
 
-/-!
-# Partial manifold derivatives
 
-Basic concrete scalar derivative and product-manifold partial derivative lemmas.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -20,11 +20,11 @@ open scoped Topology Manifold ContDiff
 
 namespace DifferentialGeometry
 
-/-- The action of a concrete tangent vector field on a scalar function.
 
-For `X : (x : M) -> TangentSpace I x`, `vderiv f X x` is `df_x (X_x)`.
-This is the concrete manifold analogue of viewing a vector field as a
-derivation on scalar functions. -/
+
+
+
+
 noncomputable abbrev vderiv
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -42,12 +42,12 @@ noncomputable abbrev vderiv
     vderiv (I := I) f X x = extDerivFun (I := I) f x (X x) := by
   rfl
 
-/- The concrete manifold Lie bracket acts on scalar functions by the
-commutator of the vector-field action:
-`[X,Y] f = X (Y f) - Y (X f)`.
 
-This is the local form of the standard chart-transfer identity
-`VectorField.fderivWithin_apply_lieBracket`. -/
+
+
+
+
+
 set_option maxHeartbeats 250000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem vderiv_mlieBracket
@@ -303,7 +303,7 @@ theorem vderiv_mlieBracket
   exact VectorField.fderivWithin_apply_lieBracket hg_smooth h_two_le huniq
     hy₀closure hy₀s hW'_diff hV'_diff
 
-/-- Exterior-derivative form of `vderiv_mlieBracket`. -/
+
 theorem extDerivFun_apply_mlieBracket
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] [CompleteSpace E]
@@ -321,8 +321,8 @@ theorem extDerivFun_apply_mlieBracket
           (fun y : M => extDerivFun (I := I) f y (X y)) x (Y x) := by
   exact vderiv_mlieBracket (I := I) X Y f x hX hY hf
 
-/-- The partial derivative along the first (real) factor of a jointly smooth
-real-valued function on `ℝ × M` is itself jointly smooth. -/
+
+
 theorem contMDiff_partial_deriv_fst_gen
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -330,25 +330,25 @@ theorem contMDiff_partial_deriv_fst_gen
     (F : C^∞⟮𝓘(ℝ, ℝ).prod I, ℝ × M; ℝ⟯) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) := by
-  -- Rewrite `deriv` as `mfderiv ... 1`, so the result follows from the smoothness
-  -- of `mfderiv` applied to a jointly smooth function.
+
+
   have hrw : (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) =
       fun p : ℝ × M => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t => F (t, p.2)) p.1) (1 : ℝ) := by
     funext p
     rw [mfderiv_eq_fderiv]
     exact (fderiv_apply_one_eq_deriv (f := fun t => F (t, p.2)) (x := p.1)).symm
   rw [hrw]
-  -- Reduce smoothness at `∞` to smoothness at every natural level.
+
   rw [contMDiff_infty]
   intro n p₀
-  -- The composition `(q : (ℝ × M) × ℝ) ↦ F (q.2, q.1.2)` is jointly `C^∞`.
+
   have harg : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
       (fun q : (ℝ × M) × ℝ => (q.2, q.1.2)) :=
     ContMDiff.prodMk contMDiff_snd contMDiff_fst.snd
   have hF : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2)) :=
     F.contMDiff.comp harg
-  -- Apply `ContMDiffAt.mfderiv_apply` with `m = n`, `n' = n + 1` (inside `WithTop ℕ∞`).
+
   have h_apply :=
     ContMDiffAt.mfderiv_apply
       (I := 𝓘(ℝ, ℝ)) (I' := 𝓘(ℝ, ℝ))
@@ -363,12 +363,12 @@ theorem contMDiff_partial_deriv_fst_gen
       contMDiffAt_id
       contMDiffAt_const
       le_rfl
-  -- The source and target models are model spaces, so `inTangentCoordinates`
-  -- collapses to the raw `mfderiv`.
+
+
   simpa [inTangentCoordinates_model_space] using h_apply
 
-/-- The partial derivative along the real factor of a jointly `C^n` scalar
-function is `C^m` at a point when `m + 1 ≤ n`. -/
+
+
 theorem timeDeriv_smoothAt
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -415,11 +415,11 @@ theorem timeDeriv_smoothAt
       hF' contMDiffAt_fst contMDiffAt_id contMDiffAt_const hmn
   simpa [inTangentCoordinates_model_space] using h_apply
 
-/-- Exterior derivative of a scalar multiple of a scalar function.
 
-This is a small bridge for Ricci-flow component calculations, where
-`partial_t g = -2 Ric` is differentiated once more in a frozen spatial
-direction. -/
+
+
+
+
 theorem extDerivFun_const_mul
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -436,9 +436,9 @@ theorem extDerivFun_const_mul
     (by exact mdifferentiableAt_const (c := c)) hf v
   simpa [extDerivFun] using hmul
 
-/-- Leibniz product rule for the scalar exterior derivative, applied to a
-tangent vector:
-`d(f · g)_x(v) = f x · dg_x(v) + g x · df_x(v)`. -/
+
+
+
 theorem extDerivFun_mul_at
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -458,9 +458,9 @@ theorem extDerivFun_mul_at
       simpa [extDerivFun, smul_eq_mul] using hmul]
   ring
 
-/-- Leibniz rule for the scalar exterior derivative of a finite sum of products,
-applied to a tangent vector:
-`d(∑ᵢ Uᵢ · Bᵢ)_x(v) = ∑ᵢ (Uᵢ x · dBᵢ_x(v) + Bᵢ x · dUᵢ_x(v))`. -/
+
+
+
 theorem extDerivFun_finset_sum_mul_at
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -474,7 +474,7 @@ theorem extDerivFun_finset_sum_mul_at
         (U i x * extDerivFun (I := I) (B i) x v +
           B i x * extDerivFun (I := I) (U i) x v) := by
   classical
-  -- Differentiability of the partial sums of products.
+
   have hsumdiff :
       ∀ (s : Finset ι), (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x) →
         (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x) →
@@ -530,8 +530,8 @@ theorem extDerivFun_finset_sum_mul_at
       rw [ih hUt hBt]
       rw [Finset.sum_insert hat]
 
-/-- Additivity of the scalar exterior derivative over a finite sum, applied to a
-tangent vector. -/
+
+
 theorem extDerivFun_finset_sum_at'
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -580,9 +580,9 @@ theorem extDerivFun_finset_sum_at'
       rw [ih hFt]
       rw [Finset.sum_insert hat]
 
-/-- Leibniz rule for the scalar exterior derivative of a finite double sum of
-products, applied to a tangent vector:
-`d(∑ᵢ ∑ⱼ Uᵢⱼ · Bᵢⱼ)_x(v) = ∑ᵢ ∑ⱼ (Uᵢⱼ x · dBᵢⱼ_x(v) + Bᵢⱼ x · dUᵢⱼ_x(v))`. -/
+
+
+
 theorem extDerivFun_finset_sum_sum_mul_at
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -596,7 +596,7 @@ theorem extDerivFun_finset_sum_sum_mul_at
         (U i j x * extDerivFun (I := I) (B i j) x v +
           B i j x * extDerivFun (I := I) (U i j) x v) := by
   classical
-  -- Differentiability of an inner sum of products.
+
   have hinner_diff :
       ∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ)
         (fun y : M => ∑ j ∈ t, U i j y * B i j y) x := by
@@ -627,10 +627,10 @@ theorem extDerivFun_finset_sum_sum_mul_at
   rw [extDerivFun_finset_sum_mul_at (I := I) t (fun j => U i j) (fun j => B i j) v
     (fun j hj => hU i hi j hj) (fun j hj => hB i hi j hj)]
 
-/-- Smoothness of the scalar exterior derivative applied to a smooth tangent field.
 
-This packages the `ContMDiffAt.mfderiv_apply` theorem in the concrete form used
-by tensor covariant-derivative smoothness proofs. -/
+
+
+
 theorem extDerivFun_apply_contMDiff
     {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -707,10 +707,10 @@ theorem extDerivFun_apply_contMDiff
       (mfderiv I 𝓘(𝕜, 𝕜) f p) (e.symmL 𝕜 p (Xcoord p))
     rw [hcancel]
 
-/-- Pointwise version of `extDerivFun_apply_contMDiff`.
 
-If a scalar function is smooth at `x₀` and `X` is a smooth tangent section,
-then `p |-> extDerivFun f p (X p)` is smooth at `x₀`. -/
+
+
+
 theorem extDerivFun_apply_contMDiffAt
     {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -788,11 +788,11 @@ theorem extDerivFun_apply_contMDiffAt
     (mfderiv I 𝓘(𝕜, 𝕜) f p) (e.symmL 𝕜 p (Xcoord p))
   rw [hcancel]
 
-/-- Product-spacetime smoothness of spatial exterior derivatives.
 
-If `F : Real × M -> Real` is `C^3` at `(t, x)` and `X` is a `C^2` spatial
-vector field at `x`, then `(s, y) |-> d_y (F(s, ·)) (X_y)` is `C^2` at
-`(t, x)`. -/
+
+
+
+
 theorem prodExtDerivAt
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -898,8 +898,8 @@ theorem prodExtDerivAt
         (e.symmL Real p.2 (Xcoord p))
   rw [hcancel]
 
-/-- Graded version of `prodExtDerivAt`: the spatial directional derivative of a
-jointly `C^{m+1}` function along a smooth field is jointly `C^m`. -/
+
+
 theorem prodExtDerivAt_gen
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -1001,9 +1001,9 @@ theorem prodExtDerivAt_gen
         (e.symmL Real p.2 (Xcoord p))
   rw [hcancel]
 
-/-- `∞` version of `prodExtDerivAt`: the spatial directional derivative of a
-jointly `C^∞` function along a smooth field stays jointly `C^∞`.  This is the
-iterable engine behind covariant-derivative tower regularity. -/
+
+
+
 theorem prodExtDerivAt_inf
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}

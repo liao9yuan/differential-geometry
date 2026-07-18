@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 
 
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -13,7 +12,7 @@ namespace Riemannian
 namespace Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -23,10 +22,12 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
+
 def parallelTransportVF (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (s : ℝ) (y : E) : E :=
   - chartChristoffelContraction (I := I) g α
       (deriv (chartCurve (I := I) α γ) s) y (chartCurve (I := I) α γ s)
+
 
 theorem parallelTransportVF_contDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {W : Set ℝ}
@@ -95,6 +96,7 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+
 theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -108,7 +110,8 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   obtain ⟨V, hV0, hVdiff, hVpar⟩ :=
-    exists_parallel_transport_on_Icc (I := I) g γ hγ hL v₀
+    exists_parallel_transport_on_Icc (I := I) g γ (N := 2) le_rfl
+      (hγ.of_le (by exact_mod_cast le_top)) hL v₀
   refine ⟨V, hV0, hVdiff, hVpar, ?_⟩
   intro t₀ ht₀
   set α : M := γ t₀ with hα_def
@@ -241,6 +244,7 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+
 theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -254,7 +258,8 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   obtain ⟨δ, hδ_pos, V, hV0, hVdiff, hVpar⟩ :=
-    exists_global_parallel_transport_on_Ioo (I := I) g γ hγ hL v₀
+    exists_global_parallel_transport_on_Ioo (I := I) g γ (N := 2) le_rfl
+      (hγ.of_le (by exact_mod_cast le_top)) hL v₀
   refine ⟨δ, hδ_pos, V, hV0, hVdiff, hVpar, ?_⟩
   set Ω : Set ℝ := Set.Ioo (-δ) (L + δ) with hΩ_def
   have hΩ_open : IsOpen Ω := isOpen_Ioo

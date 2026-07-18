@@ -6,26 +6,26 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Exponential ball diffeomorphism (MSM135 `lbl383` item 3a, assembly)
 
-Two results:
 
-* `IsLocalDiffeomorphOn.exists_diffeo_of_injOn` — the generic glue (listed as a
-  TODO in Mathlib's `Geometry.Manifold.LocalDiffeomorph`): an **injective** local
-  diffeomorphism on an open set restricts to a partial diffeomorphism onto its
-  image.  The inverse is `Function.invFunOn`, which agrees near each image point
-  with the smooth local inverse supplied by the local-diffeomorphism witness, so
-  it is smooth by locality (`contMDiffOn_of_locally_contMDiffOn`).
 
-* `exists_expBall_diffeo` — the Step A item-3a assembly: for `r` below the
-  injectivity radius, `expMap g p` restricts to a `C^1` partial diffeomorphism
-  with source the metric ball `ball 0 r ⊆ E ≃ T_p M`.  Injectivity is
-  `injOn_expMap_ball_of_ofReal_lt_injRadius`; the local-diffeomorphism input on
-  the ball (nonsingularity of `d exp` — the no-conjugate-points content, true
-  below `c/√C₀` by the Jacobi/parallel-frame Grönwall estimate of the B0 route)
-  is taken as a hypothesis here and is the B3 frontier of `ConvexBalls.md`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 open Set Function Manifold
 open scoped Topology Manifold ContDiff
@@ -47,17 +47,17 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   {N : Type*} [TopologicalSpace N] [ChartedSpace G N] {n : WithTop ℕ∞}
 
-/-- **An injective local diffeomorphism is a diffeomorphism onto its image.**
-If `f` is a local diffeomorphism on an open set `s` and injective there, it is
-realised on `s` by a partial diffeomorphism with source `s` and target `f '' s`.
-(The generic glue listed as a TODO in `Mathlib.Geometry.Manifold.LocalDiffeomorph`.) -/
+
+
+
+
 theorem exists_diffeo_of_injOn [Nonempty M]
     {f : M → N} {s : Set M} (hf : IsLocalDiffeomorphOn I J n f s)
     (hs : IsOpen s) (hinj : InjOn f s) :
     ∃ Φ : PartialDiffeomorph I J M N n,
       Φ.source = s ∧ Φ.target = f '' s ∧ EqOn Φ f s := by
   classical
-  -- the image is open: near each `f x` it contains the φ-image of an open set
+
   have htgt : IsOpen (f '' s) := by
     rw [isOpen_iff_forall_mem_open]
     rintro y ⟨x, hx, rfl⟩
@@ -67,8 +67,8 @@ theorem exists_diffeo_of_injOn [Nonempty M]
       exact ⟨x', hx's, hEq hx'φ⟩
     · exact φ.toOpenPartialHomeomorph.isOpen_image_of_subset_source
         (hs.inter φ.open_source) inter_subset_right
-  -- the global inverse is smooth: near each image point it agrees with the
-  -- local inverse of the local-diffeomorphism witness
+
+
   have hinv : ContMDiffOn J I n (invFunOn f s) (f '' s) := by
     apply contMDiffOn_of_locally_contMDiffOn
     rintro y ⟨x, hx, rfl⟩
@@ -116,11 +116,11 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-/-- **MSM135 `lbl383` item 3a, assembly form.**  For `r` below the injectivity
-radius at `p`, given the local-diffeomorphism input on the ball (nonsingularity
-of `d exp` below the conjugate scale — the B3 frontier, supplied natively by the
-Jacobi/Grönwall estimate of the B0 route), `expMap g p` restricts to a `C^1`
-partial diffeomorphism with source `Metric.ball (0 : E) r`. -/
+
+
+
+
+
 theorem exists_expBall_diffeo
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ}
     (hr : ENNReal.ofReal r < injRadius (I := I) g p)
@@ -137,12 +137,12 @@ theorem exists_expBall_diffeo
   exists_diffeo_of_injOn hloc Metric.isOpen_ball
     (injOn_expMap_ball_of_ofReal_lt_injRadius (I := I) g p hr)
 
-/-- **The nonsingularity input, discharged from normal coordinates.**  For
-`r ≤ expMapC2Radius g p`, `expMap g p` is a `C^1` local diffeomorphism at every point of
-`Metric.ball 0 r`: on the partial-diffeomorphism source `expMapDiffeo g p` (which contains
-the ball, `ball_subset_normalChartAt_target`) it agrees with that diffeomorphism
-(`expMapDiffeo_apply_eq`).  So no curvature/Jacobi nonsingularity argument is needed below
-the `C²` radius — the existing normal-coordinate diffeomorphism already supplies `hloc`. -/
+
+
+
+
+
+
 theorem exp_isLocalDiffeomorphOn_ball
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ}
     (hr : r ≤ expMapC2Radius (I := I) g p) :
@@ -161,11 +161,11 @@ theorem exp_isLocalDiffeomorphOn_ball
   exact ⟨NormalCoordinates.expMapDiffeo (I := I) g p, hsrc,
     fun y hy => (NormalCoordinates.expMapDiffeo_apply_eq (I := I) g p hy).symm⟩
 
-/-- **MSM135 `lbl383` item 3a, unconditional form.**  For `r` below both the injectivity
-radius and `expMapC2Radius g p`, `expMap g p` restricts to a `C^1` partial diffeomorphism
-with source `Metric.ball 0 r`.  The nonsingularity hypothesis of `exists_expBall_diffeo` is
-discharged from normal coordinates (`exp_isLocalDiffeomorphOn_ball`), so this is a complete
-item-3a producer with no Jacobi/Grönwall frontier. -/
+
+
+
+
+
 theorem exists_expBall_diffeo_of_lt
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ}
     (hrinj : ENNReal.ofReal r < injRadius (I := I) g p)

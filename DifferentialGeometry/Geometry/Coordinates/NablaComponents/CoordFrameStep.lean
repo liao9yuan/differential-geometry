@@ -2,30 +2,30 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.Tensor0S
 import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
-/-!
-# Rank-general coordinate covariant-step component formula (P3 Gap B, producer 2)
 
-The `(0,s)` coordinate-frame evaluation of the covariant derivative, for ARBITRARY
-rank `s` — the generalisation of `nabla0SFun_two_eval_coordFrame` past rank 2.
-Proved by specialising the rank-general moving-slot formula
-`nabla0SFun_eval_coordFrame_moving_raw` to the coordinate frame (whose model
-representation is the constant `finBasis`, trivialising the moving-slot
-differentiability hypotheses), using `extDerivFun_real_eq_mfderiv` to identify the
-directional term with `coordDeriv0SAt` and the Christoffel expansion of `cov`.
 
-**DONE + axiom-clean** (`propext, Classical.choice, Quot.sound`).
-`hpair` (coordinate-frame component smoothness) is discharged by the same-tree lemma
-`tensor0S_eval_coordinateFrame_contMDiffAt` (Tensor0S.lean) — NOT by re-deriving via
-`contMDiffAt_section_apply_gen`, which would have hit the two-tree `Tensor0SModel`
-`NormedSpace` instance diamond in this file.  `term2` is the Christoffel expansion:
-expand `(cov frame_a)(X) = Σ_k Γ^k_a • frame_k` (single-vector frame expansion via
-`IsLocalFrameOn.toBasisAt.sum_repr`, coefficients identified with
-`christoffelAlongInFrame`), push it through `α x₀`'s update slot by
-`MultilinearMap.map_update_sum` + `ContinuousMultilinearMap.map_update_smul`, and
-rewrite each `α x₀ (update V a frame_k)` as `coordComponent0SAt (α x₀)(update I0 a k)`
-via `Function.update`/`coordinateFrameAt_toBasis_apply`.  term1 (extDerivFun →
-`coordDeriv0SAt`) closes by `extDerivFun_real_eq_mfderiv` + `congr 1` (defeq).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -47,7 +47,7 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- **Producer (2): rank-general coordinate covariant-step component formula.** -/
+
 theorem nabla0SFun_eval_coordFrame {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))

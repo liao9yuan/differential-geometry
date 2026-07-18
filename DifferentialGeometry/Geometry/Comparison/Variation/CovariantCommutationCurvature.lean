@@ -668,7 +668,7 @@ theorem commute_ds_dt_curvature_innerS
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
-private theorem commute_ds_dt_curvature
+theorem commute_ds_dt_curvature
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ)
     (houterL : DifferentiableAt ℝ (chartRepAt (I := I) (fun s : ℝ => f s t)

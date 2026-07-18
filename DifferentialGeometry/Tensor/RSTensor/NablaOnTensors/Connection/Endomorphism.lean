@@ -1,9 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Extracted connection endomorphism and fixed-chart formulas
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -24,9 +24,9 @@ variable {x x₀ : M} {s : Set M}
 
 variable [CompleteSpace 𝕜]
 
-/-- Private finite-dimensional calculus bridge: to prove a CLM-valued function
-is smooth within a set, it is enough to prove smoothness after applying it to
-each fixed vector in the finite-dimensional source. -/
+
+
+
 private theorem contDiffWithinAt_clm_of_apply
     {D F : Type*} [NormedAddCommGroup D] [NormedSpace 𝕜 D]
     [NormedAddCommGroup F] [NormedSpace 𝕜 F]
@@ -77,9 +77,9 @@ private theorem covariantDerivative_finset_sum
               simp [Finset.sum_insert, hit]
 
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-/-- Applying a locally smooth covariant derivative to a chart-constant tangent
-field and then to a smooth direction field gives a locally smooth tangent
-section. -/
+
+
+
 lemma covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
@@ -277,12 +277,12 @@ lemma connectionEndomorphismInChartL_apply_modelVector
         simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source)
       (X ((extChartAt I x₀).symm y))]
 
-/-- Centered specialization of `connectionEndomorphismInChartL_apply_modelVector`.
 
-At the self-chart point, the model direction is the tangent-trivialization
-coordinate of the actual tangent vector.  This is the normalization needed to
-compare the tensor-level total-nabla constructor with the older fixed-chart
-directional implementation. -/
+
+
+
+
+
 lemma connectionEndomorphismInChartL_apply_center_modelVector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : (x : M) → TangentSpace I x) (x : M) (v : E) :
@@ -297,9 +297,9 @@ lemma connectionEndomorphismInChartL_apply_center_modelVector
   rw [extChartAt_to_inv] at h
   simpa using h
 
-/-- Centered comparison with the derivative direction written in the self-chart
-model coordinate.  This is a convenience wrapper around
-`connectionEndomorphismInChartL_apply_center_modelVector`. -/
+
+
+
 lemma connectionEndomorphismInChartL_apply_center
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : (x : M) → TangentSpace I x) (x : M) (v : E) :
@@ -315,12 +315,12 @@ lemma connectionEndomorphismInChartL_apply_center
   rw [mfderiv_extChartAt_self] at h
   simpa using h
 
-/-- Centered fixed-chart formula for the covariant derivative of a tangent
-field, written in finite basis coordinates of the fixed tangent trivialization.
 
-This is the vector-field calculation behind the tensor derivation rule: expand
-`V` locally in chart-constant tangent fields and apply the connection Leibniz
-rule. -/
+
+
+
+
+
 theorem covariantDerivative_modelInChart_center_eq_sum
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X V : (x : M) → TangentSpace I x) (x₀ : M)
@@ -467,12 +467,12 @@ theorem covariantDerivative_modelInChart_center_eq_sum
   rw [← hcenter_model]
   rw [hΓ_sum]
 
-/-- Fixed-chart formula for the covariant derivative of a tangent field at an
-arbitrary point in the fixed chart domain.
 
-This is the non-centered version of
-`covariantDerivative_modelInChart_center_eq_sum`. It is still only a finite-basis
-connection-Leibniz calculation, not a tensor-bundle chart-change theorem. -/
+
+
+
+
+
 theorem covariantDerivative_modelInChart_eq_sum
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X V : (x : M) → TangentSpace I x) (x₀ p : M)
@@ -627,8 +627,8 @@ theorem covariantDerivative_modelInChart_eq_sum
   rw [← hcenter_model]
   rw [hΓ_sum]
 
-/-- Fixed-chart smoothness of the extracted connection endomorphism applied to
-a fixed model vector. -/
+
+
 lemma connectionEndomorphismInChart_apply_contDiffWithinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
@@ -716,8 +716,8 @@ lemma connectionEndomorphismInChart_apply_contDiffWithinAt
       rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
-/-- Fixed-chart smoothness of the extracted connection endomorphism as a
-CLM-valued map. -/
+
+
 lemma connectionEndomorphismInChart_contDiffWithinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)

@@ -230,6 +230,23 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationI
   rw [ccInputSymm_add (I := I) (M := M) g₀, ccInputSymm_add (I := I) (M := M) g₀,
     ccInputSymm_add (I := I) (M := M) g₀]
   abel
+set_option linter.unusedSectionVars false in
+
+
+theorem metricCcTensor_apply (g₀ g : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
+      g.inner x v w := by
+  have hround : ccTensorMultilinear (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x =
+      metricCcTensorFib (I := I) g x := by
+    unfold ccTensorMultilinear metricCcTensor
+    rw [MixedSection.toMultilinearSection_fromMultilinearSection]
+    rfl
+  rw [ccTensorBilin_apply]
+  unfold ccTensorModel
+  rw [hround]
+  rfl
+
 
 end TensorSpectral
 end Parabolic

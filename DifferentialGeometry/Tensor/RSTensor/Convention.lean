@@ -77,29 +77,29 @@ set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSimpArgs false
 
-/-!
-# Realized tensor slot conventions
 
-This file is intentionally small.  It records the component and contraction
-slot conventions used by higher geometry files, so those files do not unfold
-the Hom implementation of `TensorRSSpace` or mention `basisTensor0S` directly.
 
-Conventions fixed here:
 
-* `componentRS_gen basis T upper lower` means:
-  evaluate the Hom tensor `T` on the covariant basis tensor selected by
-  `upper`, then evaluate the output on the basis vectors selected by `lower`.
-  In notation, this is `T(e^upper)(e_lower)`.
-* `contract_trace r s x` contracts the first upper slot with the first lower
-  slot of a `(1+r, s+1)` tensor.
-* `contract_contravariant r s x alpha` contracts the first upper slot.  In the
-  model formula the new covector is prepended by
-  `model_tensorWithCovector_first`, not appended.
 
-Keep this file as a convention checklist: documentation plus short simp
-lemmas only.  Put real tensor algebra in `Components`, `Contract`, or a
-dedicated auxiliary module.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -125,8 +125,8 @@ section Components
 
 variable (basis : Module.Basis Idx K (TangentSpace I x))
 
-/-- Convention lemma: mixed components are Hom evaluation on the basis covector
-input and basis vector output. -/
+
+
 @[simp]
 theorem componentRS_basisTensor_apply {r s : Nat}
     (T : TensorRSSpace r s I x)
@@ -136,7 +136,7 @@ theorem componentRS_basisTensor_apply {r s : Nat}
         (fun a => basis (lower a)) := by
   rfl
 
-/-- Named `(1,1)` component convention. -/
+
 @[simp]
 theorem component11_apply
     (T : TensorRSSpace 1 1 I x) (i j : Idx) :
@@ -145,7 +145,7 @@ theorem component11_apply
         (fun _ : Fin 1 => basis j) := by
   rfl
 
-/-- Named `(1,3)` component convention. -/
+
 @[simp]
 theorem component13_apply
     (T : TensorRSSpace 1 3 I x) (a i j k : Idx) :
@@ -163,7 +163,7 @@ theorem component13_apply
     · simp [h1]
     · simp [h0, h1]
 
-/-- Named `(0,2)` component convention. -/
+
 @[simp]
 theorem component02_apply
     (A : Tensor0SSpace 2 I x) (i j : Idx) :
@@ -175,7 +175,7 @@ theorem component02_apply
   funext q
   by_cases h0 : q = 0 <;> simp [h0]
 
-/-- Named `(0,4)` component convention. -/
+
 @[simp]
 theorem component04_apply
     (A : Tensor0SSpace 4 I x) (i j k l : Idx) :
@@ -198,8 +198,8 @@ end Components
 
 section Contractions
 
-/-- Model convention behind `contract_trace`: the trace contracts the first
-upper slot with the first lower slot. -/
+
+
 @[simp]
 theorem model_contract_trace_first_upper_first_lower_apply
     (r s : Nat) (T : TensorRSModel (1 + r) (s + 1) K E) :
@@ -214,8 +214,8 @@ theorem model_contract_trace_first_upper_first_lower_apply
               ((Module.finBasis K E).cDualBasis i))) T) := by
   exact model_contract_trace_apply (𝕜 := K) (E := E) r s T
 
-/-- Model convention behind `contract_contravariant`: the covector is placed in
-the first contravariant slot, before the existing `r` upper slots. -/
+
+
 @[simp]
 theorem contract_contravariant_first_model_apply
     {r : Nat} (alpha : Tensor0SModel 1 K E) (beta : Tensor0SModel r K E)

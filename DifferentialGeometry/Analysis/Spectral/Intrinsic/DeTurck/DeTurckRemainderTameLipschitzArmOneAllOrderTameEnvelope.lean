@@ -664,7 +664,7 @@ theorem deTurckPhiZero_jointSmooth_fw (g₀ g_bg : SmoothRiemannianMetric I M)
       (fun s => (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
         + (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-          + deTurckLieRemainderField (I := I) (M := M) g₀
+          + lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)) (δ := δ) (δ' := δ') :=
   threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 2 _ _
     (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ')
@@ -699,7 +699,7 @@ noncomputable def deTurckPhiZeroPathIntegral (g₀ g_bg : SmoothRiemannianMetric
     (fun s => (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-        + deTurckLieRemainderField (I := I) (M := M) g₀
+        + lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))
     (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen
     (by rw [Set.uIcc_of_le zero_le_one]; exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
@@ -762,7 +762,7 @@ theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
     (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-        + deTurckLieRemainderField (I := I) (M := M) g₀
+        + lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) with hΨ₀def
   set Ψ₁ : ℝ → SmoothCcTensor g₀ 3 2 := fun s =>
     (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
@@ -917,7 +917,7 @@ theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
         unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + deTurckLieRemainderField (I := I) (M := M) g₀
+              + lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
           + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
@@ -937,7 +937,7 @@ theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
           + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + deTurckLieRemainderField (I := I) (M := M) g₀
+              + lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
       simp only [hΨ₀def]

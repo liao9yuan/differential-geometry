@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 
-/-!
-# Third chart-jet difference of metrics
 
-This file extends the chart metric-difference seminorms by the finite aggregate
-of all third chart partials.  It is the natural difference scale for second
-Christoffel derivatives and first derivatives of the Ricci--DeTurck operator.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -27,8 +27,8 @@ local notation "D3Idx" =>
     Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
       Fin (Module.finrank ℝ E)
 
-/-- The finite sum of the absolute differences of all third chart partials of
-two metric Gram matrices at one chart point. -/
+
+
 def gramD3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   ∑ p : D3Idx,
     |partialDeriv (E := E) p.1
@@ -41,7 +41,7 @@ def gramD3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : �
             (chartGramOnE (I := I) g₂ α p.2.2.2.1 p.2.2.2.2))) y|
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Every individual third Gram-partial difference is bounded by the aggregate. -/
+
 theorem gramD3_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (d c m a b : Fin (Module.finrank ℝ E)) :
@@ -68,20 +68,20 @@ theorem gramD3_sub_le
   simpa only [gramD3DiffSup, p] using h
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The third Gram-partial difference aggregate is nonnegative. -/
+
 theorem gramD3DiffSup_nonneg
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ gramD3DiffSup (I := I) (M := M) g₁ g₂ α y := by
   exact Finset.sum_nonneg fun _ _ => abs_nonneg _
 
-/-- The chart metric `3`-jet difference is the existing `2`-jet difference plus
-the aggregate of all third Gram partials. -/
+
+
 def metricJet3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y +
     gramD3DiffSup (I := I) (M := M) g₁ g₂ α y
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The chart metric `3`-jet difference is nonnegative. -/
+
 theorem metricJet3_nonneg
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ metricJet3DiffSup (I := I) (M := M) g₁ g₂ α y :=
@@ -89,7 +89,7 @@ theorem metricJet3_nonneg
     (gramD3DiffSup_nonneg (I := I) (M := M) g₁ g₂ α y)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The metric `2`-jet difference is bounded by the metric `3`-jet difference. -/
+
 theorem metricJet2_le_jet3
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y ≤
@@ -97,7 +97,7 @@ theorem metricJet2_le_jet3
   le_add_of_nonneg_right (gramD3DiffSup_nonneg (I := I) (M := M) g₁ g₂ α y)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The third Gram-partial aggregate is bounded by the metric `3`-jet difference. -/
+
 theorem gramD3_le_jet3
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     gramD3DiffSup (I := I) (M := M) g₁ g₂ α y ≤

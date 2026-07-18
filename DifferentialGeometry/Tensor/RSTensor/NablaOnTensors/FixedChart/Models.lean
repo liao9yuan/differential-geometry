@@ -3,9 +3,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Endomorphism
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Fixed-chart tensor model representatives
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -28,13 +28,13 @@ variable [CompleteSpace 𝕜]
 
 section SmoothVectorFieldRSNabla
 
-/-!
-## Implementation layer: chart transport and connection extraction
 
-The `mcovariantDeriv_*` declarations transport the model-space formula through a
-chart and optionally extract the local connection endomorphism from mathlib's
-`CovariantDerivative`.  They are support code for the canonical `nabla*` API.
--/
+
+
+
+
+
+
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
@@ -62,7 +62,7 @@ theorem tensor0SModelInChart_center_eq_tensor0SModelAt (s : ℕ) (x₀ : M)
   unfold tensor0SModelInChart
   rw [extChartAt_to_inv]
 
-/-- Slot evaluation form of `tensor0SModelInChart`. -/
+
 theorem tensor0SModelInChart_apply (s : ℕ) (x₀ : M)
     (A : (x : M) →
       Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x)
@@ -83,8 +83,8 @@ noncomputable def tensorRSModelAt (r s : ℕ) (x₀ x : M)
   exact ((trivializationAt (TensorRSModel r s 𝕜 E)
     (fun x => TensorRSSpace r s I x) x₀) ⟨x, T⟩).2
 
-/-- At the center of the mixed tensor-bundle trivialization, transporting a model
-mixed tensor to the fiber and back gives the original model tensor. -/
+
+
 theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
     (T : TensorRSModel r s 𝕜 E) :
     letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
@@ -101,8 +101,8 @@ theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
           (fun x => TensorRSSpace r s I x) x₀)
         T)
 
-/-- The chart-local model mixed tensor field obtained from a mixed tensor field
-by the fixed tensor-bundle trivialization centered at `x₀`. -/
+
+
 noncomputable def tensorRSModelInChart (r s : ℕ) (x₀ : M)
     (T : (x : M) →
       TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x)

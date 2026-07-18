@@ -1,6 +1,6 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.RSTensor.Defs
 

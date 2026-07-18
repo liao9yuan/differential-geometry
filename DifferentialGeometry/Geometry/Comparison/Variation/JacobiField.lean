@@ -4,21 +4,21 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Jacobi fields along a curve
 
-`IsJacobiAlong g γ J`: the Jacobi equation `D_t² J + R(J, γ̇)γ̇ = 0` for a vector
-field `J` along a curve `γ`, with `D_t` the intrinsic covariant derivative along the
-curve (`covDerivAlong`) and the curvature operator in the `riemannOp` form — the
-exact shape produced by the covariant-derivative commutation theorem
-`commute_ds_dt_curvature_innerS` (`riemannOp x u v w = R(u,v)w` slot order), so that
-the variation-through-geodesics proof lines up without reshaping.
 
-This is stage 2 of the normal-coordinate metric-bound route (MSM135 Chapter 4 Step B,
-B0; see `Geometry/Flow/RicciFlow/HCGCompactness/B0NormalCoordBounds.md`): the
-coordinate vector fields of a normal chart are Jacobi fields along the radial
-geodesics, and their Grönwall estimates produce the uniform `∂^α g_{ij}` bounds.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -41,14 +41,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The velocity field of a curve, in the `mfderiv` form used by the
-covariant-commutation theorem. -/
+
+
 noncomputable def curveVelocity (γ : ℝ → M) (t : ℝ) : TangentSpace I (γ t) :=
   mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
 
-/-- **The Jacobi equation at a single parameter.**  `D_t² J + R(J, γ̇)γ̇ = 0` at `t`,
-with `D_t = covDerivAlong g γ` and the curvature operator in the `riemannOp` slot
-order of the covariant-commutation theorems (`riemannOp x u v w = R(u,v)w`). -/
+
+
+
 def IsJacobiAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) : Prop :=
   covDerivAlong (I := I) g γ
@@ -58,14 +58,14 @@ def IsJacobiAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
     = 0
 
-/-- **The Jacobi equation along a curve.**  `D_t² J + R(J, γ̇)γ̇ = 0` pointwise, with
-`D_t = covDerivAlong g γ` and the curvature operator in the `riemannOp` slot order of
-`commute_ds_dt_curvature_innerS` (`riemannOp x u v w = R(u,v)w`). -/
+
+
+
 def IsJacobiAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) : Prop :=
   ∀ t : ℝ, IsJacobiAt (I := I) g γ J t
 
-/-- Unfolding lemma for the Jacobi equation at a point. -/
+
 theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) :
     IsJacobiAlong (I := I) g γ J ↔
@@ -94,8 +94,8 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         = 0
     linear_combination (norm := module) h
 
-/-- A pointwise Jacobi equation plus a curvature-term norm bound gives the
-second-covariant-derivative norm bound used by Gronwall estimates. -/
+
+
 theorem ode_bound_of_isJacobiAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {K t : ℝ}

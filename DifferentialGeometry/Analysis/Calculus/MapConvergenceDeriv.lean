@@ -4,26 +4,26 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Derivative-closure for `MapCInfConvOnCompacts` (Euclidean analysis layer)
 
-`MapCInfConvOnCompacts U Φ Φinf` retains the FULL Fréchet-derivative data of the
-MSM135 `C^∞`-convergence definition: `mapDerivNorm r Φₖ Φinf = ‖∇ʳ(Φₖ - Φ_∞)‖`
-is controlled uniformly on compacts for every order `r`.  Hence the notion is
-closed under taking a directional derivative: if `Φₖ → Φ_∞` in `C^∞`-on-compacts
-(with all maps `C^∞`), then
 
-  `z ↦ fderiv ℝ (Φₖ) z v  →  z ↦ fderiv ℝ Φ_∞ z v`
 
-again in `C^∞`-on-compacts.  This is the analytic producer the covariant-tower
-bridge `componentConv_covDeriv_of_chartCInf` (Gap B, order `a ≥ 1`) needs to push
-the order-0 chart-component convergence through one covariant-derivative step
-(`fderiv … v` is the coordinate directional derivative entering
-`nabla0SFun_two_eval_coordFrame`).
 
-This is the canonical Euclidean analysis layer for derivative closures; it has
-no manifold or HCG-specific hypotheses.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -35,12 +35,12 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- Pointwise bound: the order-`r` Euclidean derivative norm of the difference of
-directional derivatives `z ↦ fderiv ℝ (·) z v` is `≤ ‖v‖` times the order-`(r+1)`
-derivative norm of the difference of the maps.  (`fderiv` is linear, so the
-difference of directional derivatives is the directional derivative of the
-difference; then `clm_apply_const` peels off `· v` and `norm_iteratedFDeriv_fderiv`
-raises the order by one.) -/
+
+
+
+
+
+
 theorem mapDerivNorm_fderivApply_le (r : ℕ) (v : E) {Φk Φinf : E → F} {x : E}
     (hk : ContDiff ℝ (∞ : WithTop ℕ∞) Φk) (hinf : ContDiff ℝ (∞ : WithTop ℕ∞) Φinf) :
     mapDerivNorm r (fun z => fderiv ℝ Φk z v) (fun z => fderiv ℝ Φinf z v) x
@@ -63,10 +63,10 @@ theorem mapDerivNorm_fderivApply_le (r : ℕ) (v : E) {Φk Φinf : E → F} {x :
     _ = ‖v‖ * ‖iteratedFDeriv ℝ (r + 1) g x‖ := by rw [norm_iteratedFDeriv_fderiv]
     _ = ‖v‖ * mapDerivNorm (r + 1) Φk Φinf x := by rw [mapDerivNorm, hg]
 
-/-- **Derivative-closure of `C^∞`-on-compacts convergence.**  If `Φₖ → Φ_∞` in
-`C^∞`-on-compacts on `U` (all maps `C^∞`), then the directional derivatives
-`z ↦ fderiv ℝ (Φₖ) z v` converge to `z ↦ fderiv ℝ Φ_∞ z v` in `C^∞`-on-compacts.
-At order `p`/`K` it consumes the order-`(p+1)` content of the hypothesis. -/
+
+
+
+
 theorem MapCInfConvOnCompacts.fderivApply {U : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf)
     (hΦ : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k))
@@ -85,9 +85,9 @@ theorem MapCInfConvOnCompacts.fderivApply {U : Set E} {Φ : ℕ → E → F} {Φ
         rw [← mul_div_assoc, div_le_iff₀ (by positivity : (0:ℝ) < ‖v‖ + 1)]
         nlinarith [norm_nonneg v, hε.le]
 
-/-- Taking the full Fréchet derivative preserves compact-open `C∞`
-convergence on an open set. The output order `p` uses order `p + 1` of the
-original family. -/
+
+
+
 theorem MapCInfConvOnCompacts.fderivOn {U : Set E} (hU : IsOpen U)
     {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf)
@@ -120,8 +120,8 @@ theorem MapCInfConvOnCompacts.fderivOn {U : Set E} (hU : IsOpen U)
   rw [hnorm]
   exact hk0 k hk (r + 1) (by omega) x hx
 
-/-- Flipping the two inputs of a real-valued continuous bilinear map is a
-smooth linear operation. -/
+
+
 theorem contDiff_clm_flip :
     ContDiff ℝ (∞ : WithTop ℕ∞) (ContinuousLinearMap.flip :
       (E →L[ℝ] F →L[ℝ] ℝ) → (F →L[ℝ] E →L[ℝ] ℝ)) := by
@@ -143,21 +143,21 @@ theorem contDiff_clm_flip :
     LinearIsometryEquiv.contDiff (𝕜 := ℝ) (n := ∞) flipIso
   simpa [A, B, flipIso] using h
 
-/-- Pull a continuous bilinear form back along a continuous linear map.  This
-is the fixed polynomial map used to combine a convergent bilinear-form field
-with the derivative field of a convergent coordinate map. -/
+
+
+
 noncomputable def pullbackForm
     (q : (F →L[ℝ] F →L[ℝ] ℝ) × (E →L[ℝ] F)) : E →L[ℝ] E →L[ℝ] ℝ :=
   q.1.bilinearComp q.2 q.2
 
-/-- Evaluation of `pullbackForm` in its two vector arguments. -/
+
 @[simp]
 theorem pullbackForm_apply (B : F →L[ℝ] F →L[ℝ] ℝ) (D : E →L[ℝ] F) (u v : E) :
     pullbackForm (B, D) u v = B (D u) (D v) :=
   rfl
 
-/-- The pullback of a bilinear form by a linear map is a smooth polynomial in
-the bilinear form and the linear map. -/
+
+
 theorem pullbackForm.contDiff :
     ContDiff ℝ (∞ : WithTop ℕ∞) (pullbackForm (E := E) (F := F)) := by
   unfold pullbackForm ContinuousLinearMap.bilinearComp
@@ -173,8 +173,8 @@ theorem pullbackForm.contDiff :
     hflip₁.clm_comp contDiff_snd
   exact contDiff_clm_flip.comp hcomp₂
 
-/-- Uniform convergence of a smooth family, together with `C^p` convergence of
-its Fréchet derivatives, reconstructs `C^(p+1)` convergence of the family. -/
+
+
 theorem MapCPConvOn.succ_of_fderiv {U K : Set E} {p : ℕ} (hU : IsOpen U)
     (hKU : K ⊆ U) {Φ : ℕ → E → F} {Φinf : E → F}
     (h0 : MapCPConvOn K 0 Φ Φinf)
@@ -211,9 +211,9 @@ theorem MapCPConvOn.succ_of_fderiv {U K : Set E} {p : ℕ} (hU : IsOpen U)
       rw [← hnorm]
       exact hk1 k (le_trans (le_max_right _ _) hk) r (by omega) x hx
 
-/-- **Additivity of `C^∞`-on-compacts convergence.**  Sums of `C^∞`-on-compacts
-convergent families (all `C^∞`) converge `C^∞`-on-compacts to the sum of the
-limits. -/
+
+
+
 theorem MapCInfConvOnCompacts.add {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf Ψinf : E → F}
     (hΦ : MapCInfConvOnCompacts U Φ Φinf) (hΨ : MapCInfConvOnCompacts U Ψ Ψinf)
     (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φinf)
@@ -246,9 +246,9 @@ theorem MapCInfConvOnCompacts.add {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf �
         · exact hk2 k (le_trans (le_max_right _ _) hk) r hr x hx
     _ = ε := by ring
 
-/-- **`C^∞`-on-compacts convergence is closed under subtraction.**  Lets the
-covariant-tower induction extract `s_{p+1} = towerStep − Σ corrections` from the
-directional step and the (lower-level) correction convergences. -/
+
+
+
 theorem MapCInfConvOnCompacts.sub {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf Ψinf : E → F}
     (hΦ : MapCInfConvOnCompacts U Φ Φinf) (hΨ : MapCInfConvOnCompacts U Ψ Ψinf)
     (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φinf)
@@ -281,13 +281,13 @@ theorem MapCInfConvOnCompacts.sub {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf �
         · exact hk2 k (le_trans (le_max_right _ _) hk) r hr x hx
     _ = ε := by ring
 
-/-- **`C^∞`-on-compacts convergence is closed under multiplication by a fixed
-smooth scalar field.**  If `Φₖ → Φ_∞` in `C^∞`-on-compacts (scalar, all `C^∞`) and
-`g` is `C^∞`, then `g · Φₖ → g · Φ_∞` in `C^∞`-on-compacts.  This is the closure
-the covariant-tower induction needs for the (fixed `gRef`-Christoffel) correction
-terms.  Proof: Leibniz (`norm_iteratedFDeriv_mul_le`) bounds `mapDerivNorm r
-(g·Φₖ) (g·Φ_∞)` by `∑_{i≤r} C(r,i)‖∇ⁱg‖·mapDerivNorm (r-i) Φₖ Φ_∞`, then the fixed
-`‖∇ⁱg‖` are bounded on the compact and the difference norms vanish. -/
+
+
+
+
+
+
+
 theorem MapCInfConvOnCompacts.mulLeft {U : Set E} {Φ : ℕ → E → ℝ} {Φlim : E → ℝ}
     (h : MapCInfConvOnCompacts U Φ Φlim) {g : E → ℝ} (hg : ContDiff ℝ (∞ : WithTop ℕ∞) g)
     (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φlim) :
@@ -342,10 +342,10 @@ theorem MapCInfConvOnCompacts.mulLeft {U : Set E} {Φ : ℕ → E → ℝ} {Φli
       = 2 ^ r * Bg * ε / (2 ^ p * Bg + 1) from by ring, div_le_iff₀ hD]
   nlinarith [mul_nonneg (mul_nonneg hε.le (sub_nonneg.mpr h2r)) hBg0, hε.le]
 
-/-- **Finite sums of `C^∞`-on-compacts convergent families converge.**  The
-`Finset` fold of `MapCInfConvOnCompacts.add` — the form the covariant-tower
-induction uses for the Christoffel correction sums (over the slot index and the
-frame index). -/
+
+
+
+
 theorem MapCInfConvOnCompacts.sum {ι : Type*} {U : Set E} (s : Finset ι)
     {Φ : ι → ℕ → E → F} {Φinf : ι → E → F}
     (h : ∀ i, MapCInfConvOnCompacts U (Φ i) (Φinf i))
@@ -370,8 +370,8 @@ theorem MapCInfConvOnCompacts.sum {ι : Type*} {U : Set E} (s : Finset ι)
     exact MapCInfConvOnCompacts.add (h a) ih (fun k => hc a k) (hic a)
       (fun k => ContDiff.sum (fun i _ => hc i k)) (ContDiff.sum (fun i _ => hic i))
 
-/-- Fixed-order convergence is local on an open neighborhood of the compact
-set. -/
+
+
 theorem MapCPConvOn.congr {U K : Set E} {p : ℕ}
     {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
     (h : MapCPConvOn K p Φ Φinf) (hU : IsOpen U) (hKU : K ⊆ U)
@@ -390,9 +390,9 @@ theorem MapCPConvOn.congr {U K : Set E} {p : ℕ}
   rw [hval]
   exact hk0 k hk r hr x hx
 
-/-- **Locality of `C^∞`-on-compacts convergence.**  Convergence on an OPEN set `U`
-depends only on the maps' restriction to `U`: replacing each `Φ k` and `Φinf` by
-maps agreeing with them on `U` preserves `MapCInfConvOnCompacts U`. -/
+
+
+
 theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)
     (hΦ : ∀ k, Set.EqOn (Φ' k) (Φ k) U) (hΦinf : Set.EqOn Φ'inf Φinf U) :
@@ -400,10 +400,10 @@ theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φin
   intro K hK hKU p
   exact (h K hK hKU p).congr hU hKU hΦ hΦinf
 
-/-- **Eventual locality of `C^∞`-on-compacts convergence.**  Replacing the
-sequence maps by maps that agree on the open convergence set from some index
-onward preserves the same limit.  This is the tail-stable form needed when a
-finite slot is eventually live or eventually dead. -/
+
+
+
+
 theorem MapCInfConvOnCompacts.congr_eventually
     {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)

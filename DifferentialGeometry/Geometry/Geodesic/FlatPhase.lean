@@ -2,12 +2,12 @@ import DifferentialGeometry.Analysis.ODE.Flow.Variational
 
 set_option autoImplicit false
 
-/-!
-# Flat phase-space flow
 
-This file packages the linear comparison model for a geodesic phase-space
-flow: `(x, v)' = (v, 0)`.  Its explicit flow is `(x, v) ↦ (x + t v, v)`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -18,8 +18,8 @@ namespace Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 
-/-- The flat phase-space vector field `(x, v) ↦ (v, 0)` as a continuous
-linear map. -/
+
+
 def flatPhaseCLM : (E × E) →L[Real] (E × E) :=
   (ContinuousLinearMap.snd Real E E).prod (0 : (E × E) →L[Real] E)
 
@@ -28,7 +28,7 @@ theorem flatPhaseCLM_apply (z : E × E) :
     flatPhaseCLM (E := E) z = (z.2, 0) := by
   simp [flatPhaseCLM]
 
-/-- The time-`t` flow of the flat phase-space vector field. -/
+
 def flatPhaseFlowCLM (t : Real) : (E × E) →L[Real] (E × E) :=
   (ContinuousLinearMap.fst Real E E +
       t • ContinuousLinearMap.snd Real E E).prod
@@ -44,7 +44,7 @@ theorem flatPhaseFlowCLM_zero :
     flatPhaseFlowCLM (E := E) 0 = ContinuousLinearMap.id Real (E × E) := by
   ext z <;> simp
 
-/-- Each flat phase orbit solves the linear phase equation globally. -/
+
 theorem flatPhaseFlow_hasDerivAt (z : E × E) (t : Real) :
     HasDerivAt (fun s : Real => flatPhaseFlowCLM (E := E) s z)
       (flatPhaseCLM (E := E) (flatPhaseFlowCLM (E := E) t z)) t := by
@@ -52,8 +52,8 @@ theorem flatPhaseFlow_hasDerivAt (z : E × E) (t : Real) :
   have hv := hasDerivAt_const t z.2
   simpa using hx.prodMk hv
 
-/-- If a time-dependent vector field has the flat phase linearization along
-the zero orbit, the explicit flat flow is its global variational solution. -/
+
+
 theorem flatPhase_is_var
     {f : Real → (E × E) → (E × E)}
     (hfd : ∀ t,
@@ -71,4 +71,3 @@ end Geodesic
 end Riemannian
 end Geometry
 end DifferentialGeometry
-

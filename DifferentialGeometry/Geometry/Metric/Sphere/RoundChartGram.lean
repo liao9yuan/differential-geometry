@@ -2,11 +2,11 @@ import DifferentialGeometry.Geometry.Metric.Sphere.RoundMetric
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Operator.Hessian
 
-/-!
-# The round metric's chart Gram matrix at a pole (Step 5B, P1)
 
-Working notes file: the 0-jet milestone `chartGramOnE roundMetric x₀ i j 0 = δ i j`.
--/
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ instance instNeZeroFinrankModel : NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n
   rw [finrank_euclideanSpace_fin]; infer_instance
 
 omit [NeZero n] in
-/-- The inverse stereographic chart sends the chart origin back to the chart centre. -/
+
 theorem extChartAt_symm_zero_sphere (x₀ : sphere (0 : E) 1) :
     (extChartAt (𝓡 n) x₀).symm 0 = x₀ := by
   have hchart : (extChartAt (𝓡 n) x₀).symm 0 = (stereographic' n (-x₀)).symm 0 := rfl
@@ -39,11 +39,11 @@ theorem extChartAt_symm_zero_sphere (x₀ : sphere (0 : E) 1) :
     smul_zero, zero_sub, coe_neg_sphere]
   module
 
-/-- **Chart Gram of the round metric, reduced to the ambient inner product.**  The chart
-Gram matrix of the round metric is the ambient inner product of the chart coordinate-frame
-vectors pushed forward by the inclusion differential `dIncl`.  This is the project-side
-reduction; the remaining content (that these pushed frames are an orthonormal/conformal frame)
-is the explicit stereographic computation. -/
+
+
+
+
+
 theorem chartGramOnE_roundMetric (x₀ : sphere (0 : E) 1)
     (i j : Fin (finrank ℝ (EuclideanSpace ℝ (Fin n)))) (y : EuclideanSpace ℝ (Fin n)) :
     chartGramOnE (roundMetric (E := E) (n := n)) x₀ i j y =

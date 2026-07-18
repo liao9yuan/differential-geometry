@@ -4,14 +4,14 @@ import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
 
-/-!
-# Regularity of total covariant derivatives
 
-This file proves smoothness of the canonical total `(0,s)` covariant derivative
-from the existing directional `nabla0SFun` regularity theorem.  The first
-derivative slot is handled by extending the fixed-chart local frame to a global
-smooth section near the base point.
--/
+
+
+
+
+
+
+
 
 set_option linter.unusedSectionVars false
 
@@ -32,12 +32,12 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Scalar coefficient smoothness for the total covariant derivative on
-chart-constant tangent slots.
 
-The first slot is reduced locally to a smooth global extension of the
-chart-constant field, then the existing directional `nabla0SFun` coefficient
-smoothness applies. -/
+
+
+
+
+
 theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -111,8 +111,8 @@ theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
         (b (slots a.succ)) p)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the canonical total covariant derivative for `(0,s)` tensor
-fields. -/
+
+
 theorem totalNabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -168,8 +168,8 @@ theorem totalNabla0S_reg (s : ℕ)
     congr
   exact hsec
 
-/-- Canonical first and second total covariant derivative data for a smooth
-covariant tensor field and a smooth connection. -/
+
+
 noncomputable def CanonicalSpatialDerivs0S.of_smooth_connection {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

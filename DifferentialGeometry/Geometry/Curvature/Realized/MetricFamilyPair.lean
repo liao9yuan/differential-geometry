@@ -5,14 +5,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Smooth pairings for realized metric families
 
-This file derives joint spacetime smoothness of a moving metric evaluated on
-two globally smooth tangent sections.  The proof stays scalar-valued: it
-expands both sections in one actual local frame and uses
-`MetricFamilySmoothOn.frameCompSmooth` on that frame.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,8 +32,8 @@ variable [IsManifold I ∞ M]
 
 namespace MetricFamilySmoothOn
 
-/-- A smooth realized metric family paired with two smooth tangent sections is
-jointly smooth in spacetime at every interior time. -/
+
+
 theorem pairSmoothAt
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}

@@ -423,12 +423,14 @@ def deTurckForceBallRadiusSymm (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ
   1 / (16 * (((deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M)
     (g₀ := g₀) (g_bg := g_bg) a ha_super).choose : ℝ) + 1))
 
-theorem quasilinear_maxreg_solution_of_nemytskii
+theorem nemytskii_sol_const
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (hLip : LipschitzWith L Nfun)
-    (hmix : ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+    (C₁ C₂ : ℝ≥0) (D : ℝ) (hD : 0 ≤ D)
+    (hzero : ‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ ≤ D)
+    (hsingle : ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
       ‖Nfun u - Nfun u'‖ ≤
         (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                           (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
@@ -438,9 +440,8 @@ theorem quasilinear_maxreg_solution_of_nemytskii
         (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖) :
     ∃ T₀ : ℝ,
-      T₀ = min 1 (min (1 / (64 * ((hmix.choose_spec.choose : ℝ) + 1) ^ 2))
-        ((1 / (16 * ((hmix.choose : ℝ) + 1)) /
-            (2 * (‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ + 1))) ^ 2)) ∧
+      T₀ = min 1 (min (1 / (64 * ((C₂ : ℝ) + 1) ^ 2))
+        ((1 / (16 * ((C₁ : ℝ) + 1)) / (2 * (D + 1))) ^ 2)) ∧
       0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
       ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
         (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
@@ -454,42 +455,33 @@ theorem quasilinear_maxreg_solution_of_nemytskii
             timeScaleLaplacian (I := I) (M := M) (a : ℝ)
                 (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
                   (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce) + gforce ∧
-          ‖gforce‖ ≤ 1 / (16 * ((hmix.choose : ℝ) + 1)) := by
+          ‖gforce‖ ≤ 1 / (16 * ((C₁ : ℝ) + 1)) := by
   classical
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
-  set C₁ := hmix.choose with hC₁def
-  set C₂ := hmix.choose_spec.choose with hC₂def
-  have hsingle : ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
-      ‖Nfun u - Nfun u'‖ ≤
-        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
-                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
-          * ‖u - u'‖ +
-        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
-    hmix.choose_spec.choose_spec
   set M₀ := ‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hM₀def
   have hM₀ : 0 ≤ M₀ := norm_nonneg _
+  have hM₀D : M₀ ≤ D := by simpa only [hM₀def] using hzero
+  have hD1pos : 0 < D + 1 := by linarith
 
   set ρ : ℝ := 1 / (16 * ((C₁ : ℝ) + 1)) with hρdef
   have hC₁p : (0 : ℝ) < 16 * ((C₁ : ℝ) + 1) := by positivity
   have hρpos : 0 < ρ := by rw [hρdef]; positivity
 
-  set T₀ : ℝ := min 1 (min (1 / (64 * ((C₂ : ℝ) + 1) ^ 2)) ((ρ / (2 * (M₀ + 1))) ^ 2)) with hT₀def
+  set T₀ : ℝ := min 1 (min (1 / (64 * ((C₂ : ℝ) + 1) ^ 2))
+    ((ρ / (2 * (D + 1))) ^ 2)) with hT₀def
   have hT₀pos : 0 < T₀ := by
     refine lt_min one_pos (lt_min ?_ ?_)
     · positivity
-    · have : 0 < ρ / (2 * (M₀ + 1)) := by positivity
+    · have : 0 < ρ / (2 * (D + 1)) := by positivity
       positivity
   refine ⟨T₀, ?_, hT₀pos, ?_⟩
-  · rw [hT₀def, hρdef, hC₁def, hC₂def, hM₀def]
+  · rw [hT₀def, hρdef]
   intro T hT hTT₀ hT1
 
   have hT_le1 : T ≤ 1 := hT1
   have hT_lo : T ≤ 1 / (64 * ((C₂ : ℝ) + 1) ^ 2) :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hT_stay : T ≤ (ρ / (2 * (M₀ + 1))) ^ 2 :=
+  have hT_stay : T ≤ (ρ / (2 * (D + 1))) ^ 2 :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_right _ _))
 
   set Λ : ℝ := (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with hΛdef
@@ -589,16 +581,16 @@ theorem quasilinear_maxreg_solution_of_nemytskii
     rw [hΨdef, hz₀, hM₀def]
     exact norm_nemytskiiMixedForcingMap_zero_le (I := I) (M := M) g₀ a hLip hT hT1
   have hsqrtTM : Real.sqrt T * M₀ ≤ ρ / 2 := by
-    have hsqrtT_le : Real.sqrt T ≤ ρ / (2 * (M₀ + 1)) := by
-      rw [show ρ / (2 * (M₀ + 1)) = Real.sqrt ((ρ / (2 * (M₀ + 1))) ^ 2) from
+    have hsqrtT_le : Real.sqrt T ≤ ρ / (2 * (D + 1)) := by
+      rw [show ρ / (2 * (D + 1)) = Real.sqrt ((ρ / (2 * (D + 1))) ^ 2) from
         (Real.sqrt_sq (by positivity)).symm]
       exact Real.sqrt_le_sqrt hT_stay
-    calc Real.sqrt T * M₀ ≤ (ρ / (2 * (M₀ + 1))) * M₀ :=
+    calc Real.sqrt T * M₀ ≤ (ρ / (2 * (D + 1))) * M₀ :=
           mul_le_mul_of_nonneg_right hsqrtT_le hM₀
-      _ ≤ (ρ / (2 * (M₀ + 1))) * (M₀ + 1) := by
-          apply mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+      _ ≤ (ρ / (2 * (D + 1))) * (D + 1) := by
+          exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
       _ = ρ / 2 := by
-          have hne : (M₀ + 1) ≠ 0 := by positivity
+          have hne : (D + 1) ≠ 0 := ne_of_gt hD1pos
           field_simp
   have hz₀norm : ‖z₀‖ = 0 := by rw [hz₀, norm_zero]
 
@@ -646,6 +638,43 @@ theorem quasilinear_maxreg_solution_of_nemytskii
   · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := h_compact)
       (a := (a : ℝ)) (T := T) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar]
   · exact hFstar_mem
+
+theorem quasilinear_maxreg_solution_of_nemytskii
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
+    (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hLip : LipschitzWith L Nfun)
+    (hmix : ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖Nfun u - Nfun u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖) :
+    ∃ T₀ : ℝ,
+      T₀ = min 1 (min (1 / (64 * ((hmix.choose_spec.choose : ℝ) + 1) ^ 2))
+        ((1 / (16 * ((hmix.choose : ℝ) + 1)) /
+            (2 * (‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ + 1))) ^ 2)) ∧
+      0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+      ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+        (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
+        u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce ∧
+          gforce =ᵐ[timeMeasure T]
+            (fun t => Nfun (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)) ∧
+          timeH1.trace0 _ T u = 0 ∧
+          timeH1.timeDeriv _ T u =
+            timeScaleLaplacian (I := I) (M := M) (a : ℝ)
+                (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+                  (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce) + gforce ∧
+          ‖gforce‖ ≤ 1 / (16 * ((hmix.choose : ℝ) + 1)) := by
+  exact nemytskii_sol_const (I := I) (M := M) g₀ a Nfun hLip
+    hmix.choose hmix.choose_spec.choose
+    ‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖
+    (norm_nonneg _) le_rfl hmix.choose_spec.choose_spec
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

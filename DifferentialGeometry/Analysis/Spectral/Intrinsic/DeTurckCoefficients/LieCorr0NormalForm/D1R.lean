@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Defs
 
-/-!
-# First covariant-derivative correction normal form
 
-This module extracts the finite-index normal form of the first covariant-derivative
-correction from the settled private DeTurck algebra chain.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -2894,7 +2894,7 @@ private lemma nf_D1R_h56 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ) (dg dig g
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => Finset.sum_congr rfl (fun c _ => Finset.sum_congr rfl (fun d _ => ?_))))
   rw [higs d b, hga0s j i c, hfs b a]
   try ring
-/-- Normal form for the first covariant-derivative correction term. -/
+
 theorem nf_d1r {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)

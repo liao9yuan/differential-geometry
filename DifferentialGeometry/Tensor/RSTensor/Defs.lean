@@ -1,6 +1,6 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
@@ -698,6 +698,18 @@ omit [FiniteDimensional 𝕜 E] in
 
 theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
     ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
+theorem TensorRSSpace.zero_apply (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x) :
+    (0 : TensorRSSpace r s I x) A = 0 := rfl
+
+theorem TensorRSSpace.add_apply (r s : ℕ) (x : M)
+    (T U : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
+    (T + U) A = T A + U A := rfl
+
+theorem TensorRSSpace.smul_apply (r s : ℕ) (x : M)
+    (c : 𝕜) (T : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
+    (c • T) A = c • T A := rfl
+
 
 end
 end Tensor0SBundle

@@ -8,13 +8,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Metric-Compatible Connections
 
-This file contains predicates and apply theorems for arbitrary
-metric-compatible connections.  These are ordinary connection facts, not
-realization predicates.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Connection
 
@@ -28,10 +28,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section Pointwise
 
-/-- Metric compatibility at a point, stated on differentiable tangent fields.
 
-This is the concrete form of
-`X <Y,Z> = <nabla_X Y, Z> + <Y, nabla_X Z>`. -/
+
+
+
 def IsMetricCompatibleAt_gen
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
@@ -43,14 +43,14 @@ def IsMetricCompatibleAt_gen
             g.inner x (cov Y x (X x)) (Z x) +
               g.inner x (Y x) (cov Z x (X x))
 
-/-- Metric compatibility at every point. -/
+
 def IsMetricCompatible_gen
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) : Prop :=
   forall x : M, IsMetricCompatibleAt_gen (I := I) cov g x
 
-/-- Pointwise metric compatibility:
-`X <Y,Z> = <nabla_X Y,Z> + <Y,nabla_X Z>`. -/
+
+
 theorem metric_compatible_at_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M} {x : M}
@@ -62,7 +62,7 @@ theorem metric_compatible_at_apply
         g.inner x (Y x) (cov Z x (X x)) :=
   hmc X Y Z hX hY hZ
 
-/-- Global metric compatibility at a point. -/
+
 theorem metric_compatible_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}

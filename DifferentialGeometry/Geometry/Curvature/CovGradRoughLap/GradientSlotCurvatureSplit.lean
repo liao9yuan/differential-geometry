@@ -12,7 +12,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
+set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -105,17 +105,8 @@ theorem gradSlotCurv_frameSum_toModel_eq
                 (Function.update u k.succ
                   (riemannOp (LeviCivita (I := I) g) x
                     (smoothOrthoFrame (I := I) g x i x) (W x) (u k.succ)))) := by
-  refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [gradSlotCurv_toModel_eq_leading_add_tail]
-  congr 1
-  congr 1
-  · congr 1
-    rw [baseSlotCurv_eq_riemannOp]
-    rfl
-  · refine Finset.sum_congr rfl (fun k _ => ?_)
-    congr 1
-    rw [baseSlotCurv_eq_riemannOp]
-    rfl
+  simp only [gradSlotCurv_toModel_eq_leading_add_tail,
+    baseSlotCurv_eq_riemannOp, orthoFrameSec_apply]
 
 theorem ricEndoRaisedFib_inner_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :

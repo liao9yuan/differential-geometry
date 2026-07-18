@@ -3,12 +3,12 @@ import Mathlib.Tactic
 
 set_option autoImplicit false
 
-/-!
-# Finite-sum algebra for MSM135 Lemma 4.5
 
-This file is geometry-free.  It packages the finite range-sum estimates used in
-the induction step of the abstract covariant version of MSM135 Lemma 4.5.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -77,12 +77,12 @@ theorem oneStep_partial_to_full
     exact mul_le_mul_of_nonneg_left hsum hcoef
   linarith
 
-/-- Collapse the scalar Leibniz sum in the one-step Lemma 4.5 estimate.
 
-After the tensor calculus has produced a bound by a sum of products
-`|∇^a A| * |∇^(k-a)T|`, this lemma uses
-`|∇^a A| <= eps * B a` and the full partial sum bound for the `T` terms to
-produce the `oneStepConst` coefficient. -/
+
+
+
+
+
 theorem oneStep_from_leibniz
     {eps G : Real} {B A T N : Nat -> Real} {k s : Nat}
     (heps0 : 0 <= eps)
@@ -157,11 +157,11 @@ theorem oneStep_from_leibniz
             ring
   linarith
 
-/-- Antidiagonal-indexed version of `oneStep_from_leibniz`.
 
-This matches the natural output of an iterated Leibniz formula, where a term
-has derivative orders `(a, b)` with `a + b = k`, avoiding explicit subtraction
-in the tensor-calculus theorem. -/
+
+
+
+
 theorem oneStep_from_antidiagonal
     {eps G : Real} {B A T N : Nat -> Real} {k s : Nat}
     (heps0 : 0 <= eps)
@@ -206,11 +206,11 @@ private theorem sum_eps_E_mul
   intro k _hk
   ring
 
-/-- Pure algebra for the induction step in MSM135 Lemma 4.5.
 
-`N i` is the target sequence of `H`-derivative norms of `T`; `G k` is the
-sequence of `H`-derivative norms of `nabla_g T`.  The theorem converts
-pointwise one-step estimates for every `G k` into the full `p + 1` estimate. -/
+
+
+
+
 theorem main_step_algebra
     {eps C A : Real} {E N G : Nat -> Real} {p : Nat}
     (heps0 : 0 <= eps)
@@ -297,12 +297,12 @@ theorem main_step_coeff_le_lemma45Const
   simp [lemma45Const]
   linarith
 
-/-- Algebraic induction step with the recursive Lemma 4.5 constant already
-absorbed.
 
-This is the pure finite-sum form of the `r = p + 1` case in the formal proof.
-The input `G k` represents the `H`-derivative norms of `nabla_g T`, while
-`N i` represents the `H`-derivative norms of `T`. -/
+
+
+
+
+
 theorem main_step_to_lemma45Const
     {eps A : Real} {B N G : Nat -> Real} {p s : Nat}
     (heps0 : 0 <= eps)
@@ -353,8 +353,8 @@ theorem main_step_to_lemma45Const
       _ = eps * lemma45Const B (p + 1) s * S := by ring
   linarith
 
-/-- Version of `main_step_to_lemma45Const` whose lower-order one-step
-estimates use their natural partial sums. -/
+
+
 theorem main_step_to_lemma45Const_of_partials
     {eps A : Real} {B N G : Nat -> Real} {p s : Nat}
     (heps0 : 0 <= eps)

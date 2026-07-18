@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
+import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 
@@ -80,7 +81,91 @@ lemma centre_mem_smallNormalBall (p : M) {ρ : ℝ} (hρ : 0 < ρ) :
   exact ENNReal.ofReal_pos.2 hρ
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+  [T2Space (TangentBundle I M)]
   [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+
+noncomputable def minimizingVec
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) : TangentSpace I a :=
+  Classical.choose
+    (hopf_rinow_expMapIntrinsic_surjective_minimizing
+      (I := I) g hEnorm a b)
+
+
+theorem minimizingVec_exp
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) :
+    expMapIntrinsic (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b) = b :=
+  (Classical.choose_spec
+    (hopf_rinow_expMapIntrinsic_surjective_minimizing
+      (I := I) g hEnorm a b)).1
+
+
+theorem minimizingVec_len
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) :
+    Real.sqrt (g.inner a (minimizingVec (I := I) g hEnorm a b)
+        (minimizingVec (I := I) g hEnorm a b)) =
+      (riemannianEDist I a b).toReal :=
+  (Classical.choose_spec
+    (hopf_rinow_expMapIntrinsic_surjective_minimizing
+      (I := I) g hEnorm a b)).2
+
+
+noncomputable def minJoin
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) (t : ℝ) : M :=
+  intrinsicGeodesic (I := I) g hEnorm a
+    (minimizingVec (I := I) g hEnorm a b) t
+
+
+@[simp] theorem minJoin_zero
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) : minJoin (I := I) g hEnorm a b 0 = a := by
+  exact intrinsicGeodesic_zero (I := I) g hEnorm a
+    (minimizingVec (I := I) g hEnorm a b)
+
+
+@[simp] theorem minJoin_one
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) : minJoin (I := I) g hEnorm a b 1 = b := by
+  change intrinsicGeodesic (I := I) g hEnorm a
+    (minimizingVec (I := I) g hEnorm a b) 1 = b
+  rw [← expMapIntrinsic_def, minimizingVec_exp]
+
+
+theorem minJoin_cont
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) : Continuous (minJoin (I := I) g hEnorm a b) :=
+  intrinsicGeodesic_continuous (I := I) g hEnorm a
+    (minimizingVec (I := I) g hEnorm a b)
+
+
+theorem minJoin_edist_le
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) {t : ℝ} (ht : 0 ≤ t) :
+    riemannianEDist I a (minJoin (I := I) g hEnorm a b t) ≤
+      ENNReal.ofReal ((riemannianEDist I a b).toReal * t) := by
+  simpa only [minJoin, intrinsicGeodesic_zero, minimizingVec_len, sub_zero] using
+    intrinsicGeodesic_riemannianEDist_le
+      (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b)
+        (s := 0) (t := t) ht
 
 private lemma intrinsicGeodesic_speedSq_const
     (g : SmoothRiemannianMetric I M)

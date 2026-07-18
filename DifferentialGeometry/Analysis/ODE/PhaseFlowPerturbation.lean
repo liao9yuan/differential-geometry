@@ -3,13 +3,13 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ApproximatesLinearOn
 
 set_option autoImplicit false
 
-/-!
-# Perturbation bounds for second-order phase flows
 
-This file packages the reusable ODE part of comparing a second-order flow
-`x'' = a (x, x')` with the free flow.  The geometric input is isolated in a
-Lipschitz estimate for the acceleration field on a phase-space set.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 
@@ -20,20 +20,20 @@ namespace PhaseFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The first-order phase-space field associated to the acceleration equation
-`x'' = a (x, x')`. -/
+
+
 def phaseField (a : E × E → E) (z : E × E) : E × E :=
   (z.2, a z)
 
-/-- The time-one endpoint map of the free second-order flow. -/
+
 def freeEnd : (E × E) →L[ℝ] E :=
   ContinuousLinearMap.fst ℝ E E + ContinuousLinearMap.snd ℝ E E
 
-/-- The free time-one map retaining both the initial and endpoint positions. -/
+
 def freeDiag : (E × E) →L[ℝ] E × E :=
   (ContinuousLinearMap.fst ℝ E E).prod freeEnd
 
-/-- The free retained-endpoint map as a continuous linear equivalence. -/
+
 def freeDiagCLE : (E × E) ≃L[ℝ] (E × E) :=
   ContinuousLinearEquiv.equivOfInverse freeDiag
     ((ContinuousLinearMap.fst ℝ E E).prod
@@ -49,19 +49,19 @@ theorem freeDiag_apply (z : E × E) : freeDiag z = (z.1, z.1 + z.2) := by
 theorem freeDiagCLE_apply (z : E × E) : freeDiagCLE z = (z.1, z.1 + z.2) := by
   simp [freeDiagCLE, freeDiag, freeEnd]
 
-/-- The inverse free retained-endpoint map recovers initial velocity by
-subtracting the initial position from the endpoint position. -/
+
+
 @[simp]
 theorem freeDiagInv_apply (z : E × E) :
     (freeDiagCLE (E := E)).symm z = (z.1, z.2 - z.1) := by
   rfl
 
-/-- The underlying continuous linear map of `freeDiagCLE` is `freeDiag`. -/
+
 theorem freeDiagCLE_coe :
     (freeDiagCLE (E := E) : (E × E) →L[ℝ] (E × E)) = freeDiag := rfl
 
-/-- The time-one position error coefficient for an acceleration field with
-phase-space Lipschitz constant `κ`. -/
+
+
 noncomputable def phaseErr (κ : ℝ≥0) : ℝ≥0 where
   val := (κ : ℝ) * Real.exp (1 + (κ : ℝ)) * (Real.exp 1 - 1)
   property := by
@@ -70,8 +70,8 @@ noncomputable def phaseErr (κ : ℝ≥0) : ℝ≥0 where
       (sub_nonneg.mpr (Real.one_le_exp zero_le_one))
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- The time-one phase error is monotone in the acceleration Lipschitz
-coefficient. -/
+
+
 theorem phaseErr_mono {κ κ' : ℝ≥0} (hle : κ ≤ κ') :
     phaseErr κ ≤ phaseErr κ' := by
   apply NNReal.coe_le_coe.mp
@@ -89,8 +89,8 @@ theorem phaseErr_mono {κ κ' : ℝ≥0} (hle : κ ≤ κ') :
       mul_le_mul_of_nonneg_left hexp κ'.coe_nonneg
 
 omit [NormedSpace ℝ E] in
-/-- Lifting a `κ`-Lipschitz acceleration to phase space gives a
-`max 1 κ`-Lipschitz first-order field. -/
+
+
 theorem phaseField_lip
     {a : E × E → E} {s : Set (E × E)} {κ : ℝ≥0}
     (ha : LipschitzOnWith κ a s) :
@@ -98,8 +98,8 @@ theorem phaseField_lip
   simpa only [phaseField] using
     (LipschitzWith.prod_snd.lipschitzOnWith.prodMk ha)
 
-/-- Two exact second-order trajectories have time-one position difference
-within `phaseErr κ` of the corresponding free-flow difference. -/
+
+
 theorem phase_pos_res_le
     {a : E × E → E} {s : Set (E × E)} {κ : ℝ≥0}
     {Z W : ℝ → E × E}
@@ -238,8 +238,8 @@ theorem phase_pos_res_le
     ring
   rwa [hgb] at hmain
 
-/-- The time-one position map of a family of exact phase trajectories
-approximates the free endpoint map with coefficient `phaseErr κ`. -/
+
+
 theorem phase_pos_approx
     {a : E × E → E} {q u : Set (E × E)} {κ : ℝ≥0}
     {Φ : (E × E) → ℝ → E × E}
@@ -258,8 +258,8 @@ theorem phase_pos_approx
     ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd',
     Prod.fst_sub, Prod.snd_sub, dist_eq_norm] using hres
 
-/-- Retaining the initial position upgrades the time-one endpoint estimate to
-an approximation of the free diagonal phase map. -/
+
+
 theorem phase_diag_approx
     {a : E × E → E} {q u : Set (E × E)} {κ : ℝ≥0}
     {Φ : (E × E) → ℝ → E × E}

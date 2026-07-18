@@ -6,13 +6,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Coordinate connection coefficients
 
-This file contains the bridge between the fixed-chart connection endomorphism
-used by `NablaOnTensors` and the Christoffel coefficients in the chart-induced
-coordinate frame.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -31,8 +31,8 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- A chart-constant tangent field for a model basis vector agrees near the
-base point with the corresponding coordinate-frame vector field. -/
+
+
 theorem tangentConstInChart_eq_coordinateFrame_eventually
     (x₀ : M) (i : CoordinateIdx (𝕜 := 𝕜) E) :
     (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ ((Module.finBasis 𝕜 E) i) :
@@ -49,8 +49,8 @@ theorem tangentConstInChart_eq_coordinateFrame_eventually
   rfl
 
 set_option linter.flexible false in
-/-- Model connection coefficients agree with coordinate-frame Christoffel
-coefficients in the chart-induced coordinate frame. -/
+
+
 theorem connCoeff_eq_christoffelAlong_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : (x : M) -> TangentSpace I x) (x₀ : M)

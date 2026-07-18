@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
 
-/-!
-# Sharp-flat covector endomorphism field
 
-This file packages the smooth covector endomorphism `g₀♭ ∘ g₁♯` below the
-connection-difference jet tower.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -39,7 +39,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The metric-flat operator field is smooth as a Hom-bundle section. -/
+
 theorem sharpFlatEndo_eval (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     cotangentToDual (I := I)

@@ -5,11 +5,11 @@ set_option backward.isDefEq.respectTransparency false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Quadratic bounds on time slabs
 
-Time-dependent unit tangent slabs, compactness, and absolute quadratic-form bounds.
--/
+
+
+
+
 
 noncomputable section
 
@@ -25,14 +25,14 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 
-/-- Metric quadratic evaluation on a time/tangent-bundle product. -/
+
 def metricTimeBundleQuad
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   (G q.1.1).inner q.2.proj q.2.2 q.2.2
 
-/-- Metric quadratic value of the time-dependent metric on a fixed-reference
-unit tangent source. -/
+
+
 def metricUnitTimeSlabRefQuad
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -58,8 +58,8 @@ theorem metricUnitTimeSlabRefQuad_cont_of_bundle
   simpa [metricUnitTimeSlabRefQuad, metricTimeBundleQuad, incl,
     MetricUnitTangent.base, MetricUnitTangent.vec] using hquad.comp hincl
 
-/-- The scalar normalization factor that sends a reference-unit vector to a
-`G t`-unit vector. -/
+
+
 noncomputable def metricUnitTimeSlabScale
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -81,8 +81,8 @@ theorem metricUnitTimeSlabRefQuad_pos
     (MetricUnitTangent.base (I := I) (M := M) q.2)
     (MetricUnitTangent.vec (I := I) (M := M) q.2) hv
 
-/-- Continuity of the scalar normalization factor, once the metric quadratic
-value is known to be continuous on the reference-unit source. -/
+
+
 theorem metricUnitTimeSlabScale_cont
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -95,8 +95,8 @@ theorem metricUnitTimeSlabScale_cont
       (Real.sqrt_pos.mpr
         (metricUnitTimeSlabRefQuad_pos (I := I) (M := M) G K g₀ q)))
 
-/-- Continuity of the scalar normalization factor from ambient
-time/tangent-bundle metric quadratic continuity. -/
+
+
 theorem metricUnitTimeSlabScale_cont_of_bundle
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -105,7 +105,7 @@ theorem metricUnitTimeSlabScale_cont_of_bundle
   metricUnitTimeSlabScale_cont (I := I) (M := M) G K g₀
     (metricUnitTimeSlabRefQuad_cont_of_bundle (I := I) (M := M) G K g₀ hquad)
 
-/-- The tangent-bundle part of the reference-unit normalization map. -/
+
 noncomputable def metricUnitTimeSlabScaledBundle
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -152,9 +152,9 @@ theorem metricUnitTimeSlabScaledBundle_unit
             metric_smul2 (I := I) (M := M) (G q.1.1) a v
     _ = 1 := haa
 
-/-- Fiberwise scalar multiplication is continuous on the tangent-bundle total
-space.  This is the local-trivialization fact needed by the unit-slab
-normalization map. -/
+
+
+
 private theorem tangentBundle_smul_cont :
     Continuous (fun p : Real × TangentBundle I M =>
       (⟨p.2.proj, p.1 • p.2.2⟩ : TangentBundle I M)) := by
@@ -196,9 +196,9 @@ private theorem tangentBundle_smul_cont :
       _ = (e (⟨p.2.proj, p.1 • p.2.2⟩ : TangentBundle I M)).2 := by
               rw [e.coe_linearMapAt_of_mem (R := Real) hp]
 
-/-- Continuity of the tangent-bundle component of the reference-unit
-normalization map follows from ambient time/tangent-bundle continuity of the
-metric quadratic form. -/
+
+
+
 theorem metricUnitTimeSlabScaledBundle_cont_of_bundle
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -218,8 +218,8 @@ theorem metricUnitTimeSlabScaledBundle_cont_of_bundle
     MetricUnitTangent.base, MetricUnitTangent.vec] using
     tangentBundle_smul_cont (I := I) (M := M).comp hpair
 
-/-- Normalize a reference-unit tangent vector to be unit for the time-dependent
-metric at the same base point and time. -/
+
+
 noncomputable def metricUnitTimeSlabParam
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -267,8 +267,8 @@ theorem metricUnitTimeSlabParam_time
       (metricUnitTimeSlabParam (I := I) (M := M) G K g₀ q) = q.1.1 := by
   rfl
 
-/-- The only topological input needed to make the reference-unit
-normalization map continuous is continuity of its tangent-bundle component. -/
+
+
 theorem metricUnitTimeSlabParam_cont_of_scaledBundle
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -296,8 +296,8 @@ theorem metricUnitTimeSlabParam_cont_of_scaledBundle
     metricUnitTimeSlabScale, metricUnitTimeSlabRefQuad,
     MetricUnitTangent.base, MetricUnitTangent.vec]
 
-/-- Continuity of the reference-unit normalization map follows from ambient
-time/tangent-bundle continuity of the metric quadratic form. -/
+
+
 theorem metricUnitTimeSlabParam_cont_of_bundle
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -306,8 +306,8 @@ theorem metricUnitTimeSlabParam_cont_of_bundle
   metricUnitTimeSlabParam_cont_of_scaledBundle (I := I) (M := M) G K g₀
     (metricUnitTimeSlabScaledBundle_cont_of_bundle (I := I) (M := M) G K g₀ hquad)
 
-/-- The reference-unit normalization map is onto the geometric unit tangent
-time slab. -/
+
+
 theorem metricUnitTimeSlabParam_surjective
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -371,9 +371,9 @@ theorem metricUnitTimeSlabParam_surjective
         simp
   simpa [hGtunit, hsqrtRaw] using hvecRaw
 
-/-- Compactness of the geometric time slab from an explicit continuous
-surjective reference-unit parametrization.  The hard future work is proving
-continuity of `metricUnitTimeSlabParam` from metric-family regularity. -/
+
+
+
 theorem metricUnitTimeSlab_compact_of_param
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -390,8 +390,8 @@ theorem metricUnitTimeSlab_compact_of_param
       (Set.univ : Set (MetricUnitTangentTimeSlab (I := I) (M := M) G K)) := by
   simpa [Set.image_univ, hsurj.range_eq] using hsource.image hcont
 
-/-- Compactness of the geometric time slab from the reference-unit
-normalization map, using its proved surjectivity. -/
+
+
 theorem metricUnitTimeSlab_compact_of_param_cont
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -406,8 +406,8 @@ theorem metricUnitTimeSlab_compact_of_param_cont
   metricUnitTimeSlab_compact_of_param (I := I) (M := M) G K g₀ hsource hcont
     (metricUnitTimeSlabParam_surjective (I := I) (M := M) G K g₀)
 
-/-- Compactness of the geometric time slab from compactness of the reference
-source and continuity of the normalization map. -/
+
+
 theorem metricUnitTimeSlab_compact_of_param_cont_compactSpace
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (g₀ : SmoothRiemannianMetric I M)
@@ -420,8 +420,8 @@ theorem metricUnitTimeSlab_compact_of_param_cont_compactSpace
   metricUnitTimeSlab_compact_of_param_cont (I := I) (M := M) G K g₀
     isCompact_univ hcont
 
-/-- Closed-interval version of the reference-parametrization compactness
-criterion.  The remaining input is continuity of the normalization map. -/
+
+
 theorem metricUnitTimeSlab_icc_compact_of_param_cont
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real)
@@ -451,8 +451,8 @@ theorem metricUnitTimeSlab_icc_compact_of_param_cont
   exact metricUnitTimeSlab_compact_of_param_cont
     (I := I) (M := M) G (Set.Icc t0 t1) g₀ hsource hcont
 
-/-- Closed-interval compactness of the geometric time slab from ambient
-time/tangent-bundle continuity of the metric quadratic form. -/
+
+
 theorem metricUnitTimeSlab_icc_compact_of_bundle
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real)
@@ -467,8 +467,8 @@ theorem metricUnitTimeSlab_icc_compact_of_bundle
     (metricUnitTimeSlabParam_cont_of_bundle (I := I) (M := M)
       G (Set.Icc t0 t1) g₀ hquad)
 
-/-- A unit-vector absolute bound on a two-tensor gives a metric-relative bound
-on all tangent vectors. -/
+
+
 theorem unitAbsBound_to_all
     (g : SmoothRiemannianMetric I M)
     (A : (x : M) ->
@@ -535,8 +535,8 @@ theorem unitAbsBound_to_all
       rw [hss]
       ring
 
-/-- A compact unit tangent slab and continuity of the absolute quadratic
-evaluation give a metric-relative bound on the full slab. -/
+
+
 theorem compactUnitSlab_absBound
     (G : Real -> SmoothRiemannianMetric I M)
     (A : (t : Real) -> (x : M) ->
@@ -583,8 +583,8 @@ theorem compactUnitSlab_absBound
     exfalso
     exact hne ⟨⟨⟨t, ht⟩, p⟩, Set.mem_univ _⟩
 
-/-- A compact geometric unit tangent time slab and continuity of the absolute
-quadratic evaluation give a metric-relative bound on the full time set. -/
+
+
 theorem compactUnitTimeSlab_absBound
     (G : Real -> SmoothRiemannianMetric I M)
     (A : (t : Real) -> (x : M) ->
@@ -639,8 +639,8 @@ theorem compactUnitTimeSlab_absBound
       exact MetricUnitTangent.unit (I := I) (M := M) p⟩
     exact hne ⟨q, Set.mem_univ q⟩
 
-/-- Continuity of the absolute quadratic evaluation on the geometric time slab
-from total-space continuity of the time-dependent `(0,2)` tensor. -/
+
+
 theorem timeSlabAbsQuadCont
     (G : Real -> SmoothRiemannianMetric I M)
     (A : (t : Real) -> (x : M) ->

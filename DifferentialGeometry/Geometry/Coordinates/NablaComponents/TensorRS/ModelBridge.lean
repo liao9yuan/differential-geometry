@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Basic
 
-/-!
-# Mixed tensor coordinate model bridge
 
-Fixed-chart model component and derivative bridges for mixed tensor coordinate
-components.
--/
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -29,8 +29,8 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
-/-- At the base point, mixed tensor model components in the fixed
-trivialization agree with coordinate-frame components. -/
+
+
 theorem tensorRSModelAt_coordComponentRSAt {r s : ℕ} (x₀ : M)
     (T : TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x₀)
     (upper : Fin r -> CoordinateIdx (𝕜 := 𝕜) E)
@@ -135,9 +135,9 @@ private theorem model_RS_component_eq_coord_component_comp_eventually {r s : ℕ
     simpa [trivializationAt] using hy_src
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The tensor-bundle chart derivative used by `nablaRSFun` agrees with the
-manifold directional derivative of the corresponding coordinate-frame mixed
-component. -/
+
+
+
 theorem modelDeriv_eq_coordDerivRSAt {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)

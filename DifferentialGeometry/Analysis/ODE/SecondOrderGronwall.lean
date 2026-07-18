@@ -2,22 +2,22 @@ import Mathlib.Analysis.ODE.Gronwall
 
 set_option autoImplicit false
 
-/-!
-# Grönwall bound for second-order linear ODEs
 
-`norm_le_gronwall_secondOrder`: if `Y : ℝ → E` satisfies the second-order estimate
-`‖Y''(t)‖ ≤ K‖Y(t)‖ + ε` on `[0, b)` with `‖Y 0‖ ≤ δ` and `‖Y' 0‖ ≤ δ`, then
-`‖Y t‖ ≤ gronwallBound δ (max K 1) ε t` on `[0, b]`.  Proved by passing to the
-first-order system `Z = (Y, Y')` and applying Mathlib's
-`norm_le_gronwallBound_of_norm_deriv_right_le`.
 
-This is the ODE engine for the Jacobi-field route to the normal-coordinate metric
-bounds (MSM135 Chapter 4 Step B, B0; see
-`Geometry/Flow/RicciFlow/HCGCompactness/B0NormalCoordBounds.md`): the Jacobi equation
-`Y'' + A(t)Y = F` with `‖A‖ ≤ K` and `‖F‖ ≤ ε` satisfies the hypothesis, and each
-`x`-derivative of the Jacobi field satisfies such an inhomogeneous equation with `F`
-controlled by curvature derivatives and lower-order data.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 
@@ -25,10 +25,10 @@ open Set
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The zero-initial Grönwall bound is monotone in the inhomogeneous amplitude.
 
-This small scalar bridge lets later Jacobi estimates replace a per-field
-initial speed by a uniform upper bound. -/
+
+
+
 lemma gronwallBound_zero_mono_eps
     {K eps₁ eps₂ x : ℝ} (hK : 0 ≤ K) (hx : 0 ≤ x) (heps : eps₁ ≤ eps₂) :
     gronwallBound 0 K eps₁ x ≤ gronwallBound 0 K eps₂ x := by
@@ -53,8 +53,8 @@ lemma gronwallBound_zero_mono_eps
       _ = eps₂ / K * (Real.exp (K * x) - 1) := by
           field_simp [hKne]
 
-/-- With zero initial data, `gronwallBound` is linear in the inhomogeneous
-amplitude. -/
+
+
 lemma gronwallBound_zero_mul_eps
     {K eps x a : ℝ} :
     gronwallBound 0 K (a * eps) x = a * gronwallBound 0 K eps x := by
@@ -65,8 +65,8 @@ lemma gronwallBound_zero_mul_eps
   · simp only [gronwallBound_of_K_ne_0 hKne, zero_mul, zero_add]
     field_simp [hKne]
 
-/-- A positive initial lower bound dominates the zero-initial Grönwall error
-after choosing a sufficiently small nonnegative time scale. -/
+
+
 lemma exists_gron_small
     {K D B₀ : ℝ} (hB₀ : 0 < B₀) (hK : 0 ≤ K) (hD : 0 ≤ D) :
     ∃ b B : ℝ, 0 < b ∧ 0 < B ∧
@@ -108,8 +108,8 @@ lemma exists_gron_small
   rw [hgb]
   linarith
 
-/-- A positive initial lower bound dominates the zero-initial Grönwall error at
-time `1` after choosing the coefficient `K` sufficiently small. -/
+
+
 lemma exists_gron_smallK
     {D B₀ : ℝ} (hB₀ : 0 < B₀) (hD : 0 ≤ D) :
     ∃ K B : ℝ, 0 < K ∧ 0 < B ∧
@@ -159,8 +159,8 @@ lemma exists_gron_smallK
   rw [hgb]
   linarith
 
-/-- Grönwall bound for a second-order linear ODE estimate, via the first-order
-system `(Y, Y')`. -/
+
+
 theorem norm_le_gronwall_secondOrder
     {Y Y' Y'' : ℝ → E} {K eps δ b : ℝ}
     (hK : 0 ≤ K) (heps : 0 ≤ eps)
@@ -202,11 +202,11 @@ theorem norm_le_gronwall_secondOrder
     _ ≤ gronwallBound δ (max K 1) eps (t - 0) := hmain t ht
     _ = gronwallBound δ (max K 1) eps t := by rw [sub_zero]
 
-/-- **Perturbation form of the second-order Grönwall bound.**  A solution of the
-homogeneous Jacobi-type estimate `‖Y''‖ ≤ K‖Y‖` with `Y 0 = 0`, `Y' 0 = w` stays
-`gronwallBound`-close to its linearisation `t ↦ t • w`.  (Apply with
-`Z := Y - t • w`: `Z'' = Y''` and `‖Y‖ ≤ ‖Z‖ + t‖w‖` make the estimate
-inhomogeneous with `ε = K·b·‖w‖` and zero initial data.) -/
+
+
+
+
+
 theorem gronwall_sub_linear
     {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
     (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -251,9 +251,9 @@ theorem gronwall_sub_linear
           nlinarith
   exact norm_le_gronwall_secondOrder hK heps hcZ hcZ' hdZ hdZ' hboundZ hZ0 hZ'0
 
-/-- Endpoint upper estimate following from the perturbation form: a homogeneous
-second-order Grönwall solution stays below its linear part plus the Grönwall
-error. -/
+
+
+
 theorem gronwall_le_linear
     {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
     (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -276,8 +276,8 @@ theorem gronwall_le_linear
       exact add_le_add (hsub t ht) (le_of_eq htw)
     _ = t * ‖w‖ + gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by ring
 
-/-- Endpoint lower estimate following from the perturbation form: the norm is at
-least the linear norm minus the Grönwall error. -/
+
+
 theorem gronwall_ge_linear
     {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
     (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -303,12 +303,12 @@ theorem gronwall_ge_linear
         exact add_le_add le_rfl (hsub t ht)
   linarith
 
-/-- **Nonvanishing of a Jacobi-type solution below the Grönwall scale.**  If the
-linearisation dominates the Grönwall error at the endpoint —
-`gronwallBound 0 (max K 1) (K·b·‖w‖) b < b‖w‖` — then `Y b ≠ 0`.  This is the
-analytic heart of the nonsingularity of `d exp` below the conjugate scale: the
-Jacobi field with initial data `(0, w)` cannot return to zero while the
-curvature-size `K` is small against the window `b`. -/
+
+
+
+
+
+
 theorem gronwall_ne_zero
     {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
     (hK : 0 ≤ K) (hb : 0 < b)

@@ -54,6 +54,7 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open LieCorr0Core
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
@@ -268,9 +269,9 @@ private theorem lc0w_insertField_add_endoArmBase (g₀ g₁ g_bg : SmoothRiemann
       deTurckLieDLbFib (I := I) g₁ g₀ x D from rfl]
   rw [deTurckLieDLbFib_toModel (I := I) g₁ g₀ x D m]
   have hN0 : ∀ v : TangentSpace I x,
-      deTurckLieRemainderEndo (I := I) g₀ g₁ g₀ x v = -(deTurckLieWEndo (I := I) g₁ g₀ x v) := by
+      lieCorr0NEndo (I := I) g₀ g₁ g₀ x v = -(deTurckLieWEndo (I := I) g₁ g₀ x v) := by
     intro v
-    rw [show deTurckLieRemainderEndo (I := I) g₀ g₁ g₀ x =
+    rw [show lieCorr0NEndo (I := I) g₀ g₁ g₀ x =
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x
             ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x)
           - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
@@ -278,7 +279,7 @@ private theorem lc0w_insertField_add_endoArmBase (g₀ g₁ g_bg : SmoothRiemann
           - deTurckLieWEndo (I := I) g₁ g₀ x from rfl]
     rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply, sub_self, zero_sub]
   have e0 : Tensor0SSpace.toModel D
-      (Function.update m 0 (deTurckLieRemainderEndo (I := I) g₀ g₁ g₀ x (m 0))) =
+      (Function.update m 0 (lieCorr0NEndo (I := I) g₀ g₁ g₀ x (m 0))) =
       -(Tensor0SSpace.toModel D
         (Function.update m 0 (deTurckLieWEndo (I := I) g₁ g₀ x (m 0)))) := by
     rw [hN0 (m 0), show (-(deTurckLieWEndo (I := I) g₁ g₀ x (m 0))) =
@@ -286,7 +287,7 @@ private theorem lc0w_insertField_add_endoArmBase (g₀ g₁ g_bg : SmoothRiemann
     rw [ContinuousMultilinearMap.map_update_smul]
     rw [neg_one_smul]
   have e1 : Tensor0SSpace.toModel D
-      (Function.update m 1 (deTurckLieRemainderEndo (I := I) g₀ g₁ g₀ x (m 1))) =
+      (Function.update m 1 (lieCorr0NEndo (I := I) g₀ g₁ g₀ x (m 1))) =
       -(Tensor0SSpace.toModel D
         (Function.update m 1 (deTurckLieWEndo (I := I) g₁ g₀ x (m 1)))) := by
     rw [hN0 (m 1), show (-(deTurckLieWEndo (I := I) g₁ g₀ x (m 1))) =
@@ -302,7 +303,7 @@ set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField) in
 
 private theorem lc0w_lieCorr0_add_endoArmBase_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
-    deTurckLieRemainderField (I := I) (M := M) g₀ g₁ g_bg +
+    lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg +
         deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g₀ =
       endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
           (lc0NEndoSec (I := I) (M := M) g₀ g₁ g_bg -
@@ -1447,7 +1448,7 @@ private theorem lieDerivativeCorrectionPlusEndoArm_l2JetWindow
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieRemainderField (I := I) (M := M) g₀
+            (lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
@@ -1664,19 +1665,19 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
-          (fun s => deTurckLieRemainderField (I := I) (M := M) g₀
+          (fun s => lieCorr0Field (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
             + deTurckLieEndoArmField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) (δ := δ) (δ' := δ) ∧
         (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-            ((deTurckLieRemainderField (I := I) (M := M) g₀
+            ((lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤ Λ ^ 2) ∧
         (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieRemainderField (I := I) (M := M) g₀
+            (lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
@@ -1713,7 +1714,7 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
     refine ContMDiffSection.ext (fun x => ?_)
     rfl
   refine ⟨?_, ?_, fun i s hs => henv T hδ_le hδ hδZ hball i s hs⟩
-  · have hjA := lieCorr0Field_realizedFam_jointSmooth (I := I) g₀ T 0 hδ hδZ g_bg
+  · have hjA := lieCorr0_path_joint (I := I) g₀ T 0 hδ hδZ g_bg
     have hjC := deTurckLieCoeffField_realizedFam_jointSmooth (I := I) g₀ T 0 hδ hδZ g₀
     have hjD : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
         (fun u => DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCovDerivArmField
@@ -1760,7 +1761,7 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
       rw [hEndoEq s]
       exact hsupz T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
     refine le_trans (lc0b_rfns_toSection_add_le (I := I) (M := M) g₀ 2 2
-      (deTurckLieRemainderField (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
+      (lieCorr0Field (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
       (deTurckLieEndoArmField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) x) ?_
     linarith
@@ -1793,7 +1794,7 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
             operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (deTurckLieCoeffField (I := I) (M := M) g₀
                     (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
-                  + deTurckLieRemainderField (I := I) (M := M) g₀
+                  + lieCorr0Field (I := I) (M := M) g₀
                     (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
               operatorFieldApply (I := I) (M := M) g₀ 2 2 (C0lc s)
@@ -1840,18 +1841,18 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
   refine ⟨fun s => C0da s
       + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
         - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
-      + (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+      + (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
         + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀),
     C2da, ?_, hj2da, ?_, ?_, ?_, ?_, ?_⟩
   · exact linearizedRicciThreeArmHjoint_add (I := I) (M := M) g₀ 2 _ _
       (linearizedRicciThreeArmHjoint_add (I := I) (M := M) g₀ 2 _ _ hj0da hjdf) hjrs
   · intro s hs
     have hsplit : deTurckLieCoeffField (I := I) (M := M) g₀ (fam s) g_bg
-        + deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg =
+        + lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg =
         deTurckLieCovDerivArmField (I := I) (M := M) g₀ (fam s) g_bg
         + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
           - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
-        + (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+        + (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
           + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀) := by
       rw [deTurckLieCoeffField_eq_covDerivArm_add_endoArm (I := I) (M := M) g₀
         (fam s) g_bg]
@@ -1911,7 +1912,7 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
       (C0da s
         + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
           - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
-      (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+      (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
         + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
     have e2 := iteratedCovGrad_add (I := I) (g := g₀) (r := 2) (s := 2) (j := i)
       (C0da s)
@@ -1923,14 +1924,14 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
             (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
               - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
           + iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
         ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖
           + ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
                 - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
           + ‖iteratedCovGrad (I := I) g₀ 2 2 i
-              (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+              (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
                 + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖ := by
       have t1 := norm_add_le
         (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)
@@ -1938,7 +1939,7 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
             (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
               - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
         (iteratedCovGrad (I := I) g₀ 2 2 i
-          (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+          (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
             + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
       have t2 := norm_add_le
         (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s))
@@ -1957,18 +1958,18 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
             (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
               - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
         - ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖),
       sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖
         - ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
               + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖),
       norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)),
       norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
         (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
           - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)),
       norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
-        (deTurckLieRemainderField (I := I) (M := M) g₀ (fam s) g_bg
+        (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
           + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))]
   · intro i s hs
     have hW : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
@@ -2002,7 +2003,7 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_data
             operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (deTurckLieCoeffField (I := I) (M := M) g₀
                     (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
-                  + deTurckLieRemainderField (I := I) (M := M) g₀
+                  + lieCorr0Field (I := I) (M := M) g₀
                     (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
               operatorFieldApply (I := I) (M := M) g₀ 2 2 (C0lc s)
@@ -2059,7 +2060,7 @@ private theorem exists_riemannLieDerivativeCorrection_curvatureRefold_data
                     (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
                   + (deTurckLieCoeffField (I := I) (M := M) g₀
                       (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
-                    + deTurckLieRemainderField (I := I) (M := M) g₀
+                    + lieCorr0Field (I := I) (M := M) g₀
                       (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg))
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
               operatorFieldApply (I := I) (M := M) g₀ 2 2 (C0f s)
@@ -2377,7 +2378,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s) g_bg
-        + deTurckLieRemainderField (I := I) (M := M) g₀
+        + lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s) g_bg)
     with hΨ₀def
   have hj0 : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Ψ₀ (δ := δ) (δ' := δ) := by
@@ -2437,7 +2438,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
             (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s)
           + (deTurckLieCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s) g_bg
-            + deTurckLieRemainderField (I := I) (M := M) g₀
+            + lieCorr0Field (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s) g_bg)) := by
     intro s
     simp only [hΨ₀def]

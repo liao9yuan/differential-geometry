@@ -6,26 +6,26 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
-/-!
-# The round metric on the unit sphere
 
-For a finite-dimensional real inner product space `E` with `finrank ℝ E = n + 1`,
-the unit sphere `sphere (0 : E) 1` is a smooth `n`-manifold (Mathlib's
-`EuclideanSpace.instIsManifoldSphere`).  We equip it with the **round metric**:
-the restriction of the ambient inner product, i.e. the pullback of the flat metric
-on `E` along the smooth inclusion `ι : sphere → E`.  Concretely
-`roundInner x v w = ⟪dι_x v, dι_x w⟫`, where `dι_x = mfderiv … ι x`.
 
-This is the canonical, chart-free definition, chosen so that ambient isometries of
-`E` (the orthogonal group) act by isometries of the round metric essentially for
-free — the input to the homogeneity argument for constant sectional curvature.
 
-## Main definitions / results
 
-* `roundInner`, `roundInner_apply`, `roundInner_symm`, `roundInner_pos`.
-* `roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 1)`.
-* `roundMetric_inner` — evaluation `roundMetric.inner x v w = ⟪dι_x v, dι_x w⟫`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,15 +38,15 @@ namespace Geometry
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {n : ℕ} [Fact (finrank ℝ E = n + 1)]
 
-/-- The differential of the sphere inclusion at `x`, with codomain ascribed to the
-ambient space `E` (so it carries `E`'s inner-product instances rather than the bare
-tangent-space type synonym, which has none). -/
+
+
+
 noncomputable def dIncl (x : sphere (0 : E) 1) :
     TangentSpace (𝓡 n) x →L[ℝ] E :=
   mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x
 
-/-- The round inner product on `T_x (S^n)`: the ambient inner product of the
-images of the tangent vectors under the differential of the inclusion. -/
+
+
 noncomputable def roundInner (x : sphere (0 : E) 1) :
     TangentSpace (𝓡 n) x →L[ℝ] TangentSpace (𝓡 n) x →L[ℝ] ℝ :=
   (ContinuousLinearMap.precomp ℝ (dIncl (n := n) x)).comp
@@ -75,10 +75,10 @@ theorem roundInner_pos (x : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) x)
   exact mul_pos (norm_pos_iff.mpr (dIncl_ne_zero (n := n) hv))
     (norm_pos_iff.mpr (dIncl_ne_zero (n := n) hv))
 
-/-- The flat ambient inner-product section, pulled back along the sphere inclusion `ι`:
-`x ↦ ⟨ι x, innerSL ℝ⟩`, is a smooth section over `S^n` of the Hom-bundle of `T(E)` along `ι`.
-The flat section over `E` is Mathlib's `riemannianMetricVectorSpace E` (whose fiber inner product
-is `innerSL ℝ`); we precompose with the smooth inclusion. -/
+
+
+
+
 private theorem flatInner_comp_incl_contMDiff :
     ContMDiff (𝓡 n) (𝓘(ℝ, E).prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x : sphere (0 : E) 1 => TotalSpace.mk'
@@ -88,9 +88,9 @@ private theorem flatInner_comp_incl_contMDiff :
         ((riemannianMetricVectorSpace E).inner (((↑) : sphere (0 : E) 1 → E) x))) :=
   ((riemannianMetricVectorSpace E).contMDiff.of_le le_top).comp contMDiff_coe_sphere
 
-/-- For a smooth tangent section `Y` on the sphere, the pushforward section
-`x ↦ ⟨ι x, dι_x (Y x)⟩` of `T(E)` (with base map `ι`) is smooth.  This is the cross-model
-analogue of `mfderiv_apply_section_smooth_along_diffeo`. -/
+
+
+
 private theorem dIncl_apply_section_contMDiff
     (Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x)
     (hY : ContMDiff (𝓡 n) ((𝓡 n).prod 𝓘(ℝ, EuclideanSpace ℝ (Fin n))) ∞
@@ -103,7 +103,7 @@ private theorem dIncl_apply_section_contMDiff
           (mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x (Y x))) :=
   ((contMDiff_coe_sphere (n := n)).contMDiff_tangentMap (le_refl _)).comp hY
 
-/-- The round metric on the unit sphere. -/
+
 noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 1) where
   inner x := roundInner (n := n) x
   symm x v w := roundInner_symm (n := n) x v w
@@ -123,13 +123,13 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
       (V₂ := fun _ : sphere (0 : E) 1 => ℝ)
       (φ := fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x))
     intro W
-    -- Pushforward sections of `T(E)` along `ι`.
+
     have hv := dIncl_apply_section_contMDiff (n := n) (fun x => Y x) Y.contMDiff
     have hw := dIncl_apply_section_contMDiff (n := n) (fun x => W x) W.contMDiff
-    -- Flat ambient inner product, pulled back along `ι`.
+
     have hg := flatInner_comp_incl_contMDiff (E := E) (n := n)
-    -- Apply the bilinear (constant flat) bundle map to the two pushforwards.  The result is a
-    -- section of the trivial bundle over the ambient base `E`, with base map `ι`.
+
+
     have h_total : ContMDiff (𝓡 n) (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) ∞
         (fun x : sphere (0 : E) 1 => TotalSpace.mk' ℝ
           (E := Bundle.Trivial E ℝ)
@@ -149,7 +149,7 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
         (w := fun x : sphere (0 : E) 1 =>
           mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x (W x))
         hg hv hw
-    -- Extract the scalar `x ↦ roundInner x (Y x) (W x)`.
+
     have h_scalar : ContMDiff (𝓡 n) 𝓘(ℝ, ℝ) ∞
         (fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x) (W x)) := by
       have h_eq : (fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x) (W x))
@@ -165,7 +165,7 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
       have h_at := h_total x
       rw [contMDiffAt_totalSpace] at h_at
       exact h_at.2
-    -- Lift the scalar to the trivial-bundle section.
+
     intro x
     rw [contMDiffAt_section]
     refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_

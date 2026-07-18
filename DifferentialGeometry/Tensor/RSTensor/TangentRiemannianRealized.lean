@@ -32,14 +32,14 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metric Data on Fibers
 
-This file contains the finite-dimensional pointwise metric interface used by
-the tensor bundle layer.  It does not construct tensor-power metrics by
-choice.  Instead, later files take explicit metric-extension data tied to a
-given Riemannian metric.
--/
+
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -71,13 +71,13 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Tensor-folder alias for a smooth Riemannian metric on `TM`. -/
+
 abbrev SmoothMetric_gen
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
 
-/-- The tangent flat map induced by a smooth Riemannian metric. -/
+
 def tangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
   toFun v := (g.inner x v).toLinearMap
@@ -96,7 +96,7 @@ def tangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     tangentFlatLinear_gen (I := I) g x v w = g.inner x v w := by
   rfl
 
-/-- The tangent flat map is injective by positive-definiteness. -/
+
 theorem tangentFlatLinear_injective_gen
     (g : SmoothMetric_gen I M) (x : M) :
     Function.Injective (tangentFlatLinear_gen (I := I) g x) := by
@@ -115,7 +115,7 @@ theorem tangentFlatLinear_injective_gen
   have hpos : 0 < g.inner x (v - w) (v - w) := g.pos x (v - w) hvw_ne
   exact (lt_irrefl (0 : Real)) ((hzero (v - w)) ▸ hpos)
 
-/-- The tangent flat equivalence induced by a smooth Riemannian metric. -/
+
 def tangentFlatEquiv_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentSpace I x ≃ₗ[Real] Module.Dual Real (TangentSpace I x) :=
   LinearMap.linearEquivOfInjective
@@ -129,17 +129,17 @@ def tangentFlatEquiv_gen (g : SmoothMetric_gen I M) (x : M) :
     tangentFlatEquiv_gen (I := I) g x v w = g.inner x v w := by
   rfl
 
-/-- Explicit pointwise metric data on `T_x M` tied to the Riemannian metric `g`.
 
-This is an interface, not an existence theorem.  The eventual construction
-should fill `metric` with the flat map induced by `g.inner`. -/
+
+
+
 structure TangentMetricData_gen
     (g : SmoothMetric_gen I M) (x : M) where
   metric : MetricFiberData (TangentSpace I x)
   realizes_inner : forall X Y : TangentSpace I x,
     metric.inner X Y = g.inner x X Y
 
-/-- The tangent metric data constructed from the Riemannian metric. -/
+
 def tangentMetricData_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentMetricData_gen (I := I) g x where
   metric :=

@@ -21,10 +21,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-variable {g : SmoothRiemannianMetric I M}
+variable {g : SmoothRiemannianMetric I M} {r s₀ : ℕ}
 
-private lemma lambda_mul_tensorSobolevWeight
-    (i : TensorEigenIdx (I := I) (M := M) g 0 2) (σ : ℝ) :
+lemma lambda_mul_tensorSobolevWeight
+    (i : TensorEigenIdx (I := I) (M := M) g r s₀) (σ : ℝ) :
     TensorEigenIdx.lambda (I := I) (M := M) i *
         tensorSobolevWeight (I := I) (M := M) i σ =
       tensorSobolevWeight (I := I) (M := M) i (σ + 1) -
@@ -36,13 +36,13 @@ private lemma lambda_mul_tensorSobolevWeight
   ring
 
 noncomputable def galerkinEnergy
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) (t : ℝ) : ℝ :=
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) (t : ℝ) : ℝ :=
   ∑ i ∈ s, tensorSobolevWeight (I := I) (M := M) i σ * (u t i) ^ 2
 
 lemma galerkinEnergy_nonneg
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) (t : ℝ) :
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) (t : ℝ) :
     0 ≤ galerkinEnergy (I := I) (M := M) s u σ t := by
   unfold galerkinEnergy
   refine Finset.sum_nonneg (fun i _ => ?_)
@@ -51,18 +51,18 @@ lemma galerkinEnergy_nonneg
   positivity
 
 lemma galerkinEnergy_continuousOn
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) {J : Set ℝ}
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) {J : Set ℝ}
     (hu : ∀ i ∈ s, ContinuousOn (fun t => u t i) J) :
     ContinuousOn (galerkinEnergy (I := I) (M := M) s u σ) J := by
   unfold galerkinEnergy
   refine continuousOn_finset_sum s (fun i hi => ?_)
   exact continuousOn_const.mul ((hu i hi).pow 2)
 
-private lemma galerkinEnergy_hasDerivWithinAt
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
-    (du : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) {t : ℝ}
+lemma galerkinEnergy_hasDerivWithinAt
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ)
+    (du : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) {t : ℝ}
     (hu : ∀ i ∈ s,
       HasDerivWithinAt (fun s => u s i) (du t i) (Set.Ici t) t) :
     HasDerivWithinAt (galerkinEnergy (I := I) (M := M) s u σ)
@@ -77,10 +77,10 @@ private lemma galerkinEnergy_hasDerivWithinAt
   have := hsq.const_mul (tensorSobolevWeight (I := I) (M := M) i σ)
   simpa [pow_one] using this
 
-private theorem galerkinEnergy_deriv_identity
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
-    (F : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) (t : ℝ) :
+theorem galerkinEnergy_deriv_identity
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ)
+    (F : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) (t : ℝ) :
     (∑ i ∈ s, tensorSobolevWeight (I := I) (M := M) i σ *
         (2 * u t i *
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * u t i + F t i))) =
@@ -106,9 +106,9 @@ private theorem galerkinEnergy_deriv_identity
     Finset.sum_add_distrib]
 
 theorem galerkinEnergy_hasDerivWithinAt_ode
-    (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
-    (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
-    (F : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) {t : ℝ}
+    (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
+    (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ)
+    (F : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) {t : ℝ}
     (hu : ∀ i ∈ s,
       HasDerivWithinAt (fun s => u s i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * u t i + F t i)
@@ -218,9 +218,9 @@ theorem energy_hierarchy_explicit_bound_perScale
     _ ≤ gronwallBound (B0 k) (C k + 1) ((seed k) ^ 2 / 4) T := hmono
 
 theorem galerkin_energy_uniform_bound_perScale
-    {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ}
-    {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ}
-    {sseq : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g 0 2)}
+    {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {sseq : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g r s₀)}
     {T σ₀ Cδ : ℝ} {Cmid seed B0 : ℕ → ℝ}
     (hCδ : Cδ < 2) (hCmid : ∀ k, 0 ≤ Cmid k)
     (hcont : ∀ N, ∀ i ∈ sseq N,
@@ -295,9 +295,9 @@ theorem galerkin_energy_uniform_bound_perScale
   exact hkey N k t ht
 
 theorem galerkin_energy_uniform_bound
-    {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ}
-    {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ}
-    {sseq : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g 0 2)}
+    {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {sseq : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g r s₀)}
     {T σ₀ Cδ Cmid : ℝ} {seed B0 : ℕ → ℝ}
     (hCδ : Cδ < 2) (hCmid : 0 ≤ Cmid)
     (hcont : ∀ N, ∀ i ∈ sseq N,

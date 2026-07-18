@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Basic
 
-/-!
-# Mixed tensor coordinate input expansion
 
-Hom-input expansion and scalar product-rule bridges for coordinate-frame mixed
-tensor components.
--/
+
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -80,11 +80,11 @@ private theorem coordinateFrameAt_basis_repr_eq_trivializationAt
   ext i
   exact (congrFun (e.repr_sum_self (fun i => b.repr v i)) i).symm
 
-/-- On the coordinate-frame domain, the fixed tensor-bundle basis section
-`Tensor0SSpace.constInChart` is the basis tensor of the coordinate local frame.
 
-This is the local-frame/trivialization normalization needed by the mixed
-upper-slot contraction product rule. -/
+
+
+
+
 theorem constInChart_basisTensor0S_coordFrame {r : ℕ}
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (upper : Fin r -> CoordinateIdx (𝕜 := 𝕜) E) :
@@ -120,12 +120,12 @@ private theorem coordFrameRSComp_at {r s : ℕ}
       coordComponentRSAt (I := I) (T x₀) upper lower := by
   rfl
 
-/-- Coordinate-frame expansion of evaluating a mixed tensor field on a
-covariant input field.
 
-Near `x₀`, the lower coordinate-frame component of `T θ` is the finite
-contraction of the coordinate-frame components of `θ` with the fixed-chart
-mixed components of `T`. -/
+
+
+
+
+
 theorem applyInput_coordFrame_eventually {r s : ℕ}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
@@ -230,13 +230,13 @@ theorem tensorRS_eval_constInChart_coordinateFrame_contMDiffAt {r s : ℕ}
       (T := fun p : M => T p) (β := βsec)
       (V := fun b : Fin s => coordinateFrameAt (I := I) x₀ (lower b)) x₀ hT hβ hV
 
-/-- Coordinate derivative product rule for evaluating a mixed tensor field on a
-covariant input field.
 
-This is the first-product producer for upper-slot contractions: differentiating
-the coordinate component of `T θ` is the sum of the differentiated probe
-components times the mixed tensor components, plus the probe components times
-the differentiated mixed tensor components. -/
+
+
+
+
+
+
 theorem coordDeriv0SAt_applyInput_eq_sum {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

@@ -11,14 +11,14 @@ import Mathlib.Topology.MetricSpace.Pseudo.Basic
 
 set_option autoImplicit false
 
-/-!
-# Compact-open C∞ convergence of Euclidean maps
 
-This is the canonical analysis-layer home of the map convergence predicates used
-by the HCG compactness construction. It contains only the generic definitions
-and elementary restriction, subsequence, and uniform-convergence bridges.
-Arzelà–Ascoli extraction remains in the Ricci-flow compactness layer.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -31,9 +31,9 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- The Euclidean pointwise quantity `|∇ʳ(Φₖ - Φ_∞)(x)|` from the MSM135
-"`C^p`-convergence of maps" definition: the operator norm of the `r`-th Fréchet
-derivative of the difference `Φₖ - Φ_∞`, with `∇` the Euclidean gradient. -/
+
+
+
 noncomputable def mapDerivNorm (r : ℕ) (Φk Φinf : E → F) (x : E) : ℝ :=
   ‖iteratedFDeriv ℝ r (fun y => Φk y - Φinf y) x‖
 
@@ -41,23 +41,23 @@ theorem mapDerivNorm_nonneg (r : ℕ) (Φk Φinf : E → F) (x : E) :
     0 ≤ mapDerivNorm r Φk Φinf x :=
   norm_nonneg _
 
-/-- MSM135 Definition "`C^p`-convergence of maps": `Φₖ → Φ_∞` in `C^p` on the
-compact set `K`.  For every `ε > 0` there is a threshold `k₀` past which all
-derivatives up to order `p` of `Φₖ - Φ_∞` are uniformly `≤ ε` on `K`. -/
+
+
+
 def MapCPConvOn (K : Set E) (p : ℕ) (Φ : ℕ → E → F) (Φinf : E → F) : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k →
     ∀ r : ℕ, r ≤ p → ∀ x ∈ K, mapDerivNorm r (Φ k) Φinf x ≤ ε
 
-/-- MSM135 Definition "`C^∞`-convergence of maps uniformly on compact sets"
-(`lbl373`): on every compact `K ⊆ U`, the sequence converges in `C^p` for every
-finite order `p`.  (The book's per-`(K,p)` threshold `k₁` is absorbed into the
-`∃ k₀` already inside `MapCPConvOn`, since a tail of a `C^p`-convergent sequence is
-`C^p`-convergent to the same limit.) -/
+
+
+
+
+
 def MapCInfConvOnCompacts (U : Set E) (Φ : ℕ → E → F) (Φinf : E → F) : Prop :=
   ∀ K : Set E, IsCompact K → K ⊆ U → ∀ p : ℕ, MapCPConvOn K p Φ Φinf
 
-/-- `C^p` convergence is monotone in the order: convergence to order `p` forces
-convergence to every lower order `p' ≤ p` (fewer derivatives to control). -/
+
+
 theorem MapCPConvOn.mono_order {K : Set E} {p p' : ℕ} (hp : p' ≤ p)
     {Φ : ℕ → E → F} {Φinf : E → F} (h : MapCPConvOn K p Φ Φinf) :
     MapCPConvOn K p' Φ Φinf := by
@@ -65,7 +65,7 @@ theorem MapCPConvOn.mono_order {K : Set E} {p p' : ℕ} (hp : p' ≤ p)
   obtain ⟨k0, hk0⟩ := h ε hε
   exact ⟨k0, fun k hk r hr x hx => hk0 k hk r (hr.trans hp) x hx⟩
 
-/-- `C^p` convergence on a set restricts to any subset. -/
+
 theorem MapCPConvOn.mono_set {K K' : Set E} (hK : K' ⊆ K) {p : ℕ}
     {Φ : ℕ → E → F} {Φinf : E → F} (h : MapCPConvOn K p Φ Φinf) :
     MapCPConvOn K' p Φ Φinf := by
@@ -73,15 +73,15 @@ theorem MapCPConvOn.mono_set {K K' : Set E} (hK : K' ⊆ K) {p : ℕ}
   obtain ⟨k0, hk0⟩ := h ε hε
   exact ⟨k0, fun k hk r hr x hx => hk0 k hk r hr x (hK hx)⟩
 
-/-- The `C^∞`-on-compacts limit converges in `C^p` on every compact subset of the
-domain — the elementary projection that consumers use to extract a single
-`MapCPConvOn` instance. -/
+
+
+
 theorem MapCInfConvOnCompacts.cPConvOn {U : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf) {K : Set E} (hK : IsCompact K)
     (hKU : K ⊆ U) (p : ℕ) : MapCPConvOn K p Φ Φinf :=
   h K hK hKU p
 
-/-- `C^p` convergence passes to any subsequence (the condition is asymptotic in `k`). -/
+
 theorem MapCPConvOn.comp_subseq {K : Set E} {p : ℕ} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCPConvOn K p Φ Φinf) {φ : ℕ → ℕ} (hφ : StrictMono φ) :
     MapCPConvOn K p (fun k => Φ (φ k)) Φinf := by
@@ -89,14 +89,14 @@ theorem MapCPConvOn.comp_subseq {K : Set E} {p : ℕ} {Φ : ℕ → E → F} {Φ
   obtain ⟨k0, hk0⟩ := h ε hε
   exact ⟨k0, fun k hk r hr x hx => hk0 (φ k) (le_trans hk (hφ.id_le k)) r hr x hx⟩
 
-/-- `C^∞`-on-compacts convergence passes to any subsequence. -/
+
 theorem MapCInfConvOnCompacts.comp_subseq {U : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf) {φ : ℕ → ℕ} (hφ : StrictMono φ) :
     MapCInfConvOnCompacts U (fun k => Φ (φ k)) Φinf :=
   fun K hK hKU p => (h K hK hKU p).comp_subseq hφ
 
-/-- The order-`0` content of `C^p` convergence on `K` is plain uniform convergence on `K`
-(`∇⁰` is the value itself, `norm_iteratedFDeriv_zero`). -/
+
+
 theorem tendstoUniformlyOn_of_cPConv {K : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCPConvOn K 0 Φ Φinf) : TendstoUniformlyOn Φ Φinf atTop K := by
   rw [Metric.tendstoUniformlyOn_iff]
@@ -109,8 +109,8 @@ theorem tendstoUniformlyOn_of_cPConv {K : Set E} {Φ : ℕ → E → F} {Φinf :
   rw [dist_eq_norm, norm_sub_rev]
   exact lt_of_le_of_lt hb (by linarith)
 
-/-- Pointwise convergence at a domain point, extracted from `C^∞`-on-compacts convergence
-(apply the order-`0` content at the singleton `{x}`). -/
+
+
 theorem tendsto_of_cInf {U : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (h : MapCInfConvOnCompacts U Φ Φinf) {x : E} (hx : x ∈ U) :
     Tendsto (fun k => Φ k x) atTop (𝓝 (Φinf x)) := by
@@ -124,11 +124,11 @@ theorem tendsto_of_cInf {U : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
   rw [dist_eq_norm]
   exact lt_of_le_of_lt hb (by linarith)
 
-/-- **Bridge to the uniform-convergence engine.**  If every Euclidean derivative
-`∇ʳΦₖ` of order `r ≤ p` converges uniformly on `K` to `∇ʳΦ_∞` (the natural output of
-an Arzelà–Ascoli extraction), then `Φₖ → Φ_∞` in `C^p` on `K`.  The `C^p` smoothness
-hypotheses let `∇ʳ` commute with the difference (`iteratedFDeriv_sub_apply`), turning
-`∇ʳΦₖ → ∇ʳΦ_∞` into `∇ʳ(Φₖ - Φ_∞) → 0`. -/
+
+
+
+
+
 theorem mapCPConvOn_of_tendstoUniformly {K : Set E} {p : ℕ}
     {Φ : ℕ → E → F} {Φinf : E → F}
     (hΦ : ∀ k, ContDiff ℝ (p : ℕ∞) (Φ k)) (hΦinf : ContDiff ℝ (p : ℕ∞) Φinf)

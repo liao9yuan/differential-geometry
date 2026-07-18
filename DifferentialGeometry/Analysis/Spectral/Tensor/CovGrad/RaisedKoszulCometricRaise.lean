@@ -120,8 +120,8 @@ lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcT
     simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply,
-      
-      
+
+
 ]
     rfl
   rw [hlin, hperm, hperm, hperm]

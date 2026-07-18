@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
 
 noncomputable section
@@ -163,22 +164,58 @@ lemma leviCivitaStitched_isCovariantDerivativeOn_univ
 
 def LeviCivita (g : SmoothRiemannianMetric I M) :
     CovariantDerivative I E (TangentSpace I : M → Type _) :=
-  CovariantDerivative.of_isCovariantDerivativeOn_of_open_cover
-    (s := fun α : M => chartLeviCivitaGoodSet (I := I) α)
-    (cov := leviCivitaStitched (I := I) g)
-    (fun α => leviCivitaStitched_isCovariantDerivativeOn (I := I) g α)
-    (iUnion_chartLeviCivitaGoodSet (I := I) (M := M))
+  leviCivitaConnectionOfMetric (I := I) g
 
-@[simp] lemma LeviCivita_toFun (g : SmoothRiemannianMetric I M) :
-    (LeviCivita (I := I) g).toFun = leviCivitaStitched (I := I) g := rfl
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+
+
+theorem LeviCivita_eq_leviCivitaConnectionOfMetric (g : SmoothRiemannianMetric I M) :
+    LeviCivita (I := I) g = leviCivitaConnectionOfMetric (I := I) g := rfl
 
 theorem LeviCivita_chart_apply (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
     {σ : Π x : M, TangentSpace I x} (hσ : MDiffAt (T% σ) x)
     (v : TangentSpace I x) :
     (LeviCivita (I := I) g).toFun σ x v = chartLeviCivita (I := I) g α σ x v := by
-  rw [LeviCivita_toFun]
-  exact leviCivitaStitched_eq_chart (I := I) g α hx hσ v
+  classical
+  obtain ⟨X, hXx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+    (F := E) (V := (TangentSpace I : M → Type _)) x v
+  have hX : MDiffAt (T% fun y => X y) x := X.mdifferentiableAt
+  set s : Set M := {x} with hs
+  have hxs : x ∈ s := rfl
+  have htor0 : (leviCivitaConnectionOfMetric (I := I) g).torsion = 0 :=
+    funext fun y => leviCivitaConnectionOfMetric_isTorsionFree (I := I) g y
+  have hTF₁ : ∀ ⦃A B : Π y : M, TangentSpace I y⦄ ⦃y : M⦄,
+      MDiffAt (T% A) y → MDiffAt (T% B) y → y ∈ s →
+      (leviCivitaConnectionOfMetric (I := I) g).toFun B y (A y) -
+        (leviCivitaConnectionOfMetric (I := I) g).toFun A y (B y) =
+        VectorField.mlieBracket I A B y := by
+    intro A B y hA hB _
+    exact (CovariantDerivative.torsion_eq_zero_iff
+      (leviCivitaConnectionOfMetric (I := I) g)).mp htor0 hA hB
+  have hTF₂ : ∀ ⦃A B : Π y : M, TangentSpace I y⦄ ⦃y : M⦄,
+      MDiffAt (T% A) y → MDiffAt (T% B) y → y ∈ s →
+      chartLeviCivita (I := I) g α B y (A y) -
+        chartLeviCivita (I := I) g α A y (B y) =
+        VectorField.mlieBracket I A B y := by
+    intro A B y hA hB hy
+    have hyx : y = x := hy
+    subst hyx
+    exact chartLeviCivita_torsion_free_on (I := I) g α hA hB hx
+  have hMC₁ : IsMetricCompatibleOn (leviCivitaConnectionOfMetric (I := I) g).toFun g s := by
+    intro Y Z y hY hZ _ v
+    obtain ⟨W, hWy⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) y v
+    have hW : MDiffAt (T% fun b => W b) y := W.mdifferentiableAt
+    have hgen := leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g y W Y Z hW hY hZ
+    rw [hWy] at hgen
+    exact hgen
+  have hMC₂ : IsMetricCompatibleOn (chartLeviCivita (I := I) g α) g s :=
+    (chartLeviCivita_isMetricCompatibleOn (I := I) g α).mono
+      (by intro y hy; have : y = x := hy; subst this; exact hx)
+  have hloc :=
+    koszul_local_uniqueness (s := s) hTF₁ hTF₂ hMC₁ hMC₂ hX hσ hxs
+  simpa [hXx] using hloc
 
 theorem LeviCivita_torsion_eq_zero (g : SmoothRiemannianMetric I M) :
     (LeviCivita (I := I) g).torsion = 0 := by

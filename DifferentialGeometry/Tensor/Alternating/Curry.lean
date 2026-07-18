@@ -1,9 +1,9 @@
-/-
-Copyright (c) 2024 Yury Kudryashov. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yury Kudryashov
-Coauthors: Jack McCarthy
--/
+
+
+
+
+
+
 import DifferentialGeometry.Tensor.Alternating.Flip
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Congr
@@ -339,7 +339,7 @@ theorem lift_comp_domCoprod_eq_uncurrySum
   simp only [AlternatingMap.domCoprod.summand_mk'', uncurrySum.summand_mk'',
     MultilinearMap.smul_apply, MultilinearMap.domDomCongr_apply, MultilinearMap.domCoprod_apply,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    ContinuousMultilinearMap.uncurrySum_apply, 
+    ContinuousMultilinearMap.uncurrySum_apply,
     Function.comp_def]
   simp only [ContinuousMultilinearMap.flipMultilinear_apply,
     coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,

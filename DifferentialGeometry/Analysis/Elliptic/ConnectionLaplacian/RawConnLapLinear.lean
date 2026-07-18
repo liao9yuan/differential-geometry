@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 
-/-!
-# Linear raw connection Laplacian on smooth tensor sections
 
-This file packages the bundled raw connection Laplacian as a linear map on
-smooth compactly-supported tensor sections.  It is the section-level producer
-used before any `L²` realization or unbounded-operator construction.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,8 +36,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- The raw connection Laplacian as a linear endomorphism of smooth,
-compactly-supported `(r, s)`-tensor sections. -/
+
+
 noncomputable def rawConnLapLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →ₗ[ℝ] SmoothCcTensor g r s where
@@ -116,7 +116,7 @@ noncomputable def rawConnLapLin
     exact hsmul
 
 set_option linter.unusedSectionVars false in
-/-- Evaluating `rawConnLapLin` gives the bundled raw connection Laplacian. -/
+
 @[simp] theorem rawConnLapLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawConnLapLin (I := I) g r s T =

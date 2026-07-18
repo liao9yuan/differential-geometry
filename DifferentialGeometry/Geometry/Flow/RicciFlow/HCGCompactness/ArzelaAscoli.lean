@@ -10,21 +10,21 @@ import Mathlib.Topology.UniformSpace.Real
 
 set_option autoImplicit false
 
-/-!
-# Sequential Arzela-Ascoli For Compact Convergence
 
-This file packages Mathlib's set-compactness form of Arzela-Ascoli into the
-sequential form used in MSM135 Lemma 3.14: an equicontinuous, pointwise bounded
-sequence of real-valued continuous maps on a locally compact sigma-compact
-Hausdorff space has a subsequence converging uniformly on compact sets.
 
-It also provides the vector-valued generalization (target a proper normed group,
-e.g. any finite-dimensional real normed space): the compactness core
-`arzelaAscoli_isCompact_closure` and the sequential extraction
-`arzelaAscoli_subseq_vec`.  These serve the Arzela-Ascoli-for-maps engine of the
-MSM135 Chapter 4 subsection *Compactness of maps* (`MapConvergence.lean`), where
-the targets are spaces of continuous multilinear maps.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -35,10 +35,10 @@ open scoped Topology
 variable {X : Type*} [TopologicalSpace X] [LocallyCompactSpace X]
   [SigmaCompactSpace X] [T2Space X]
 
-/-- Bundled compact-open version of MSM135 Lemma 3.14.
 
-This is the sequential extraction statement before translating compact-open
-convergence into uniform convergence on each compact subset. -/
+
+
+
 theorem arzelaAscoli_subseq_tendsto
     (f : Nat -> C(X, Real))
     (hequi : Equicontinuous (fun k => (f k : X -> Real)))
@@ -118,8 +118,8 @@ theorem arzelaAscoli_subseq_tendsto
   rcases hcompact.tendsto_subseq hmem with ⟨g, _hg, phi, hphi, htendsto⟩
   exact ⟨phi, g, hphi, by simpa [Function.comp_def] using htendsto⟩
 
-/-- MSM135 Lemma 3.14, sequential Arzela-Ascoli as uniform convergence on
-compact subsets. -/
+
+
 theorem arzelaAscoli_subseq_tendstoUniformlyOnCompacts
     (f : Nat -> C(X, Real))
     (hequi : Equicontinuous (fun k => (f k : X -> Real)))
@@ -139,15 +139,15 @@ section VectorTarget
 variable {V : Type*} [NormedAddCommGroup V] [ProperSpace V]
 
 omit [SigmaCompactSpace X] [T2Space X] in
-/-- Arzela-Ascoli compactness core with a vector target: an equicontinuous,
-pointwise norm-bounded sequence of continuous maps from a locally compact space
-into a proper normed group has compact closure in `C(X, V)` (compact-open =
-uniform-on-compacts topology).
 
-This is the `Set.range`-compactness form; combined with sequential compactness of
-`C(X, V)` (metrizable for sigma-compact `X`) it yields `arzelaAscoli_subseq_vec`,
-and it is the per-derivative-order input of the Arzela-Ascoli-for-maps engine
-(`MapConvergence.exists_cInf_subseq`). -/
+
+
+
+
+
+
+
+
 theorem arzelaAscoli_isCompact_closure
     (f : Nat -> C(X, V))
     (hequi : Equicontinuous (fun k => (f k : X -> V)))
@@ -219,9 +219,9 @@ theorem arzelaAscoli_isCompact_closure
       (s := Set.range f) hEq hPoint
 
 omit [T2Space X] in
-/-- Sequential vector Arzela-Ascoli: an equicontinuous, pointwise norm-bounded
-sequence of continuous maps into a proper normed group has a subsequence converging
-uniformly on every compact subset. -/
+
+
+
 theorem arzelaAscoli_subseq_vec
     (f : Nat -> C(X, V))
     (hequi : Equicontinuous (fun k => (f k : X -> V)))

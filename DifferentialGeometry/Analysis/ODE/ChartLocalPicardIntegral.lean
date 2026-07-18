@@ -101,5 +101,31 @@ theorem variational_jacobian_gronwall_bound
       _ ≤ ‖J 0‖ + ∫ r in (0:ℝ)..t, CA * f r := by gcongr
       _ = ‖J 0‖ + CA * ∫ r in (0:ℝ)..t, f r := by rw [hconstmul]
   exact gronwall_integral_le hT (norm_nonneg _) hCA hf_cont hf_nn hf_int
+theorem ode_right_ftc
+    {γ : ℝ → E} {v : ℝ → E} {T : ℝ}
+    (hγcont : ContinuousOn γ (Set.Icc 0 T))
+    (hγderiv : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasDerivWithinAt γ (v t) (Set.Ici t) t)
+    (hvcont : ContinuousOn v (Set.Icc 0 T)) :
+    ∀ s ∈ Set.Icc (0 : ℝ) T, γ s = γ 0 + ∫ r in (0 : ℝ)..s, v r := by
+  intro s hs
+  have hγcont_s : ContinuousOn γ (Set.Icc 0 s) :=
+    hγcont.mono (Set.Icc_subset_Icc le_rfl hs.2)
+  have hderiv_right : ∀ x ∈ Set.Ioo (0 : ℝ) s,
+      HasDerivWithinAt γ (v x) (Set.Ioi x) x := by
+    intro x hx
+    have hxIco : x ∈ Set.Ico (0 : ℝ) T :=
+      ⟨hx.1.le, hx.2.trans_le hs.2⟩
+    exact (hγderiv x hxIco).mono Set.Ioi_subset_Ici_self
+  have hint : IntervalIntegrable v volume 0 s := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hs.1]
+    exact hvcont.mono (Set.Icc_subset_Icc le_rfl hs.2)
+  have hftc : ∫ r in (0 : ℝ)..s, v r = γ s - γ 0 :=
+    intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le hs.1 hγcont_s
+      hderiv_right hint
+  rw [hftc]
+  abel
+
 
 end DifferentialGeometry.Analysis.ODE

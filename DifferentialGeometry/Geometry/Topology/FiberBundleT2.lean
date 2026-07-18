@@ -3,25 +3,25 @@ import Mathlib.Topology.Separation.Hausdorff
 
 set_option autoImplicit false
 
-/-!
-# The total space of a fiber bundle over a Hausdorff base with Hausdorff fiber is Hausdorff
 
-A general-topology fact that Mathlib lacks: for a `FiberBundle F E` with `[T2Space B]` (base) and
-`[T2Space F]` (fiber), the total space `Bundle.TotalSpace F E` is Hausdorff.  Two points with
-different projections are separated by preimages of separating opens of the base; two points over
-the same base point lie in a common trivialization's source (an open embedding into `B × F`, which
-is Hausdorff), and are separated there and pulled back.
 
-The corollary this file exists for: `T2Space (TangentBundle I M)` for a Hausdorff manifold `M`
-(fiber `= E`, a normed space, is `T2`).  This closes MSM135 Step D's `T2Space (TangentBundle I Lim)`
-requirement (`DirectLimitManifold.lean`), which the rest of the tree carries as a hypothesis.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 
 open Bundle Set Topology
 
-/-- **The total space of a fiber bundle over a Hausdorff base with Hausdorff fiber is Hausdorff.** -/
+
 instance FiberBundle.t2Space_totalSpace
     {B F : Type*} [TopologicalSpace B] [TopologicalSpace F]
     {E : B → Type*} [TopologicalSpace (Bundle.TotalSpace F E)] [∀ b, TopologicalSpace (E b)]
@@ -29,7 +29,7 @@ instance FiberBundle.t2Space_totalSpace
     T2Space (Bundle.TotalSpace F E) := by
   refine ⟨fun x y hxy => ?_⟩
   by_cases hproj : (π F E) x = (π F E) y
-  · -- same base point: separate inside a common trivialization
+  ·
     set e := trivializationAt F E ((π F E) x) with he
     have hxs : x ∈ e.source := by
       rw [e.mem_source]; exact mem_baseSet_trivializationAt F E _
@@ -42,7 +42,7 @@ instance FiberBundle.t2Space_totalSpace
       e.toOpenPartialHomeomorph.isOpen_inter_preimage hV,
       ⟨hxs, hxU⟩, ⟨hys, hyV⟩, ?_⟩
     exact (hUV.preimage e).mono inter_subset_right inter_subset_right
-  · -- different base points: pull back separating opens of the base
+  ·
     obtain ⟨U, V, hU, hV, hxU, hyV, hUV⟩ := t2_separation hproj
     refine ⟨(π F E) ⁻¹' U, (π F E) ⁻¹' V,
       hU.preimage (FiberBundle.continuous_proj F E),

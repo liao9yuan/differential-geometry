@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Calculus.Cutoff
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 
-/-!
-# Smooth time slices of an exact ODE family
 
-This file propagates smooth dependence on initial data along a compact time
-interval.  The local input is the existing smooth Picard flow; compactness of
-one reference orbit supplies a uniform restart window.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -21,9 +21,9 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- Two solutions of a `C¹` autonomous ODE that meet inside an open interval
-agree throughout that interval when one reference orbit remains in the open
-smoothness domain of the field. -/
+
+
+
 theorem orbit_unique_on
     {Ω : Set E} (hΩ : IsOpen Ω)
     {v : E → E} (hv : ContDiffOn ℝ 1 v Ω)
@@ -72,8 +72,8 @@ theorem orbit_unique_on
       hfEventually hgEventually hfg
     exact (heq.and htime).mono fun _ h ↦ ⟨h.1, h.2⟩
 
-/-- Two solutions of a `C¹` autonomous ODE that meet inside an open interval
-agree throughout that interval. -/
+
+
 theorem orbit_unique_smooth
     {v : E → E} (hv : ContDiff ℝ 1 v)
     {f g : ℝ → E} {a b t₀ : ℝ} (ht₀ : t₀ ∈ Ioo a b)
@@ -89,8 +89,8 @@ section UniformRestart
 variable [CompleteSpace E] [FiniteDimensional ℝ E]
 
 omit [CompleteSpace E] in
-/-- Two integral curves of a globally smooth autonomous field that agree at
-the left endpoint agree on the whole closed interval. -/
+
+
 theorem orbit_unique_Icc
     {v : E → E} (hv : ContDiff ℝ ∞ v)
     {f g : ℝ → E} {a b : ℝ}
@@ -163,9 +163,9 @@ theorem orbit_unique_Icc
     exact Set.eqOn_empty f g
 
 omit [CompleteSpace E] in
-/-- Two integral curves of a smooth autonomous field on an open domain that
-agree at the left endpoint agree on the whole closed interval, provided both
-curves remain in the domain. -/
+
+
+
 theorem orbit_unique_Icc_on
     {Ω : Set E} (hΩ : IsOpen Ω)
     {v : E → E} (hv : ContDiffOn ℝ ∞ v Ω)
@@ -201,8 +201,8 @@ theorem orbit_unique_Icc_on
     simpa only [w, hχg, one_smul] using hg t ht
   exact orbit_unique_Icc hw hfw hgw h₀
 
-/-- A smooth autonomous field has one positive restart window over any compact
-set of possible anchor points. -/
+
+
 theorem exists_uniform_flow
     {v : E → E} (hv : ContDiff ℝ ∞ v) {K : Set E} (hK : IsCompact K) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ y ∈ K,
@@ -258,8 +258,8 @@ theorem exists_uniform_flow
     simpa using ((hΨ p).hasDerivWithinAt z hz' t (Ioo_subset_Icc_self ht')).hasDerivAt
       (Icc_mem_nhds ht'.1 ht'.2)
 
-/-- A smooth autonomous field on an open domain has a common positive restart
-window over a compact set.  The returned local flows remain in the domain. -/
+
+
 theorem exists_flow_on
     {Ω : Set E} (hΩ : IsOpen Ω)
     {v : E → E} (hv : ContDiffOn ℝ ∞ v Ω)
@@ -353,9 +353,9 @@ theorem exists_flow_on
           ((hετ p hp).trans (min_le_left _ _ |>.trans (half_le_self (hδ p).le)))
     exact hLΩ (interior_subset (hball p hpair))
 
-/-- Smooth dependence on an arbitrary initial parameter map propagates forward
-to every time slice of a closed interval for an autonomous field smooth on an
-open domain, provided the selected curves remain in that domain. -/
+
+
+
 theorem flow_slice_right_on
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -488,9 +488,9 @@ theorem flow_slice_right_on
   rw [hgrid_N] at htargetSmooth
   exact htargetSmooth.contDiffWithinAt
 
-/-- A selected family of autonomous integral curves is jointly smooth in its
-parameter and time variables on a closed forward interval when the field is
-smooth on an open domain containing every selected curve. -/
+
+
+
 theorem flow_joint_right_on
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -586,9 +586,9 @@ theorem flow_joint_right_on
       ⟨hs₀s, le_rfl⟩
   exact hcand.contDiffWithinAt.congr_of_eventuallyEq_of_mem heq.symm ⟨hx, ht⟩
 
-/-- Smooth dependence on an arbitrary initial parameter map propagates forward
-to every time slice of a closed interval for a globally smooth autonomous
-field. -/
+
+
+
 theorem flow_slice_right
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {v : E → E} (hv : ContDiff ℝ ∞ v)
@@ -603,9 +603,9 @@ theorem flow_slice_right
   exact flow_slice_right_on isOpen_univ hv.contDiffOn hA ha₀ hγ
     (fun _ _ _ _ => mem_univ _)
 
-/-- Smooth dependence on an arbitrary initial parameter map for a
-time-dependent field smooth on an open space-time domain, obtained by
-autonomizing the time variable. -/
+
+
+
 theorem ode_slice_right_on
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {J : Set ℝ} (hJ : IsOpen J)
@@ -647,9 +647,9 @@ theorem ode_slice_right_on
   exact (flow_slice_right_on (E := ℝ × E) (hJ.prod hV) hw hA haAug hγAug
     hstayAug t ht).snd
 
-/-- An arbitrary selected family of exact solutions of a smooth
-time-dependent ODE is jointly smooth in its parameter and time variables when
-all selected curves remain in the open field domain. -/
+
+
+
 theorem contDiffOn_solutionFamily_of_stays
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {J : Set ℝ} (hJ : IsOpen J)
@@ -689,8 +689,8 @@ theorem contDiffOn_solutionFamily_of_stays
     hγAug hstayAug
   simpa only [γAug, uncurry_apply_pair] using haug.snd
 
-/-- Smooth dependence on an arbitrary initial parameter map for a globally
-smooth time-dependent field, obtained by autonomizing the time variable. -/
+
+
 theorem ode_slice_right
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {v : ℝ → E → E}
@@ -706,9 +706,9 @@ theorem ode_slice_right
   exact ode_slice_right_on isOpen_univ isOpen_univ hv.contDiffOn hA
     (subset_univ _) ha₀ hγ (fun _ _ _ _ => mem_univ _)
 
-/-- If a family consists of exact trajectories of a smooth autonomous field
-on a common compact time interval and is the identity at one interior time,
-then every interior time slice depends smoothly on the initial point. -/
+
+
+
 theorem flow_slice_smooth
     {v : E → E} (hv : ContDiff ℝ ∞ v)
     {D : Set E} (hD : IsOpen D) {a b t₀ : ℝ} (ht₀ : t₀ ∈ Ioo a b)

@@ -26,9 +26,9 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-/-!
-# Local scalar derivation formulas for tensor nabla
--/
+
+
+
 namespace Tensor0SBundle
 
 open Bundle Set TensorLieDeriv
@@ -1176,13 +1176,13 @@ theorem nablaRSFun_sub_raw {r s : ℕ}
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Pointwise moving-slot derivation formula for `nabla0SFun` in arbitrary
-covariant valence.
 
-This is the `(0,s)` version of
-`nabla0SFun_one_eval_coordFrame_moving_raw`. The hypotheses are deliberately
-local: the moving slots only need the fixed-chart model differentiability needed
-by the product rule and the vector-field covariant-derivative chart formula. -/
+
+
+
+
+
+
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

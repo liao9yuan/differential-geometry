@@ -690,6 +690,53 @@ theorem chartRepAtBase_differentiableAt [I.Boundaryless]
       (fun s => chartTransitionAt (I := I) α β (uα s) (repα s)) t :=
     hAcomp_diff.clm_apply hrepα_hd.differentiableAt
   exact hdiff.congr_of_eventuallyEq hrepβ_eq
+lemma chartRepAt_sum {ι : Type*} (s : Finset ι) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) :
+    chartRepAt (I := I) γ (fun u => ∑ i ∈ s, V i u) t =
+      fun u => ∑ i ∈ s, chartRepAt (I := I) γ (V i) t u := by
+  funext u
+  simp [chartRepAt, map_sum]
+
+theorem covDerivAlong_sum {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (s : Finset ι) (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
+    (hV : ∀ i ∈ s, DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t) :
+    covDerivAlong (I := I) g γ (fun u => ∑ i ∈ s, V i u) t =
+      ∑ i ∈ s, covDerivAlong (I := I) g γ (V i) t := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      have h0 : (fun u => ∑ i ∈ (∅ : Finset ι), V i u)
+          = fun u => (0 : TangentSpace I (γ u)) := by
+        funext u; simp
+      rw [h0, covDerivAlong_zero, Finset.sum_empty]
+  | insert i s hi ih =>
+      have hVi := hV i (Finset.mem_insert_self i s)
+      have hVtail : ∀ j ∈ s, DifferentiableAt ℝ (chartRepAt (I := I) γ (V j) t) t :=
+        fun j hj => hV j (Finset.mem_insert_of_mem hj)
+      have hVs : DifferentiableAt ℝ
+          (chartRepAt (I := I) γ (fun u => ∑ j ∈ s, V j u) t) t := by
+        rw [chartRepAt_sum]
+        exact DifferentiableAt.fun_sum hVtail
+      have hsplit : (fun u => ∑ j ∈ insert i s, V j u)
+          = fun u => V i u + ∑ j ∈ s, V j u := by
+        funext u; rw [Finset.sum_insert hi]
+      rw [hsplit, covDerivAlong_add g γ _ _ t hVi hVs, ih hVtail,
+        Finset.sum_insert hi]
+
+theorem covDerivAlong_expand {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (s : Finset ι) (y : ι → ℝ → ℝ) (F : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
+    (hy : ∀ i ∈ s, DifferentiableAt ℝ (y i) t)
+    (hF : ∀ i ∈ s, DifferentiableAt ℝ (chartRepAt (I := I) γ (F i) t) t)
+    (hpar : ∀ i ∈ s, covDerivAlong (I := I) g γ (F i) t = 0) :
+    covDerivAlong (I := I) g γ (fun u => ∑ i ∈ s, y i u • F i u) t =
+      ∑ i ∈ s, deriv (y i) t • F i t := by
+  rw [covDerivAlong_sum g γ s (fun i u => y i u • F i u) t (fun i hi => by
+    rw [chartRepAt_smulFun]
+    exact (hy i hi).smul (hF i hi))]
+  refine Finset.sum_congr rfl fun i hi => ?_
+  rw [covDerivAlong_smulFun g γ (y i) (F i) t (hy i hi) (hF i hi), hpar i hi,
+    smul_zero, add_zero]
+
 
 end CovariantDerivativeAlong
 

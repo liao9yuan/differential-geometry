@@ -1058,6 +1058,72 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     _ ≤ Real.sqrt (Ktot * (1 + H ^ 2)) := Real.sqrt_le_sqrt hnorm_sq
     _ = Real.sqrt Ktot * Real.sqrt (1 + H ^ 2) := Real.sqrt_mul hKtot_nn _
     _ ≤ Real.sqrt Ktot * (1 + H) := mul_le_mul_of_nonneg_left hsqrt_le (Real.sqrt_nonneg _)
+set_option linter.unusedSectionVars false in
+
+
+theorem appCc_jet_l2Sq_le
+    (g : SmoothRiemannianMetric I M) (b c j : ℕ)
+    (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (K : ℕ → ℝ)
+    (hK : ∀ i, i ≤ j → 0 ≤ K i)
+    (hΦ : ∀ i, i ≤ j → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+          ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ K i) :
+    ‖iteratedCovGrad (I := I) g 0 c j
+        (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      diagonalGridGrowthFactor (E := E) j *
+        ∑ i ∈ Finset.range (j + 1), K i *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  set F : M → ℝ := fun x => diagonalGridGrowthFactor (E := E) j *
+    ∑ i ∈ Finset.range (j + 1), K i *
+      ∑ l ∈ Finset.range (j + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+          ((iteratedCovGrad (I := I) g 0 b l W).toSection x) with hF_def
+  have hF_int : MeasureTheory.Integrable F μ := by
+    rw [hF_def]
+    exact (MeasureTheory.integrable_finset_sum (Finset.range (j + 1)) (fun i _ =>
+      (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i)) (fun l _ =>
+        integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
+          (iteratedCovGrad (I := I) g 0 b l W))).const_mul (K i))).const_mul _
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
+          ((iteratedCovGrad (I := I) g 0 c j
+            (operatorFieldApply (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+    intro x
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le
+        (I := I) (M := M) g b c Φ W j x) ?_
+    rw [hF_def]
+    refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hij : i ≤ j := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    exact mul_le_mul (hΦ i hij x) le_rfl
+      (Finset.sum_nonneg (fun l _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (b + l) x _)) (hK i hij)
+  have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g 0 (c + j)
+    (iteratedCovGrad (I := I) g 0 c j
+      (operatorFieldApply (I := I) (M := M) g b c Φ W)) F hF_int hpt
+  refine le_trans hnorm (le_of_eq ?_)
+  rw [hF_def, MeasureTheory.integral_const_mul,
+    MeasureTheory.integral_finset_sum (Finset.range (j + 1)) (fun i _ =>
+      (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i)) (fun l _ =>
+        integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
+          (iteratedCovGrad (I := I) g 0 b l W))).const_mul (K i))]
+  apply congrArg (fun z : ℝ => diagonalGridGrowthFactor (E := E) j * z)
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [MeasureTheory.integral_const_mul,
+    MeasureTheory.integral_finset_sum (Finset.range (j + 1 - i)) (fun l _ =>
+      integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
+        (iteratedCovGrad (I := I) g 0 b l W))]
+  apply congrArg (fun z : ℝ => K i * z)
+  exact Finset.sum_congr rfl (fun l _ => by
+    rw [SmoothCcTensor.norm_def,
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+        (I := I) (M := M) g 0 (b + l)])
+
 
 end DifferentialGeometry.Integral.Connection
 

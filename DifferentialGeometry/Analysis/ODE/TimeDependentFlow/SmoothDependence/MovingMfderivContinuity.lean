@@ -1,21 +1,21 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
-/-!
-# Time-continuity of the moving spatial differential of a jointly-smooth flow
 
-For a flow `Φg : M → ℝ → M` that is jointly `C∞` in `(time, point)` on an open
-slab `O ×ˢ univ`, the moving spatial differential at a fixed seed `(y, u)` —
-packaged inside the tangent bundle as `s ↦ ⟨Φg y s, mfderiv (Φg · s) y u⟩` — is
-continuous in time at each `s₀ ∈ O`.
 
-This is the smooth-dependence-on-the-initial-condition continuity of the moving
-Jacobian (the object whose time-variation feeds the Cartan-cancellation chain),
-read off the joint smoothness via `ContMDiffWithinAt.mfderivWithin` (the moving
-spatial differential is `C∞` in time) and `ContMDiffAt.clm_apply_of_inCoordinates`
-(applying that `C∞` family of differentials to the seed vector, tracked coherently
-in tangent-bundle coordinates).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 open Set Function Filter Bundle
@@ -29,14 +29,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [BoundarylessManifold I M] [T2Space M]
 
 set_option linter.unusedSectionVars false in
-/-- **Time-continuity of the moving spatial differential of a jointly-smooth flow.**
 
-If `Φg` is jointly `C∞` in `(time, point)` on `O ×ˢ univ` for an open `O ∋ s₀`,
-then the tangent-bundle datum `s ↦ ⟨Φg y s, mfderiv (Φg · s) y u⟩` is continuous
-at `s₀`. The moving spatial differential `s ↦ mfderivWithin I I (Φg · s) univ y`
-is `C∞` in `s` by `ContMDiffWithinAt.mfderivWithin`, and applying that family to the
-fixed seed `u` (coherently in bundle coordinates) is continuous by
-`ContMDiffAt.clm_apply_of_inCoordinates`. -/
+
+
+
+
+
+
+
 theorem slice_mfderiv_continuousAt_of_jointFlow
     (Φg : M → ℝ → M) {O : Set ℝ} (hO : IsOpen O) {s₀ : ℝ} (hs₀ : s₀ ∈ O)
     (hΦg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φg q.2 q.1) (O ×ˢ Set.univ))

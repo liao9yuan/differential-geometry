@@ -3,21 +3,21 @@ import DifferentialGeometry.Geometry.Curvature.Tensor
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Quadratic-form bound from a unit-sphere (operator-norm) bound
 
-For any `(0,2)`-tensor `Q` and Riemannian metric `g`, the quadratic form
-`v ↦ Q(v, v)` is controlled by its supremum over the `g`-unit sphere: if
-`Q(u, u) ≤ Λ` for every `g`-unit vector `u`, then `Q(v, v) ≤ Λ · g(v, v)` for
-*all* `v`.
 
-This is the geometric Rayleigh / operator-norm bound. It holds in **every
-dimension** — no spectral theorem, eigenbasis, or `dim = 3` hypothesis is
-needed. The only ingredients are quadratic homogeneity of `Q` and the metric
-and positive-definiteness of `g`. The `Λ` produced for `Q = Ric` is exactly the
-operator norm of the Ricci form (the largest `|Ricci eigenvalue|`), which the
-pinching machinery bounds.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-/-- Quadratic homogeneity of a `(0,2)`-tensor: `Q(c•v, c•v) = c² · Q(v, v)`. -/
+
 private theorem tensor02_vec2_smul
     (Q : Tensor02At (I := I) (M := M) x) (c : Real) (v : TangentSpace I x) :
     Q (vec2 (I := I) (c • v) (c • v)) = c ^ 2 * Q (vec2 (I := I) v v) := by
@@ -43,7 +43,7 @@ private theorem tensor02_vec2_smul
   have hmap := Q.map_smul_univ (fun _ : Fin 2 => c) (vec2 (I := I) v v)
   simpa [Fin.prod_univ_two, pow_two, smul_eq_mul] using hmap
 
-/-- Quadratic homogeneity of the metric: `g(c•v, c•v) = c² · g(v, v)`. -/
+
 private theorem metric_inner_smul_self
     (g : SmoothRiemannianMetric I M) (c : Real) (v : TangentSpace I x) :
     g.inner x (c • v) (c • v) = c ^ 2 * g.inner x v v := by
@@ -53,10 +53,10 @@ private theorem metric_inner_smul_self
   rw [h1 (c • v), g.symm x v (c • v), h1 v]
   ring
 
-/-- **Geometric Rayleigh bound (any dimension).** If a `(0,2)`-tensor `Q` is
-bounded by `Λ` on every `g`-unit vector, then `Q(v, v) ≤ Λ · g(v, v)` for all
-`v`. Proof: homogeneity reduces the general `v` to the unit vector
-`v / ‖v‖_g`; no eigenbasis or spectral theorem is used. -/
+
+
+
+
 theorem tensor02_quadForm_le_of_unit_bound
     (g : SmoothRiemannianMetric I M) (Q : Tensor02At (I := I) (M := M) x) {Λ : Real}
     (hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 → Q (vec2 (I := I) u u) ≤ Λ)
@@ -87,10 +87,10 @@ theorem tensor02_quadForm_le_of_unit_bound
     rw [hQv, mul_comm Λ (g.inner x v v)]
     exact mul_le_mul_of_nonneg_left hQunit hpos.le
 
-/-- **Absolute geometric Rayleigh bound (any dimension).** If `|Q(u, u)| ≤ Λ`
-on every `g`-unit vector `u`, then `|Q(v, v)| ≤ Λ · g(v, v)` for all `v`. This
-is the exact shape consumed by `TwoTensorQuadBoundOnWindow`: with `Q = Ricci`,
-`Λ = ‖Ric‖_op` it discharges the equation (3.3) curvature hypothesis. -/
+
+
+
+
 theorem tensor02_quadForm_abs_le_of_unit_bound
     (g : SmoothRiemannianMetric I M) (Q : Tensor02At (I := I) (M := M) x) {Λ : Real}
     (hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 → |Q (vec2 (I := I) u u)| ≤ Λ)

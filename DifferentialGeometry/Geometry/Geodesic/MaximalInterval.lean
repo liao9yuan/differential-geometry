@@ -314,6 +314,92 @@ private lemma continuousOn_velocityWithin_totalSpace_C1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+private theorem pathELength_eq_arcLength_riemannianBundle
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
+    (hab : a ≤ b)
+    (hγ_int : MeasureTheory.IntegrableOn
+      (fun t : ℝ => Real.sqrt
+        (g.inner (γ t)
+          (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
+          (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))) (Set.Icc a b) MeasureTheory.volume)
+    (hEnorm : ∀ t ∈ Set.Icc a b,
+        ‖mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)‖ₑ
+          = ENNReal.ofReal (Real.sqrt
+              (g.inner (γ t)
+                (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
+                (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))))) :
+    pathELength I γ a b
+      = ENNReal.ofReal
+        (DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g γ a b) := by
+  classical
+  set F : ℝ → ℝ := fun t : ℝ => Real.sqrt
+      (g.inner (γ t)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))) with hF_def
+  have hF_nn : ∀ t : ℝ, 0 ≤ F t := fun t => Real.sqrt_nonneg _
+  rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
+  change ∫⁻ t in Set.Icc a b, (fun t : ℝ => ‖mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)‖ₑ) t
+    = ENNReal.ofReal (DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
+        (I := I) g γ a b)
+  have h_lint_eq :=
+    MeasureTheory.setLIntegral_congr_fun (μ := MeasureTheory.volume)
+      (f := fun t : ℝ => ‖mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)‖ₑ)
+      (g := fun t : ℝ => ENNReal.ofReal (F t))
+      (s := Set.Icc a b)
+      measurableSet_Icc
+      (fun t ht => by simpa [hF_def] using hEnorm t ht)
+  rw [h_lint_eq]
+  have h_ofReal :
+      ENNReal.ofReal (∫ t in Set.Icc a b, F t)
+        = ∫⁻ t in Set.Icc a b, ENNReal.ofReal (F t) := by
+    have hF_nn_ae : 0 ≤ᵐ[(MeasureTheory.volume).restrict (Set.Icc a b)] F :=
+      MeasureTheory.ae_of_all _ hF_nn
+    exact MeasureTheory.ofReal_integral_eq_lintegral_ofReal hγ_int hF_nn_ae
+  rw [← h_ofReal]
+  have h_Icc_Ioc :
+      ∫ t in Set.Icc a b, F t = ∫ t in Set.Ioc a b, F t := by
+    have h_set : Set.Icc a b = {a} ∪ Set.Ioc a b := by
+      ext x
+      simp only [Set.mem_Icc, Set.mem_union, Set.mem_singleton_iff, Set.mem_Ioc]
+      constructor
+      · rintro ⟨h1, h2⟩
+        by_cases h : x = a
+        · left; exact h
+        · right; exact ⟨lt_of_le_of_ne h1 (fun h' => h h'.symm), h2⟩
+      · rintro (rfl | ⟨h1, h2⟩)
+        · exact ⟨le_refl _, hab⟩
+        · exact ⟨le_of_lt h1, h2⟩
+    rw [h_set]
+    have hdisj : Disjoint ({a} : Set ℝ) (Set.Ioc a b) := by
+      rw [Set.disjoint_left]
+      rintro y hy hy'
+      simp only [Set.mem_singleton_iff] at hy
+      rw [hy] at hy'
+      exact lt_irrefl _ hy'.1
+    have h_int_singleton :
+        MeasureTheory.IntegrableOn F ({a} : Set ℝ) MeasureTheory.volume := by
+      rw [MeasureTheory.integrableOn_singleton_iff]
+      exact Or.inr (by simp)
+    have h_int_Ioc :
+        MeasureTheory.IntegrableOn F (Set.Ioc a b) MeasureTheory.volume :=
+      hγ_int.mono_set Set.Ioc_subset_Icc_self
+    rw [MeasureTheory.setIntegral_union hdisj measurableSet_Ioc
+      h_int_singleton h_int_Ioc]
+    have h_singleton : ∫ t in ({a} : Set ℝ), F t = 0 := by
+      simp
+    rw [h_singleton, zero_add]
+  have h_intInterval : ∫ t in a..b, F t = ∫ t in Set.Ioc a b, F t :=
+    intervalIntegral.integral_of_le hab
+  have h_arcLength :
+      DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g γ a b
+        = ∫ t in a..b, F t := by
+    unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
+    rfl
+  rw [h_arcLength, h_intInterval, ← h_Icc_Ioc]
+
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 
 omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -495,6 +581,31 @@ theorem pathELength_eq_arcLength
     unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
     rfl
   rw [h_arcLength, h_intInterval, ← h_Icc_Ioc]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+
+
+
+
+
+
+theorem riemannianEDist_le_arcLength
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b)
+    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc a b))
+    (hEnorm : ∀ t ∈ Set.Icc a b,
+        ‖mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)‖ₑ
+          = ENNReal.ofReal (Real.sqrt
+              (g.inner (γ t)
+                (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
+                (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))))) :
+    riemannianEDist I (γ a) (γ b)
+      ≤ ENNReal.ofReal
+        (DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g γ a b) := by
+  have hle : riemannianEDist I (γ a) (γ b) ≤ pathELength I γ a b :=
+    riemannianEDist_le_pathELength hγ rfl rfl hab
+  rwa [pathELength_eq_arcLength_riemannianBundle (I := I) g hab
+    (speedSqrt_integrableOn_Icc_of_C1 (I := I) g hab hγ) hEnorm] at hle
 
 end ArcLengthBridge
 

@@ -6,12 +6,12 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Realized curvature wrappers
 
-This file keeps only realization-facing wrappers and predicates.  The intrinsic
-curvature operator and trace formulas live in `DifferentialGeometry.Integral.Connection.Basic`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -55,14 +55,14 @@ theorem ricci_comp_eq_trace
 
 
 
-/-- **⚠ SOFT-DEPRECATED — do not add new uses (eventual cleanup target).**
 
-A transparent `abbrev` alias of `scalarFromRicciTraceInFrame`, kept ONLY for the `scalarCurvature…`
-naming and its existing consumers (its `_apply`/`_realizes` lemmas + the volume-frame scalar in
-`Flow/RicciFlow/Evolution/Volume.lean`).  It adds no mathematics beyond the rename.  Prefer
-`scalarFromRicciTraceInFrame` directly in new code; this alias is slated for removal once those uses
-migrate.  (Tolerated-now, fine to keep — see the "eventual cleanup targets" list in
-`Geometry/Curvature/CurvatureCanonicalization.md`.) -/
+
+
+
+
+
+
+
 abbrev scalarCurvatureFromRicciTraceInFrame
     (Ric : RawTwoTensorField (I := I) (M := M))
     (gInv : InverseMetricComponents M Idx)
@@ -78,7 +78,7 @@ theorem scalarCurvatureFromRicciTraceInFrame_apply
       ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) := by
   exact scalarFromRicciTraceInFrame_apply (I := I) Ric gInv frame x
 
-/-- A scalar curvature function realizes the frame trace of Ricci. -/
+
 def ScalarRealizesRicciTraceInFrame
     (scalar : M -> Real)
     (Ric : RawTwoTensorField (I := I) (M := M))
@@ -97,7 +97,7 @@ theorem scalar_eq_trace
       ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) := by
   simpa [scalarFromRicciTraceInFrame] using hScalar x
 
-/-- The canonical scalar curvature trace realizes the scalar trace predicate. -/
+
 theorem scalarCurvatureFromRicciTraceInFrame_realizes
     (Ric : RawTwoTensorField (I := I) (M := M))
     (gInv : InverseMetricComponents M Idx)

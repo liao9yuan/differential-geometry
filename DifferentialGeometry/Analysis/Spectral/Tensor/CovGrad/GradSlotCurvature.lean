@@ -4,12 +4,12 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 
-/-!
-# Curvature coefficient for the leading gradient-slot commutator
 
-This module packages the Ricci identity for the first two slots of a second
-covariant gradient as the action of a fixed smooth curvature coefficient.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -56,8 +56,8 @@ private theorem unitModel_sub
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- The antisymmetric part in the two leading slots of `∇²S` is the action of
-a fixed smooth curvature coefficient on `S`. -/
+
+
 theorem gradSlot_sub_eq_curv
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : SmoothCcTensor g₀ 2 4,

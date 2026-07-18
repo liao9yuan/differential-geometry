@@ -1,13 +1,13 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 
-/-!
-# Local tangent sections with prescribed first covariant jet
 
-This file is the tangent-connection layer used by the tensor weak maximum
-principle first-null argument.  The target is a local one-jet construction:
-given a tangent vector at a point, construct a smooth tangent section whose
-value is that vector and whose covariant derivative vanishes at the point.
--/
+
+
+
+
+
+
+
 
 namespace TensorLieDeriv
 
@@ -74,8 +74,8 @@ private theorem tangentFieldModelInChart_sum_tangentConst_model
           rw [map_smul, hconst i, hright]
     _ = F y := b.sum_repr (F y)
 
-/-- Local one-jet extension for tangent fields: construct a smooth tangent
-section with prescribed value and zero covariant derivative at a point. -/
+
+
 theorem exists_cov_zero_at
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (_hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
@@ -362,8 +362,8 @@ theorem exists_cov_zero_at
   refine ⟨V, hV_val, ?_⟩
   rw [hcov_congr, hcovVloc]
 
-/-- Directional form of `exists_cov_zero_at`, convenient for first-null test
-sections. -/
+
+
 theorem exists_cov_zero_at_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)

@@ -104,7 +104,7 @@ lemma localFiber_pos (x₀ : M) {x : M}
   positivity
 
 omit [FiniteDimensional ℝ E] in
-private lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
+lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (φ : TangentSpace I x →L[ℝ] ℝ) :
     (trivializationAt (E →L[ℝ] ℝ) (fun y => TangentSpace I y →L[ℝ] ℝ) x₀).continuousLinearMapAt

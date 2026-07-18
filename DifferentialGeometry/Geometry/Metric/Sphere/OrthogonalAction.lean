@@ -3,24 +3,24 @@ import DifferentialGeometry.Geometry.Metric.Pullback
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 
-/-!
-# The orthogonal group acting on the round sphere by isometries
 
-An ambient linear isometry `e : E ≃ₗᵢ[ℝ] E` restricts to a diffeomorphism
-`sphereDiffeo e` of the unit sphere, and this diffeomorphism is an **isometry of
-the round metric**: `pullbackMetric roundMetric (sphereDiffeo e) = roundMetric`.
 
-This is the shared backbone for (a) the homogeneity proof that the round sphere has
-constant sectional curvature and (b) the descent of the round metric through a
-finite Γ ⊂ O(n+1) action to a spherical space form.
 
-## Main definitions / results
 
-* `sphereDiffeo e : sphere (0:E) 1 ≃ₘ⟮𝓡 n, 𝓡 n⟯ sphere (0:E) 1`.
-* `mfderiv_incl_sphereDiffeo` — the chain-rule identity `dι_{φx}(dφ_x v) = e (dι_x v)`.
-* `roundInner_sphereDiffeo` — the round inner product is preserved.
-* `pullbackMetric_round_eq` — `pullbackMetric roundMetric (sphereDiffeo e) = roundMetric`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -33,7 +33,7 @@ namespace Geometry
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
 variable {n : ℕ} [Fact (finrank ℝ E = n + 1)]
 
-/-- The self-map of the unit sphere induced by an ambient linear isometry. -/
+
 noncomputable def sphereMap (e : E ≃ₗᵢ[ℝ] E) :
     sphere (0 : E) 1 → sphere (0 : E) 1 :=
   Set.codRestrict (fun x : sphere (0 : E) 1 => (e (x : E) : E)) (sphere (0 : E) 1)
@@ -50,7 +50,7 @@ theorem sphereMap_contMDiff (e : E ≃ₗᵢ[ℝ] E) :
   ContMDiff.codRestrict_sphere
     (e.toContinuousLinearMap.contMDiff.comp contMDiff_coe_sphere) _
 
-/-- The diffeomorphism of the unit sphere induced by an ambient linear isometry `e`. -/
+
 noncomputable def sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) :
     sphere (0 : E) 1 ≃ₘ⟮𝓡 n, 𝓡 n⟯ sphere (0 : E) 1 where
   toFun := sphereMap e
@@ -63,8 +63,8 @@ noncomputable def sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) :
 @[simp] theorem sphereDiffeo_coe (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1) :
     ((sphereDiffeo (n := n) e x : sphere (0 : E) 1) : E) = e (x : E) := rfl
 
-/-- `mfderiv` of an ambient linear isometry, applied to a vector: `d e_y w = e w`
-(the derivative of a linear map is the map itself). -/
+
+
 private theorem mfderiv_lie_apply (e : E ≃ₗᵢ[ℝ] E) (y w : E) :
     mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (⇑e) y w = e w := by
   have h : mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (⇑e) y = e.toContinuousLinearMap := by
@@ -72,9 +72,9 @@ private theorem mfderiv_lie_apply (e : E ≃ₗᵢ[ℝ] E) (y w : E) :
     simp only [ContinuousLinearMap.fderiv]
   rw [h]; rfl
 
-/-- **Naturality of the inclusion differential under `sphereDiffeo`.**  The differential
-of the inclusion at `φ x` applied to `dφ_x v` equals the ambient isometry applied to
-`dι_x v`.  This is the chain rule for `ι ∘ φ = e ∘ ι`. -/
+
+
+
 theorem mfderiv_incl_sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1)
     (v : TangentSpace (𝓡 n) x) :
     dIncl (n := n) (sphereDiffeo (n := n) e x)
@@ -100,8 +100,8 @@ theorem mfderiv_incl_sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1
   rw [← ContinuousLinearMap.comp_apply, ← e1, hcomp, e2]
   exact mfderiv_lie_apply e _ _
 
-/-- **`sphereDiffeo e` preserves the round inner product** (it is an isometry):
-`⟪dφ v, dφ w⟫_round = ⟪v, w⟫_round`. -/
+
+
 theorem roundInner_sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1)
     (v w : TangentSpace (𝓡 n) x) :
     roundInner (sphereDiffeo (n := n) e x)
@@ -112,9 +112,9 @@ theorem roundInner_sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1)
     mfderiv_incl_sphereDiffeo, mfderiv_incl_sphereDiffeo]
   exact e.inner_map_map _ _
 
-/-- **`sphereDiffeo e` is an isometry of the round metric:** pulling the round metric
-back along it returns the round metric.  Feeds `metricRm04Std_pullback` to give
-curvature invariance under the orthogonal action. -/
+
+
+
 theorem pullbackMetric_round_eq (e : E ≃ₗᵢ[ℝ] E) :
     Diffeomorph.pullbackMetric (roundMetric (E := E) (n := n)) (sphereDiffeo (n := n) e)
       = roundMetric := by

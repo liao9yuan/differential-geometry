@@ -95,7 +95,7 @@ theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
   have hself : ∀ t : Fin (Module.finrank ℝ E),
       chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
     chartBasisVecFiber_self (I := I) x t
-  apply metricFlatLinear_injective (I := I) g₁ x
+  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective (I := I) g₁ x
   ext u
   change g₁.inner x (cometricLmodel (I := I) g₁ x
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((chartModelBasis E).cDualBasis k))) u =

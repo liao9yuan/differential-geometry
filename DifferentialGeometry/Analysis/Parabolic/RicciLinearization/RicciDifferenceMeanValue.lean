@@ -658,7 +658,8 @@ theorem metricSharp_jointContMDiffOn
         ((chartAt H α).source ×ˢ S)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-        (metricSharp (I := I) (gfam p.2) p.1 (cv p.2 p.1)))
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (I := I) (gfam p.2) p.1 (cv p.2 p.1)))
       (Set.univ ×ˢ S) := by
   intro p hp
   obtain ⟨_, hps⟩ := hp
@@ -670,7 +671,8 @@ theorem metricSharp_jointContMDiffOn
       TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
           (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1) =
         TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
-          (metricSharp (I := I) (gfam q.2) q.1 (cv q.2 q.1)) := by
+          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+            (I := I) (gfam q.2) q.1 (cv q.2 q.1)) := by
     rintro q ⟨hqx, _⟩
     have hqbase : q.1 ∈ (trivializationAt E (TangentSpace I) p.1).baseSet := by
       rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]; exact hqx
@@ -740,7 +742,8 @@ theorem inverseMetricSharpField_realizedFam_jointContMDiffOn [BoundarylessManifo
   refine hjoint.congr (fun p hp => ?_)
 
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
+      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
   rw [inverseMetricSharpFib_apply, hcvdef]
@@ -1357,10 +1360,27 @@ theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
   refine hjoint.congr (fun p hp => ?_)
 
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
+      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
   rw [ricEndoRaisedFib_apply, hcvdef]
+  refine congrArg (TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1) ?_
+  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
+    (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+  ext w
+  change (realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+          ((ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+            (Y p.1)).toLinearMap)) w =
+    (realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+      (DifferentialGeometry.Integral.Connection.metricSharp
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+          ((ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+            (Y p.1)).toLinearMap)) w
+  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp,
+    DifferentialGeometry.Integral.Connection.inner_metricSharp]
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -1496,6 +1516,319 @@ theorem ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous [BoundarylessMani
   exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
     (fun t => ricciArmOrder0CurvCoeff (I := I) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
+theorem genGram_of_family
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (α : M) :
+    ChartGramFamilyJointSmoothNondegenerate (I := I) (fun t => G.metric t) α D.regular := by
+  classical
+  refine ⟨?_, ?_⟩
+  · intro i j s₀ y₀ hs hy
+    set e := trivializationAt E (TangentSpace I) α with he
+    have hframe :
+        IsLocalFrameOn I E (∞ : WithTop ℕ∞) (e.localFrame (chartModelBasis E)) e.baseSet :=
+      e.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (chartModelBasis E)
+    have hbridge : ∀ {x : M}, x ∈ e.baseSet → ∀ k : Fin (Module.finrank ℝ E),
+        e.localFrame (chartModelBasis E) k x = chartBasisVecFiber (I := I) α k x := by
+      intro x hx k
+      rw [e.localFrame_apply_of_mem_baseSet (chartModelBasis E) hx]
+      rfl
+    have hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (G.metric p.1) α p.2 i j)
+        (D.regular ×ˢ e.baseSet) := by
+      have hcomp := hG.frameCompSmooth (e.localFrame (chartModelBasis E)) hframe i j
+      refine hcomp.congr ?_
+      intro p hp
+      simp only [chartGramMatrix_apply, hbridge hp.2 i, hbridge hp.2 j]
+    have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
+        (extChartAt I α).target :=
+      contMDiffOn_extChartAt_symm (I := I) α
+    have hsubset : (extChartAt I α).target ⊆ (extChartAt I α).symm ⁻¹' e.baseSet := by
+      intro y hy'
+      have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+        (extChartAt I α).map_target hy'
+      rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
+      rw [he, trivializationAt_baseSet_eq_chartAt_source]
+      exact hsource
+    have hσ1 : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × E => p.1) (D.regular ×ˢ interior (extChartAt I α).target) :=
+      (contMDiff_iff_contDiff.mpr contDiff_fst).contMDiffOn
+    have hsnd : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞
+        (fun p : ℝ × E => p.2) (D.regular ×ˢ interior (extChartAt I α).target) :=
+      (contMDiff_iff_contDiff.mpr contDiff_snd).contMDiffOn
+    have hmaps2 : Set.MapsTo (fun p : ℝ × E => p.2)
+        (D.regular ×ˢ interior (extChartAt I α).target) (extChartAt I α).target :=
+      fun p hp => interior_subset hp.2
+    have hσ2 : ContMDiffOn 𝓘(ℝ, ℝ × E) I ∞
+        (fun p : ℝ × E => (extChartAt I α).symm p.2)
+        (D.regular ×ˢ interior (extChartAt I α).target) :=
+      hsymm.comp hsnd hmaps2
+    have hσ : ContMDiffOn 𝓘(ℝ, ℝ × E) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2))
+        (D.regular ×ˢ interior (extChartAt I α).target) :=
+      hσ1.prodMk hσ2
+    have hcomp : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
+        (fun p : ℝ × E => chartGramOnE (I := I) (G.metric p.1) α i j p.2)
+        (D.regular ×ˢ interior (extChartAt I α).target) := by
+      refine (hsmooth.comp hσ (fun p hp => ⟨hp.1, hsubset (interior_subset hp.2)⟩)).congr ?_
+      intro p _
+      rfl
+    exact hcomp.contDiffOn.contDiffAt
+      (prod_mem_nhds (D.regular_isOpen.mem_nhds hs) (isOpen_interior.mem_nhds hy))
+  · intro s₀ _ x hx
+    exact chartGramMatrix_det_pos (I := I) (G.metric s₀) α hx
+
+theorem invGram_of_family
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartInvGramMatrix (I := I) (G.metric p.2) α p.1 i j)
+      ((chartAt H α).source ×ˢ D.regular) := by
+  have hGram := genGram_of_family (I := I) G hG α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ D.regular) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst
+      (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, ht⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]
+    exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := chartInvGramOnE_contDiffAt_joint (I := I) (fun t => G.metric t) α hGram i j ht hy
+  have hentryM : ContMDiffAt 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartInvGramOnE (I := I) (G.metric r.1) α i j r.2)
+      (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ × E) ∞
+      (fun q : M × ℝ => (q.2, extChartAt I α q.1))
+      ((chartAt H α).source ×ˢ D.regular) p := by
+    have hm := hmove p ⟨hx, ht⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  refine (hentryM.comp_contMDiffWithinAt p hmoveAt).congr ?_ ?_
+  · intro q hq
+    have hqx : q.1 ∈ (extChartAt I α).source := by
+      rw [extChartAt_source (I := I)]
+      exact hq.1
+    rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
+  · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
+
+theorem christ_of_family
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (α : M) (i j k : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ =>
+        chartChristoffel (I := I) (G.metric p.2) α i j k (extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ D.regular) := by
+  have hGram := genGram_of_family (I := I) G hG α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ D.regular) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst
+      (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, ht⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]
+    exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_christoffel (I := I) (fun t => G.metric t) α hGram i j k ht hy
+  have hentryM : ContMDiffAt 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartChristoffel (I := I) (G.metric r.1) α i j k r.2)
+      (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ × E) ∞
+      (fun q : M × ℝ => (q.2, extChartAt I α q.1))
+      ((chartAt H α).source ×ˢ D.regular) p := by
+    have hm := hmove p ⟨hx, ht⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  simpa only [Function.comp_apply] using hentryM.comp_contMDiffWithinAt p hmoveAt
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+theorem invSharp_of_family
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E →L[ℝ] E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 1 ℝ E →L[ℝ] E)
+        (E := fun z : M => Tensor0SSpace 1 I z →L[ℝ] TangentSpace I z) p.1
+        (inverseMetricSharpFib (I := I) (G.metric p.2) p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
+    (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
+    (F₂ := E) (V₂ := fun x : M => TangentSpace I x)
+    (φ := fun p : M × ℝ => inverseMetricSharpFib (I := I) (G.metric p.2) p.1)
+    (S := D.regular)
+  intro Y
+  set cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ :=
+    fun _ b => cotangentToDualLinear (I := I) (x := b) (Y b) with hcvdef
+  have hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => chartInvGramMatrix (I := I) (G.metric p.2) α p.1 i j)
+        ((chartAt H α).source ×ˢ D.regular) :=
+    fun α i j => invGram_of_family (I := I) G hG α i j
+  have hcv : ∀ (α : M) (j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1))
+        ((chartAt H α).source ×ˢ D.regular) := by
+    intro α j
+    have hbase := cotangentSection_chartComponent_contMDiffOn (I := I) Y α j
+    have heqfn : (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1)) =
+        (fun p : M × ℝ => (fun b : M => Tensor0SSpace.toModel (Y b)
+          (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b)) p.1) := by
+      funext p
+      rw [hcvdef]
+      simp only
+      rw [cotangentToDualLinear_apply, cotangentToDual_apply]
+      rfl
+    rw [heqfn]
+    exact hbase.comp contMDiffOn_fst (fun p hp => hp.1)
+  have hjoint := metricSharp_jointContMDiffOn (I := I)
+    (gfam := fun t => G.metric t) (cv := cv) (S := D.regular)
+    D.regular_isOpen hinv hcv
+  refine hjoint.congr (fun p _ => ?_)
+  change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) (G.metric p.2) p.1 (cv p.2 p.1)) =
+    TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+      (inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (Y p.1))
+  rw [inverseMetricSharpFib_apply, hcvdef]
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+
+
+
+
+
+
+
+
+
+
+theorem comRaise_of_family (s : ℕ)
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (Y : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (s + 2) I p.1)
+    (hY : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 2) ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (s + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 2) I z) p.1 (Y p))
+      ((Set.univ : Set M) ×ˢ D.regular)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (s + 1) ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 1 (s + 1) ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 (s + 1) I z) p.1
+        (cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E)
+    (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
+    (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (s + 1) I x)
+    (φ := fun p : M × ℝ => (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+        Tensor0SBundle.Tensor0SSpace (s + 1) I p.1 from
+      cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)))
+    (S := D.regular)
+  intro β
+  have hsharp := invSharp_of_family (I := I) G hG
+  have hβjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) p.1 (β p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    have hβM : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x (β x)) := β.contMDiff
+    exact hβM.comp_contMDiffOn contMDiffOn_fst
+  have hsharpβ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+        (inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (β p.1)))
+      ((Set.univ : Set M) ×ˢ D.regular) :=
+    ContMDiffOn.clm_bundle_apply (b := Prod.fst) hsharp hβjoint
+  set sharpβ : ∀ p : M × ℝ, TangentSpace I p.1 :=
+    fun p => inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (β p.1)
+  have hraise := interiorProductField_jointContMDiffOn_vecJoint (I := I) (s := s + 1)
+    (S := D.regular) (X := sharpβ) hsharpβ (α := fun p => Y p) hY
+  refine hraise.congr (fun p _ => ?_)
+  change TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) p.1
+      (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (s + 1) p.1
+        (sharpβ p) (Y p)) =
+    TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) p.1
+      ((show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (s + 1) I p.1 from
+        cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)) (β p.1))
+  congr 1
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+
+
+
+
+
+
+
+
+
+
+theorem comTrace_of_family (p : ℕ)
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (Y : ∀ q : M × ℝ, Tensor0SBundle.Tensor0SSpace (p + 2) I q.1)
+    (hY : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (p + 2) ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (p + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (p + 2) I z) q.1 (Y q))
+      ((Set.univ : Set M) ×ˢ D.regular)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel p ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel p ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace p I z) q.1
+        (cometricDoubleTraceFib (I := I) (G.metric q.2) p q.1 (Y q)))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+  have hraise := comRaise_of_family (I := I) p G hG Y hY
+  have htrace := contractTraceField_jointContMDiffOn (I := I) 0 p
+    (S := D.regular)
+    (fun q : M × ℝ => cometricRaiseSlot0Fib (I := I) (G.metric q.2) p q.1 (Y q))
+    hraise
+  have hunit : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 0 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
+        (Integral.Connection.unitZeroSec (I := I) (M := M) q.1))
+      ((Set.univ : Set M) ×ˢ D.regular) :=
+    (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn
+      contMDiffOn_fst
+  have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
+  refine htraceUnit.congr (fun q _ => ?_)
+  congr 1
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [cometricDoubleTraceFib_toModel]
+  rw [← model_contract_trace_raiseSlot0ModelL (E := E) p
+    (cometricLmodel (I := I) (G.metric q.2) q.1)
+    (Tensor0SBundle.Tensor0SSpace.toModel (Y q))]
+  rw [contract_trace_unitZero_toModel (I := I) p q.1
+    (cometricRaiseSlot0Fib (I := I) (G.metric q.2) p q.1 (Y q))]
+  congr 1
 
 end RicciLinearization
 end DeTurck

@@ -74,7 +74,8 @@ def g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M) :
 lemma inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (g₀ g' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g' x (g0FlatCLM (I := I) g₀ x v) =
-      metricSharp (I := I) g' x (g₀.inner x v).toLinearMap := by
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (I := I) g' x (g₀.inner x v).toLinearMap := by
   rw [inverseMetricSharpFib_apply, g0FlatCLM_apply]
   rw [show cotangentToDualLinear (I := I) (dualToCotangent (I := I) (g₀.inner x v).toLinearMap)
         = (g₀.inner x v).toLinearMap from by
@@ -321,19 +322,24 @@ theorem metricFlat_chartComponent_contMDiffOn (g₀ : SmoothRiemannianMetric I M
 lemma gInvDiffRaisedEndo_eq_metricSharp_flatDiff (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     metricComparisonDiffEndo (I := I) g₀ g₁ x v =
-      metricSharp (I := I) g₁ x
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
   rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
 
-  have hv : metricSharp (I := I) g₁ x (g₁.inner x v).toLinearMap = v := by
+  have hv : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (I := I) g₁ x (g₁.inner x v).toLinearMap = v := by
     rw [← inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
     exact inverseMetricSharpFib_g0FlatCLM (I := I) g₁ x v
 
-  have hsharp_sub : metricSharp (I := I) g₁ x
+  have hsharp_sub : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap)
-      = metricSharp (I := I) g₁ x (g₀.inner x v).toLinearMap
-        - metricSharp (I := I) g₁ x (g₁.inner x v).toLinearMap := by
-    rw [metricSharp_def, metricSharp_def, metricSharp_def, map_sub]
+      = DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (I := I) g₁ x (g₀.inner x v).toLinearMap
+        - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (I := I) g₁ x (g₁.inner x v).toLinearMap := by
+    rw [DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_sub]
   rw [hsharp_sub, hv]
 
 omit [CompactSpace M] in
@@ -366,7 +372,7 @@ theorem gInvDiffRaisedEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E
         (E := fun z : M => TangentSpace I z) b
-        (metricSharp (I := I) g₁ b
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ b
           ((g₀.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap))) := by
     apply metricSharp_contMDiff_total (I := I) g₁
     intro γ j
@@ -836,7 +842,8 @@ theorem gInvSlotEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E
         (E := fun z : M => TangentSpace I z) b
-        (metricSharp (I := I) g₁ b (g₀.inner b (Y b)).toLinearMap)) := by
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (I := I) g₁ b (g₀.inner b (Y b)).toLinearMap)) := by
     apply metricSharp_contMDiff_total (I := I) g₁
     intro γ j
     exact metricFlat_chartComponent_contMDiffOn (I := I) g₀ Y γ j
@@ -891,6 +898,23 @@ theorem riemannianFiberNormSq_gInvSlotEndo_le
   calc (n : ℝ) * (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
       ≤ (n : ℝ) * ((n : ℝ) * r ^ 2) := mul_le_mul_of_nonneg_left hsum_le hn_nn
     _ = ((Module.finrank ℝ E : ℝ) * r) ^ 2 := by rw [← hnE]; ring
+lemma inner_sharp_mixed (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) (v : TangentSpace I x) :
+    g₀.inner x (inverseMetricSharpFib (I := I) g₁ x om) v =
+      cotangentToDual (I := I) (x := x) om (metricComparisonEndo (I := I) g₀ g₁ x v) := by
+  rw [show cotangentToDual (I := I) (x := x) om (metricComparisonEndo (I := I) g₀ g₁ x v) =
+      cotangentToDualLinear (I := I) (x := x) om
+        (metricComparisonEndo (I := I) g₀ g₁ x v) from rfl]
+  rw [← inverseMetricSharpFib_inner (I := I) g₁ x om
+    (metricComparisonEndo (I := I) g₀ g₁ x v)]
+  rw [g₁.symm x (inverseMetricSharpFib (I := I) g₁ x om)
+    (metricComparisonEndo (I := I) g₀ g₁ x v)]
+  rw [gInvRaisedEndo_apply]
+  rw [inverseMetricSharpFib_inner (I := I) g₁ x
+    (g0FlatCLM (I := I) g₀ x v) (inverseMetricSharpFib (I := I) g₁ x om)]
+  rw [cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
+  rw [g₀.symm x v (inverseMetricSharpFib (I := I) g₁ x om)]
+
 
 end DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 

@@ -3,13 +3,13 @@ import Mathlib.Topology.OpenPartialHomeomorph.Continuity
 
 set_option autoImplicit false
 
-/-!
-# Smooth convergence of moving inverse branches
 
-This file specializes compact moving-root stability to inverse branches of
-open partial homeomorphisms.  The forward maps converge on one fixed source
-neighborhood; a smaller common target ball is produced, rather than assumed.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -69,9 +69,9 @@ private theorem partial_sub_snd
 
 namespace OpenPartialHomeomorph
 
-/-- Smoothly convergent forward partial homeomorphisms have smoothly
-convergent exact inverse branches on a smaller common target ball.  The
-preimage control on that smaller ball is a conclusion. -/
+
+
+
 theorem exists_symm_convOn_ball
     {X : Type*}
     [NormedAddCommGroup X] [NormedSpace Real X]
@@ -300,10 +300,10 @@ theorem exists_symm_convOn_ball
   exact ⟨delta₀, hdelta₀, hdelta₀delta, hInf_maps,
     hmaps_eventually, hinv_conv⟩
 
-/-- Smoothly convergent forward partial homeomorphisms have smoothly
-convergent exact inverse branches on a common neighborhood of any compact
-subset of the limiting target.  Both the common stage-target containment and
-the source-side preimage control are conclusions. -/
+
+
+
+
 theorem exists_symm_cInf
     {X : Type*}
     [NormedAddCommGroup X] [NormedSpace Real X]

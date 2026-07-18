@@ -627,9 +627,10 @@ private lemma corrField_raisedKoszulVec_realizedFam_chartα
   set cvx : TangentSpace I x →ₗ[ℝ] ℝ := (g₁.inner x W).toLinearMap with hcvx
   have hraisedeq : raisedKoszulVec (I := I) g₀ g₁ x
         (chartBasisVecFiber (I := I) α j x) (chartBasisVecFiber (I := I) α k x) =
-      metricSharp (I := I) g₀ x cvx := by
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₀ x cvx := by
     rw [raisedKoszulVec_apply, inverseMetricSharpFib_apply]
-    refine congrArg (fun t => metricSharp (I := I) g₀ x t) ?_
+    refine congrArg
+      (fun t => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₀ x t) ?_
     ext w
     rw [cotangentToDualLinear_apply,
       DifferentialGeometry.Analysis.Sobolev.TensorHilbert.cotangentToDual_g0FlatCLM]

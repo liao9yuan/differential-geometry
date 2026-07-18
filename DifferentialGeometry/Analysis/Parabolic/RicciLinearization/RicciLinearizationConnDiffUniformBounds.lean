@@ -404,6 +404,32 @@ theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCo
               (realizedFam (I := I) g₀ T T' hδ hδ' s) x) := rfl
     rw [h1]
     exact Real.sqrt_le_sqrt hmain.2
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem ricci_coeff_rfns_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δc : ℝ} (_hδc_le : δc ≤ max δ₀ 0)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
+        (x : M),
+        (∑ j ∈ Finset.range 3,
+            (letI : Bundle.RiemannianBundle
+                (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + j) I b) :=
+              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+            ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)) ≤ B →
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+              linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) ≤ C ∧
+        riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+            (show Tensor0SBundle.TensorRSSpace 3 2 I x from
+              linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) ≤ C := by
+  exact
+    exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope
+      (I := I) (M := M) g₀ hδ₀ B hB
+
 
 end UniformBound
 

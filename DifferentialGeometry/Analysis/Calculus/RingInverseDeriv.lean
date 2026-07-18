@@ -4,14 +4,14 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 
 set_option autoImplicit false
 
-/-!
-# Quantitative iterated derivatives of inversion
 
-This file contains the reusable Banach-algebra estimates for iterated
-derivatives of `Ring.inverse` and of its composition with an operator field.
-The declarations retain their original namespace so existing Chapter 4
-consumers keep the same API after the producer is moved to the analysis layer.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,7 +24,7 @@ open ContinuousLinearMap Ring Set
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {R : Type*} [NormedRing R] [NormedAlgebra 𝕜 R] [HasSummableGeomSeries R]
 
-/-- `Ring.inverse` is `C^n` on the open set of units. -/
+
 theorem contDiffOn_ringInverse (n : WithTop ℕ∞) :
     ContDiffOn 𝕜 n Ring.inverse {y : R | IsUnit y} := by
   intro y hy
@@ -32,11 +32,11 @@ theorem contDiffOn_ringInverse (n : WithTop ℕ∞) :
   obtain ⟨u, rfl⟩ := hy
   exact (contDiffAt_ringInverse 𝕜 u).contDiffWithinAt
 
--- The nested operator-valued induction needs an extended, terminating
--- instance-synthesis budget.
+
+
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The `i`-th derivative of inversion at a unit is bounded by
-`i! * ||x⁻¹||^(i+1)`, computed within the open unit set. -/
+
+
 theorem norm_iteratedFDerivWithin_ringInverse_le : ∀ (i : ℕ) (x : Rˣ),
     ‖iteratedFDerivWithin 𝕜 i Ring.inverse {y : R | IsUnit y} (x : R)‖
       ≤ (i.factorial : ℝ) * ‖(↑x⁻¹ : R)‖ ^ (i + 1) := by
@@ -107,7 +107,7 @@ theorem norm_iteratedFDerivWithin_ringInverse_le : ∀ (i : ℕ) (x : Rˣ),
     exact (mul_le_mul ((opNorm_neg _).trans_le (opNorm_mulLeftRight_le 𝕜 R)) hsum
       (Finset.sum_nonneg fun k _ => by positivity) zero_le_one).trans_eq (one_mul _)
 
-/-- Ambient form of the quantitative iterated-derivative bound for inversion. -/
+
 theorem norm_iteratedFDeriv_ringInverse_le (i : ℕ) (x : Rˣ) :
     ‖iteratedFDeriv 𝕜 i Ring.inverse (x : R)‖ ≤
       (i.factorial : ℝ) * ‖(↑x⁻¹ : R)‖ ^ (i + 1) := by
@@ -119,9 +119,9 @@ theorem norm_iteratedFDeriv_ringInverse_le (i : ℕ) (x : Rˣ) :
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- If an operator field has power-shaped derivative bounds and remains
-invertible near the base point, its inverse field has an explicit
-Faà-di-Bruno bound. -/
+
+
+
 theorem norm_iteratedFDeriv_invComp_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace E]
     (A : P → (E →L[ℝ] E)) (x : P) (m : ℕ) (Lambda D : ℝ)

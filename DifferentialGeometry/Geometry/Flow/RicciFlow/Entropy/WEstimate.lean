@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Fixed-metric normal forms for Perelman's W functional
 
-The first theorem rewrites `W` in terms of a positive amplitude `v` whose
-square is the Perelman density.  It is the algebraic entry point for the
-closed-manifold log-Sobolev lower bound.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -31,9 +31,9 @@ variable [IsManifold I ∞ M]
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Positive-amplitude form of Perelman's `W` functional.  If the density is
-`v²`, then its potential-gradient contribution is `4 |∇v|²`, while the
-potential itself supplies the usual `-v² log(v²)` entropy term. -/
+
+
+
 theorem w_square_form
     (mu : Measure M) (g : SmoothRiemannianMetric I M) (n : Nat)
     {tau : Real} (htau : 0 < tau) (scalarCurvature : M -> Real)

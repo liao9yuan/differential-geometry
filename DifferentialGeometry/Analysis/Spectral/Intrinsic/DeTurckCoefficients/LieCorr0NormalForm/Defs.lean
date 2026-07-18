@@ -1,12 +1,12 @@
 import Mathlib
 
-/-!
-# Shared scalar definitions for the zeroth-order DeTurck normal form
 
-This module contains the finite-index expressions shared by the normal-form
-proofs.  They are internal algebraic representations, not geometric input
-packages.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -17,7 +17,7 @@ open scoped BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieCorr0NF
 
-/-- Collapse a metric/cometric contraction with the free index in the vector factor. -/
+
 lemma collapse {n : ℕ} (ig cg : Fin n → Fin n → ℝ)
     (hcol : ∀ l e, (∑ k, cg k e * ig k l) = if l = e then (1 : ℝ) else 0)
     (X : Fin n → ℝ) (e : Fin n) :
@@ -34,7 +34,7 @@ lemma collapse {n : ℕ} (ig cg : Fin n → Fin n → ℝ)
   · intro h
     exact absurd (Finset.mem_univ e) h
 
-/-- Collapse a metric/cometric contraction with the free index in the coefficient factor. -/
+
 lemma collapse_rev {n : ℕ} (ig cg : Fin n → Fin n → ℝ)
     (hcol : ∀ l e, (∑ k, cg k e * ig k l) = if l = e then (1 : ℝ) else 0)
     (X : Fin n → ℝ) (e : Fin n) :
@@ -51,21 +51,21 @@ lemma collapse_rev {n : ℕ} (ig cg : Fin n → Fin n → ℝ)
   · intro h
     exact absurd (Finset.mem_univ e) h
 
-/-- The background covariant derivative of a symmetric two-tensor in coordinates. -/
+
 def r3B {n : ℕ} (_ig _cg f : Fin n → Fin n → ℝ)
     (_dg _dig ga0 _ga1 _gbg _gb _f3 : Fin n → Fin n → Fin n → ℝ)
     (_ddg _dga0 _dga1 _dgbg _dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
     (a b c : Fin n) : ℝ :=
   -(∑ r, ga0 a b r * f r c) + (-(∑ r, ga0 a c r * f b r))
 
-/-- The inverse-metric variation contribution to the connection correction. -/
+
 def chrCorrF {n : ℕ} (ig _cg f : Fin n → Fin n → ℝ)
     (_dg _dig _ga0 _ga1 _gbg gb _f3 : Fin n → Fin n → Fin n → ℝ)
     (_ddg _dga0 _dga1 _dgbg _dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
     (a b k : Fin n) : ℝ :=
   (1 / 2 : ℝ) * (∑ l, (-(∑ q, ∑ p, ig k p * f p q * ig q l)) * gb a b l)
 
-/-- The zeroth-order variation of the traced connection difference. -/
+
 def wcF {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -73,7 +73,7 @@ def wcF {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   ∑ a, ∑ b, ((-(∑ q, ∑ p, ig a p * f p q * ig q b)) * (ga1 a b k - gbg a b k) +
     ig a b * chrCorrF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb a b k)
 
-/-- The coordinate derivative of the traced connection difference. -/
+
 def dvfbF {n : ℕ} (ig _cg _f : Fin n → Fin n → ℝ)
     (_dg dig _ga0 ga1 gbg _gb _f3 : Fin n → Fin n → Fin n → ℝ)
     (_ddg _dga0 dga1 dgbg _dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -81,14 +81,14 @@ def dvfbF {n : ℕ} (ig _cg _f : Fin n → Fin n → ℝ)
   ∑ a, ∑ b, (dig m a b * (ga1 a b k - gbg a b k) +
     ig a b * (dga1 m a b k - dgbg m a b k))
 
-/-- The inverse-metric correction to the derivative of the traced connection difference. -/
+
 def d0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
     (m k : Fin n) : ℝ :=
   ∑ a, ∑ b, ((-(∑ q, ∑ p, (dig m a p * f p q * ig q b + ig a p * f p q * dig m q b))) * (ga1 a b k - gbg a b k) + (-(∑ q, ∑ p, ig a p * f p q * ig q b)) * (dga1 m a b k - dgbg m a b k) + dig m a b * chrCorrF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb a b k + ig a b * ((1 / 2 : ℝ) * (∑ l, ((-(∑ q, ∑ p, (dig m k p * f p q * ig q l + ig k p * f p q * dig m q l))) * gb a b l + (-(∑ q, ∑ p, ig k p * f p q * ig q l)) * dgb m a b l))))
 
-/-- The assembled order-zero inverse-metric correction. -/
+
 def o0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -99,14 +99,14 @@ def o0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (∑ k, cg k j * d0F ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb i k) +
     (∑ k, cg i k * d0F ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb j k)
 
-/-- The traced connection difference. -/
+
 def vfbF {n : ℕ} (ig _cg _f : Fin n → Fin n → ℝ)
     (_dg _dig _ga0 ga1 gbg _gb _f3 : Fin n → Fin n → Fin n → ℝ)
     (_ddg _dga0 _dga1 _dgbg _dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
     (k : Fin n) : ℝ :=
   ∑ a, ∑ b, ig a b * (ga1 a b k - gbg a b k)
 
-/-- The covariant derivative of the connection-difference tensor. -/
+
 def covAF {n : ℕ} (_ig _cg _f : Fin n → Fin n → ℝ)
     (_dg _dig _ga0 ga1 gbg _gb _f3 : Fin n → Fin n → Fin n → ℝ)
     (_ddg _dga0 dga1 dgbg _dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -116,7 +116,7 @@ def covAF {n : ℕ} (_ig _cg _f : Fin n → Fin n → ℝ)
     (∑ c, ga1 a m c * (ga1 k c p - gbg k c p)) -
     (∑ c, ga1 a k c * (ga1 c m p - gbg c m p))
 
-/-- The covariant derivative of the traced connection difference. -/
+
 def covWF {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -124,7 +124,7 @@ def covWF {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   dvfbF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb a p +
     ∑ c, ga1 a c p * vfbF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb c
 
-/-- The assembled covariant-derivative correction block. -/
+
 def v0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
@@ -136,7 +136,7 @@ def v0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     ((∑ p, covWF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb i p * f p j) +
       (∑ p, covWF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb j p * f i p))
 
-/-- The first-covariant-derivative remainder block. -/
+
 def d1RF {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)

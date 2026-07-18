@@ -3,14 +3,14 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 set_option autoImplicit false
 
-/-!
-# Open-subtype restriction of a cross-model partial diffeomorphism
 
-This file restricts a smooth partial diffeomorphism to an arbitrary open
-subset of its source and packages the restriction as a global diffeomorphism
-between open subtypes.  Unlike the earlier HCG-local helper, the source and
-target model-with-corners structures may be different.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,8 +28,8 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H' N] [IsManifold J ∞ 
 variable {n : WithTop ℕ∞}
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-/-- Restricting the codomain of a smooth map to an open subtype preserves
-smoothness at a point, also when the source and target models differ. -/
+
+
 theorem codRestr_contMDiffAt
     {N' : Type*} [TopologicalSpace N'] [ChartedSpace H' N']
     {V : Opens N'} {f : M → N'} (hmem : ∀ y, f y ∈ V) {x : M}
@@ -43,8 +43,8 @@ theorem codRestr_contMDiffAt
   convert hdiff using 2
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-/-- The image of a source open under a cross-model partial diffeomorphism is
-open when that source open lies in the partial domain. -/
+
+
 theorem image_opens_isOpen
     (Φ : PartialDiffeomorph I J M N n)
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source) :
@@ -68,8 +68,8 @@ theorem image_opens_isOpen
 
 namespace PartialDiffeomorph
 
-/-- Restrict a cross-model partial diffeomorphism to a source open and its
-image, producing a global diffeomorphism of open subtypes. -/
+
+
 noncomputable def toOpensDiffeoCross
     (Φ : PartialDiffeomorph I J M N (∞ : WithTop ℕ∞))
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source) :
@@ -130,8 +130,8 @@ noncomputable def toOpensDiffeoCross
     exact codRestr_contMDiffAt (I := J) (J := I) hmem hbase
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-/-- The differential of the open-subtype restriction is the ambient
-differential of the cross-model partial diffeomorphism. -/
+
+
 theorem opensDiffeo_mfd
     (Φ : PartialDiffeomorph I J M N (∞ : WithTop ℕ∞))
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source)

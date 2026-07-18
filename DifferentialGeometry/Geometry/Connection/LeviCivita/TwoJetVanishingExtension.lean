@@ -1498,14 +1498,9 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
     have hCd : MDiffAt (T% C) x₀ := hC_sm.mdifferentiableAt (by norm_num)
     have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hLv hCd
       (Set.mem_univ x₀)
-    rw [LeviCivita_toFun] at hadd ⊢
     rw [show (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
         linearExtensionTangent (I := I) x₀ v + C from rfl, hadd]
     rw [ContinuousLinearMap.add_apply]
-    rw [show leviCivitaStitched (I := I) g (linearExtensionTangent (I := I) x₀ v) x₀ u =
-        (LeviCivita (I := I) g).toFun (linearExtensionTangent (I := I) x₀ v) x₀ u from rfl]
-    rw [show leviCivitaStitched (I := I) g C x₀ u =
-        (LeviCivita (I := I) g).toFun C x₀ u from rfl]
     rw [hC_grad u, add_neg_cancel]
   · intro u
 
@@ -1518,13 +1513,11 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
       have hLvb : MDiffAt (T% (linearExtensionTangent (I := I) x₀ v)) b :=
         (linearExtensionTangent_smooth (I := I) x₀ v).mdifferentiableAt (by norm_num)
       have hCb : MDiffAt (T% C) b := hC_sm.mdifferentiableAt (by norm_num)
-      have hbgood : b ∈ chartLeviCivitaGoodSet (I := I) b :=
-        self_mem_chartLeviCivitaGoodSet (I := I) (α := b)
       simp only [Connection.covApply_apply, Pi.add_apply]
       rw [show (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
           linearExtensionTangent (I := I) x₀ v + C from rfl]
-      rw [LeviCivita_toFun,
-        leviCivitaStitched_add_on_goodSet (I := I) g b hLvb hCb hbgood]
+      rw [(LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add
+        hLvb hCb (Set.mem_univ b)]
       rfl
     rw [hsplit]
 
@@ -1545,17 +1538,7 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
         (linearExtensionTangent_smooth (I := I) x₀ u) hC1
     have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBLv hBC
       (Set.mem_univ x₀)
-    rw [LeviCivita_toFun] at hadd ⊢
     rw [hadd, ContinuousLinearMap.add_apply]
-    rw [show leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g)
-          (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v)) x₀ u =
-        (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g)
-          (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v)) x₀ u
-        from rfl]
-    rw [show leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g)
-          (linearExtensionTangent (I := I) x₀ u) C) x₀ u =
-        (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g)
-          (linearExtensionTangent (I := I) x₀ u) C) x₀ u from rfl]
     rw [hC_hess u, add_neg_cancel]
 
 omit [CompactSpace M] [I.Boundaryless] in
@@ -1597,11 +1580,11 @@ theorem covApply_covApply_eq_linExt_of_covApply_zero
 
   have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBZ hBD (Set.mem_univ x₀)
   rw [hsplit]
-  rw [LeviCivita_toFun] at hadd ⊢
   rw [hadd]
   rw [ContinuousLinearMap.add_apply]
 
-  have hDvanish : leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g) D W) x₀ (Y x₀) = 0 := by
+  have hDvanish : (LeviCivita (I := I) g).toFun
+      (covApply (LeviCivita (I := I) g) D W) x₀ (Y x₀) = 0 := by
 
     have hτ_sm : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
         (fun x : M => TotalSpace.mk' (E →L[ℝ] E)

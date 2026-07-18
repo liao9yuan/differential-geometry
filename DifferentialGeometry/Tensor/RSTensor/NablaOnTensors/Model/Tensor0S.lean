@@ -30,9 +30,9 @@ import DifferentialGeometry.Tensor.RSTensor.Basis
 import Mathlib.Analysis.Calculus.FDeriv.ContinuousMultilinearMap
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-/-!
-# Model-space covariant derivative for covariant tensors
--/
+
+
+
 namespace TensorLieDeriv
 
 noncomputable section
@@ -55,13 +55,13 @@ variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
 
-/-!
-## Implementation layer: model-space tensor formula
 
-These definitions are the fixed-vector-space formulas used after trivializing
-the tensor bundle in a chart.  They are deliberately lower-level than
-`nabla0SFun` / `nablaRSFun`.
--/
+
+
+
+
+
+
 
 
 theorem covariantDeriv_tensor0SModelAt_apply_slots {s : ℕ}
@@ -96,7 +96,7 @@ theorem covariantDeriv_tensor0SModelWithin_apply_slots {s : ℕ}
   exact covariantDeriv_tensor0SModelAt_apply_slots (𝕜 := 𝕜) (E := E)
     (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) slots
 
-/-- Evaluation of the covariant-slot correction operator on explicit slots. -/
+
 theorem lieDeriv_correctionL_apply_slots {s : ℕ}
     (ΓX : E →L[𝕜] E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -116,10 +116,10 @@ theorem lieDeriv_correctionL_apply_slots {s : ℕ}
     simp
   · simp [Function.update, hb]
 
-/-- Product rule for evaluating a model `(0,s)` tensor on variable model slots
-written as continuous linear maps from `𝕜` and then evaluated on fixed scalar
-slots. This is the pure model-space calculus input behind the moving-slot
-derivation formula. -/
+
+
+
+
 theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
     (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (L : Fin s → E → 𝕜 →L[𝕜] E)
@@ -176,8 +176,8 @@ theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
     simp
   · simp [Function.update, hb]
 
-/-- Product rule for evaluating a model `(0,s)` tensor on genuinely `E`-valued
-variable model slots. -/
+
+
 theorem fderivWithin_tensor0SModel_eval_slots {s : ℕ}
     (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (V : Fin s → E → E)

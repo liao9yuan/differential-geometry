@@ -155,7 +155,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 abbrev SmoothMetric
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
-  Bundle.ContMDiffRiemannianMetric I ⊤ E (TangentSpace I : M -> Type _)
+  Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
 
 def tangentFlatLinear (g : SmoothMetric I M) (x : M) :
     TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where

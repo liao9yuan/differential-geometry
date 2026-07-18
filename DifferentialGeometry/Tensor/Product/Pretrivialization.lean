@@ -1,6 +1,6 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.Product.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Topology.FiberBundle.Basic

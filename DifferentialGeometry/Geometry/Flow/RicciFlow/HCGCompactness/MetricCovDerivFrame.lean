@@ -5,17 +5,17 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Metric covariant-derivative-in-frame components (HCG port)
 
-The definitions `metricCovDeriv{,2,3}ForMetricCompInFrame` exist in the source
-RicciFlower development under `Coordinates/MetricCompatibility/Covariant.lean`
-but are absent from this repository's
-`Geometry/Coordinates/MetricCompatibility/Covariant.lean` (which only carries the
-`inverse...` variants).  They are reproduced here verbatim, in the same
-`DifferentialGeometry.Tensor.Coordinates` namespace, so the
-Hamilton--Cheeger--Gromov `AllTimesBounds` file can cite them.
--/
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -37,8 +37,8 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-- Covariant derivative components of a metric with respect to an arbitrary
-connection in a local frame. -/
+
+
 def metricCovDerivForMetricCompInFrame
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -55,12 +55,12 @@ def metricCovDerivForMetricCompInFrame
       christoffelSymbolInFrame cov frame hframe x d b p *
         metricCompForMetricInFrame (I := I) g frame x a p)
 
-/-- Second covariant derivative components of a metric with respect to an
-arbitrary connection in a local frame.
 
-The slot order is the derivative direction `d`, followed by the three slots
-`a b c` of `nabla g`.  This is the coordinate object needed for the
-differentiated Christoffel-difference formula used in MSM135 Chapter 4 F3. -/
+
+
+
+
+
 def metricCovDeriv2ForMetricCompInFrame
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -85,12 +85,12 @@ def metricCovDeriv2ForMetricCompInFrame
         metricCovDerivForMetricCompInFrame
           (I := I) g cov frame hframe x a b p)
 
-/-- Third covariant derivative components of a metric with respect to an
-arbitrary connection in a local frame.
 
-The slot order is the new derivative direction `m`, followed by the four slots
-`d a b c` of `nabla^2 g`.  This is the coordinate object needed for the first
-higher-order connection-difference estimate in MSM135 Chapter 4 F3. -/
+
+
+
+
+
 def metricCovDeriv3ForMetricCompInFrame
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

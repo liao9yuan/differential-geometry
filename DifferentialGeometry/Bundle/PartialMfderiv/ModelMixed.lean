@@ -1,10 +1,10 @@
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 
-/-!
-# Model mixed derivatives
 
-Model-space mixed derivative lemmas used by fixed-base time derivative producers.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -82,8 +82,8 @@ private theorem model_hasDerivAt_fixed_snd
     · fun_prop
   simpa [hLderiv] using hcomp
 
-/-- Derivative of a scalar model function along a horizontal line in
-`ℝ × ℝ`. -/
+
+
 theorem modelLine_fst_hasDerivAt
     {A : ℝ × ℝ -> ℝ} {s t : ℝ}
     (hA : DifferentiableAt ℝ A (s, t)) :
@@ -101,8 +101,8 @@ theorem modelLine_fst_hasDerivAt
     · fun_prop
   simpa [L, hLderiv] using hcomp
 
-/-- Derivative of a scalar model function along a vertical line in
-`ℝ × ℝ`. -/
+
+
 theorem modelLine_snd_hasDerivAt
     {A : ℝ × ℝ -> ℝ} {s t : ℝ}
     (hA : DifferentiableAt ℝ A (s, t)) :
@@ -120,12 +120,12 @@ theorem modelLine_snd_hasDerivAt
     · fun_prop
   simpa [L, hLderiv] using hcomp
 
-/-- Model-space fixed-base mixed derivative.
 
-This is the chart-level theorem behind
-`∂t (d_x F_t(V)) = d_x(∂t F_t)(V)`.  The manifold version still needs the
-coordinate transport from `extDerivFun` to chart derivatives, but the analytic
-mixed-partial calculation itself is discharged here. -/
+
+
+
+
+
 theorem fixedBaseFDerivTimeDerivativeAt_of_contDiff
     (F : ℝ -> E -> ℝ)
     (hF : ContDiff ℝ 2 (fun p : ℝ × E => F p.1 p.2))
@@ -279,8 +279,8 @@ theorem fixedBaseFDerivTimeDerivativeWithinAt_of_contDiff
       t :=
   (fixedBaseFDerivTimeDerivativeAt_of_contDiff (E := E) F hF t x V).hasDerivWithinAt
 
-/-- Model-space equality of scalar mixed partials on `ℝ × ℝ`, expressed as
-equality of the two directional derivatives of the first derivative. -/
+
+
 theorem modelMix2
     {φ : ℝ × ℝ -> ℝ} {s t : ℝ}
     (hφ : ContDiffAt ℝ 2 φ (s, t)) :
@@ -301,9 +301,9 @@ theorem modelMix2
   simp [VectorField.lieBracket] at hlie
   linarith
 
-/-- Model-space equality of the mixed partials of the time derivative on
-`ℝ × ℝ`.  This is the scalar `∂s∂t∂t = ∂t∂s∂t` bridge used by surface
-velocity-jet calculations. -/
+
+
+
 theorem modelMix3
     {φ : ℝ × ℝ -> ℝ} {s t : ℝ}
     (hφ : ContDiffAt ℝ 3 φ (s, t)) :

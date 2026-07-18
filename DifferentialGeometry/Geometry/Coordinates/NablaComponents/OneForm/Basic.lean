@@ -3,11 +3,11 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -56,8 +56,8 @@ theorem nabla0S_one_model_coord
     simp
   simpa only [Fin.sum_univ_one, hupdate] using h
 
-/-- Coordinate-frame component formula for one-forms, after supplying the
-derivative-identification bridge. -/
+
+
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -84,13 +84,13 @@ theorem nabla0S_one_coord
     simp
   simpa only [Fin.sum_univ_one, hupdate] using h
 
-/-- Evaluation form of `nabla0S_one_coord` on a coordinate-frame basis vector.
 
-This is the coordinate-frame bridge from the canonical raw derivative
-`nabla0SFun` to the usual one-form Christoffel component formula.  It is not the
-intrinsic moving-vector-field identity
-`(∇_X α)(Z) = X(α Z) - α(∇_X Z)`; that identity additionally needs a product
-rule for differentiating the scalar pairing `p ↦ α p (Z p)`. -/
+
+
+
+
+
+
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -110,8 +110,8 @@ theorem nabla0SFun_one_eval_coordFrame
   simpa [coordComponent0SAt, component0S] using
     nabla0S_one_coord (I := I) cov X α x₀ hderiv j
 
-/-- Evaluate a one-form on an arbitrary tangent vector by expanding the vector
-in the coordinate-frame basis at the base point. -/
+
+
 theorem tensor0S_one_eval_coordFrame_sum
     {x₀ : M}
     (αx : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 1 x₀)

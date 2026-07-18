@@ -2,12 +2,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJo
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
-/-!
-# Covariant jet bounds for smooth parameter integrals
 
-This file transfers a uniform finite covariant `L²` jet bound for a jointly
-smooth one-parameter tensor family to its interval integral.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -41,7 +41,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Jointly smooth mixed-tensor families are closed under fibrewise subtraction. -/
+
 theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -79,7 +79,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Jointly smooth mixed-tensor families are closed under fibrewise addition. -/
+
 theorem joint_rs_add {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -286,8 +286,8 @@ private theorem icg_norm_sq_int
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- Iterated covariant differentiation commutes with the coefficient-field
-path integral for a jointly smooth family. -/
+
+
 theorem icg_path_comm
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -326,8 +326,8 @@ theorem icg_path_comm
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- A uniform covariant `L²` jet bound for a jointly smooth parameter family
-passes unchanged to its interval-integrated coefficient field. -/
+
+
 theorem path_jetL2_le
     (g₀ : SmoothRiemannianMetric I M) (r s a : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)

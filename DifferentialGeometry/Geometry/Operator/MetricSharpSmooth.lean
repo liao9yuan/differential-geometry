@@ -17,6 +17,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+lemma metricSharp_eq_connectionMetricSharp
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (alpha : TangentSpace I x →ₗ[ℝ] ℝ) :
+    metricSharp (I := I) g x alpha =
+      DifferentialGeometry.Integral.Connection.metricSharp (I := I) g x alpha := by
+  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
+    (I := I) g x
+  ext w
+  change g.inner x (metricSharp (I := I) g x alpha) w =
+    g.inner x (DifferentialGeometry.Integral.Connection.metricSharp
+      (I := I) g x alpha) w
+  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp,
+    DifferentialGeometry.Integral.Connection.inner_metricSharp]
+
 def metricSharpChartCoeff (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=

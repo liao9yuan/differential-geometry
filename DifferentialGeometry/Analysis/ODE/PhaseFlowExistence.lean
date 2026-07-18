@@ -2,13 +2,13 @@ import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.VariationalSolutionOperator
 import Mathlib.Analysis.Normed.Operator.NNNorm
 
-/-!
-# Uniform existence for small phase flows
 
-This file uses anisotropic position/velocity scaling before applying
-Picard--Lindelof.  The scaling separates the harmless free drift `x' = v`
-from the genuinely small acceleration term.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -20,16 +20,16 @@ namespace PhaseFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 
-/-- A closed phase box with separate position and velocity radii. -/
+
 def phaseBox (P V : NNReal) : Set (E × E) :=
   {z | ‖z.1‖ ≤ (P : Real) ∧ ‖z.2‖ ≤ (V : Real)}
 
-/-- Normalize position by `P` and velocity by `V`. -/
+
 def phaseScale (P V : NNReal) : (E × E) →L[Real] (E × E) :=
   (((P : Real)⁻¹) • ContinuousLinearMap.fst Real E E).prod
     (((V : Real)⁻¹) • ContinuousLinearMap.snd Real E E)
 
-/-- Undo the anisotropic phase normalization. -/
+
 def phaseUnscale (P V : NNReal) : (E × E) →L[Real] (E × E) :=
   ((P : Real) • ContinuousLinearMap.fst Real E E).prod
     ((V : Real) • ContinuousLinearMap.snd Real E E)
@@ -54,7 +54,7 @@ theorem scale_unscale {P V : NNReal} (hP : P ≠ 0) (hV : V ≠ 0)
     (z : E × E) : phaseScale P V (phaseUnscale P V z) = z := by
   ext <;> simp [phaseUnscale, phaseScale, hP, hV, smul_smul]
 
-/-- The unit phase ball unscales into the corresponding closed phase box. -/
+
 theorem unscale_maps_box (P V : NNReal) :
     MapsTo (phaseUnscale P V) (closedBall (0 : E × E) 1) (phaseBox P V) := by
   intro z hz
@@ -69,8 +69,8 @@ theorem unscale_maps_box (P V : NNReal) :
       abs_of_nonneg V.coe_nonneg]
     simpa using mul_le_mul_of_nonneg_left hz2 V.coe_nonneg
 
-/-- An ordinary phase ball maps into an inner normalized ball whenever its
-radius fits both weighted component radii. -/
+
+
 theorem scale_maps_ball {P V b q : NNReal} (hP : 0 < P) (hV : 0 < V)
     (hqP : q ≤ b * P) (hqV : q ≤ b * V) :
     MapsTo (phaseScale (E := E) P V) (closedBall (0 : E × E) q)
@@ -104,12 +104,12 @@ theorem scale_maps_ball {P V b q : NNReal} (hP : 0 < P) (hV : 0 < V)
       _ ≤ (b : Real) := (div_le_iff₀ hVr).2 (by
         simpa only [mul_comm] using hqVr)
 
-/-- The first-order field in normalized phase variables. -/
+
 def scaledPhase (P V : NNReal) (a : E × E → E) (z : E × E) : E × E :=
   phaseScale P V (phaseField a (phaseUnscale P V z))
 
-/-- A Lipschitz acceleration on a phase box gives a Lipschitz normalized
-first-order field on the unit ball. -/
+
+
 theorem scaledPhase_lip {P V κ : NNReal} {a : E × E → E}
     (ha : LipschitzOnWith κ a (phaseBox P V)) :
     LipschitzOnWith
@@ -124,8 +124,8 @@ theorem scaledPhase_lip {P V κ : NNReal} {a : E × E → E}
   have hs := (phaseScale (E := E) P V).lipschitz.comp_lipschitzOnWith hm
   simpa only [scaledPhase, Function.comp_def, mul_assoc] using hs
 
-/-- If the free drift and acceleration each fit the normalized speed budget
-`L`, then the normalized phase field has norm at most `L` on the unit ball. -/
+
+
 theorem scaledPhase_norm {P V A L : NNReal} {a : E × E → E}
     (hP : 0 < P) (hV : 0 < V)
     (ha : ∀ z ∈ phaseBox P V, ‖a z‖ ≤ (A : Real))
@@ -262,9 +262,9 @@ private theorem exists_fenced_Icc [CompleteSpace E]
   · intro t ht
     exact unscale_maps_box P V (hΨmem t ht)
 
-/-- A normalized Picard argument produces a common time-one family of exact
-phase trajectories.  Initial data are measured in the inner normalized ball;
-all trajectories remain in the original anisotropic phase box. -/
+
+
+
 theorem exists_fenced [CompleteSpace E]
     {P V A L b κ : NNReal} {a : E × E → E}
     (hP : 0 < P) (hV : 0 < V)
@@ -289,8 +289,8 @@ theorem exists_fenced [CompleteSpace E]
   exact Analysis.ODE.Flow.hasDerivWithinAt_Ici_of_Icc
     (hΦderiv t ⟨ht.1, ht.2.le⟩) ht
 
-/-- A normalized Picard argument produces one common exact phase-flow family
-on any symmetric interval whose length fits the normalized fence. -/
+
+
 theorem exists_fenced_on [CompleteSpace E]
     {P V A L b κ : NNReal} {T : Real} {a : E × E → E}
     (hT : 0 ≤ T) (hP : 0 < P) (hV : 0 < V)
@@ -318,10 +318,10 @@ theorem exists_fenced_on [CompleteSpace E]
   exact (hΦderiv t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
-/-- Under the same unit-time fence as `exists_fenced`, one common family of
-exact phase trajectories exists on the symmetric interval `[-1, 1]`.  The
-closed-interval derivative is retained, and hence becomes an ordinary
-derivative at every interior time. -/
+
+
+
+
 theorem exists_fenced_sym [CompleteSpace E]
     {P V A L b κ : NNReal} {a : E × E → E}
     (hP : 0 < P) (hV : 0 < V)

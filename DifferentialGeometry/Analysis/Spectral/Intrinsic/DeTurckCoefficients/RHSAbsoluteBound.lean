@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 
-/-!
-# Absolute chart bounds for the Ricci--DeTurck right-hand side
 
-This file records finite-sum estimates for the chart Ricci tensor, the
-DeTurck Lie summand, and their sum.  The estimates consume entrywise bounds
-on the coefficients and do not use compactness or a Sobolev realization.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
@@ -25,8 +25,8 @@ variable
       [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Entrywise Christoffel and first-Christoffel-derivative bounds control a
-chart Ricci component. -/
+
+
 theorem chartRicci_abs_le
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E)
@@ -150,8 +150,8 @@ theorem chartRicci_abs_le
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
-/-- Gram, first-Gram, DeTurck-vector-field, and first-vector-field bounds
-control a chart Lie summand. -/
+
+
 theorem chartLie_abs_le
     (g gBase : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E)
@@ -240,7 +240,7 @@ theorem chartLie_abs_le
           add_le_add (add_le_add hfirst hsecond) hthird
     _ = (Module.finrank ℝ E : ℝ) * (V * Q₁ + 2 * Q₀ * DV) := by ring
 
-/-- Absolute Ricci and Lie bounds control the full chart Ricci--DeTurck RHS. -/
+
 theorem chartRHS_abs_le
     (gBase g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E)

@@ -2,14 +2,14 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 
-/-!
-# Cometric trace retagging
 
-This file proves the fibrewise metric/cometric naturality identity needed to
-factor a scalar moving-Laplacian coefficient through a covector endomorphism.
-The statement is scalarized at covariant rank zero; it does not compare whole
-dependent Hom bundles.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -37,7 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Retagging one covariant slot by `q♭ ∘ h♯` changes the `q`-trace into the `h`-trace. -/
+
 theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     cometricDoubleTraceFib (I := I) h 0 x D =

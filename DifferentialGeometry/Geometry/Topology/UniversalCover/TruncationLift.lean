@@ -4,15 +4,15 @@ import Mathlib.Topology.Path
 import Mathlib.Topology.Homotopy.Path
 import Mathlib.Topology.Homotopy.Lifting
 
-/-!
-# Truncation-lift slice-topology continuity
 
-Material for the truncation lift `s ↦ ⟨γ s, q.2.trans ⟦γ.truncate 0 s⟧⟩`
-into the universal cover. The first lemma (`uc_trans_truncate_class`) is
-fully proved here. The remaining two declarations
-(`uc_truncLift_continuous`, `uc_liftPath_one_eq`) are placeholder stubs
-whose conclusion is currently `True`, recording the intended results.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -24,12 +24,12 @@ namespace UniversalCover
 
 open Set unitInterval
 
-/-- **Path-class identity expressing a truncation as a concatenation.**
 
-For any path `γ` in `X` and reals `0 ≤ s₀ ≤ s ≤ 1`, the truncation
-`γ|_{[0,s]}` is path-homotopic rel endpoints to the concatenation
-`γ|_{[0,s₀]} ⋆ γ|_{[s₀,s]}`. Hence their homotopy classes agree in the
-fundamental groupoid. -/
+
+
+
+
+
 lemma uc_trans_truncate_class
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)
     {s₀ s : ℝ} (h0 : (0 : ℝ) ≤ s₀) (h0s : s₀ ≤ s) (hs1 : s ≤ 1) :
@@ -171,8 +171,8 @@ lemma uc_trans_truncate_class
       rw [p.target]
 
 set_option linter.unusedVariables false in
-/-- Placeholder stub (conclusion `True`) for the intended statement that the
-truncation lift is continuous in the slice topology. -/
+
+
 lemma uc_truncLift_continuous
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     {a b : X} (γ : _root_.Path a b)
@@ -180,8 +180,8 @@ lemma uc_truncLift_continuous
     True := trivial
 
 set_option linter.unusedVariables false in
-/-- Placeholder stub (conclusion `True`) for the intended statement about the
-value at `1` of the lift of a path starting at the basepoint. -/
+
+
 lemma uc_liftPath_one_eq
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     [ConnectedSpace X] [LocPathConnectedSpace X]

@@ -13,23 +13,23 @@ import Mathlib.Topology.MetricSpace.Pseudo.Basic
 
 set_option autoImplicit false
 
-/-!
-# `C^p` / `C^∞` convergence of maps (MSM135 Chapter 4, "Compactness of maps")
 
-This file formalizes the two MSM135 definitions in the subsection *Compactness of
-maps* (the convergence-of-maps notions, `lbl373`), for maps between open sets of a
-real normed space.  These are the Euclidean analogues of the metric-convergence
-definitions in `PointedConvergence.lean` (`MetricCPConvOn`,
-`MetricCInfConvOnCompacts`): there the derivative is the Levi-Civita covariant
-derivative of a reference metric and the norm is metric-induced; here `∇` is the
-Euclidean gradient — the iterated Fréchet derivative `iteratedFDeriv ℝ r` — and the
-norm is the operator norm on `ContinuousMultilinearMap`s.
 
-The displayed book condition is `sup_{0 ≤ r ≤ p} sup_{x ∈ K} |∇ʳ(Φₖ - Φ_∞)(x)| ≤ ε`.
-We state it in the equivalent direct `∀ r ≤ p, ∀ x ∈ K, ‖…‖ ≤ ε` form (avoiding an
-`sSup` and its boundedness side conditions), which is the Mathlib-idiomatic shape
-that the Arzelà–Ascoli engine and Step D consume.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -42,11 +42,11 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
-/-- Spaces of continuous multilinear maps with finite-dimensional (real) source and
-target are finite-dimensional: curry induction on the arity through
-`continuousMultilinearCurryLeftEquiv`, with the linear-arity instance
-`ContinuousLinearMap.instModuleFinite` at each step (Mathlib has no multilinear
-instance). -/
+
+
+
+
+
 theorem cmm_finiteDimensional (r : ℕ) :
     FiniteDimensional ℝ (ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F) := by
   induction r with
@@ -58,10 +58,10 @@ theorem cmm_finiteDimensional (r : ℕ) :
         (fun _ : Fin (r + 1) => E) F).symm.toLinearEquiv).finiteDimensional
 
 omit [FiniteDimensional ℝ F] in
-/-- Equicontinuity input for the Arzelà–Ascoli extraction: the order-`(r+1)` uniform
-bound on the closed unit ball around each point makes the order-`r` derivative family
-uniformly Lipschitz there (mean value inequality, `fderiv ∇ʳΦ = (∇^{r+1}Φ).curryLeft`
-from the Taylor-series field), hence equicontinuous. -/
+
+
+
+
 private theorem equicont_iteratedFDeriv
     (Φ : ℕ → E → F) (hΦ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Φ k))
     (hbdd : ∀ r : ℕ, ∀ K : Set E, IsCompact K →
@@ -76,7 +76,7 @@ private theorem equicont_iteratedFDeriv
   have hx1 : x ∈ Metric.closedBall x₀ 1 :=
     Metric.mem_closedBall.mpr (hx.trans_le (min_le_left _ _)).le
   have hx₀1 : x₀ ∈ Metric.closedBall x₀ 1 := Metric.mem_closedBall_self zero_le_one
-  -- mean value inequality with the uniform order-`(r+1)` bound
+
   have hlip : ‖iteratedFDeriv ℝ r (Φ k) x - iteratedFDeriv ℝ r (Φ k) x₀‖
       ≤ max M 0 * ‖x - x₀‖ := by
     refine Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le
@@ -97,27 +97,27 @@ private theorem equicont_iteratedFDeriv
         mul_lt_mul_of_pos_right (lt_add_one _) (by positivity)
     _ = ε := by field_simp
 
-/-- **Arzelà–Ascoli for maps** (the map-valued compactness the MSM135 subsection
-*Compactness of maps* "shall need", used to prove the isometry corollary `lbl374`).
 
-If a sequence of smooth maps `Φₖ : E → F` (between finite-dimensional real normed
-spaces) has all Euclidean iterated derivatives uniformly bounded on every compact set
-— `∀ r, ∀ K compact, ∃ M, ∀ k, ∀ x ∈ K, ‖∇ʳΦₖ(x)‖ ≤ M` — then a subsequence converges
-in `C^∞` uniformly on compact sets to a smooth limit `Φ_∞`.
 
-Proof route:
-(1) the order-`(r+1)` bound makes `{∇ʳΦₖ}ₖ` equicontinuous (`equicont_iteratedFDeriv`)
-   and the order-`r` bound makes it pointwise bounded, so the bundled family has
-   compact closure in `C(E, E[×r]→L[ℝ] F)` (`arzelaAscoli_isCompact_closure`, with
-   `cmm_finiteDimensional` providing properness of the target);
-(2) one subsequence works for every order `r` at once: the sequence of all-order
-   derivative tuples lives in the countable product of those compact closures, which
-   is compact and first countable (no explicit diagonal, as in `DiagonalSubseq`);
-(3) `hasFDerivAt_of_tendstoUniformlyOn` on unit balls identifies the uniform limit of
-   the order-`(r+1)` derivatives as the derivative of the order-`r` limit, so the
-   limits `G r` assemble into `HasFTaylorSeriesUpTo ⊤` of `Φ_∞ := (G 0).curry0`;
-(4) hence `Φ_∞` is `C^∞` with `∇ʳΦ_∞ = G r` (`HasFTaylorSeriesUpTo.eq_iteratedFDeriv`)
-   and the convergence is `C^∞`-on-compacts via `mapCPConvOn_of_tendstoUniformly`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem exists_cInf_subseq
     (Φ : ℕ → E → F) (hΦ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Φ k))
     (hbdd : ∀ r : ℕ, ∀ K : Set E, IsCompact K →
@@ -126,11 +126,11 @@ theorem exists_cInf_subseq
       StrictMono φ ∧ ContDiff ℝ (⊤ : ℕ∞) Φinf ∧
         MapCInfConvOnCompacts Set.univ (fun k => Φ (φ k)) Φinf := by
   classical
-  -- bundle the order-`r` derivative families as continuous maps
+
   let Fb : (r : ℕ) → ℕ → C(E, ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F) :=
     fun r k => ⟨iteratedFDeriv ℝ r (Φ k),
       (contDiff_infty.mp (hΦ k) r).continuous_iteratedFDeriv'⟩
-  -- each family has compact closure in `C(E, ⋯)` (vector Arzelà–Ascoli)
+
   have hcpt : ∀ r : ℕ, IsCompact (closure (Set.range (Fb r))) := by
     intro r
     haveI := cmm_finiteDimensional (E := E) (F := F) r
@@ -138,7 +138,7 @@ theorem exists_cInf_subseq
       (equicont_iteratedFDeriv Φ hΦ hbdd r) (fun x => ?_)
     obtain ⟨M, hM⟩ := hbdd r {x} isCompact_singleton
     exact ⟨M, fun k => hM k x rfl⟩
-  -- one subsequence for all orders at once, via the compact countable product
+
   haveI : ∀ r : ℕ, CompactSpace (closure (Set.range (Fb r))) :=
     fun r => isCompact_iff_compactSpace.mp (hcpt r)
   set xseq : ℕ → Π r : ℕ, closure (Set.range (Fb r)) :=
@@ -158,7 +158,7 @@ theorem exists_cInf_subseq
   have hGunif : ∀ r : ℕ, ∀ K : Set E, IsCompact K →
       TendstoUniformlyOn (fun k => ⇑(Fb r (φ k))) (⇑(G r)) atTop K :=
     fun r => ContinuousMap.tendsto_iff_forall_isCompact_tendstoUniformlyOn.mp (hGconv r)
-  -- the uniform limits are linked by differentiation
+
   have hGderiv : ∀ (r : ℕ) (x₀ : E),
       HasFDerivAt (⇑(G r)) (((G (r + 1)) x₀).curryLeft) x₀ := by
     intro r x₀
@@ -178,7 +178,7 @@ theorem exists_cInf_subseq
       (hGunif r _ hball).tendsto_at (Metric.ball_subset_closedBall hy)
     exact hasFDerivAt_of_tendstoUniformlyOn Metric.isOpen_ball hf' hfd hfg
       (Metric.mem_ball_self one_pos)
-  -- the limits assemble into a full Taylor series of the order-`0` limit
+
   have htaylor : HasFTaylorSeriesUpTo ((⊤ : ℕ∞) : WithTop ℕ∞)
       (fun y => ((G 0) y).curry0) (fun y r => (G r) y) :=
     ⟨fun _ => rfl, fun m _ y => hGderiv m y, fun m _ => (G m).continuous⟩
@@ -197,18 +197,18 @@ theorem exists_cInf_subseq
     funext fun y => (hid r y).symm] at h
   exact h
 
-/-! ### Localized Arzelà–Ascoli on an open domain (MSM135 Ch4 Step B, B-loc)
 
-The same extraction, but for maps that are only `ContDiffOn ℝ ⊤ · U` on an open set
-`U`, with uniform derivative bounds on compact subsets of `U`.  The output limit is
-`ContDiffOn ℝ ⊤ · U` and the convergence is `MapCInfConvOnCompacts U`.  Authorized
-addition for the Step B nested-ball maps (`STEPB_PLAN.md` Q2). -/
+
+
+
+
+
 
 omit [FiniteDimensional ℝ F] in
-/-- Localized equicontinuity input for `exists_cInf_subseq_on`: the order-`(r+1)`
-within-derivative bound on a closed ball inside `U` makes the order-`r` within-derivative
-family uniformly Lipschitz there (mean value inequality with the within Taylor series),
-hence equicontinuous as a family of maps on the metric subspace `↥U`. -/
+
+
+
+
 private theorem equicontOn_iteratedFDerivWithin
     {U : Set E} (hU : IsOpen U) (Φ : ℕ → E → F)
     (hΦ : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (Φ k) U)
@@ -263,18 +263,18 @@ private theorem equicontOn_iteratedFDerivWithin
         mul_lt_mul_of_pos_right (lt_add_one _) (by positivity)
     _ = ε := by field_simp
 
-/-- **Localized Arzelà–Ascoli for maps** (MSM135 Ch4 Step B, `lbl394` input).  If a
-sequence of maps `Φₖ : E → F` is `C^∞` *on an open set `U`* and has all Euclidean
-iterated derivatives uniformly bounded on every compact subset of `U`, then a
-subsequence converges in `C^∞` uniformly on compact subsets of `U` to a limit that is
-`C^∞` on `U`.
 
-The proof localizes `exists_cInf_subseq`: the order-`r` *within* derivatives
-`∇ᵤʳΦₖ` are bundled as continuous maps on the metric subspace `↥U` (locally compact,
-second-countable hence sigma-compact), Arzelà–Ascoli extracts one subsequence for all
-orders at once, the uniform limits are linked by differentiation on open balls inside
-`U`, and they assemble into a `HasFTaylorSeriesUpToOn ⊤` of the limit.  The unconditional
-identity `iteratedFDerivWithin_of_isOpen` bridges within/global derivatives on `U`. -/
+
+
+
+
+
+
+
+
+
+
+
 theorem exists_cInf_subseq_on
     {U : Set E} (hU : IsOpen U) (Φ : ℕ → E → F)
     (hΦ : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (Φ k) U)
@@ -285,14 +285,14 @@ theorem exists_cInf_subseq_on
         MapCInfConvOnCompacts U (fun k => Φ (φ k)) Φinf := by
   classical
   haveI : LocallyCompactSpace U := hU.locallyCompactSpace
-  -- the global derivative bounds equal within-`U` bounds on compacts of `U`
+
   have hbddW : ∀ r : ℕ, ∀ K : Set E, IsCompact K → K ⊆ U →
       ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDerivWithin ℝ r (Φ k) U x‖ ≤ M := by
     intro r K hK hKU
     obtain ⟨M, hM⟩ := hbdd r K hK hKU
     exact ⟨M, fun k x hx => by
       rw [iteratedFDerivWithin_of_isOpen r hU (hKU hx)]; exact hM k x hx⟩
-  -- bundle the within order-`r` derivative families as continuous maps on `↥U`
+
   let Fb : (r : ℕ) → ℕ → C(U, ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F) :=
     fun r k => ⟨fun x => iteratedFDerivWithin ℝ r (Φ k) U (x : E),
       ((hΦ k).continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top)
@@ -323,13 +323,13 @@ theorem exists_cInf_subseq_on
   have hGunif : ∀ r : ℕ, ∀ K : Set U, IsCompact K →
       TendstoUniformlyOn (fun k => ⇑(Fb r (φ k))) (⇑(G r)) atTop K :=
     fun r => ContinuousMap.tendsto_iff_forall_isCompact_tendstoUniformlyOn.mp (hGconv r)
-  -- partial limit functions on `E`, junk outside `U`
+
   let Gext : (r : ℕ) → E → ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F :=
     fun r x => if h : x ∈ U then (G r) ⟨x, h⟩ else 0
   have hGext : ∀ (r : ℕ) (x : E) (hx : x ∈ U), Gext r x = (G r) ⟨x, hx⟩ :=
     fun r x hx => dif_pos hx
   let Φinf : E → F := fun x => (Gext 0 x).curry0
-  -- transfer the subtype uniform convergence to compacts of `U` in `E`
+
   have hGunifE : ∀ r : ℕ, ∀ K : Set E, IsCompact K → K ⊆ U →
       TendstoUniformlyOn (fun k => iteratedFDerivWithin ℝ r (Φ (φ k)) U)
         (Gext r) atTop K := by
@@ -344,7 +344,7 @@ theorem exists_cInf_subseq_on
     have hxU : x ∈ U := hKU hx
     have hkx := hk ⟨x, hxU⟩ hx
     rwa [show (G r) ⟨x, hxU⟩ = Gext r x from (hGext r x hxU).symm] at hkx
-  -- the within limits are linked by differentiation on balls inside `U`
+
   have hGderiv : ∀ (r : ℕ) (x₀ : E), x₀ ∈ U →
       HasFDerivAt (Gext r) ((Gext (r + 1) x₀).curryLeft) x₀ := by
     intro r x₀ hx₀
@@ -373,7 +373,7 @@ theorem exists_cInf_subseq_on
         (Set.singleton_subset_iff.mpr (hballU hy))).tendsto_at rfl
     exact hasFDerivAt_of_tendstoUniformlyOn Metric.isOpen_ball hf' hfd hfg
       (Metric.mem_ball_self (by positivity))
-  -- assemble the within Taylor series of the limit on `U`
+
   have hcontGext : ∀ m : ℕ, ContinuousOn (Gext m) U := by
     intro m
     rw [continuousOn_iff_continuous_restrict]

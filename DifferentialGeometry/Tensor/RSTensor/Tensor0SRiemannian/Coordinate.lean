@@ -5,13 +5,13 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Covariant Tensor Fibers
 
-The metric on `T_x M` induces metrics on all covariant tensor powers.  The
-construction is intrinsic on the fiber `Tensor0SSpace s I x`; coordinate
-formulas are evaluation theorems for local frames.
--/
+
+
+
+
+
+
 
 namespace Tensor0SBundle
 
@@ -144,8 +144,8 @@ theorem basis_repr_eq_sum_inv_inner
       · intro hi
         simp at hi
 
-/-- Coordinate trace formula for an endomorphism in a basis with inverse metric
-components. -/
+
+
 theorem linearMap_trace_eq_sum_inv_inner_apply
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -164,8 +164,8 @@ theorem linearMap_trace_eq_sum_inv_inner_apply
   rw [LinearMap.toMatrix_apply]
   exact basis_repr_eq_sum_inv_inner (I := I) g x basis gInv hinv (A (basis i)) i
 
-/-- Positivity of the trace of a tangent endomorphism from positivity of its
-metric quadratic form. -/
+
+
 theorem linearMap_trace_nonneg_of_metric_inner_apply_self_nonneg
     (g : SmoothMetric_gen I M) (x : M)
     (A : TangentSpace I x →ₗ[Real] TangentSpace I x)

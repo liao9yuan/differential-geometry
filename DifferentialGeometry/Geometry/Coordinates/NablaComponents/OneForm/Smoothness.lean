@@ -1,10 +1,10 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 
-/-!
-# Coordinate one-form covariant derivative components
 
-This submodule is part of the split `OneForm` coordinate component API.
--/
+
+
+
+
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -89,7 +89,7 @@ theorem oneForm_eval_coordinateFrame_contMDiffAt
     (hv := fun _ : Fin 1 => hframe)
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
-/-- Intrinsic one-form covariant derivative formula for smooth moving slots. -/
+
 theorem nabla0SFun_one_eval_smooth_slots
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -150,12 +150,12 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
   exact (hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smoothness of the scalar function obtained by evaluating `nabla0SFun 1`
-on a smooth vector field.
 
-This is the intrinsic one-form smoothness input: use the moving-slot formula,
-then prove smoothness of the exterior-derivative term and the correction term
-separately. -/
+
+
+
+
+
 theorem nabla0SFun_one_eval_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (∞ : WithTop ℕ∞))
@@ -227,12 +227,12 @@ theorem nabla0SFun_one_eval_contMDiff
         (by simp))]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Local coordinate-frame scalar smoothness for `nabla0SFun 1`.
 
-This is the local-frame version of `nabla0SFun_one_eval_contMDiff`: the moving
-slot is the chart-induced coordinate-frame field around `x₀`, which is only
-known to be smooth locally. The proof uses
-`ContMDiffCovariantDerivativeLocally`, not global smooth-section extension. -/
+
+
+
+
+
 theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -310,12 +310,12 @@ theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
     (hZ_at.mdifferentiableAt (by simp))]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Local-frame proof that `nabla0SFun 1` is a smooth one-form section.
 
-This avoids global extension of coordinate-frame fields. Smoothness is checked
-in local tensor-bundle coordinates, whose basis coefficients are exactly the
-scalar evaluations handled by
-`nabla0SFun_one_eval_coordinateFrame_contMDiffAt`. -/
+
+
+
+
+
 theorem nabla0SFun_one_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

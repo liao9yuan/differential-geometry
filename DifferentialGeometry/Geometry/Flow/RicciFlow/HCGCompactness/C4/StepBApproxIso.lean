@@ -3,36 +3,36 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenc
 
 set_option autoImplicit false
 
-/-!
-# Local maps converge to the identity (MSM135 Ch4 Step B, `lbl399` — `C⁰` core)
 
-`lbl399`: the composed local maps `F_{kℓ,β}^α = J̄_ℓ^{αβ} ∘ J_k^{βα} : E^β → vec E^β`
-converge to the identity as `k, ℓ → ∞` (independently).  Since `J_k^{βα} → J_∞^{βα}` and
-`J̄_ℓ^{αβ} → J̄_∞^{αβ}` with the limit cocycle `J̄_∞^{αβ} ∘ J_∞^{βα} = id`, this is the
-two-parameter composition convergence `A_ℓ ∘ B_k → A_∞ ∘ B_∞ = id`.
 
-## What is delivered: the `C⁰` (uniform-on-compacts) core
 
-`comp_tendsto_id_on` proves the **order-`0`** content: from `B_k → B_∞` and
-`A_ℓ → A_∞` uniformly on compacts (the `MapCInfConvOnCompacts` outputs of B-trans /
-`isometry_seq_diffeo_on`) and the limit identity `A_∞ ∘ B_∞ = id`, the family
-`A_ℓ ∘ B_k → id` **uniformly on each compact `K ⊆ U`** as `k, ℓ → ∞`.  The moving
-evaluation point `B_k x` is corralled into a fixed compact `cthickening δ₀ (B_∞ '' K) ⊆
-V` (Heine–Cantor uniform continuity of `A_∞` there + uniform convergence of `A_ℓ`).
-The inverse identity is consumed **conditionally on `B_∞ x ∈ V`** (hypothesis `hKV`),
-matching `isometry_seq_diffeo_on`'s honest membership conditions.
 
-## Reported frontier: the full `C^∞` `lbl399`
 
-Upgrading `comp_tendsto_id_on` from `C⁰` to `C^∞` (so that `F_{kℓ} → id` in
-`MapCInfConvOnCompacts`, as the book states) requires a **Faà-di-Bruno composition
-convergence** lemma: `∇ʳ(A_ℓ ∘ B_k)` is a universal polynomial in `(∇^{≤r}A_ℓ)∘B_k` and
-`∇^{≤r}B_k`, and one must push the two-parameter uniform-on-compacts convergence through
-that polynomial (with the moving evaluation point `B_k x`).  Mathlib has the static
-Faà-di-Bruno formula but **no convergence version**.  This is the smallest missing
-lemma; per the plan's "do not invent a broad convergence framework" it is reported, not
-built here.  The same lemma is the frontier for `lbl404` (almost-identity pullback).
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -44,13 +44,13 @@ variable {E F : Type*}
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
 omit [FiniteDimensional ℝ E] in
-/-- **Local maps converge to the identity** (`lbl399`, `C⁰` core).  Given
-`B_k → B_∞` in `C^∞` on compacts of the open `U ⊆ E`, `A_ℓ → A_∞` in `C^∞` on compacts
-of the open `V ⊆ F`, and the limit identity `A_∞ (B_∞ x) = x` (for `x ∈ U` with
-`B_∞ x ∈ V`), the composed family `A_ℓ ∘ B_k` converges to the identity **uniformly on
-each compact `K ⊆ U`** with `B_∞ '' K ⊆ V`, as `k, ℓ → ∞` independently:
-for every `ε > 0` there is `N` with `dist (A_ℓ (B_k x)) x < ε` for all `k, ℓ ≥ N`,
-`x ∈ K`. -/
+
+
+
+
+
+
+
 theorem comp_tendsto_id_on
     {U : Set E} {V : Set F} (hV : IsOpen V)
     (B : ℕ → E → F) (Binf : E → F) (A : ℕ → F → E) (Ainf : F → E)
@@ -99,16 +99,16 @@ theorem comp_tendsto_id_on
     _ = ε := by ring
 
 omit [FiniteDimensional ℝ E] in
-/-- **Local maps converge to the identity in `C^∞`** (`lbl399`, two-parameter
-form).  This upgrades `comp_tendsto_id_on` from order `0` to every finite order:
-for every compact `K ⊆ U`, order `p`, and `ε > 0`, all derivatives up to order
-`p` of `A_l ∘ B_k - id` are uniformly `≤ ε` on `K` once both indices are large.
 
-The proof uses the reusable same-index composition theorem in
-`MapConvergenceComp.lean`: if such a two-parameter threshold failed, choosing bad
-indices `k_N,l_N ≥ N` would give reindexed sequences still tending to infinity,
-contradicting same-index `C^∞` convergence of `A_{l_N} ∘ B_{k_N}` to
-`A∞ ∘ B∞ = id`. -/
+
+
+
+
+
+
+
+
+
 theorem comp_cInf_id_on
     {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
     (B : ℕ → E → F) (Binf : E → F) (A : ℕ → F → E) (Ainf : F → E)

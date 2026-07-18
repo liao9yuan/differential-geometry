@@ -1,30 +1,30 @@
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.IteratedFDerivProdMatch
 import Mathlib.Analysis.Calculus.TangentCone.Real
 
-/-!
-# Joint hyperplane splice from matching seam jets
 
-The parametrized (joint-in-`(t, z)`) analogue of `contDiff_if_le_of_jet_match`
-(`SmoothExtension/SmoothJetGlue.lean`). Two families `fL`, `fR` that are jointly `C∞` on the closed
-lower/upper half-slabs `Iic 0 ×ˢ V` / `Ici 0 ×ˢ V` (with `V` open) and whose joint iterated Fréchet
-derivatives agree at every seam point `(0, z)` glue to a function `C∞` on the full slab `univ ×ˢ V`.
 
-The seam *coefficient* match (equality of `iteratedFDerivWithin n` at `(0, z)`) is taken as a
-hypothesis here (`contDiffOn_glue_of_seam_param`); the companion file derives it from the one-sided
-`t`-jets via `Analysis.iteratedFDerivWithin_prod_match` (the cross-slab seam match). This is the
-junction-smoothness assembly tool for the Ricci-flow `hglue` (extending a flow with bounded
-curvature past its singular time), where the seam is the singular time `ω`. See `JetGlueParam.md`.
 
-## Implementation
 
-A direct port of the 1-D `contDiff_if_le_of_jet_match` to the product: the closed half-lines become
-closed half-slabs (`UniqueDiffOn.prod`), the interior-point neighbourhood `Iio 0` becomes the open
-product slab `Iio 0 ×ˢ V` (a genuine `ℝ × E`-neighbourhood because `V` is open), and the seam union
-`Iic 0 ∪ Ici 0 = univ` becomes `(Iic 0 ×ˢ V) ∪ (Ici 0 ×ˢ V) = univ ×ˢ V` via `Set.union_prod`. The
-glued candidate Taylor series is assembled piecewise from the two one-sided `ftaylorSeriesWithin`,
-and `HasFTaylorSeriesUpToOn ∞ · · (univ ×ˢ V)` is verified directly
-(`hasFTaylorSeriesUpToOn_top_iff'`), the seam derivative glued with `HasFDerivWithinAt.union`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -38,14 +38,14 @@ namespace SmoothExtension
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- **Joint smooth gluing across a seam hyperplane from a matching Fréchet seam jet.** If `fL` is
-`C∞` on the closed lower half-slab `Iic 0 ×ˢ V`, `fR` is `C∞` on the closed upper half-slab
-`Ici 0 ×ˢ V` (`V` open), and the joint iterated Fréchet derivatives of `fL` and `fR` agree at every
-seam point `(0, z)` (`z ∈ V`), then the piecewise function `fun p => if p.1 ≤ 0 then fL p else fR p`
-is `C∞` on the full slab `univ ×ˢ V`.
 
-The seam coefficient match is the hypothesis the companion cross-slab lemma supplies from the
-one-sided `t`-jets. -/
+
+
+
+
+
+
+
 theorem contDiffOn_glue_of_seam_param
     {V : Set E} (hV : IsOpen V) (fL fR : ℝ × E → F)
     (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0:ℝ) ×ˢ V))
@@ -68,26 +68,26 @@ theorem contDiffOn_glue_of_seam_param
   have hUDR : UniqueDiffOn ℝ sR := UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hV.uniqueDiffOn
   have hTL : HasFTaylorSeriesUpToOn ∞ fL pL sL := hL.ftaylorSeriesWithin hUDL
   have hTR : HasFTaylorSeriesUpToOn ∞ fR pR sR := hR.ftaylorSeriesWithin hUDR
-  -- The seam coefficient match transported to the assembled series `pL`/`pR`.
+
   have hmatchP : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pR (0, z) n := by
     intro n z hz
     simpa only [hpL_def, hpR_def, ftaylorSeriesWithin] using hmatch n z hz
-  -- `p` agrees with `pL` on the lower slab (the `if`-guard `·.1 ≤ 0` is true there).
+
   have hEqL : ∀ m : ℕ, Set.EqOn (fun y => p y m) (fun y => pL y m) sL := by
     rintro m ⟨y1, y2⟩ hy
     obtain ⟨hy1, _⟩ := hy
     simp only [hp_def, if_pos (Set.mem_Iic.mp hy1)]
-  -- `p` agrees with `pR` on the upper slab (`> 0` directly; at the seam `= 0` via `hmatchP`).
+
   have hEqR : ∀ m : ℕ, Set.EqOn (fun y => p y m) (fun y => pR y m) sR := by
     rintro m ⟨y1, y2⟩ hy
     obtain ⟨hy1, hy2⟩ := hy
     rcases eq_or_lt_of_le (Set.mem_Ici.mp hy1) with hy0 | hy0
-    · -- `y1 = 0`: the `if` picks `pL (0, y2)`, equal to `pR (0, y2)` by `hmatchP`.
+    ·
       subst hy0
       simp only [hp_def, if_pos (le_refl (0:ℝ)), hmatchP m y2 hy2]
-    · -- `y1 > 0`: the `if`-guard is false.
+    ·
       simp only [hp_def, if_neg (not_le.mpr hy0)]
-  -- Pointwise value of `f` matches `(p · 0).curry0` (the `zero_eq` field).
+
   have hzero : ∀ x : ℝ × E, x ∈ ((Set.univ : Set ℝ) ×ˢ V) → (p x 0).curry0 = f x := by
     rintro ⟨x1, x2⟩ hx
     obtain ⟨_, hx2⟩ := hx
@@ -99,7 +99,7 @@ theorem contDiffOn_glue_of_seam_param
       simp only [hp_def, hf_def, if_neg hx1, hval]
   have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
     exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
-  -- The core derivative obligation on `univ ×ˢ V`.
+
   have hderiv : ∀ (m : ℕ) (x : ℝ × E), x ∈ ((Set.univ : Set ℝ) ×ˢ V) →
       HasFDerivWithinAt (fun y => p y m) (p x m.succ).curryLeft ((Set.univ : Set ℝ) ×ˢ V) x := by
     rintro m ⟨x1, x2⟩ hx
@@ -109,7 +109,7 @@ theorem contDiffOn_glue_of_seam_param
     have hpR_succ : ∀ y : ℝ × E, 0 < y.1 → p y m.succ = pR y m.succ :=
       fun y hy => by simp only [hp_def, if_neg (not_le.mpr hy)]
     rcases lt_trichotomy x1 0 with hx1 | hx1 | hx1
-    · -- Interior of the lower slab: upgrade the `sL`-derivative to a full one over `Iio 0 ×ˢ V`.
+    ·
       have hxle : x1 ≤ 0 := le_of_lt hx1
       have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (x1, x2) m.succ).curryLeft sL (x1, x2) :=
         hTL.fderivWithin m (hm_lt m) (x1, x2) ⟨hxle, hx2⟩
@@ -124,7 +124,7 @@ theorem contDiffOn_glue_of_seam_param
         hdL'.congr_of_eventuallyEq hee
       rw [hpL_succ (x1, x2) hxle]
       exact hfd.hasFDerivWithinAt
-    · -- The seam `x1 = 0`: glue the two one-sided derivatives over `sL ∪ sR = univ ×ˢ V`.
+    ·
       subst hx1
       have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL ((0:ℝ), x2) m.succ).curryLeft sL
           ((0:ℝ), x2) := hTL.fderivWithin m (hm_lt m) ((0:ℝ), x2) ⟨Set.self_mem_Iic, hx2⟩
@@ -145,7 +145,7 @@ theorem contDiffOn_glue_of_seam_param
       rw [hsetUnion] at hunion
       rw [hpL_succ ((0:ℝ), x2) (le_refl (0:ℝ))]
       exact hunion
-    · -- Interior of the upper slab: upgrade the `sR`-derivative to a full one over `Ioi 0 ×ˢ V`.
+    ·
       have hxge : (0:ℝ) ≤ x1 := le_of_lt hx1
       have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (x1, x2) m.succ).curryLeft sR (x1, x2) :=
         hTR.fderivWithin m (hm_lt m) (x1, x2) ⟨hxge, hx2⟩
@@ -160,26 +160,26 @@ theorem contDiffOn_glue_of_seam_param
         hdR'.congr_of_eventuallyEq hee
       rw [hpR_succ (x1, x2) hx1]
       exact hfd.hasFDerivWithinAt
-  -- Assemble the global Taylor series (no continuity check needed at order `∞`).
+
   have hTaylor : HasFTaylorSeriesUpToOn ∞ f p ((Set.univ : Set ℝ) ×ˢ V) :=
     (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr
       ⟨fun x hx => hzero x hx, fun m x hx => hderiv m x hx⟩
   exact hTaylor.contDiffOn
 
-/-- **Cross-slab seam match.** Two families `fL`, `fR` that are jointly `C∞` on the closed
-lower/upper half-slabs `Iic 0 ×ˢ V` / `Ici 0 ×ˢ V` (`V` open) and share their entire one-sided
-`t`-jet at every seam parameter `w ∈ V` have equal joint iterated Fréchet derivatives at every seam
-point `(0, z)`.
 
-This is the cross-slab (`Iic` vs `Ici`) analogue of `Analysis.iteratedFDerivWithin_prod_match`,
-proved directly by the same induction (no reflection / no Borel witness): the successor step reduces,
-via `iteratedFDerivWithin_succ_eq_comp_left`, to equality of the Fréchet derivatives of the `n`-th
-iterates as continuous linear maps on `ℝ × E`, which is checked on the transverse direction `(1, 0)`
-(through `fderivWithin_iteratedFDerivWithin_apply_eq` and the induction hypothesis applied to the
-transverse partials `∂ₜfL`, `∂ₜfR`) and the seam-tangential direction `(0, e)` (the `n`-th iterates
-agree on the whole seam `{0} ×ˢ V` by the induction hypothesis, so their directional derivatives
-along the seam agree). It supplies the Fréchet seam-match hypothesis of
-`contDiffOn_glue_of_seam_param`. -/
+
+
+
+
+
+
+
+
+
+
+
+
+
 theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
     ∀ (n : ℕ) {fL fR : ℝ × E → F},
       ContDiffOn ℝ ∞ fL (Set.Iic (0:ℝ) ×ˢ V) →
@@ -220,14 +220,14 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
       exact ⟨hq.1, subset_closure hq.2⟩
     have hmemL : ((0:ℝ), z) ∈ sL := ⟨Set.self_mem_Iic, hz⟩
     have hmemR : ((0:ℝ), z) ∈ sR := ⟨Set.self_mem_Ici, hz⟩
-    -- Reduce to equality of the Fréchet derivatives of the `n`-th iterates at `(0, z)`.
+
     simp only [iteratedFDerivWithin_succ_eq_comp_left, Function.comp_apply]
     congr 1
     refine ContinuousLinearMap.ext (fun p => ?_)
     obtain ⟨t, e⟩ := p
     have hsplit : (t, e) = t • ((1:ℝ), (0:E)) + ((0:ℝ), e) := by
       simp [Prod.smul_mk, Prod.mk_add_mk]
-    -- Transverse direction `(1, 0)`: commute, then `IH` on the transverse partials.
+
     have htrans : fderivWithin ℝ (iteratedFDerivWithin ℝ n fL sL) sL (0, z) ((1:ℝ), (0:E))
         = fderivWithin ℝ (iteratedFDerivWithin ℝ n fR sR) sR (0, z) ((1:ℝ), (0:E)) := by
       rw [fderivWithin_iteratedFDerivWithin_apply_eq hUDL hSLclo n hL ((1:ℝ), (0:E)) (0, z) hmemL,
@@ -270,7 +270,7 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
           iteratedDerivWithin_congr hcongrR Set.self_mem_Ici, ← iteratedDerivWithin_succ']
         exact hjet (i + 1) w hw
       exact IH hDtL hDtR hjet' hz
-    -- Seam-tangential direction `(0, e)`: the `n`-th iterates agree on `{0} ×ˢ V` by `IH`.
+
     have hseam : fderivWithin ℝ (iteratedFDerivWithin ℝ n fL sL) sL (0, z) ((0:ℝ), e)
         = fderivWithin ℝ (iteratedFDerivWithin ℝ n fR sR) sR (0, z) ((0:ℝ), e) := by
       set ι : E → ℝ × E := fun v => (0, v) with hι_def
@@ -309,14 +309,14 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
         ContinuousLinearMap.inr_apply] using happ
     rw [hsplit, map_add, map_add, map_smul, map_smul, htrans, hseam]
 
-/-- **Joint hyperplane splice from matching one-sided `t`-jets.** If `fL` is `C∞` on the closed
-lower half-slab `Iic 0 ×ˢ V`, `fR` is `C∞` on the closed upper half-slab `Ici 0 ×ˢ V` (`V` open),
-and `fL`, `fR` share their entire one-sided `t`-jet at every seam parameter `w ∈ V`, then the
-piecewise function `fun p => if p.1 ≤ 0 then fL p else fR p` is `C∞` on the full slab `univ ×ˢ V`.
 
-This is the caller-facing splice: `contDiffOn_glue_of_seam_param` (the Taylor glue) composed with
-`iteratedFDerivWithin_seam_match` (the cross-slab seam match). It is the junction-smoothness
-assembly tool for the Ricci `hglue`. -/
+
+
+
+
+
+
+
 theorem contDiffOn_glue_of_jet_param
     {V : Set E} (hV : IsOpen V) (fL fR : ℝ × E → F)
     (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0:ℝ) ×ˢ V))

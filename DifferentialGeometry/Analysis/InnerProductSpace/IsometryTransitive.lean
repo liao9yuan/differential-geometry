@@ -1,23 +1,23 @@
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
-/-!
-# Transitivity of the orthogonal group on the unit sphere
 
-In a finite-dimensional real inner product space, any unit vector can be mapped to
-any other unit vector by a linear isometry equivalence.  This is the orthogonal
-group acting transitively on the unit sphere, packaged as the existence of a
-`LinearIsometryEquiv`.
 
-This is the linear-algebra backbone for the homogeneity argument that the round
-sphere has constant sectional curvature: combined with the naturality of the
-Riemann tensor under isometries, transitivity on points lets a curvature identity
-established at one point spread to the whole sphere.
 
-## Main results
 
-* `exists_linearIsometryEquiv_unit` — for unit `u, v`, a `LinearIsometryEquiv`
-  sending `u` to `v`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -28,9 +28,9 @@ namespace DifferentialGeometry
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
 
-/-- **The orthogonal group acts transitively on the unit sphere.**  In a
-finite-dimensional real inner product space, any unit vector `u` can be carried to
-any unit vector `v` by a linear isometry equivalence. -/
+
+
+
 theorem exists_linearIsometryEquiv_unit {u v : E} (hu : ‖u‖ = 1) (hv : ‖v‖ = 1) :
     ∃ e : E ≃ₗᵢ[ℝ] E, e u = v := by
   classical
@@ -41,7 +41,7 @@ theorem exists_linearIsometryEquiv_unit {u v : E} (hu : ‖u‖ = 1) (hv : ‖v�
   let i0 : Fin (finrank ℝ E) := ⟨0, hn⟩
   have card_eq : finrank ℝ E = Fintype.card (Fin (finrank ℝ E)) :=
     (Fintype.card_fin _).symm
-  -- A single unit vector is an orthonormal family on the singleton index `{i0}`.
+
   have hsingle : ∀ (w : E), ‖w‖ = 1 →
       Orthonormal ℝ (({i0} : Set (Fin (finrank ℝ E))).restrict (fun _ => w)) := by
     intro w hw

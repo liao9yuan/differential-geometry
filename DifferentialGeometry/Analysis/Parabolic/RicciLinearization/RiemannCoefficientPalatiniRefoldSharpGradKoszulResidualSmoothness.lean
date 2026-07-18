@@ -117,7 +117,8 @@ private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
     g₁.inner x (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) z =
       linearizedKoszulCovec (I := I) g₀ S x a b z := by
   rw [sharpRaisedKoszulVec]
-  exact inner_metricSharp (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x a b) z
+  exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g₁ x
+    (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 omit [BoundarylessManifold I M] in
 private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -125,7 +126,8 @@ private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
     g₁.inner x z (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) =
       linearizedKoszulCovec (I := I) g₀ S x a b z := by
   rw [sharpRaisedKoszulVec]
-  exact inner_metricSharp_right (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x a b) z
+  exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp_right (I := I) g₁ x
+    (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 set_option backward.isDefEq.respectTransparency false in
 private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetric I M)

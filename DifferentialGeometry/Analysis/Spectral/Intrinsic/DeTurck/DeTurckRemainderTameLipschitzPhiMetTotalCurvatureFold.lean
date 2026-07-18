@@ -41,6 +41,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieArmChartValue
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionL2JetBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmDiffL2TameBallUniform
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 
 
 noncomputable section
@@ -81,17 +82,6 @@ private lemma unitModel_zero_fw (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
   have h := unitModel_sub_local (I := I) g s 0 0 x
   rw [sub_zero] at h
   rw [h, sub_self]
-
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option backward.isDefEq.respectTransparency false in
-def deTurckPhiMetTotal (g₀ g_bg g : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g₀ 4 2 :=
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff
-      (I := I) g₀ g g_bg
-    + traceHessianCoeff (I := I) (M := M) g₀ g
-    - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g
-        + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -474,7 +464,7 @@ theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
         (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + deTurckLieRemainderField (I := I) (M := M) g₀
+              + lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + operatorFieldApply (I := I) (M := M) g₀ 3 2
@@ -499,7 +489,7 @@ theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
         (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + deTurckLieRemainderField (I := I) (M := M) g₀
+              + lieCorr0Field (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + operatorFieldApply (I := I) (M := M) g₀ 3 2
@@ -522,7 +512,7 @@ theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
     operatorFieldApply (I := I) (M := M) g₀ 2 2
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-          + deTurckLieRemainderField (I := I) (M := M) g₀
+          + lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
         (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
       + operatorFieldApply (I := I) (M := M) g₀ 3 2
@@ -629,7 +619,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
     (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-        + deTurckLieRemainderField (I := I) (M := M) g₀
+        + lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) with hΨ₀def
   set Ψ₁ : ℝ → SmoothCcTensor g₀ 3 2 := fun s =>
     (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
@@ -784,7 +774,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
           unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (deTurckLieCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-                + deTurckLieRemainderField (I := I) (M := M) g₀
+                + lieCorr0Field (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
             + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
@@ -804,7 +794,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
             + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (deTurckLieCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-                + deTurckLieRemainderField (I := I) (M := M) g₀
+                + lieCorr0Field (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
         simp only [hΨ₀def]
@@ -875,7 +865,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
         ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' t)
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg
-          + deTurckLieRemainderField (I := I) (M := M) g₀
+          + lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg) x
       have hsm : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' t).toSection x) =
@@ -892,7 +882,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       have haddL := lc0b_rfns_toSection_add_le (I := I) (M := M) g₀ 2 2
         (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg)
-        (deTurckLieRemainderField (I := I) (M := M) g₀
+        (lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg) x
       have hL0 := hL0r T T' hδ_le hδ hδ'_le hδ' hTball hT'ball t ht x
       have hLc := hLcr T T' hδ_le hδ hδ'_le hδ' hTball hT'ball t ht x
@@ -949,7 +939,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
         ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-          + deTurckLieRemainderField (I := I) (M := M) g₀
+          + lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       have hsc : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
           ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)‖ ^ 2) =
@@ -964,7 +954,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       have htowL := jetTowerSum_add_le (I := I) g₀ 2 2 (a + 1)
         (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
-        (deTurckLieRemainderField (I := I) (M := M) g₀
+        (lieCorr0Field (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       have hLsum : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
           (deTurckLieCoeffField (I := I) (M := M) g₀
@@ -974,7 +964,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
           hP0j T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
             (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs
       have hcsum : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
-          (deTurckLieRemainderField (I := I) (M := M) g₀
+          (lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2) ≤
           ∑ i ∈ Finset.range (a + 1), PL i :=
         Finset.sum_le_sum fun i hi =>

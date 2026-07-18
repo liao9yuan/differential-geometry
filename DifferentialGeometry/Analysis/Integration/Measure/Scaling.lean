@@ -4,13 +4,13 @@ import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian volume under constant metric scaling
 
-This file proves the constant-scaling law for the canonical Riemannian volume
-measure.  It proceeds through the chart Gram matrix, chart density, chart-local
-measure, and partition-of-unity assembly.
--/
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Integral.Measure
 
@@ -40,8 +40,8 @@ private theorem sqrt_pow (c : Real) (hc : 0 ≤ c) (n : Nat) :
   | succ n ih =>
       rw [pow_succ, Real.sqrt_mul (pow_nonneg hc n), ih, pow_succ]
 
-/-- A constant positive scaling of the metric scales every chart Gram matrix
-by the same constant. -/
+
+
 theorem chartGram_scale (c : Real) (hc : 0 < c)
     (g : SmoothRiemannianMetric I M) (x₀ x : M) :
     chartGramMatrix (scaleMetric (I := I) c hc g) x₀ x =
@@ -49,8 +49,8 @@ theorem chartGram_scale (c : Real) (hc : 0 < c)
   ext i j
   simp [chartGramMatrix_apply, scaleMetric_inner]
 
-/-- A constant positive metric scaling multiplies the chart volume density by
-the square root of the determinant scaling factor. -/
+
+
 theorem chartDensity_scale (c : Real) (hc : 0 < c)
     (g : SmoothRiemannianMetric I M) (x₀ x : M) :
     chartDensity (scaleMetric (I := I) c hc g) x₀ x =
@@ -60,8 +60,8 @@ theorem chartDensity_scale (c : Real) (hc : 0 < c)
   simp only [Fintype.card_fin]
   rw [Real.sqrt_mul (pow_nonneg hc.le _)]
 
-/-- The chart-local Riemannian measure scales by the constant chart-density
-factor. -/
+
+
 theorem chartLocal_scale (c : Real) (hc : 0 < c)
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     chartLocalMeasure (I := I) (scaleMetric (I := I) c hc g) x₀ =
@@ -83,8 +83,8 @@ theorem chartLocal_scale (c : Real) (hc : 0 < c)
   unfold chartLocalMeasure
   rw [hdensity, withDensity_smul' a _ ha, Measure.map_smul]
 
-/-- A constant positive metric scaling multiplies the partition-of-unity
-Riemannian measure by the same dimension-dependent factor. -/
+
+
 theorem riemMeasure_scale [T2Space M] [SigmaCompactSpace M]
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (rho : SmoothPartitionOfUnity M I M Set.univ) :
@@ -108,8 +108,8 @@ theorem riemMeasure_scale [T2Space M] [SigmaCompactSpace M]
   rw [Measure.sum_apply _ hs, Measure.smul_apply, Measure.sum_apply _ hs]
   exact ENNReal.tsum_const_smul a
 
-/-- The canonical Riemannian volume measure of `c g` is
-`sqrt(c)^n` times that of `g`, where `n` is the model dimension. -/
+
+
 theorem volume_scaleMetric [T2Space M] [SigmaCompactSpace M]
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) :
     riemannianVolumeMeasure (I := I) (M := M)
@@ -120,8 +120,8 @@ theorem volume_scaleMetric [T2Space M] [SigmaCompactSpace M]
     ENNReal.ofReal_pow (Real.sqrt_nonneg c)] using
     riemMeasure_scale (I := I) (M := M) c hc g (chartAtlasPOU I M)
 
-/-- Setwise form of `volume_scaleMetric`, ready for metric-ball volume
-calculations. -/
+
+
 theorem volume_scale_apply [T2Space M] [SigmaCompactSpace M]
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (s : Set M) :
     riemannianVolumeMeasure (I := I) (M := M)

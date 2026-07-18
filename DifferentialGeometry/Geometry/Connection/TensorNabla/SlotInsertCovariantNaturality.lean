@@ -251,6 +251,28 @@ theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I
   rw [appFullSec_idHomTensorRSField (I := I) (M := M) g (s + 1) (s + 1)
     (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)] at hbase
   exact hbase
+omit [CompleteSpace E] in
+
+
+lemma cotangent_slot_apply (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (om : Tensor0SSpace 1 I x)
+    (w : TangentSpace I x) :
+    cotangentToDual (I := I)
+        (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) w =
+      cotangentToDual (I := I) om (Λ w) := by
+  rw [cotangentToDual_apply, cotangentToDual_apply]
+  rw [show (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) (fun _ : Fin 1 => w) =
+      Tensor0SSpace.toModel (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om)
+        (fun _ : Fin 1 => (show E from w)) from rfl]
+  rw [slotInsertEndoFib_apply_eval]
+  rw [show Function.update (fun _ : Fin 1 => (show E from w)) 0
+        (Λ ((fun _ : Fin 1 => (show E from w)) 0)) =
+      (fun _ : Fin 1 => (show E from Λ w)) from by
+    funext k
+    fin_cases k
+    simp]
+  rfl
+
 
 end Connection
 end Integral

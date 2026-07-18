@@ -505,6 +505,124 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
           (Module.finrank ℝ E : ℝ) *
             ((Module.finrank ℝ E : ℝ) * (4 * Clip * Mg * jet1)) by ring]
 
+theorem chartRicci_pou_lip
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q₁ : ℝ) (hQ₁_nn : 0 ≤ Q₁)
+    (hQ₁ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q₁)
+    (Q₂ : ℝ) (hQ₂_nn : 0 ≤ Q₂)
+    (hQ₂ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ c m a q : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+            (partialDeriv (E := E) m
+              (chartGramOnE (I := I) (gSeq k) α a q)) (extChartAt I α b)| ≤ Q₂) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ i k : Fin (Module.finrank ℝ E),
+            |chartRicciTensor (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+              chartRicciTensor (I := I) (gSeq k₂) α i k (extChartAt I α b)| ≤
+                C * chartMetricJet2DiffSup (I := I) (M := M)
+                  (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by
+  classical
+  obtain ⟨Clip, hClip_pos, hClip⟩ :=
+    christoffel_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+      Q₁ hQ₁_nn hQ₁
+  obtain ⟨Cdiff, hCdiff_pos, hCdiff⟩ :=
+    christoffelD_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+      Q₁ hQ₁_nn hQ₁ Q₂ hQ₂_nn hQ₂
+  obtain ⟨Mg, hMg_nn, hMg⟩ :=
+    christoffel_pou_bnd (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+      Q₁ hQ₁_nn hQ₁
+  let C : ℝ := 2 * (Module.finrank ℝ E : ℝ) * Cdiff +
+    4 * (Module.finrank ℝ E : ℝ) ^ 2 * Clip * Mg + 1
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb i k
+  have hjet2_nn : 0 ≤ chartMetricJet2DiffSup (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
+    chartMetricJet2DiffSup_nonneg _ _ _ _
+  have hjet1_le_jet2 : chartMetricJet1DiffSup (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b) ≤
+        chartMetricJet2DiffSup (I := I) (M := M)
+          (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
+    chartMetricJet1DiffSup_le_jet2 (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b)
+  have hCdiff' : ∀ m i j k : Fin (Module.finrank ℝ E),
+      |partialDeriv (E := E) m
+          (chartChristoffel (I := I) (gSeq k₁) α i j k) (extChartAt I α b) -
+        partialDeriv (E := E) m
+          (chartChristoffel (I := I) (gSeq k₂) α i j k) (extChartAt I α b)| ≤
+        Cdiff * chartMetricJet2DiffSup (I := I) (M := M)
+          (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
+    fun m i j k => hCdiff α hα k₁ k₂ b hb m i j k
+  have hClip' : ∀ i j k : Fin (Module.finrank ℝ E),
+      |chartChristoffel (I := I) (gSeq k₁) α i j k (extChartAt I α b) -
+        chartChristoffel (I := I) (gSeq k₂) α i j k (extChartAt I α b)| ≤
+        Clip * chartMetricJet1DiffSup (I := I) (M := M)
+          (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
+    fun i j k => hClip α hα k₁ k₂ b hb i j k
+  have hMg1 : ∀ i j k : Fin (Module.finrank ℝ E),
+      |chartChristoffel (I := I) (gSeq k₁) α i j k (extChartAt I α b)| ≤ Mg :=
+    fun i j k => hMg α hα k₁ b hb i j k
+  have hMg2 : ∀ i j k : Fin (Module.finrank ℝ E),
+      |chartChristoffel (I := I) (gSeq k₂) α i j k (extChartAt I α b)| ≤ Mg :=
+    fun i j k => hMg α hα k₂ b hb i j k
+  have h2nd := chartRicciSecondOrderTerm_sub_abs_le (I := I) (M := M)
+    (gSeq k₁) (gSeq k₂) α hCdiff' i k
+  have h1st := chartRicciFirstOrderTerm_sub_abs_le (I := I) (M := M)
+    (gSeq k₁) (gSeq k₂) α hClip_pos.le hMg_nn hClip' hMg1 hMg2 i k
+  have hsplit :
+      chartRicciTensor (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+          chartRicciTensor (I := I) (gSeq k₂) α i k (extChartAt I α b) =
+        (chartRicciSecondOrderTerm (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+          chartRicciSecondOrderTerm (I := I) (gSeq k₂) α i k (extChartAt I α b)) +
+        (chartRicciFirstOrderTerm (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+          chartRicciFirstOrderTerm (I := I) (gSeq k₂) α i k (extChartAt I α b)) := by
+    rw [chartRicciTensor_eq_secondOrder_add_firstOrder
+        (I := I) (gSeq k₁) α i k (extChartAt I α b),
+      chartRicciTensor_eq_secondOrder_add_firstOrder
+        (I := I) (gSeq k₂) α i k (extChartAt I α b)]
+    ring
+  rw [hsplit]
+  refine (abs_add_le _ _).trans ?_
+  set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M)
+    (gSeq k₁) (gSeq k₂) α (extChartAt I α b) with hjet2_def
+  have h1st' :
+      |chartRicciFirstOrderTerm (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+        chartRicciFirstOrderTerm (I := I) (gSeq k₂) α i k (extChartAt I α b)| ≤
+        4 * (Module.finrank ℝ E : ℝ) ^ 2 * Clip * Mg * jet2 := by
+    refine h1st.trans ?_
+    refine mul_le_mul_of_nonneg_left hjet1_le_jet2 ?_
+    positivity
+  calc
+    |chartRicciSecondOrderTerm (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+          chartRicciSecondOrderTerm (I := I) (gSeq k₂) α i k (extChartAt I α b)| +
+        |chartRicciFirstOrderTerm (I := I) (gSeq k₁) α i k (extChartAt I α b) -
+          chartRicciFirstOrderTerm (I := I) (gSeq k₂) α i k (extChartAt I α b)|
+      ≤ 2 * (Module.finrank ℝ E : ℝ) * Cdiff * jet2 +
+          4 * (Module.finrank ℝ E : ℝ) ^ 2 * Clip * Mg * jet2 :=
+        add_le_add h2nd h1st'
+    _ ≤ C * jet2 := by
+      dsimp [C]
+      rw [add_mul, add_mul, one_mul]
+      linarith
+
 theorem exists_chartRicciTensor_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

@@ -743,19 +743,21 @@ def riemannMixedBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₀ x) x
 
-theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M)
-    (x₀ : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
-    riemannMixedBiContrFib (I := I) (M := M) g₀ g₁ y =
-      riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₀ x₀) y := by
+private theorem riemannMixedBiContrFibFixedFrame_eq_of_orthonormal
+    (g₀ g₁ : SmoothRiemannianMetric I M) (y : M)
+    (B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i j, g₀.inner y (B i y) (B j y) = if i = j then (1 : ℝ) else 0)
+    (hC : ∀ i j, g₀.inner y (C i y) (C j y) = if i = j then (1 : ℝ) else 0) :
+    riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ B y =
+      riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ C y := by
   classical
   apply ContinuousLinearMap.ext
   intro D
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [riemannMixedBiContrFib, riemannMixedBiContrFibFixedFrame_toModel,
-    riemannMixedBiContrFibFixedFrame_toModel]
-  congr 1
+  rw [riemannMixedBiContrFibFixedFrame_toModel, riemannMixedBiContrFibFixedFrame_toModel]
+  apply congrArg (fun z : ℝ => 2 * z)
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         g₀.inner y (riemannOp (LeviCivita (I := I) g₁) y (v 0) (Bf a) (Bf b)) (v 1) *
@@ -769,13 +771,19 @@ theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemanni
     rw [frameRiemannMixedKernel_apply (I := I) g₀ g₁ y (v 0) (v 1) (Bf a) (Bf b),
       bilinFormToModel_symm_apply (TangentSpace I y) (Tensor0SSpace.toModel D) (Bf a) (Bf b)]
     rfl
-  rw [hrewrite (fun a => smoothOrthoFrame (I := I) g₀ y a y),
-    hrewrite (fun a => smoothOrthoFrame (I := I) g₀ x₀ a y)]
+  rw [hrewrite (fun a => B a y), hrewrite (fun a => C a y)]
   exact double_frame_bilin_trace_indep (I := I) g₀ y
     (frameRiemannMixedKernel (I := I) g₀ g₁ y (v 0) (v 1))
     ((bilinFormToModel (TangentSpace I y)).symm (Tensor0SSpace.toModel D))
-    (fun a => smoothOrthoFrame (I := I) g₀ y a y)
-    (fun a => smoothOrthoFrame (I := I) g₀ x₀ a y)
+    (fun a => B a y) (fun a => C a y) hB hC
+
+theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M)
+    (x₀ : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    riemannMixedBiContrFib (I := I) (M := M) g₀ g₁ y =
+      riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₀ x₀) y := by
+  rw [riemannMixedBiContrFib]
+  exact riemannMixedBiContrFibFixedFrame_eq_of_orthonormal (I := I) g₀ g₁ y
+    (smoothOrthoFrame (I := I) g₀ y) (smoothOrthoFrame (I := I) g₀ x₀)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₀ x₀ hy i j)
 

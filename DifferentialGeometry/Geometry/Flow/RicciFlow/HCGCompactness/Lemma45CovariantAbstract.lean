@@ -4,35 +4,35 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 
 set_option autoImplicit false
 
-/-!
-# Covariant Abstract Boundary for MSM135 Lemma 4.5
 
-This file pins down the checked RicciFlower names used by the covariant
-`(0,s)` route to MSM135 Lemma 4.5.  It intentionally contains no new
-frontier hypothesis and no approximate-isometry specialization.
 
-Notation map for the later theorem:
 
-* `H` is the comparison metric/connection.  Its Levi-Civita connection is
-  `LeviCivita.leviCivitaConnectionOfMetric`.
-* `A = nabla_g - nabla_H` is represented intrinsically by
-  `Tensor0SBundle.connectionDifferenceTensorAt`.
-* The checked first-order covariant connection-change identity is
-  `Tensor0SBundle.nabla0SFun_sub_cov`.
-* The checked mixed component version is
-  `Tensor0SBundle.componentRS_nablaRSFun_sub`.
-* The checked component action and coarse norm constant are
-  `Tensor0SBundle.connActComp` and `Tensor0SBundle.connActConst`.
-* The checked first-order norm producer is
-  `Tensor0SBundle.totalNablaNorm_bound`.
-* The checked algebraic induction constants are
-  `oneStepConst`, `lemma45Const`, and `main_step_to_lemma45Const`.
 
-The next missing producer is the iterated `H`-Leibniz estimate for repeated
-covariant derivatives of the connection-difference action.  That proof should
-live below the final approximate-isometry theorem and consume the names above,
-rather than expanding Christoffel symbols in the Lemma 4.5 induction.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -41,18 +41,18 @@ namespace HCGCompactness
 
 open scoped BigOperators
 
-/-- Scalar induction skeleton for MSM135 Lemma 4.5.
 
-`N i` represents the `H`-derivative norms of a tensor `T`, `G k` represents the
-`H`-derivative norms of `nabla_g T`, and `D r` represents the `g`-derivative
-norms of `T`.  The hypotheses are exactly the two non-algebraic inputs used by
-the book proof:
 
-* `hLift`: apply the lower-order Lemma 4.5 estimate to `nabla_g T`;
-* `hOne`: the one-step estimate comparing `H^k (nabla_g T)` to `H`-derivatives
-  of `T`.
 
-The conclusion is the recursive Lemma 4.5 estimate with `lemma45Const`. -/
+
+
+
+
+
+
+
+
+
 theorem lemma45Scalar
     {eps : Real} {B N G D : Nat -> Real} {s : Nat}
     (heps0 : 0 <= eps)
@@ -109,13 +109,13 @@ theorem lemma45Scalar
           heps0 heps1 hB hN (hLift p) (hOne p)
           (fun k _hk => hOne k)
 
-/-- Scalar Lemma 4.5 induction with the one-step estimate supplied in the
-natural antidiagonal Leibniz form.
 
-`A a` represents the norm of the `a`-th `H`-derivative of the connection
-difference, and `N b` represents the norm of the `b`-th `H`-derivative of the
-tensor.  The theorem converts a raw product-rule estimate for each `G k` into
-the final recursive Lemma 4.5 bound. -/
+
+
+
+
+
+
 theorem lemma45Anti
     {eps : Real} {B A N G D : Nat -> Real} {s : Nat}
     (heps0 : 0 <= eps)
@@ -146,10 +146,10 @@ theorem lemma45Anti
     (fun b hb => single_le_sum_range hN hb)
     (hLeib k)
 
-/-- Bounded-hypothesis variant of `lemma45Scalar`: the lift and one-step inputs are
-only required below the target order `P`.  This is the shape consumable by the
-double induction `lemma45Double`, where the lift estimates come from the induction
-hypothesis at strictly smaller orders. -/
+
+
+
+
 theorem lemma45ScalarBdd
     {eps : Real} {B N G D : Nat -> Real} {s P : Nat}
     (heps0 : 0 <= eps)
@@ -207,17 +207,17 @@ theorem lemma45ScalarBdd
           (hOne P (Nat.lt_succ_self P))
           (fun k hk => hOne k (hk.trans (Nat.lt_succ_self P)))
 
-/-- MSM135 Lemma 4.5, double-induction form (the F3 book induction with the lift
-discharged).
 
-`W i k` plays the role of `|∇_H^k (∇_g^i T)|_g` for a covariant `s`-tensor `T`, so
-`W r 0 = |∇_g^r T|`, `W 0 i = |∇_H^i T|`.  The `hLift` input of `lemma45Scalar` —
-"apply the lower-order Lemma 4.5 to `∇_g T`" — is here discharged by strong
-induction (the inner instance at base `i+1` and valence `s+i+1`).  The only
-remaining non-algebraic input is the one-step interface `hOne`
-(`|∇_H^k ∇_g X| ≤ |∇_H^{k+1} X| + ε·oneStepConst·Σ`), the iterated
-connection-difference Leibniz estimate to be discharged by the component
-contraction-Leibniz engine. -/
+
+
+
+
+
+
+
+
+
+
 theorem lemma45Double
     {eps : Real} {B : Nat -> Real} {s : Nat}
     (heps0 : 0 <= eps)
@@ -249,11 +249,11 @@ theorem lemma45Double
       · intro k _
         exact hOne i k
 
-/-- **Bounded-hypothesis variant of `lemma45Double`**: the one-step input is only
-required on the finite envelope `i + k < P` actually consumed by the double
-induction (the inner-base index and the derivative order trade off one-for-one).
-This is the shape matching the book's Lemma 4.5, whose ε-hypotheses are bounds on
-finitely many derivative orders. -/
+
+
+
+
+
 theorem lemma45DoubleBdd
     {eps : Real} {B : Nat -> Real} {s : Nat}
     (heps0 : 0 <= eps)

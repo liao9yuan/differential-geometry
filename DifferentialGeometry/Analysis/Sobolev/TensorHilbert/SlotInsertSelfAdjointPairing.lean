@@ -71,12 +71,22 @@ theorem multilinear_slot0_pairing_self_adjoint
     refine Fin.cases ?_ (fun j => ?_) i
     · simp
     · simp
-  set wA : TangentSpace I x := metricSharp (I := I) g₀ x φA.toLinearMap with hwA_def
-  set wB : TangentSpace I x := metricSharp (I := I) g₀ x φB.toLinearMap with hwB_def
+  set wA : TangentSpace I x :=
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (I := I) g₀ x φA.toLinearMap with hwA_def
+  set wB : TangentSpace I x :=
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (I := I) g₀ x φB.toLinearMap with hwB_def
   have hwA_inner : ∀ u : TangentSpace I x, g₀.inner x wA u = φA u := by
-    intro u; rw [hwA_def]; exact inner_metricSharp (I := I) g₀ x φA.toLinearMap u
+    intro u
+    rw [hwA_def]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp
+      (I := I) g₀ x φA.toLinearMap u
   have hwB_inner : ∀ u : TangentSpace I x, g₀.inner x wB u = φB u := by
-    intro u; rw [hwB_def]; exact inner_metricSharp (I := I) g₀ x φB.toLinearMap u
+    intro u
+    rw [hwB_def]
+    exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp
+      (I := I) g₀ x φB.toLinearMap u
   have hAe : ∀ a : Fin (Module.finrank ℝ E),
       Am (Fin.cons (e a) (fun k => e (J' k))) = g₀.inner x wA (e a) := by
     intro a; rw [hwA_inner, hφA_apply]

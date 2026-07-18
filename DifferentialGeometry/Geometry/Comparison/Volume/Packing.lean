@@ -6,14 +6,14 @@ import Mathlib.Topology.MetricSpace.Basic
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Finite packing count arithmetic
 
-This file records the small arithmetic endpoint used by volume-packing
-arguments.  The geometric measure step should prove an inequality of the form
-`card * lowerVolume <= upperVolume`; this file only converts that inequality
-plus a strict choice of integer cap into a cardinality bound.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace Geometry
@@ -22,12 +22,12 @@ namespace VolumeComparison
 
 open MeasureTheory
 
-/-- If `n` objects each contribute at least `L > 0`, the total is at most `U`,
-and `U` is strictly below the contribution of `N + 1` objects, then `n <= N`.
 
-This is the final arithmetic gate in a finite volume-packing proof after the
-measure-theoretic disjoint-union estimate has produced
-`(n : Real) * L <= U`. -/
+
+
+
+
+
 theorem card_le_of_mul_lt {n N : Nat} {L U : Real}
     (hL : 0 < L)
     (hle : (n : Real) * L <= U)
@@ -41,12 +41,12 @@ theorem card_le_of_mul_lt {n N : Nat} {L U : Real}
     mul_le_mul_of_nonneg_right hNn_real hL.le
   nlinarith
 
-/-- A finite disjoint family of measurable sets with a uniform lower real
-measure bound has total lower mass bounded by the real measure of any containing
-set.
 
-This is the measure-theoretic input needed before applying
-`card_le_of_mul_lt` in a packing argument. -/
+
+
+
+
+
 theorem mul_lower_le_upper {α ι : Type*} [MeasurableSpace α]
     (μ : Measure α)
     (J : Finset ι) (small : ι → Set α) (large : Set α)
@@ -73,8 +73,8 @@ theorem mul_lower_le_upper {α ι : Type*} [MeasurableSpace α]
     exact measureReal_mono hUnion_sub hlarge_fin
   exact hsum_lower.trans hsum_upper
 
-/-- Balls of radius `r / 2` around an `r`-separated finite family are pairwise
-disjoint. -/
+
+
 theorem balls_disjoint {α ι : Type*} [PseudoMetricSpace α]
     {J : Finset ι} {centers : ι → α} {r : Real}
     (hsep : ∀ i ∈ J, ∀ j ∈ J, i ≠ j → r ≤ dist (centers i) (centers j)) :
@@ -97,9 +97,9 @@ theorem balls_disjoint {α ι : Type*} [PseudoMetricSpace α]
       _ = r := by ring
   exact False.elim ((not_lt_of_ge (hsep i hi j hj hij)) hdist)
 
-/-- If each center lies within `m * r` of `z`, then the union of radius `r / 2`
-balls around those centers lies in the radius `(m + 1 / 2) * r` ball around
-`z`. -/
+
+
+
 theorem balls_subset_ball {α ι : Type*} [PseudoMetricSpace α]
     {J : Finset ι} {centers : ι → α} {z : α} {r m : Real}
     (hJz : ∀ j ∈ J, dist (centers j) z ≤ m * r) :
@@ -117,12 +117,12 @@ theorem balls_subset_ball {α ι : Type*} [PseudoMetricSpace α]
   have hrewrite : r / 2 + m * r = (m + 1 / 2) * r := by ring
   exact Metric.mem_ball.mpr (by simpa [hrewrite] using hxz)
 
-/-- Metric-ball form of the finite packing measure inequality.
 
-For an `r`-separated finite center family whose selected centers lie within
-`m * r` of `z`, uniform lower real measure bounds on the radius `r / 2` balls
-give the corresponding cardinality-times-lower-bound estimate inside the
-radius `(m + 1 / 2) * r` ball around `z`. -/
+
+
+
+
+
 theorem ball_mul_le {α ι : Type*} [PseudoMetricSpace α]
     [MeasurableSpace α] [BorelSpace α]
     (μ : Measure α)
@@ -140,13 +140,13 @@ theorem ball_mul_le {α ι : Type*} [PseudoMetricSpace α]
   exact balls_subset_ball (J := J) (centers := centers) (z := z) (r := r) (m := m) hJz
     (Set.mem_iUnion.2 ⟨j, Set.mem_iUnion.2 ⟨hj, hx⟩⟩)
 
-/-- Capped metric-ball packing bound from ENNReal volume estimates, with
-measurability of the small balls supplied explicitly.
 
-This is the direct finite-packing gate before a `ballMult` producer: local
-ENNReal lower bounds on the small balls and an ENNReal upper bound on the
-containing ball are converted to real constants, then fed to
-`ball_mul_le` and `card_le_of_mul_lt`. -/
+
+
+
+
+
+
 theorem ball_card_le_meas {α ι : Type*} [PseudoMetricSpace α] [MeasurableSpace α]
     (μ : Measure α) (J : Finset ι) (centers : ι → α) (z : α)
     {r m L U : Real} {N : Nat}
@@ -188,12 +188,12 @@ theorem ball_card_le_meas {α ι : Type*} [PseudoMetricSpace α] [MeasurableSpac
     ENNReal.toReal_le_of_le_ofReal hUnonneg hupper
   exact card_le_of_mul_lt hLpos (hmul.trans hupper_real) hcap
 
-/-- Capped metric-ball packing bound from ENNReal volume estimates.
 
-This is the direct finite-packing gate before a `ballMult` producer: local
-ENNReal lower bounds on the small balls and an ENNReal upper bound on the
-containing ball are converted to real constants, then fed to
-`ball_mul_le` and `card_le_of_mul_lt`. -/
+
+
+
+
+
 theorem ball_card_le_of_vol {α ι : Type*} [PseudoMetricSpace α]
     [MeasurableSpace α] [BorelSpace α]
     (μ : Measure α) (J : Finset ι) (centers : ι → α) (z : α)

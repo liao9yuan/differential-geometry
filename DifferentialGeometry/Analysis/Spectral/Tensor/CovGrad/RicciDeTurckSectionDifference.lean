@@ -19,7 +19,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
+set_option maxHeartbeats 6400000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -456,6 +456,7 @@ theorem connDiffBiContrCoeff_appCc_eq (gj g₀ g₁ g₁' : SmoothRiemannianMetr
   congr 1
   funext j
   fin_cases j <;> simp
+
 
 end TensorSpectral
 end Parabolic

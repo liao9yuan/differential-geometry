@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Defs
 
-/-!
-# Inverse-metric correction normal form
 
-This module extracts the finite-index normal form of the order-zero
-inverse-metric correction from the settled private DeTurck algebra chain.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -1313,7 +1313,7 @@ private lemma nf_O0_h31 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   rw [hstep]
   exact nf_O0_h31' ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb higs hcgs hfs hdgs2 hga0s hga1s hgbgs hdga0s hdga1s hdgbgs hddgs hf3s hgbs hdgbs hdigs hcol hga1e hdga1e hdige hgbe hdgbe i j
 
-/-- The inverse-metric correction block has its complete scalar normal form. -/
+
 theorem nf_o0 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)

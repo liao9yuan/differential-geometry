@@ -1,12 +1,12 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 
-/-!
-# Iterated passenger extension of a leading-slot insertion
 
-The passenger-slot extension tower moves the original leading slot past each newly added
-passenger slot.  Thus, after `w` extensions, a leading-slot endomorphism insertion acts in slot `w`.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -32,7 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-- After `w` passenger-slot extensions, a leading-slot insertion acts in slot `w`. -/
+
 theorem slotExtIter_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -63,7 +63,7 @@ theorem slotExtIter_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
         slotExtendFib_apply_eval (I := I) (M := M) g ((s + 1) + w) ((s + 1) + w)]
       rw [ih]
 
-/-- The iterated passenger extension acts by inserting the endomorphism in slot `w`. -/
+
 theorem app_slotExt_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))

@@ -43,6 +43,15 @@ theorem iteratedCovGrad_add (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_add]
 
 omit [BoundarylessManifold I M] in
+theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : Integral.L2.SmoothCcTensor g r s) :
+    iteratedCovGrad g r s j (c • w) = c • iteratedCovGrad g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih =>
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_neg (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (w : Integral.L2.SmoothCcTensor g r s) :
     iteratedCovGrad g r s j (-w) = -iteratedCovGrad g r s j w := by

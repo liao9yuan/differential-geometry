@@ -14,6 +14,16 @@ linter.style.emptyLine = false
 linter.style.whitespace = false
 linter.style.maxHeartbeats = false
 linter.style.setOption = false
+linter.unusedSectionVars = false
+linter.unusedFintypeInType = false
+linter.unusedDecidableInType = false
+linter.flexible = false
+linter.unnecessarySimpa = false
+linter.style.cases = false
+weak.linter.unnecessarySeqFocus = false
+weak.linter.unreachableTactic = false
+weak.linter.unusedTactic = false
+weak.linter.style.multiGoal = false
 
 [[require]]
 name = "mathlib"

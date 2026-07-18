@@ -918,7 +918,8 @@ private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
       PDE.DeTurck.connDiff (I := I) g₁ g₀ x u ζ := by
   apply inner_ext_vec (I := I) (M := M) g₁ x
   intro z
-  rw [sharpRaisedKoszulVec, inner_metricSharp (I := I) g₁ x _ z,
+  rw [sharpRaisedKoszulVec,
+    DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g₁ x _ z,
     linearizedKoszulCovec_apply,
     connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z, hsymmS]
 

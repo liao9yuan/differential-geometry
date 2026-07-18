@@ -170,7 +170,7 @@ private theorem lieArm_threeArm_coeffFields_perOrder_data
         have hadd := lc0b_rfns_toSection_add_le (I := I) (M := M) g₀ 2 2
           (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
-          (deTurckLieRemainderField (I := I) (M := M) g₀
+          (lieCorr0Field (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) x
         refine le_trans hadd ?_
         have h1 := hΛ0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
@@ -191,7 +191,7 @@ private theorem lieArm_threeArm_coeffFields_perOrder_data
       · set R0 : SmoothCcTensor g₀ 2 2 :=
           DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-            + deTurckLieRemainderField (I := I) (M := M) g₀
+            + lieCorr0Field (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg with hR0_def
         have hsingle : ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (symmAbsorbedCoeff (I := I) (M := M) g₀ 0 R0 σ'₀)‖ ^ 2 ≤
@@ -211,7 +211,7 @@ private theorem lieArm_threeArm_coeffFields_perOrder_data
           have hsplit := lc0b_normSq_icg_add_le (I := I) (M := M) g₀ 2 2 k
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
-            (deTurckLieRemainderField (I := I) (M := M) g₀
+            (lieCorr0Field (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
           have hA := hP0jet T T' hδ_le hδ hδ'_le hδ' hTball hT'ball k hk_le s hs
           have hB := hPLjet T T' hδ_le hδ hδ'_le hδ' hTball hT'ball k hk_le s hs

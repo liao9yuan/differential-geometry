@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
-/-!
-# Parametrized evaluation of Riemannian volume
 
-This file starts the Integration-layer API for evaluating the Riemannian volume
-measure through a supplied coordinate parametrization.  The main downstream
-consumer is the volume-comparison lane, where the parametrization will be the
-normal-coordinate partial diffeomorphism.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -29,14 +29,14 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Gram matrix pulled back by a `C¹` coordinate parametrization.
 
-Mathematically, at a source point `w` this is the matrix
-`g_{Ψ w}(dΨ_w e_i, dΨ_w e_j)` in the fixed model basis of `E`.  The regularity
-needed for interpreting `mfderiv` on the source is the `C¹` data carried by
-`Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1`.  The volume-comparison lane consumes
-this at `Ψ := expMapDiffeo g x`; the same object is also the density input for
-polar and entropy integrals. -/
+
+
+
+
+
+
+
 def paramGramMatrix (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) :
     E → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -46,11 +46,11 @@ def paramGramMatrix (g : SmoothRiemannianMetric I M)
       (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) j))
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise unfolding of the pulled-back parametrization Gram matrix.
 
-This is the direct API for consumers that need to compare the parametrized
-density with a canonical chart density.  It uses only the `C¹` derivative of
-the parametrization and is consumed by V0a/V1a rewriting. -/
+
+
+
+
 @[simp] lemma paramGramMatrix_apply
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -60,22 +60,22 @@ the parametrization and is consumed by V0a/V1a rewriting. -/
         (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) i))
         (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) j)) := rfl
 
-/-- The Riemannian density of a coordinate parametrization.
 
-This is `sqrt(det paramGramMatrix)`.  It is mathematically positive on the
-source of the partial diffeomorphism because `dΨ` is an isomorphism there, and
-continuous on the source from the `C¹` parametrization and the smooth metric.
-The V1 normal-chart formula, V2 polar transfer, and entropy integral estimates
-consume this scalar density. -/
+
+
+
+
+
+
 def paramDensity (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) : E → ℝ :=
   fun w => Real.sqrt (paramGramMatrix (I := I) g Ψ w).det
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise unfolding of the parametrization density.
 
-This exposes the `sqrt(det Gram)` normal form used by the V0 transformation
-law and by the V1 normal-coordinate specialization. -/
+
+
+
 @[simp] lemma paramDensity_apply
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -83,13 +83,13 @@ law and by the V1 normal-coordinate specialization. -/
     paramDensity (I := I) g Ψ w =
       Real.sqrt (paramGramMatrix (I := I) g Ψ w).det := rfl
 
-/-- The differential of a parametrizing partial diffeomorphism is a continuous
-linear equivalence at every source point.
 
-This is true because a `C¹` partial diffeomorphism is a local diffeomorphism on
-its open source.  V0a uses the equivalence to identify the pulled-back Gram
-with a congruence of the canonical chart Gram, and V1a uses it to get positivity
-of the normal-coordinate density. -/
+
+
+
+
+
+
 noncomputable def paramDerivEquiv
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {w : E} (hw : w ∈ Ψ.source) :
@@ -99,11 +99,11 @@ noncomputable def paramDerivEquiv
       (by norm_num)
 
 set_option linter.unusedSectionVars false in
-/-- The parametrization differential has trivial kernel on the source.
 
-This is the linear-algebra form of local invertibility needed to prove that
-the pulled-back Gram matrix is positive definite; it only uses the `C¹`
-partial-diffeomorphism structure of `Ψ`. -/
+
+
+
+
 lemma paramDeriv_ker
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {w : E} (hw : w ∈ Ψ.source) :
@@ -115,21 +115,21 @@ lemma paramDeriv_ker
   intro v hv
   apply (hlocal.mfderivToContinuousLinearEquiv (by norm_num)).injective
 
-/-- The model-space representative of a parametrization in the canonical chart
-centered at `x₀`.
 
-This is the Euclidean map whose Jacobian appears in the V0a change-of-variables
-step: for `Ψ := expMapDiffeo g x`, it is the normal parametrization written in
-the canonical chart at `x₀`.  Only `C¹` regularity of `Ψ` is needed. -/
+
+
+
+
+
 def paramChartMap (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) : E → E :=
   fun w => extChartAt I x₀ (Ψ w)
 
-/-- The Jacobian matrix of `paramChartMap` in the fixed model basis.
 
-This is the matrix `D(extChartAt x₀ ∘ Ψ)_w` used in the V0a Gram transformation
-law and in the V0b Euclidean change-of-variables formula.  V1a consumes the
-specialization where `Ψ` is the normal-coordinate exponential diffeomorphism. -/
+
+
+
+
 def paramJacobianMatrix (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -137,11 +137,11 @@ def paramJacobianMatrix (x₀ : M)
     (fderiv ℝ (paramChartMap (I := I) x₀ Ψ) w).toLinearMap
 
 set_option linter.unusedSectionVars false in
-/-- Entrywise unfolding of the parametrized Jacobian matrix.
 
-The `(k,i)` entry is the `k`-th coordinate, in the fixed model basis, of
-`D(extChartAt x₀ ∘ Ψ)_w(e_i)`.  This is the coefficient form used by the V0a
-Gram pullback proof. -/
+
+
+
+
 @[simp] lemma paramJacobianMatrix_apply
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E)
     (k i : Fin (Module.finrank ℝ E)) :
@@ -152,13 +152,13 @@ Gram pullback proof. -/
   simp [paramJacobianMatrix, LinearMap.toMatrix_apply]
 
 set_option linter.unusedSectionVars false in
-/-- The parametrization derivative decomposes in the canonical chart basis.
 
-At a source point whose image lies in the canonical chart at `x₀`, the derivative
-`dΨ_w(e_i)` is obtained by applying the inverse chart derivative to
-`D(extChartAt x₀ ∘ Ψ)_w(e_i)`.  Expanding the latter in the fixed model basis
-gives this coefficient formula.  This is the missing bridge needed before the
-V0a Gram transformation can reuse the existing chart-density algebra. -/
+
+
+
+
+
+
 lemma paramDeriv_chartBasis_eq_sum
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {w : E} (hw : w ∈ Ψ.source)
@@ -229,13 +229,13 @@ lemma paramDeriv_chartBasis_eq_sum
           rw [ContinuousLinearEquiv.apply_symm_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Entrywise V0a Gram transformation law.
 
-On the overlap where the parametrization lands in the canonical chart at `x₀`,
-the pulled-back parametrization Gram matrix is the chart Gram matrix evaluated
-on the Jacobian columns of `extChartAt x₀ ∘ Ψ`.  This is the coefficient form
-used by the matrix and density versions consumed by V1a, V2a, and entropy
-integrals. -/
+
+
+
+
+
+
 lemma paramGramMatrix_pullback_eq_sum
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -284,12 +284,12 @@ lemma paramGramMatrix_pullback_eq_sum
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Matrix V0a Gram transformation law.
 
-At a source point whose image lies in the canonical chart at `x₀`, the
-parametrized Gram matrix is `Jᵀ * G_x₀ * J`, where `J` is the Fréchet Jacobian
-of `extChartAt x₀ ∘ Ψ` in the fixed model basis.  This is the integration-layer
-bridge needed before the V0 density identity and V0b change of variables. -/
+
+
+
+
+
 theorem paramGramMatrix_pullback_eq_mul
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -311,12 +311,12 @@ theorem paramGramMatrix_pullback_eq_mul
   ring
 
 set_option linter.unusedSectionVars false in
-/-- The determinant of the parametrized Jacobian matrix equals the determinant
-of the underlying Fréchet derivative.
 
-This identifies the coefficient matrix used in the V0a Gram law with the
-Jacobian determinant required by Mathlib's Euclidean change-of-variables
-formula in V0b. -/
+
+
+
+
+
 lemma paramJacobianMatrix_det
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E) :
     (paramJacobianMatrix (I := I) x₀ Ψ w).det =
@@ -325,12 +325,12 @@ lemma paramJacobianMatrix_det
   rw [LinearMap.det_toMatrix]
 
 set_option linter.unusedSectionVars false in
-/-- Determinant form of V0a.
 
-On the chart overlap, `det(paramGram)` is the square of the Jacobian determinant
-of `extChartAt x₀ ∘ Ψ` times the canonical chart Gram determinant.  This is the
-algebraic input for the scalar density identity used by V1a and later polar
-integration. -/
+
+
+
+
+
 lemma paramGramMatrix_det_pullback
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -345,12 +345,12 @@ lemma paramGramMatrix_det_pullback
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Scalar V0a density transformation law.
 
-Where the parametrization lands in the canonical chart at `x₀`, its density is
-the absolute Jacobian of `extChartAt x₀ ∘ Ψ` times the canonical chart density.
-This is the exact scalar identity needed by the V0b Jacobian change of
-variables, and V1a consumes it at `Ψ := expMapDiffeo g x`. -/
+
+
+
+
+
 theorem paramDensity_eq_abs_det_mul_chartDensity
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -365,11 +365,11 @@ theorem paramDensity_eq_abs_det_mul_chartDensity
   rw [Real.sqrt_sq_eq_abs]
 
 set_option linter.unusedSectionVars false in
-/-- The chart representative of a parametrization is `C¹` on any open set where
-the parametrization stays in the chosen chart.
 
-This is the regularity input for continuity of the Jacobian determinant and
-hence of the parametrized density on chart-valid pieces. -/
+
+
+
+
 lemma paramChartMap_contDiffOn
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_source : s ⊆ Ψ.source)
@@ -390,12 +390,12 @@ lemma paramChartMap_contDiffOn
     (by simpa [paramChartMap, Function.comp_def] using hcomp)
 
 set_option linter.unusedSectionVars false in
-/-- The parametrized density is continuous on any open source subset whose image
-lies in one canonical chart.
 
-This is the chart-local continuity statement needed for measurable POU
-recombination.  The global source-continuity statement should be obtained by
-localizing this lemma around each source point. -/
+
+
+
+
+
 lemma paramDensity_continuousOn_chart
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -423,7 +423,7 @@ lemma paramDensity_continuousOn_chart
       (hs_source hw) (hs_chart w hw))
 
 set_option linter.unusedSectionVars false in
-/-- Measurability form of chart-local continuity of the parametrized density. -/
+
 lemma aemeasurable_ofReal_paramDensity_on_chart
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -437,12 +437,12 @@ lemma aemeasurable_ofReal_paramDensity_on_chart
   exact ENNReal.measurable_ofReal.comp_aemeasurable (hcont.aemeasurable hs_meas)
 
 set_option linter.unusedSectionVars false in
-/-- The chart representative of a parametrization has the expected Fréchet
-derivative within any set.
 
-This is the `HasFDerivWithinAt` input required by Mathlib's Euclidean
-change-of-variables theorem in V0b.  It uses only `C¹` regularity of the
-partial diffeomorphism on its source and smoothness of the canonical chart. -/
+
+
+
+
+
 lemma paramChartMap_hasFDerivWithinAt
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} {w : E} (hw : w ∈ Ψ.source)
@@ -462,12 +462,12 @@ lemma paramChartMap_hasFDerivWithinAt
   exact hTdiff.differentiableAt.hasFDerivAt.hasFDerivWithinAt
 
 set_option linter.unusedSectionVars false in
-/-- The chart representative of a parametrization is injective on chart-valid
-subsets of the source.
 
-The proof uses injectivity of the canonical chart on its source and injectivity
-of the partial diffeomorphism on its source.  This is the `InjOn` input for the
-V0b Jacobian change of variables. -/
+
+
+
+
+
 lemma paramChartMap_injOn
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_source : s ⊆ Ψ.source)
@@ -491,12 +491,12 @@ lemma paramChartMap_injOn
   exact Ψ.toPartialEquiv.injOn (hs_source hu) (hs_source hv) hΨuv
 
 set_option linter.unusedSectionVars false in
-/-- The image of a measurable source subset under the chart representative of
-a parametrization is measurable.
 
-This is the measurability companion to `paramChartMap_injOn`: Mathlib's
-Jacobian API supplies it from differentiability within the source set and
-injectivity.  V0b uses this image as the Euclidean integration domain. -/
+
+
+
+
+
 lemma measurableSet_image_paramChartMap
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_meas : MeasurableSet s)
@@ -512,12 +512,12 @@ lemma measurableSet_image_paramChartMap
     (paramChartMap_injOn (I := I) x₀ Ψ hs_source hs_chart)
 
 set_option linter.unusedSectionVars false in
-/-- The parametrized image is measurable when it lies in one canonical chart.
 
-The proof first shows measurability of the Euclidean image
-`(extChartAt x₀ ∘ Ψ) '' s`, then maps it back through the inverse chart.  The
-`T2Space` assumption is exactly the codomain separation hypothesis needed by
-the Lusin-Souslin image theorem for continuous injective maps. -/
+
+
+
+
+
 lemma measurableSet_image_param
     [T2Space M]
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -575,12 +575,12 @@ lemma measurableSet_image_param
     simpa [paramChartMap] using ((extChartAt I x₀).left_inv hxsrc).symm
 
 set_option linter.unusedSectionVars false in
-/-- The image of a measurable source subset under a parametrizing partial
-diffeomorphism is measurable.
 
-This is the global Borel-image input for the final V0 formula.  It uses the
-same Lusin-Souslin image theorem as the chart-contained version, but applies it
-directly to `Ψ` on the measurable subset of its open source. -/
+
+
+
+
+
 lemma measurableSet_image_param_global
     [T2Space M]
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -595,12 +595,12 @@ lemma measurableSet_image_param_global
   exact hs_meas.image_of_continuousOn_injOn hcont hinj
 
 set_option linter.unusedSectionVars false in
-/-- The inverse image of a measurable target subset under a parametrizing
-partial diffeomorphism is measurable in the model space.
 
-This is the measurability input for the set-form V0 corollary: it turns a
-measurable target set `A ⊆ Ψ.target` into the source set `Ψ.symm '' A` to which
-`riemannianVolumeMeasure_image_param_eq` applies. -/
+
+
+
+
+
 lemma measurableSet_symm_image_param
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -636,11 +636,11 @@ lemma measurableSet_symm_image_param
       exact Ψ.toPartialEquiv.left_inv hwsrc⟩
 
 set_option linter.unusedSectionVars false in
-/-- The source piece whose parametrized image lies in the chart at `x₀` is
-measurable.
 
-This is the standard chart-piece domain used in the POU recombination:
-`s ∩ Ψ ⁻¹' (chartAt H x₀).source`. -/
+
+
+
+
 lemma measurableSet_param_chartPiece
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_meas : MeasurableSet s)
@@ -663,13 +663,13 @@ lemma measurableSet_param_chartPiece
   exact hs_meas.inter hopen.measurableSet
 
 set_option linter.unusedSectionVars false in
-/-- The parametrized density is a.e.-measurable on an arbitrary measurable
-chart piece `s ∩ Ψ ⁻¹' (chartAt H x₀).source`.
 
-The proof obtains continuity on the open chart-valid set
-`Ψ.source ∩ Ψ ⁻¹' (chartAt H x₀).source`, then restricts it to the measurable
-piece.  This is the density-side measurability input for the POU
-recombination route. -/
+
+
+
+
+
+
 lemma aemeasurable_ofReal_paramDensity_on_chartPiece
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -703,8 +703,8 @@ lemma aemeasurable_ofReal_paramDensity_on_chartPiece
     ((hcontU.mono hpiece_sub).aemeasurable hpiece_meas)
 
 set_option linter.unusedSectionVars false in
-/-- A partition-of-unity weight pulled back by the parametrization is
-a.e.-measurable on a chart piece. -/
+
+
 lemma aemeasurable_ofReal_pou_param_on_chartPiece
     (ρ : SmoothPartitionOfUnity M I M univ) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -726,8 +726,8 @@ lemma aemeasurable_ofReal_pou_param_on_chartPiece
   exact (measurable_ofReal_pou_weight (I := I) ρ x₀).comp_aemeasurable hΨ_aem
 
 set_option linter.unusedSectionVars false in
-/-- The parameter-side product of the parametrized density with a pulled-back
-POU weight is a.e.-measurable on a chart piece. -/
+
+
 lemma aemeasurable_paramDensity_mul_pou_on_chartPiece
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) (x₀ : M)
@@ -745,8 +745,8 @@ lemma aemeasurable_paramDensity_mul_pou_on_chartPiece
       hs_meas hs_source)
 
 set_option linter.unusedSectionVars false in
-/-- The chart-piece weighted parameter integrand, extended by zero off the
-chart-valid piece, is a.e.-measurable for the model Haar measure. -/
+
+
 lemma aemeasurable_paramDensity_mul_pou_indicator_chartPiece
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) (x₀ : M)
@@ -766,8 +766,8 @@ lemma aemeasurable_paramDensity_mul_pou_indicator_chartPiece
       hs_meas hs_source)
 
 set_option linter.unusedSectionVars false in
-/-- A POU weight subordinate to the chart atlas vanishes outside its chart
-source. -/
+
+
 lemma pou_weight_eq_zero_of_notMem_chart
     (ρ : SmoothPartitionOfUnity M I M univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -777,14 +777,14 @@ lemma pou_weight_eq_zero_of_notMem_chart
   exact hx (hρ α (subset_tsupport _ hne))
 
 set_option linter.unusedSectionVars false in
-/-- V0b, chart-image form: Euclidean change of variables for a parametrization
-written in a canonical chart.
 
-For a measurable subset of the parametrization source whose image lies in the
-canonical chart at `x₀`, integrating the canonical chart density over
-`(extChartAt x₀ ∘ Ψ) '' s` is the same as integrating the parametrized density
-over `s`.  This is the local Jacobian-change-of-variables step consumed by the
-V0 recombination proof and, after specialization, by V1a normal coordinates. -/
+
+
+
+
+
+
+
 theorem lintegral_image_paramChartMap_chartDensity_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -831,11 +831,11 @@ theorem lintegral_image_paramChartMap_chartDensity_eq
   rw [← paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ (hs_source hw) hx]
 
 set_option linter.unusedSectionVars false in
-/-- Weighted V0b, chart-image form.
 
-This is the change-of-variables formula needed for the POU recombination step:
-an arbitrary nonnegative weight pulled back through the inverse chart becomes
-the same weight evaluated on the parametrized point. -/
+
+
+
+
 theorem lintegral_image_paramChartMap_mul_chartDensity_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -888,15 +888,15 @@ theorem lintegral_image_paramChartMap_mul_chartDensity_eq
   rw [← paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ (hs_source hw) hx]
 
 set_option linter.unusedSectionVars false in
-/-- V0c, chart-local form with an explicit measurability hypothesis on the
-parametrized image.
 
-For a measurable source subset whose parametrized image lies in one canonical
-chart, the chart-local Riemannian measure of that image is the model-space
-integral of the parametrized density.  The extra hypothesis
-`MeasurableSet (Ψ '' s)` is intentionally explicit: removing it for arbitrary
-measurable `s` is the remaining Borel-image API needed before the global V0d
-recombination theorem can be stated without side assumptions. -/
+
+
+
+
+
+
+
+
 theorem chartLocalMeasure_image_param_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -972,9 +972,9 @@ theorem chartLocalMeasure_image_param_eq
     hs_meas hs_source hs_chart
 
 set_option linter.unusedSectionVars false in
-/-- V0c, chart-local form: if the parametrized set lies in one canonical chart,
-then its chart-local Riemannian measure is the model-space integral of the
-parametrized density. -/
+
+
+
 theorem chartLocalMeasure_image_param_eq_t2
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -989,10 +989,10 @@ theorem chartLocalMeasure_image_param_eq_t2
     (measurableSet_image_param (I := I) x₀ Ψ hs_meas hs_source hs_chart)
 
 set_option linter.unusedSectionVars false in
-/-- Weighted V0c, chart-local form.
 
-This is the local formula needed by the global POU recombination: a measurable
-nonnegative weight on the manifold pulls back along the parametrization. -/
+
+
+
 theorem chartLocalMeasure_lintegral_image_param_eq_t2
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -1069,13 +1069,13 @@ theorem chartLocalMeasure_lintegral_image_param_eq_t2
     hs_meas hs_source hs_chart F
 
 set_option linter.unusedSectionVars false in
-/-- A single POU summand of the global Riemannian measure decomposition,
-restricted to a parametrized image, is the corresponding weighted parameter
-integral over the chart-valid source piece.
 
-This is the main local recombination step for V0d.  The remaining global step
-is to sum this identity over `α` and collapse the POU weights on the
-parameter side. -/
+
+
+
+
+
+
 theorem riemannianMeasure_param_summand_eq
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -1151,8 +1151,8 @@ theorem riemannianMeasure_param_summand_eq
           rw [hS_def]
 
 set_option linter.unusedSectionVars false in
-/-- If a POU summand is identically zero, then its parameter-side chart-piece
-integral is zero. -/
+
+
 lemma param_pou_piece_zero
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) (α : M)
@@ -1171,8 +1171,8 @@ lemma param_pou_piece_zero
   simp [hzero]
 
 set_option linter.unusedSectionVars false in
-/-- Restrict the parameter-side POU chart-piece sum to the countable support of
-the partition of unity. -/
+
+
 lemma tsum_param_pou_piece_eq_subtype
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -1195,7 +1195,7 @@ lemma tsum_param_pou_piece_eq_subtype
   exact hα (param_pou_piece_zero (I := I) g ρ α hne Ψ)
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise collapse of the parameter-side POU chart-piece sum. -/
+
 lemma tsum_param_pou_piece_indicator_eq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1262,9 +1262,9 @@ lemma tsum_param_pou_piece_indicator_eq
     rw [Set.indicator_of_notMem hmem]
 
 set_option linter.unusedSectionVars false in
-/-- Global V0d recombination for an arbitrary chart-subordinate POU: the glued
-Riemannian measure of a parametrized measurable source image is the parameter
-integral of the parametrized density. -/
+
+
+
 theorem riemannianMeasure_image_param_eq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1340,7 +1340,7 @@ theorem riemannianMeasure_image_param_eq
           rw [MeasureTheory.lintegral_indicator hB_meas]
 
 set_option linter.unusedSectionVars false in
-/-- Global V0 evaluation formula for the canonical Riemannian volume measure. -/
+
 theorem riemannianVolumeMeasure_image_param_eq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1356,13 +1356,13 @@ theorem riemannianVolumeMeasure_image_param_eq
     (chartAtlasPOU_isSubordinate I M) Ψ hB_meas hB_source
 
 set_option linter.unusedSectionVars false in
-/-- Set-form V0 evaluation formula on a measurable target subset.
 
-If `A` lies in the target of a `C¹` parametrizing partial diffeomorphism, then
-the Riemannian volume of `A` is computed by integrating the parametrized density
-over the inverse source image `Ψ.symm '' A`.  This is the convenience form
-consumed by normal-coordinate V1a and later polar/entropy applications when the
-geometric set is already expressed in the manifold. -/
+
+
+
+
+
+
 theorem riemannianVolumeMeasure_param_target_eq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1395,11 +1395,11 @@ theorem riemannianVolumeMeasure_param_target_eq
           rw [hB_def]
 
 set_option linter.unusedSectionVars false in
-/-- The parametrized Gram matrix is symmetric.
 
-The statement is purely pointwise: it follows from symmetry of the Riemannian
-metric and is used in the positive-definite proof for the density consumed by
-V1a/V2a. -/
+
+
+
+
 lemma paramGramMatrix_isHermitian
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E) :
@@ -1414,12 +1414,12 @@ lemma paramGramMatrix_isHermitian
     (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) i))
 
 set_option linter.unusedSectionVars false in
-/-- The quadratic form of `paramGramMatrix` is the metric norm-square of the
-corresponding linear combination of parametrized basis vectors.
 
-This is the same Gram-matrix algebra used for `chartGramMatrix`; it is local to
-the source and feeds the positivity proof required before the V0 density can be
-used in V1a. -/
+
+
+
+
+
 lemma paramGramMatrix_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E)
@@ -1477,12 +1477,12 @@ lemma paramGramMatrix_dotProduct_mulVec
   ring
 
 set_option linter.unusedSectionVars false in
-/-- The pulled-back parametrization Gram matrix is positive definite on
-`Ψ.source`.
 
-The proof uses that `dΨ_w` is injective because `Ψ` is a `C¹` partial
-diffeomorphism.  This is the positivity input for the parametrized density
-used by V1 normal coordinates and later polar/entropy integrations. -/
+
+
+
+
+
 lemma paramGramMatrix_posDef
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -1510,10 +1510,10 @@ lemma paramGramMatrix_posDef
   exact g.pos (Ψ w) v hvnz
 
 set_option linter.unusedSectionVars false in
-/-- The determinant of `paramGramMatrix` is positive on `Ψ.source`.
 
-This is the determinant form of local invertibility and metric positivity.  It
-is the direct scalar input for `paramDensity_pos` and the V0 transformation law. -/
+
+
+
 lemma paramGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -1522,12 +1522,12 @@ lemma paramGramMatrix_det_pos
   (paramGramMatrix_posDef (I := I) g Ψ hw).det_pos
 
 set_option linter.unusedSectionVars false in
-/-- The parametrization density is strictly positive on the source.
 
-The source hypothesis is the precise scale/domain condition: positivity holds
-where the partial diffeomorphism supplies an invertible `C¹` differential.  This
-is consumed by V1a at the normal chart, and by V2/polar estimates whenever the
-parametrized density is bounded above and below. -/
+
+
+
+
+
 lemma paramDensity_pos
     (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)

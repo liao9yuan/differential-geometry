@@ -31,15 +31,15 @@ import DifferentialGeometry.Tensor.Product.Pretrivialization
 open scoped Topology
 open scoped TensorProduct
 
-/-
-# The vector bundle of tensor products
 
-We define the (topological) vector bundle of tensor products of two vector bundles
-over the same base.
 
-Given bundles `E₁ E₂ : B → Type*` and normed spaces `F₁` and `F₂`, we define a vector bundle
-with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -61,7 +61,7 @@ variable {E₁ E₂}
 variable [TopologicalSpace B] (e₁ e₁' : Trivialization F₁ (π F₁ E₁))
   (e₂ e₂' : Trivialization F₂ (π F₂ E₂))
 
-/-! ## Induced norm on tensor product -/
+
 
 section TensorNorm
 
@@ -81,7 +81,7 @@ variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [Finit
 
 end TensorNorm
 
-/-- The tensor product map `(v, w) ↦ v ⊗ₜ w` as a continuous bilinear map. -/
+
 noncomputable def TensorProduct.tmulL :
     F₁ →L[𝕜] F₂ →L[𝕜] (F₁ ⊗[𝕜] F₂) := by
   classical
@@ -106,7 +106,7 @@ theorem TensorProduct.tmulL_apply (v : F₁) (w : F₂) :
     TensorProduct.tmulL (𝕜 := 𝕜) (F₁ := F₁) (F₂ := F₂) v w = v ⊗ₜ[𝕜] w := by
   simp [TensorProduct.tmulL]
 
-/-! ## TensorProduct.mapL and its properties -/
+
 
 section MapL
 
@@ -121,7 +121,7 @@ end MapL
 
 namespace Pretrivialization
 
-/-! ## Pretrivialization for tensor product bundle -/
+
 
 
 variable {e₁ e₁' e₂ e₂'}
@@ -230,11 +230,11 @@ noncomputable def totalSpaceTopology :
     TopologicalSpace
       (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) := by
   classical
-  -- provide fiber topologies locally
+
   letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
     Bundle.TensorProduct.tensorFiberTopology
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂) x
-  -- now identical to the sample
+
   exact
     (Bundle.TensorProduct.vectorPrebundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).totalSpaceTopology
@@ -296,7 +296,7 @@ theorem tensorProduct_trivializationAt_apply_snd
   rw [tensorProduct_trivializationAt]
   rfl
 
-/-- Tensor-bundle analogue of the Hom-bundle `inCoordinates` map. -/
+
 def inCoordinates
     (x₀ x : B) (y₀ y : B) (t : E₁ x ⊗[𝕜] E₂ y) : F₁ ⊗[𝕜] F₂ :=
   TensorProduct.map

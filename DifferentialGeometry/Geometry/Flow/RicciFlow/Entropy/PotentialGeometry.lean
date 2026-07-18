@@ -4,12 +4,12 @@ import DifferentialGeometry.Geometry.Operator.Operators
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Geometric identities for Perelman's reconstructed potential
 
-This file converts the scalar density-to-potential parametrization into
-pointwise gradient identities for a fixed realized Riemannian metric.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -27,8 +27,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-- The gradient of the potential reconstructed from a positive density is
-`-u⁻¹ ∇u`. -/
+
+
 theorem potential_grad
     (g : SmoothRiemannianMetric I M) (n : Nat) {tau : Real}
     {u : M -> Real} (hu : ContMDiff I 𝓘(Real, Real) ∞ u)
@@ -66,7 +66,7 @@ theorem potential_grad
   congr 1
   ring
 
-/-- Squared gradient identity for a reconstructed positive density. -/
+
 theorem potential_grad_sq
     (g : SmoothRiemannianMetric I M) (n : Nat) {tau : Real}
     {u : M -> Real} (hu : ContMDiff I 𝓘(Real, Real) ∞ u)
@@ -82,8 +82,8 @@ theorem potential_grad_sq
   simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   field_simp [(hpos x).ne']
 
-/-- Pointwise logarithmic form of the potential reconstructed from the square
-of a positive amplitude. -/
+
+
 theorem potential_square
     (n : Nat) {tau : Real} {v : M -> Real}
     (hpos : ∀ y : M, 0 < v y) (htau : 0 < tau) (x : M) :
@@ -94,8 +94,8 @@ theorem potential_square
     (mul_ne_zero (hpos x).ne' (hpos x).ne') (prefactor_pos n htau).ne']
   ring
 
-/-- For a positive amplitude `v`, the density-weighted potential energy of
-the density `v²` is four times the Dirichlet energy of `v`. -/
+
+
 theorem square_pot_energy
     (g : SmoothRiemannianMetric I M) (n : Nat) {tau : Real}
     {v : M -> Real} (hv : ContMDiff I 𝓘(Real, Real) ∞ v)

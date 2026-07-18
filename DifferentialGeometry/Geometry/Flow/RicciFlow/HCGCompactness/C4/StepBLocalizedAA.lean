@@ -3,39 +3,39 @@ import DifferentialGeometry.Analysis.Calculus.PiDeriv
 
 set_option autoImplicit false
 
-/-!
-# Localized map / isometry compactness on nested Euclidean domains (MSM135 Ch4 Step B, B-loc)
 
-MSM135 Chapter 4 Step B maps and metrics (`normalTransition`, `normalCoordMetric`,
-the transition maps `J_k^{αβ}`) live only on nested Euclidean balls
-`E^α ⊆ Ē^α ⊆ vec E^α`, not on all of `E`.  The F7/F8 engine
-(`MapConvergence.exists_cInf_subseq`, `IsometryCompactness.isometry_seq_*`) is stated
-for **total** maps: global `ContDiff ℝ ⊤` smoothness, `IsometryDerivBounds` over
-**every** compact `K ⊆ E`, and a `Set.univ` conclusion.  This file is the localized
-bridge requested by `STEPB_PLAN.md` PLANNER RULING Q2.
 
-## What is delivered here
 
-- `IsometryDerivBoundsOn U Φ` — the localized derivative-bounds predicate: uniform
-  Euclidean derivative bounds on compact subsets **of an open domain `U`** only.
-  `IsometryDerivBoundsOn.comp_subseq` and `IsometryDerivBounds.toOn` (a global bound
-  restricts to any `U`).
-- `comp_eq_id_of_cInf_on` — the localized **inverse-identity step** (`lbl374`'s
-  "by symmetry").  A pure *consumer* of `C^∞`-on-compacts convergence: a compact
-  neighbourhood of `Ψ_∞ x` is taken **inside** the open codomain `V`
-  (`exists_compact_subset`, finite-dim `F` locally compact).
-- `isometry_seq_cInf_on`, `isometry_seq_diffeo_on` — the two localized F8 producers,
-  consuming the localized Arzelà–Ascoli engine.  The diffeo inverse identities are
-  stated **conditionally on domain membership** (`Φ_∞ x ∈ V`, `Ψ_∞ y ∈ U`) — Step B's
-  nested-ball data supplies those facts later, so no membership frontier is hidden.
 
-The localized Arzelà–Ascoli **extraction** itself lives in `MapConvergence.lean` as
-`exists_cInf_subseq_on` (planner-authorized engine addition): it bundles the order-`r`
-*within* derivatives `∇ᵤʳΦₖ` as continuous maps on the metric subspace `↥U`, runs the
-existing vector Arzelà–Ascoli, links the limits by differentiation on balls inside `U`,
-and assembles a `HasFTaylorSeriesUpToOn ⊤` of the limit — no smooth cutoff, no
-ball-to-space diffeomorphism.  See `MapConvergence.md`.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -46,17 +46,17 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
-/-- **Localized isometry derivative bounds** (the open-domain analogue of
-`IsometryDerivBounds`).  Uniform Euclidean derivative bounds for the sequence on every
-compact subset of the open domain `U`, rather than on every compact subset of `E`.
-This is the hypothesis the localized Arzelà–Ascoli extraction `exists_cInf_subseq_on`
-(and `isometry_seq_cInf_on`) consumes. -/
+
+
+
+
+
 def IsometryDerivBoundsOn (U : Set E) (Φ : ℕ → E → F) : Prop :=
   ∀ r : ℕ, ∀ K : Set E, IsCompact K → K ⊆ U →
     ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDeriv ℝ r (Φ k) x‖ ≤ M
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-/-- A sub-sequence still has the localized uniform derivative bounds. -/
+
 theorem IsometryDerivBoundsOn.comp_subseq {U : Set E} {Φ : ℕ → E → F}
     (h : IsometryDerivBoundsOn U Φ) (φ : ℕ → ℕ) :
     IsometryDerivBoundsOn U (fun k => Φ (φ k)) := by
@@ -65,8 +65,8 @@ theorem IsometryDerivBoundsOn.comp_subseq {U : Set E} {Φ : ℕ → E → F}
   exact ⟨M, fun k x hx => hM (φ k) x hx⟩
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-/-- Finitely many componentwise localized derivative bounds assemble into a
-localized derivative bound for the corresponding Pi-valued map. -/
+
+
 theorem IsometryDerivBoundsOn.pi
     {ι : Type*} [Fintype ι] {U : Set E} {Φ : ℕ → E → (ι → F)}
     (hU : IsOpen U)
@@ -93,21 +93,21 @@ theorem IsometryDerivBoundsOn.pi
       Finset.single_le_sum (fun j _ => le_max_right (M j) 0) (Finset.mem_univ i)
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-/-- A global all-compacts bound (`IsometryDerivBounds`) restricts to any open domain. -/
+
 theorem IsometryDerivBounds.toOn {Φ : ℕ → E → F} (h : IsometryDerivBounds Φ)
     (U : Set E) : IsometryDerivBoundsOn U Φ :=
   fun r K hK _ => h r K hK
 
 omit [FiniteDimensional ℝ E] in
-/-- **Localized inverse-identity step** (`comp_eq_id_of_cInf` on nested open domains).
-If `Φₖ → Φ_∞` in `C^∞` uniformly on compacts of an *open* `V ⊆ F`, `Ψₖ → Ψ_∞` in `C^∞`
-on compacts of `U ⊆ E`, `Φ_∞` is continuous on `V`, and `Φₖ ∘ Ψₖ = id`, then
-`Φ_∞ (Ψ_∞ x) = x` at every `x ∈ U` with `Ψ_∞ x ∈ V`.
 
-The book uses this for the cocycle identity `J̄_∞^{βα} ∘ J_∞^{αβ} = id` on the inner
-ball.  Unlike the global `comp_eq_id_of_cInf`, the compact neighbourhood of `Ψ_∞ x`
-must be taken **inside** the open `V` (`exists_compact_subset`, finite-dimensional `F`
-being locally compact); the convergence helpers already accept a general domain. -/
+
+
+
+
+
+
+
+
 theorem comp_eq_id_of_cInf_on
     {U : Set E} {V : Set F}
     {Φ : ℕ → F → E} {Φinf : F → E} {Ψ : ℕ → E → F} {Ψinf : E → F}
@@ -129,12 +129,12 @@ theorem comp_eq_id_of_cInf_on
   simp only [hidx] at hcomp
   exact (tendsto_nhds_unique tendsto_const_nhds hcomp).symm
 
-/-! ### Localized isometry compactness (the two F8 producers, `lbl374` on `U`) -/
 
-/-- **Localized convergence core** of `lbl374`: from the localized derivative bounds, a
-subsequence of maps that are `C^∞` on the open `U` converges in `C^∞` on compacts of
-`U` to a limit `C^∞` on `U`.  Pure application of the localized Arzelà–Ascoli engine
-`exists_cInf_subseq_on`. -/
+
+
+
+
+
 theorem isometry_seq_cInf_on
     {U : Set E} (hU : IsOpen U) (Φ : ℕ → E → F)
     (hΦ : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (Φ k) U) (hbdd : IsometryDerivBoundsOn U Φ) :
@@ -143,15 +143,15 @@ theorem isometry_seq_cInf_on
         MapCInfConvOnCompacts U (fun k => Φ (φ k)) Φinf :=
   exists_cInf_subseq_on hU Φ hΦ hbdd
 
-/-- **Localized diffeomorphism compactness** (`lbl374` on nested open domains).  A
-sequence of mutually inverse maps `Φₖ : U → V`, `Ψₖ : V → U` (each `C^∞` on its open
-domain, both satisfying the localized isometry derivative bounds) has a subsequence
-whose forward/backward limits converge in `C^∞` on compacts and are mutually inverse.
 
-The inverse identities are stated **conditionally on domain membership** (`Φ_∞ x ∈ V`,
-`Ψ_∞ y ∈ U`): the limits are only controlled on the open domains, and Step B's nested
-ball data supplies those membership facts later.  Mirrors the global
-`isometry_seq_diffeo`, with `comp_eq_id_of_cInf_on` for the two inverse identities. -/
+
+
+
+
+
+
+
+
 theorem isometry_seq_diffeo_on
     {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
     (Φ : ℕ → E → F) (Ψ : ℕ → F → E)

@@ -14,14 +14,14 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
-/-!
-# Metric compatibility in local-frame components
 
-This file contains coordinate/local-frame consequences of metric compatibility
-that are independent of Ricci-flow time evolution.  In particular it exposes
-the component form of `nabla gInv = 0` for an arbitrary smooth metric and a
-metric-compatible connection.
--/
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -43,7 +43,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-/-! ## Fixed-chart inverse metric components -/
+
 
 noncomputable def metricFlatContinuousEquiv
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -58,8 +58,8 @@ theorem metricFlatContinuousEquiv_apply
   change ((metricFlatEquiv (I := I) g x₀) v) w = g.inner x₀ v w
   rw [metricFlatEquiv_apply]
 
-/-- The metric flat map represented in the tangent trivialization centered at
-`x₀`, viewed over the model chart target. -/
+
+
 noncomputable def metricFlatModelInChart
     (g : SmoothRiemannianMetric I M) (x₀ : M) (y : E) :
     E →L[Real] E →L[Real] Real :=
@@ -245,7 +245,7 @@ theorem metricFlatModelInChart_center_isInvertible
   rw [metricFlatModelInChart_center_eq (I := I) g x₀]
   exact ContinuousLinearMap.isInvertible_equiv
 
-/-- The fixed-chart metric flat map is smooth on the model chart at the center. -/
+
 theorem metricFlatModelInChart_contDiffWithinAt
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -292,7 +292,7 @@ theorem metricFlatModelInChart_contDiffWithinAt
       (x := extChartAt I x₀ x₀) hsymm
   exact hcomp.contDiffWithinAt
 
-/-- The inverse metric flat map is smooth in the fixed model chart. -/
+
 theorem inverseMetricFlatModelInChart_contDiffWithinAt
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -315,7 +315,7 @@ noncomputable def inverseMetricFlatModelInChart_component
         (metricFlatModelInChart (I := I) g x₀ y))
       (LinearMap.toContinuousLinearMap ((Module.finBasis Real E).coord l)))
 
-/-- Fixed-chart inverse metric coefficients are smooth model functions. -/
+
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -409,8 +409,8 @@ theorem inverseMetricFlatModelInChart_component_center_eq_symm
           rw [A.apply_symm_apply]
     _ = (Module.finBasis Real E).coord j (A.symm (ε i)) := rfl
 
-/-- Fixed-chart inverse metric coefficients are symmetric at points where the
-coordinate frame is defined. -/
+
+
 theorem gInvChart_symm
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -696,7 +696,7 @@ theorem inverseMetricFlatModelInChart_metricInverseInBasis_center
               simp [hij, hji]
   · exact hsecond i j
 
-/-- Metric component of a smooth metric in a fixed local frame. -/
+
 def metricCompForMetricInFrame
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)

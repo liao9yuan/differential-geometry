@@ -3,15 +3,15 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 
 set_option autoImplicit false
 
-/-!
-# Quantitative coordinate Koszul algebra for a model-space metric
 
-This file packages the coordinate Koszul expression associated to the first
-Fréchet derivative of a metric-valued map.  A coercivity bound for the metric
-then gives an explicit norm bound for the corresponding raised Koszul vector.
-The identification with the Christoffel contraction of an existing connection
-is deliberately left to a separate geometric realization theorem.
--/
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -19,21 +19,21 @@ namespace MetricKoszul
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 
-/-- The covector in the coordinate Koszul formula associated to a trilinear
-metric derivative `D` and two model-space vectors. -/
+
+
 def koszulCov
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     E →L[Real] Real :=
   (1 / 2 : Real) • ((D v) w + (D w) v - (D.flip v).flip w)
 
-/-- Evaluation of the coordinate Koszul covector. -/
+
 @[simp] theorem koszulCov_apply
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v w : E) :
     koszulCov D v w u =
       (1 / 2 : Real) * (D v w u + D w v u - D u v w) := by
   simp [koszulCov]
 
-/-- The coordinate Koszul covector is subtractive in the metric derivative. -/
+
 theorem koszulCov_sub
     (D F : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     koszulCov (D - F) v w = koszulCov D v w - koszulCov F v w := by
@@ -41,8 +41,8 @@ theorem koszulCov_sub
   simp only [koszulCov_apply, ContinuousLinearMap.sub_apply]
   ring
 
-/-- Diagonal variation of the coordinate Koszul covector, expanded in its two
-velocity slots. -/
+
+
 theorem koszulCov_diag_sub
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     koszulCov D v v - koszulCov D w w =
@@ -52,8 +52,8 @@ theorem koszulCov_diag_sub
     koszulCov_apply, map_sub]
   ring
 
-/-- A pointwise trilinear bound gives the corresponding three-halves operator
-norm bound for the coordinate Koszul covector. -/
+
+
 theorem koszulCov_norm_le
     (D : E →L[Real] E →L[Real] E →L[Real] Real)
     {C : Real} (hC : 0 ≤ C)
@@ -171,8 +171,8 @@ private theorem koszulCovBilin_le
   simpa only [koszulCovBilin_apply, mul_assoc] using
     koszulCov_norm_le D (norm_nonneg D) (tri_norm_apply D) v w
 
-/-- The coordinate Koszul operation as a bounded linear map from metric
-three-tensors to bilinear covector-valued maps. -/
+
+
 noncomputable def koszulCovCLM :
     (E →L[Real] E →L[Real] E →L[Real] Real) →L[Real]
       E →L[Real] E →L[Real] E →L[Real] Real :=
@@ -189,29 +189,29 @@ noncomputable def koszulCovCLM :
         ring }
   f.mkContinuous (3 / 2 : Real) koszulCovBilin_le
 
-/-- Evaluation of the bounded linear Koszul-covector operation. -/
+
 @[simp] theorem koszulCovCLM_apply
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     koszulCovCLM D v w = koszulCov D v w := by
   simp [koszulCovCLM]
 
-/-- The bounded linear Koszul-covector operation has norm at most `3 / 2`. -/
+
 theorem koszulCovCLM_norm_le : ‖koszulCovCLM (E := E)‖ ≤ (3 / 2 : Real) := by
   refine ContinuousLinearMap.opNorm_le_bound _ (by norm_num) ?_
   exact koszulCovBilin_le
 
 end CovCLM
 
-/-- The algebraic model vector obtained by raising the coordinate Koszul
-covector with a coercive metric.  It is not yet identified with the
-Christoffel contraction of a geometric connection. -/
+
+
+
 noncomputable def koszulVec
     [CompleteSpace E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) : E :=
   hco.sharp (koszulCov D v w)
 
-/-- Lowering the raised Koszul vector recovers its coordinate Koszul covector. -/
+
 @[simp] theorem apply_koszulVec
     [CompleteSpace E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
@@ -219,8 +219,8 @@ noncomputable def koszulVec
     B (koszulVec hco D v w) = koszulCov D v w := by
   exact hco.apply_sharp _
 
-/-- A coercivity constant `c` gives an explicit norm bound for the
-raised Koszul vector. -/
+
+
 theorem koszulVec_norm_le
     [CompleteSpace E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
@@ -238,7 +238,7 @@ theorem koszulVec_norm_le
     _ ≤ c⁻¹ * ((3 / 2 : Real) * C * ‖v‖ * ‖w‖) :=
       mul_le_mul_of_nonneg_left (koszulCov_norm_le D hC hD v w) (inv_nonneg.mpr hc.le)
 
-/-- Diagonal velocity variation of the raised coordinate Koszul vector. -/
+
 theorem koszulVec_diag_le
     [CompleteSpace E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
@@ -274,8 +274,8 @@ theorem koszulVec_diag_le
     _ = c⁻¹ * ((3 / 2 : Real) * C * (‖v‖ + ‖w‖) * ‖v - w‖) := by
       ring
 
-/-- Explicit difference bound for raised Koszul vectors when both the metric
-and its first derivative vary. -/
+
+
 theorem koszulVec_sub_le
     [CompleteSpace E]
     {B C : E →L[Real] E →L[Real] Real}

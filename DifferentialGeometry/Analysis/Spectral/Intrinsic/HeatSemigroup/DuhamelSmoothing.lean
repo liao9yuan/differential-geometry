@@ -3,6 +3,10 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 
 noncomputable section
 
+set_option linter.style.setOption false
+set_option synthInstance.maxHeartbeats 400000
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace

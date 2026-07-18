@@ -7,15 +7,15 @@ import Mathlib.Topology.MetricSpace.Thickening
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Composition for `MapCInfConvOnCompacts`
 
-This file is the Step-B analysis layer for composition convergence.  The first
-lemmas expose a basic projection that the composition proof needs: the project
-definition controls derivatives of the difference `Φₖ - Φ∞`, and under the
-localized smoothness hypotheses this is equivalent to uniform convergence of the
-individual iterated derivatives on compact subsets of the open domain.
--/
+
+
+
+
+
+
+
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -28,9 +28,9 @@ variable {E F G : Type*}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-/-- Extract uniform convergence of a fixed iterated derivative from `MapCPConvOn`
-on an open domain.  The `ContDiffOn` hypotheses let `iteratedFDeriv` commute with
-subtraction at points of the compact set. -/
+
+
+
 theorem MapCPConvOn.tendstoUniformlyOn_iteratedFDeriv
     {U K : Set E} {p : ℕ} {Φ : ℕ → E → F} {Φinf : E → F}
     (hU : IsOpen U) (hKU : K ⊆ U) (h : MapCPConvOn K p Φ Φinf)
@@ -55,7 +55,7 @@ theorem MapCPConvOn.tendstoUniformlyOn_iteratedFDeriv
   rw [dist_eq_norm, norm_sub_rev]
   exact lt_of_le_of_lt hb (by linarith)
 
-/-- `C^p` convergence is stable under any reindexing tending to infinity. -/
+
 theorem MapCPConvOn.comp_tendsto_atTop {K : Set E} {p : ℕ}
     {Φ : ℕ → E → F} {Φinf : E → F} (h : MapCPConvOn K p Φ Φinf)
     {τ : ℕ → ℕ} (hτ : Tendsto τ atTop atTop) :
@@ -65,7 +65,7 @@ theorem MapCPConvOn.comp_tendsto_atTop {K : Set E} {p : ℕ}
   obtain ⟨N, hN⟩ := eventually_atTop.mp (hτ.eventually_ge_atTop k0)
   exact ⟨N, fun k hk r hr x hx => hk0 (τ k) (hN k hk) r hr x hx⟩
 
-/-- `C^∞`-on-compacts convergence is stable under any reindexing tending to infinity. -/
+
 theorem MapCInfConvOnCompacts.comp_tendsto_atTop {U : Set E}
     {Φ : ℕ → E → F} {Φinf : E → F} (h : MapCInfConvOnCompacts U Φ Φinf)
     {τ : ℕ → ℕ} (hτ : Tendsto τ atTop atTop) :
@@ -73,9 +73,9 @@ theorem MapCInfConvOnCompacts.comp_tendsto_atTop {U : Set E}
   fun K hK hKU p => (h K hK hKU p).comp_tendsto_atTop hτ
 
 omit [NormedAddCommGroup F] [NormedSpace ℝ F] in
-/-- Convergence along every cofinal pair of natural-number sequences gives one
-common rectangular tail on each compact set, through any fixed derivative
-order. -/
+
+
+
 theorem mapCInf_pair_tail
     {U : Set E} {Φ : ℕ → ℕ → E → G} {Φinf : E → G}
     (hconv : ∀ kn ln : ℕ → ℕ,
@@ -100,8 +100,8 @@ theorem mapCInf_pair_tail
   exact not_lt_of_ge
     (hN N le_rfl (j N) (hj N) (x N) (hx N)) (hbad N)
 
-/-- Eventual truth along every cofinal triple of natural-number sequences gives
-one common three-index tail. -/
+
+
 theorem exists_three_tail {P : Nat → Nat → Nat → Prop}
     (h : ∀ an bn cn : Nat → Nat,
       Tendsto an atTop atTop → Tendsto bn atTop atTop →
@@ -123,8 +123,8 @@ theorem exists_three_tail {P : Nat → Nat → Nat → Prop}
   obtain ⟨N, hN⟩ := eventually_atTop.mp (h a b c ha_top hb_top hc_top)
   exact hbad N (hN N le_rfl)
 
-/-- Compact-open containment persists eventually under `C∞` convergence on
-compact subsets. -/
+
+
 theorem MapCInfConvOnCompacts.eventually_mapsTo
     {U : Set E} {Φ : Nat → E → F} {Φinf : E → F}
     (hconv : MapCInfConvOnCompacts U Φ Φinf)
@@ -146,9 +146,9 @@ theorem MapCInfConvOnCompacts.eventually_mapsTo
   exact ⟨Φinf x, ⟨x, hx, rfl⟩, by
     simpa only [dist_comm] using hn x hx⟩
 
-/-- Convergence along every triple of index sequences tending to infinity is
-equivalent, in the direction needed by applications, to one common
-three-index tail for each compact set, derivative order, and tolerance. -/
+
+
+
 theorem MapCInfConvOnCompacts.three_tail
     {U : Set E} {Φ : ℕ → ℕ → ℕ → E → F} {Φinf : E → F}
     (hconv : ∀ an bn cn : ℕ → ℕ,
@@ -179,9 +179,9 @@ theorem MapCInfConvOnCompacts.three_tail
   exact not_lt_of_ge
     (hN N le_rfl (r N) (hr N) (x N) (hx N)) (hbad N)
 
-/-- A finite family of refinable compact-`C∞` subsequence producers admits one
-common strictly increasing subsequence, even when its members have different
-domains. -/
+
+
+
 theorem exists_cInf_finite
     {ι : Type*} [Finite ι]
     (U : ι → Set E) (Φ : ι → ℕ → E → F)
@@ -218,7 +218,7 @@ theorem exists_cInf_finite
   obtain ⟨ψ, hψ, hconv⟩ := aux Finset.univ
   exact ⟨ψ, hψ, fun i => hconv i (Finset.mem_univ i)⟩
 
-/-- The fixed-order derivative projection for `MapCInfConvOnCompacts`. -/
+
 theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv
     {U K : Set E} {Φ : ℕ → E → F} {Φinf : E → F}
     (hU : IsOpen U) (hK : IsCompact K) (hKU : K ⊆ U)
@@ -232,7 +232,7 @@ theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv
     (fun k => (hΦ k).of_le (by exact_mod_cast le_top))
     (hΦinf.of_le (by exact_mod_cast le_top)) le_rfl
 
-/-- Localized version of `mapCPConvOn_of_tendstoUniformly` on an open domain. -/
+
 theorem mapCPConvOn_of_tendstoUniformlyOn {U K : Set E} {p : ℕ}
     {Φ : ℕ → E → F} {Φinf : E → F} (hU : IsOpen U) (hKU : K ⊆ U)
     (hΦ : ∀ k, ContDiffOn ℝ (p : ℕ∞) (Φ k) U)
@@ -264,9 +264,9 @@ theorem mapCPConvOn_of_tendstoUniformlyOn {U K : Set E} {p : ℕ}
   exact ⟨k0, fun k hk r hr x hx => hk0 k hk r (Set.mem_Iic.mpr hr) x hx⟩
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace ℝ F] in
-/-- Uniform convergence on `K` is little-`o(1)` on the product filter
-`atTop × principal K`, in the additive difference form consumed by the
-Taylor-composition estimates. -/
+
+
+
 theorem TendstoUniformlyOn.isLittleO_sub_const
     {K : Set E} {Fseq : ℕ → E → F} {Flim : E → F}
     (h : TendstoUniformlyOn Fseq Flim atTop K) :
@@ -280,8 +280,8 @@ theorem TendstoUniformlyOn.isLittleO_sub_const
     simpa [dist_eq_norm, norm_sub_rev] using hk x hx
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- A uniform pointwise bound over the compact variable gives boundedness along
-the product filter `atTop × principal K`. -/
+
+
 theorem isBoundedUnder_prod_principal_of_forall_le {K : Set E} {u : ℕ × E → ℝ}
     (h : ∃ C : ℝ, ∀ k x, x ∈ K → u (k, x) ≤ C) :
     (atTop ×ˢ Filter.principal K).IsBoundedUnder (· ≤ ·) u := by
@@ -291,8 +291,8 @@ theorem isBoundedUnder_prod_principal_of_forall_le {K : Set E} {u : ℕ × E →
   exact Eventually.of_forall fun k x hx => hC k x hx
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- Eventual uniform bounds over `x ∈ K` give boundedness along
-`atTop × principal K`. -/
+
+
 theorem isBoundedUnder_prod_principal_of_eventually_forall_le {K : Set E} {u : ℕ × E → ℝ}
     (h : ∃ C : ℝ, ∀ᶠ k in atTop, ∀ x ∈ K, u (k, x) ≤ C) :
     (atTop ×ˢ Filter.principal K).IsBoundedUnder (· ≤ ·) u := by
@@ -302,8 +302,8 @@ theorem isBoundedUnder_prod_principal_of_eventually_forall_le {K : Set E} {u : �
   exact hC
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace ℝ F] in
-/-- A uniformly convergent family is eventually uniformly norm-bounded if its
-limit is uniformly norm-bounded. -/
+
+
 theorem TendstoUniformlyOn.eventually_norm_le
     {K : Set E} {Fseq : ℕ → E → F} {Flim : E → F}
     (h : TendstoUniformlyOn Fseq Flim atTop K)
@@ -322,10 +322,10 @@ theorem TendstoUniformlyOn.eventually_norm_le
   nlinarith [hC x hx, hdist.le]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-/-- Moving-evaluation derivative convergence.  If `Aₖ → A∞` in `C^∞` on a fixed
-compact `K' ⊆ V`, `Bₖ → B∞` uniformly on `K`, and the moving points `Bₖ x`,
-`B∞ x` stay in `K'`, then each fixed derivative of `Aₖ` evaluated at `Bₖ x`
-converges uniformly on `K`. -/
+
+
+
+
 theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv_comp_moving
     {K : Set E} {V K' : Set F}
     {A : ℕ → F → G} {Ainf : F → G} {B : ℕ → E → F} {Binf : E → F}
@@ -377,8 +377,8 @@ theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv_comp_moving
         exact add_lt_add (hNB k hkB x hx) (hNA k hkA (B k x) hBxK')
     _ = ε := by ring
 
-/-- Composing a `C^p`-convergent inner family with a `C^∞`-convergent outer
-family preserves `C^p` convergence on a fixed compact set. -/
+
+
 theorem MapCPConvOn.comp_cInf
     {U K : Set E} {V : Set F} {p : ℕ} (hU : IsOpen U) (hV : IsOpen V)
     [ProperSpace F]
@@ -530,8 +530,8 @@ theorem MapCPConvOn.comp_cInf
   exact htail.mono fun k hk x hx => by
     simpa [dist_eq_norm, norm_sub_rev] using hk x hx
 
-/-- Composition preserves `C^∞` convergence on compact subsets of an open
-domain. -/
+
+
 theorem MapCInfConvOnCompacts.comp
     {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
     [ProperSpace F]
@@ -555,16 +555,16 @@ variable {E' P Q : Type*}
   [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup Q] [NormedSpace ℝ Q]
 
-/-- **Constant sequences converge to themselves** in `MapCInfConvOnCompacts` — the `A`-slot of
-`MapCInfConvOnCompacts.comp` when the outer map (the chart center of mass) is `k`-independent. -/
+
+
 theorem mapCInfConv_const {U : Set E'} (Φ : E' → P) :
     MapCInfConvOnCompacts U (fun _ : ℕ => Φ) Φ := by
   intro K _ _ p ε hε
   exact ⟨0, fun k _ r _ x _ => by
     simpa [mapDerivNorm, sub_self] using hε.le⟩
 
-/-- Precomposition by one fixed smooth map preserves smooth convergence on
-compact subsets. -/
+
+
 theorem MapCInfConvOnCompacts.precomp
     {D : Set E'} {U : Set P} (hD : IsOpen D) (hU : IsOpen U)
     [ProperSpace P]
@@ -579,8 +579,8 @@ theorem MapCInfConvOnCompacts.precomp
   MapCInfConvOnCompacts.comp hD hU (mapCInfConv_const f) hA
     (fun _ => hf) hf hAc hAinfC hmap (fun _ => hmap)
 
-/-- Pairing preserves fixed-order convergence on a compact subset of an open
-domain. -/
+
+
 theorem MapCPConvOn.prodMk {U K : Set E'} {p : ℕ} (hU : IsOpen U) (hKU : K ⊆ U)
     {u : ℕ → E' → P} {uinf : E' → P} {v : ℕ → E' → Q} {vinf : E' → Q}
     (hu : MapCPConvOn K p u uinf) (hv : MapCPConvOn K p v vinf)
@@ -611,8 +611,8 @@ theorem MapCPConvOn.prodMk {U K : Set E'} {p : ℕ} (hU : IsOpen U) (hKU : K ⊆
   exact max_le (hk1 k (le_trans (le_max_left k1 k2) hk) r hr x hx)
     (hk2 k (le_trans (le_max_right k1 k2) hk) r hr x hx)
 
-/-- **Pairing preserves `C^∞` convergence on compacts.**  The `B`-slot builder for
-`MapCInfConvOnCompacts.comp` when the inner map is the `(weights, targets)` pair. -/
+
+
 theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
     {u : ℕ → E' → P} {uinf : E' → P} {v : ℕ → E' → Q} {vinf : E' → Q}
     (hu : MapCInfConvOnCompacts U u uinf) (hv : MapCInfConvOnCompacts U v vinf)
@@ -625,9 +625,9 @@ theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
   exact MapCPConvOn.prodMk hU hKU (hu K hK hKU p) (hv K hK hKU p)
     huc huinfc hvc hvinfc
 
-/-- **Tupling preserves `C^∞` convergence on compacts** — the `Fintype`-pi analog of
-`mapCInfConv_prodMk`, packaging the per-slot target convergences into the `(ι → E)`-valued
-points-tuple the chart center of mass consumes. -/
+
+
+
 theorem mapCInfConv_pi {ι : Type*} [Fintype ι] {U : Set E'} (hU : IsOpen U)
     {v : ι → ℕ → E' → Q} {vinf : ι → E' → Q}
     (hv : ∀ i, MapCInfConvOnCompacts U (v i) (vinf i))
@@ -651,10 +651,10 @@ theorem mapCInfConv_pi {ι : Type*} [Fintype ι] {U : Set E'} (hU : IsOpen U)
   intro i
   exact hk0 i k (le_trans (Finset.le_sup (Finset.mem_univ i)) hk) r hr x hx
 
-/-- **Postcomposition with a continuous linear map preserves `C^∞` convergence on compacts** —
-the summation step of the weight quotient (`L := Σ projections`): the order-`r` derivative of
-`L ∘ (difference)` is `L.compContinuousMultilinearMap` of the difference's derivative
-(`iteratedFDeriv_comp_left`), with operator-norm bound `‖L‖`. -/
+
+
+
+
 theorem mapCInfConv_clm {F' G' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ F']
     [NormedAddCommGroup G'] [NormedSpace ℝ G']
     {U : Set E'} (hU : IsOpen U) (L : F' →L[ℝ] G')
@@ -684,8 +684,8 @@ theorem mapCInfConv_clm {F' G' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ
         refine mul_le_mul (by linarith [norm_nonneg L]) hbase (norm_nonneg _) hL1.le
     _ = ε := mul_div_cancel₀ ε (ne_of_gt hL1)
 
-/-- Pullback of a varying bilinear-form field along a varying linear-map field
-preserves compact-open `C∞` convergence. -/
+
+
 theorem MapCInfConvOnCompacts.pullbackForm
     {V W : Type*}
     [NormedAddCommGroup V] [NormedSpace ℝ V]
@@ -718,8 +718,8 @@ theorem MapCInfConvOnCompacts.pullbackForm
 
 end BasicClosures
 
-/-- Ring inversion preserves compact-open `C∞` convergence while the operator
-fields stay in the open set of units. -/
+
+
 theorem MapCInfConvOnCompacts.ringInv
     {E R : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E]

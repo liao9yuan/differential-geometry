@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Basic
 
-/-!
-# Fourth block of the zeroth-order DeTurck normal form
 
-This module expands the reanchored connection-difference block.  Repeated
-four-index permutations are factored through two private reindexing lemmas.
--/
+
+
+
+
+
 
 noncomputable section
 
@@ -41,7 +41,7 @@ private lemma four_left {n : ℕ} (ig f : Fin n → Fin n → ℝ)
   rw [hAs b j a]
   ring
 
-/-- The reanchored connection-difference block has its eight-term scalar normal form. -/
+
 theorem nf_p4 {n : ℕ} (ig f : Fin n → Fin n → ℝ)
     (ga0 ga1 gbg : Fin n → Fin n → Fin n → ℝ)
     (hfs : ∀ a b, f a b = f b a)

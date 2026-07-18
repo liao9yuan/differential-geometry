@@ -4,12 +4,12 @@ import DifferentialGeometry.Geometry.Metric.Basic
 
 set_option autoImplicit false
 
-/-!
-# Smooth Riemannian Metric Alias
 
-This file contains the alias for smooth Riemannian metrics.
-It is not a realized object; realized metric families import this definition.
--/
+
+
+
+
+
 
 namespace DifferentialGeometry
 
@@ -27,7 +27,7 @@ theorem ball_subset_of_le
   rw [Metric.mem_ball] at hy ⊢
   exact lt_of_lt_of_le hy hr
 
-/-- Closed metric balls are monotone in the radius. -/
+
 theorem cball_subset_of_le
     {X : Type*} [PseudoMetricSpace X] {x : X} {r R : Real}
     (hr : r ≤ R) :
@@ -36,8 +36,8 @@ theorem cball_subset_of_le
   rw [Metric.mem_closedBall] at hy ⊢
   exact le_trans hy hr
 
-/-- A map is injective on a covered set when it is locally injective on buffered
-cover sets and admits a common approximate return map within half the buffer. -/
+
+
 theorem injOn_of_return
     {X Y ι : Type*} [PseudoMetricSpace X]
     {S : Set X} {F : X → Y} {H : Y → X}

@@ -23,20 +23,20 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The measure-layer metric family associated to a realized metric family. -/
+
 abbrev metricFamilyForMeasure
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) :
     Real → SmoothRiemannianMetric I M :=
   fun t => G.metric t
 
-/-- The measure-layer metric family associated to an interval realized metric family. -/
+
 abbrev metricFamilyForMeasureOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) :
     Real → SmoothRiemannianMetric I M :=
   fun t => G.metric t
 
-/-- The time-dependent Riemannian measure family for a realized metric family. -/
+
 abbrev volumeMeasureFamily [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) :
     Real → MeasureTheory.Measure M :=
@@ -48,7 +48,7 @@ theorem volumeMeasureFamily_eq [T2Space M] [SigmaCompactSpace M]
     volumeMeasureFamily (I := I) (M := M) G t =
       Measure.volumeMeasureAt (I := I) (M := M) G t := rfl
 
-/-- The time-dependent Riemannian measure family for an interval realized metric family. -/
+
 abbrev volumeMeasureFamilyOn [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) :
@@ -71,7 +71,7 @@ theorem volumeMeasureFamilyOn_eq_volumeMeasureOn [T2Space M] [SigmaCompactSpace 
     volumeMeasureFamilyOn (I := I) (M := M) G (t : Real) =
       Measure.volumeMeasureOn (I := I) (M := M) G t := rfl
 
-/-- The trace of the time derivative of the metric in the existing measure API. -/
+
 abbrev traceTimeDerivMetricAt
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) (t : Real) (x : M) :
     Real :=
@@ -83,7 +83,7 @@ theorem traceTimeDerivMetricAt_eq
     traceTimeDerivMetricAt (I := I) G t x =
       traceTimeDerivMetric (I := I) (metricFamilyForMeasure (I := I) (M := M) G) t x := rfl
 
-/-- The trace of the time derivative of an interval-indexed realized metric family. -/
+
 abbrev traceTimeDerivMetricOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) (t : Real) (x : M) :

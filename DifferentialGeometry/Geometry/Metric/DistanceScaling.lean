@@ -3,13 +3,13 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option autoImplicit false
 
-/-!
-# Distance under constant metric scaling
 
-This file exposes Mathlib's path-length distance with the Riemannian metric as
-an explicit argument and proves its behavior under positive constant scaling.
-The explicit wrapper keeps the norm-instance choice local to this metric layer.
--/
+
+
+
+
+
+
 
 noncomputable section
 
@@ -26,7 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Riemannian extended distance with the metric supplied explicitly. -/
+
 noncomputable def riemannianEDistOf
     (g : SmoothRiemannianMetric I M) (x y : M) : ℝ≥0∞ :=
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
@@ -53,8 +53,8 @@ private theorem edistOf_iInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Positive constant metric scaling multiplies Riemannian extended distance
-by the square root of the scaling constant. -/
+
+
 theorem edistOf_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (x y : M) :
@@ -83,8 +83,8 @@ theorem edistOf_scale
   rw [Real.sqrt_mul hc.le]
   rw [ENNReal.ofReal_mul (Real.sqrt_nonneg c)]
 
-/-- Scaling the metric by `c` and the radius by `√c` preserves the carrier
-of an extended-distance ball. -/
+
+
 theorem edistBall_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (x : M) (r : Real) :

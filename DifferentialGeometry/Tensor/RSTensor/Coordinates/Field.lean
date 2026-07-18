@@ -1,7 +1,8 @@
-/-
-Authors: Yuan Liao, Jack McCarthy
--/
+
+
+
 import DifferentialGeometry.Tensor.RSTensor.Defs
+import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
@@ -60,6 +61,7 @@ def tensorRSField_smulByFun
       (e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀))
       fun x hx => (e.linear 𝕜 hx).2 _ _⟩
 
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem tensorRSField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -74,6 +76,7 @@ def tensor0SField_smulByFun
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem tensor0SField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -205,13 +208,97 @@ noncomputable def tensor0SSpace_evalScalar (x : M) :
   (ContinuousMultilinearMap.apply 𝕜 (fun _ : Fin 0 => E) 𝕜 Fin.elim0).comp
     (Tensor0SSpace.toModelL 0 x)
 
+omit n in
+@[simp]
+theorem Tensor0SSpace.evalScalar_apply (x : M) (c : Tensor0SSpace 0 I x) :
+    tensor0SSpace_evalScalar x c = c Fin.elim0 := by
+  change Tensor0SSpace.toModel c Fin.elim0 = c Fin.elim0
+  exact congrArg c (Subsingleton.elim _ _)
+
+omit n in
+noncomputable def Tensor0SSpace.toRS0 {s : ℕ} {x : M} (A : Tensor0SSpace s I x) :
+    TensorRSSpace 0 s I x :=
+  (tensor0SSpace_evalScalar x).smulRight A
+
+omit n in
+@[simp]
+theorem Tensor0SSpace.toRS0_apply {s : ℕ} {x : M}
+    (A : Tensor0SSpace s I x) (c : Tensor0SSpace 0 I x) :
+    Tensor0SSpace.toRS0 A c = tensor0SSpace_evalScalar x c • A :=
+  rfl
+
 noncomputable def Tensor0SField.toTensorRSField {s : ℕ} [CompleteSpace 𝕜]
     (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
     TensorRSField n 0 s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) :=
+  by
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 0 s
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 0
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
-  ⟨fun x => ContinuousLinearMap.smulRight (tensor0SSpace_evalScalar x) (α x), by
-    sorry⟩
+  exact ⟨fun x => (tensor0SSpace_evalScalar x).smulRight (α x), by
+    intro x₀
+    rw [contMDiffAt_section x₀]
+    have hα := (contMDiffAt_section x₀).mp α.contMDiff.contMDiffAt
+    refine ((contMDiffAt_const
+      (c := ContinuousLinearMap.smulRightL 𝕜
+        (Tensor0SModel 0 𝕜 E)
+        (Tensor0SModel s 𝕜 E)
+        (ContinuousMultilinearMap.apply 𝕜 (fun _ : Fin 0 => E) 𝕜 Fin.elim0))).clm_apply
+      hα).congr_of_eventuallyEq ?_
+    filter_upwards [(trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
+      (mem_baseSet_trivializationAt E (TangentSpace I) x₀)] with x hx
+    have hx_s : x ∈ (trivializationAt (Tensor0SModel s 𝕜 E)
+      (fun y => Tensor0SSpace s I y) x₀).baseSet := hx
+    apply ContinuousLinearMap.ext
+    intro c₀
+    apply ContinuousMultilinearMap.ext
+    intro m
+    rw [hom_trivializationAt_apply]
+    simp only [ContinuousLinearMap.inCoordinates,
+      ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearMap.smulRight_apply,
+      ContinuousLinearMap.smulRightL_apply_apply,
+      ContinuousMultilinearMap.smul_apply,
+      map_smul,
+      Tensor0SSpace.evalScalar_apply]
+    have hc₀ :
+        ((trivializationAt (Tensor0SModel 0 𝕜 E)
+          (fun y => Tensor0SSpace 0 I y) x₀).symmL 𝕜 x c₀) Fin.elim0 =
+          (ContinuousMultilinearMap.apply 𝕜 (fun _ : Fin 0 => E) 𝕜 Fin.elim0) c₀ := by
+      change (Tensor0SSpace.constInChart (𝕜 := 𝕜) (I := I) 0 x₀ c₀ x) Fin.elim0 =
+        c₀ Fin.elim0
+      rw [Tensor0SSpace.constInChart_apply (𝕜 := 𝕜) (I := I)
+        (x₀ := x₀) (x := x) 0 hx c₀ Fin.elim0]
+      exact congrArg c₀ (Subsingleton.elim _ _)
+    rw [hc₀]
+    have hαx :
+        ((trivializationAt (Tensor0SModel s 𝕜 E)
+          (fun y => Tensor0SSpace s I y) x₀).continuousLinearMapAt 𝕜 x (α x)) m =
+          (trivializationAt (Tensor0SModel s 𝕜 E)
+            (fun y => Tensor0SSpace s I y) x₀ ⟨x, α x⟩).2 m := by
+      rw [(trivializationAt (Tensor0SModel s 𝕜 E)
+        (fun y => Tensor0SSpace s I y) x₀).continuousLinearMapAt_apply 𝕜]
+      exact congrArg (fun A : Tensor0SModel s 𝕜 E => A m)
+        (congrFun ((trivializationAt _ (fun y => Tensor0SSpace s I y) x₀
+          ).coe_linearMapAt_of_mem (R := 𝕜) hx_s) (α x))
+    rw [hαx]
+    ⟩
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem Tensor0SField.toRS0_apply {s : ℕ} [CompleteSpace 𝕜]
+    (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
+    (x : M) (c : Tensor0SSpace 0 I x) :
+    α.toTensorRSField n x c = tensor0SSpace_evalScalar x c • α x :=
+  rfl
+
+set_option linter.unusedSectionVars false in
+
+theorem Tensor0SField.toRS0_eq {s : ℕ} [CompleteSpace 𝕜]
+    (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
+    (x : M) :
+    α.toTensorRSField n x = Tensor0SSpace.toRS0 (α x) := by
+  ext c
+  rw [Tensor0SField.toRS0_apply, Tensor0SSpace.toRS0_apply]
 
 end
 end Tensor0SBundle

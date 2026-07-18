@@ -26,65 +26,65 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# Gradient of a smooth function on a Riemannian manifold
 
-Given a smooth Riemannian metric `g` on the tangent bundle of a smooth manifold
-`M` and a smooth scalar function `f : M → ℝ`, this file defines the gradient
-`grad_g g hf` (where `hf` is a smoothness witness) as a smooth tangent
-section, and establishes its defining duality with the differential of `f` and
-basic algebraic properties.
 
-## Construction
 
-At each point `x : M`, the metric `g.inner x : E →L[ℝ] E →L[ℝ] ℝ` (where
-`E := TangentSpace I x` definitionally) is a positive-definite continuous
-bilinear form. The "musical flat" map `v ↦ g.inner x v` is an `ℝ`-linear map
-from `E` into `E →ₗ[ℝ] ℝ`. By positive-definiteness it is injective; since `E`
-is finite-dimensional, the spaces `E` and `E →ₗ[ℝ] ℝ` have the same dimension,
-so the flat map is a linear equivalence.
 
-The gradient at `x` is then defined as the preimage under this equivalence of
-the differential `mfderiv I 𝓘(ℝ) f x`, viewed as a linear functional on
-`TangentSpace I x`. This gives the duality identity
-$$g(\nabla_g f, v) = (\mathrm{d}f)(v)$$
-for all tangent vectors `v` at `x`.
 
-## Smoothness
 
-Smoothness of `grad_g g hf` is established by exhibiting it pointwise on each
-chart base set as the linear combination
-$$(\nabla_g f)(x) = \sum_{i,j} G^{ij}(x)\, \partial_j \tilde f(\varphi(x))\,
-    e_i(x),$$
-where `G^{ij}` is the entrywise inverse of the chart Gram matrix `G_{ij} =
-g.inner x (e_i, e_j)`, the `e_i` are the chart-basis frame vectors, and
-$\tilde f = f \circ \varphi^{-1}$ is the chart-pullback of `f`. The inverse
-Gram matrix is smooth on the chart base set since the Gram matrix is smooth
-and positive-definite there.
 
-## Compact support
 
-If `f : M → ℝ` has compact support, so does `grad_g g hf`: the gradient
-vanishes wherever `mfderiv f x` does (in particular, off `tsupport f` where
-`f` is locally zero).
 
-## Main definitions
 
-* `metricFlatMap g x` : the flat linear equivalence
-  `TangentSpace I x ≃ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ)` induced by `g.inner x`.
-* `metricSharp g x α` : the gradient (sharp) of a covector `α` at `x`, defined
-  as the inverse of `metricFlatMap g x`.
-* `gradFun g f` : the underlying pointwise gradient function.
-* `grad_g g hf` : the smooth gradient of a smooth scalar `f` (with smoothness
-  proof `hf`) as a smooth tangent section.
 
-## Main results
 
-* `tangentSectionAction_grad_g_eq_inner` : duality with the differential.
-* `inner_grad_g_symm` : symmetry of the metric on two gradients.
-* `hasCompactSupport_grad_g` : compact support of the gradient when `f` has
-  compact support.
--/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -100,20 +100,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Pointwise flat map and its inverse
 
-For each `x : M`, the metric `g.inner x` defines a continuous bilinear form on
-`TangentSpace I x`. Currying gives a linear map `metricFlatLinear g x` from
-the tangent space into its `ℝ`-linear dual; positive-definiteness makes this
-map injective, and hence (by finite-dimensionality and equality of dimensions)
-a linear equivalence. -/
+
+
+
+
+
+
 
 
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional ℝ (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional ℝ E)
 
-/-- The flat map's domain and codomain have the same finite dimension over `ℝ`. -/
+
 private lemma metricFlatLinear_finrank_eq (x : M) :
     Module.finrank ℝ (TangentSpace I x) =
       Module.finrank ℝ (TangentSpace I x →ₗ[ℝ] ℝ) :=
@@ -130,7 +130,7 @@ private lemma hasMFDerivAt_rexp
   refine ⟨Real.continuous_exp.continuousAt.comp hf.1, ?_⟩
   simpa [writtenInExtChartAt, Function.comp_def] using hf.2.exp
 
-/-- Chain rule for the linear map underlying `d(exp(-f))`. -/
+
 lemma mfderiv_exp_neg_toLinearMap
     {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
@@ -146,7 +146,7 @@ lemma mfderiv_exp_neg_toLinearMap
   ext v
   rfl
 
-/-- Pointwise chain rule for the gradient of `exp(-f)`. -/
+
 lemma gradFun_exp_neg
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
@@ -159,7 +159,7 @@ lemma gradFun_exp_neg
     (-Real.exp (-(f x)))
     (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap
 
-/-! ## Inverse Gram matrix and its smoothness -/
+
 
 
 private lemma chartGramMatrixOnE_entry_contDiffOn
@@ -269,8 +269,8 @@ private lemma trace_invGram_mul_partialGram
       rw [chartGramMatrixOnE_partial_symm (I := I) g α p i j y]
     _ = _ := rfl
 
-/-- Point-centered chart-density logarithmic derivative in matrix form. This is
-the density side of the later density/Christoffel-trace bridge. -/
+
+
 theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -390,12 +390,12 @@ theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
                 (extChartAt I x x) := by
       rw [htrace]
 
-/-! ## `L¹` entry sum of the inverse Gram matrix
 
-The pointwise sum of absolute values of all entries of the chart-`α` inverse
-Gram matrix. This is a non-negative real-valued function on `M`, continuous on
-the chart-`α` source. It plays the role of a pointwise operator-norm proxy in
-chart-bridge estimates for the gradient. -/
+
+
+
+
+
 
 
 private lemma gradChartCoeff_contMDiffOn
@@ -408,7 +408,7 @@ private lemma gradChartCoeff_contMDiffOn
   classical
   refine contMDiffOn_finset_sum (fun j _ => ?_)
   refine ContMDiffOn.mul ?_ ?_
-  · -- `chartInvGramMatrix g α x i j` is smooth on the chart base set.
+  ·
     have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun x => chartInvGramMatrix (I := I) g α x i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -419,7 +419,7 @@ private lemma gradChartCoeff_contMDiffOn
     have := hx.1
     rw [extChartAt_source_eq_chartAt_source (I := I)] at this
     exact this
-  · -- The chart-pulled-back partial derivative is smooth on the smoothness domain.
+  ·
     have hpartial : ContDiffOn ℝ ∞
         (partialDeriv (E := E) j (scalarOnE (I := I) α f))
         (interior (extChartAt I α).target) := by
@@ -453,8 +453,8 @@ private lemma gradChartCoeff_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-/-- The chart-local representation `gradChartLocal g α f` is smooth as a
-tangent-bundle section on the smoothness domain. -/
+
+
 private lemma gradChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -463,8 +463,8 @@ private lemma gradChartLocal_contMDiffOn_total
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) := by
   classical
-  -- Each summand is `gradChartCoeff α f i x • chartBasisVecFiber α i x`, smooth.
-  -- Sum them.
+
+
   have hcoeff : ∀ i, ContMDiffOn I 𝓘(ℝ) ∞ (gradChartCoeff (I := I) g α f i)
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) :=
@@ -487,7 +487,7 @@ private lemma gradChartLocal_contMDiffOn_total
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) := by
     intro i
     exact (hcoeff i).smul_section (hbasis i)
-  -- Sum.
+
   have hsum : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x
         (∑ i, gradChartCoeff (I := I) g α f i x •
@@ -497,8 +497,8 @@ private lemma gradChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-/-- Under `[I.Boundaryless]`, the smoothness domain of `gradChartLocal` reduces to the
-chart base set. -/
+
+
 private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -528,7 +528,7 @@ theorem tangentSectionAction_grad_g_eq_inner [I.Boundaryless]
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
 
-/-! ## Symmetry -/
+
 
 
 end DifferentialGeometry.Integral.DivergenceTheorem

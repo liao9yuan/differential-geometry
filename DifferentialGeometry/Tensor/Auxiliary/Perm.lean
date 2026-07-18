@@ -1,7 +1,7 @@
-/-
-Authors: Yury Kudryashov
-Coauthors: Jack McCarthy
--/
+
+
+
+
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 

@@ -5,20 +5,20 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Naturality of the covariant derivative under slot reindexing
 
-The directional covariant derivative `nabla0SFun` commutes with reindexing the
-tensor slots by an equivalence `e : Fin s ≃ Fin s'`:
 
-`∇_X (Z·e) (slots) = (∇_X Z) (slots ∘ e)`.
 
-Lifted to the canonical total derivative, this says `∇(Z·e) = (∇Z)·(e.front)`
-where `e.front : Fin (s+1) ≃ Fin (s'+1)` fixes the new leading derivative slot
-and reindexes the rest by `e`.  This is what lets `∇ᵐ` pass through the
-`domDomCongr` that appears in the second term of the tensor-product Leibniz rule,
-so that `normSq0S` permutation-invariance applies to the inductive hypothesis.
--/
+
+
+
+
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -36,8 +36,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [CompleteSpace E] [IsManifold I ∞ M]
 
-/-- The front-slot extension of `e : Fin s ≃ Fin s'` to `Fin (s+1) ≃ Fin (s'+1)`:
-fixes the leading slot `0` and reindexes the remaining `s` slots by `e`. -/
+
+
 def frontExtendEquiv {s s' : ℕ} (e : Fin s ≃ Fin s') : Fin (s + 1) ≃ Fin (s' + 1) :=
   (finSuccEquiv s).trans ((Equiv.optionCongr e).trans (finSuccEquiv s').symm)
 
@@ -49,8 +49,8 @@ def frontExtendEquiv {s s' : ℕ} (e : Fin s ≃ Fin s') : Fin (s + 1) ≃ Fin (
     frontExtendEquiv e i.succ = (e i).succ := by
   simp [frontExtendEquiv]
 
-/-- Evaluating a `Fin.cons` tuple at a front-extended index reindexes the tail by
-`e` (pointwise form, fires under binders). -/
+
+
 @[simp] theorem cons_apply_frontExtendEquiv {s s' : ℕ} (e : Fin s ≃ Fin s')
     {α : Type*} (c : α) (g : Fin s' → α) (i : Fin (s + 1)) :
     (Fin.cons c g : Fin (s' + 1) → α) (frontExtendEquiv e i)
@@ -59,8 +59,8 @@ def frontExtendEquiv {s s' : ℕ} (e : Fin s ≃ Fin s') : Fin (s + 1) ≃ Fin (
   · subst h; rw [frontExtendEquiv_zero, Fin.cons_zero, Fin.cons_zero]
   · subst h; rw [frontExtendEquiv_succ, Fin.cons_succ, Fin.cons_succ, Function.comp_apply]
 
-/-- **Naturality of the directional covariant derivative under slot reindexing.**
-`∇_X (Z · e) (slots) = (∇_X Z) (slots ∘ e)`. -/
+
+
 theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -92,9 +92,9 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
   rw [show slots = (fun a : Fin s' => V a x) from (funext hV).symm, h1,
     show ((fun a : Fin s' => V a x) ∘ e) = (fun a : Fin s => V (e a) x) from rfl, h2]
   refine congrArg₂ (· - ·) ?_ ?_
-  · -- exterior-derivative terms
+  ·
     congr 1
-  · -- correction sums
+  ·
     refine Fintype.sum_equiv e.symm _ _ ?_
     intro a
     change (ContinuousMultilinearMap.domDomCongr e (Z x)) _ = _
@@ -104,9 +104,9 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     simp only [Function.update_apply, Equiv.apply_symm_apply,
       Equiv.apply_eq_iff_eq_symm_apply]
 
-/-- **Naturality of the total covariant derivative under slot reindexing.**
-`∇(Z · e) = (∇Z) · (frontExtendEquiv e)`: the canonical covariant derivative
-commutes with a slot reindexing (the new leading derivative slot is fixed). -/
+
+
+
 theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -146,10 +146,10 @@ theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I
   simp only [cons_apply_frontExtendEquiv]
   rw [totalNabla0SFun_apply_section]
 
-/-- **`TotalNabla0SRealizes` is closed under slot reindexing.**  If `nablaZ` realizes
-`∇Z`, then `(∇Z)·(frontExtendEquiv e)` realizes `∇(Z·e)` — the realizer-level form of
-`totalNabla0SFun_domDomCongr`, used to push covariant derivatives through the slot
-permutations of Kulkarni–Nomizu-type combinations. -/
+
+
+
+
 theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -175,12 +175,12 @@ theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManif
   exact (hZ X x (slots ∘ e)).trans
     (nabla0SFun_domDomCongr (I := I) cov X e Z x slots).symm
 
-/-- **Realization uniqueness**: two fields that both realize the total covariant
-derivative of `α` are equal.  `TotalNabla0SRealizes` pins the value on every
-`Fin.cons (X x) slots`, and every `(s+1)`-tuple is `cons (v 0) (tail v)` with `v 0`
-realizable as a smooth-section value (`exists_eq_at_gen`); multilinear extensionality
-then forces equality.  Canonical Tensor-layer home; the local copy in
-`HCGCompactness/ProductMFoldNorm.lean` should redirect here once that thread lands. -/
+
+
+
+
+
+
 theorem totalNabla0SRealizes_unique [T2Space M] {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
