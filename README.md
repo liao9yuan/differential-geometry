@@ -1,6 +1,6 @@
 # Differential Geometry in Lean 4
 
-An ongoing geometry library project, currently working on geometric analysis on Riemannian manifolds and heading toward Ricci flow.
+An ongoing Lean 4 library for differential geometry and geometric analysis, currently focused on Ricci flow.
 
 ## Formalized theorems
 
@@ -11,15 +11,19 @@ Each is `sorry`-free (axioms: `propext, Classical.choice, Quot.sound`).
 - [Ricci flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTimeExistence.lean#L34) — on every closed Riemannian manifold $(M, g_0)$ the Ricci flow $\partial_t g = -2\,\mathrm{Ric}_{g(t)}$ has a solution on some $[0, T)$ with $g(0) = g_0$, jointly smooth in $(t, x)$ up to and including the initial time. Proved via the DeTurck's trick and a conjugating flow of the DeTurck vector field.
 - [Ricci–DeTurck flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTime/DeTurckInitialDataExistence.lean#L142) — the gauge-fixed, strictly parabolic flow behind the reduction: a solution whose chart-Gram entries are jointly smooth on the closed time slab, together with joint smoothness of the DeTurck vector field.
 - [Ricci-tensor naturality under diffeomorphisms](DifferentialGeometry/Geometry/Flow/RicciFlow/Pullback/Naturality/RicciTensor.lean#L24) — $\mathrm{Ric}_{\Phi^* g}(v, w) = \mathrm{Ric}_g(d\Phi\, v, d\Phi\, w)$, the equivariance that transports the DeTurck solution back to a Ricci flow.
+- [Scalar-curvature evolution under Ricci flow](DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Scalar/Basic.lean#L96).
+- [Bonnet–Myers diameter bound](DifferentialGeometry/Geometry/Comparison/BonnetMyers/Headlines.lean#L570) — a positive Ricci lower bound forces a bounded diameter.
 - [Bochner formula](DifferentialGeometry/Analysis/Elliptic/Regularity/Bochner/Polarised.lean#L244) — the polarised, pointwise form.
 - [Weitzenböck identity](DifferentialGeometry/Analysis/Elliptic/ConnectionLaplacian/GreenIdentityAndIBP/IntegratedOrder2Weitzenbock.lean#L103) — the integrated $L^2$ form.
 - [Lichnerowicz inequality](DifferentialGeometry/Analysis/Elliptic/Lichnerowicz.lean#L59), with the [eigenvalue bound on closed manifolds](DifferentialGeometry/Analysis/Elliptic/Lichnerowicz.lean#L586).
 - [Reilly identity](DifferentialGeometry/Analysis/Elliptic/WithBoundary/Neumann/Reilly.lean#L43) — an integral identity on a manifold with boundary.
 - [Voss–Weyl divergence formula](DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean#L576) — the chart-invariant divergence.
+- [Perelman's $\mathcal{W}$-entropy invariances](DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/Defs.lean#L141) — scale and diffeomorphism invariance.
+- [Perelman's $\mathcal{F}$-functional first variation](DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/F/Producer.lean#L411) — Perelman's formula 5.10.
 
 ## PDE infrastructure
 
-Underlying these results is a substantial geometric-analysis backbone — the [`Analysis/`](DifferentialGeometry/Analysis) pillar, roughly 680,000 lines of Lean:
+Underlying these results is a substantial geometric-analysis backbone — the [`Analysis/`](DifferentialGeometry/Analysis) pillar, roughly 770,000 lines of Lean:
 
 - [**Integration & the divergence theorem**](DifferentialGeometry/Analysis/Integration) — Riemannian measures, integration by parts and surface measures, with and without boundary.
 - [**Elliptic regularity**](DifferentialGeometry/Analysis/Elliptic) — the connection (rough) Laplacian, Green identities, Gårding / Caccioppoli estimates, and interior bootstrap.
@@ -32,7 +36,7 @@ The classical De Giorgi–Nash–Moser regularity machinery is vendored under [`
 
 ## Work in progress
 
-- **Hamilton's theorem (1982)**: every closed 3-manifold carrying a metric of positive Ricci curvature admits a metric of constant positive sectional curvature — it is a spherical space form, and in the simply-connected case diffeomorphic to $S^3$. This is the surgery-free ancestor of Perelman's proof of the Poincaré conjecture: the normalized Ricci flow converges directly to the round metric. Building on the [Ricci flow machinery](DifferentialGeometry/Geometry/Flow/RicciFlow) above; upcoming milestones include uniqueness of the flow, curvature evolution equations, tensor maximum principles, and the pinching estimates that drive convergence of the normalized flow.
+- [**Hamilton's theorem (1982)**](DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonPositiveRicci.lean#L3258) — the three-dimensional positive-Ricci program. Curvature evolution, tensor maximum principles, pinching, Hamilton–Cheeger–Gromov compactness, volume comparison, and universal-cover infrastructure are present. The headline remains incomplete.
 
 ## AI Disclaimer
 
