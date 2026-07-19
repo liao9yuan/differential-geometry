@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerSolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinComplete
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
-import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBoundFlow
+import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
@@ -28,10 +30,10 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-open Bundle Set
+open Bundle Set Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
-open scoped Manifold ContDiff BigOperators
+open scoped Manifold ContDiff BigOperators Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
@@ -219,6 +221,69 @@ private theorem metric_equiv_start
 
 end AnchorComparison
 
+section RicciQuadraticBound
+
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+
+private theorem ricci_quad_sol
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    {t C : Real} (ht : t ∈ D.carrier)
+    (hcurv : ∀ x : M,
+      normSq0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x) ≤ C)
+    (x : M) (v : TangentSpace I x) :
+    |ricciTensor (I := I) (S.base.metric t) x v v| ≤
+      (Module.finrank Real E : Real) ^ 2 * Real.sqrt C *
+        (S.base.metric t).inner x v v := by
+  have hunit : ∀ u : TangentSpace I x,
+      (S.base.metric t).inner x u u = 1 →
+        |S.ricciAt t x (vec2 (I := I) u u)| ≤
+          (Module.finrank Real E : Real) ^ 2 * Real.sqrt C := by
+    intro u hu
+    obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) (S.base.metric t) x
+    have hinv : MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
+        (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+      have h := metricInverseInBasis_of_orthonormal (I := I) (S.base.metric t) basis hON
+      intro i j
+      simpa [identityInvMetric, diagonalInvMetric] using h i j
+    have hbridge : ∀ i j : Fin (Module.finrank Real (TangentSpace I x)),
+        (S.ricci t) x (vec2 (I := I) (basis i) (basis j)) =
+          S.ricciAt t x (vec2 (I := I) (basis i) (basis j)) := by
+      intro i j
+      simp
+    have htrace : ∀ i j : Fin (Module.finrank Real (TangentSpace I x)),
+        S.ricciAt t x (vec2 (I := I) (basis i) (basis j)) =
+          ∑ a, S.base.rm04 t x
+            (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)) := by
+      intro i j
+      have h := ricci_diag_eq_sum_rm04_diag_of_orthonormal
+        (I := I) (S.base.metric t) basis
+        (S.ricci t) (S.base.rm13 t) (S.base.rm04 t)
+        (ricciTraceOfSol (I := I) S t ht)
+        (solution_rm04LowersRm13At (I := I) S t x) hON i j
+      rw [hbridge i j] at h
+      exact h
+    have hraw := ricci_unitQuad_le_of_trace (I := I) (S.base.metric t)
+      basis hON hinv (S.ricciAt t x) (S.base.rm04 t x) htrace u hu
+    calc
+      |S.ricciAt t x (vec2 (I := I) u u)| ≤
+          (Module.finrank Real (TangentSpace I x) : Real) ^ 2 *
+            Real.sqrt (normSq0S (I := I) (S.base.metric t) x 4
+              (S.base.rm04 t x)) := hraw
+      _ ≤ (Module.finrank Real E : Real) ^ 2 * Real.sqrt C := by
+        change (Module.finrank Real E : Real) ^ 2 *
+            Real.sqrt (normSq0S (I := I) (S.base.metric t) x 4
+              (S.base.rm04 t x)) ≤
+          (Module.finrank Real E : Real) ^ 2 * Real.sqrt C
+        exact mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt (hcurv x)) (by positivity)
+  have hray := tensor02_quadForm_abs_le_of_unit_bound
+    (I := I) (S.base.metric t) (S.ricciAt t x) hunit v
+  simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
+    metricRicciAt_apply_eq_ricciTensor] using hray
+
+end RicciQuadraticBound
+
 section CompleteTruncation
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -227,6 +292,8 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 private theorem complete_of_heat
     {D : RealTimeInterval}
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -249,7 +316,8 @@ private theorem complete_of_heat
     (hw_space : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ y : M,
       MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
     (hw_grad : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
-      MDiffAt (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
     (m : Nat) (c : Real) (hc : 0 ≤ c)
     (hlevelC : ∀ k : Nat, k ≤ m → levelC k ≤ c)
     (Ceq Kric : Real) (hCeq : 1 ≤ Ceq) (hKric : 0 ≤ Kric)
@@ -313,6 +381,25 @@ private theorem complete_of_heat
     have hjk : j ≤ k := by omega
     rw [hw'_val_le j (hjk.trans hk),
       hw'_val_le (k - j) ((Nat.sub_le k j).trans hk), hw'_val_le k hk]
+  have hreact_mono : ∀ {c₀ c₁ : Real}, c₀ ≤ c₁ → ∀ k : Nat, ∀ s : Real, ∀ y : M,
+      towerReactionSum (M := M) w c₀ k s y ≤
+        towerReactionSum (M := M) w c₁ k s y := by
+    intro c₀ c₁ hc01 k s y
+    unfold towerReactionSum
+    apply Finset.sum_le_sum
+    intro j _
+    have hprod : 0 ≤
+        Real.sqrt (w j s y) * Real.sqrt (w (k - j) s y) * Real.sqrt (w k s y) :=
+      mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
+        (Real.sqrt_nonneg _)
+    calc
+      c₀ * Real.sqrt (w j s y) * Real.sqrt (w (k - j) s y) * Real.sqrt (w k s y) =
+          c₀ * (Real.sqrt (w j s y) * Real.sqrt (w (k - j) s y) *
+            Real.sqrt (w k s y)) := by ring
+      _ ≤ c₁ * (Real.sqrt (w j s y) * Real.sqrt (w (k - j) s y) *
+            Real.sqrt (w k s y)) := mul_le_mul_of_nonneg_right hc01 hprod
+      _ = c₁ * Real.sqrt (w j s y) * Real.sqrt (w (k - j) s y) *
+            Real.sqrt (w k s y) := by ring
   let B : BernsteinTower (I := I) G :=
     { D := D
       w := w'
@@ -337,24 +424,23 @@ private theorem complete_of_heat
       hTK := hTK
       hheat := by
         intro k tau y
-        rcases lt_trichotomy k m with hlt | rfl | hgt
+        rcases lt_trichotomy k m with hlt | heq | hgt
         · have hk : k ≤ m := hlt.le
           obtain ⟨d, hd, hle⟩ := hheat k tau y
           refine ⟨d, ?_, ?_⟩
           · simpa only [hw'_val_le k hk] using hd
           · rw [hwLap'_val_le k hk, hw'_val_le (k + 1) hlt,
               hreact_eq k hk]
-            have hmono := towerReactionSum_mono_const w
-              (hlevelC k hk) k (tau : Real) y
+            have hmono := hreact_mono (hlevelC k hk) k (tau : Real) y
             linarith
-        · obtain ⟨d, hd, hle⟩ := hheat m tau y
+        · subst m
+          obtain ⟨d, hd, hle⟩ := hheat k tau y
           refine ⟨d, ?_, ?_⟩
-          · simpa only [hw'_val_le m le_rfl] using hd
-          · rw [hwLap'_val_le m le_rfl,
-              hw'_val_gt (m + 1) (by omega), hreact_eq m le_rfl]
-            have hmono := towerReactionSum_mono_const w
-              (hlevelC m le_rfl) m (tau : Real) y
-            have hnn := hw_nonneg (m + 1) (tau : Real) y
+          · simpa only [hw'_val_le k le_rfl] using hd
+          · rw [hwLap'_val_le k le_rfl,
+              hw'_val_gt (k + 1) (by omega), hreact_eq k le_rfl]
+            have hmono := hreact_mono (hlevelC k le_rfl) k (tau : Real) y
+            have hnn := hw_nonneg (k + 1) (tau : Real) y
             nlinarith
         · have hk : ¬ k ≤ m := by omega
           refine ⟨0, ?_, ?_⟩
@@ -434,7 +520,7 @@ private theorem complete_of_heat
           filter_upwards with z
           exact congrArg (fun v ↦ (⟨z, v⟩ : TotalSpace E (TangentSpace I)))
             (gradientFun_const (I := I) (G.metric s) 0 z) }
-  have hkey := B.estimate_complete Ceq Kric hCeq hKric hequiv hric
+  have hkey := BernsteinTower.estimate_complete B Ceq Kric hCeq hKric hequiv hric
     m t htmem htpos x
   have hdiv : B.w m t x ≤
       (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by
@@ -478,6 +564,8 @@ noncompact Bernstein maximum principle, the Ricci trace estimate, and metric
 equivalence to the complete left-anchor metric.  The displayed constant is
 independent of the particular flow, which is what permits the sequence
 wrapper below. -/
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem movingShi_of_bound
     {D : RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D)
@@ -506,7 +594,301 @@ theorem movingShi_of_bound
     MovingShiBoundOn (I := I) Set.univ beta psi
       (fun _ t => F.S.family.metric t) N
       (shiOpenConst (Module.finrank Real E) C alpha beta psi N) := by
-  sorry
+  classical
+  have halphaPsi : alpha < psi := halphaBeta.trans_le hbetaPsi
+  let t0 : Real := (alpha + beta) / 2
+  have halphaT0 : alpha < t0 := by
+    dsimp only [t0]
+    linarith
+  have hT0Beta : t0 < beta := by
+    dsimp only [t0]
+    linarith
+  have hT0Psi : t0 < psi := hT0Beta.trans_le hbetaPsi
+  have hpsiReg : psi ∈ D.regular := hreg ⟨halphaPsi, le_rfl⟩
+  obtain ⟨a, omega, hpsiWin, hwinReg⟩ := D.exists_Icc_regular hpsiReg
+  have hpsiOmega : psi < omega := hpsiWin.2
+  have halphaOmega : alpha < omega := halphaPsi.trans hpsiOmega
+  let Dco := RealTimeInterval.closedOpen alpha omega halphaOmega
+  let Sco : SolutionOn (I := I) (M := F.M) Dco := F.S.timeRestrict Dco
+  have hSco : IsSolutionOn (I := I) Sco := by
+    apply isSoln_timeRestrict (I := I) F.isSolution
+    · intro s hs
+      change s ∈ Set.Ico alpha omega at hs
+      by_cases hspsi : s ≤ psi
+      · exact hslab ⟨hs.1, hspsi⟩
+      · exact D.regular_subset (hwinReg ⟨by linarith [hpsiWin.1], hs.2.le⟩)
+    · intro s hs
+      change s ∈ Set.Ioo alpha omega at hs
+      by_cases hspsi : s ≤ psi
+      · exact hreg ⟨hs.1, hspsi⟩
+      · exact hwinReg ⟨by linarith [hpsiWin.1], hs.2.le⟩
+  have hT0Omega : t0 < omega := hT0Psi.trans hpsiOmega
+  have hShift : alpha - t0 < omega - t0 := sub_lt_sub_right halphaOmega t0
+  let DShift := RealTimeInterval.closedOpen (alpha - t0) (omega - t0) hShift
+  let SShift : SolutionOn (I := I) (M := F.M) DShift :=
+    (Sco.timeShift t0).timeRestrict DShift
+  have hSShift : IsSolutionOn (I := I) SShift := by
+    apply isSoln_timeRestrict (I := I) (isSolutionOn_timeShift (I := I) hSco t0)
+    · intro s hs
+      change s + t0 ∈ Set.Ico alpha omega
+      change s ∈ Set.Ico (alpha - t0) (omega - t0) at hs
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    · intro s hs
+      change s + t0 ∈ Set.Ioo alpha omega
+      change s ∈ Set.Ioo (alpha - t0) (omega - t0) at hs
+      exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  have hZeroOmega : 0 < omega - t0 := sub_pos.mpr hT0Omega
+  let D0 := RealTimeInterval.closedOpen 0 (omega - t0) hZeroOmega
+  let S0 : SolutionOn (I := I) (M := F.M) D0 := SShift.timeRestrict D0
+  have hS0 : IsSolutionOn (I := I) S0 := by
+    simpa only [S0, D0, DShift] using
+      (isSoln_tailRestrict (I := I) hSShift (sub_neg.mpr halphaT0) hZeroOmega)
+  let d : Nat := Module.finrank Real E
+  let levelC : Nat → Real := fun k ↦ 2 * (d : Real) ^ (6 + k)
+  have hHeat (k : Nat) :
+      TowerHeatBoundOn (D := D0)
+        (nablaKRm04NormSqIntrinsic (I := I) S0)
+        (nablaKNormLap (I := I) S0) (levelC k) k := by
+    simpa only [S0, D0, DShift, levelC, d] using
+      (towerHeatSol_any (I := I) hSShift (sub_neg.mpr halphaT0) hZeroOmega k)
+  let delta : Real := (beta - alpha) / 2
+  have hdeltaEq : delta = beta - t0 := by
+    dsimp only [delta, t0]
+    ring
+  have hDelta : 0 < delta := by
+    dsimp only [delta]
+    linarith
+  let K : Real := max 1 C
+  have hKOne : 1 ≤ K := le_max_left 1 C
+  have hKPos : 0 < K := zero_lt_one.trans_le hKOne
+  have hCK : C ≤ K := le_max_right 1 C
+  let aScale : Real := K * (psi - alpha)
+  have hScale : 0 ≤ aScale :=
+    mul_nonneg hKPos.le (sub_nonneg.mpr halphaPsi.le)
+  let levels : Finset Nat := Finset.range (N + 1)
+  let c : Real := max 0 (∑ k ∈ levels, levelC k)
+  have hc : 0 ≤ c := le_max_left _ _
+  have hLevel (k : Nat) (hk : k ≤ N) : levelC k ≤ c := by
+    have hkMem : k ∈ levels := by
+      simp only [levels, Finset.mem_range]
+      omega
+    have hsingle : levelC k ≤ ∑ j ∈ levels, levelC j :=
+      Finset.single_le_sum (f := levelC)
+        (fun j _ ↦ by dsimp only [levelC]; positivity) hkMem
+    exact hsingle.trans (le_max_right _ _)
+  let A : Real := (d : Real) ^ 2 * Real.sqrt C
+  have hA : 0 ≤ A := by
+    dsimp only [A]
+    positivity
+  have hquad : ∀ s ∈ Set.Icc alpha psi, ∀ x : F.M,
+      ∀ v : TangentSpace I x,
+        |ricciTensor (I := I) (F.S.base.metric s) x v v| ≤
+          A * (F.S.base.metric s).inner x v v := by
+    intro s hs x v
+    simpa only [A, d] using
+      (ricci_quad_sol (I := I) F.S (hslab hs)
+        (fun y ↦ by simpa only [PointedFlowData.rmNormSq] using hcurv s hs y) x v)
+  have hpde := metric_pde_start (I := I) F.S F.isSolution
+    halphaPsi hslab hreg
+  have hmetric := metric_equiv_start (I := I)
+    (fun s ↦ F.S.base.metric s) hpde hquad
+  let Yalpha := F.atTime (I := I) alpha
+  letI : TopologicalSpace.MetrizableSpace F.M := Manifold.metrizableSpace I F.M
+  letI : T3Space F.M := inferInstance
+  letI : RiemannianBundle (fun x : F.M ↦ TangentSpace I x) :=
+    ⟨Yalpha.metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : F.M ↦ TangentSpace I x) :=
+    ⟨⟨Yalpha.metric.inner, Yalpha.metric.contMDiff.continuous,
+      by intro x v w; rfl⟩⟩
+  letI : EMetricSpace F.M := EMetricSpace.ofRiemannianMetric I F.M
+  letI : CompleteSpace F.M := MetricComplete.complete (I := I) Yalpha hcomplete
+  let T : Real := psi - t0
+  have hT : 0 < T := by
+    dsimp only [T]
+    linarith
+  have hSlab : Set.Icc 0 T ⊆ D0.carrier := by
+    intro s hs
+    change s ∈ Set.Ico 0 (omega - t0)
+    exact ⟨hs.1, by dsimp only [T] at hs; linarith [hs.2, hpsiOmega]⟩
+  have hRegular : ∀ s : Real, s ∈ Set.Icc 0 T → 0 < s → s ∈ D0.regular := by
+    intro s hs hsPos
+    change s ∈ Set.Ioo 0 (omega - t0)
+    exact ⟨hsPos, by dsimp only [T] at hs; linarith [hs.2, hpsiOmega]⟩
+  have hw0 : ∀ s : Real, s ∈ Set.Icc 0 T → ∀ y : F.M,
+      nablaKRm04NormSqIntrinsic (I := I) S0 0 s y ≤ K ^ 2 := by
+    intro s hs y
+    have hu : s + t0 ∈ Set.Icc alpha psi := by
+      dsimp only [T] at hs
+      exact ⟨by linarith [halphaT0, hs.1], by linarith [hs.2]⟩
+    have hraw := hcurv (s + t0) hu y
+    have hraw' : nablaKRm04NormSqIntrinsic (I := I) S0 0 s y ≤ C := by
+      simpa [PointedFlowData.rmNormSq, nablaKRm04NormSqIntrinsic,
+        nablaKRm04Field_zero, S0, SShift, Sco, SolutionOn.timeRestrict,
+        SolutionOn.timeShift, SolutionFamily.timeShift] using hraw
+    nlinarith [hCK, hKOne]
+  have hTK : T ≤ aScale / K := by
+    calc
+      T ≤ psi - alpha := by dsimp only [T]; linarith [halphaT0]
+      _ = aScale / K := by
+        apply (eq_div_iff (ne_of_gt hKPos)).2
+        dsimp only [aScale]
+        ring
+  have hLap : ∀ j : Nat, ∀ s : Real, s ∈ Set.Icc 0 T →
+      0 < s → ∀ y : F.M,
+        heatOperatorWithDrift (I := I) (flowG (I := I) S0) s
+          (fun _z : F.M ↦ (0 : TangentSpace I _z))
+          (nablaKRm04NormSqIntrinsic (I := I) S0 j s) y =
+            nablaKNormLap (I := I) S0 j s y := by
+    intro j s _hs _hsPos y
+    rw [heatOperatorWithDrift_zero_drift, heatOperator_eq_laplacianAt,
+      laplacianAt_eq]
+    rfl
+  have hwCont : ∀ j : Nat, ContinuousOn
+      (fun p : Real × F.M ↦ nablaKRm04NormSqIntrinsic (I := I) S0 j p.1 p.2)
+      (spacetimeSlab (M := F.M) T) := by
+    intro j
+    have hJoint := (towerNorm_joint (I := I) hSShift j).continuousOn
+    have hSub : spacetimeSlab (M := F.M) T ⊆ DShift.regular ×ˢ Set.univ := by
+      intro p hp
+      change p.1 ∈ Set.Icc 0 T ∧ p.2 ∈ Set.univ at hp
+      change p.1 ∈ Set.Ioo (alpha - t0) (omega - t0) ∧ p.2 ∈ Set.univ
+      exact ⟨⟨by linarith [halphaT0, hp.1.1],
+        by dsimp only [T] at hp; linarith [hp.1.2, hpsiOmega]⟩, hp.2⟩
+    have hfun :
+        (fun p : Real × F.M ↦ nablaKRm04NormSqIntrinsic (I := I) S0 j p.1 p.2) =
+          (fun p : Real × F.M ↦
+            nablaKRm04NormSqIntrinsic (I := I) SShift j p.1 p.2) := by
+      funext p
+      simp only [nablaKRm04NormSqIntrinsic]
+      rw [nablaKRm_eq_iterCov (I := I) S0 p.1 j,
+        nablaKRm_eq_iterCov (I := I) SShift p.1 j]
+      rfl
+    rw [hfun]
+    exact hJoint.mono hSub
+  have hwSpace : ∀ j : Nat, ∀ s : Real, s ∈ Set.Icc 0 T →
+      0 < s → ∀ y : F.M,
+        MDifferentiableAt I (modelWithCornersSelf Real Real)
+          (nablaKRm04NormSqIntrinsic (I := I) S0 j s) y := by
+    intro j s _hs _hsPos y
+    exact (nablaKNorm_smooth (I := I) S0 s j).contMDiffAt.mdifferentiableAt (by simp)
+  let Ceq : Real := Real.exp (2 * A * (psi - alpha))
+  have hCeq : 1 ≤ Ceq := by
+    rw [show (1 : Real) = Real.exp 0 by simp]
+    apply Real.exp_le_exp.mpr
+    dsimp only [Ceq]
+    exact mul_nonneg (mul_nonneg (by norm_num) hA) (sub_nonneg.mpr halphaPsi.le)
+  have hanchor_inner (x : F.M) (v : TangentSpace I x) :
+      (F.S.base.metric alpha).inner x v v = ‖v‖ ^ 2 := by
+    change inner Real v v = ‖v‖ ^ 2
+    exact real_inner_self_eq_norm_sq v
+  have hequiv : ∀ s : Real, s ∈ Set.Icc 0 T → ∀ x : F.M,
+      ∀ v : TangentSpace I x,
+        Ceq⁻¹ * ‖v‖ ^ 2 ≤ ((flowG (I := I) S0).metric s).inner x v v ∧
+          ((flowG (I := I) S0).metric s).inner x v v ≤ Ceq * ‖v‖ ^ 2 := by
+    intro s hs x v
+    have hu : s + t0 ∈ Set.Icc alpha psi := by
+      dsimp only [T] at hs
+      exact ⟨by linarith [halphaT0, hs.1], by linarith [hs.2]⟩
+    have hm := hmetric (s + t0) hu x v
+    have hga : 0 ≤ (F.S.base.metric alpha).inner x v v :=
+      metric_inner_self_nonneg (I := I) (M := F.M) (F.S.base.metric alpha) x v
+    have hexpUpper : Real.exp (2 * A * (s + t0 - alpha)) ≤ Ceq := by
+      dsimp only [Ceq]
+      apply Real.exp_le_exp.mpr
+      dsimp only [T] at hs
+      nlinarith [hA]
+    have hCeqInv : Ceq⁻¹ = Real.exp (-(2 * A * (psi - alpha))) := by
+      dsimp only [Ceq]
+      exact (Real.exp_neg _).symm
+    have hexpLower : Ceq⁻¹ ≤ Real.exp (-(2 * A * (s + t0 - alpha))) := by
+      rw [hCeqInv]
+      apply Real.exp_le_exp.mpr
+      dsimp only [T] at hs
+      nlinarith [hA]
+    have hinner :
+        Ceq⁻¹ * (F.S.base.metric alpha).inner x v v ≤
+            (F.S.base.metric (s + t0)).inner x v v ∧
+          (F.S.base.metric (s + t0)).inner x v v ≤
+            Ceq * (F.S.base.metric alpha).inner x v v := by
+      constructor
+      · exact (mul_le_mul_of_nonneg_right hexpLower hga).trans hm.1
+      · exact hm.2.trans (mul_le_mul_of_nonneg_right hexpUpper hga)
+    simpa [flowG, S0, SShift, Sco, SolutionOn.timeRestrict,
+      SolutionOn.timeShift, SolutionFamily.timeShift, hanchor_inner] using hinner
+  have hric : ∀ s : Real, s ∈ Set.Icc 0 T → ∀ x : F.M,
+      ∀ v : TangentSpace I x,
+        -A * ((flowG (I := I) S0).metric s).inner x v v ≤
+          ricciTensor (I := I) ((flowG (I := I) S0).metric s) x v v := by
+    intro s hs x v
+    have hu : s + t0 ∈ Set.Icc alpha psi := by
+      dsimp only [T] at hs
+      exact ⟨by linarith [halphaT0, hs.1], by linarith [hs.2]⟩
+    have hneg := (abs_le.mp (hquad (s + t0) hu x v)).1
+    simpa [flowG, S0, SShift, Sco, SolutionOn.timeRestrict,
+      SolutionOn.timeShift, SolutionFamily.timeShift] using hneg
+  intro k hk _i t ht x _hx
+  have htShiftMem : t - t0 ∈ Set.Icc 0 T := by
+    dsimp only [T]
+    exact ⟨by linarith [hT0Beta, ht.1], by linarith [ht.2]⟩
+  have htShiftPos : 0 < t - t0 := by linarith [hT0Beta, ht.1]
+  have hEstimate := complete_of_heat (I := I)
+    (D := D0) (flowG (I := I) S0)
+    (w := nablaKRm04NormSqIntrinsic (I := I) S0)
+    (wLap := nablaKNormLap (I := I) S0) levelC
+    K aScale T hT hKPos hScale hSlab hRegular
+    (fun j s y ↦ nablaKRm04NormSqIntrinsic_nonneg (I := I) S0 j s y)
+    hw0 hTK hHeat hLap hwCont hwSpace
+    (fun j s _hs _hsPos y ↦ gradientFun_mdiffAt (I := I) (S0.base.metric s)
+      (nablaKNorm_smooth (I := I) S0 s j) y)
+    k c hc (fun j hj ↦ hLevel j (hj.trans hk))
+    Ceq A hCeq hA hequiv hric htShiftMem htShiftPos x
+  have hNum : 0 ≤ (towerConst c aScale k) ^ 2 * K ^ 2 := by positivity
+  have hPow : delta ^ k ≤ (t - t0) ^ k := by
+    gcongr
+    rw [hdeltaEq]
+    exact sub_le_sub_right ht.1 t0
+  have hUniform : nablaKRm04NormSqIntrinsic (I := I) S0 k (t - t0) x ≤
+      (towerConst c aScale k) ^ 2 * K ^ 2 / delta ^ k :=
+    hEstimate.trans (div_le_div_of_nonneg_left hNum (pow_pos hDelta k) hPow)
+  have hField :
+      nablaKRm04Field (I := I) S0 (t - t0) k =
+        nablaKRm04Field (I := I) F.S t k := by
+    have hTime : t - t0 + t0 = t := by ring
+    rw [nablaKRm_eq_iterCov (I := I) S0 (t - t0) k,
+      nablaKRm_eq_iterCov (I := I) F.S t k]
+    simp [S0, SShift, Sco, SolutionOn.timeRestrict, SolutionOn.timeShift,
+      SolutionFamily.timeShift, SolutionFamily.rm04, hTime]
+  have hUniformS : nablaKRm04NormSqIntrinsic (I := I) F.S k t x ≤
+      (towerConst c aScale k) ^ 2 * K ^ 2 / delta ^ k := by
+    unfold nablaKRm04NormSqIntrinsic at hUniform ⊢
+    rw [hField] at hUniform
+    simpa [S0, SShift, Sco, SolutionOn.timeRestrict, SolutionOn.timeShift,
+      SolutionFamily.timeShift] using hUniform
+  let term : Nat → Real := fun j ↦
+    (d : Real) ^ ((2 + j) + 2) *
+      ((towerConst c aScale j) ^ 2 * K ^ 2 / delta ^ j)
+  have hRic := ricTower_normSq_le (I := I) F.S t k x
+  have hRicTerm :
+      normSq0S (I := I) (F.S.base.metric t) x (2 + k)
+          (ricCovTower (I := I) (F.S.base.metric t) (F.S.base.metric t) k x) ≤
+        term k := by
+    calc
+      _ ≤ (d : Real) ^ ((2 + k) + 2) *
+          nablaKRm04NormSqIntrinsic (I := I) F.S k t x := by
+        simpa only [d] using hRic
+      _ ≤ (d : Real) ^ ((2 + k) + 2) *
+          ((towerConst c aScale k) ^ 2 * K ^ 2 / delta ^ k) :=
+        mul_le_mul_of_nonneg_left hUniformS (by positivity)
+      _ = term k := rfl
+  have hkMem : k ∈ levels := by
+    simp only [levels, Finset.mem_range]
+    omega
+  have hTermSum : term k ≤ ∑ j ∈ levels, term j :=
+    Finset.single_le_sum (f := term)
+      (fun j _ ↦ by dsimp only [term]; positivity) hkMem
+  have hsqrt := Real.sqrt_le_sqrt (hRicTerm.trans hTermSum)
+  simpa [shiOpenConst, term, levels, delta, aScale, c, levelC, K, d] using hsqrt
 
 /-- A complete Ricci flow with a curvature bound on a larger left-buffered
 slab has moving Shi bounds through every prescribed finite order. -/

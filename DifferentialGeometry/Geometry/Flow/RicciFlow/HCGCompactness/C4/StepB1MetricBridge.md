@@ -1,8 +1,30 @@
 # StepB1MetricBridge
 
-## Verified producer state
+## Framed migration status (2026-07-18)
 
-The source-chart coefficient lane is focused-green.
+The canonical framed-coordinate source migration is complete.  Focused Lean
+verification and the exact module refresh both pass against the current framed
+Stage-C and H6 dependency chain.
+
+- `HasStageJetData.coeff_tail` now defines its source and target chart readout
+  with `NormalCoordinates.framedChartAt`.
+- `HasStageJetData.chart_conv` now takes the framed source-chart `MapsTo`
+  premise and proves convergence for the framed stage-map readout.
+- `HasStageJetData.pb_conv` now uses framed source and target charts throughout.
+  Its phase-radius smoothness proof consumes `phaseRadius_exp` at its canonical
+  `expRadiusGp / 4` target and enlarges only to `expRadiusGp`, using
+  `expRadiusGp_pos`; the obsolete raw `expMapC2Radius` seam is gone.
+- `HasStageJetData.pb_jet_tail` now exposes the corresponding framed source
+  premise and framed two-stage coefficient family.
+
+No theorem was renamed, no wrapper or new hypothesis was added, and
+`normalCoordMetric` remains the already-canonical framed metric.  Source and
+diff review also pass.
+
+## Previously verified producer state
+
+Before the canonical framed-coordinate migration, the source-chart coefficient
+lane was focused-green.  The mathematical roles of the producers remain:
 
 - `MapCInfConvOnCompacts.pullbackAlong` packages moving evaluation of a
   bilinear-form field, convergence of the derivative of a moving map, and the
@@ -57,17 +79,20 @@ exact-inverse convergence lane.
 
 ## Honest accounting
 
-- `HasStageJetData.coeff_tail`, `chart_conv`, `pb_conv`, and `pb_jet_tail`:
-  proved and focused-green (100%).
-- Arbitrary finite pullback-coefficient jets to the retained limit metric:
-  proved (100%) once the stated local rectangular source premise is supplied.
-- Direct arbitrary-order comparison with the moving source metric: theorem not
-  yet stated (0%); its dedicated coefficient-convergence machinery is about
-  80%.
-- Chart-to-`tensor02CovDerivNormWith` producer: not started (0%); its dedicated
-  local coefficient machinery is now available, but the intrinsic conversion
-  remains open.
-- Concrete `StepB1RawInput` producer: 0%.
+- Live framed `HasStageJetData.coeff_tail`, `chart_conv`, `pb_conv`, and
+  `pb_jet_tail`: source migration and current module verification complete
+  (100%).
+- Arbitrary finite pullback-coefficient jets and their comparison with the
+  moving source metric have complete live proof bodies in the downstream
+  `cov_comp_tail`, `fwd_norm_tail`, and `inv_norm_tail` chain.  Those theorems
+  are not yet framed-revalidated because their consumer files still require
+  semantic migration.
+- The chart-to-`tensor02CovDerivNormWith` producer and the exact-local-inverse
+  route are implemented in live source; they are no longer analytic theorem
+  frontiers.  Their current framed chain verification remains pending.
+- `MetricCompactBase.exists_b1_raw`: proof body complete with no local
+  `sorry`/`admit`; not yet framed-green until the metric/inverse stack is
+  migrated and checked.
 - Textbook Step B1 theorem: 0%.
 - Repository-wide rounded machinery estimates remain the project-map figures:
   about 95% for Step-B/B1, 87% for Chapter 4, and 60% for the whole HCG

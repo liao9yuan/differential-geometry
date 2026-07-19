@@ -61,26 +61,31 @@ before the reference manifold is frozen.
 All listed files passed focused verification; the canonical stage-map module
 and the canonical energy module also passed exact module refreshes.
 
-## Exact analytic stop point
+## Live analytic status
 
-The analytic route is now decomposed at native layers.  Metric-jet to spray
+The analytic route is decomposed at native layers.  Metric-jet to spray
 convergence is checked algebraic packaging: `MetricKoszul.metricSpray_conv` and
 `normalGeodesicSpray_conv` use a proof-independent inverse Gram expression and
 introduce no velocity, stage-stay, or endpoint-radius assumption.
 
-The earliest genuinely new theorem is
-`MapCInfConvOnCompacts.ode_solutionAt`, deriving compact-tube containment and
-all parameter-jet convergence from limit-trajectory containment.  Its exact
-analysis-layer statement is typechecked, while its proof remains 0% with one
-honest `sorry`.  Once it is proved, forward normal-phase endpoint convergence
-is a thin specialization.  A fixed compact root tube then supplies inverse
-convergence; the same moving-root API is later applied to `invVelSum`, not
-directly to `chartCmEqnB`.
+The previously recorded analytic stop points are now implemented in live
+source.  `MapCInfConvOnCompacts.ode_solutionAt` derives compact-tube containment
+and all parameter-jet convergence from limit-trajectory containment; its proof
+uses `ode_c0_on_compact`, smooth solution families, `ode_iterated_any`, and
+shift removal, with no stage-family stay assumption and no `sorry`.  The exact
+local inverse tails `inv_chart_conv` and `inv_chart_tail`, the intrinsic metric
+bridges `cov_comp_tail`, `inv_cov_comp_tail`, `fwd_norm_tail`, and
+`inv_norm_tail`, the carrier `preapprox_tail`, and
+`MetricCompactBase.exists_b1_raw` likewise have complete proof bodies and do
+not assume their conclusions.
 
-After the all-pairs chart tail, exact-local-inverse convergence and the
-chart-to-`tensor02CovDerivNormWith` bridge remain independent frontiers.  See
-`B1_MOVING_ROOT_CONSULT.md` for the answered architecture request and current
-theorem-level accounting.
+The current stop is semantic revalidation after the canonical framed-coordinate
+migration.  Several B1 metric and inverse consumers still mention raw
+`normalChartAt`, `expMapDiffeo`, or `expMapC2Radius`; their old `.olean` files
+predate the framed backend.  Therefore the live proof architecture is complete,
+but the framed `exists_b1_raw` chain is not yet checked.  See
+`B1_MOVING_ROOT_CONSULT.md` for the answered architecture request; its historic
+frontier accounting must be read together with this update.
 
 ## Forbidden repairs
 
@@ -92,13 +97,16 @@ theorem-level accounting.
 
 ## Accounting
 
-The canonical map-definition seam, nested-core producer, and smooth Route-A
-configuration convergence are each checked.
-The proof-independent metric spray and `normalGeodesicSpray_conv` are checked
-(100%).  `MapCInfConvOnCompacts.ode_solutionAt` has its final public statement
-and canonical placement (100%), but its theorem proof and dedicated all-order
-stability machinery remain 0%.
-The all-pairs stage-map chart-tail theorem, concrete `StepB1RawInput` producer,
-and textbook B1 theorem remain 0%.  Rounded dedicated Step-B/B1 machinery stays
-about 95%, Chapter 4 machinery about 87%, and whole-HCG machinery about 57%.
-All compactness endpoints remain theorem-level 0%.
+The canonical map-definition seam, nested-core producer, smooth Route-A
+configuration convergence, moving ODE stability, exact-inverse convergence,
+intrinsic metric bridges, and raw-input assembly all have complete live proof
+bodies (100% source implementation, with no local `sorry` or `admit`).
+
+This is not yet a checked framed endpoint.  The current framed source migration
+of the B1 metric/inverse consumer stack is complete (100% source
+implementation), while its chain-wide framed verification is still 0% pending;
+consequently `MetricCompactBase.exists_b1_raw` must not be reported as
+framed-green.  The separately named textbook B1 theorem and all unconditional
+compactness endpoints remain theorem-level 0%.  Rounded dedicated Step-B/B1
+machinery remains about 95%, Chapter 4 machinery about 87%, and whole-HCG
+machinery about 60%.

@@ -289,3 +289,12 @@ This file now owns only the honest external-input bundle, its divisor-independen
 updated source is focused-green and contains no proof `sorry`.  Endpoint theorem
 completion is accounted for only in `MetricCompactnessEndpoint.md`, separately
 from this input-layer infrastructure.
+
+## 2026-07-18 framed radius profile
+
+`NormalRadiusProfile.le_exp_radius` now directly targets `expRadiusGp`, and
+`gpRatio` is the canonical metric ratio rather than a square-root/coercivity
+conversion.  The old `half_le_gpConst` path was removed.  Focused verification
+and the exact module refresh passed.  This is input-layer infrastructure only;
+`MetricCompactBase.exists_b1_raw` remains theorem-level 0% until the full
+framed producer route is revalidated.

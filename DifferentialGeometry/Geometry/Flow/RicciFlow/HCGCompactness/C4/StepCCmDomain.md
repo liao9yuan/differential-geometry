@@ -1,5 +1,29 @@
 # StepCCmDomain
 
+## 2026-07-18 canonical framed-coordinate migration
+
+- All fixed-base configuration coordinates in `centerCfgOn`, `chartCenterOn`,
+  both center readout producers, the ambient extension interfaces, and
+  `centerReadoutB_min` now use `framedChartAt`.  The raw `normalChartAt` calls
+  whose base is the selected moving center are intentionally retained: they
+  are the true tangent readout used by the inverse-exponential equation.
+- `chartCenterOn_cont` now uses the framed partial diffeomorphism's exported
+  `contMDiffOn_toFun`, and the minimizing readout's base/decode seam uses the
+  framed chart source together with `framedExp_target`.
+- The model-space instance block now matches the canonical no-diamond Step-C
+  API: `InnerProductSpace`, `FiniteDimensional`, and `CompleteSpace` supply the
+  required normed and finite-module structure without parallel explicit
+  instances.  This mirrors the deterministic-timeout repair in
+  `StepB1Producers`; no heartbeat was raised.
+- Focused verification is green with zero diagnostics, the exact module refresh
+  is green, and the scoped diff is clean.  The module's canonical framed API is
+  now available to downstream consumers.  Current rounded infrastructure
+  accounting remains about
+  95% for B1, 87% for C4, and 60% for the whole HCG compactness project; the
+  `MetricCompactBase.exists_b1_raw` source proof body is complete but awaits
+  this framed-chain validation.  The separately named textbook B1 theorem and
+  unconditional endpoints remain theorem-level 0%.
+
 ## 2026-07-13 minimizing-branch center readout
 
 `centerReadoutB_min` is implemented, focused-green, and sorry-free. For a

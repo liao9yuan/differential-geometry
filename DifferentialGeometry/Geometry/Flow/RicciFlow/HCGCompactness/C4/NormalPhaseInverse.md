@@ -29,3 +29,10 @@ inverse once forward smoothness is known; the next producer is joint
 `C^infinity` dependence of the retained endpoint on initial phase data.  See
 `NormalPhaseEndpoint.md`; do not restart the naturality audit or expose a second
 consumer-facing inverse.
+
+## 2026-07-18 framed-radius migration
+
+`exists_normal_inv` now consumes the canonical `expRadiusGp / 4` quarter-ball
+fence required by `exists_normalFlow`.  Focused verification and the module
+refresh passed.  This repairs the exported consumer signature only; it does
+not construct the sequence-uniform H6 radius profile.

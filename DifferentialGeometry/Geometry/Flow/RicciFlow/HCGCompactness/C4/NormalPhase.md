@@ -19,3 +19,11 @@ The normal acceleration and fenced-flow producer layer is complete for the
 current quantitative branch.  Endpoint naturality is now handled downstream
 by `NormalPhaseEndpoint`; the live frontier is transporting the resulting
 uniform branch into the HCG readout consumer.
+
+## 2026-07-18 framed-radius migration
+
+- The quarter-ball hypotheses of the acceleration, Lipschitz, endpoint
+  approximation, and flow producers now use the canonical `expRadiusGp`
+  profile.
+- Focused verification passed.  This is a consumer-interface migration; it
+  does not prove the sequence-uniform H6 radius profile.

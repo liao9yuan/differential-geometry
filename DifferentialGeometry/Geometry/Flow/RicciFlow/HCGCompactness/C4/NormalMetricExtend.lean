@@ -48,7 +48,7 @@ def normalBall (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact ⟨Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x), Metric.isOpen_ball⟩
+  exact ⟨Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x), Metric.isOpen_ball⟩
 
 /-- The exponential map restricted to its named smoothness ball, upgraded from
 the original `C¹` partial diffeomorphism to a `C∞` partial diffeomorphism. -/
@@ -63,23 +63,26 @@ noncomputable def normalExpPD
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  let Φ := expMapDiffeo (I := I) Y.metric x
+  let Φ := framedExpDiffeo (I := I) Y.metric x
   let U : Opens E := normalBall (I := I) Y x
   have hU : (U : Set E) ⊆ Φ.source := by
     intro v hv
-    exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
-      (by simpa [U, normalBall, Metric.mem_ball, dist_zero_right] using hv)
+    change v ∈ (framedExpDiffeo (I := I) Y.metric x).source
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    change v ∈ Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) at hv
+    rw [Metric.mem_ball, dist_zero_right] at hv
+    simpa only [normalFrame_sqrt] using hv
   have himage : (Φ : E → Y.M) '' (U : Set E) =
-      (fun v : E ↦
-        (expMap (I := I) Y.metric x (show TangentSpace I x from v) : Y.M)) ''
-        (U : Set E) := by
+      framedExpMap (I := I) Y.metric x '' (U : Set E) := by
     apply image_congr
     intro v hv
-    exact expMapDiffeo_apply_eq (I := I) Y.metric x (hU hv)
+    exact framedExp_eq_expMap (I := I) Y.metric x (hU hv)
   exact
     { toPartialEquiv :=
         { toFun := Φ
-          invFun := normalChartAt (I := I) Y.metric x
+          invFun := framedChartAt (I := I) Y.metric x
           source := U
           target := (Φ : E → Y.M) '' (U : Set E)
           map_source' := by
@@ -87,7 +90,7 @@ noncomputable def normalExpPD
             exact ⟨v, hv, rfl⟩
           map_target' := by
             rintro q ⟨v, hv, rfl⟩
-            have hleft : normalChartAt (I := I) Y.metric x ((Φ : E → Y.M) v) = v :=
+            have hleft : framedChartAt (I := I) Y.metric x ((Φ : E → Y.M) v) = v :=
               Φ.left_inv' (hU hv)
             rw [hleft]
             exact hv
@@ -96,21 +99,17 @@ noncomputable def normalExpPD
             exact Φ.left_inv' (hU hv)
           right_inv' := by
             rintro q ⟨v, hv, rfl⟩
-            have hleft : normalChartAt (I := I) Y.metric x ((Φ : E → Y.M) v) = v :=
+            have hleft : framedChartAt (I := I) Y.metric x ((Φ : E → Y.M) v) = v :=
               Φ.left_inv' (hU hv)
             rw [hleft] }
       open_source := U.2
       open_target := image_opens_isOpen Φ hU
       contMDiffOn_toFun := by
         simpa only [Φ, U, normalBall] using
-          expMapDiffeo_contMDiffOn_expBall (I := I) Y x
+          framedExp_smoothOn (I := I) Y x
       contMDiffOn_invFun := by
-        have hsm := normalChartAt_contMDiffOn_infty (I := I) Y.metric x
-        have hsm' : ContMDiffOn I 𝓘(Real, E) ∞
-            (normalChartAt (I := I) Y.metric x) ((Φ : E → Y.M) '' (U : Set E)) := by
-          rw [himage]
-          simpa only [U, normalBall] using hsm
-        exact hsm' }
+        rw [himage]
+        simpa only [U, normalBall] using framedChart_smooth (I := I) Y x }
 
 @[simp]
 theorem normalExpPD_source
@@ -200,7 +199,7 @@ private theorem ballDiffeo_apply
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ((normalBallDiffeo (I := I) Y x z : normalImage (I := I) Y x) : Y.M) =
-      expMapDiffeo (I := I) Y.metric x (z : E) := by
+      framedExpDiffeo (I := I) Y.metric x (z : E) := by
   rfl
 
 private theorem ballDiffeo_mfd
@@ -214,7 +213,7 @@ private theorem ballDiffeo_mfd
         (normalBallDiffeo (I := I) Y x :
           normalBall (I := I) Y x → normalImage (I := I) Y x) z v =
       mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v := by
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -289,8 +288,8 @@ noncomputable def normalCut
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  let R := expMapC2Radius (I := I) Y.metric x
-  have hR : 0 < R := expMapC2Radius_pos (I := I) Y.metric x
+  let R := expRadiusGp (I := I) Y.metric x
+  have hR : 0 < R := expRadiusGp_pos (I := I) Y.metric x
   exact ⟨R / 4, R / 2, by positivity, by linarith⟩
 
 /-- The normal cutoff is smooth as a map on the model vector space. -/
@@ -336,10 +335,10 @@ theorem normalCut_supp
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   rw [(normalCut (I := I) Y x).tsupport_eq]
-  change Metric.closedBall (0 : E) (expMapC2Radius (I := I) Y.metric x / 2) ⊆
-    Metric.ball 0 (expMapC2Radius (I := I) Y.metric x)
+  change Metric.closedBall (0 : E) (expRadiusGp (I := I) Y.metric x / 2) ⊆
+    Metric.ball 0 (expRadiusGp (I := I) Y.metric x)
   exact Metric.closedBall_subset_ball (by
-    have hR := expMapC2Radius_pos (I := I) Y.metric x
+    have hR := expRadiusGp_pos (I := I) Y.metric x
     linarith)
 
 /-- The normal cutoff is one on the open quarter-radius ball. -/
@@ -350,7 +349,7 @@ theorem normalCut_one
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ {z : E}, z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) →
+      (expRadiusGp (I := I) Y.metric x / 4) →
       (normalCut (I := I) Y x : E → Real) z = 1 := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -367,16 +366,16 @@ theorem normalInner_sub
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x / 4) ⊆
+    Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x / 4) ⊆
       (normalBall (I := I) Y x : Set E) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  change Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x / 4) ⊆
-    Metric.ball 0 (expMapC2Radius (I := I) Y.metric x)
+  change Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x / 4) ⊆
+    Metric.ball 0 (expRadiusGp (I := I) Y.metric x)
   exact Metric.ball_subset_ball (by
-    have hR := expMapC2Radius_pos (I := I) Y.metric x
+    have hR := expRadiusGp_pos (I := I) Y.metric x
     linarith)
 
 /-- A total smooth metric on the model space which agrees with the pulled-back
@@ -423,7 +422,7 @@ theorem normalTotal_inner
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E), z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) → ∀ v w : E,
+      (expRadiusGp (I := I) Y.metric x / 4) → ∀ v w : E,
       (normalTotal (I := I) Y x).inner z v w =
         normalCoordMetric (I := I) Y x z v w := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -447,7 +446,7 @@ theorem normalTotal_inner
           (normalMetric (I := I) Y x) (normalCut (I := I) Y x : E → Real)
           (normalCut_smooth (I := I) Y x) (normalCut_range (I := I) Y x)
           (normalCut_supp (I := I) Y x)
-          (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x / 4))
+          (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x / 4))
           (fun q hq ↦ normalCut_one (I := I) Y x hq) hsub z hz v w
     _ = normalCoordMetric (I := I) Y x z v w :=
       normalMetric_inner (I := I) Y x ⟨z, hsub hz⟩ v w
@@ -462,7 +461,7 @@ theorem normalTotal_eq
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E), z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) →
+      (expRadiusGp (I := I) Y.metric x / 4) →
       (normalTotal (I := I) Y x).inner z = normalCoordMetric (I := I) Y x z := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -488,7 +487,7 @@ theorem normal_cov_eq
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E), z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) →
+      (expRadiusGp (I := I) Y.metric x / 4) →
     ∀ (hco : IsCoercive (normalCoordMetric (I := I) Y x z)) (v w : E),
     (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
         (normalTotal (I := I) Y x) (fun _ : E ↦ w) z) v =
@@ -525,7 +524,7 @@ theorem normal_cov_eq_fderiv
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E), z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) →
+      (expRadiusGp (I := I) Y.metric x / 4) →
     ∀ (hco : IsCoercive (normalCoordMetric (I := I) Y x z))
       (V : E → E)
       (_hV : MDifferentiableAt 𝓘(Real, E)

@@ -141,6 +141,104 @@ Recommended file split:
 
 ## Brick Board
 
+### Live framed-coordinate migration - 2026-07-18
+
+The historical brick verdicts below describe the former raw model-coordinate
+route.  The live route now chooses a centerwise metric-orthonormal frame and
+uses `framedExpMap`, `framedExpDiffeo`, `framedChartAt`, and
+`framedTransition` throughout.
+
+Current status:
+
+- `StepBInputs`: framed definitions and the origin metric identity are
+  focused- and target-green.
+- `ProperBallExp` and `GoodCoveringItem3`: framed source/image contracts are
+  focused- and target-green.
+- `MetricCompactnessInputs`: the radius profile now targets `expRadiusGp`
+  directly and no longer carries the raw coercivity conversion; it is focused-
+  and target-green.
+- `StepCPairGeometry`: direct framed source/target containment is focused- and
+  target-green. `StepCAtomConv`, `StepCTransitionRefine`, and `StepCPairTail`
+  have completed their ordered exact refresh and are target-green.
+- `StepBTransition`, `StepBTransitionOverlap`, `H6IsometryDeriv`, and
+  `NormalCoordDistance` are framed and verified. `StepCTransitionRefine` is
+  target-green with all four extraction layers on `expRadiusGp`.
+- `NormalMetricExtend` is framed and target-green.  `NormalMetricLocal` is
+  framed and focused- and target-green.
+- `H6NormalCoord.exists_equiv_ball` is focused- and target-green and supplies the genuine
+  per-center zero-order half/two estimate. It does not supply the
+  sequence-uniform relative-radius profile or all-order metric constants.
+- `H6NormalCoord.exists_equiv_radii` is focused- and target-green and packages the local
+  choices for all `(k, x)`; the chosen radius still depends on `(k, x)`, so it
+  does not advance the uniform-profile theorem itself.
+- `H6NormalCoord.framed_rm04_of_seq` and `exists_rm04_radii` are focused- and
+  target-green.
+  Uniform bounded geometry now gives arbitrary-direction half/two metric
+  equivalence on one curvature scale intersected with the pointwise
+  `framedJacobiRadius`; this completes the Jacobi/Rm04 and scalar-budget bricks
+  without claiming a uniform lower bound for the clamp.
+- The framed Step-C producer chain through `StepCProducers` is target-green.
+  In the first stage-consumer batch, `StepCStageMap` and `StepCStageFill` are
+  target-green; `StepCStageCenter` and `StepCSupportCapstone` are now
+  exact-green after the framed consumer chain through `StepCHatReadout`,
+  `NormalMetricConv`, and `NormalLiveConv` was refreshed.
+- `NormalPhase`, `NormalPhaseSmallness`, `NormalPhaseRealization`,
+  `NormalPhaseSym`, and `NormalPhaseInverse` now expose `expRadiusGp` fences.
+  Their source checks pass, and the exported phase-flow signatures needed by
+  `NormalPhaseEndpoint` and the Stage consumers have been refreshed.
+- `NormalPhaseConv` and `NormalDiagAt` are also source- and target-green on
+  `expRadiusGp`; the fixed-radius branch fence now lands directly in the
+  canonical framed `normalBall`.
+- `NormalLimitPhase` and `NormalDiagBranch` are source- and target-green on the
+  framed route.  The latter now carries fixed-center pair coordinates through
+  `framedChartAt`/`framedExpDiffeo`, while preserving genuinely moving-base
+  exponential uses in the phase endpoint path.
+- `NormalBranchScale` and `NormalBranchMin` are source/focused- and
+  target-green after the direct `expRadiusGp` and fixed-center framed-chart
+  migration. They introduced no new radius assumption or branch wrapper.
+- `StepCSmoothness` now exposes framed fixed-base parameters throughout the
+  selected-branch equation and IFT stack, while retaining raw moving-base
+  inverse-tangent readouts. `NormalBranchHessian` consumes that API directly;
+  both modules are source/focused- and target-green.
+- `JacobiVariation` retains the equation, regularity, first derivative, and
+  endpoint equation on the explicit common radius
+  `jacobiVarRadius = expMapC2Radius / 26`; the old existential declarations are
+  compatibility wrappers. In addition, `intrinsic_jacobi` and
+  `intrinsic_jacobi_one` are focused- and exact-green and prove the global Jacobi equation
+  plus its exact time-one differential identity for the complete intrinsic
+  exponential, without a clamp or launch-radius assumption.
+
+Current B/C status: the complete stage chain through `StepCStageMaster` is
+focused- and exact-green. `StepB1MetricBridge`, `StepB1MetricLocal`,
+`StepB1Inverse`, `StepB1MetricReverse`, `StepB1MetricIntrinsic`,
+`StepB1MetricCarrier`, and `StepB1RawProducer` are focused- and exact-green.
+The canonical framed `MetricCompactBase.exists_b1_raw` producer is therefore
+checked with all five `StepB1RawInput` fields closed; the reverse remains the
+exact `Function.invFunOn`. The consumer chain through `StepCSupportCapstone` is
+exact-green. The
+independent H6 lane has completed
+the explicit arbitrary-vector Rm04 endpoint, clamped sequence-uniform
+zero-order metric estimate, sub-injectivity-ball `expDomain` containment, and
+global smoothness of the basepoint-free geodesic spray, finite-time smooth-flow
+  continuation, identification with the intrinsic geodesic velocity lift, and
+  global intrinsic Jacobi equation. The smooth time-one intrinsic endpoint,
+  affine two-parameter variation, and intrinsic endpoint differential identity
+  are focused- and exact-green. The exact remaining branch
+  gate is the canonical intrinsic-vs-chart-fixed exponential architecture and
+  the canonical branch construction. In addition, H6 must choose the
+  `NormalCoordMetricBoundInput.radius` together with its profile; no positive
+  ratio follows for an arbitrary record whose radius may be shrunk. The
+  decision prompt and exact signatures are in `H6_RADIUS_CONSULT.md`. The
+  current `expMapC2Radius`
+inside `expRadiusGp` remains a qualitative choice and cannot be lower-bounded
+by CGT injectivity. Do not add an endpoint wrapper or a synonym profile
+assumption to bypass this gate.
+
+Accounting: the canonical framed `MetricCompactBase.exists_b1_raw` theorem is
+100% checked. Textbook B1 and the unconditional compactness endpoint remain
+theorem-level 0%; the checked raw producer is dedicated machinery for those
+future endpoints, not either endpoint itself.
+
 ### B-input - normal-coordinate metric honest input
 
 Status: accepted 2026-06-13.

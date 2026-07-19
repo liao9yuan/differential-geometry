@@ -1,5 +1,27 @@
 # NormalBranchCage
 
+## 2026-07-18 canonical framed-cage migration
+
+- The selected-branch cage now uses `framedChartAt` at every fixed center.
+  All 35 former raw-chart occurrences in this module were fixed-base chart
+  coordinates; no moving-base inverse-tangent readout occurs here.
+- The retained phase quarter-ball is now stated directly with
+  `expRadiusGp / 4`, matching `phaseRadius_exp`; the obsolete
+  `expMapC2Radius / 4` target was not recovered through a false comparison.
+- `HasNormalBrFull.exists_cm_eqn`, `HasNormalBrFull.exists_cm_deriv`, and the
+  prescribed/live-slot readouts therefore consume the canonical framed
+  `StepCCmDomain.centerReadoutB_min` interface without a conjugation wrapper or
+  a new radius assumption.
+- Focused verification is green with zero diagnostics, and the exact module
+  refresh is green.  The framed Cage producer interface is now available to
+  downstream readouts.
+
+The concrete `MetricCompactBase.exists_b1_raw` proof body is complete, but its
+canonical framed dependency validation is still in progress; the separately
+named textbook B1 theorem and unconditional compactness endpoints remain
+theorem-level 0%.  Current rounded infrastructure accounting is about 95% for
+B1, 87% for C4, and 60% for the whole HCG compactness project.
+
 ## Role
 
 This module is intended to combine the center/point cage ledger with one

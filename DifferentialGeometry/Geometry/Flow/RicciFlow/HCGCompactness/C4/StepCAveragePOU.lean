@@ -161,15 +161,16 @@ theorem chartPtsConv (g : SmoothRiemannianMetric I M) (p : M)
   rw [hleft] at hdist
   simpa [ψ] using hdist
 
-/-- A compact source cage supplies the coordinate compact for
-`chartPtsConv` by taking its image under the normal chart. -/
-theorem chartPtsSrcK (g : SmoothRiemannianMetric I M) (p : M)
+/-- A compact source cage supplies the coordinate compact for decoded point
+convergence under any selected partial chart. -/
+theorem chartPtsSrcK (g : SmoothRiemannianMetric I M)
+    (ψ : PartialDiffeomorph I (modelWithCornersSelf Real E) M E 1)
     {S Ksrc : Set M} (hKsrc : IsCompact Ksrc) (hSsub : S ⊆ Ksrc)
-    (hsrcK : Ksrc ⊆ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hsrcK : Ksrc ⊆ ψ.source)
     (F : Nat -> Nat -> E -> E)
     (hclose : ∀ δ : Real, δ > 0 -> ∃ N : Nat,
       ∀ a : Nat, a ≥ N -> ∀ b : Nat, b ≥ N -> ∀ v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) g p) '' Ksrc ->
+        v ∈ ψ '' Ksrc ->
           dist (F a b v) v < δ) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -178,34 +179,53 @@ theorem chartPtsSrcK (g : SmoothRiemannianMetric I M) (p : M)
     letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
     ∀ ε : Real, ε > 0 -> ∃ N : Nat,
       ∀ a : Nat, a ≥ N -> ∀ b : Nat, b ≥ N -> ∀ x : M, x ∈ S ->
-        dist x ((NormalCoordinates.normalChartAt (I := I) g p).symm
-          (F a b ((NormalCoordinates.normalChartAt (I := I) g p) x))) < ε := by
+        dist x (ψ.symm (F a b (ψ x))) < ε := by
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     ⟨g.toRiemannianMetric⟩
   letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
-  let ψ := NormalCoordinates.normalChartAt (I := I) g p
   have hcont : ContinuousOn (fun x : M => ψ x) Ksrc := by
     exact ψ.contMDiffOn_toFun.continuousOn.mono hsrcK
   have hK : IsCompact (ψ '' Ksrc) := hKsrc.image_of_continuousOn hcont
   have hKtarget : ψ '' Ksrc ⊆ ψ.target := by
     rintro v ⟨x, hx, rfl⟩
     exact ψ.map_source (hsrcK hx)
-  have hSsource : ∀ x : M, x ∈ S -> x ∈ ψ.source := by
-    intro x hx
-    exact hsrcK (hSsub hx)
-  have hScoord : ∀ x : M, x ∈ S -> ψ x ∈ ψ '' Ksrc := by
-    intro x hx
-    exact ⟨x, hSsub hx, rfl⟩
-  simpa [ψ] using
-    chartPtsConv (I := I) (g := g) (p := p) (S := S) (K := ψ '' Ksrc)
-      hK hKtarget hSsource hScoord F hclose
+  obtain ⟨η, hηpos, hηtarget⟩ :=
+    hK.exists_cthickening_subset_open ψ.open_target hKtarget
+  let K' : Set E := Metric.cthickening η (ψ '' Ksrc)
+  have hK' : IsCompact K' := hK.cthickening
+  have hK'target : K' ⊆ ψ.target := by
+    simpa only [K'] using hηtarget
+  have huc : UniformContinuousOn (fun v : E => ψ.symm v) K' :=
+    hK'.uniformContinuousOn_of_continuous
+      (ψ.contMDiffOn_invFun.continuousOn.mono hK'target)
+  rw [Metric.uniformContinuousOn_iff] at huc
+  intro ε hε
+  obtain ⟨δ, hδpos, hδ⟩ := huc ε hε
+  obtain ⟨N, hN⟩ := hclose (min δ η) (lt_min hδpos hηpos)
+  refine ⟨N, fun a ha b hb x hx => ?_⟩
+  have hxKsrc : x ∈ Ksrc := hSsub hx
+  have hxsrc : x ∈ ψ.source := hsrcK hxKsrc
+  have hxK : ψ x ∈ ψ '' Ksrc := ⟨x, hxKsrc, rfl⟩
+  have hxK' : ψ x ∈ K' := Metric.self_subset_cthickening _ hxK
+  have hdist : dist (F a b (ψ x)) (ψ x) < min δ η :=
+    hN a ha b hb (ψ x) hxK
+  have hFK' : F a b (ψ x) ∈ K' :=
+    Metric.mem_cthickening_of_dist_le (F a b (ψ x)) (ψ x) η _ hxK
+      (le_trans hdist.le (min_le_right δ η))
+  have hdecoded : dist (ψ.symm (F a b (ψ x))) (ψ.symm (ψ x)) < ε :=
+    hδ (F a b (ψ x)) hFK' (ψ x) hxK'
+      (lt_of_lt_of_le hdist (min_le_left δ η))
+  have hleft : ψ.symm.toPartialEquiv (ψ.toPartialEquiv x) = x :=
+    ψ.toPartialEquiv.left_inv hxsrc
+  rw [hleft] at hdecoded
+  simpa only [dist_comm] using hdecoded
 
-/-- A realized proper-metric closed ball lies in the source of the normal chart
-when its radius is strictly below the radial `g_p` normal-ball radius.  This is
-the C4 bridge from proper-metric cages to the Gauss-lemma source API; the actual
-radius choice remains the separate geometric producer. -/
+/-- A realized proper-metric closed ball lies in the source of the framed
+normal chart when its radius is strictly below the radial `g_p` normal-ball
+radius.  This is the C4 bridge from proper-metric cages to the Gauss-lemma
+source API; the actual radius choice remains the separate geometric producer. -/
 theorem properBallSrcOfRad
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) {c : Y.M} {R : Real}
@@ -223,7 +243,7 @@ theorem properBallSrcOfRad
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     letI : MetricSpace Y.M := P.ms
     Metric.closedBall c R ⊆
-      (NormalCoordinates.normalChartAt (I := I) Y.metric c).source := by
+      (NormalCoordinates.framedChartAt (I := I) Y.metric c).source := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -254,7 +274,9 @@ theorem properBallSrcOfRad
   have hsmall : (riemannianEDist I c y).toReal < expRadiusGp (I := I) Y.metric c := by
     rw [hed, ENNReal.toReal_ofReal (dist_nonneg : 0 ≤ dist c y)]
     exact lt_of_le_of_lt hdist_le hR
-  exact memNChartSrcOfDist (I := I) Y.metric c hEnorm hfin hsmall
+  simpa only [NormalCoordinates.framedChartAt,
+    NormalCoordinates.framedExp_target] using
+    memNChartSrcOfDist (I := I) Y.metric c hEnorm hfin hsmall
 
 /-- A point in a realized proper-metric ball below the radial normal radius has
 normal coordinates whose `g_c`-length is exactly the realized distance. -/
@@ -648,7 +670,7 @@ theorem hatCageSrcOfBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (X.obj (L.φ n)).t2TangentBundle
       letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
       Metric.closedBall (center gamma) (4 * L.lamInf (gamma : Nat)) ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source) :
     letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
     letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -656,7 +678,7 @@ theorem hatCageSrcOfBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
       (X.obj (L.φ n)).t2TangentBundle
     NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
-      (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+      (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
         (center gamma)).source := by
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
   letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -693,7 +715,7 @@ theorem hatCageSrcOfRad (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
       (X.obj (L.φ n)).t2TangentBundle
     NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
-      (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+      (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
         (center gamma)).source := by
   exact
     NetLimitData.hatCageSrcOfBall (I := I) (X := X) hd P L pb r n center gamma
@@ -727,7 +749,7 @@ theorem hatCageSrcCases (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (X.obj (L.φ n)).t2TangentBundle
     forall gamma : Fin (pb.A r),
       NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source := by
   intro gamma
   cases hc : seqCenter hd D P (L.φ n) (gamma : Nat) with
@@ -767,7 +789,7 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : ι,
         sourceCage gamma ⊆
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
             (center gamma)).source)
     (hBcont : forall gamma : ι, ContinuousOn (Binf gamma) (U gamma))
     (hKU :
@@ -777,7 +799,7 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : ι,
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) ''
             sourceCage gamma ⊆
           U gamma)
@@ -792,7 +814,7 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         x ∈ s ->
         mu x gamma ≠ 0 ->
           Binf gamma
-              ((NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+              ((NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
                 (center gamma)) x) ∈ V' gamma) :
     letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
     letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -806,13 +828,13 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         x ∈ s ->
         mu x gamma ≠ 0 -> x ∈ sourceK gamma) ∧
       (forall gamma : ι, sourceK gamma ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source) ∧
       (forall gamma : ι,
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma ⊆ U gamma) ∧
       (forall gamma : ι, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        v ∈ (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V' gamma) := by
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
   letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -822,7 +844,7 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (X.obj (L.φ n)).t2TangentBundle
   let sourceBall : Set (X.obj (L.φ n)).M := s
   let chart : ι -> (X.obj (L.φ n)).M -> E := fun gamma =>
-    NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+    NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
       (center gamma)
   let support : ι -> Set (X.obj (L.φ n)).M := fun gamma =>
     {x | x ∈ sourceBall ∧ mu x gamma ≠ 0}
@@ -846,7 +868,7 @@ theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   · intro gamma v hv
     rcases hv with ⟨x, hx, rfl⟩
     have hchart : ContinuousOn (chart gamma) (sourceCage gamma) :=
-      (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+      (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
         (center gamma)).contMDiffOn_toFun.continuousOn.mono (hsrc gamma)
     have hcomp : ContinuousOn (fun y => Binf gamma (chart gamma y))
         (sourceCage gamma) :=
@@ -1204,7 +1226,8 @@ theorem hatChartPtsSrcK (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         Set (X.obj (L.φ n)).M)
   obtain ⟨N, hN⟩ :=
     chartPtsSrcK (I := I) (g := (X.obj (L.φ n)).metric)
-      (p := center gamma) (S := S) (Ksrc := sourceK gamma)
+      (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (center gamma)) (S := S) (Ksrc := sourceK gamma)
       (hKsrc gamma) (hSsub gamma) (hsrcK gamma) (F gamma)
       (hclose gamma) eps heps
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
@@ -1374,7 +1397,7 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : ι, sourceK gamma ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
     (hVopen : forall gamma : ι, IsOpen (V gamma))
     (hB : forall gamma : ι,
@@ -1392,7 +1415,7 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : ι,
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma ⊆ U gamma)
     (hKV :
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -1401,7 +1424,7 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : ι, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        v ∈ (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V gamma) :
     letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
     letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -1428,9 +1451,9 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         forall x : (X.obj (L.φ n)).M,
           x ∈ s ->
           mu x gamma ≠ 0 ->
-            dist x ((NormalCoordinates.normalChartAt (I := I)
+            dist x ((NormalCoordinates.framedChartAt (I := I)
               (X.obj (L.φ n)).metric (center gamma)).symm
-                (A gamma b (B gamma a ((NormalCoordinates.normalChartAt (I := I)
+                (A gamma b (B gamma a ((NormalCoordinates.framedChartAt (I := I)
                   (X.obj (L.φ n)).metric (center gamma)) x)))) < eps := by
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
   letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -1458,7 +1481,7 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   have hSsub : S ⊆ sourceK gamma := by
     intro x hx
     exact hSupp gamma x hx.1 hx.2
-  let psi := NormalCoordinates.normalChartAt (I := I)
+  let psi := NormalCoordinates.framedChartAt (I := I)
     (X.obj (L.φ n)).metric (center gamma)
   have hcont : ContinuousOn (fun x : (X.obj (L.φ n)).M => psi x)
       (sourceK gamma) :=
@@ -1475,9 +1498,9 @@ theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (hAcont gamma) (hid gamma) hKimg (hKU gamma) (hKV gamma) delta hdelta
   obtain ⟨N, hN⟩ :=
     chartPtsSrcK (I := I) (g := (X.obj (L.φ n)).metric)
-      (p := center gamma) (S := S) (Ksrc := sourceK gamma)
+      psi (S := S) (Ksrc := sourceK gamma)
       (hKsrc gamma) hSsub (hsrcK gamma)
-      (fun a b v => A gamma b (B gamma a v)) (by simpa [psi] using hclose)
+      (fun a b v => A gamma b (B gamma a v)) hclose
       eps heps
   refine ⟨N, fun a ha b hb x hx hmu => ?_⟩
   exact hN a ha b hb x ⟨hx, hmu⟩
@@ -3075,7 +3098,7 @@ theorem unifHatSrcOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : Fin (pb.A r), sourceK gamma ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
@@ -4127,7 +4150,7 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : Fin (pb.A r), sourceK gamma ⊆
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
     (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
       x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
@@ -4153,7 +4176,11 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
       letI : MetricSpace (X.obj (L.φ n)).M :=
         HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
-      let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      let ptsSeq := fun a b x gamma =>
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).symm
+            (A gamma b (B gamma a ((NormalCoordinates.framedChartAt (I := I)
+              (X.obj (L.φ n)).metric (center gamma)) x)))
       forall a b : Nat, forall x : (X.obj (L.φ n)).M,
         x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
           forall gamma : Fin (pb.A r), mu x gamma ≠ 0 ->
@@ -4170,7 +4197,11 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
         Manifold.metrizableSpace I (X.obj (L.φ n)).M
       letI : T3Space (X.obj (L.φ n)).M := inferInstance
-      let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      let ptsSeq := fun a b x gamma =>
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).symm
+            (A gamma b (B gamma a ((NormalCoordinates.framedChartAt (I := I)
+              (X.obj (L.φ n)).metric (center gamma)) x)))
       forall a b : Nat, forall x : (X.obj (L.φ n)).M,
         x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
           StrictDistInput (I := I) (X.obj (L.φ n)).metric
@@ -4193,7 +4224,7 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : Fin (pb.A r),
-        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma ⊆ U gamma)
     (hKV :
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -4202,7 +4233,7 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
         (X.obj (L.φ n)).t2TangentBundle
       forall gamma : Fin (pb.A r), forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        v ∈ (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V gamma) :
     let hcomplete :=
       NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
@@ -4226,7 +4257,11 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
     letI : MetricSpace (X.obj (L.φ n)).M :=
       HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
-    let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+    let ptsSeq := fun a b x gamma =>
+      (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
+        (center gamma)).symm
+          (A gamma b (B gamma a ((NormalCoordinates.framedChartAt (I := I)
+            (X.obj (L.φ n)).metric (center gamma)) x)))
     forall eps : Real, eps > 0 -> exists N : Nat,
       forall a : Nat, a >= N -> forall b : Nat, b >= N ->
         forall x : (X.obj (L.φ n)).M,
@@ -4269,7 +4304,11 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
   let hcomplete :=
     NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
-  let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+  let ptsSeq := fun a b x gamma =>
+    (NormalCoordinates.framedChartAt (I := I) (X.obj (L.φ n)).metric
+      (center gamma)).symm
+        (A gamma b (B gamma a ((NormalCoordinates.framedChartAt (I := I)
+          (X.obj (L.φ n)).metric (center gamma)) x)))
   exact centerAverage.unifTwoIdDataSelf (I := I)
     (g := (X.obj (L.φ n)).metric) (join := join)
     (s := NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
@@ -4279,7 +4318,7 @@ theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (fun _ _ y hy => ⟨(hmu.data hy).1, fun _ hne => hne⟩)
     (by simpa [ptsSeq] using hstrict)
     (by
-      simpa [ptsSeq, decodedCompPts] using
+      simpa [ptsSeq] using
         NetLimitData.hatSuppPtsOfComp (I := I) (X := X) hd P L pb r n mu center
           sourceK U V B Binf A Ainf hconn hKsrc hSupp hsrcK hVopen hB hA
           hBcont hAcont hid hKU hKV)

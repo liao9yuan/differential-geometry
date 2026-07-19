@@ -19,7 +19,12 @@ the same `HasStageJetData` through its checked `subseq` theorem.
 one package.  There is deliberately no global factorization through a fixed
 radius and no equivalence between old and refined dependent slot types.
 
-Focused verification passed with no `sorry`.  The nested integer-radius
-diagonal and dependent fixed-radius tail persistence are complete (100%).
-`MetricCompactBase.exists_b1_raw` and the textbook Step B1 endpoint remain
-unproved (0%); this file closes the master-extraction machinery only.
+The canonical framed-chain focused verification passes with no local
+diagnostics after the exact `StepCStageSeed` refresh.  This module's own exact
+target refresh also completed successfully in the coordinated Stage-DAG write
+chain.  The
+nested integer-radius diagonal and dependent fixed-radius tail persistence are
+complete (100% current module verification).  `MetricCompactBase.exists_b1_raw`
+has a complete proof body, but its framed downstream validation is still in
+progress.  The separately named textbook Step B1 endpoint remains
+unstated/unproved (0%); this file closes only the master-extraction machinery.

@@ -246,11 +246,16 @@ The analytic and provenance lanes run in parallel:
 - `BernsteinTower.estimate_complete`: interface stated and focused-green;
   theorem completion remains 0% at its single complete-noncompact scalar
   maximum-principle/cutoff `sorry`; dedicated machinery is about 10%.
-- `movingShi_complete` and `CurvBoundInput.movingShi_open`: wrapper proofs are
-  focused-green and select one explicit constant before the sequence member;
-  trusted theorem completion remains 0% because their constants-first core
-  `movingShi_of_bound` contains the single complete-noncompact Shi `sorry`.
-- `StepDCanonData` / `compactness_canon`: not stated, theorem 0%.
+- `movingShi_complete` and `CurvBoundInput.movingShi_open`: the wrappers and a
+  full source proof of `movingShi_of_bound` are assembled with one explicit
+  constant chosen before the sequence member.  The latest source revision is
+  awaiting focused verification after the framed-coordinate refresh; its
+  trusted analytic foundation still depends on the explicit lower-level
+  frontiers in `exists_rmTowerSol` and `BernsteinTower.estimate_complete`.
+- `StepDCanonData` / `compactness_canon`: the sidecar, subsequence transport,
+  and public projection are stated; the source was focused-green around one
+  honest `HasCanonBounds` frontier.  Its exact refresh is paused while H6
+  migrates the shared framed normal-coordinate import chain.
 - `SrcCovLipData`: source-native interface stated and focused-green.
   `srcCovLip_of_soln` remains theorem-level 0% at its single constants-first
   varying-source analytic `sorry`.

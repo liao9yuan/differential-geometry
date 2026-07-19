@@ -108,3 +108,14 @@ Progress accounting at pause:
 - Step-B/B1 machinery remains about 77%, Chapter 4 machinery about 74%, and
   whole-HCG machinery about 51%.  These overall estimates are deliberately not
   raised for an unverified local proof candidate.
+
+## 2026-07-18 framed fixed-center branch migration
+
+`tan_mem_of_small` now uses `framedChartAt` and `framedExpDiffeo` throughout
+its fixed-center decode and inverse argument. The old raw
+`expMapC2Radius`/`expMapDiffeo` source chain was removed; the inverse identities
+are the direct left inverses of the framed partial diffeomorphisms. The
+mathematical branch, minimizing tangent, and radius budget are unchanged.
+
+Focused verification and the exact module refresh passed. This repairs a
+downstream framed consumer and adds no H6 producer or endpoint assumption.

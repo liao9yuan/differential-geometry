@@ -73,7 +73,7 @@ Wires `NormalCoordMetricBoundInput` (B-input) into `exists_metricLimit_on`, for 
 sequence of chart centers `c k : (X.obj k).M` (one `β`) on a fixed open domain `U`.  The
 two remaining hypotheses are now both **honest geometric containments** of `U` in a
 per-term ball: `hdom` (`U ⊆ ball 0 (input.radius k (c k))`, where the `lbl395`
-derivative/equivalence bounds apply) and `hsub` (`U ⊆ ball 0 (expMapC2Radius … (c k))`,
+derivative/equivalence bounds apply) and `hsub` (`U ⊆ ball 0 (expRadiusGp … (c k))`,
 where the pulled-back metric is `C^∞`).  The previous `hsmooth` hypothesis — the
 `C^∞` smoothness of `normalCoordMetric` on `U` — is **no longer a frontier**: it is
 discharged internally from `hsub` via `contDiffOn_normalCoordMetric_of_subset_expBall`
@@ -99,7 +99,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 set_option synthInstance.maxHeartbeats 800000 in
 /-- **`normalCoordMetric` local metric limit** (`lbl394` metric part, fixed-`β` HCG
 form).  For a fixed sequence of chart centers `c k : (X.obj k).M` on a fixed open `U`
-contained in every `lbl395` bound ball (`hdom`) and in every `expMapC2Radius` smoothness
+contained in every `lbl395` bound ball (`hdom`) and in every `expRadiusGp` smoothness
 ball (`hsub`), with the `lbl395` derivative/equivalence input (`input`), a subsequence of
 `normalCoordMetric (X.obj k) (c k)` converges in `C^∞` on compacts of `U` to a limit
 metric that is `C^∞` on `U` and retains the `½δ ≤ g ≤ 2δ` equivalence (hence positive
@@ -116,7 +116,7 @@ theorem exists_metricLimit_normalCoord
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (c k))) :
+      U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I) (X.obj k).metric (c k))) :
     ∃ (φ : ℕ → ℕ) (gInf : E → (E →L[ℝ] E →L[ℝ] ℝ)),
       StrictMono φ ∧ ContDiffOn ℝ (⊤ : ℕ∞) gInf U ∧
         MapCInfConvOnCompacts U
@@ -146,7 +146,7 @@ theorem exists_metric_lim_pi
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (c i k))) :
+        (expRadiusGp (I := I) (X.obj k).metric (c i k))) :
     ∃ (phi : Nat → Nat)
         (gInf : E → (ι → (E →L[Real] E →L[Real] Real))),
       StrictMono phi ∧

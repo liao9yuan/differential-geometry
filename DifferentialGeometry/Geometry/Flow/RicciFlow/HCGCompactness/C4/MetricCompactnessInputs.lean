@@ -49,8 +49,8 @@ Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
   genuine: the Jacobi-field ODE analysis depends only on the curvature bounds).
 * `normalRadius` — compatibility of the preceding radius with the CGT profile:
   one fixed positive fraction of `mu (dist x O)` lies in every controlled
-  normal-coordinate ball.  Its derived `gpRatio` also lies below the intrinsic
-  `expRadiusGp`, using H6 metric equivalence at the chart origin.  This is the
+  normal-coordinate ball and in the intrinsic framed exponential radius.
+  Its compatibility projection `gpRatio` is the same coefficient.  This is the
   noncompact uniformity actually used by the construction; an absolute radius
   floor over all base points would be false.
 ## Deliberately NOT in the bundle (derived at assembly, or bundle-v2)
@@ -107,7 +107,7 @@ structure NormalRadiusProfile
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x
 
 namespace NormalRadiusProfile
 
@@ -133,17 +133,16 @@ def subseq
     letI : T2Space (TangentBundle I (X.obj (f k)).M) :=
       (X.obj (f k)).t2TangentBundle
     change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj (f k)).metric x
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj (f k)).metric x
     exact h.le_exp_radius (f k) x
 
-/-- The relative radius coefficient that also fits inside the intrinsic
-`g_p`-radius. -/
+/-- Compatibility name for the relative intrinsic framed-radius coefficient. -/
 def gpRatio
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : Real :=
-  Real.sqrt (1 / 2 : Real) * h.ratio
+  h.ratio
 
 /-- The intrinsic-radius profile coefficient is strictly positive. -/
 theorem gpRatio_pos
@@ -151,8 +150,7 @@ theorem gpRatio_pos
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : 0 < h.gpRatio := by
-  rw [gpRatio]
-  exact mul_pos (Real.sqrt_pos.mpr (by norm_num)) h.ratio_pos
+  exact h.ratio_pos
 
 /-- The intrinsic-radius coefficient is no larger than the original normal
 coordinate profile coefficient. -/
@@ -161,11 +159,7 @@ theorem gpRatio_le_ratio
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : h.gpRatio ≤ h.ratio := by
-  rw [gpRatio]
-  have hsqrt : Real.sqrt (1 / 2 : Real) ≤ 1 :=
-    Real.sqrt_le_one.mpr (by norm_num)
-  simpa only [one_mul] using
-    mul_le_mul_of_nonneg_right hsqrt h.ratio_pos.le
+  exact le_rfl
 
 /-- The profile gives a positive source-radius floor on each fixed
 basepoint-distance sublevel. -/
@@ -193,7 +187,7 @@ theorem floor_le_radius
     _ ≤ hb.radius k x := h.le_radius k x
 
 /-- On a fixed basepoint-distance sublevel, the profile floor also lies in the
-named smooth exponential-chart ball. -/
+intrinsic framed exponential-chart ball. -/
 theorem floor_le_exp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -205,7 +199,7 @@ theorem floor_le_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     h.ratio * hd.mu R ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -214,7 +208,7 @@ theorem floor_le_exp
     h.ratio * hd.mu R ≤
         h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
-    _ ≤ Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
+    _ ≤ Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
       h.le_exp_radius k x
 
 /-- On a fixed basepoint-distance sublevel, the strengthened H6 profile also
@@ -235,18 +229,7 @@ theorem floor_le_expGp
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  rw [gpRatio, Geometry.Riemannian.expRadiusGp]
-  calc
-    Real.sqrt (1 / 2 : Real) * h.ratio * hd.mu R =
-        Real.sqrt (1 / 2 : Real) * (h.ratio * hd.mu R) := by ring
-    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj k).metric x) * (h.ratio * hd.mu R) :=
-      mul_le_mul_of_nonneg_right
-        (Real.sqrt_le_sqrt (hb.half_le_gpConst k x)) (h.floor_pos R).le
-    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj k).metric x) *
-          Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
-      mul_le_mul_of_nonneg_left (h.floor_le_exp hx) (Real.sqrt_nonneg _)
+  simpa only [gpRatio] using h.floor_le_exp hx
 
 /-- Choosing the covering divisor larger than `c / ratio` places the scaled
 covering radius strictly below the profile floor. -/
@@ -277,7 +260,7 @@ theorem mul_lambda_lt_radius
   (h.mul_lambda_lt_floor hD hc).trans_le (h.floor_le_radius hx)
 
 /-- On a fixed basepoint-distance sublevel, the same divisor choice places the
-scaled covering radius inside the named smooth exponential-chart ball. -/
+scaled covering radius inside the intrinsic framed exponential-chart ball. -/
 theorem mul_lambda_lt_exp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -291,7 +274,7 @@ theorem mul_lambda_lt_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     c * hd.lambda D R <
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -372,9 +355,7 @@ theorem gpScaleTail
         (R := seqRadius hd D P (L.φ n) (γ : Nat)) hD h8 hx
 
 /-- The same lower half of `lambda_window` places half of any item-3 radius
-inside the intrinsic `g_p` exponential ball.  The hypothesis is expressed in
-the original normal-radius ratio: the numerical inequality
-`sqrt (1 / 2) > 1 / 2` converts it to the strengthened `gpRatio` budget. -/
+inside the intrinsic framed exponential ball. -/
 theorem halfGpScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -395,17 +376,9 @@ theorem halfGpScaleTail
         (a / 2) * L.lamInf (γ : Nat) <
           Geometry.Riemannian.expRadiusGp
             (I := I) (X.obj (L.φ n)).metric c := by
-  have hsqrt : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
-    have hsqrtSq := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
-    have hsqrtNonneg := Real.sqrt_nonneg (1 / 2 : Real)
-    nlinarith
-  have hratioD : 0 < h.ratio * D := mul_pos h.ratio_pos hD
   have haGp : a < h.gpRatio * D := by
-    calc
-      a < (1 / 2 : Real) * (h.ratio * D) := by nlinarith
-      _ < Real.sqrt (1 / 2 : Real) * (h.ratio * D) :=
-        mul_lt_mul_of_pos_right hsqrt hratioD
-      _ = h.gpRatio * D := by rw [gpRatio]; ring
+    rw [gpRatio]
+    nlinarith [ha]
   have hwin : ∀ᶠ n in atTop, ∀ γ ∈ Finset.range (pb.A r),
       L.lamInf γ / 2 ≤ hd.lambda D (seqRadius hd D P (L.φ n) γ) :=
     (Filter.eventually_all_finset _).mpr fun γ _ =>

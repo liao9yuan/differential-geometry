@@ -111,3 +111,65 @@ the rounded machinery estimates remain 94% / 86% / 57%.
 addition to `qWide`, and proves the derived alignment
 `C1 alpha ⊆ ball 0 (q alpha / 2)`. Focused verification passed. This closes a
 data-loss seam only; the all-pairs chart tail and `StepB1RawInput` remain 0%.
+
+## 2026-07-18 canonical framed-coordinate migration
+
+Every selected source-local patch in this capstone now uses `framedChartAt`.
+The four direct two-stage point families use `framedTransition` at both moving
+stages, with the corresponding bundled manifold instances installed locally.
+The already framed `normalCoordMetric` interface is unchanged.  No chart
+selector, cross-chart weight compatibility, radius assumption, or legacy raw
+normal-coordinate wrapper was added.
+
+Focused verification passed after the separately owned
+`NormalPhaseSmallness` object was refreshed, and the source diff contains no
+remaining `normalChartAt` or `normalTransition` occurrence.  This file's
+framed migration is therefore 100% revalidated.  It does not by itself
+revalidate the full downstream B/C chain: the previously proved raw B1
+producer remains subject to that chain-wide framed refresh, while the
+separately named textbook B1 theorem and unconditional compactness endpoints
+remain theorem-level 0%.  The whole-HCG machinery estimate remains about 60%.
+
+## 2026-07-18 exact refresh frontier
+
+The authorized exact refresh was attempted immediately after
+`StepCStageCenter` became exact-green. It did not reach this file's source:
+the build stopped in `Geometry/Comparison/Volume/RadialGronwall.lean` because
+the installed `JacobiVariation.olean` did not yet export
+`DifferentialGeometry.Geometry.Riemannian.exists_jacobi_diff`.
+
+The live `JacobiVariation.lean` source does contain that public theorem, and
+the source was newer than its installed object. This is therefore a stale
+upstream artifact in the separately owned H6 Jacobi lane, not a local proof or
+mathematical regression in `StepCSupportCapstone`. Exact validation of this
+capstone remains pending the coordinated Jacobi/Radial refresh; no endpoint
+radius assumption or compatibility wrapper was introduced.
+
+The coordinated Jacobi and Radial refresh then succeeded. The next exact
+attempt again stopped before reaching this file, now in the owning module
+`StepCCmDomain.lean`. That module still mixed raw fixed-base
+`normalChartAt` center configurations with the canonical framed
+`chartCmEqnB` and selected diagonal branch. The build reported deterministic
+normalization timeouts at those mismatched interfaces and a concrete failed
+rewrite at the final `centerReadoutB_min` proof. The smallest repair is the
+canonical fixed-base framed migration in `StepCCmDomain`; moving-base inverse
+tangent readouts remain raw. `StepCSupportCapstone` exact validation is still
+pending, while its own focused-green framed source status is unchanged.
+
+## 2026-07-18 exact framed-chain closure
+
+The upstream blockers above are now resolved.  The fixed-base configuration
+API in `StepCCmDomain`, the minimizing Cage and Hat readouts, and the
+normal-metric live diagonal were refreshed on their canonical framed and
+`expRadiusGp` semantics.  `StepCSupportCapstone` then passed both its focused
+check and the exact module refresh; the latter rebuilt the full selected
+transition/atom/source-cover dependency chain through this capstone.
+
+This establishes the support-local capstone as checked on the live framed
+tree.  It does not prove the independent quantitative producer for
+`NormalRadiusProfile.le_exp_radius`, nor does it finish the downstream
+all-pairs stage-map and metric-carrier validation.  The source proof body of
+`MetricCompactBase.exists_b1_raw` is complete but still awaits those remaining
+checks.  The separately named textbook B1 theorem and unconditional endpoints
+remain theorem-level 0%; rounded machinery estimates remain B1 95%, C4 87%,
+whole HCG 60%.

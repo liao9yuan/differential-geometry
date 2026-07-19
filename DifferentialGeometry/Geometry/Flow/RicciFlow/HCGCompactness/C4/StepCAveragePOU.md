@@ -605,3 +605,38 @@ whole source ball, so no mathematics changed. The generalized file is
 focused-green with no local warning. This closes the support-index/API part of
 the B/C architecture (100%); it does not close the independent
 Hessian/Neumann `StrictDistInput` frontier or any compactness endpoint (0%).
+
+## 2026-07-18, framed support-cage interface
+
+The canonical source-cage path now uses the per-center orthonormal normal
+coordinates. `properBallSrcOfRad`, `hatCageSrcOfBall`, `hatCageSrcOfRad`, and
+`hatCageSrcCases` return source membership for `framedChartAt`. The generic
+support closure theorem `hatSuppCageData` likewise takes and returns framed
+chart sources and framed chart images, so its Step-C caller no longer has to
+translate a raw chart image into the canonical H6 coordinates.
+
+The older generic coordinate-convergence lemmas in this file were not
+mechanically rewritten: they remain valid raw-coordinate utilities and are not
+part of this canonical support seam. The framed support-cage declarations and
+the whole file pass focused verification. No new hypothesis or parallel API
+was added.
+
+The framed support-cage seam is complete (100%). The live framed B/C raw-input
+producer and textbook Step B1 theorem remain theorem-level 0% until the rest of
+the downstream migration and revalidation are complete; whole-HCG support
+machinery remains about 60%.
+
+The selected support-local decoded-point path is now framed as well.
+`chartPtsSrcK` was generalized to an explicitly selected partial chart, so its
+compact-image and inverse-uniform-continuity proof is independent of either
+normal-coordinate implementation. `hatSuppPtsOfComp` instantiates that helper
+with `framedChartAt`, and `unifHatSuppData` now uses the same framed chart for
+its source hypotheses, image hypotheses, active point family, and averaging
+readout. This avoids any raw/framed equality wrapper.
+
+The adjacent legacy whole-cage consumers still use their original raw decoded
+point family; they were deliberately not swept by this selected-route repair.
+Focused verification of the complete file passed. The selected framed
+support-point sub-brick is complete (100%); the live `StepB1RawInput` producer
+and textbook Step B1 remain theorem-level 0%, while whole-HCG support machinery
+remains about 60%.

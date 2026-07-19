@@ -98,15 +98,15 @@ does not pin its `MetricSourceData.referenceMetric`, so it cannot by itself
 produce the canonical `hcp` seminorm consumed by `open_upgrade_of_raw`.
 
 The analytic boundary is now explicit in `MovingShiOpen.lean`.
-`movingShi_complete` and `CurvBoundInput.movingShi_open` are focused-green
-wrappers around the constants-first theorem `movingShi_of_bound`.  The
-sequence wrapper chooses the common curvature bound and the explicit
-`shiOpenConst` before the member index; it does not uniformize memberwise
-existentials.  Trusted theorem completion is still 0% because
-`movingShi_of_bound` contains the one honest complete-noncompact Shi `sorry`.
-Its lower work is split visibly between the arbitrary-dimensional
-commuted-curvature producer and the complete-noncompact Bernstein maximum
-principle.
+`movingShi_complete` and `CurvBoundInput.movingShi_open` choose the common
+curvature bound and the explicit `shiOpenConst` before the member index; they
+do not uniformize memberwise existentials.  A full source proof of the
+constants-first `movingShi_of_bound` has now been assembled, but that revision
+still awaits focused verification after the shared framed-coordinate refresh.
+Its trusted lower work remains split visibly between the explicit
+`exists_rmTowerSol` commuted-curvature frontier and the explicit
+`BernsteinTower.estimate_complete` complete-noncompact maximum-principle
+frontier.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` is focused-green and records constants before `k`; its producer
@@ -114,8 +114,12 @@ The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `hcovTail` migration is now complete across the ten-module open-convergence
 chain: `hchi` and the artificial whole-source bump-collar estimate are gone,
 and the focused checks plus exact refreshes are green.  The concrete
-`StepDCanonData` provenance sidecar is being verified independently.  The
-approved architecture therefore needs no further consult at this point.
+`StepDCanonData` provenance sidecar, its subsequence transport, and the
+`compactness_canon` producer are now stated.  The source was focused-green
+around one honest `HasCanonBounds` frontier; exact refresh and the flow-side
+projection adapters are paused until H6 hands back the shared
+framed-normal-coordinate import chain.  The approved architecture therefore
+needs no further consult at this point.
 
 The downstream audit rules out globally replacing `carrier` by `regular` in
 the canonical convergence API.  `SourceSpacetimeConvergenceData.toSpatial`

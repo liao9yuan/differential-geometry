@@ -20,13 +20,31 @@ The module imports only the source-flow/extension foundation in
 `ConvFieldAssembly`; it does not depend on the older consumer-side producer
 collection in `ConvFieldInputs`.
 
-## Frontier
+## Checked assembly and exact frontier
 
-The theorem proof is the one remaining analytic frontier in this file.  It
-cannot be obtained by invoking the existing per-source compact theorem after
-fixing `k`, because that route chooses the constants in the wrong order.
-The intended proof reuses the constants-first `covOrderBound_of_soln` algebra
-but must run it uniformly on the varying whole source domains.
+The outer `srcCovLip_of_soln` assembly is now checked.  Its proof exposes one
+local joint invariant-estimate frontier and then completes all downstream
+steps:
+
+- the covariant half of the joint estimate fills `SrcCovLipData.cov`;
+- the Ricci-evolution half is combined with the checked pulled-back
+  `sourceFlow` equation and `hevComp_of_solutions`;
+- `timeLipschitz_of_hasDerivAt` gives the estimate at each fixed order;
+- a finite sum over `Finset.range (p + 1)` gives one nonnegative constant for
+  every order `q <= p`.
+
+The sole remaining `sorry` is therefore exactly the constants-first invariant
+induction which, for each `q`, chooses `Cq` and `Lq` before `k` and proves on
+every whole source domain both
+
+1. the `gRef`-covariant bound for `nabla^q g(t)`; and
+2. the `gRef`-norm bound for the evolution tensor `-2 nabla^q Ric(g(t))`.
+
+This cannot be obtained by invoking the existing per-source compact theorem
+after fixing `k`, because that route chooses the constants in the wrong order.
+The intended proof reuses the invariant algebra behind
+`covOrderBound_of_soln`, but removes its finite spatial-subcover dependence and
+runs the induction uniformly on the varying whole source domains.
 
 No endpoint assumption or branch-specific field has been added.  Downstream,
 `SrcCovLipData.cov` feeds the grow-local `covTail_of_bounds`, while
@@ -34,6 +52,8 @@ No endpoint assumption or branch-specific field has been added.  Downstream,
 
 ## Verification and accounting
 
-Focused verification passed.  The `SrcCovLipData` interface is dedicated
-machinery; `srcCovLip_of_soln` remains theorem-level 0% until its analytic
-proof replaces the single explicit `sorry`.
+Focused verification passed with the one intentional analytic-frontier
+warning.  The target theorem remains theorem-level 0% until that explicit
+joint estimate is proved; its Lean-facing assembly after the estimate is 100%,
+and the dedicated file machinery is about 45%.  The unconditional
+`compactnessSol` endpoint remains theorem-level 0%.

@@ -55,3 +55,12 @@ about 80%, and pair-to-capstone integration is about 65%.  Dedicated Step-B/B1
 machinery is about 84%, Chapter 4 machinery about 80%, and whole HCG machinery
 about 53%.  `StepB1RawInput`, textbook B1, and all compactness endpoints remain
 theorem-level 0%.
+
+## 2026-07-18 framed migration status
+
+The live source uses `framedExpDiffeo`, `framedExpMap`, and `expRadiusGp`
+through the atom, proper-ball, pair-image, and overlap paths; the obsolete
+coercivity/square-root conversion was removed. The ordered exact refresh
+`StepCAtomConv -> StepCTransitionRefine -> StepCPairTail` completed green, so
+this framed pair-tail layer is revalidated. This does not complete
+`StepB1RawInput` or the textbook B1 theorem; both remain theorem-level 0%.

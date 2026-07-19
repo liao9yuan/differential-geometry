@@ -16,3 +16,11 @@ radius field nor a parallel proper-metric package.  The local bridge layer is
 `StepCPairGeometry`.  Dedicated Step-B/B1 machinery is about 83%, Chapter 4
 machinery about 79%, and whole-HCG machinery about 53%; `StepB1RawInput`,
 textbook B1, and the conditional compactness endpoint remain theorem-level 0%.
+
+## 2026-07-18 framed route
+
+Both bridge theorems now use the centerwise orthonormal framed exponential.
+`properBall_to_exp` sends a physical ball into a `framedExpMap` image with no
+raw coercivity divisor, and `exp_sigma_maps` uses `framedExpDiffeo` on the
+direct `expRadiusGp` source ball.  Focused verification passed.  Downstream
+pair and Step-C callers still require revalidation against these signatures.

@@ -76,3 +76,14 @@ estimate or assumption was introduced. Focused verification passed.
 
 These fields support the prescribed stage radius `q` and limit radius `q / 2`
 route. `StepB1RawInput` and textbook B1 remain theorem-level 0%.
+
+## 2026-07-18 framed-radius migration
+
+The two exponential-domain bounds in `normalBrAccept` now target the canonical
+`expRadiusGp` used by `IsNormalDiag.pair_mem_of_closed`. The existing
+`NormalRadiusProfile.floor_le_exp` proof supplies both bounds directly; no
+constant, branch, or hypothesis changed. Focused verification and the exact
+module refresh passed.
+
+This is a consumer-interface repair only. It does not construct the missing
+sequence-uniform relative radius profile or the all-order H6 metric bounds.

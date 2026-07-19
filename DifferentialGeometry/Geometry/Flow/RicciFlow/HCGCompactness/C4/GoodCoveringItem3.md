@@ -78,3 +78,11 @@ The finite tail uses radius
 Focused verification and the targeted refresh passed.  This closes the
 exp-diffeomorphism radius quantifiers, not the book's full geodesic-convexity
 claim, which remains theorem-level 0%.
+
+## 2026-07-18 framed route
+
+The finite-slot item-3 source and image APIs now use `expRadiusGp`,
+`framedExpDiffeo`, and `framedExpMap`.  The raw `expMapC2Radius` image contract
+is no longer exposed to covering consumers.  Focused verification passed; the
+targeted object refresh is coordinated separately because the shared import
+chain is write-producing.

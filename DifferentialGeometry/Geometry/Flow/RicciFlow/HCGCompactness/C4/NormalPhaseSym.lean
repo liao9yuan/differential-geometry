@@ -45,7 +45,7 @@ theorem exists_normal_biflow
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqPos : 6 * (q : Real) < r)
     (hqAcc : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤

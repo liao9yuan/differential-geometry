@@ -20,9 +20,31 @@ The intended recursive-radius consumer uses `HasStageSeed.subseq`; stability
 of each further strict refinement is supplied by the existing
 `NetLimitData.stable_subseq`.  No master radius diagonal is asserted here.
 
-Focused verification and the exact module refresh passed with no `sorry`.
+At the 2026-07-16 pre-framed snapshot, focused verification and the exact
+module refresh passed with no `sorry`; the current status is recorded below.
 The seed theorem is complete (100%).  The recursive integer-radius master
 diagonal remains a separate unstated/proof frontier (0%), and
 `MetricCompactBase.exists_b1_raw` and the
 textbook Step B1 endpoint remain unproved (0%); this file is dedicated
 producer machinery, not endpoint completion.
+
+## 2026-07-18 canonical framed migration focused and exact green
+
+Inside `MetricCompactBase.exists_stage_seed`, the frozen-stage local chart
+`chi` now uses `NormalCoordinates.framedChartAt`.  The two calls to the HCG
+`normalTransition` API are deliberately unchanged: that canonical alias now
+delegates to `framedTransition`.  The retained scale package already uses
+`expRadiusGp`, so no radius conversion, compatibility wrapper, or new
+assumption was introduced.
+
+The one-line source migration and scoped diff review are complete.  After the
+canonical `StepCStageComparison` and geodesic/injectivity artifacts were
+refreshed, this file passes focused Lean verification with no local diagnostics.
+Its own exact target refresh also completed successfully in the coordinated
+Stage-DAG write chain.
+
+The seed proof body is canonical-framed focused- and exact-green.
+`MetricCompactBase.exists_b1_raw` likewise has a complete proof body but is not
+yet fully validated through the framed chain.  The separately named textbook
+B1 theorem and the unconditional compactness endpoint remain theorem-level 0%;
+whole-HCG machinery remains about 60%.

@@ -296,3 +296,36 @@ and then in `NormalChartMeasure` exposed public theorem-head instance plumbing
 around `IsContinuousRiemannianBundle` / `FiberBundle` / `VectorBundle`.  This is
 an adapter-context issue, not a mathematical obstruction to the endpoint Jacobi
 equation.
+
+### 2026-07-18 canonical launch radius
+
+The four clamped-variation producers now use the explicit common radius
+`jacobiVarRadius g p = expMapC2Radius g p / 26`.  The new direct theorems are
+`radial_jacobi_of_lt`, `jacobi_diff_of_lt`, `radial_deriv_of_lt`, and
+`jacobi_zero_of_lt`; the old `exists_*` declarations remain as compatibility
+wrappers with unchanged statements.
+
+This removes the independent opaque `C^8` radius choice from every proof.  The
+smooth variation now consumes the named-radius `C^infty` exponential theorem
+already built into `expMapC2Radius`, so downstream Rm04 packaging can refer to
+one concrete radius rather than taking minima of unrelated choices.  Focused
+verification passed.  This is a radius/API advance only: relating the canonical
+exponential radius to the sequence-wide CGT decay profile remains a separate
+H6 producer obligation.
+
+The focused check and exact module refresh both passed.
+
+### 2026-07-18 natural intrinsic variation
+
+- `intrinsic_jacobi` removes the clamp and launch-radius assumptions for the
+  complete intrinsic exponential. It proves the Jacobi equation along the
+  entire intrinsic geodesic by applying the existing curvature commutation
+  theorem to the globally smooth affine-velocity variation.
+- The proof reuses `intrinsicVar_smooth`,
+  `intrinsicGeodesic_isGeodesic`, `commute_ds_dt_intrinsic`, and
+  `commute_ds_dt_curvature`; no new radius assumption or wrapper was added.
+- `intrinsic_jacobi` and `intrinsic_jacobi_one` are focused- and exact-green. The latter
+  identifies the time-one variation field with the vector-slot differential of
+  `expMapIntrinsic` using `intrinsicFiber_smooth` and the chain rule.
+- The coordinated exact module refresh passed (`3799/3799`). No source proof
+  frontier remains in this file.

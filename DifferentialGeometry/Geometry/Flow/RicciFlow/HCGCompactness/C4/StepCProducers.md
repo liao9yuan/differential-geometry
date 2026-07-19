@@ -701,3 +701,71 @@ approximate-return argument.  It does not prove either analytic estimate or
 construct `StepB1RawInput`; theorem-level `StepB1RawInput`, textbook B1, and all
 compactness endpoints remain 0%.  Rounded machinery accounting stays about
 98% / 90% / 60% for Step-B/B1 / Chapter 4 / whole HCG.
+
+## 2026-07-18 framed-radius migration
+
+The two obsolete `half_le_gpConst` coercivity calculations were removed.
+`properBallImgOfRad'`, `hatCageImg'`, `SigmaScaleAt`, and `SigmaScaleField` now
+use the orthonormally framed chart and the intrinsic `expRadiusGp` radius.
+`NormalRadiusProfile.sigmaCenterTail` uses the direct
+`mul_lambda_lt_expGp` profile projection.  The `HasAtomWeightLim.binf_of_live`
+weight bound now passes the direct `hGp` output of the item-3 profile to
+`weight_trans_small`, and `stepCJoin` exposes intrinsic framed-radius domain
+hypotheses.  The raw `properBallImgOfRad` / `hatCageImg` compatibility API was
+left unchanged.
+
+Focused verification failed after reaching four upstream boundaries:
+
+- `StepCPairTail.olean` is stale: its exported `weight_trans_small` still asks
+  for `expMapC2Radius`, while the live `StepCPairTail.lean` source asks for
+  `expRadiusGp`.
+- `StepCAtomConv.stepCAtom_readout` and `stepCAtomChart` still mix the raw
+  exponential chart with the now-framed `normalTransition`; the resulting
+  mismatch is visible at the `hatom` readout in this file.
+- `StepCAveragePOU.hatSuppCageData` (and its downstream
+  `hatSuppPtsOfComp`) still quantify over `normalChartAt`, so the new
+  half-free `hatCageImg'` conclusion over `framedChartAt` cannot discharge the
+  source-cage image premise.  `StepCSourceCover` likewise still exports the
+  raw source-cover geometry consumed at this site.
+- `StepCTransitionRefine.NormalTransAt` still stores four
+  `expMapC2Radius` domain fields, whereas the refreshed
+  `StepBTransition.exists_trans_h6` consumes `expRadiusGp` fields.
+
+These are canonical raw-to-framed API migrations in the named upstream
+modules, not local coercion lemmas to recreate here.  No compatibility wrapper
+or extra radius assumption was added.  The requested source migration in this
+file is complete, but this file is not focused-green until those owners migrate
+and refresh their modules.
+
+## 2026-07-18 selected-route framed source package
+
+The selected finite-source-cover route is now framed throughout this file.
+`exists_atom_supp_fin`, `HasSuppConvData` and its projections, and
+`exists_supp_pts_fin` use `framedExpDiffeo`, `framedChartAt`, and the intrinsic
+`expRadiusGp` bound.  The sparse transition maps remain under the canonical
+`normalTransition` name, whose implementation is already framed.  The two raw
+Gauss-lemma source lemmas used after unfolding `framedExp_source` are a local
+proof kernel, not a competing public coordinate semantics.
+
+The sparse compatibility wrappers `binf_of_weight`, `exists_supp_trans`, and
+the old `exists_supp_fin` also now accept the framed source map, because their
+canonical atom-diagonal consumer no longer accepts the raw map.  The old
+fixed-join readout below remains a deferred raw compatibility route and is not
+part of the selected producer.  No equality between local weight families,
+pointwise chart selector, whole-cage containment, or new radius assumption was
+introduced.
+
+After refreshing `StepCAveragePOU`, `StepCSourceCover`, `StepCAtomJoin`,
+`StepCAtomPackage`, and `StepCAtomDiagonal`, the first exact producer build
+found the three stale wrapper source-map binders above.  Migrating those
+binders made the focused check pass, and the final exact `StepCProducers`
+refresh then passed 3940/3940.  Thus this selected framed producer layer is
+revalidated (100%).  The downstream global stage-map/B1 chain is not thereby
+revalidated, and the live `StepB1RawInput` producer, textbook B1, and all
+unconditional compactness endpoints remain theorem-level 0%; whole-HCG
+machinery remains about 60%.
+
+The Lean file was also reduced from 3068 to 2985 lines by condensing historical
+doc comments into result-facing summaries.  No declaration, proof, or public
+signature moved; the detailed architecture remains in this note.  This restores
+the repository's 3000-line source-file limit without broadening the migration.

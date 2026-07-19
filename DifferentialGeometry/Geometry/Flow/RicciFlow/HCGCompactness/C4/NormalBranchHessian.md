@@ -66,3 +66,17 @@ The theorem-level accounting is unchanged: the concrete `StepB1RawInput`
 producer, textbook B1 theorem, and compactness endpoints remain **0%**.  This
 closes one arbitrary-order branch-local regularity brick inside the already
 reported **94%** dedicated Step-B/B1 machinery.
+
+## 2026-07-18 framed branch revalidation
+
+All fixed-center source, decode, readout, and smoothness arguments now use the
+canonical framed chart. Membership in the framed exponential source is derived
+from `expRadiusGp` through `normalFrame_sqrt`; all-order chart-inverse
+smoothness uses `framedExp_smoothOn`; the final point decodes use the framed
+chart's own `left_inv`. The Hessian factorization, Neumann estimate, and IFT
+proofs are unchanged.
+
+Focused verification and the exact module refresh passed. This revalidates the
+existing selected-branch Hessian machinery after the coordinate migration; it
+does not construct the missing sequence-uniform H6 radius profile or all-order
+metric bounds.

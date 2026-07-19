@@ -661,6 +661,36 @@ noncomputable def compactness_canon
       StepDCanonData.canonDomain, StepDCanonData.canonRef,
       limitPointedCoc, limitPointed]
     rfl
+  let XTail := X.subseq (fun n => σ (j₀ + n))
+  let bTail : forall n, (XTail.obj n).M := fun n =>
+    (S.toSeqSystem.F (Nat.zero_le n) (tailCenter b j₀ 0) :
+      (X.obj (σ (j₀ + n))).M)
+  let Φr : PointedRiemannianCGMaps (I := I) (XTail.repoint bTail) L id := by
+    change PointedRiemannianCGMaps (I := I)
+      (chainAmbientSeq (I := I) j₀ (tailBallOpen b j₀) S
+        (tailCenter b j₀ 0) g) L id
+    exact chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
+      (tailCenter b j₀ 0) g gTail hgTail
+  have hbase' : forall n,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (XTail.obj (id n)).M := (XTail.obj (id n)).topology
+      letI : ChartedSpace H (XTail.obj (id n)).M := (XTail.obj (id n)).charted
+      Φr.partialDiffeomorph n L.basepoint = (XTail.obj (id n)).basepoint := by
+    intro n
+    calc
+      Φr.partialDiffeomorph n (S.toSeqSystem.incl 0 (tailCenter b j₀ 0)) =
+          (S.toSeqSystem.F (Nat.zero_le n) (tailCenter b j₀ 0) :
+            (X.obj (σ (j₀ + n))).M) :=
+        congrArg Subtype.val
+          (S.invIncl_incl_le (Nat.zero_le n) (tailCenter b j₀ 0))
+      _ = (X.obj (σ (j₀ + n))).basepoint := by
+        exact congrArg Subtype.val
+          (tailCenter_map (I := I) b Ψ hbase g (by
+            intro j x v
+            simpa using
+              (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+                (I := I) (g j) x v)) j₀ D₀ n)
   let hconverges : PointedRiemannianCGConverges (I := I) X L
       (fun n => σ (j₀ + n)) maps :=
     tailMemberConv (I := I) P σ Ψ hbase j₀ D₀ gTail hgTail hchain
@@ -678,20 +708,8 @@ noncomputable def compactness_canon
         StepDCanonData.canonDomain (I := I) maps k := by
     intro k
     change MetricSourceData.ofSubseq (I := I) (fun n => σ (j₀ + n)) k
-        (MetricSourceData.unrepoint (I := I)
-          (fun n =>
-            (S.toSeqSystem.F (Nat.zero_le n) (tailCenter b j₀ 0) :
-              (X.obj (σ (j₀ + n))).M)
-          (by
-            intro n
-            exact congrArg Subtype.val
-              (tailCenter_map (I := I) b Ψ hbase g (by
-                intro j x v
-                simpa using
-                  (DifferentialGeometry.Geometry.Riemannian.
-                    tensor0SBundle_enorm_eq_riemannianBundle_enorm
-                      (I := I) (g j) x v)) j₀ D₀ n))
-          k (hchain.metrics.domain k)) =
+        (MetricSourceData.unrepoint (I := I) bTail hbase' k
+          (hchain.metrics.domain k)) =
       StepDCanonData.canonDomain (I := I) maps k
     rw [hchain_domain k]
     rfl

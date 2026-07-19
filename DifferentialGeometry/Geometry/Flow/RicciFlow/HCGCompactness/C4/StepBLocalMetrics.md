@@ -297,3 +297,15 @@ is anchored to it.  All focused checks GREEN; the three new endpoints are **axio
   lower bound (gap #2: a `radius_lb` field or a Step-A lemma giving the uniform `R`).
 This is the "full Step-A β wiring" the planner flagged as a separate follow-up; it is now pure assembly
 (no remaining smoothness/geometry frontier), gated only on the honest-input `radius_lb`/Item3 wiring.
+
+## 2026-07-18 framed-radius migration
+
+The canonical normal-coordinate metric is now the framed pullback metric.  Both
+`exists_metricLimit_normalCoord` and `exists_metric_lim_pi` therefore take the
+intrinsic `expRadiusGp` model-ball containment directly; they no longer expose
+the old raw `expMapC2Radius` seam.  The existing smoothness reducer consumes the
+same framed-radius premise after the `StepBInputs` migration.
+
+Focused verification passed.  This is a source/API consistency repair, not a
+producer for `StepB1RawInput`: that theorem and textbook B1 remain 0%; the whole
+HCG support machinery remains about 60%.

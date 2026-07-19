@@ -9,6 +9,14 @@ not produce the C-track comparison maps.  It has been removed.  The replacement 
   basepoint identity, and two-sided `PreApproxIsoDataOn`;
 - `stepB1_of_raw P B`: the checked conditional assembly through `stepB1_glue`.
 
+**Live update (2026-07-18).**  Downstream
+`MetricCompactBase.exists_b1_raw` now has a complete proof body and closes all
+five raw fields; its canonical framed dependency chain is currently being
+revalidated, so it is source-complete but not yet framed-green.  The separately
+named textbook Step B1 theorem remains unstated/unproved (0%), as do the
+unconditional compactness endpoints.  The older accounting below is a
+historical snapshot.
+
 Focused verification passes, and this file now has no `sorry`.  Honest accounting remains:
 conditional assembly 100%; producer of `StepB1RawInput` from the conditional compactness inputs
 0%; textbook B1 theorem 0%.  Step D consumes this boundary explicitly through `directed_of_b1`.

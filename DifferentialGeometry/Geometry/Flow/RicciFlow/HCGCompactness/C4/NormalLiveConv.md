@@ -1,5 +1,19 @@
 # NormalLiveConv
 
+## 2026-07-18 framed dependency validation
+
+No local source migration was needed: this module contains no raw fixed-base
+chart or old exponential-radius occurrence.  After refreshing the framed Cage
+and the `expRadiusGp`-based `NormalMetricConv` producer, both focused
+verification and the exact module refresh are green.  Thus
+`exists_live_diag`, `exists_slot_diag`, and `exists_diag_full` preserve the
+same minimizing branches on the canonical framed metric-limit chain.
+
+`MetricCompactBase.exists_b1_raw` has a complete source proof body but still
+awaits the remaining Support/stage/metric framed validation.  The separately
+named textbook B1 theorem and unconditional endpoints remain theorem-level
+0%; rounded machinery estimates remain B1 95%, C4 87%, whole HCG 60%.
+
 ## 2026-07-16 prescribed live-slot diagonal branches
 
 `MetricCompactnessInputs.exists_slot_diag` combines the finite slotwise metric

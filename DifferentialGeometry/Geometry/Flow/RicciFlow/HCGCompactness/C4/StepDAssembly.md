@@ -87,3 +87,39 @@ before applying the generic nested-subsequence lift.  The conditional Theorem
 3.9 endpoint is focused- and targeted-green.  This file remains the complete
 Step-D consumer (100%); the separately named textbook B1 statement and the
 unconditional compactness theorems remain distinct 0% endpoints.
+
+## 2026-07-18 canonical-provenance sidecar
+
+The concrete Step-D constructor now exposes `StepDCanonData` while preserving
+the old public `MetricCompactnessConclusion` as its `mc` projection.  The
+sidecar records equality with the complete canonical `MetricSourceData`
+record, rather than only separate metric equalities; this retains the source
+topology/chart/manifold instances and the restricted-limit reference metric in
+one transportable fact.  `StepDCanonData.ofSeqSubseq` preserves that equality,
+the canonical reference identity, and the two constants-first bounds.
+
+The direct-limit assembly proves the canonical-domain equality first for the
+ambient chain and then transports it through `unrepoint` and `ofSubseq`.
+Focused verification passes against the canonical framed B/C chain, and the
+exact endpoint consumer refresh is current.  There is exactly one deliberate `sorry`: the
+`HasCanonBounds` producer combining the `hclose` tail with finite-head compact
+collars to obtain whole-source metric equivalence and all-order initial
+covariant bounds.  No parallel reference-metric API or new geometric
+assumption was introduced.
+
+The remaining proof is internal to `HasCanonBounds`.  The tail route is already
+available from `hclose`: order zero yields eventual constant-`2` metric
+equivalence, and arbitrary order plus metric compatibility yields one eventual
+covariant envelope.  The finite head is controlled on compact closed-ball
+collars before taking a finite maximum.  Two reusable lower interfaces were
+identified: uniform equivalence of two smooth metrics on an arbitrary compact
+subset, and a short identification of the canonical-domain limit/pullback
+metrics with the corresponding pullbacks.  These are API bridges, not new
+endpoint assumptions, and the sidecar statement need not change.
+
+Honest accounting: the canonical record/projection/subsequence transport and
+the framed consumer DAG are 100%; `compactness_canon` as a theorem is 0% until
+its one bound-producer `sorry` is proved; its dedicated structural assembly is
+about 85%.  The Step-D provenance lane is about 45%.  The P4 machinery remains
+approximately 95%, the whole HCG machinery approximately 60%, and the
+unconditional `compactnessSol` endpoint remains 0%.

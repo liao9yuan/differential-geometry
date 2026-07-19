@@ -7,14 +7,19 @@ uses the exact `Function.invFunOn` of the forward stage comparison map; the
 opposite-direction comparison map remains only an approximate return map for
 injectivity and is never identified with the exact inverse.
 
-## Checked result
+## Current source status
 
-`HasStageJetData.inv_cov_comp_tail` is focused-green with no `sorry`.  It gives
-the intended rectangular `k,l` tail, a basis-parametric finite
+The source migration of `HasStageJetData.inv_cov_comp_tail` to canonical framed
+normal charts is complete.  Every fixed-center source and target chart in the
+statement and proof now uses `NormalCoordinates.framedChartAt`.  The theorem
+still gives the same rectangular `k,l` tail, basis-parametric finite
 covariant-component tower, and evaluation on the actual moving target image of
-the buffered source cover.  Its proof uses `inv_chart_conv`, normal-coordinate
-metric convergence, `MapCInfConvOnCompacts.pullbackAlong`, and
-`metric_tower_conv`.
+the buffered source cover.  Its exact `Function.invFunOn` semantics, theorem
+name, quantifiers, and analytic proof structure are unchanged.
+
+The canonical-coordinate source passes focused Lean verification against the
+exact-current inverse artifact, with no local diagnostics.  This module's own
+exact refresh also completes successfully.
 
 The first API gap was that `inv_chart_conv` hid the eventual smoothness of its
 exact inverse charts even though its moving-inverse construction already proves
@@ -28,16 +33,22 @@ comparison map is not used or identified with the exact inverse.
 
 ## Remaining frontier
 
-This theorem is still coordinate-level.  A downstream intrinsic bridge must
-turn its finite component bounds into the reverse
+This theorem remains coordinate-level.  Its focused and exact gates are green.
+The downstream intrinsic
+bridge turns the finite component bounds into the reverse
 `tensor02CovDerivNormWith`/`metricDerivNorm` tail on the local pullback-field
-carrier before `StepB1RawInput` can be assembled.
+carrier.
+
+The proof body of `MetricCompactBase.exists_b1_raw` is complete, but its live
+framed import chain is not yet green.  It must not be reported as a checked
+producer until this file and the rest of that chain have been revalidated.
 
 ## Accounting
 
-- `inv_cov_comp_tail` theorem: 100%.
-- Dedicated reverse coordinate machinery: 100%.
-- Reverse intrinsic norm/carrier bridge: not completed in this file.
-- StepB1RawInput producer: still 0% until the forward and reverse intrinsic
-  metric tails are both checked and the producer theorem is proved.
+- `inv_cov_comp_tail` proof body: canonical framed source/focused complete.
+- Dedicated reverse coordinate machinery: 100% current module verification.
+- `MetricCompactBase.exists_b1_raw` proof body: complete (100% source
+  implementation); live framed chain verification remains 0% pending.
+- `StepB1RawInput` producer under live framed semantics: proof body complete,
+  but not yet framed-green.
 - Textbook Step B1: 0%.

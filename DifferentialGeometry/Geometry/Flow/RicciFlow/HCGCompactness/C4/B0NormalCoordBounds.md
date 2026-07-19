@@ -155,10 +155,11 @@ endpoint Gronwall interfaces already exist in the volume-comparison lane.
 The H6 route therefore resumes at the representation boundary rather than
 rebuilding those layers.
 
-Completed and focused-green: `H6NormalCoord.lean` proves that
-`normalCoordMetric` is exactly the endpoint Gram form of the radial Jacobi
-fields and converts two-sided Jacobi estimates into
-`NormalCoordMetricEquivOn`.
+Completed and focused-green: the public `normalCoordMetric` is the canonical
+framed pullback metric. `H6NormalCoord.lean` proves its endpoint Gram formula,
+converts framed Jacobi estimates into `NormalCoordMetricEquivOn`, and proves
+`exists_equiv_ball`: every center has a positive half/two equivalence ball
+contained in `expRadiusGp`.
 
 The initial audit correctly found that the current parametrization is not
 normalized by a `g_x`-orthonormal frame, but incorrectly reported this as a
@@ -175,10 +176,11 @@ model balls exactly with `g_x` tangent balls. `H6NormalCoord.lean` proves that
 the resulting metric is the actual chart pullback and the endpoint Gram form of
 the corresponding radial Jacobi fields.
 
-The real remaining formalization frontier is now the shared consumer boundary:
-the current Chapter-4 input and `injRadius` still use raw model-norm balls. They
-must consume the framed chart so that the metric, transition maps, and
-injectivity radius all refer to one normal coordinate system. This is an API
-migration, not a new H6 assumption. After that migration, specialize the
-existing Rm04 endpoint package and continue the separate all-order metric-jet
-induction.
+The framed input, proper-ball, transition/overlap, isometry-derivative,
+distance, metric-extension/local, pair-geometry, and pair-tail paths have now
+been refreshed and checked. The next native H6 frontier is not local
+coercivity: it is a constants-first arbitrary-vector framed Jacobi endpoint
+estimate whose radius has the CGT relative lower bound. The existing Rm04
+exports fixed-basis upper and coordinate-direction lower statements on a raw
+source, so it does not yet provide that theorem. The all-order metric-jet
+induction remains separate.

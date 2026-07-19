@@ -1,5 +1,4 @@
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
-import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Exponential.NormalFrame
 
 set_option autoImplicit false
@@ -39,6 +38,20 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space (TangentBundle I M)]
+
+/-- The global exponential map written in the selected `g_p`-orthonormal
+model coordinates. Unlike `framedExpDiffeo`, this is the actual exponential
+map at every model vector, not a partial-equivalence function outside its
+source. -/
+noncomputable def framedExpMap (g : SmoothRiemannianMetric I M) (p : M) :
+    E -> M :=
+  fun z => expMap (I := I) g p (normalFrame (I := I) g p z)
+
+@[simp] theorem framedExpMap_apply (g : SmoothRiemannianMetric I M) (p : M)
+    (z : E) :
+    framedExpMap (I := I) g p z =
+      expMap (I := I) g p (normalFrame (I := I) g p z) := by
+  rfl
 
 /-- The selected exponential partial diffeomorphism after identifying the
 fixed model space with `T_p M` by a `g_p`-orthonormal frame. -/
@@ -111,16 +124,6 @@ theorem framed_norm_lt_iff (g : SmoothRiemannianMetric I M) (p : M)
       z ∈ Metric.ball (0 : E) r := by
   rw [normalFrame_sqrt, Metric.mem_ball, dist_zero_right]
 
-/-- The intrinsic exponential radius gives a model ball contained in the
-source of the framed exponential chart. -/
-theorem framedExp_mem_of_lt (g : SmoothRiemannianMetric I M) (p : M)
-    {z : E} (hz : ‖z‖ < expRadiusGp (I := I) g p) :
-    z ∈ (framedExpDiffeo (I := I) g p).source := by
-  rw [framedExp_source]
-  apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p
-  apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p
-  simpa only [normalFrame_sqrt] using hz
-
 @[simp] theorem framedChart_apply (g : SmoothRiemannianMetric I M) (p : M)
     (q : M) :
     framedChartAt (I := I) g p q =
@@ -163,8 +166,8 @@ exponential launched with velocity `normalFrame g p z`. -/
 theorem framedExp_eq_expMap (g : SmoothRiemannianMetric I M) (p : M)
     {z : E} (hz : z ∈ (framedExpDiffeo (I := I) g p).source) :
     framedExpDiffeo (I := I) g p z =
-      expMap (I := I) g p (normalFrame (I := I) g p z) := by
-  rw [framedExp_apply]
+      framedExpMap (I := I) g p z := by
+  rw [framedExpMap_apply, framedExp_apply]
   exact expMapDiffeo_apply_eq (I := I) g p (by
     simpa only [framedExp_source] using hz)
 
@@ -196,6 +199,54 @@ theorem mfderiv_framedExp (g : SmoothRiemannianMetric I M) (p : M)
     rw [mfderiv_eq_fderiv, ContinuousLinearMap.fderiv]
   rw [hLderiv] at hchain
   simpa only [Function.comp_apply, framedExp_apply, Φ, L0, L] using hchain
+
+/-- The Riemannian metric pulled back through the orthonormally framed
+exponential parametrization at `p`. -/
+noncomputable def framedMetric (g : SmoothRiemannianMetric I M) (p : M) :
+    E -> E →L[Real] E →L[Real] Real :=
+  fun z =>
+    let D : E →L[Real] TangentSpace I (framedExpDiffeo (I := I) g p z) :=
+      mfderiv (modelWithCornersSelf Real E) I
+        (fun w : E => framedExpDiffeo (I := I) g p w) z
+    (ContinuousLinearMap.precomp Real D).comp
+      ((g.inner (framedExpDiffeo (I := I) g p z)).comp D)
+
+/-- Evaluation of the metric pulled back through the framed exponential. -/
+theorem framedMetric_apply (g : SmoothRiemannianMetric I M) (p : M)
+    (z v w : E) :
+    framedMetric (I := I) g p z v w =
+      g.inner (framedExpDiffeo (I := I) g p z)
+        (mfderiv (modelWithCornersSelf Real E) I
+          (fun q : E => framedExpDiffeo (I := I) g p q) z v)
+        (mfderiv (modelWithCornersSelf Real E) I
+          (fun q : E => framedExpDiffeo (I := I) g p q) z w) := by
+  simp only [framedMetric, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.precomp_apply]
+  rfl
+
+/-- At the center of an orthonormally framed normal chart, the pulled-back
+metric is the fixed model inner product. -/
+@[simp] theorem framedMetric_zero (g : SmoothRiemannianMetric I M) (p : M) :
+    framedMetric (I := I) g p 0 =
+      (innerSL Real : E →L[Real] E →L[Real] Real) := by
+  ext v w
+  rw [framedMetric_apply, framedExp_zero,
+    mfderiv_framedExp (I := I) g p (zero_mem_framedExp_source (I := I) g p),
+    map_zero]
+  calc
+    g.inner p
+        (mfderiv (modelWithCornersSelf Real E) I
+          (fun u : E => expMapDiffeo (I := I) g p u) 0
+          (normalFrame (I := I) g p v))
+        (mfderiv (modelWithCornersSelf Real E) I
+          (fun u : E => expMapDiffeo (I := I) g p u) 0
+          (normalFrame (I := I) g p w)) =
+      g.inner p (normalFrame (I := I) g p v)
+        (normalFrame (I := I) g p w) :=
+      normalChartAt_metric_pullback_at_origin (I := I) g p
+        (normalFrame (I := I) g p v) (normalFrame (I := I) g p w)
+    _ = Inner.inner Real v w := normalFrame_inner (I := I) g p v w
+    _ = (innerSL Real : E →L[Real] E →L[Real] Real) v w := rfl
 
 end NormalCoordinates
 end Riemannian

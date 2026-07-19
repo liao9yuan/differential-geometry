@@ -1,5 +1,31 @@
 # StepBTransitionOverlap status
 
+## 2026-07-18 canonical framed source repair
+
+The four adapters now use the same framed contract as the live item-3/radius
+producers: `expRadiusGp` balls, source map `framedExpDiffeo`, target image
+`framedExpMap`, inverse chart `framedChartAt`, and the framed
+`normalTransition` compatibility alias at instance-packaging public
+boundaries.  `normalOverlap_of_map` constructs the framed overlap predicate;
+`normalTrans_mapsTo`, `NormalOverlapOn.decode`, and
+`NormalOverlapOn.cancel` use the framed partial-diffeomorphism inverse laws.
+The private helper `mem_framed_src` has a fully framed statement.  Its two raw
+lemmas are the intentional proof kernel after unfolding `framedExp_source`:
+there is currently no public theorem taking `‖z‖ < expRadiusGp` directly to
+`z ∈ framedExpDiffeo.source`.  No competing public wrapper is introduced here.
+
+After the canonical dependency chain was refreshed in order, official focused
+verification passed against the live framed `NormalOverlapOn` interface.  The
+earlier stale raw-versus-framed diagnostics are resolved.  The temporary
+private diagnostic predicate used before refresh was removed and is not part
+of the source.
+
+Accounting: the overlap source repair and verification are 100% complete.
+With `StepBTransition`, this is 2/29 audited migration files repaired and
+verified; it does not advance the 0% textbook B1 theorem or the 0%
+unconditional endpoint theorem.  Dedicated transition machinery in these two
+files is 100%; whole-HCG machinery remains about 60%.
+
 Status: 2026-07-13, focused verification passed without warnings or `sorry`.
 
 `normalOverlap_of_map` turns source/target C2-radius inclusions plus an

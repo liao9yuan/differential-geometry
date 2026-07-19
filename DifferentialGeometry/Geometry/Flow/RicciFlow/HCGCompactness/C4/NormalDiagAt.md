@@ -58,3 +58,11 @@ This API placement change does not complete an endpoint.  `StepB1RawInput` and
 textbook B1 remain theorem-level **0%**; dedicated Step-B/B1 machinery is about
 **95%**, Chapter 4 about **87%**, and whole-HCG compactness machinery about
 **57%**.
+
+## 2026-07-18 framed-radius migration
+
+`normalDiagAtFull` and `normalDiagAt` now take the canonical
+`expRadiusGp / 4` quarter-ball fence.  The retained `NormalDiagFence` proof
+uses the direct `normalBall = ball 0 expRadiusGp` containment.  Focused
+verification and the module refresh passed.  No branch, radius assumption, or
+moving-base exponential was replaced.

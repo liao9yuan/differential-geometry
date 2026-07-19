@@ -8,9 +8,9 @@ extends it to a total model-space metric by a buffered cutoff.
 
 ## Current state
 
-- `normalBall` is the ball of radius `expMapC2Radius`.
-- `normalExpPD` upgrades the restricted exponential and normal chart to a
-  `PartialDiffeomorph … ∞`.
+- `normalBall` is the ball of radius `expRadiusGp`.
+- `normalExpPD` upgrades `framedExpDiffeo` and `framedChartAt` to a
+  `PartialDiffeomorph … ∞` on that ball.
 - `normalImage` is its open image.
 - `normalBallDiffeo` packages that restriction using the general cross-model
   opens API.
@@ -29,17 +29,15 @@ extends it to a total model-space metric by a buffered cutoff.
 - `normal_cov_eq_fderiv` gives the corresponding moving-field formula:
   Frechet derivative plus the raised normal-coordinate Koszul correction.
 
-Focused verification of the complete file passed without local warnings after
-the exact `MetricKoszul` artifact was refreshed. No new `sorry` or `admit` was
-introduced.
+Focused verification and the framed exact module refresh passed. No new
+`sorry` or `admit` was introduced.
 
 ## Frontier
 
-The next brick is to identify the selected inverse tangent field with its
-normal-coordinate moving-field germ, then transport the connection through
-`normalBallDiffeo`.  The live API already supplies pullback-cross and open-
-subtype restriction theorems; the smallest possible missing producer is
-Levi--Civita locality under equality of metric germs.  Do not replace that
+The local pullback and total-extension producer is complete on the framed
+radius.  The live migration frontier is downstream: refresh
+`NormalMetricLocal`, then convert only the branch consumers whose public
+statements still expose raw normal-coordinate maps.  Do not replace that work
 with an endpoint radius assumption or a parallel connection hierarchy.
 
 The positive-Hessian and `StrictDistInput` producers remain unstated and are

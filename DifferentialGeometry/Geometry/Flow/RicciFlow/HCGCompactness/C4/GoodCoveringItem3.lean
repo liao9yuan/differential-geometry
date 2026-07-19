@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
+import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRiemannian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
 
@@ -11,11 +12,12 @@ set_option linter.unusedSectionVars false
 The layer bridge from the Step A net (over `PointedRiemannianManifold`s `X.obj k`) to the
 exponential ball diffeomorphism `exists_expBall_diffeo_of_lt` (`ExpBallDiffeo.lean`,
 item 3a, unconditional): for a bundled pointed Riemannian manifold `Y`, a center `c : Y.M`,
-and a radius `ρ` below both the injectivity radius and the `C²` radius of `Y.metric` at `c`,
-the exponential map is a `C^1` partial diffeomorphism on `Metric.ball 0 ρ`.
+and a radius `ρ` below both the injectivity radius and the intrinsic framed
+radius of `Y.metric` at `c`, the framed exponential map is a `C^1` partial
+diffeomorphism on `Metric.ball 0 ρ`.
 
 This is the per-center half of `lbl383` item 3; the net-level instantiation (the radius
-discipline `λ^α ≤ expMapC2Radius` — the book's "`D` large enough" choice — and the
+discipline `λ^α ≤ expRadiusGp` — the book's "`D` large enough" choice — and the
 universal clause over live centers) consumes this.
 -/
 
@@ -28,6 +30,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type uE} [NormedAddCommGroup E]
@@ -38,8 +41,8 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
 /-- **`lbl383` item 3, per-manifold form.**  On a bundled pointed Riemannian manifold `Y`,
-for a center `c` and radius `ρ ≤ expMapC2Radius Y.metric c` with
-`ofReal ρ < injRadius Y.metric c`, the exponential map `expMap Y.metric c` restricts to a
+for a center `c` and radius `ρ ≤ expRadiusGp Y.metric c` with
+`ofReal ρ < injRadius Y.metric c`, the framed exponential map restricts to a
 `C^1` partial diffeomorphism with source `Metric.ball 0 ρ`.  The bundle's stored instances
 (`Y.topology`, …, `Y.t2TangentBundle`) are installed locally; the nonsingularity input is
 discharged inside `exists_expBall_diffeo_of_lt` from normal coordinates. -/
@@ -52,14 +55,11 @@ theorem PointedRiemannianManifold.exists_expBall_diffeo
     letI := Y.t2
     letI := Y.t2TangentBundle
     ENNReal.ofReal ρ < injRadius (I := I) Y.metric c →
-    ρ ≤ expMapC2Radius (I := I) Y.metric c →
+    ρ ≤ expRadiusGp (I := I) Y.metric c →
       ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E Y.M 1,
         Φ.source = Metric.ball (0 : E) ρ ∧
-        Φ.target = (fun v : E =>
-          (expMap (I := I) Y.metric c (show TangentSpace I c from v) : Y.M)) ''
-            Metric.ball (0 : E) ρ ∧
-        Set.EqOn Φ (fun v : E =>
-          (expMap (I := I) Y.metric c (show TangentSpace I c from v) : Y.M))
+        Φ.target = framedExpMap (I := I) Y.metric c '' Metric.ball (0 : E) ρ ∧
+        Set.EqOn Φ (framedExpMap (I := I) Y.metric c)
           (Metric.ball (0 : E) ρ) := by
   letI := Y.topology
   letI := Y.charted
@@ -84,7 +84,7 @@ theorem item3Factor_pos (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
   exact mul_pos (by norm_num) (Real.exp_pos _)
 
 /-- **Honest-input (book "`D` large enough", `lbl391`/`lbl392`).**  At each live net center
-`x_k^α`, the chosen item-3 ball radius `ρ k α` is below the exponential `C²` radius and the
+`x_k^α`, the chosen item-3 ball radius `ρ k α` is below the intrinsic framed radius and the
 injectivity radius of the realized metric `(X.obj k).metric`.  This is the §5 geometric
 scale choice: the injectivity part follows from `InjRadiusDecayInput.decay` (for `D > 1`),
 the `C²` part from the curvature-comparison `C²`-radius lower bound (the `lbl413`/§5
@@ -100,7 +100,7 @@ def Item3RadiusInput (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     letI := (X.obj k).t2
     letI := (X.obj k).t2TangentBundle
     ENNReal.ofReal (ρ k α) < injRadius (I := I) (X.obj k).metric c ∧
-      ρ k α ≤ expMapC2Radius (I := I) (X.obj k).metric c
+      ρ k α ≤ expRadiusGp (I := I) (X.obj k).metric c
 
 /-- The item-3 radius discipline at one sequence index and on the finite
 packing family, for radii `a * lamInf γ`. -/
@@ -119,7 +119,7 @@ def Item3RadiusAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
       ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
           injRadius (I := I) (X.obj (L.φ n)).metric c ∧
         a * L.lamInf (γ : Nat) ≤
-          expMapC2Radius (I := I) (X.obj (L.φ n)).metric c
+          expRadiusGp (I := I) (X.obj (L.φ n)).metric c
 
 /-- The finite packing-local item-3 radius discipline eventually holds along
 the chosen net-limit subsequence. -/
@@ -173,12 +173,9 @@ theorem exists_seqItem3Diffeo
     letI := (X.obj k).t2TangentBundle
       ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj k).M 1,
         Φ.source = Metric.ball (0 : E) (ρ k α) ∧
-        Φ.target = (fun v : E =>
-          (expMap (I := I) (X.obj k).metric c (show TangentSpace I c from v) :
-            (X.obj k).M)) '' Metric.ball (0 : E) (ρ k α) ∧
-        Set.EqOn Φ (fun v : E =>
-          (expMap (I := I) (X.obj k).metric c (show TangentSpace I c from v) :
-            (X.obj k).M))
+        Φ.target = framedExpMap (I := I) (X.obj k).metric c ''
+          Metric.ball (0 : E) (ρ k α) ∧
+        Set.EqOn Φ (framedExpMap (I := I) (X.obj k).metric c)
           (Metric.ball (0 : E) (ρ k α)) :=
   (X.obj k).exists_expBall_diffeo c (hrad k α c hc).1 (hrad k α c hc).2
 
@@ -199,13 +196,9 @@ theorem exists_item3Diffeo
     letI := (X.obj (L.φ n)).t2TangentBundle
       ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
         Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Φ.target = (fun v : E =>
-          (expMap (I := I) (X.obj (L.φ n)).metric c
-            (show TangentSpace I c from v) : (X.obj (L.φ n)).M)) ''
-              Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Set.EqOn Φ (fun v : E =>
-          (expMap (I := I) (X.obj (L.φ n)).metric c
-            (show TangentSpace I c from v) : (X.obj (L.φ n)).M))
+        Φ.target = framedExpMap (I := I) (X.obj (L.φ n)).metric c ''
+          Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+        Set.EqOn Φ (framedExpMap (I := I) (X.obj (L.φ n)).metric c)
           (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) :=
   (X.obj (L.φ n)).exists_expBall_diffeo c
     (hrad γ c hc).1 (hrad γ c hc).2

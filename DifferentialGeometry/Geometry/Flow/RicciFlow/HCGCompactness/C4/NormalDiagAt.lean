@@ -50,7 +50,7 @@ theorem normalDiagAtFull
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqWide : 6 * (q : Real) < r)
     (hqAccel : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤
@@ -160,12 +160,12 @@ theorem normalDiagAtFull
     have htime : (1 : Real) ∈ Set.Icc (-1) 1 := by norm_num
     have hzEnd : (Φ z 1).1 ∈ Metric.ball (0 : E) r :=
       (hΦbox z hz 1 htime).1
-    have hExpPos := expMapC2Radius_pos (I := I) (X.obj k).metric x
+    have hExpPos := expRadiusGp_pos (I := I) (X.obj k).metric x
     have hrNormal : Metric.ball (0 : E) r ⊆ normalBall (I := I) (X.obj k) x := by
       intro v hv
       have hvQuarter := hrQuarter hv
       change v ∈ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x)
+        (expRadiusGp (I := I) (X.obj k).metric x)
       exact Metric.ball_subset_ball (by nlinarith) hvQuarter
     have hzFirst' := hrNormal hzFirst
     have hzEnd' := hrNormal hzEnd
@@ -190,7 +190,7 @@ theorem normalDiagAt
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqWide : 6 * (q : Real) < r)
     (hqAccel : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤

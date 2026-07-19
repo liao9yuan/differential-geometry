@@ -71,3 +71,13 @@ calls `existsTransUniv`; it returns the same forward/reverse limits and
 conditional cocycles on a composed strict subsequence.  Focused verification
 and the targeted refresh passed.  No S6 compatibility declaration remains in
 this file.
+
+## 2026-07-18 framed radius migration
+
+The complete extraction chain now uses `expRadiusGp`: `existsTransRefH6`,
+`existsTransFinite`, `existsTransUniv`, and `NormalTransAt`.  This is a direct
+signature migration to the already-framed `exists_trans_h6`; the subsequence
+and finite-diagonal proofs are unchanged.  Focused verification passed and the
+diff is clean.  The exact refresh is intentionally ordered after
+`StepCAtomConv` and before `StepCPairTail` so downstream diagnostics read one
+coherent interface generation.

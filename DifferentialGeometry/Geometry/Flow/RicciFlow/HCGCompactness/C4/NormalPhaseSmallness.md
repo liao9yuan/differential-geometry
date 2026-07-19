@@ -53,3 +53,10 @@ below `T / (2 * (N + 1))`, where `N` is the norm of the free inverse and
 below one while preserving the previous target-radius lower bound.  This is
 an internal scale tightening, not a new endpoint hypothesis.  Focused
 verification passed.
+
+## 2026-07-18 framed-radius migration
+
+`phaseRadius_exp` now targets `expRadiusGp / 4`, matching the canonical framed
+normal-coordinate profile.  Focused verification and the module refresh
+passed.  The theorem still consumes `NormalRadiusProfile`; it is not its
+producer.

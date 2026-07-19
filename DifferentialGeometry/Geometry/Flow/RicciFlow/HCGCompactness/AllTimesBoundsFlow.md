@@ -22,3 +22,17 @@ existing scalar evaluation theorem `metricDiffCovDerivAt_zero_apply`.
 
 Focused verification passed.  This is a reusable metric-norm producer; it does
 not itself prove the scalar Galerkin closure or Perelman noncollapsing endpoint.
+
+## 2026-07-18 compact-set metric equivalence
+
+Added `equivOn_compact`, which gives one `MetricUniformEquivalentOn` constant
+for two smooth Riemannian metrics on an arbitrary compact set.  It consumes the
+generic `metric_lower_on` theorem in both directions.  The existing
+`metricUniformEquivalentOn_of_compact` statement is preserved as the
+whole-manifold corollary.
+
+Focused verification and the exact module refresh pass.  The six local
+`show`-as-`change` style warnings exposed by the refresh were removed before the
+final check.  `StepDAssembly.HasCanonBounds` can now consume the API.  This
+closes the finite-head compact-equivalence API gap only; the Step-D sidecar
+theorem still has its separate tail/head assembly frontier.

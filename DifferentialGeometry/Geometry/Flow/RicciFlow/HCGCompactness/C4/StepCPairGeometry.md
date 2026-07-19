@@ -18,3 +18,11 @@ composition is provisionally about 85%.  Dedicated Step-B/B1 machinery remains
 about 83%, Chapter 4 machinery about 79%, and whole-HCG machinery about 53%.
 `StepB1RawInput`, textbook B1, and the conditional compactness endpoint remain
 theorem-level 0%.
+
+## 2026-07-18 framed pair image
+
+`pair_exp_maps` now consumes the canonical `expRadiusGp` tail and maps the
+framed source diffeomorphism into the framed target exponential image.  The old
+origin coercivity and square-root conversion are gone.  Focused verification
+and the exact module refresh passed.  This completes the pair-image producer;
+it does not change the theorem-level 0% accounting for `StepB1RawInput`.

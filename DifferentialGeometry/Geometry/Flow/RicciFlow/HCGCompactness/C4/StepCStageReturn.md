@@ -47,6 +47,9 @@ the producer layer, not to add a hypothesis to the final B1 endpoint.
 
 ## Honest accounting
 
+The bullets below are the 2026-07-16 pre-framed snapshot and are superseded by
+the current migration status in the next section.
+
 - The return-control sublane in this file: approximately 100% implemented and
   focused-verified.
 - Dedicated global-injectivity machinery: approximately 70%; local jet/local
@@ -56,3 +59,25 @@ the producer layer, not to add a hypothesis to the final B1 endpoint.
 - The concrete `StepB1RawInput` producer: unstated, hence 0% theorem completion.
 - Textbook Step B1: 0% theorem completion; the work here is supporting
   infrastructure in its Step-C-to-B1 producer lane.
+
+## 2026-07-18 canonical framed migration focused and exact green
+
+The source proofs of `HasStageJetData.mapsTo_tail` and `return_tail` now use
+`NormalCoordinates.framedChartAt` for both moving stages.  Their chart-target
+containments consume the existing `geom_on` `expRadiusGp` ball and pass through
+`framedExpDiffeo`, `framedExp_source`, `normalFrame_sqrt`, and the checked
+intrinsic-to-raw source-radius bridge.  The center readout uses
+`framedExp_zero`.  The remaining `normalExpPD` occurrences are the canonical
+already-framed smooth HCG restriction, not a raw-coordinate fallback.
+
+The source migration is complete and its scoped diff is clean.  After the
+canonical `StepCStageComparison` exact refresh, this file passes focused Lean
+verification with no local diagnostics.  Its own exact target refresh completed
+successfully in the coordinated Stage-DAG write chain.
+
+The two return-control proof bodies are canonical-framed focused- and
+exact-green.
+`MetricCompactBase.exists_b1_raw` has a complete proof body but is not yet
+fully validated through the framed downstream chain.  The
+separately named textbook B1 theorem and the unconditional compactness
+endpoint remain theorem-level 0%; whole-HCG machinery remains about 60%.

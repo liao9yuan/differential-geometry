@@ -1,5 +1,30 @@
 # StepBTransition.lean — B-trans transition limits + cocycle (`lbl394` transition, 2026-06-13)
 
+## UPDATE 2026-07-18 — canonical framed source repair
+
+`NormalOverlapOn` now records the actual framed chart domain:
+`framedExpDiffeo x` source membership followed by `framedChartAt y` source
+membership.  The lower-layer `StepBInputs.framedChart_smooth` transports the
+existing raw inverse-chart smoothness through the fixed orthonormal frame;
+this file only consumes that canonical producer.  `contDiffOn_normalTransition`
+now consumes `expRadiusGp` balls plus a
+`framedExpDiffeo x`-to-`framedExpMap y` image containment.  The public
+`normalTransition` name is retained where it deliberately packages the
+per-object manifold instances; its definition is the canonical
+`framedTransition`.
+
+`exists_trans_h6` now asks for `expRadiusGp` containments.  After the canonical
+dependency chain was refreshed in order, this file passed focused verification
+with the lower `framedChart_smooth` producer and the migrated H6
+`normal_bounds_on` interface.  The earlier stale-artifact diagnostics are
+resolved; there is no remaining source or verification blocker in this file.
+
+Accounting: this file's framed source repair and verification are 100%
+complete.  Together with the overlap file this is 2/29 audited migration files
+repaired and verified; it does not change the 0% textbook B1 theorem or the 0%
+unconditional endpoint theorem.  Dedicated transition machinery in these two
+files is 100%; whole-HCG machinery remains about 60%.
+
 ## UPDATE 2026-06-22 — transition `C∞` DONE; `hsmoothJ`/`hsmoothJbar` frontier discharged
 
 The `C∞`-chart-inverse frontier described in the 2026-06-21 passes is **resolved** (verified,

@@ -205,7 +205,7 @@ theorem HasStageJetData.inv_chart_conv
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
       Set.MapsTo
-        (NormalCoordinates.normalChartAt (I := I) Yk.metric
+        (NormalCoordinates.framedChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P S (kn n))) :
     let Lphi := L.subseq hphi
@@ -224,9 +224,9 @@ theorem HasStageJetData.inv_chart_conv
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
       let F := stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
       chiK (Function.invFunOn F (Metric.ball Yk.basepoint T) (chiL.symm w))
@@ -251,9 +251,9 @@ theorem HasStageJetData.inv_chart_conv
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
     chiL (stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
       (chiK.symm z))
@@ -272,9 +272,9 @@ theorem HasStageJetData.inv_chart_conv
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))
-    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat))
     let F := stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
     chiK (Function.invFunOn F (Metric.ball Yk.basepoint T) (chiL.symm w))
@@ -299,7 +299,7 @@ theorem HasStageJetData.inv_chart_conv
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       Set.MapsTo
-        (NormalCoordinates.normalChartAt (I := I) Yk.metric
+        (NormalCoordinates.framedChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         Q (Lphi.hatSourceBall inp.decay P S (kn n)) := by
     filter_upwards [hsource] with n hn
@@ -348,8 +348,8 @@ theorem HasStageJetData.inv_chart_conv
     let F := stageComparisonMap inp P Lphi r hr hconn (kn n) (ln n)
     let ck := seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat)
     let cl := seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat)
-    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
-    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
+    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
+    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
     have hjet (z : E) (hz : z ∈ W) :
         F (chiK.symm z) ∈ (normalExpPD (I := I) Yl cl).target ∧
           ContDiffAt Real ∞ (A n) z ∧
@@ -383,22 +383,30 @@ theorem HasStageJetData.inv_chart_conv
       (kn n) alpha
     have hUtgt : U alpha ⊆ chiK.target := by
       intro z hz
-      have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric ck := by
-        simpa only [Metric.mem_ball, dist_zero_right] using hgeomK.2.1 hz
-      simpa only [chiK] using
-        ball_subset_normalChartAt_target (I := I) Yk.metric ck hzNorm
+      have hzBall := hgeomK.2.1 hz
+      rw [Metric.mem_ball, dist_zero_right] at hzBall
+      change z ∈ (NormalCoordinates.framedExpDiffeo
+        (I := I) Yk.metric ck).source
+      rw [NormalCoordinates.framedExp_source]
+      apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
+      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
+      simpa only [NormalCoordinates.normalFrame_sqrt] using hzBall
     have hsmallTarget : ∀ q : Yl.M,
         q ∈ (normalExpPD (I := I) Yl cl).target → q ∈ chiL.source := by
       intro q hq
       rcases hq with ⟨v, hv, rfl⟩
-      have hvNorm : ‖v‖ < expMapC2Radius (I := I) Yl.metric cl := by
+      have hvNorm : ‖v‖ < expRadiusGp (I := I) Yl.metric cl := by
         change v ∈ Metric.ball (0 : E)
-          (expMapC2Radius (I := I) Yl.metric cl) at hv
+          (expRadiusGp (I := I) Yl.metric cl) at hv
         simpa only [Metric.mem_ball, dist_zero_right] using hv
-      have hvSource :=
-        mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl hvNorm
-      have hmap :=
-        (NormalCoordinates.expMapDiffeo (I := I) Yl.metric cl).map_source hvSource
+      have hvSource : v ∈ (NormalCoordinates.framedExpDiffeo
+          (I := I) Yl.metric cl).source := by
+        rw [NormalCoordinates.framedExp_source]
+        apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl
+        apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yl.metric cl
+        simpa only [NormalCoordinates.normalFrame_sqrt] using hvNorm
+      have hmap := (NormalCoordinates.framedExpDiffeo
+        (I := I) Yl.metric cl).map_source hvSource
       simpa only [normalExpPD, chiL] using hmap
     have hAinj : Set.InjOn (A n) W := by
       intro z hz w hw hzw
@@ -489,7 +497,7 @@ theorem HasStageJetData.inv_chart_tail
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
       Set.MapsTo
-        (NormalCoordinates.normalChartAt (I := I) Yk.metric
+        (NormalCoordinates.framedChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P S k))
     (p : Nat) (eps : Real) (heps : 0 < eps) :
@@ -509,9 +517,9 @@ theorem HasStageJetData.inv_chart_tail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       let F := stageComparisonMap inp P Lphi r hr hconn k l
       chiK (Function.invFunOn F (Metric.ball Yk.basepoint T) (chiL.symm w))
@@ -535,9 +543,9 @@ theorem HasStageJetData.inv_chart_tail
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
     let F := stageComparisonMap inp P Lphi r hr hconn k l
     chiK (Function.invFunOn F (Metric.ball Yk.basepoint T) (chiL.symm w))
@@ -556,7 +564,7 @@ theorem HasStageJetData.inv_chart_tail
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
       Set.MapsTo
-        (NormalCoordinates.normalChartAt (I := I) Yk.metric
+        (NormalCoordinates.framedChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P S (kn n)) := by
     filter_upwards [hkn.eventually_ge_atTop Nsrc] with n hn

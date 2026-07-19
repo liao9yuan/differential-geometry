@@ -411,3 +411,18 @@ stucks every consumer of `hcomp`), then `hcomp.unique hconst` with `hconst` in t
   complete.  The selected-branch extension/domain consumers in
   `StepCCmDomain`, the concrete quantitative HCG branch producer, and the
   finite-hat scale specialization remain.
+
+## 2026-07-18 framed selected-branch coordinates
+
+The selected-branch equation stack now interprets its fixed-base model
+parameters with `framedChartAt g p`: `chartCmEqnB`, `chartCmEqn'`, their joint
+smoothness lemmas, both implicit-solution APIs, and the concrete center
+endpoints all use the same orthonormal coordinates as the quantitative branch.
+The moving-base `normalChartAt g y q` terms remain raw because they represent
+the actual inverse-exponential tangent vector at `y`, rather than a fixed-base
+parameter coordinate.
+
+The framed section now obtains its normed-space instance from
+`InnerProductSpace` and records the required `CompleteSpace E`, avoiding the
+old model-with-corners instance mismatch. Focused verification and the exact
+module refresh passed. No new assumption or parallel equation API was added.

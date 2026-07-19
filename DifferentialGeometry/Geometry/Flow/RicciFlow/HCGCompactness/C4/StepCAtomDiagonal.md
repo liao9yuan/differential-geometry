@@ -71,3 +71,27 @@ about 92%, pair-to-capstone integration about 78%, dedicated Step-B/B1
 machinery about 84%, Chapter 4 about 80%, and whole-HCG machinery about 53%.
 `StepB1RawInput`, textbook B1, and the compactness endpoints remain theorem-level
 0%.
+
+## 2026-07-18 framed normal-coordinate migration
+
+The complete canonical atom-diagonal surface now uses the framed semantics.
+`HasAtomWeightLim.of_atoms`, both normalized-weight projections,
+`binter_of_weight`, `exists_atom_lim`, and `exists_atom_fin` map source domains
+with `framedExpDiffeo`; the H6 target cages use `framedExpMap`; all source and
+target radius premises use `expRadiusGp`.  The finite subsequence induction
+passes these same framed premises without adding a field, wrapper, or
+assumption.
+
+Source review is clean, but focused verification is blocked by exactly two
+stale `StepCAtomPackage` declarations: the exported `atomWeight_of_atoms` still
+expects the raw source map, and `existsAtomWeightH6` still expects the old
+`expMapC2Radius` premise.  No independent proof or type error was exposed.  The
+ordered refresh/recheck chain is `StepCAtomConv`, `StepCAtomJoin`,
+`StepCAtomPackage`, then a focused check of this module; refresh this module
+only when its downstream consumer requires the artifact.
+
+Accordingly, atom-diagonal framed source migration is 100%, but the migrated
+theorems are 0% revalidated until that upstream refresh chain completes.  The
+selected B/C capstone, `StepB1RawInput`, textbook Step B1, and unconditional
+compactness endpoints remain theorem-level 0%; whole-HCG support machinery is
+approximately 60%.

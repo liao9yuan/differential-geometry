@@ -249,3 +249,16 @@ verification passed.  The module header now points to the H6 metric-jet route
 instead of describing the removed endpoint field.  This cleanup removes a
 black-box input but does not start
 or prove the textbook B1 or compactness endpoint theorem, which remain 0%.
+
+## 2026-07-18: framed normal-coordinate migration
+
+`normalTransition` is now the transition between the canonical framed normal
+charts, and `normalCoordMetric` is the pullback by that framed chart.  The frame
+at each center is orthonormal for the center metric, so `normalMetric_zero` is
+the model inner product directly.  The old origin-coercivity projection and the
+raw-model-space interpretation have been removed from the live API.
+
+Focused verification passed.  This verifies the canonical Step-B input layer,
+not `StepB1RawInput`: the live framed downstream route still requires full
+consumer revalidation before that producer or the compactness endpoint can be
+counted complete.

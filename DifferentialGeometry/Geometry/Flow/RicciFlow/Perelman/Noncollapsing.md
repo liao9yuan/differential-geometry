@@ -1084,7 +1084,7 @@ present in the current hypotheses.  The interior compact-span route is
 mathematically sound, but the joint varying-background modulus is a
 substantial missing API rather than a local elaboration repair.
 
-### Prepared consult prompt (do not send automatically)
+### Prepared consult prompt (answered; superseded)
 
 Inspect the GitHub repository
 `liao9yuan/differential-geometry`, branch `short-time-existence`, especially:
@@ -1147,3 +1147,85 @@ wrapper black box, no equality between `tensorHs` spaces for different
 terminal metrics, and every new theorem name must have at most 20 characters.
 Give repository-native Lean statement skeletons with exact theorem references;
 do not rely on local filesystem paths.
+
+## 2026-07-18 varying-background span closure
+
+The compact-interior consult route has been adopted.  The endpoint work
+`gallim_w_cont` and `gallim_w_le` remains closed, and propagation will start at
+one fixed positive regular time rather than trying to obtain first metric-jet
+control at the nonregular original endpoint.
+
+The first new producer, `metric_c1_span`, now passes focused verification.  For
+every compact slab `Icc a b ⊆ D.regular` and every positive tolerance it gives
+one positive radius such that all nearby `base` and `var` in the slab satisfy
+
+```lean
+metricDerivNormSupOn Set.univ 1
+  (G.metric var) (G.metric base) (G.metric base) ≤ ε.
+```
+
+Its proof is genuinely varying-background and scalar.  It uses canonical
+coordinate-frame Gram and inverse-Gram entries for the order-zero norm, scalar
+spatial derivatives plus the coordinate Koszul formula for the order-one
+component, a finite spatial subcover for each diagonal time, and a finite time
+subcover of the compact slab.  It introduces no endpoint regularity, global
+frame, whole varying-fibre tensor equality, `HasLocallyConstantChartAt`, or new
+consumer assumption.
+
+The existing `Entropy/F` tree remains useful but orthogonal to this producer.
+Its `weightedGreen` and `weighted_grad_zero` theorems are already consumed by
+`WeightedHessian.lean` in the checked W square/monotonicity chain.  The
+Formula-5.10 F-functional assembly does not supply the target-length Galerkin
+or heat-potential propagation theorem.
+
+The exact next producer is `gal_span`: replay `scalar_gal_exists`,
+`scalar_crit_tame`, `scalar_gal_bound`, and `scalar_gal_subseq` on every
+prescribed target length below the common radius returned by
+`metric_c1_span`.  After that come `gallim_on`, target-length positivity and
+mass, and the finite Good-set induction on the positive interior slab.
+
+Honest accounting: `metric_c1_span`, `gallim_w_cont`, and `gallim_w_le` are
+theorem-level 100%, with their dedicated local machinery 100%.  `gal_span`,
+`gallim_on`, the target-length positivity/mass package, the finite Good-set
+induction, `NoLocalCollapsing`, and `ham3_noncollapse` remain theorem-level 0%.
+Selected-scale contradiction machinery remains about 99%, broader
+entropy/noncollapsing machinery about 97%, and whole HCG machinery about 60%.
+
+## 2026-07-18 target-length Garding frontier
+
+The compact-span replay now has a dedicated Garding module,
+`ScalarNonautSpan.lean`.  It contains the intended `metricDiff_span` statement
+and proof skeleton: one radius on `Icc a b ⊆ D.regular`, any frozen regular
+time in that slab, and every requested backward length below the radius.  It
+also contains `scalarFlux_span`, which reuses `scalarFlux_jet_grid` and has no
+additional analytic frontier.
+
+Focused verification succeeds with exactly one `sorry` warning and no Lean
+errors.  The remaining obligation is the already-proved fixed-background
+metric-difference joint-smoothness fact, currently private as
+`metricDiff_joint` in `ScalarFluxJetBound.lean`.  It is needed only to apply
+`joint_jet_bdd` on the prescribed compact interval.  Copying its long
+bundle-realization proof was rejected; the canonical repair is to expose the
+existing theorem and reuse it.
+
+The subsequent target-length pairing replay has the same visibility issue in
+`ScalarNonautUniform.lean`: `appRS_jet_bdd`, `fixed_jet_bdd`,
+`fluxDiv_jet_bdd`, and `traceCast_jet_bdd` are generic but private.  Normal
+claims on both source files failed because of old ownership-unknown claims
+(tokens `4bc8c3d3-d009-4dce-bc77-21043f23e1d4` and
+`a05069d7-e9e4-45fc-a965-f4abe11355eb`; recorded processes are dead).  They
+were not force-released.
+
+The exact next step is therefore a small canonical API exposure in those two
+claimed files, followed by `cc_a2_span`, target-length `scalar_crit_tame`, and
+`gal_span`.  Finite-subcovering the existing existential lifetimes is not a
+valid substitute because the terminal metric, and hence the spectral space,
+varies with the base time.
+
+Honest accounting: `metric_c1_span`, `gallim_w_cont`, and `gallim_w_le` remain
+theorem-level 100%.  `metricDiff_span` and `scalarFlux_span` are theorem-level
+0% until their single producer `sorry` is discharged; dedicated machinery is
+about 95%.  `cc_a2_span`, target-length critical tame/Galerkin, `gallim_on`,
+target-length positivity/mass, finite Good induction, `NoLocalCollapsing`, and
+`ham3_noncollapse` remain theorem-level 0%.  Broader noncollapsing machinery
+remains about 97%, and whole HCG machinery about 60%.

@@ -34,21 +34,22 @@ verification.  The complete local-to-global file passes focused verification:
 - `metric_cp_tendsto` intersects the finitely many exact-order time
   neighborhoods and proves convergence in every cumulative order `p`;
 - `metric_c1_tendsto` takes a compact finite subcover and intersects its time
-  neighborhoods.
+  neighborhoods;
+- `metric_c1_span` proves one uniform varying-background order-one modulus on
+  every compact regular-time slab.
 
 No `HasLocallyConstantChartAt`, global frame, whole-tensor equality, or new
 consumer convergence hypothesis is used.
 
 ## Progress
 
-The `metric_c1_tendsto` and all-finite-order `metric_cp_tendsto` theorems are
-proved and focused-verified (100%); their dedicated local-to-global machinery
-is complete (100%).  This closes the time-uniform metric-jet input needed by
-the noncollapsing operator route.  The actual finite-spectral-support `A2(s)`
-estimate remains unstated and unproved (0%).  Its dedicated machinery is now
-approximately 77% complete: the live local analytic frontier is the
-rank-generic arbitrary-input small-principal-coefficient `appCc` tame bound,
-then specialization to the scalar Hessian/gradient decomposition.
+The fixed-background `metric_c1_tendsto`, all-finite-order
+`metric_cp_tendsto`, and varying-background `metric_c1_span` theorems are
+proved and focused-verified (100%).  Their dedicated local-to-global metric
+modulus machinery is complete (100%).  The noncollapsing endpoint is still
+unstated and unproved (0%): the next exact producer is the target-length
+Galerkin theorem `gal_span`, followed by `gallim_on`, target-length
+positivity/mass, and the finite interior Good-set induction.
 
 ## 2026-07-14 fixed-slab bounds
 
@@ -69,3 +70,26 @@ pairings.  `scalar_crit_tame` remains unstated/unproved (0%); its dedicated
 machinery is about 77%.  Perelman noncollapsing remains 0% with about 40%
 dedicated analytic machinery, and whole HCG machinery remains about 53% with
 endpoint theorems at 0%.
+
+## 2026-07-18 varying-background span
+
+`metric_c1_span` now passes focused verification.  It quantifies over the
+background time before any spectral type is formed and returns one positive
+radius uniform in both times and all spatial points on a compact regular-time
+slab.
+
+The proof remains scalar throughout.  In one canonical coordinate frame it
+expresses the order-zero norm through the Gram matrix and its inverse, and the
+order-one component through scalar spatial derivatives and the coordinate
+Koszul formula for the varying Levi-Civita connection.  Compactness first
+turns the local spatial patches into a uniform neighborhood of one diagonal
+time, then a finite cover of the compact time slab supplies the global radius.
+No equality of whole tensors in varying fibres, global frame, endpoint
+regularity upgrade, or new consumer hypothesis is used.
+
+Honest accounting: `metric_c1_span` is theorem-level 100%, and its dedicated
+varying-background modulus machinery is 100%.  This is one geometric producer,
+not the noncollapsing theorem: `gal_span`, `gallim_on`, the target-length
+positivity/mass package, the finite Good-set induction, `NoLocalCollapsing`,
+and `ham3_noncollapse` remain theorem-level 0%.  Whole HCG machinery remains
+about 60%.

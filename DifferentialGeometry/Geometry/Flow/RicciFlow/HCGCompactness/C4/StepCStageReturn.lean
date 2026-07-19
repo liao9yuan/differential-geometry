@@ -168,8 +168,8 @@ theorem HasStageJetData.mapsTo_tail
     hC1U alpha (interior_subset (hC01 alpha hzC0))
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
   have hxCoord : chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R0 k := by
@@ -215,11 +215,13 @@ theorem HasStageJetData.mapsTo_tail
   have hUtgt : U alpha ⊆ chiL.target := by
     intro q hq
     have hqBall := hExpL hq
-    have hqNorm : ‖q‖ < expMapC2Radius (I := I) Yl.metric cl := by
-      simpa only [Metric.mem_ball, dist_zero_right] using hqBall
-    simpa only [chiL] using
-      Geometry.Riemannian.ball_subset_normalChartAt_target
-        (I := I) Yl.metric cl hqNorm
+    rw [Metric.mem_ball, dist_zero_right] at hqBall
+    change q ∈ (NormalCoordinates.framedExpDiffeo
+      (I := I) Yl.metric cl).source
+    rw [NormalCoordinates.framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yl.metric cl
+    simpa only [NormalCoordinates.normalFrame_sqrt] using hqBall
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Yl (P (Lphi.φ l)) hEquiv hUtgt hseg
   have hFw : chiL.symm w = F x := by
@@ -230,7 +232,7 @@ theorem HasStageJetData.mapsTo_tail
     exact (normalExpPD (I := I) Yl cl).right_inv htarget
   have hzeroL : chiL.symm (0 : E) = cl := by
     simpa only [chiL] using
-      NormalCoordinates.normalChartAt_symm_zero (I := I) Yl.metric cl
+      NormalCoordinates.framedExp_zero (I := I) Yl.metric cl
   rw [hFw, hzeroL] at hman
   have hzNorm : ‖z‖ < 8 * L.lamInf (alpha.1 : Nat) := by
     simpa only [Metric.mem_ball, dist_zero_right] using hU8 alpha hzU
@@ -393,8 +395,8 @@ theorem HasStageJetData.return_tail
   have hzC0 : z ∈ C0 alpha := interior_subset hzInt
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
   have hxCoord : chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R0 k := by
@@ -466,11 +468,13 @@ theorem HasStageJetData.return_tail
   have hUtgt : U alpha ⊆ chiK.target := by
     intro q hq
     have hqBall := hExpK hq
-    have hqNorm : ‖q‖ < expMapC2Radius (I := I) Yk.metric ck := by
-      simpa only [Metric.mem_ball, dist_zero_right] using hqBall
-    simpa only [chiK] using
-      Geometry.Riemannian.ball_subset_normalChartAt_target
-        (I := I) Yk.metric ck hqNorm
+    rw [Metric.mem_ball, dist_zero_right] at hqBall
+    change q ∈ (NormalCoordinates.framedExpDiffeo
+      (I := I) Yk.metric ck).source
+    rw [NormalCoordinates.framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
+    simpa only [NormalCoordinates.normalFrame_sqrt] using hqBall
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Yk (P (Lphi.φ k)) hEquiv hUtgt hseg
   have hHu : chiK.symm u = Flk (Fkl x) := by

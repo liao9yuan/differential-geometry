@@ -33,3 +33,9 @@ frontier is not regularity of each time trajectory.  It is joint
 `C^infinity` dependence of the retained time-one endpoint on the initial phase
 point, needed before `PhaseFlow.quantInv_smooth` can supply a smooth inverse on
 the explicit quantitative target.
+
+## 2026-07-18 framed-radius migration
+
+`normalFlow_geoOn` now consumes the same `expRadiusGp / 4` fence as
+`normalAccel_lip`.  Focused verification and the module refresh passed.  No
+new geometric assumption or wrapper was introduced.

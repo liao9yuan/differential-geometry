@@ -1,5 +1,28 @@
 # StepB1Producers.lean — B1 (`lbl397`) producer layer, notes
 
+## 2026-07-18 live framed status
+
+The old entries below are historical.  The concrete
+`MetricCompactBase.exists_b1_raw` theorem now has a complete proof body with no
+local `sorry` or `admit`; it is 100% source implementation, not theorem-level
+0%.  The canonical framed-coordinate migration has been propagated through its
+Step-C and B1 metric/inverse source dependencies, but the full dependency chain
+has not yet been revalidated, so the theorem must not be reported as
+framed-green.  The separately named textbook Step B1 theorem and unconditional
+compactness endpoints remain theorem-level 0%.  Current rounded machinery
+accounting is about 95% for Step-B/B1, 87% for Chapter 4, and 60% for the whole
+HCG project.
+
+The framed refresh exposed a deterministic `isDefEq` timeout in
+`chartCm_contDiffOn`.  Its fixed-base hypotheses still expanded raw
+`normalChartAt`, while the canonical `centerOfMass_contDiffAt` consumer had
+already moved to `framedChartAt`.  Migrating that one theorem and removing the
+redundant explicit `NormedSpace` instance from the shared inner-product-space
+variable block eliminated both the large definition-equality search and its
+instance diamond.  Focused verification now passes; no heartbeat limit or
+public assumption was changed.  The exact module refresh also passes after the
+repair.
+
 ## 2026-07-15 analysis-layer extraction
 
 The generic `MapCInfConvOnCompacts` constant, product, finite-Pi, and continuous
@@ -524,3 +547,19 @@ The generic `iteratedFDerivPi` proof was moved to
 `Analysis/Calculus/PiDeriv.lean` as `iteratedFDeriv_pi`. This file now imports
 and consumes the lower-layer theorem; no Step-B1 producer statement changed.
 Focused verification passed.
+
+## 2026-07-18 framed radial separation
+
+The `expRadiusGp` migration changed `radialEnorm_normal` to the canonical framed
+normal-coordinate curve.  The direct consumers are now aligned:
+
+- `normLowerOfSepExp` takes an `expRadiusGp` coordinate ball and launches the
+  geometric exponential with `normalFrame v`;
+- the raw `expMapC2Radius` estimate remains only as a private proof step for the
+  underlying tangent-fiber exponential;
+- `seqChartNorm_ge` now uses `framedChartAt` and `framedExpDiffeo` throughout.
+
+Focused verification passed after this repair.  No new assumption or radius
+hierarchy was introduced.  `StepB1RawInput` and textbook B1 remain theorem-level
+0%; this repair only restores the framed Step-B support chain, while whole-HCG
+support machinery remains about 60%.

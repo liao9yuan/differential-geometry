@@ -121,17 +121,17 @@ theorem metricQuadFormDiff_le_metricDerivNorm
       metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
         = gk.inner x v v - gInf.inner x v v := by
-    show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+    change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = _
     have hk : metricCovDeriv (I := I) gk gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gk x
+      change Tensor0SBundle.metricTensorField (I := I) gk x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
     have hI : metricCovDeriv (I := I) gInf gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gInf x
+      change Tensor0SBundle.metricTensorField (I := I) gInf x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
@@ -176,17 +176,17 @@ theorem metricDiffCovDerivAt_zero_apply
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     change IsManifold I ∞ M; infer_instance
-  show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+  change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = _
   have hk : metricCovDeriv (I := I) gk gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gk x
+    change Tensor0SBundle.metricTensorField (I := I) gk x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
   have hI : metricCovDeriv (I := I) gInf gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gInf x
+    change Tensor0SBundle.metricTensorField (I := I) gInf x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
@@ -366,21 +366,20 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
     _ <= δ * gInf.inner x v v :=
         mul_le_mul_of_nonneg_right (hsmall x hx) hgnn
 
-/-- **(A): two metrics on a closed manifold are uniformly equivalent.** On a
-compact manifold both the lower and upper comparison constants come from
-`metric_lower_bound_of_compact` (applied each way). This supplies the per-pair
-equivalence for the finitely many "head" terms of a Cheeger–Gromov convergent
-sequence. -/
-theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
+/-- Two smooth Riemannian metrics are uniformly equivalent on a compact set. -/
+theorem equivOn_compact
+    {K : Set M} (hK : IsCompact K)
     (gRef h : SmoothRiemannianMetric I M) :
-    ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
-  obtain ⟨c, hc, hlow⟩ := DifferentialGeometry.metric_lower_bound_of_compact h gRef
-  obtain ⟨c', hc', hup⟩ := DifferentialGeometry.metric_lower_bound_of_compact gRef h
+    ∃ C : Real, MetricUniformEquivalentOn (I := I) K gRef h C := by
+  obtain ⟨c, hc, hlow⟩ :=
+    DifferentialGeometry.metric_lower_on (I := I) hK h gRef
+  obtain ⟨c', hc', hup⟩ :=
+    DifferentialGeometry.metric_lower_on (I := I) hK gRef h
   set C : Real := max (max c⁻¹ c'⁻¹) 1 with hCdef
   have hc_inv_le_C : c⁻¹ <= C := le_trans (le_max_left _ _) (le_max_left _ _)
   have hc'_inv_le_C : c'⁻¹ <= C := le_trans (le_max_right _ _) (le_max_left _ _)
   refine ⟨C, le_max_right _ _, ?_⟩
-  intro x _ v
+  intro x hx v
   have hgnn : 0 <= gRef.inner x v v := by
     by_cases hv : v = 0
     · subst hv; simp
@@ -396,12 +395,18 @@ theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
       exact le_of_mul_le_mul_right h3 hC_pos
     calc C⁻¹ * gRef.inner x v v <= c * gRef.inner x v v :=
           mul_le_mul_of_nonneg_right hCinv_le_c hgnn
-      _ <= h.inner x v v := hlow x v
+      _ <= h.inner x v v := hlow x hx v
   · have hub : h.inner x v v <= c'⁻¹ * gRef.inner x v v := by
       rw [inv_mul_eq_div, le_div_iff₀ hc']
-      linarith [hup x v]
+      linarith [hup x hx v]
     calc h.inner x v v <= c'⁻¹ * gRef.inner x v v := hub
       _ <= C * gRef.inner x v v := mul_le_mul_of_nonneg_right hc'_inv_le_C hgnn
+
+/-- **(A): two metrics on a closed manifold are uniformly equivalent.** -/
+theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
+    (gRef h : SmoothRiemannianMetric I M) :
+    ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
+  simpa using equivOn_compact (I := I) isCompact_univ gRef h
 
 /-- **`hle`.** Each per-point metric-difference norm is bounded by the window
 supremum (the `BddAbove` content for the `②`-bookkeeping, via the per-point

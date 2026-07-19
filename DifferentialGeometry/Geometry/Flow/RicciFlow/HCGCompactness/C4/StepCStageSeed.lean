@@ -225,7 +225,7 @@ theorem MetricCompactBase.exists_stage_seed
           (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
         z gamma
     let chi := fun (alpha : LiveSlot L inp.pack r) =>
-      NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
+      NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
     let sourceBall := Lphi.hatSourceBall inp.decay P r n
     let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
       sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha

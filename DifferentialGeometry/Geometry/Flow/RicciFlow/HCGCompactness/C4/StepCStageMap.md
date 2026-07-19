@@ -62,3 +62,17 @@ This closes the map-level persistence needed by the radius diagonal, but does
 not itself prove an all-radius master subsequence.  `StepB1RawInput` and
 textbook B1 remain theorem-level 0%; dedicated Step-B/B1 machinery is roughly
 98%, Chapter-4 machinery roughly 90%, and whole-HCG machinery roughly 60%.
+
+## 2026-07-18 framed stage-map migration
+
+The canonical finite-stage map now uses the orthonormally framed normal charts
+in its definition.  `stageTarget_chart` is stated with `framedTransition`,
+`stageTarget_local` decodes with the framed partial-diffeomorphism inverse, and
+`stageCompare_base` uses the exact framed center/origin identities.  No raw
+`normalChartAt` or raw transition remains in this file, and no radius or
+endpoint assumption was added.
+
+Focused verification passed.  This restores the map-definition layer itself
+to framed-green (100%).  It does not verify the downstream all-pairs chart
+tail: the concrete framed `StepB1RawInput` producer and textbook B1 theorem
+remain theorem-level 0%, while whole-HCG machinery remains about 60%.

@@ -85,3 +85,24 @@ global B1 map itself.  Current rounded accounting remains about 98% for
 dedicated Step-B/B1 machinery, 90% for Chapter 4 machinery, and 60% for whole
 HCG machinery; `StepB1RawInput`, textbook B1, and all compactness endpoints
 remain theorem-level 0%.
+
+## 2026-07-18 framed source-cover migration
+
+Both public cover producers now state their patch maps with
+`framedExpDiffeo`, and their radial model-ball clause is the intrinsic
+`expRadiusGp` clause supplied by the migrated Item-3 profile. The local proof
+uses `normalMetric_zero = innerSL`, so the stage-zero quadratic form is exactly
+`‖v‖²`. For the reverse cover witness, the raw Gauss-lemma vector is converted
+once through `normalFrame.symm`; the theorem exposes only the framed model
+coordinate and framed exponential image.
+
+`exists_live_cores` and its `exists_live_source_cover` projection both pass
+focused verification under the canonical framed imports. The only issues met
+during migration were local elaboration shapes for `innerSL`, the intentionally
+disabled tangent-space norm instance, and framed-source preimage unfolding;
+none was a missing geometric API or a new assumption.
+
+The framed finite-source-cover sub-brick is complete (100%). The live framed
+`MetricCompactBase.exists_b1_raw` producer and the textbook Step B1 theorem
+remain theorem-level 0% until the remaining downstream chain is migrated and
+revalidated; whole-HCG support machinery remains about 60%.

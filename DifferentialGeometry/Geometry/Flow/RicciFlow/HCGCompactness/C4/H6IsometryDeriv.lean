@@ -2027,78 +2027,78 @@ theorem normalTrans_isom
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
-      expMapDiffeo (I := I) Y.metric x z ∈
-        (normalChartAt (I := I) Y.metric y).source ->
+      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
+      framedExpDiffeo (I := I) Y.metric x z ∈
+        (framedChartAt (I := I) Y.metric y).source ->
       forall u v : E',
-        normalCoordMetric (I := I) Y y (normalTransition (I := I) Y x y z)
-            (fderiv Real (normalTransition (I := I) Y x y) z u)
-            (fderiv Real (normalTransition (I := I) Y x y) z v) =
+        normalCoordMetric (I := I) Y y
+            (framedTransition (I := I) Y.metric x y z)
+            (fderiv Real (framedTransition (I := I) Y.metric x y) z u)
+            (fderiv Real (framedTransition (I := I) Y.metric x y) z v) =
           normalCoordMetric (I := I) Y x z u v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro z hzx hzy u v
-  have hw : normalTransition (I := I) Y x y z ∈
-      (expMapDiffeo (I := I) Y.metric y).source := by
-    rw [← normalChartAt_target_eq (I := I)]
-    change normalChartAt (I := I) Y.metric y
-      (expMapDiffeo (I := I) Y.metric x z) ∈
-        (normalChartAt (I := I) Y.metric y).target
-    exact (normalChartAt (I := I) Y.metric y).map_source hzy
+  have hw : framedTransition (I := I) Y.metric x y z ∈
+      (framedExpDiffeo (I := I) Y.metric y).source := by
+    change framedChartAt (I := I) Y.metric y
+      (framedExpDiffeo (I := I) Y.metric x z) ∈
+        (framedChartAt (I := I) Y.metric y).target
+    exact (framedChartAt (I := I) Y.metric y).map_source hzy
   have hbase :
-      expMapDiffeo (I := I) Y.metric y
-          (normalTransition (I := I) Y x y z) =
-        expMapDiffeo (I := I) Y.metric x z := by
-    change (normalChartAt (I := I) Y.metric y).symm
-        (normalChartAt (I := I) Y.metric y
-          (expMapDiffeo (I := I) Y.metric x z)) =
-      expMapDiffeo (I := I) Y.metric x z
-    exact (normalChartAt (I := I) Y.metric y).left_inv hzy
+      framedExpDiffeo (I := I) Y.metric y
+          (framedTransition (I := I) Y.metric x y z) =
+        framedExpDiffeo (I := I) Y.metric x z := by
+    change (framedChartAt (I := I) Y.metric y).symm
+        (framedChartAt (I := I) Y.metric y
+          (framedExpDiffeo (I := I) Y.metric x z)) =
+      framedExpDiffeo (I := I) Y.metric x z
+    exact (framedChartAt (I := I) Y.metric y).left_inv hzy
   have hdx : MDifferentiableAt 𝓘(Real, E') I
-      (expMapDiffeo (I := I) Y.metric x) z :=
-    ((expMapDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
+      (framedExpDiffeo (I := I) Y.metric x) z :=
+    ((framedExpDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero z hzx).mdifferentiableAt
-        ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hzx)
+        ((framedExpDiffeo (I := I) Y.metric x).open_source.mem_nhds hzx)
   have hcy : MDifferentiableAt I 𝓘(Real, E')
-      (normalChartAt (I := I) Y.metric y)
-      (expMapDiffeo (I := I) Y.metric x z) :=
-    ((normalChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
+      (framedChartAt (I := I) Y.metric y)
+      (framedExpDiffeo (I := I) Y.metric x z) :=
+    ((framedChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero _ hzy).mdifferentiableAt
-        ((normalChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
+        ((framedChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
   have hT : MDifferentiableAt 𝓘(Real, E') 𝓘(Real, E')
-      (normalTransition (I := I) Y x y) z := by
-    simpa only [normalTransition, Function.comp_apply] using hcy.comp z hdx
+      (framedTransition (I := I) Y.metric x y) z := by
+    simpa only [framedTransition, Function.comp_apply] using hcy.comp z hdx
   have hdy : MDifferentiableAt 𝓘(Real, E') I
-      (expMapDiffeo (I := I) Y.metric y)
-      (normalTransition (I := I) Y x y z) :=
-    ((expMapDiffeo (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
+      (framedExpDiffeo (I := I) Y.metric y)
+      (framedTransition (I := I) Y.metric x y z) :=
+    ((framedExpDiffeo (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
       one_ne_zero _ hw).mdifferentiableAt
-        ((expMapDiffeo (I := I) Y.metric y).open_source.mem_nhds hw)
+        ((framedExpDiffeo (I := I) Y.metric y).open_source.mem_nhds hw)
   have hnear : ∀ᶠ q in nhds z,
-      expMapDiffeo (I := I) Y.metric x q ∈
-        (normalChartAt (I := I) Y.metric y).source :=
+      framedExpDiffeo (I := I) Y.metric x q ∈
+        (framedChartAt (I := I) Y.metric y).source :=
     hdx.continuousAt.eventually
-      ((normalChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
+      ((framedChartAt (I := I) Y.metric y).open_source.mem_nhds hzy)
   have heq :
-      (expMapDiffeo (I := I) Y.metric y) ∘
-          (normalTransition (I := I) Y x y) =ᶠ[nhds z]
-        expMapDiffeo (I := I) Y.metric x := by
+      (framedExpDiffeo (I := I) Y.metric y) ∘
+          (framedTransition (I := I) Y.metric x y) =ᶠ[nhds z]
+        framedExpDiffeo (I := I) Y.metric x := by
     filter_upwards [hnear] with q hq
-    change (normalChartAt (I := I) Y.metric y).symm
-        (normalChartAt (I := I) Y.metric y
-          (expMapDiffeo (I := I) Y.metric x q)) =
-      expMapDiffeo (I := I) Y.metric x q
-    exact (normalChartAt (I := I) Y.metric y).left_inv hq
+    change (framedChartAt (I := I) Y.metric y).symm
+        (framedChartAt (I := I) Y.metric y
+          (framedExpDiffeo (I := I) Y.metric x q)) =
+      framedExpDiffeo (I := I) Y.metric x q
+    exact (framedChartAt (I := I) Y.metric y).left_inv hq
   have hcomp :
       (mfderiv 𝓘(Real, E') I
-          (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
-          (normalTransition (I := I) Y x y z)).comp
+          (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
+          (framedTransition (I := I) Y.metric x y z)).comp
           (mfderiv 𝓘(Real, E') 𝓘(Real, E')
-            (normalTransition (I := I) Y x y) z) =
+            (framedTransition (I := I) Y.metric x y) z) =
         mfderiv 𝓘(Real, E') I
-          (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z := by
+          (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z := by
     have hderiv := Filter.EventuallyEq.mfderiv_eq
       (I := 𝓘(Real, E')) (I' := I) heq
     rw [mfderiv_comp z hdy hT] at hderiv
@@ -2107,21 +2107,21 @@ theorem normalTrans_isom
   have hu := DFunLike.congr_fun hcomp u
   have hv := DFunLike.congr_fun hcomp v
   rw [mfderiv_eq_fderiv (𝕜 := Real) (E := E') (E' := E')
-    (f := normalTransition (I := I) Y x y) (x := z)] at hu hv
+    (f := framedTransition (I := I) Y.metric x y) (x := z)] at hu hv
   change (mfderiv 𝓘(Real, E') I
-      (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
-      (normalTransition (I := I) Y x y z))
-        (fderiv Real (normalTransition (I := I) Y x y) z u) =
+      (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
+      (framedTransition (I := I) Y.metric x y z))
+        (fderiv Real (framedTransition (I := I) Y.metric x y) z u) =
       mfderiv 𝓘(Real, E') I
-        (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z u at hu
+        (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z u at hu
   change (mfderiv 𝓘(Real, E') I
-      (fun q : E' => expMapDiffeo (I := I) Y.metric y q)
-      (normalTransition (I := I) Y x y z))
-        (fderiv Real (normalTransition (I := I) Y x y) z v) =
+      (fun q : E' => framedExpDiffeo (I := I) Y.metric y q)
+      (framedTransition (I := I) Y.metric x y z))
+        (fderiv Real (framedTransition (I := I) Y.metric x y) z v) =
       mfderiv 𝓘(Real, E') I
-        (fun q : E' => expMapDiffeo (I := I) Y.metric x q) z v at hv
+        (fun q : E' => framedExpDiffeo (I := I) Y.metric x q) z v at hv
   exact congrArg₂
-    (fun a b => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z) a b) hu hv
+    (fun a b => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z) a b) hu hv
 
 /-- On a controlled overlap, the derivative of a normal-coordinate
 transition is a linear bijection. -/
@@ -2133,24 +2133,24 @@ theorem normal_fderiv_bij
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
-      expMapDiffeo (I := I) Y.metric x z ∈
-        (normalChartAt (I := I) Y.metric y).source ->
+      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
+      framedExpDiffeo (I := I) Y.metric x z ∈
+        (framedChartAt (I := I) Y.metric y).source ->
       z ∈ U ->
       Function.Bijective
-        (fderiv Real (normalTransition (I := I) Y x y) z) := by
+        (fderiv Real (framedTransition (I := I) Y.metric x y) z) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro z hzx hzy hzU
   have hinj : Function.Injective
-      (fderiv Real (normalTransition (I := I) Y x y) z) :=
+      (fderiv Real (framedTransition (I := I) Y.metric x y) z) :=
     isom_injective
       (normalCoordMetric (I := I) Y x z)
       (normalCoordMetric (I := I) Y y
-        (normalTransition (I := I) Y x y z))
-      (fderiv Real (normalTransition (I := I) Y x y) z)
+        (framedTransition (I := I) Y.metric x y z))
+      (fderiv Real (framedTransition (I := I) Y.metric x y) z)
       (fun v => (hx z hzU v).1)
       (fun v => normalTrans_isom Y x y hzx hzy v v)
   exact ⟨hinj, LinearMap.surjective_of_injective hinj⟩
@@ -2167,12 +2167,12 @@ theorem normal_fderiv_le_two
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     forall {z : E'},
-      z ∈ (expMapDiffeo (I := I) Y.metric x).source ->
-      expMapDiffeo (I := I) Y.metric x z ∈
-        (normalChartAt (I := I) Y.metric y).source ->
+      z ∈ (framedExpDiffeo (I := I) Y.metric x).source ->
+      framedExpDiffeo (I := I) Y.metric x z ∈
+        (framedChartAt (I := I) Y.metric y).source ->
       z ∈ U ->
-      normalTransition (I := I) Y x y z ∈ V ->
-      ‖fderiv Real (normalTransition (I := I) Y x y) z‖ <= 2 := by
+      framedTransition (I := I) Y.metric x y z ∈ V ->
+      ‖fderiv Real (framedTransition (I := I) Y.metric x y) z‖ <= 2 := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -2180,10 +2180,11 @@ theorem normal_fderiv_le_two
   intro z hzx hzy hzU hzV
   exact opNorm_le_two
     (normalCoordMetric (I := I) Y x z)
-    (normalCoordMetric (I := I) Y y (normalTransition (I := I) Y x y z))
-    (fderiv Real (normalTransition (I := I) Y x y) z)
+    (normalCoordMetric (I := I) Y y
+      (framedTransition (I := I) Y.metric x y z))
+    (fderiv Real (framedTransition (I := I) Y.metric x y) z)
     (fun v => (hx z hzU v).2)
-    (fun w => (hy (normalTransition (I := I) Y x y z) hzV w).1)
+    (fun w => (hy (framedTransition (I := I) Y.metric x y z) hzV w).1)
     (fun v => normalTrans_isom Y x y hzx hzy v v)
 
 section NormalBounds
@@ -2213,7 +2214,7 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       U ⊆ Metric.ball (0 : E')
-        (expMapC2Radius (I := I) (X.obj k).metric (x k)))
+        (expRadiusGp (I := I) (X.obj k).metric (x k)))
     (hVexp : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -2221,7 +2222,7 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       V ⊆ Metric.ball (0 : E')
-        (expMapC2Radius (I := I) (X.obj k).metric (y k)))
+        (expRadiusGp (I := I) (X.obj k).metric (y k)))
     (hPhi : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x k) (y k)) U)
     (hovl : ∀ k,
@@ -2231,9 +2232,9 @@ theorem normal_bounds_on
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       ∀ z ∈ U,
-        z ∈ (expMapDiffeo (I := I) (X.obj k).metric (x k)).source ∧
-          expMapDiffeo (I := I) (X.obj k).metric (x k) z ∈
-            (normalChartAt (I := I) (X.obj k).metric (y k)).source)
+        z ∈ (framedExpDiffeo (I := I) (X.obj k).metric (x k)).source ∧
+          framedExpDiffeo (I := I) (X.obj k).metric (x k) z ∈
+            (framedChartAt (I := I) (X.obj k).metric (y k)).source)
     (hmap : ∀ k, Set.MapsTo
       (normalTransition (I := I) (X.obj k) (x k) (y k)) U V) :
     IsometryDerivBoundsOn U

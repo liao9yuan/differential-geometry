@@ -1,5 +1,28 @@
 # StepCStageComparison.lean - local identification of the global stage map
 
+## 2026-07-18 framed migration: focused and exact green
+
+The canonical stage-map statements and proofs now use `framedChartAt` at every
+source and target center.  The item-3 target radius passed to
+`stageWeight_small` is the intrinsic `expRadiusGp` bound.  The three chart-target
+membership arguments use the checked `framedExp_source` reduction and the
+orthonormal-frame radius comparison.  The sequence-level `normalTransition`
+calls remain unchanged because that name is already the canonical framed alias.
+No endpoint-radius hypothesis, compatibility wrapper, or public theorem rename
+was introduced.  The complete selected-branch prerequisite chain through
+`StepCSupportCapstone` has now been exact-refreshed on the framed semantics, and
+this file passes focused Lean verification against those current artifacts.
+Static source and diff review also passed.  Its exact target refresh then
+completed successfully against the same canonical framed dependency chain.
+
+The framed source migration and current module verification are 100%.  The live
+`MetricCompactBase.exists_b1_raw` declaration already has a complete proof
+body, but its canonical framed downstream validation is still in progress and
+must not yet be reported as a fully revalidated producer.  The separately named
+textbook Step B1 theorem and unconditional compactness endpoints remain
+theorem-level 0%.  Dedicated B1 machinery is about 95%, Chapter 4 machinery
+about 87%, and whole-HCG compactness machinery about 60%.
+
 ## 2026-07-15 checked identification seam
 
 `uniqueStage_of_fill` proves that a local `CenterInput` for any active-filled

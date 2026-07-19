@@ -15,23 +15,27 @@ plan). Verification passed, sorry-free (2026-06-11).
   `contMDiffOn_of_locally_contMDiffOn`.
 - **`exists_expBall_diffeo`** (MSM135 `lbl383` item 3a, assembly form): for
   `ofReal r < injRadius g p`, given `hloc : IsLocalDiffeomorphOn 𝓘(ℝ,E) I 1
-  (expMap g p) (ball 0 r)`, the exponential restricts to a `C^1`
+  (framedExpMap g p) (ball 0 r)`, the orthonormally framed exponential restricts to a `C^1`
   `PartialDiffeomorph` with source `Metric.ball (0:E) r`. Injectivity is
   discharged (`injOn_expMap_ball_of_ofReal_lt_injRadius`); `hloc` is the one
   remaining input.
 
 ## B3 RESOLVED (2026-06-13) — item-3a complete, unconditional
 
-- **`exp_isLocalDiffeomorphOn_ball`** (`r ≤ expMapC2Radius`): discharges `hloc`
-  DIRECTLY from `NormalCoordinates.expMapDiffeo` (the repo's normal-coordinate
-  partial-diffeomorphism realizing exp). Source ⊇ ball via
-  `ball_subset_normalChartAt_target` + `normalChartAt_target_eq`; equals exp on the
-  source via `expMapDiffeo_apply_eq`. `IsLocalDiffeomorphAt` is then immediate (the
-  diffeo Φ with `x ∈ Φ.source`, `EqOn exp Φ Φ.source`).
-- **`exists_expBall_diffeo_of_lt`** (`ofReal r < injRadius` AND `r ≤ expMapC2Radius`):
+- **`exp_isLocalDiffeomorphOn_ball`** (`r ≤ expRadiusGp`): discharges `hloc`
+  from `framedExpDiffeo`. `normalFrame_sqrt` converts the model radius into the
+  intrinsic tangent radius used by the Gauss/source lemmas.
+- **`exists_expBall_diffeo_of_lt`** (`ofReal r < injRadius` AND `r ≤ expRadiusGp`):
   the UNCONDITIONAL item-3a ball diffeomorphism — `hloc` no longer a hypothesis.
 
 The Jacobi/Grönwall route below (the "remaining input") is NO LONGER NEEDED for `hloc`.
+
+## 2026-07-18 framed migration
+
+The item-3a API now uses the same orthonormally framed exponential map as
+`injRadius`. Focused verification passes after the Gauss radius dependency was
+refreshed. This removes the previous mismatch between intrinsic injectivity
+balls and raw atlas-model balls.
 
 ## (Obsolete for hloc) The former B3 frontier
 

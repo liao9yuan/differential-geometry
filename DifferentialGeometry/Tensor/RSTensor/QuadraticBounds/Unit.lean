@@ -760,32 +760,27 @@ private theorem unitRest_compact
   haveI : CompactSpace D := isCompact_iff_compactSpace.mp hDcompact
   exact isCompact_range hmkCont
 
-/-- Compactness of the unit tangent bundle over a compact base.
-
-The intended proof is by local trivializations of `TangentBundle I M`, compact
-model unit spheres in finite-dimensional fibers, and a finite subcover of the
-compact base. -/
-theorem metricUnit_compact
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
-    (g : SmoothRiemannianMetric I M) :
-    IsCompact (Set.univ : Set (MetricUnitTangent (I := I) (M := M) g)) := by
+/-- Metric-unit tangent vectors based in a compact set form a compact set. -/
+theorem metricUnitOn_compact
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
+    IsCompact {p : MetricUnitTangent (I := I) (M := M) g |
+      MetricUnitTangent.base (I := I) (M := M) p ∈ K} := by
   classical
   let U : M → Set M := fun x => (trivializationAt E (TangentSpace I) x).baseSet
   have hUopen : ∀ x : M, IsOpen (U x) := by
     intro x
     exact (trivializationAt E (TangentSpace I) x).open_baseSet
-  have hUcover : (Set.univ : Set M) ⊆ ⋃ x : M, U x := by
+  have hUcover : K ⊆ ⋃ x : M, U x := by
     intro y hy
     exact mem_iUnion.mpr
       ⟨y, mem_baseSet_trivializationAt E (TangentSpace I) y⟩
   obtain ⟨t, htcover⟩ :=
-    (isCompact_univ : IsCompact (Set.univ : Set M)).elim_finite_subcover
-      U hUopen hUcover
-  obtain ⟨K, hKcompact, hKsub, hKeq⟩ :=
-    (isCompact_univ : IsCompact (Set.univ : Set M)).finite_compact_cover
-      t U (fun i _ => hUopen i) htcover
+    hK.elim_finite_subcover U hUopen hUcover
+  obtain ⟨Kloc, hKcompact, hKsub, hKeq⟩ :=
+    hK.finite_compact_cover t U (fun i _ => hUopen i) htcover
   let loc : M → Set (MetricUnitTangent (I := I) (M := M) g) :=
-    fun i => {p | MetricUnitTangent.base (I := I) (M := M) p ∈ K i}
+    fun i => {p | MetricUnitTangent.base (I := I) (M := M) p ∈ Kloc i}
   have hlocal_compact : ∀ i ∈ t, IsCompact (loc i) := by
     intro i hi
     obtain ⟨R, hR, hbound⟩ :=
@@ -796,19 +791,29 @@ theorem metricUnit_compact
         (trivializationAt E (TangentSpace I) i)
         (hKcompact i) (by simpa [U] using hKsub i) hR hbound
   have hunion :
-      (Set.univ : Set (MetricUnitTangent (I := I) (M := M) g)) =
+      {p : MetricUnitTangent (I := I) (M := M) g |
+          MetricUnitTangent.base (I := I) (M := M) p ∈ K} =
         ⋃ i ∈ t, loc i := by
     ext p
     constructor
     · intro hp
       have hbase : MetricUnitTangent.base (I := I) (M := M) p ∈
-          (Set.univ : Set M) := Set.mem_univ _
+          K := hp
       rw [hKeq] at hbase
       simpa [loc] using hbase
     · intro hp
-      exact Set.mem_univ p
+      change MetricUnitTangent.base (I := I) (M := M) p ∈ K
+      rw [hKeq]
+      simpa [loc] using hp
   rw [hunion]
   exact t.isCompact_biUnion hlocal_compact
+
+/-- Compactness of the unit tangent bundle over a compact manifold. -/
+theorem metricUnit_compact
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) :
+    IsCompact (Set.univ : Set (MetricUnitTangent (I := I) (M := M) g)) := by
+  simpa using metricUnitOn_compact (I := I) (M := M) g isCompact_univ
 
 /-- Continuity of evaluating a smooth `(0,2)` tensor field on the repeated
 unit-tangent vector.

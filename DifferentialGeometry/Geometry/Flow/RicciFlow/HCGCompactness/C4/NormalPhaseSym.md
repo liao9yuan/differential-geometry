@@ -26,3 +26,10 @@ are unchanged.
 This ODE-side producer is complete for the current branch.  The remaining work
 is the HCG-side branch/readout transport and concrete finite-hat containment;
 it is not another flow-regularity problem.
+
+## 2026-07-18 framed-radius migration
+
+`exists_normal_biflow` now exposes the canonical `expRadiusGp / 4` source
+fence.  Focused verification and the module refresh passed after the owning
+realization binder was migrated first.  This closes the stale phase-flow
+signature chain but does not discharge the uniform H6 profile frontier.

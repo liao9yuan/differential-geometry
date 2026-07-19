@@ -63,3 +63,19 @@ the minimizing readout.  Focused verification and the targeted module refresh
 passed.  `StepB1RawInput` and textbook B1 remain theorem-level **0%**;
 dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
 whole-HCG compactness machinery about **57%**.
+
+## 2026-07-18 framed branch migration
+
+The selected branch now consistently uses the orthonormally framed fixed-center
+coordinates.  `chart_mem_norm_le` returns `framedChartAt` source membership and
+uses `normalFrame_sqrt` with the Gauss radial-length identity, so the obsolete
+raw-coordinate coercivity calculation at the origin is gone.  The branch
+origin, target recovery, closed-ball fences, controlled pair decoding, and the
+common-domain radius chain now use `framedExpDiffeo`, `framedChartAt`, and
+`expRadiusGp`.
+
+The raw exponential was not replaced at a moving base point; this file's
+changes are confined to coordinates based at the fixed center `x`.  Focused
+verification and the targeted module refresh passed, with no local warnings.
+This closes a framed consumer seam but does not prove `NormalRadiusProfile`:
+that theorem remains 0%, while its dedicated Rm04 machinery remains about 80%.

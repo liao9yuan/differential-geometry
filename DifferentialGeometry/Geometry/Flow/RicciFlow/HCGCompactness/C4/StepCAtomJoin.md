@@ -56,3 +56,18 @@ a separate downstream task. Focused verification after the cleanup passed.
 The downstream task is now complete: the finite source-slot diagonal uses the
 H6 entrypoint, and the endpoint S6 field/type were removed after a zero-consumer
 audit.  The remaining sparse interacting-target redesign is independent of S6.
+
+## 2026-07-18 framed normal-coordinate migration
+
+`existsLiveJointH6` now uses the canonical per-center orthonormal-frame
+coordinates throughout: its radius premises are stated with `expRadiusGp`, and
+its source/target map is `framedExpDiffeo` into a `framedExpMap` image.  The old
+manual raw-chart decoding in the transition maps-to proof was deleted in favor
+of the checked `normalTrans_mapsTo` adapter from `StepBTransitionOverlap`.
+
+Focused verification passes with no diagnostics.  This restores the joint
+metric/transition extractor itself to 100% checked under framed semantics; it
+does not revalidate the downstream atom package or the selected B/C capstone.
+`StepB1RawInput` and textbook Step B1 remain 0% theorem completion.  Whole-HCG
+support machinery remains approximately 60%, while the unconditional
+compactness endpoints remain 0%.

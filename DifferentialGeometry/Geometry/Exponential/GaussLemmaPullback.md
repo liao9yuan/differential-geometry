@@ -50,3 +50,20 @@ constant; the candidate coefficient need not be positive.
 This is the canonical lower-layer repair needed by the HCG Gate 6 radius
 producer.  Focused verification and the targeted module refresh passed.  No
 HCG endpoint assumption or parallel coercivity constant was introduced.
+
+## 2026-07-18: explicit-radius comparisons after framed injectivity migration
+
+The framed injectivity-radius migration temporarily exposed an instance
+compatibility regression in the raw `expMapDiffeo` source-ball helper.  The
+canonical helper was repaired in `Comparison/InjectivityRadius.lean` so its
+legacy raw section retains the caller's explicit `NormedSpace` instance; this
+file does not duplicate that open-ball argument.
+
+The four projections from `expMapC2Radius` are now proved by first unfolding
+the named minimum into a local `hle`, then composing the requested strict
+inequality with that bound.  This makes the proof insensitive to elaboration
+of nested `min_le_left`/`min_le_right` chains while preserving every public
+statement and the value of `expMapC2Radius`.
+
+Focused verification and the exact module refresh passed against the repaired
+canonical API.

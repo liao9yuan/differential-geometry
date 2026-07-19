@@ -1,5 +1,27 @@
 # StepB1MetricLocal status
 
+## 2026-07-18: canonical framed-coordinate source migration
+
+Status: source migration, focused Lean verification, and the exact module
+refresh are complete on the canonical framed chain.
+
+- Every fixed-center chart in `source_stay`, `pb_buf_tail`, and
+  `pb_local_tail` now uses `framedChartAt`.
+- The source-target entry proof in `source_stay` now consumes the intrinsic
+  `expRadiusGp` ball supplied by `HasSuppConvData.geom_on` and enters the
+  framed exponential source using `framedExp_source`, `normalFrame_sqrt`, and
+  the existing intrinsic-to-raw kernel bridge.  No raw-radius hypothesis or
+  endpoint radius input was added.
+- Public theorem names and assumptions are unchanged.  The remaining
+  `expMapC2Radius` spelling occurs only inside the established low-level bridge
+  theorem that proves membership in the raw exponential kernel after applying
+  the orthonormal frame; it is not a public radius seam.
+
+Focused verification exposed only three missing namespace qualifications in
+the local source-membership bridge.  Qualifying `framedExpDiffeo`,
+`framedExp_source`, and `normalFrame_sqrt` through `NormalCoordinates` closed
+the file without changing any theorem statement or geometric argument.
+
 ## 2026-07-16: buffered moving-source coefficient tail
 
 Status: focused verification passed, with no `sorry`, `admit`, or warnings.
@@ -32,16 +54,17 @@ no stage-family stay assumption or new compactness-input field was added.
 
 ## Remaining frontier and accounting
 
-The Euclidean moving-source coefficient sublane in this file is complete
-(100%).  The next independent analytic frontier is the chart-coefficient to
-intrinsic `tensor02CovDerivNormWith` conversion, followed by the corresponding
-exact-local-inverse estimate.  Those results are not claimed here.
+The canonical framed moving-source coefficient proof is focused- and
+exact-green.
+The chart-coefficient to intrinsic `tensor02CovDerivNormWith` conversion and
+the corresponding exact-local-inverse estimate now have complete live proof
+bodies in downstream modules.  They are not new analytic frontiers; their
+canonical framed consumer files still require migration and revalidation.
 
-- `StepB1RawInput` producer theorem: stated and partially filled, but still 0%
-  at theorem level while its two metric fields contain `sorry`.  Its dedicated
-  concrete record-field machinery is approximately 60% complete.
-- Dedicated B/C machinery: approximately 98%.
-- Chapter 4 machinery: approximately 90%.
+- `exists_b1_raw` has a proof body, but its framed dependency chain has not yet
+  been reverified green.  Its source implementation is complete, but it must
+  not yet be reported as framed-green.
+- Dedicated B1 machinery: approximately 95%.
+- Chapter 4 machinery: approximately 87%.
 - Whole HCG machinery: approximately 60%.
-- Textbook B1 and compactness endpoints: 0% until their Lean theorem bodies are
-  stated and proved from the concrete producer.
+- Textbook B1 and unconditional compactness endpoints: 0%.

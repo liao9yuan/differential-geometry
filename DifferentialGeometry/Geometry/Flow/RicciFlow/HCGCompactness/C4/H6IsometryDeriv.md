@@ -8,8 +8,19 @@ branch and does not add a new consumer-side assumption.
 
 ## Status
 
-- Focused verification and the targeted module build pass with no `sorry` or
-  local linter warning in this file.
+- The framed-coordinate migration is complete. `normalTrans_isom`,
+  `normal_fderiv_bij`, and `normal_fderiv_le_two` now state their overlap and
+  derivative conclusions directly with `framedExpDiffeo`, `framedChartAt`, and
+  `framedTransition`.
+- `normal_bounds_on` now takes its two smoothness containments at the intrinsic
+  `expRadiusGp` scale and its overlap hypothesis in the framed chart domains.
+  Its sequence-family input/output deliberately retains the public
+  `normalTransition` compatibility alias: that alias is definitionally
+  `framedTransition` and packages the per-object manifold instances that a raw
+  sequence lambda cannot infer on its own.
+- Focused verification and the later ordered exact module refresh pass with no
+  `sorry` or local linter warning.  The refresh was deferred until explicit
+  authorization and run in dependency order.
 - Gate 1 is complete: `isom_first_bound` turns exact metric isometry and the H6
   `1/2`/`2` quadratic-form comparison into the order-one bound `2`.
 - Gate 2 is complete at the reusable pointwise level.  `isom_jet_one`
@@ -33,6 +44,8 @@ branch and does not add a new consumer-side assumption.
 - Route-mistake count is zero.  No alternative mathematical route was discarded.
 - Final localized `IsometryDerivBoundsOn` producer theorem: **100% proved**.
   Dedicated H6 Section 5 machinery: **100% for the localized producer**.
+  The canonical framed source repair and its focused verification are also
+  **100% complete**.
   The fixed-source B/C consumer path through transition extraction, live-slot
   extraction, and atom/weight packaging is now checked. The finite source-slot
   diagonal and endpoint removal of `ExpInverseDerivBoundInput` remain separate.

@@ -92,3 +92,24 @@ layer can wrap `atomWeight_of_atoms` directly when it has fixed `L`, `beta`, and
 theorem. Focused verification passed. This API refactor changes no endpoint
 percentage: the final compactness theorem remains unstated/unproved (0%), while
 whole-project machinery remains about 53%.
+
+## 2026-07-18 framed normal-coordinate migration
+
+All direct atom-package consumers have been migrated to the canonical framed
+API.  `atomWeight_of_atoms`, the private common-tail core, both H6 entrypoints,
+and the compatibility cover now use `framedExpDiffeo`; transition target images
+use `framedExpMap`; chart-source membership uses `framedChartAt`; and every
+normal-coordinate radius premise is `expRadiusGp`.  No new assumption or
+compatibility wrapper was introduced.
+
+Source review is clean, but focused verification is intentionally not yet green:
+the only diagnostics are stale-import shapes from the old exported
+`StepCAtomConv` and `StepCAtomJoin` declarations (raw `seqAtomChart`, raw
+`stepCAtom_conv` source membership, old smoothness radius, and old joint H6
+signature).  The required refresh order is `StepCAtomConv`, then
+`StepCAtomJoin`; after those artifacts are refreshed, this file must be focused
+checked before any optional `StepCAtomPackage` refresh.  Until that happens the
+framed fixed-source atom/weight package is 0% revalidated, although its source
+migration is complete.  The selected B/C capstone, `StepB1RawInput`, textbook
+Step B1, and the unconditional compactness endpoints remain 0% theorem
+completion; whole-HCG support machinery remains approximately 60%.

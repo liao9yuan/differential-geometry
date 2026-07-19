@@ -144,3 +144,21 @@ Focused verification and the targeted refresh passed. The concrete
 `StepB1RawInput` producer and textbook B1 remain theorem-level **0%**;
 dedicated Step-B/B1 machinery is about **98%**, Chapter 4 about **90%**, and
 whole-HCG compactness machinery about **60%**.
+
+## 2026-07-18 canonical framed-chart migration
+
+The five fixed-base readouts in `HasHatCmEqn` and `HasHatCmStrictAt` now use
+`NormalCoordinates.framedChartAt` at the selected center `x0`.  This matches
+the canonical model-space coordinates already returned by
+`exists_hat_cm_eqn_at` and `exists_hat_cm_sol_at`; no moving-base chart was
+changed.
+
+The first downstream focused check found only a stale Cage artifact.  After
+the coordinated exact Cage refresh, the repeated focused check and the exact
+module refresh are green, confirming that all three producer calls now consume
+the framed interface without a local proof repair.  The
+`exists_b1_raw` source proof is complete but is not yet counted exact-green
+until that validation passes.  Dedicated Step-B/B1 machinery is about **95%**,
+Chapter 4 about **87%**, and whole-HCG compactness machinery about **60%**.
+Textbook B1 and the unconditional compactness endpoints remain theorem-level
+**0%**.

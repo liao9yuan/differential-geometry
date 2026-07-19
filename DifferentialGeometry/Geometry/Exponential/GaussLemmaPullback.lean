@@ -261,10 +261,15 @@ theorem expMap_contMDiffAt_infty_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {w : E}
     (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
     ContMDiffAt 𝓘(ℝ, E) I ∞
-      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
-  (Classical.choose_spec
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact min_le_left _ _
+  exact (Classical.choose_spec
     (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p)).2 w
-    (lt_of_lt_of_le hw (min_le_left _ _))
+      (lt_of_lt_of_le hw hle)
 
 /-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²` (a fortiori
 from the `C^∞` smoothness on the named ball). -/
@@ -282,10 +287,15 @@ lemma radial_hasGeodesicEquationAt_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Ioo (-1 : ℝ) 2) :
     Geodesic.HasGeodesicEquationAt (I := I) g
-      (fun s : ℝ => maximalGeodesic (I := I) g p v s) t :=
-  (Classical.choose_spec
+      (fun s : ℝ => maximalGeodesic (I := I) g p v s) t := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact (min_le_right _ _).trans (min_le_left _ _)
+  exact (Classical.choose_spec
     (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).2
-    (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_left _ _))) t ht
+      (lt_of_lt_of_le hv hle) t ht
 
 /-- On the ball of radius `expMapC2Radius g p`, the geodesic rescaling
 identity `maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t` holds for
@@ -293,11 +303,15 @@ identity `maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t` holds for
 lemma maximalGeodesic_rescale_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
-    maximalGeodesic (I := I) g p (t • v) 1 = maximalGeodesic (I := I) g p v t :=
-  (Classical.choose_spec
+    maximalGeodesic (I := I) g p (t • v) 1 = maximalGeodesic (I := I) g p v t := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))
+  exact (Classical.choose_spec
     (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)).2
-    (lt_of_lt_of_le hv
-      (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))) t ht
+      (lt_of_lt_of_le hv hle) t ht
 
 /-- The Euclidean ball of radius `expMapC2Radius g p` is contained in the
 target of the normal chart at `p` (equivalently, the source of the
@@ -311,8 +325,9 @@ lemma ball_subset_normalChartAt_target
   refine (Classical.choose_spec
     (exists_metric_ball_subset_expMapDiffeo_source (I := I) g p)).2 ?_
   rw [Metric.mem_ball, dist_zero_right]
-  exact lt_of_lt_of_le hx
-    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
+  apply lt_of_lt_of_le hx
+  rw [expMapC2Radius]
+  exact (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))
 
 /-- The Euclidean ball of radius `expMapC2Radius g p` lies in the source of the
 exponential-side diffeomorphism `expMapDiffeo g p` (equivalently, the target of
@@ -482,6 +497,36 @@ lemma norm_lt_expMapC2Radius_of_sqrt_inner_lt
   have hsq_lt : ‖x‖ ^ 2 < (expMapC2Radius (I := I) g p) ^ 2 :=
     lt_of_mul_lt_mul_left hlt hc_pos.le
   have hRpos : 0 < expMapC2Radius (I := I) g p := expMapC2Radius_pos (I := I) g p
+  nlinarith [norm_nonneg x, hsq_lt, hRpos]
+
+/-- The coercivity conversion is compatible with division by the same positive
+scale on the Riemannian and model radii. -/
+lemma norm_lt_exp_div
+    (g : SmoothRiemannianMetric I M) (p : M) {x : E} {n : ℝ}
+    (hn : 0 < n)
+    (hx : Real.sqrt (g.inner p x x) < expRadiusGp (I := I) g p / n) :
+    ‖x‖ < expMapC2Radius (I := I) g p / n := by
+  have hc_pos : 0 < gpCoerciveConst (I := I) g p :=
+    gpCoerciveConst_pos (I := I) g p
+  have hsq :
+      g.inner p x x < (expRadiusGp (I := I) g p / n) ^ 2 :=
+    Real.lt_sq_of_sqrt_lt hx
+  have hR : (expRadiusGp (I := I) g p / n) ^ 2 =
+      gpCoerciveConst (I := I) g p *
+        (expMapC2Radius (I := I) g p / n) ^ 2 := by
+    rw [expRadiusGp, div_pow, mul_pow, Real.sq_sqrt hc_pos.le, div_pow]
+    ring
+  rw [hR] at hsq
+  have hcoerc : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤
+      g.inner p x x := gpCoerciveConst_le (I := I) g p x
+  have hlt : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 <
+      gpCoerciveConst (I := I) g p *
+        (expMapC2Radius (I := I) g p / n) ^ 2 :=
+    lt_of_le_of_lt hcoerc hsq
+  have hsq_lt : ‖x‖ ^ 2 < (expMapC2Radius (I := I) g p / n) ^ 2 :=
+    lt_of_mul_lt_mul_left hlt hc_pos.le
+  have hRpos : 0 < expMapC2Radius (I := I) g p / n :=
+    div_pos (expMapC2Radius_pos (I := I) g p) hn
   nlinarith [norm_nonneg x, hsq_lt, hRpos]
 
 

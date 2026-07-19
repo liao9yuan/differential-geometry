@@ -114,3 +114,23 @@ cover theorem is still not stated or proved (0%); this lemma supplies only its
 limit-metric equivalence input.  The current broader accounting remains:
 dedicated Step-B/B1 machinery about 80%, Chapter 4 machinery about 76%, whole
 HCG machinery about 53%, and all compactness endpoint theorems 0%.
+
+## 2026-07-18 framed normal-coordinate migration
+
+- `quadNormal_readout`, `stepCAtom_readout`, `stepCAtomChart`, and
+  `seqAtomChart` now consume the canonical orthonormally framed exponential
+  chart. The public overlap hypotheses use `framedChartAt`, while transition
+  convergence continues to use `normalTransition`, the bundled-manifold alias
+  of `framedTransition`.
+- The intrinsic `quadNormal` definition remains frame-independent. Its framed
+  readout proof uses `normalFrame_inner` to identify the old tangent-vector
+  quadratic form with the fixed model inner product; no compatibility synonym
+  or geometric assumption was added.
+- `seqAtomChart_smooth` now uses the intrinsic `expRadiusGp` ball and
+  `framedExp_smoothOn`. The disjoint-support and finite-family convergence
+  hypotheses were migrated to the same framed parametrization.
+- Focused source verification passed with no diagnostics. This local semantic
+  migration is complete (100%). The live framed `MetricCompactBase.exists_b1_raw`
+  theorem remains 0% until the full downstream framed import chain is repaired
+  and revalidated; the separately named textbook B1 theorem and compactness
+  endpoints remain 0%. Reusable whole-HCG support machinery is about 60%.
