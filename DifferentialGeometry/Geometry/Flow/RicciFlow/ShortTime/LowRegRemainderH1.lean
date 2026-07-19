@@ -8,8 +8,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 
 This file subtracts the fixed background connection Laplacian from the
 low-regularity Ricci--DeTurck forcing estimates. The zero-order estimate is
-closed at `H2 -> H0`; the remaining frontier is the mixed first-derivative
-estimate needed for `H3 -> H1`.
+closed at `H2 -> H0`, and `rem_h1_of_bounds` gives the conditional mixed
+`H3 -> H1` assembly.  The remaining frontier is unconditional integral-product
+control of the concrete lower path coefficients.
 -/
 
 noncomputable section
@@ -24,6 +25,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -105,6 +108,10 @@ theorem rem_h0_lip {ι : Type*}
     _ = (Crhs + 1) *
           ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
 
+-- `unusedVariables` only inspects syntactic dependency in the conclusion and
+-- therefore flags the sufficient bound hypotheses below, although the proof
+-- consumes each of them to establish that conclusion.
+set_option linter.unusedVariables false in
 /-- In dimension three, the exact Ricci--DeTurck path decomposition gives the
 mixed `H3 -> H1` remainder estimate once the concrete zero- and one-order path
 coefficients have uniform low-regularity bounds.  The only `H3` coefficient is

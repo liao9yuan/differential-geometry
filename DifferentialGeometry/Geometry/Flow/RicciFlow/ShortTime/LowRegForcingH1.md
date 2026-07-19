@@ -38,9 +38,10 @@ cancellation.
 
 - `rhs_raw_lip` at H2 input: theorem 100%.
 - `rhs_h0_lip`: theorem 100%.
-- Mixed H3-to-H1 remainder theorem: not yet stated/proved, 0%; dedicated
-  machinery is approximately 60%.
+- Unconditional mixed H3-to-H1 remainder theorem: not yet stated/proved, 0%.
+  The 60% machinery estimate was this file's historical snapshot and is
+  superseded by the 2026-07-18 route ruling in `LowRegRemainderH1.md`.
 - Uniform low-regularity Ricci--DeTurck existence theorem: not yet stated/proved,
   0%.
-- Whole HCG compactness machinery remains approximately 57%; endpoint
-  compactness theorems remain 0% until stated and proved.
+- Whole-program HCG accounting is maintained in `HCGCompactness/PROJECT_MAP.md`;
+  this local forcing note does not carry a second percentage snapshot.

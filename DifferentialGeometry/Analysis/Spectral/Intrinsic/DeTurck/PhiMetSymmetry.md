@@ -19,11 +19,13 @@ The correct repair was to reuse the already public
 `appCcRS_zero_eq_appCc`/`appCc_assoc` API rather than duplicate the old private
 DeTurck helper.
 
-The fold theorem is complete (100%).  The mixed `H^3 -> H^1` remainder theorem
-is still unstated and therefore 0%; its dedicated low-regularity machinery is
-approximately 65% complete.  The next missing producer is a uniform low-order
-bound for the explicit path coefficients, followed by the `H^2`-coefficient
-times `H^2`-tensor product estimate.
+At this historical checkpoint the fold theorem was complete (100%), while the
+mixed `H^3 -> H^1` remainder theorem was unstated and its dedicated machinery
+was estimated at 65%.  The proposed pointwise low-order-coefficient producer is
+superseded by the 2026-07-18 normal-form ruling: that interface cannot be
+closed on the candidate `H3`-bounded, `H2`-small Sobolev contraction ball, and
+the viable replacement is the integral `H1 x H2 -> H1` product route recorded
+in `LowRegRemainderH1.md`.
 
 ## 2026-07-16 public dependency migration
 
@@ -31,8 +33,15 @@ The module no longer imports the oversized remainder implementation. The Lie
 principal readout now comes from `DeTurckLieCoeffAppCcValue`, and the gradient
 slot commutator comes from the new public `gradSlot_sub_eq_curv` producer.
 
-The source migration is complete. Its downstream focused verification is
-temporarily blocked because the new curvature module cannot receive a named
-`.olean` while the unrelated in-flight `Geometry/Operator/Operators.lean`
-changes fail. The mixed `H3 -> H1` endpoint is still unstated (0%); dedicated
-machinery is approximately 78% complete.
+The source migration was complete, but its downstream focused verification was
+temporarily blocked at this checkpoint.  The approximately 78% machinery
+figure was historical and is superseded by the later route ruling.
+
+## 2026-07-18 verification repair
+
+The module already imported `GradSlotCurvature`, but its selective opening of
+`DifferentialGeometry.Analysis.Parabolic.TensorSpectral` omitted
+`gradSlot_sub_eq_curv`.  Adding that one canonical name repairs the stale
+visibility failure.  The named downstream target build and this file's focused
+source check pass.  `phiMet_symm_zero` and `phiMet_curv_fold` remain 100%; the
+unconditional mixed remainder and uniform-existence endpoint remain 0%.

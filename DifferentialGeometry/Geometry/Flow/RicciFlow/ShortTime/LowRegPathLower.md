@@ -14,8 +14,11 @@ covariant derivatives, acts from spectral H2 to spectral H1.  The theorem is
 independent of any high metric Sobolev order.
 
 Focused verification passed without local `sorry`s.  This analytic packaging
-is complete, but the mixed H3-to-H1 endpoint theorem is still unstated and 0%
-complete.  The Ricci pointwise coefficient producer and the public Lie C0
-correction field now exist without high-order assumptions.  What remains is
-the exact public lower-arm readout plus the q=0,1 uniform C3 bounds for the
-resulting C0/C1 coefficient pair along the realized metric path.
+is a proved conditional consumer, but it is not the viable unconditional
+interface for the candidate Sobolev contraction ball.  The 2026-07-18
+normal-form ruling in `LowRegRemainderH1.md` shows that the requested pointwise
+zero-order bound fails on an `H3`-bounded, `H2`-small ball.  The replacement
+frontier is `lower_jet_h1`: integral `H1` control of the zero-order coefficient
+and `H2` control of the first-order coefficient, assembled through an
+`H1 x H2 -> H1` tensor-product estimate.  The unconditional mixed theorem and
+uniform-existence endpoint remain 0%.
