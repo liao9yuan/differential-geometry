@@ -37,7 +37,8 @@ until the fresh axiom audit excludes `sorryAx` or the local-Weyl dependency is
 removed. Its dedicated construction machinery is otherwise highly integrated.
 This does not complete the downstream HCG endpoints: the
 conditional compactness endpoint and textbook B1 theorem remain 0%; the whole
-HCG machinery estimate remains about 51% as recorded in `PROJECT_MAP.md`.
+HCG machinery estimate was about 51% in this 2026-07-13 snapshot.  Current
+whole-program accounting is maintained in `HCGCompactness/PROJECT_MAP.md`.
 
 The two uncommitted planning edits in the primary worktree were deliberately
 not copied into this merge.  They describe an earlier pre-merge state in part
@@ -258,22 +259,29 @@ The sorry-free quantitative coefficient chain is now verified:
   `chartRHS_pou_lip`, giving one constant that controls the Ricci--DeTurck RHS
   value difference by the metric `2`-jet difference for the whole family.
 - `chartRHS_pou_bnd` gives one positive absolute RHS component bound for the
-  whole family.  This supplies the forcing-size budget needed for the
-  fixed-point self-map estimate; a Lipschitz modulus alone did not supply it.
+  whole family.  This supplies the chart-level input to a forcing-size budget;
+  a Lipschitz modulus alone did not supply it.  A uniform realization of that
+  component bound in the spectral `H1` norm used for `norm (Nfun 0)`, including
+  the cross-metric norm comparison, is still missing downstream.
 - `LowRegCoeff`, `IsLowRegCoeff`, and `exists_low_reg_coeff` package all of
   those facts directly from the E1 hypotheses.  Focused and targeted
   verification pass; the headline package and RHS theorem are axiom-clean.
 
 These do not close E1.  The current spectral nonlinearity still requires high
 Sobolev order and the joint-smooth realization chooses a further positive
-subinterval without a uniform lower bound.  The smallest remaining E1 frontier
-is therefore the three-dimensional mixed tame estimate realizing the
+subinterval without a uniform lower bound.  The smallest remaining frontier
+inside the dimension-three specialization is the mixed tame estimate
+realizing the
 Ricci--DeTurck nonlinearity as `H^3 -> H^1` at maximal-regularity order `a = 1`,
 with constants controlled by `LowRegCoeff`.  Its top path arm is now verified:
 `LowRegPathSplit.phi_dev_h2`, `top_path_dev_h2`, and `top_path_ball_h1` give the
 small principal-coefficient estimate from a three-dimensional spectral `H2`
 ball.  `rem_h0_lip` also remains verified.  The exact mixed theorem is still
-unstated and therefore 0%; its dedicated machinery is approximately 70%.
+  unstated and therefore 0%.  The approximately 70% machinery estimate was a
+  2026-07-15 snapshot and is superseded by the 2026-07-18 route ruling below.
+This specialization cannot by itself prove the dimension-generic public
+endpoint; that still needs a quantitative Schauder/`W2p` route or another
+dimension-adaptive low-order solver.
 
 ### 2026-07-16 route-A execution
 
@@ -285,39 +293,148 @@ top path coefficients. Both the exact cancellation and integrated identity are
 sorry-free and need no high-`a` assumption. The generic gradient-slot Ricci
 commutator was also extracted as `GradSlotCurvature.gradSlot_sub_eq_curv`.
 
-`LowRegPathSplit` now consumes `rhsTopPathIntegral` and the public top-path
-joint-smoothness theorem, so its source import chain no longer reaches the
-oversized high-order remainder file. Final downstream verification is waiting
-on an unrelated in-flight failure in `Geometry/Operator/Operators.lean`, which
-currently prevents named `.olean` refreshes. The smallest real mathematical
-frontier is now the uniform `LowRegCoeff` control of the concrete C0/C1 path
-coefficients, followed by assembly with `LowRegPathLower.lower_coeff_h1` and
-`top_path_ball_h1`.
+At the 2026-07-16 checkpoint, `LowRegPathSplit` consumed
+`rhsTopPathIntegral` and the public top-path joint-smoothness theorem, so its
+source import chain no longer reached the oversized high-order remainder file.
+Final downstream verification was then waiting on an unrelated in-flight
+failure in `Geometry/Operator/Operators.lean`.  That verification blocker is
+historical: the 2026-07-18 repair and named target refresh below supersede it.
+The proposed uniform pointwise `LowRegCoeff` frontier is likewise superseded by
+the residual cometric-variation ruling and integral-product route below.
 
-The exact mixed theorem remains unstated and therefore theorem-level 0%; its
-dedicated machinery is approximately 78%. A coarse appeal to `rhs_h1_lip`
+This was the route proposed on 2026-07-16.  The 2026-07-18 execution record
+below identifies the residual cometric-variation obstruction in its zero-order
+C0 term and replaces the pointwise argument by the integral-product route.
+
+The exact mixed theorem remains unstated and therefore theorem-level 0%.  The
+approximately 78% machinery estimate was the 2026-07-16 snapshot and is
+superseded by the 2026-07-18 route ruling below. A coarse appeal to `rhs_h1_lip`
 remains inadmissible because it leaves a nonsmall coefficient on the `H3`
 difference.
 
-After the mixed estimate come the actual low-regularity solver and a
+This route is conditional on `finrank E = 3`; completing it would settle a
+useful specialization, not the unchanged generic endpoint.
+
+Within that specialization, after the mixed estimate come the actual
+low-regularity solver and a
 regularization statement valid on the same uniform interval.  E1 and
-`ricci_flow_unif_existence` remain theorem-level 0%; dedicated E1 machinery is
-about 42%.  The solver must quantify the admissible metric family once and
+`ricci_flow_unif_existence` remain theorem-level 0%.  The roughly 42% E1
+machinery figure was a 2026-07-16 historical estimate, not a current endpoint
+percentage.  The solver must quantify the admissible metric family once and
 produce one `tau > 0` such that every member has both an
 `IsQuasilinearMetricParabolicSolution` and `JointChartGramSmooth` on that same
 `tau`; a later metric-dependent shrink does not prove the uniform statement.
 
-Smallest honest U producer: harmonic-map heat-flow existence for a smooth Ricci
-flow relative to a fixed background, together with the gauge identity and a
-reverse strong-solution realization theorem feeding
+After the missing initial-edge estimate, the smallest honest uniqueness
+producer is
+harmonic-map heat-flow existence for a smooth Ricci flow relative to a fixed
+background, together with the gauge identity and a reverse strong-solution
+realization theorem feeding
 `quasilinear_strong_unique`. This is likewise substantial new analysis.
+
+### 2026-07-18 analytic-producer execution and route ruling
+
+The exact public endpoints remain theorem-level 0%:
+`ricci_flow_unif_existence` and `ricci_flow_forward_unique` still have their
+original statements and proof holes.  No replacement hypothesis, axiom, or
+opaque producer was introduced.  The statements are still expected to be
+mathematically true; the rulings below concern the available formal routes.
+
+For uniform existence, three genuinely different routes were audited to their
+first unavoidable obstruction and ruled out with the current formal API.
+
+1. The checked high-Sobolev maximal-regularity route gives a lifetime depending
+   on mixed constants and `norm (Nfun 0)` at order
+   `4 * finrank E + 10`.  The endpoint's uniform ellipticity and covariant
+   metric bounds only through order three do not control those quantities, so
+   this route cannot choose the required family-wide `tau`.
+2. The intended dimension-three `H3 -> H1` route has a sound small top arm and
+   a fully checked conditional assembly theorem `rem_h1_of_bounds` (named
+   target build and warning-free focused check pass), but its current
+   lower-arm interface is too strong.  It asks for a pointwise bound on
+   `rhsLow0PathIntegral`.  The raw Ricci second-derivative terms partially
+   cancel with the DeTurck terms, but the complete normal form retains the
+   generically nonzero arm
+   `D(g^-1)[U] * nabla^2 g = -(g^-1 U g^-1) * nabla^2 g`.
+   With a fixed compactly supported chart bump and
+   `bump_n(x) = n^(-3/2) phi(n * (x - x0)) K`, take
+   `T'_n = bump_n` and `T_n = P0 + bump_n` for fixed small `P0`.  Both endpoints
+   stay `H2`-small and `H3`-bounded, their fixed difference is `P0`, and the
+   coefficient is unbounded in `C0`.  Thus the requested pointwise bound is false
+   on the candidate ball.  The faithful replacement is an intrinsic tensor
+   `H1 -> L6` theorem, an `appCc` product estimate
+   `H1 x H2 -> H1`, and a lower-path consumer using `H1` control for the
+   zero-order coefficient and `H2` control for the first-order coefficient.
+   Its differentiated product uses `H2 -> L-infinity`, `H1 -> L6`, and
+   finite-volume `L6 -> L3` for the separate factors.  The scalar Sobolev and
+   component estimates exist, but public finite-component
+   reconstruction is currently only available in `L2`.  Even after that layer,
+   this route is dimension-three only, while the endpoint is generic in
+   `finrank E`; it also still needs family-uniform mixed constants, comparison
+   between the `gBase` and `g0` spectral norms, a uniform spectral-`H1`
+   realization of the existing chart-level RHS bound as `norm (Nfun 0)`, and
+   smoothing on the same selected horizon.
+3. A dimension-generic Schauder or `W2p` proof would faithfully use the stated
+   `C3` family data, but the repository has no corresponding quasilinear
+   parabolic existence and regularization engine.  This is foundational
+   analytic infrastructure, not an adapter around the current Hilbert solver.
+
+The smallest useful existence producer is therefore the dimension-three
+tensor `H1 -> L6` bridge (then `appCc_h1_h2_h1`), but it is only the next
+machinery lemma, not a proof of the unchanged generic endpoint.  A complete
+endpoint route must additionally supply either a dimension-generic low-order
+solver or a Schauder/`W2p` engine, plus uniform-family norm comparison and
+horizon-preserving smoothing.
+
+For smooth forward uniqueness, three different routes were likewise audited
+to their first unavoidable obstruction and ruled out with the current formal
+API before the geometric endpoint.
+
+1. The harmonic-map DeTurck ladder is missing short-time harmonic-map heat-flow
+   existence for an arbitrary Ricci flow, diffeomorphism regularity, and the
+   gauge PDE identity.  The existing ODE-flow uniqueness can be reused only
+   after this common gauge has been constructed.
+2. A direct Kotschwar-style metric/connection/curvature energy proof has some
+   algebraic connection and curvature difference identities available, but no
+   coupled evolution inequalities, closed energy estimate, or boundary-time
+   regularization theorem for the endpoint's merely `C0`-at-initial-time class.
+   In particular the available hypotheses have not been bridged to uniform
+   fixed-background first-derivative and parabolically weighted second-derivative
+   bounds near the initial time.
+3. The checked maximal-regularity uniqueness theorem compares two fixed points
+   of one truncated forcing map.  There is no reverse theorem taking an
+   arbitrary geometric Ricci--DeTurck solution to that Duhamel representation;
+   a fixed-coordinate attack on Ricci flow itself retains the diffeomorphism
+   kernel and therefore does not avoid the gauge construction.
+
+The smallest next uniqueness lemma is an initial-edge estimate
+`ricci_edge_bounds`: on a common short window it should derive metric
+equivalence, an order-one fixed-background covariant bound, and a
+`sqrt (t-a)`-weighted order-two bound from the exact endpoint hypotheses.  The
+next consumer-shaped producers are a short-window harmonic map heat flow and
+gauge identity (for example `hmHeatShort` followed by `ricciGaugeShort`),
+together with either local Ricci--DeTurck energy uniqueness or the missing
+PDE-to-Duhamel realization.  A separate faithful alternative is
+an identity-gauge uniqueness theorem for regularizing Ricci flows from a smooth
+`C0` initial metric; that rough-flow infrastructure is also absent.  Local
+uniqueness must then be continued across the whole common interval and the
+gauge undone.
+
+Consequently `extends_of_rmBounded` still depends directly on both unproved
+analytic endpoints.  Its consumer/gluing construction remains checked, but
+neither it nor the downstream maximal-time blow-up package is axiom-clean of
+these two `sorryAx` dependencies.  The HCG compactness lanes remain independent
+and can progress, while the unconditional Hamilton positive-Ricci endpoint
+remains theorem-level 0%.
 
 ## §5 Risks / open questions
 
 1. The merged high-Sobolev engine cannot be uniformized from C3 data by merely
    exposing its time choice: its zero-forcing norm and mixed constants live at
-   order `4 * finrank E + 10`.  E1 therefore needs the low-regularity solver
-   identified above; do not revive the old "re-run the same contraction"
+   order `4 * finrank E + 10`.  The generic E1 endpoint therefore needs a
+   dimension-generic low-order or Schauder/`W2p` solver; the current
+   dimension-three lane is only a specialization.  Do not revive the old
+   "re-run the same contraction"
    fallback without strengthening the restart hypotheses.
 2. Merge scale: 106 both-modified + 15 delete/modify + comment-strip noise;
    budget a dedicated merge session with the M1 policy table in hand, and

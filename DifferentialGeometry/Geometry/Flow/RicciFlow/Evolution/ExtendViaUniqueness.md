@@ -29,13 +29,15 @@ fed to the banked `isSolutionOn_of_extendData`. ε := t* + T̃ − ω > 0.
   + `r̃` interior C∞ shifted (`ContMDiffOn.comp` with `(s,x)↦(s−t*,x)`); `ContMDiffOn.union` (both
   open). Similarly C⁰ via `ContinuousOn`.
 
-## The two NEW obligations (the route's frontiers; replace Gate-R/L + jet-matching)
+## Historical planning snapshot (2026-07-02; superseded below)
 
 - **(A) `ricci_flow_interior_restart`**: bounded-curvature solution on `[α,ω)` ⇒ `∃ t* ∈ [α,ω), T̃`,
   `ω < t*+T̃`, and a restart `r̃` from `g_fam t*` (interior C∞ on `Ioo 0 T̃`, C⁰ `Ico`, PDE `Ico`).
   Needs a **uniform/stable existence time** (existence time from `g(t*)` doesn't collapse as `t*→ω`):
   cleanest via `g(t*) → g(ω)` C∞ (BBS) + lower-semicontinuity of the short-time existence time, OR a
-  quantitative-in-curvature short-time existence. **Not in the project.**
+  quantitative-in-curvature short-time existence. **This was the missing state
+  at the snapshot; (A) is now proved from (N), so it is no longer an independent
+  frontier.**
 - **(B) `ricci_flow_forward_unique`**: two flows with the same PDE + interior C∞ + C⁰ + equal initial
   value agree forward. Standard (DeTurck), **not in the project**. ← the main new ingredient / block.
 
@@ -44,14 +46,14 @@ fed to the banked `isSolutionOn_of_extendData`. ε := t* + T̃ − ω > 0.
 User asked to double-check truth before citing. Checked against the local GSM77 LaTeX
 (`RicciFlow/RicciFlowBooksLatex/GSM77/tex/chapters/`):
 
-1. **(B) forward uniqueness on closed M — TRUE, citable.** GSM77 Ch. 7 §5.2 ("Uniqueness of the
-   Ricci–DeTurck flow", the Proposition after eq. 7.41, energy argument in the class with
-   C⁰-comparability + `|∇̃g| + √t|∇̃²g| ≤ A` — automatic for smooth solutions on closed M) +
-   harmonic-map-flow conversion; invoked as standard in GSM77 Ch. 4 (isometry preservation) and
-   Ch. 6. **CAVEAT: the current Lean statement of (B) is TOO WEAK to be this theorem** — it has only
-   the pointwise-in-t PDE + smooth slices; the textbook theorem is for smooth solutions (joint
-   regularity). Before citing, ADD the chart-Gram joint-regularity hypotheses (interior C∞ on
-   `Ioo a b`, C⁰ on `Ico a b` — the standard project fields). Both wiring-site flows have them.
+1. **(B) forward uniqueness on closed M — TRUE, but the advertised GSM route needs an edge
+   theorem.** GSM77 Ch. 7 §5.2 uses the Ricci–DeTurck energy class with C⁰-comparability and
+   `|∇̃g| + √t|∇̃²g| ≤ A`, followed by harmonic-map-flow conversion.  Interior joint C∞ plus
+   chart-Gram C⁰ at the initial time does not by itself make those derivative bounds automatic.
+   The exact Lean statement is still expected true (it is the identity-gauge regularizing-flow
+   class), but this route first needs a theorem deriving the displayed edge bounds from its exact
+   hypotheses, or a direct uniqueness theorem for regularizing Ricci flows.  Merely adding the
+   already-present `Ioo`-C∞ and `Ico`-C⁰ fields did not finish that bridge.
 
 2. **"Flow exists ≥ c(n)/K when |Rm(g₀)| ≤ K" — TRUE mathematics, but CIRCULAR here; DO NOT cite.**
    GSM77 Ch. 6: the doubling-time estimate (`lem doubling time`: |Rm| ≤ 2K for t ≤ 1/(16K)) is an
@@ -75,19 +77,21 @@ finite-k BBS bounds [Bernstein machinery mostly banked] → uniform C³ limit g(
 BBSLimitProducer-style but finite-k] → (3) gives uniform τ₀ near ω → pick t*, restart → (B) →
 `extend_construction_of_restart` [DONE] → `isSolutionOn_of_extendData` [DONE].
 
-## STATEMENTS DRAFTED + APPROVED ROUTE (2026-07-02) — brick board
+## Historical statement draft and approved route (2026-07-02) — brick board
 
 User approved the faithful black boxes after the §VERIFIED audit. Drafted, typechecked, and banked
 (build green, 9367 jobs; the file's 3 sorries are exactly these):
 
-- **(N) `ricci_flow_unif_existence` (:64) — BLACK BOX, stays sorry** (cited: parabolic continuous
-  dependence; box picks a finite centre family `S`, then `∀ Λ ≥ 1, ∃ τ₀ > 0` uniform over
-  `Λ`-elliptic (vs `gBase`), chart-C³-`Λ`-bounded data).
-- **(A) `ricci_flow_interior_restart` (:96) — WIRING TARGET (Brick V), to be PROVED** from (N);
+- **(N) `ricci_flow_unif_existence` (live line 74) — analytic producer, still sorry**
+  (`∀ Λ ≥ 1, ∃ τ₀ > 0` uniform over `Λ`-elliptic data with intrinsic
+  `MetricCovDerivOrderBoundOn` hypotheses through order three).  The earlier
+  centre-family `S` wording is not part of the live statement.
+- **(A) `ricci_flow_interior_restart` (live line 103) — DONE from (N)**;
   hypotheses = the two tail producers `hell` (ellipticity) + `hC3` (chart-C³ on any finite family).
-- **(B) `ricci_flow_forward_unique` (:133) — BLACK BOX, stays sorry** (GSM77 Ch. 7 §5.2; now in the
-  faithful smooth class: chart-Gram `Ioo`-C∞ + `Ico`-C⁰ hypotheses on BOTH flows).
-- `extend_construction_of_restart` (:168) — **Brick U, DONE sorry-free** (accepted).
+- **(B) `ricci_flow_forward_unique` (live line 175) — analytic producer, still sorry.** Its chart-Gram
+  `Ioo`-C∞ + `Ico`-C⁰ hypotheses describe the intended regularizing-flow class, but a
+  boundary derivative estimate is still required before applying the GSM energy theorem.
+- `extend_construction_of_restart` (live line 210) — **Brick U, DONE sorry-free** (accepted).
 
 ### Brick board (dependency order)
 
@@ -97,7 +101,7 @@ User approved the faithful black boxes after the §VERIFIED audit. Drafted, type
 | V | prove (A) from (N): Λ-max + t\*-choice + box application | ✅ DONE (2026-07-02), (A)'s sorry removed |
 | X | `hell` producer: `\|Ric\| ≤ K·g` ⟹ metric equivalence `exp(±2K(ω−α))` vs `g_α` on a tail | ✅ DONE (2026-07-02), sorry-free |
 | ~~W~~ | ~~bespoke chart-C³ `hC3` producer~~ | **RETIRED 2026-07-02** (scoping: obviated by Lemma 3.11 — see `ChartTailBounds.md`; the chart-∂ₜΓ time-integration frontier is deleted from the critical path) |
-| Y | rewiring `extends_of_rmBounded` at `MaximalTime` level (imports HCGCompactness, no cycle): `hell` + tail-cov-bounds discharged from **Lemma 3.11** (`metricUniformEquivalentOnWindow_of_*` + `metricCovOrderWindow_of_*` at `gSeq:=fun _ t=>g_fam t`) → static covariant→chart adapter for (A)'s `hC3` → (A) → (B) on `[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData`; retire old `hglue`/Gate-R path | next (W-less; the adapter is static, no time-integration) |
+| Y | rewiring `extends_of_rmBounded` at `MaximalTime` level (imports HCGCompactness, no cycle): `hell` + tail-cov-bounds discharged from **Lemma 3.11** (`metricUniformEquivalentOnWindow_of_*` + `metricCovOrderWindow_of_*` at `gSeq:=fun _ t=>g_fam t`) → static covariant→chart adapter for (A)'s `hC3` → (A) → (B) on `[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData`; retire old `hglue`/Gate-R path | ✅ DONE; its remaining `sorryAx` is transitive through (N) and (B) |
 
 ### BRICK V+X — DONE (2026-07-02)
 
@@ -523,9 +527,90 @@ Endpoint accounting remains strict: `ricci_flow_unif_existence` is 0% and
 `ricci_flow_forward_unique` is 0%. Their existing consumer assembly is 100%,
 but it does not count toward either theorem.
 
-## Remaining block (unchanged, upstream of this brick)
-The two NEW obligations stay PAUSED (user, 2026-06-20): (A) interior-restart existence and (B) forward
-uniqueness. (A) is not generally true in the naive form — awaits revised short-time existence; (B) is a
-substantial standard theorem (DeTurck) absent from the project. This brick is deliberately decoupled from
-both, so it is complete independently of their resolution. Corollary (a) + Lemma 3 remain unnecessary for
-`hglue` under this route.
+## Analytic producer execution (2026-07-18)
+
+Both exact endpoint theorems remain 0%.  Their public statements were left
+unchanged, and no new hypothesis, axiom, opaque constant, or `sorry`-backed
+producer was added.  The existing statements are still expected to be true;
+the present repository lacks a complete faithful proof route.
+
+### (N) `ricci_flow_unif_existence`
+
+Three mathematically different routes were audited to their first unavoidable
+obstruction and ruled out with the current formal API.
+
+1. The proved high-Sobolev fixed-point engine selects time from constants and
+   `norm (Nfun 0)` at order `4 * finrank E + 10`; those data are not uniformly
+   controlled by the endpoint's order-at-most-three metric hypotheses.
+2. In the dimension-three mixed `H3 -> H1` route, the conditional remainder
+   assembly is fully checked (named target build and warning-free focused check
+   pass), but the proposed pointwise bound on the
+   zero-order lower coefficient is false on an `H3`-bounded, `H2`-small ball.
+   After the raw Ricci/DeTurck cancellation, the full normal form retains the
+   generically nonzero cometric-variation arm
+   `D(g^-1)[U] * nabla^2 g`.  With a fixed compactly supported chart bump
+   `bump_n(x) = n^(-3/2) phi(n * (x - x0)) K`, take
+   `T'_n = bump_n` and `T_n = P0 + bump_n` for fixed small `P0`.  Both endpoints
+   stay `H2`-small and `H3`-bounded, their difference is the fixed `P0`, and the
+   pointwise coefficient diverges.  The faithful repair is tensor `H1 -> L6`,
+   then
+   `appCc_h1_h2_h1`, not a coarse `rhs_h1_lip` estimate.  The missing public
+   finite-component reconstruction makes this a substantial new analytic
+   layer.  Moreover this route assumes `finrank E = 3`, while the endpoint is
+   dimension-generic, and it still lacks uniform cross-metric Sobolev constants,
+   a uniform spectral-`H1` realization of the existing chart-level RHS bound as
+   the common forcing-size bound, and same-horizon smoothing.
+3. A dimension-generic Schauder/`W2p` construction would match the C3 data, but
+   no such quasilinear parabolic existence/regularization engine is formalized.
+
+Smallest next machinery lemma: a public intrinsic tensor `H1 -> L6` estimate,
+followed by the `H1 x H2 -> H1` coefficient-action theorem.  Smallest complete
+endpoint design: a dimension-generic low-order solver (or Schauder/`W2p`
+engine) with family-uniform constants and horizon-preserving regularization.
+
+### (B) `ricci_flow_forward_unique`
+
+Three different routes were likewise audited to their first unavoidable
+obstruction and ruled out with the current formal API.
+
+1. The standard harmonic-map heat-flow gauge is absent: there is no short-time
+   map heat-flow producer for an arbitrary Ricci flow, no diffeomorphism
+   regularity package, and no proved gauge PDE identity.
+2. A direct metric/connection/curvature energy route lacks the coupled evolution
+   inequalities and a closed energy estimate, including the boundary-time
+   regularization needed for the theorem's `C0`-at-initial-time hypotheses.
+   The present API does not derive uniform fixed-background first-derivative
+   and parabolically weighted second-derivative bounds near `a` from those exact
+   hypotheses.
+3. `quasilinear_strong_unique` only compares two forcing-space fixed points.
+   There is no geometric Ricci--DeTurck PDE-to-Duhamel converse, and working
+   directly in fixed coordinates leaves the Ricci diffeomorphism kernel.
+
+Smallest next lemma: `ricci_edge_bounds`, deriving metric equivalence, an
+order-one fixed-background covariant bound, and a `sqrt (t-a)`-weighted
+order-two bound on a common short window from the exact endpoint hypotheses.
+After it, the next consumer-shaped producers are short-window harmonic-map
+heat-flow existence and its gauge identity (`hmHeatShort`/`ricciGaugeShort` in
+a future API), followed by local Ricci--DeTurck uniqueness and continuation over
+the common interval.  The existing time-dependent ODE-flow uniqueness is
+reusable only after that common gauge exists.  Identity-gauge uniqueness for
+regularizing Ricci flows from a smooth `C0` initial metric is another faithful
+route, but its rough-flow existence/stability machinery is likewise absent.
+
+### Downstream status
+
+`extends_of_rmBounded` remains blocked directly by (N) and (B).  Brick U, the
+restart/gluing consumer, is still 100% checked, but this does not make the
+maximal-time theorem axiom-clean: the two analytic `sorryAx` dependencies flow
+to `rmUnbounded_of_maximal` and the Hamilton continuation package.  HCG
+compactness work remains an independent lane; the unconditional Hamilton
+positive-Ricci endpoint remains 0%.
+
+## Earlier pause record
+
+The 2026-06-20 pause identified interior-restart existence and forward
+uniqueness as upstream of this brick.  The restart statement has since been
+revised and its consumer wiring proved; the exact 2026-07-18 analytic status is
+the execution record above.  Brick U remains deliberately decoupled from both
+producers and is complete independently of them.  Corollary (a) + Lemma 3
+remain unnecessary for `hglue` under this route.
