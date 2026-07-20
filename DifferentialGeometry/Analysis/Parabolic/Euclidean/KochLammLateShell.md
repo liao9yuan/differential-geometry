@@ -2,7 +2,7 @@
 
 ## Proved facts
 
-- the `k`-th closed-open spatial shell is measurable and lies in its outer
+- the `k`-th half-open spatial shell `[kR,(k+1)R)` is measurable and lies in its outer
   closed ball;
 - shell membership gives the lower distance `kR` required by the Gaussian
   tail bound;

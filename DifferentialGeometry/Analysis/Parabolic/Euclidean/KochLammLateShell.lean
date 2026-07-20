@@ -24,9 +24,9 @@ variable {V F : Type*}
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
-/-- The closed-open shell between radii `kR` and `(k+1)R`. -/
+/-- The half-open shell of radii `[kR, (k+1)R)`. -/
 def klLateShell (x : V) (R : ℝ) (k : ℕ) : Set V :=
-  Metric.closedBall x (((k + 1 : ℕ) : ℝ) * R) \
+  Metric.ball x (((k + 1 : ℕ) : ℝ) * R) \
     Metric.ball x ((k : ℝ) * R)
 
 omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [Nontrivial V] in
@@ -34,7 +34,7 @@ omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [Nontrivial V] in
 theorem klLateShell_mble (x : V) (R : ℝ) (k : ℕ) :
     MeasurableSet (klLateShell x R k) := by
   unfold klLateShell
-  exact Metric.isClosed_closedBall.measurableSet.diff
+  exact Metric.isOpen_ball.measurableSet.diff
     Metric.isOpen_ball.measurableSet
 
 omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
@@ -43,7 +43,7 @@ omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
 theorem klLateShell_sub (x : V) (R : ℝ) (k : ℕ) :
     klLateShell x R k ⊆
       Metric.closedBall x (((k + 1 : ℕ) : ℝ) * R) := by
-  exact diff_subset
+  exact diff_subset.trans Metric.ball_subset_closedBall
 
 omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
