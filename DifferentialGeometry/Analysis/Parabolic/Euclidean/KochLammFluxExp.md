@@ -1,0 +1,22 @@
+# KochLammFluxExp
+
+## Purpose
+
+This file supplies the exact real Hölder exponents for the late
+`KLSource1 → L∞` heat-potential estimate.
+
+## Proved source content
+
+- `klPReal` is the real form of `klP = n+4`.
+- `klPDual = (n+4)/(n+3)` is its Hölder conjugate.
+- `klD1Exp` simplifies to `-(n+2)/(n+3)`, hence is strictly greater than
+  `-1`.
+- `klD1Time_intble` proves the corresponding reflected terminal-time power is
+  integrable on `(t/2,t]`.
+
+## Verification state
+
+Focused verification passes with no local warning.  The source contains no
+`sorry`, `admit`, axiom, or opaque replacement.  This is one analytic layer
+of the late flux value arm, not the full heat map, so
+`ricci_flow_forward_unique` remains 0%.
