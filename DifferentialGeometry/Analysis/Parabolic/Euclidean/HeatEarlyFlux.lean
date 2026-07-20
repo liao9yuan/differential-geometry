@@ -454,6 +454,146 @@ theorem fluxShellMass_raw {T t : ℝ} {C : ℝ≥0∞}
               C ^ ((1 : ℝ) / 2))) :=
       mul_le_mul_right hsource _
 
+omit [CompleteSpace F] in
+/-- With the quantitative cover cardinality inserted, all heat scales cancel
+from one shell.  Only polynomial cover growth, the radial `k+1` factor, and a
+summable exponential remain. -/
+theorem fluxShellMass_le {T t : ℝ} {C : ℝ≥0∞}
+    (ht : 0 < t) (htT : t ≤ T) (w : V) (f : ℝ × V → F)
+    (x : V) (k : ℕ) (s : Finset V)
+    (hcard : s.card ≤ (5 * (k + 1)) ^ Module.finrank ℝ V)
+    (hcover : fluxShell t x k ⊆
+      ⋃ c ∈ s, Metric.ball c (heatScale t))
+    (hsrc : GradCarl T C f) :
+    fluxShellMass t w f x k ≤
+      ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) *
+        ENNReal.ofReal
+          ((5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V *
+            ((k + 1 : ℕ) : ℝ) *
+              Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ))) := by
+  let G : ℝ := Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ) ^ 2)
+  let P : ℝ :=
+    (5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V
+  let q : ℝ := ((k + 1 : ℕ) : ℝ)
+  let K : ℝ :=
+    ‖w‖ *
+      (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+        (heatScale (t / 2))⁻¹ *
+          (((2 : ℝ)⁻¹ * (Real.sqrt 2 * q)) *
+            ((baseHeatMass V)⁻¹ * G)))
+  have hG0 : 0 ≤ G := (Real.exp_pos _).le
+  have hP0 : 0 ≤ P := by dsimp [P]; positivity
+  have hq0 : 0 ≤ q := by dsimp [q]; positivity
+  have hK0 : 0 ≤ K := by
+    dsimp [K]
+    exact mul_nonneg (norm_nonneg w)
+      (mul_nonneg
+        (mul_nonneg
+          (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg _) _))
+          (inv_nonneg.mpr (Real.sqrt_nonneg _)))
+        (mul_nonneg
+          (mul_nonneg (by positivity)
+            (mul_nonneg (Real.sqrt_nonneg _) hq0))
+          (mul_nonneg
+            (inv_nonneg.mpr (baseHeatMass_pos (V := V)).le) hG0)))
+  have hscale : K * (heatScale t) ^ (Module.finrank ℝ V + 1) =
+      ‖w‖ * earlyFluxD1C V * (q * G) := by
+    dsimp [K, earlyFluxD1C]
+    calc
+      ‖w‖ *
+            (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+              (heatScale (t / 2))⁻¹ *
+                ((2 : ℝ)⁻¹ * (Real.sqrt 2 * q) *
+                  ((baseHeatMass V)⁻¹ * G))) *
+              (heatScale t) ^ (Module.finrank ℝ V + 1) =
+          ‖w‖ *
+            ((((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+              (heatScale (t / 2))⁻¹ *
+                (heatScale t) ^ (Module.finrank ℝ V + 1)) *
+              ((2 : ℝ)⁻¹ * (Real.sqrt 2 * q) *
+                ((baseHeatMass V)⁻¹ * G))) := by ring
+      _ = ‖w‖ *
+          ((Real.sqrt 2) ^ (Module.finrank ℝ V + 1) *
+            ((2 : ℝ)⁻¹ * (Real.sqrt 2 * q) *
+              ((baseHeatMass V)⁻¹ * G))) := by
+        rw [halfScale_cancel_succ (V := V) ht]
+      _ = ‖w‖ *
+          ((Real.sqrt 2) ^ (Module.finrank ℝ V + 1) *
+            (((2 : ℝ)⁻¹ * Real.sqrt 2) * (baseHeatMass V)⁻¹)) *
+              (q * G) := by ring
+  have hpow : ENNReal.ofReal
+      ((heatScale t) ^ (Module.finrank ℝ V + 1)) =
+      (ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) :=
+    ENNReal.ofReal_pow (Real.sqrt_nonneg _) _
+  have hcardE : (s.card : ℝ≥0∞) ≤ ENNReal.ofReal P := by
+    rw [← ENNReal.ofReal_natCast s.card]
+    apply ENNReal.ofReal_le_ofReal
+    dsimp [P]
+    exact_mod_cast hcard
+  have hkSq : (k : ℝ) ≤ (k : ℝ) ^ 2 := by
+    cases k with
+    | zero => norm_num
+    | succ k =>
+        have hk1 : (1 : ℝ) ≤ ((k + 1 : ℕ) : ℝ) := by
+          exact_mod_cast Nat.succ_le_succ (Nat.zero_le k)
+        nlinarith
+  have hdecay : G ≤ Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ)) := by
+    dsimp [G]
+    apply Real.exp_le_exp.mpr
+    nlinarith
+  have hweight : P * (q * G) ≤
+      P * (q * Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ))) := by
+    gcongr
+  refine (fluxShellMass_raw ht htT w f x k s hcover hsrc).trans ?_
+  change ENNReal.ofReal K *
+      ((s.card : ℝ≥0∞) *
+        ((ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) *
+          (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2))) ≤ _
+  calc
+    ENNReal.ofReal K *
+          ((s.card : ℝ≥0∞) *
+            ((ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) *
+              (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2))) =
+        (ENNReal.ofReal K *
+          (ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1)) *
+            (s.card : ℝ≥0∞) * (heatBallVol V) ^ ((1 : ℝ) / 2) *
+              C ^ ((1 : ℝ) / 2) := by ac_rfl
+    _ = ENNReal.ofReal
+          (K * (heatScale t) ^ (Module.finrank ℝ V + 1)) *
+            (s.card : ℝ≥0∞) * (heatBallVol V) ^ ((1 : ℝ) / 2) *
+              C ^ ((1 : ℝ) / 2) := by
+      rw [← hpow, ← ENNReal.ofReal_mul hK0]
+    _ = ENNReal.ofReal (‖w‖ * earlyFluxD1C V * (q * G)) *
+          (s.card : ℝ≥0∞) * (heatBallVol V) ^ ((1 : ℝ) / 2) *
+            C ^ ((1 : ℝ) / 2) := by rw [hscale]
+    _ = (ENNReal.ofReal ‖w‖ * ENNReal.ofReal (earlyFluxD1C V) *
+          ENNReal.ofReal (q * G)) * (s.card : ℝ≥0∞) *
+            (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2) := by
+      rw [ENNReal.ofReal_mul
+          (mul_nonneg (norm_nonneg w) earlyFluxD1C_nonneg),
+        ENNReal.ofReal_mul (norm_nonneg w)]
+    _ ≤ (ENNReal.ofReal ‖w‖ * ENNReal.ofReal (earlyFluxD1C V) *
+          ENNReal.ofReal (q * G)) * ENNReal.ofReal P *
+            (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2) := by
+      gcongr
+    _ = ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) *
+          ENNReal.ofReal (P * (q * G)) := by
+      rw [ENNReal.ofReal_mul hP0]
+      unfold earlyFluxC
+      ac_rfl
+    _ ≤ ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) *
+          ENNReal.ofReal
+            (P * (q * Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ)))) := by
+      gcongr
+    _ = ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) *
+        ENNReal.ofReal
+          ((5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V *
+            ((k + 1 : ℕ) : ℝ) *
+              Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ))) := by
+      dsimp [P, q]
+      congr 2
+      all_goals ring
+
 /-- The actual Bochner potential of one divergence-source component on an
 early heat-scale cylinder. -/
 def heatEarly1Near (t : ℝ) (w : V) (f : ℝ × V → F) (x : V) : F :=

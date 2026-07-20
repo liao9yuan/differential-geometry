@@ -29,6 +29,9 @@
 - `fluxShellMass_raw` combines that pointwise kernel bound with
   `earlyFlux_cover_l1`, giving the complete pre-cancellation bound for one
   shell and an arbitrary finite heat-scale cover.
+- `fluxShellMass_le` inserts the quantitative cardinality bound and cancels
+  every power of `sqrt t`; the remaining factor is exactly polynomial cover
+  growth times `(k+1) exp(-k/4)`.
 
 The focused Lean check passes with no warnings. The source contains no
 `sorry`, `admit`, axiom, opaque replacement, new class, instance, or notation.
@@ -38,8 +41,8 @@ The focused Lean check passes with no warnings. The source contains no
 This file now contains the near-cylinder atom and the finite-cover source-mass
 step, but not yet the full early divergence potential. The next producer must
 instantiate the existing quantitative finite-ball cover on every spatial
-shell, cancel the displayed heat scales, and sum the resulting
-polynomial-times-exponential series. After that, `KLSource1.local_l2` converts
+shell and sum the resulting polynomial-times-exponential series. After that,
+`KLSource1.local_l2` converts
 the squared radius to its stated `A₂` bound.
 
 The exact theorem `ricci_flow_forward_unique` remains 0% until the complete
