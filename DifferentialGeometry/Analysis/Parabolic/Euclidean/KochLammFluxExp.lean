@@ -66,6 +66,19 @@ theorem klP_holder : (klPDual V).HolderConjugate (klPReal V) := by
   · unfold klPReal
     positivity
 
+/-- The first-derivative dual exponent is at least one. -/
+theorem klPDual_one : 1 ≤ klPDual V :=
+  (klP_holder (V := V)).lt.le
+
+/-- The first-derivative dual exponent lies in the `L¹ ∩ L²` interpolation
+range used by `baseD1Maj_rpow`. -/
+theorem klPDual_two : klPDual V ≤ 2 := by
+  unfold klPDual
+  have hn : 0 ≤ (Module.finrank ℝ V : ℝ) := by positivity
+  have hn3 : 0 < (Module.finrank ℝ V : ℝ) + 3 := by positivity
+  apply (div_le_iff₀ hn3).2
+  linarith
+
 /-- The first-derivative kernel power has exponent `-(n+2)/(n+3)`. -/
 theorem klD1Exp_eq :
     klD1Exp V =

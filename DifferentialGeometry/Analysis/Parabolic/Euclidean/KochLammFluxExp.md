@@ -9,6 +9,8 @@ This file supplies the exact real Hölder exponents for the late
 
 - `klPReal` is the real form of `klP = n+4`.
 - `klPDual = (n+4)/(n+3)` is its Hölder conjugate.
+- `klPDual_one` and `klPDual_two` place that dual exponent in `[1,2]`, the
+  range consumed by the first-derivative power-mass theorem.
 - `klD1Exp` simplifies to `-(n+2)/(n+3)`, hence is strictly greater than
   `-1`.
 - `klD1Time_intble` proves the corresponding reflected terminal-time power is
