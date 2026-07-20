@@ -20,7 +20,7 @@ namespace Integral
 namespace Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -45,7 +45,6 @@ def paramGramMatrix (g : SmoothRiemannianMetric I M)
       (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) i))
       (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) j))
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -71,7 +70,6 @@ def paramDensity (g : SmoothRiemannianMetric I M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) : E → ℝ :=
   fun w => Real.sqrt (paramGramMatrix (I := I) g Ψ w).det
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -98,12 +96,12 @@ noncomputable def paramDerivEquiv
     (I := 𝓘(ℝ, E)) (J := I) (n := 1) Ψ hw).mfderivToContinuousLinearEquiv
       (by norm_num)
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma paramDeriv_ker
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {w : E} (hw : w ∈ Ψ.source) :
@@ -136,12 +134,12 @@ def paramJacobianMatrix (x₀ : M)
   LinearMap.toMatrix (chartModelBasis E) (chartModelBasis E)
     (fderiv ℝ (paramChartMap (I := I) x₀ Ψ) w).toLinearMap
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [IsManifold I ∞ M] in
 @[simp] lemma paramJacobianMatrix_apply
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E)
     (k i : Fin (Module.finrank ℝ E)) :
@@ -151,7 +149,6 @@ set_option linter.unusedSectionVars false in
           ((chartModelBasis E) i)) k := by
   simp [paramJacobianMatrix, LinearMap.toMatrix_apply]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -228,7 +225,6 @@ lemma paramDeriv_chartBasis_eq_sum
           rw [hbasis]
           rw [ContinuousLinearEquiv.apply_symm_apply]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -283,7 +279,6 @@ lemma paramGramMatrix_pullback_eq_sum
   rw [chartGramMatrix_apply]
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -310,13 +305,13 @@ theorem paramGramMatrix_pullback_eq_mul
   intro k _
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [IsManifold I ∞ M] in
 lemma paramJacobianMatrix_det
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) (w : E) :
     (paramJacobianMatrix (I := I) x₀ Ψ w).det =
@@ -324,7 +319,6 @@ lemma paramJacobianMatrix_det
   unfold paramJacobianMatrix
   rw [LinearMap.det_toMatrix]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -344,7 +338,6 @@ lemma paramGramMatrix_det_pullback
   rw [paramJacobianMatrix_det (I := I) x₀ Ψ w]
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -364,12 +357,12 @@ theorem paramDensity_eq_abs_det_mul_chartDensity
   rw [Real.sqrt_mul (sq_nonneg _)]
   rw [Real.sqrt_sq_eq_abs]
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [FiniteDimensional ℝ E] in
 lemma paramChartMap_contDiffOn
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_source : s ⊆ Ψ.source)
@@ -389,7 +382,6 @@ lemma paramChartMap_contDiffOn
   exact contMDiffOn_iff_contDiffOn.mp
     (by simpa [paramChartMap, Function.comp_def] using hcomp)
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -422,7 +414,6 @@ lemma paramDensity_continuousOn_chart
     paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ
       (hs_source hw) (hs_chart w hw))
 
-set_option linter.unusedSectionVars false in
 
 lemma aemeasurable_ofReal_paramDensity_on_chart
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -436,13 +427,13 @@ lemma aemeasurable_ofReal_paramDensity_on_chart
     paramDensity_continuousOn_chart (I := I) g x₀ Ψ hs_open hs_source hs_chart
   exact ENNReal.measurable_ofReal.comp_aemeasurable (hcont.aemeasurable hs_meas)
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [FiniteDimensional ℝ E] in
 lemma paramChartMap_hasFDerivWithinAt
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} {w : E} (hw : w ∈ Ψ.source)
@@ -461,13 +452,13 @@ lemma paramChartMap_hasFDerivWithinAt
     simpa [paramChartMap, Function.comp_def] using hchartdiff.comp w hΨdiff
   exact hTdiff.differentiableAt.hasFDerivAt.hasFDerivWithinAt
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [FiniteDimensional ℝ E] in
 lemma paramChartMap_injOn
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_source : s ⊆ Ψ.source)
@@ -490,7 +481,6 @@ lemma paramChartMap_injOn
     (extChartAt I x₀).injOn hu_ext hv_ext huv
   exact Ψ.toPartialEquiv.injOn (hs_source hu) (hs_source hv) hΨuv
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -511,7 +501,6 @@ lemma measurableSet_image_paramChartMap
   exact MeasureTheory.measurable_image_of_fderivWithin hs_meas hf'
     (paramChartMap_injOn (I := I) x₀ Ψ hs_source hs_chart)
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -574,13 +563,13 @@ lemma measurableSet_image_param
       exact hxchart
     simpa [paramChartMap] using ((extChartAt I x₀).left_inv hxsrc).symm
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [IsManifold I ∞ M] in
 lemma measurableSet_image_param_global
     [T2Space M]
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -594,13 +583,13 @@ lemma measurableSet_image_param_global
     exact Ψ.toPartialEquiv.injOn (hs_source hu) (hs_source hv) huv
   exact hs_meas.image_of_continuousOn_injOn hcont hinj
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma measurableSet_symm_image_param
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -635,12 +624,12 @@ lemma measurableSet_symm_image_param
       change Ψ.toPartialEquiv.symm (Ψ.toPartialEquiv w) = w
       exact Ψ.toPartialEquiv.left_inv hwsrc⟩
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma measurableSet_param_chartPiece
     (x₀ : M) (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
     {s : Set E} (hs_meas : MeasurableSet s)
@@ -662,7 +651,6 @@ lemma measurableSet_param_chartPiece
   rw [heq]
   exact hs_meas.inter hopen.measurableSet
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -702,9 +690,9 @@ lemma aemeasurable_ofReal_paramDensity_on_chartPiece
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     ((hcontU.mono hpiece_sub).aemeasurable hpiece_meas)
 
-set_option linter.unusedSectionVars false in
 
 
+omit [IsManifold I ∞ M] in
 lemma aemeasurable_ofReal_pou_param_on_chartPiece
     (ρ : SmoothPartitionOfUnity M I M univ) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -725,7 +713,6 @@ lemma aemeasurable_ofReal_pou_param_on_chartPiece
     (hΨcont_source.mono hS_sub_source).aemeasurable hS_meas
   exact (measurable_ofReal_pou_weight (I := I) ρ x₀).comp_aemeasurable hΨ_aem
 
-set_option linter.unusedSectionVars false in
 
 
 lemma aemeasurable_paramDensity_mul_pou_on_chartPiece
@@ -744,7 +731,6 @@ lemma aemeasurable_paramDensity_mul_pou_on_chartPiece
     (aemeasurable_ofReal_pou_param_on_chartPiece (I := I) ρ x₀ Ψ
       hs_meas hs_source)
 
-set_option linter.unusedSectionVars false in
 
 
 lemma aemeasurable_paramDensity_mul_pou_indicator_chartPiece
@@ -765,9 +751,9 @@ lemma aemeasurable_paramDensity_mul_pou_indicator_chartPiece
     (aemeasurable_paramDensity_mul_pou_on_chartPiece (I := I) g ρ x₀ Ψ
       hs_meas hs_source)
 
-set_option linter.unusedSectionVars false in
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma pou_weight_eq_zero_of_notMem_chart
     (ρ : SmoothPartitionOfUnity M I M univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -776,7 +762,6 @@ lemma pou_weight_eq_zero_of_notMem_chart
   by_contra hne
   exact hx (hρ α (subset_tsupport _ hne))
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -830,7 +815,6 @@ theorem lintegral_image_paramChartMap_chartDensity_eq
   rw [← ENNReal.ofReal_mul (abs_nonneg _)]
   rw [← paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ (hs_source hw) hx]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -887,7 +871,6 @@ theorem lintegral_image_paramChartMap_mul_chartDensity_eq
   rw [← ENNReal.ofReal_mul (abs_nonneg _)]
   rw [← paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ (hs_source hw) hx]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -971,7 +954,6 @@ theorem chartLocalMeasure_image_param_eq
   exact lintegral_image_paramChartMap_chartDensity_eq (I := I) g x₀ Ψ
     hs_meas hs_source hs_chart
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -988,7 +970,6 @@ theorem chartLocalMeasure_image_param_eq_t2
   chartLocalMeasure_image_param_eq (I := I) g x₀ Ψ hs_meas hs_source hs_chart
     (measurableSet_image_param (I := I) x₀ Ψ hs_meas hs_source hs_chart)
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1068,7 +1049,6 @@ theorem chartLocalMeasure_lintegral_image_param_eq_t2
   exact lintegral_image_paramChartMap_mul_chartDensity_eq (I := I) g x₀ Ψ
     hs_meas hs_source hs_chart F
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1150,7 +1130,6 @@ theorem riemannianMeasure_param_summand_eq
           ENNReal.ofReal (ρ α (Ψ w)) ∂(modelHaar (E := E)) := by
           rw [hS_def]
 
-set_option linter.unusedSectionVars false in
 
 
 lemma param_pou_piece_zero
@@ -1170,7 +1149,6 @@ lemma param_pou_piece_zero
     exact (Set.notMem_empty _) hx
   simp [hzero]
 
-set_option linter.unusedSectionVars false in
 
 
 lemma tsum_param_pou_piece_eq_subtype
@@ -1194,7 +1172,6 @@ lemma tsum_param_pou_piece_eq_subtype
   rw [Set.not_nonempty_iff_eq_empty] at hne
   exact hα (param_pou_piece_zero (I := I) g ρ α hne Ψ)
 
-set_option linter.unusedSectionVars false in
 
 lemma tsum_param_pou_piece_indicator_eq
     [T2Space M] [SigmaCompactSpace M]
@@ -1261,7 +1238,6 @@ lemma tsum_param_pou_piece_indicator_eq
       exact hwB hw.1
     rw [Set.indicator_of_notMem hmem]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1339,7 +1315,6 @@ theorem riemannianMeasure_image_param_eq
         ∂(modelHaar (E := E)) := by
           rw [MeasureTheory.lintegral_indicator hB_meas]
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianVolumeMeasure_image_param_eq
     [T2Space M] [SigmaCompactSpace M]
@@ -1355,7 +1330,6 @@ theorem riemannianVolumeMeasure_image_param_eq
   exact riemannianMeasure_image_param_eq (I := I) g (chartAtlasPOU I M)
     (chartAtlasPOU_isSubordinate I M) Ψ hB_meas hB_source
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1394,7 +1368,6 @@ theorem riemannianVolumeMeasure_param_target_eq
         ∂(modelHaar (E := E)) := by
           rw [hB_def]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1413,7 +1386,6 @@ lemma paramGramMatrix_isHermitian
     (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) j))
     (mfderiv 𝓘(ℝ, E) I Ψ w ((chartModelBasis E) i))
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1476,7 +1448,6 @@ lemma paramGramMatrix_dotProduct_mulVec
   intro j _
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1509,7 +1480,6 @@ lemma paramGramMatrix_posDef
     exact hc this
   exact g.pos (Ψ w) v hvnz
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1521,7 +1491,6 @@ lemma paramGramMatrix_det_pos
     0 < (paramGramMatrix (I := I) g Ψ w).det :=
   (paramGramMatrix_posDef (I := I) g Ψ hw).det_pos
 
-set_option linter.unusedSectionVars false in
 
 
 

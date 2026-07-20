@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -33,6 +32,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
+omit [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem curvatureAction0SAt_vec2_eq
     (Rm13 : DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     {x : M}
@@ -53,6 +53,7 @@ private theorem curvatureAction0SAt_vec2_eq
 
 
 
+omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_left_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -108,6 +109,7 @@ private theorem contractedCurvatureAction_left_eq
 
 
 
+omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_right_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -190,6 +192,7 @@ private theorem contractedCurvatureAction_right_eq
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise commutator producer instead" (since := "2026-05-22")]
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -458,6 +461,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciSecCommLocId
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -782,6 +786,8 @@ def RicciContractedCommutatorsInFrameOnLocal
           contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
             (t : Real) x i j
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem RicciContractedCommutatorsInFrame.toLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -797,6 +803,7 @@ theorem RicciContractedCommutatorsInFrame.toLocal
   intro t x _hx i j
   exact hcomm t x i j
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem ricci_trace_terms_eq_of_differentiatedBianchi
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -814,6 +821,7 @@ theorem ricci_trace_terms_eq_of_differentiatedBianchi
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem traceTermsEqLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -833,6 +841,8 @@ theorem traceTermsEqLoc
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciCommLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -857,6 +867,8 @@ theorem ricciCommLoc
   exact ⟨by rw [hleft, hA], by rw [hright, hB, hB'],
     traceTermsEqLoc (M := M) gInv nabla2Ric u hbianchi t x hx i j⟩
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -877,6 +889,7 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutato
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -997,6 +1010,7 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
       hbianchi hHessSymm hNabla2 hRicciId hRicTrace13 hLower
       hPair hOutput hFirst hRic
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -1089,6 +1103,8 @@ private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1153,6 +1169,8 @@ def ricciCurvatureTerms_eq
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrame_of_variation_expanded
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1174,6 +1192,8 @@ theorem ricciEvolutionEquationInFrame_of_variation_expanded
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1197,6 +1217,8 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolution_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1217,6 +1239,8 @@ theorem ricciEvolution_of_variation_commutators
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1239,6 +1263,8 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

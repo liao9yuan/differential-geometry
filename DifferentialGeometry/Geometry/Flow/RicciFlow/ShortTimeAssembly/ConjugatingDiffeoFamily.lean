@@ -30,7 +30,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -64,6 +64,7 @@ private theorem contMDiffWithinAt_neg_tangentBundleSection
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_neg (X q₀.1 q₀.2)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem conjugating_diffeo_family_jointsmooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)
@@ -166,6 +167,7 @@ theorem conjugating_diffeo_family_jointsmooth
     change (Φ_fam s : M → M) x = Φ s x
     rw [hfun_eqOn s hs]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem conjugating_diffeo_family
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)

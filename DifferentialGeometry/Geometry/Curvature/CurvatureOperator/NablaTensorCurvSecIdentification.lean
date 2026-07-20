@@ -17,13 +17,14 @@ namespace Connection
 open Tensor0SBundle Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nablaTensorCurvSec_tensor0SCov_eq_nablaTensor0SCurv
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -34,6 +35,7 @@ theorem nablaTensorCurvSec_tensor0SCov_eq_nablaTensor0SCurv
       nablaTensor0SCurv (I := I) g s X Y Z A x :=
   rfl
 
+omit [CompleteSpace E] in
 theorem nablaTensorCurvSec_diag_frameSum_eq_nablaTensor0SCurv_diag_frameSum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

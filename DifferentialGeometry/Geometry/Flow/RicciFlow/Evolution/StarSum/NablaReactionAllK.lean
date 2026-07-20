@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReacti
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -40,7 +39,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -63,6 +62,8 @@ def nablaKRmFrozenSlotField
       (n := (∞ : WithTop ℕ∞)) 1 :=
   freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotField_apply_vec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -87,6 +88,8 @@ def nablaKRmNablaFrozenSlotField
       1 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nablaKRmFrozenSlotField (I := I) S t k q Y))
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmNablaFrozenSlotField_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -105,6 +108,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -154,7 +159,11 @@ def nablaKRmFrozenSlotSharpSection
       (β := fun y : M => nablaKRmFrozenSlotField (I := I) S t k q Y y)
       (fun α j => nablaKRmFrozenSlot_chartBasis_contMDiffOn (I := I) S t k q Y α j))
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem nablaKRmFrozenSlotSharpSection_apply
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -168,7 +177,11 @@ def nablaKRmFrozenSlotSharpSection
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotSharp_mdiffAt
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -186,6 +199,8 @@ theorem nablaKRmFrozenSlotSharp_mdiffAt
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_eval
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -244,7 +259,11 @@ open DifferentialGeometry.Integral.DivergenceTheorem in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRmRaise_summand_covDeriv
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -374,6 +393,7 @@ def nablaKSlotSections {k : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaKSlotSections_apply {k : ℕ}
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -393,7 +413,12 @@ theorem nablaKSlotSections_apply {k : ℕ}
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaK_antisym_eq_covDeriv_curvatureAction
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -529,7 +554,10 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem nablaK_antisym_eq_rm04_raise_leibniz
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -642,7 +670,10 @@ variable {n : ℕ}
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem abs_nablaK_antisym_covConst_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -845,7 +876,10 @@ theorem abs_nablaK_antisym_covConst_le
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem abs_nablaK_antisym_basis_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -894,7 +928,10 @@ theorem abs_nablaK_antisym_basis_le
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem abs_spatialBracket_nablaKRm_ortho_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -972,7 +1009,10 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem abs_spatialComm_nablaKRm_ortho_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -61,6 +60,7 @@ def frontExtendEquiv {s s' : ℕ} (e : Fin s ≃ Fin s') : Fin (s + 1) ≃ Fin (
 
 
 
+omit [CompleteSpace E] in
 theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -107,6 +107,7 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
+omit [CompleteSpace E] in
 theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -150,6 +151,7 @@ theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I
 
 
 
+omit [CompleteSpace E] in
 theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -181,6 +183,7 @@ theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManif
 
 
 
+omit [CompleteSpace E] in
 theorem totalNabla0SRealizes_unique [T2Space M] {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -97,6 +97,7 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
       hy_ne
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN}
@@ -217,6 +218,8 @@ private lemma chartL2RestrictCLM_eq_zero_iff (α : M) (s : Set EuclN)
   · intro h
     exact (MemLp.coeFn_toLp _).trans h
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartL2RestrictCLM_tensorL2ChartComponentCutoff_smooth_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -256,6 +259,8 @@ private lemma chartL2RestrictCLM_tensorL2ChartComponentCutoff_smooth_eq_zero
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
       (S : TensorL2 r s g) α P₀)).mpr h_ae
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -290,6 +295,8 @@ private lemma tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
   rw [tensorL2ChartComponentCutoffCLM_apply] at h_eq
   exact h_eq
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_tensorL2ChartComponentCutoff_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (u : TensorL2 r s g) :
@@ -392,6 +399,8 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
         rw [ENNReal.ofReal_mul hCop_nn,
           ENNReal.ofReal_mul (Real.rpow_nonneg hc_max_pos.le _), mul_assoc]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_tensorL2ChartComponentCutoff_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

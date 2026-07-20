@@ -114,6 +114,7 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_contDiffOn_interior_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -249,6 +250,7 @@ private lemma phiOnE_contDiff
       exact hy this
     · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
+omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_differentiableOn_interior_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -273,6 +275,7 @@ private lemma fderiv_phiOnE_eq_fderiv_scalarOnE
     exact phiOnE_eq_scalarOnE_on_target (I := I) α φ (interior_subset hz)
   exact Filter.EventuallyEq.fderiv_eq h_eq
 
+omit [InnerProductSpace ℝ E] in
 private theorem ibp_per_index
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -449,12 +452,14 @@ private theorem ibp_per_index
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
 
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_continuousOn_baseSet
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContinuousOn (localDivergenceWithin (I := I) g α X) (chartAt H α).source :=
   localDivergenceWithin_continuousOn (I := I) g α X
 
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_mul_phi_measurable
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -493,6 +498,7 @@ private lemma localDivergenceWithin_mul_phi_measurable
   rw [h_eq]
   exact hpiecewise_meas
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_measurable
     (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -566,6 +572,7 @@ private lemma localDivergenceWithin_mul_phi_pullback_zero_off_chartImage
     exact hsymm_notin (subset_tsupport _ hne)
   rw [hφ_zero, mul_zero, mul_zero]
 
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_mul_phi_pullback_eq_on_chartImage
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -619,6 +626,7 @@ private lemma localDivergenceWithin_mul_phi_pullback_eq_on_chartImage
   rw [Finset.sum_congr rfl (fun i _ => h_partial_eq i)]
   field_simp
 
+omit [InnerProductSpace ℝ E] in
 private lemma lhs_chart_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -688,6 +696,7 @@ private lemma lhs_chart_target
     intro y hy
     rw [phiOnE_apply_of_notMem (I := I) α φ hy, mul_zero]
 
+omit [InnerProductSpace ℝ E] in
 private lemma rhs_chart_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -807,6 +816,7 @@ private lemma rhs_chart_target
     intro i _
     rw [vwIntegrandOnE_apply_of_notMem (I := I) g α X i hy, zero_mul]
 
+omit [InnerProductSpace ℝ E] in
 private lemma summand_int_lhs
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -858,6 +868,7 @@ private lemma summand_int_lhs
     hphi_compactSupp.mul_left
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
+omit [InnerProductSpace ℝ E] in
 private lemma summand_int_rhs
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -936,6 +947,7 @@ private lemma summand_int_rhs
     rw [hfderiv_zero]; simp
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
+omit [InnerProductSpace ℝ E] in
 theorem chart_local_ibp_within
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

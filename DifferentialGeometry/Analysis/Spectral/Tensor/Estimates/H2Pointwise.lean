@@ -33,6 +33,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem grad_jet_norm
     (g : SmoothRiemannianMetric I M) (s j : ℕ) (T : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad (I := I) g 0 (s + 1) j

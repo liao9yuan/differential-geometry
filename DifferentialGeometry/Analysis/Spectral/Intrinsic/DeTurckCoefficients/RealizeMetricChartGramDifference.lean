@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramMatrix_realize_apply
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -47,6 +48,8 @@ theorem chartGramMatrix_realize_apply
   rw [chartGramMatrix_apply, chartGramMatrix_apply,
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ_lt hδ x]
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -131,6 +134,8 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   ring
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

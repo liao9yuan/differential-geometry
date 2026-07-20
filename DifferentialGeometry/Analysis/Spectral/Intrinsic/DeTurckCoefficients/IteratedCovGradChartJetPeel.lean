@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,11 +39,13 @@ def bareChartJetContent (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∑ m ∈ Finset.range (N + 1),
       ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g r s X α q'.1 q'.2) y‖
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContent_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) (N : ℕ) (y : EuclN) :
     0 ≤ bareChartJetContent (I := I) (M := M) g r s X α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M)
@@ -70,6 +72,7 @@ lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
   refine hbig.trans (le_of_eq ?_)
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) {N N' : ℕ} (hN : N ≤ N') (y : EuclN) :
     bareChartJetContent (I := I) (M := M) g r s X α N y ≤
@@ -81,6 +84,7 @@ lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
   refine Finset.sum_le_sum (fun q' _ => ?_)
   exact Finset.sum_le_sum_of_subset_of_nonneg hsub (fun m _ _ => norm_nonneg _)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma iteratedFDeriv_euclidPartial_norm_le
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (m : Fin (Module.finrank ℝ E)) (l : ℕ) {y : EuclN} (hy : y ∈ O) :
@@ -113,6 +117,7 @@ lemma iteratedFDeriv_euclidPartial_norm_le
         rw [h_single_norm, one_mul]
     _ = ‖iteratedFDeriv ℝ (l + 1) u y‖ := h_fderiv_iter
 
+omit [BoundarylessManifold I M] in
 lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -392,6 +397,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     (bareChartJetContent_nonneg (I := I) (M := M) g r s X α _ y)
   exact Finset.le_sup' Cp (Finset.mem_range.mpr (by omega))
 
+omit [BoundarylessManifold I M] in
 lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) (P : ℕ) :
@@ -409,6 +415,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
       (I := I) (M := M) g r s α P
   exact ⟨C, hC_nn, fun p l hlP Idx Jdx y hy => hC X p l hlP Idx Jdx y hy⟩
 
+omit [BoundarylessManifold I M] in
 theorem bareJet_le_fiber
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (N : ℕ) :
@@ -539,6 +546,7 @@ theorem bareJet_le_fiber
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]
     _ = (Npair * (Cpeel * (((N : ℝ) + 1) * Cfibmax))) * FibSum := by ring
 
+omit [BoundarylessManifold I M] in
 lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (D : SmoothCcTensor g r s) (α : M) (N : ℕ) :

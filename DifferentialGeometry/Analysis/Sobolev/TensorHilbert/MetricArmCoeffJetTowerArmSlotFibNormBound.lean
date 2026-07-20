@@ -33,7 +33,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 open TensorMultilinear
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
     (a : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (c • a) =
@@ -57,6 +58,7 @@ private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
   rw [← tensor0S_curry_apply_eval (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm a)]
   simp only [ContinuousLinearEquiv.apply_symm_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma curry_symm_add_aux (s : ℕ) (x : M)
     (a b : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (a + b) =
@@ -86,12 +88,14 @@ def bilinearSlotInsertCurriedCLM (s : ℕ) (x : M)
         rw [slotInsertEndoFib_smul_left (I := I) (M := M) (s+1) 0 x c (Arm a)]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma armCurryCLM_apply (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) (v0 : TangentSpace I x) :
     bilinearSlotInsertCurriedCLM (I := I) (M := M) s x Arm D v0 =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Arm v0) D := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma armCurryCLM_add (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D D' : Tensor0SSpace (s + 1) I x) :
@@ -100,6 +104,7 @@ lemma armCurryCLM_add (s : ℕ) (x : M)
   apply ContinuousLinearMap.ext; intro v0
   simp only [ContinuousLinearMap.add_apply, armCurryCLM_apply, map_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma armCurryCLM_smul (s : ℕ) (x : M) (c : ℝ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) :
@@ -120,6 +125,7 @@ def bilinearSlotInsertCLM (s : ℕ) (x : M)
       map_smul' := fun c D => by
         rw [armCurryCLM_smul, curry_symm_smul_aux]; rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma armSlotFib_apply (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) :
@@ -127,6 +133,7 @@ def bilinearSlotInsertCLM (s : ℕ) (x : M)
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
         (bilinearSlotInsertCurriedCLM (I := I) (M := M) s x Arm D) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma armSlotFib_apply_eval (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) (v : Fin (s + 1 + 1) → TangentSpace I x) :
@@ -141,6 +148,7 @@ lemma armSlotFib_apply_eval (s : ℕ) (x : M)
   conv_lhs => rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from (Fin.cons_self_tail v).symm]
   exact hkey.symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberComponent_bilinearSlotInsertCLM_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -181,6 +189,7 @@ private lemma fiberComponent_bilinearSlotInsertCLM_eq
   rw [show Matrix.vecTail (fun l => e (J l)) l = e (J (Fin.succ l)) from rfl,
     horth (K l) (J (Fin.succ l))]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sum_compSq_armSlotFib_eq_normSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -267,6 +276,7 @@ private lemma sum_compSq_armSlotFib_eq_normSq
   exact hpars w
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_bilinearSlotInsertCLM_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) (B : ℝ)
@@ -308,6 +318,7 @@ theorem riemannianFiberNormSq_bilinearSlotInsertCLM_le
         push_cast; ring
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_armSlotFib_eq_sum_normSq_frame
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -366,6 +377,7 @@ private lemma rfns_armSlotFib_eq_sum_normSq_frame
   rw [Fintype.sum_prod_type]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_armSlotFib_spectator_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -386,6 +398,7 @@ theorem riemannianFiberNormSq_armSlotFib_spectator_eq
   rw [show ((Module.finrank ℝ E : ℝ)) ^ s = (n : ℝ) ^ s from by rw [hnE]]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem armSlotFib_contMDiff (s : ℕ)
     (Arm : Π x : M, TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (harm : ∀ (V0 W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),

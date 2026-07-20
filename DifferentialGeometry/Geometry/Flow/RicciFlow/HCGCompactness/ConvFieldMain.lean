@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -47,8 +46,8 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)]
+  [finiteE : FiniteDimensional Real E] [CompleteSpace E]
+  [neZeroE : NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 
@@ -65,7 +64,10 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem derivNorm_congr_left
+    [Module.Finite ℝ E]
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (a : Nat) (g₁ g₂ gI gRef : SmoothRiemannianMetric I M) (x : M)
     (h : Tensor0SBundle.metricTensorField (I := I) g₁
@@ -77,7 +79,10 @@ theorem derivNorm_congr_left
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem supOn_congr_left
+    [Module.Finite ℝ E]
     (K : Set M) (p : Nat) (g₁ g₂ gI gRef : SmoothRiemannianMetric I M)
     (h : forall x, x ∈ K -> forall a : Nat, a <= p ->
       metricDerivNorm (I := I) a g₁ gI gRef x = metricDerivNorm (I := I) a g₂ gI gRef x) :
@@ -105,7 +110,10 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 
 
-theorem sourceCompactSet_image_eq (k : Nat) {K : Set P.M}
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem sourceCompactSet_image_eq
+    (k : Nat) {K : Set P.M}
     (hKsrc : letI : TopologicalSpace P.M := P.topology; K ⊆ Φ.source k) :
     Subtype.val '' (sourceCompactSet (I := I) Φ k K) = K := by
   ext y
@@ -144,7 +152,10 @@ noncomputable def resSrc (hsrc : SrcSigma Φ) (k : Nat)
 
 
 
-theorem resSrc_inner (hsrc : SrcSigma Φ) (k : Nat)
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem resSrc_inner
+    (hsrc : SrcSigma Φ) (k : Nat)
     (g : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
@@ -162,6 +173,8 @@ theorem resSrc_inner (hsrc : SrcSigma Φ) (k : Nat)
 
 
 
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem refRes_eq_resSrc
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -172,7 +185,10 @@ theorem refRes_eq_resSrc
 
 
 
-theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
+include finiteE in
+omit neZeroE [I.Boundaryless] in
+theorem supOn_resSrc_eq
+    (hsrc : SrcSigma Φ) (k : Nat)
     (g₁ g₂ g₃ : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
@@ -200,14 +216,14 @@ theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
   letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) := sourceDomSigmaOf (I := I) Φ k (hsrc k)
-  let sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
+  letI sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
     change SigmaCompactSpace (SourceDomain (I := I) Φ k)
     exact sourceDomSigmaOf (I := I) Φ k (hsrc k)
-  let sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
+  letI sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k)
     exact sourceDomT2 (I := I) Φ k
-  exact @metricDerivNormSupOn_restrictOpen E _ _ _ _ _ H _ I
-    P.M P.topology P.charted P.t2 P.smooth P.sigmaCompact
+  exact @metricDerivNormSupOn_restrictOpen E _ _ finiteE _ H _ I
+    P.M P.topology P.charted P.t2 P.smooth
     g₁ g₂ g₃ (sourceOpen (I := I) Φ k) sourceSigma sourceT2 C p
 
 
@@ -388,6 +404,8 @@ noncomputable def convOut
 
 
 
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 private theorem ofRP_supOn_def
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -428,6 +446,8 @@ open Tensor0SBundle in
 
 
 
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_eq
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -574,6 +594,8 @@ theorem ofRP_supOn_eq
 
 
 
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_conv
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -621,6 +643,8 @@ theorem ofRP_supOn_conv
 
 
 
+include finiteE in
+omit neZeroE [I.Boundaryless] in
 theorem gInf_zero_eq
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;

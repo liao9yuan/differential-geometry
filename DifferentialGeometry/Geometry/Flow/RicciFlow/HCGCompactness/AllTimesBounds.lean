@@ -13,7 +13,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -246,6 +245,7 @@ noncomputable def componentVec3
     EuclideanSpace Real (Idx × Idx × Idx) :=
   WithLp.toLp 2 (fun p : Idx × Idx × Idx => A p.1 p.2.1 p.2.2)
 
+omit [Fintype Idx] in
 @[simp]
 theorem componentVec3_apply
     (A : Idx -> Idx -> Idx -> Real)
@@ -558,7 +558,7 @@ theorem gammaL2_le_initial_add_regular
 end ComponentL2
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -573,6 +573,7 @@ local instance : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
 
 
 
+omit [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 private theorem componentRS_eq_gen
     [IsManifold I 1 M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : Nat} {x : M}
@@ -618,6 +619,7 @@ def MetricUniformEquivalentOnWindow
     MetricUniformEquivalentOn (I := I) K gRef (gSeq i t) (B t)
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_le
     {K : Set M} {gRef h : SmoothRiemannianMetric I M} {C C' : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
@@ -642,6 +644,7 @@ theorem metricUniformEquivalentOn_of_le
         (mul_le_mul_of_nonneg_right hCC' hgin_nonneg)
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_mono
     {K K' : Set M} {β ψ : Real} {gRef : SmoothRiemannianMetric I M}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M} {B : Real -> Real}
@@ -698,6 +701,7 @@ def MetricCovDerivOrderBoundOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovBound_of_pointwise
     (K : Set M) (p : Nat)
     (h gRef : SmoothRiemannianMetric I M) (C : Real)
@@ -716,6 +720,7 @@ theorem metricCovBound_of_pointwise
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovBoundOne_of_orders
     (K : Set M) (h gRef : SmoothRiemannianMetric I M) (C : Real)
     (hC : 0 <= C)
@@ -741,6 +746,7 @@ def MetricCovDerivBoundsAtTimeOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovAtTime_of_pointwise
     (K : Set M) (t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -779,6 +785,7 @@ def MetricCovDerivOrderBoundOnWindow
     MetricCovDerivOrderBoundOn (I := I) K a (gSeq i t) gRef C
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_mono
     {K K' : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -790,6 +797,7 @@ theorem metricCovOrderWindow_mono
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_of_pointwise
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -805,6 +813,7 @@ theorem metricCovOrderWindow_of_pointwise
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovBoundOneWindow_of_orders
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -822,6 +831,7 @@ theorem metricCovBoundOneWindow_of_orders
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovWindow_of_pointwise
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -851,6 +861,7 @@ noncomputable def metricCovCumulativeConstant
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovBoundsWindow_of_orderBounds
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -881,6 +892,7 @@ theorem metricCovBoundsWindow_of_orderBounds
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem gammaL2_le_of_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -944,6 +956,7 @@ theorem gammaL2_le_of_christoffel
 set_option linter.unusedDecidableInType false in
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCov1_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
@@ -987,6 +1000,7 @@ theorem metricCov1_coord
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_two_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M)
     (X :
@@ -1057,6 +1071,7 @@ theorem metricCovDeriv_two_eval_smooth_slots
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_three_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M)
     (X :
@@ -1127,6 +1142,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
 set_option linter.unusedDecidableInType false in
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCov2_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
@@ -1555,6 +1571,7 @@ theorem metricCov2_coord
 set_option linter.unusedDecidableInType false in
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCov3_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
@@ -1822,6 +1839,7 @@ noncomputable def lcMetricFamily
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_eq_metricCovAtBase
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -1841,6 +1859,7 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
   ring
 
 
+omit [SigmaCompactSpace M] in
 theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -1871,6 +1890,7 @@ theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricGammaEquiv
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -1992,6 +2012,7 @@ theorem metricGammaEquiv
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_diag_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M) (x : M)
@@ -2035,6 +2056,7 @@ theorem sqrt_normSq0S_three_diag_le
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_diagInv_of_metricUniformEquivalentOn
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -2179,6 +2201,7 @@ theorem exists_diagInv_of_metricUniformEquivalentOn
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_symm
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C) :
@@ -2207,6 +2230,7 @@ theorem metricUniformEquivalentOn_symm
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -2228,6 +2252,7 @@ theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn_symm
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -2246,6 +2271,7 @@ theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn_symm
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_connDiff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -2295,6 +2321,7 @@ theorem covOne_le_connDiff
 
 
 
+omit [SigmaCompactSpace M] in
 theorem connDiff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -2340,6 +2367,7 @@ theorem connDiff_le_covOne
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_diff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (h gRef : SmoothRiemannianMetric I M)
@@ -2388,6 +2416,7 @@ theorem covOne_le_diff
 
 
 
+omit [SigmaCompactSpace M] in
 theorem diff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (h gRef : SmoothRiemannianMetric I M)
@@ -2437,6 +2466,7 @@ theorem diff_le_covOne
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem diffNormSq_eq_l2
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
@@ -2479,6 +2509,7 @@ theorem diffNormSq_eq_l2
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSqRS12_eq_l2
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h : SmoothRiemannianMetric I M) {x : M}
@@ -2504,6 +2535,7 @@ theorem normSqRS12_eq_l2
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem applyCons3
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -2530,6 +2562,7 @@ private theorem sub_swap_of_sub_eq_sub
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem coord_eq_inner_id
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h : SmoothRiemannianMetric I M) {x : M}
@@ -2553,6 +2586,7 @@ theorem coord_eq_inner_id
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOneCompDiff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -2747,6 +2781,7 @@ theorem covOneCompDiff
 
 
 
+omit [SigmaCompactSpace M] in
 theorem connDiffBasisSymm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -2849,6 +2884,7 @@ theorem connDiffBasisSymm
           simp [covH, covG, hX, hY]
 
 
+omit [SigmaCompactSpace M] in
 theorem connDiffCompSymm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -2880,6 +2916,7 @@ theorem connDiffCompSymm
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -2954,6 +2991,7 @@ theorem covOne_le_diff_basis
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -2980,6 +3018,7 @@ theorem covOne_le_diff_basis_lc
 
 
 
+omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -3055,6 +3094,7 @@ theorem diff_le_covOne_basis
 
 
 
+omit [SigmaCompactSpace M] in
 theorem connDiffCompEq
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -3124,6 +3164,7 @@ theorem connDiffCompEq
 
 
 
+omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
@@ -3148,6 +3189,7 @@ theorem diff_le_covOne_basis_lc
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_ref
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
     (h gRef : SmoothRiemannianMetric I M) {x : M} (hxK : x ∈ K)
@@ -3203,6 +3245,7 @@ theorem covOne_le_diff_basis_ref
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_ref_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
     (h gRef : SmoothRiemannianMetric I M) {x : M} (hxK : x ∈ K)
@@ -3228,6 +3271,7 @@ theorem covOne_le_diff_basis_ref_lc
 
 
 
+omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_ref
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
     (h gRef : SmoothRiemannianMetric I M) {x : M} (hxK : x ∈ K)
@@ -3284,6 +3328,7 @@ theorem diff_le_covOne_basis_ref
 
 
 
+omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_ref_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
     (h gRef : SmoothRiemannianMetric I M) {x : M} (hxK : x ∈ K)
@@ -3308,6 +3353,7 @@ theorem diff_le_covOne_basis_ref_lc
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricInvBasisId
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (h : SmoothRiemannianMetric I M)
@@ -3336,6 +3382,7 @@ theorem metricInvBasisId
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -3490,6 +3537,7 @@ theorem covOne_le_christoffel
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covOne_le_init
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -3662,6 +3710,7 @@ private theorem metric_factor_mul
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_logDerivativeInput
     (K : Set M) (β ψ t0 C A : Real)
     (gRef : SmoothRiemannianMetric I M)
@@ -3860,6 +3909,7 @@ noncomputable def metricMixedDerivNorm
     (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
       (metricMixedDeriv (I := I) p q h gRef x t))
 
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem metricMixedDerivNorm_zero
     (p : Nat) (h : Real -> SmoothRiemannianMetric I M)
@@ -3892,6 +3942,7 @@ def MetricMixedDerivBoundsOnWindow
             metricMixedDerivNorm (I := I) a b (gSeq i) gRef x t <= C p q
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedWindow_of_pointwise
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -3906,6 +3957,7 @@ theorem metricMixedWindow_of_pointwise
   exact hpoint i t ht x hx
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedBoundsWindow_of_pointwise
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -3923,6 +3975,7 @@ theorem metricMixedBoundsWindow_of_pointwise
   exact hpoint i t ht p q a ha b hb x hx
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSq0S_smul
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (c : Real)
@@ -3937,6 +3990,7 @@ theorem normSq0S_smul
   simp [pow_two, mul_assoc]
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_smul
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (c : Real)
@@ -3969,6 +4023,7 @@ def MetricMixedDerivOneEvolutionOn
       (-2 : Real) • nablaRic i t x
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedDeriv_one_eq_of_evolution
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -3994,6 +4049,7 @@ def metricMixedOneConstant (Cpp Csp0 Cppp : Real) : Real :=
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedOneWindow_of_ric_bound
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -4177,6 +4233,7 @@ structure MetricAllTimesFirstOrderConclusion
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovOrderOneWindow_of_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -4412,6 +4469,7 @@ structure MetricCovOrderEvolutionInput
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_of_evolution
     {K : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -4606,6 +4664,7 @@ theorem metricCovOrderWindow_of_evolution
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedOneWindow_of_evolution
     {K : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -4650,6 +4709,7 @@ def metricMixedQConstant (Cpq : Real) : Real :=
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedQWindow_of_evolution
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -4698,6 +4758,7 @@ theorem metricMixedQWindow_of_evolution
   simpa [hnorm, metricMixedQConstant] using hscaled
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedZeroWindow_of_spatial
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -4719,6 +4780,7 @@ noncomputable def metricMixedCumulativeConstant
     (fun ab : Nat × Nat => D ab.1 ab.2)
 
 
+omit [SigmaCompactSpace M] in
 theorem metricMixedBoundsWindow_of_layerBounds
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}

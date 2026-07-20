@@ -17,7 +17,6 @@ noncomputable section
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
@@ -41,6 +40,7 @@ def nabla2VectorField
     (cov (fun p : M => (cov Z p) (Y p)) x) (X x) -
       (cov Z x) ((cov Y x) (X x))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp]
 theorem nabla2VectorField_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

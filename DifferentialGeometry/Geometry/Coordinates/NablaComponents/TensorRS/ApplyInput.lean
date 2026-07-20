@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,15 +19,15 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 private theorem coordinateFrameAt_basis_continuousLinearMapAt
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i : CoordinateIdx (𝕜 := 𝕜) E) :
@@ -50,6 +49,8 @@ private theorem coordinateFrameAt_basis_continuousLinearMapAt
   rw [hframe]
   exact e.continuousLinearMapAt_symmL (R := 𝕜) hxE ((Module.finBasis 𝕜 E) i)
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 private theorem coordinateFrameAt_basis_repr_eq_trivializationAt
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (v : TangentSpace I x) :
@@ -85,6 +86,7 @@ private theorem coordinateFrameAt_basis_repr_eq_trivializationAt
 
 
 
+omit [IsManifold I 2 M] in
 theorem constInChart_basisTensor0S_coordFrame {r : ℕ}
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (upper : Fin r -> CoordinateIdx (𝕜 := 𝕜) E) :
@@ -103,6 +105,7 @@ theorem constInChart_basisTensor0S_coordFrame {r : ℕ}
   rw [← continuousMultilinearMap_basis_repr (Module.finBasis 𝕜 E) r,
     Module.Basis.repr_self, Finsupp.single_apply]
 
+omit [IsManifold I 2 M] in
 private theorem coordFrameRSComp_at {r s : ℕ}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
@@ -126,6 +129,7 @@ private theorem coordFrameRSComp_at {r s : ℕ}
 
 
 
+omit [IsManifold I 2 M] in
 theorem applyInput_coordFrame_eventually {r s : ℕ}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
@@ -175,6 +179,7 @@ theorem applyInput_coordFrame_eventually {r s : ℕ}
           simp [basis, component0S_apply, componentRS_apply_gen, hconst]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [IsManifold I 2 M] in
 theorem tensorRS_eval_constInChart_coordinateFrame_contMDiffAt {r s : ℕ}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
@@ -237,6 +242,7 @@ theorem tensorRS_eval_constInChart_coordinateFrame_contMDiffAt {r s : ℕ}
 
 
 
+omit [IsManifold I 2 M] in
 theorem coordDeriv0SAt_applyInput_eq_sum {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

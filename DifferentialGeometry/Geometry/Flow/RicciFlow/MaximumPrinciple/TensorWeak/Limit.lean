@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,13 +14,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -43,6 +40,7 @@ def TensorBarrierUniformOnSlab
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_limit_on_fixed_slab
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -127,6 +125,7 @@ def TensorBarrierLimitClosureOn
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 private theorem nonnegativeTime_isClosed
     {S : TwoTensorFamily (I := I) (M := M)}
     {T : Real}
@@ -159,6 +158,7 @@ private theorem nonnegativeTime_isClosed
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierLimitClosure_of_continuous
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -404,6 +404,7 @@ structure TensorWMPSectionReg
 namespace TensorWMPSectionCore
 
 
+omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -457,6 +458,7 @@ theorem ofCompact
   barrierFixedContinuous := hFixed
 
 
+omit [IsManifold I 2 M] in
 theorem ofTotal
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -515,6 +517,7 @@ theorem ofTotal
     hFixed
 
 
+omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -563,6 +566,7 @@ theorem ofSmoothMetric
     hTensor hFixed
 
 
+omit [IsManifold I 2 M] in
 theorem toRaw
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -610,6 +614,7 @@ def toCore
 
 
 
+omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -681,6 +686,7 @@ theorem ofCompact
 
 
 
+omit [IsManifold I 2 M] in
 theorem ofTotal
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -757,6 +763,7 @@ theorem ofTotal
 
 
 
+omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -822,6 +829,7 @@ theorem ofSmoothMetric
 
 
 
+omit [IsManifold I 2 M] in
 theorem toRaw
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

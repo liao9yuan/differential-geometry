@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,6 +48,7 @@ private lemma component_contDiff_of_contDiffOn (α : M)
     (isClosed_tsupport f) hf_supp hf
     (fun _ hy => image_eq_zero_of_notMem_tsupport hy)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma componentBump_contMDiffOn
     (α : M) {f : EuclN → ℝ}
     (hf : ContDiffOn ℝ ∞ f (chartTargetEuclid (I := I) (M := M) α))
@@ -57,6 +58,7 @@ private lemma componentBump_contMDiffOn
   chartTestPullback_contMDiffOn (I := I) (M := M) α
     (component_contDiff_of_contDiffOn (I := I) (M := M) α hf hf_supp)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma componentBump_tsupport_subset
     (α : M) {f : EuclN → ℝ}
     (hf_cs : HasCompactSupport f)
@@ -124,6 +126,7 @@ noncomputable def tensorBundleSectionOfChartComponents
           (hsupp P).1 (hsupp P).2)
         P
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensorBundleSectionOfChartComponents_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (u : TensorCompIdx (E := E) r s → EuclN → ℝ)
@@ -142,6 +145,7 @@ private lemma tensorBundleSectionOfChartComponents_eq
   classical
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (u : TensorCompIdx (E := E) r s → EuclN → ℝ)
@@ -183,6 +187,7 @@ theorem tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
       (hsupp P).1 (hsupp P).2) P x,
     chartTestPullback_apply_of_notMem (I := I) α _ hx, zero_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_tensorBundleSectionOfChartComponents
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (u : TensorCompIdx (E := E) r s → EuclN → ℝ)

@@ -22,7 +22,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ section MainBound
 
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -73,6 +74,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 
+omit [CompleteSpace E] in
 private lemma rhsTerm1_wkpNorm_le :
     ∃ C : ℝ, 0 ≤ C ∧
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
@@ -212,6 +214,7 @@ private lemma rhsTerm2_wkpNorm_le
   rw [h_eq, hΩ_def]
   exact hC_bd
 
+omit [CompleteSpace E] in
 private lemma rhsTerm3_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧

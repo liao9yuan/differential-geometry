@@ -167,6 +167,8 @@ theorem deturck_metric_pde_interior
   exact hpush
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_metric_pde_at_zero
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x)

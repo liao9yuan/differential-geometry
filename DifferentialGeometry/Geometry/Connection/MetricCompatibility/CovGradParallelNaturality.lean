@@ -22,7 +22,7 @@ open Tensor0SNabla
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,12 +42,15 @@ noncomputable def unitZeroSec :
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)),
     contMDiff_unitZeroSection (I := I) (M := M)⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma unitZeroSec_apply (y : M) :
     unitZeroSec (I := I) (M := M) y =
       Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_apply_unit_eval
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (y : M)
     (v : Fin 3 → TangentSpace I y) :
@@ -63,6 +66,7 @@ lemma covGrad_apply_unit_eval
   exact covGrad_toSection_apply_eval (I := I) (M := M) g 0 2 T₀ y
     (unitZeroSec (I := I) (M := M) y) v
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_covDeriv_at_unit_eq
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (v : TangentSpace I x) :

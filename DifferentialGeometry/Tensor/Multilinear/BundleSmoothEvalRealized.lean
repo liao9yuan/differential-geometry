@@ -42,7 +42,6 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
-set_option linter.unusedSectionVars false
 open Bundle Set IsManifold ContinuousLinearMap
 open Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -52,7 +51,7 @@ namespace TensorMultilinear
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+    [FiniteDimensional 𝕜 E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -62,6 +61,7 @@ variable
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem compContinuousLinearMap_isEmpty
     {F₁ F₂ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
     [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
@@ -84,6 +84,7 @@ private theorem compContinuousLinearMap_isEmpty
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel (n + 1) 𝕜 E)
@@ -93,6 +94,7 @@ private theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem trivializationAt_tensor0SBundle_zero_fibre_gen
     (T : ∀ b : M, Tensor0SSpace 0 I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel 0 𝕜 E)
@@ -105,6 +107,7 @@ theorem trivializationAt_tensor0SBundle_zero_fibre_gen
   rw [compContinuousLinearMap_isEmpty]
 
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_homBundle_fibre {n : ℕ}
     (ϕ : ∀ b : M, TangentSpace I b →L[𝕜] Tensor0SSpace n I b) (x₀ b : M) :
     (trivializationAt (E →L[𝕜] Tensor0SModel n 𝕜 E)
@@ -118,6 +121,7 @@ private theorem trivializationAt_homBundle_fibre {n : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
       (fun x : M => Tensor0SSpace n I x) x₀).baseSet)
@@ -137,6 +141,7 @@ private theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rfl
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SBundle_linearMapAt_apply_tensor {n : ℕ} (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
       (fun x : M => Tensor0SSpace n I x) x₀).baseSet)
@@ -158,6 +163,7 @@ def curriedSection_gen {n : ℕ} (T : ∀ b : M, Tensor0SSpace (n + 1) I b) :
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem trivializationAt_homBundle_curriedSection_eq_gen {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
@@ -196,6 +202,7 @@ theorem trivializationAt_homBundle_curriedSection_eq_gen {n : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : Continuous (fun b : M =>
@@ -246,6 +253,7 @@ private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E)) ∞
@@ -288,6 +296,7 @@ private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tensor0S_curry_apply_eval_gen {n : ℕ} {b : M}
     (T : Tensor0SSpace (n + 1) I b)
     (v0 : E) (vs : Fin n → E) :
@@ -309,6 +318,7 @@ theorem tensor0S_curry_apply_eval_gen {n : ℕ} {b : M}
 
 
 
+omit [CompleteSpace 𝕜] in
 private theorem continuous_section_apply_aux : ∀ (n : ℕ)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : Continuous (fun b : M =>
@@ -384,6 +394,7 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_tensor0SBundle_succ_fibre_pt {n : ℕ}
     {b : M} (A : Tensor0SSpace (n + 1) I b) (x₀ : M) :
     (trivializationAt (Tensor0SModel (n + 1) 𝕜 E)
@@ -391,6 +402,7 @@ private theorem trivializationAt_tensor0SBundle_succ_fibre_pt {n : ℕ}
     A.compContinuousLinearMap
       (fun _ : Fin (n + 1) => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 b) := rfl
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_tensor0SBundle_zero_fibre_pt
     {b : M} (A : Tensor0SSpace 0 I b) (x₀ : M) :
     (trivializationAt (Tensor0SModel 0 𝕜 E)
@@ -402,6 +414,7 @@ private theorem trivializationAt_tensor0SBundle_zero_fibre_pt
     ContinuousMultilinearMap.constOfIsEmpty 𝕜 _ (A 0)
   rw [compContinuousLinearMap_isEmpty]
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_homBundle_fibre_pt {n : ℕ}
     {b : M} (φ : TangentSpace I b →L[𝕜] Tensor0SSpace n I b) (x₀ : M) :
     (trivializationAt (E →L[𝕜] Tensor0SModel n 𝕜 E)
@@ -411,6 +424,7 @@ private theorem trivializationAt_homBundle_fibre_pt {n : ℕ}
       (fun x : M => Tensor0SSpace n I x) x₀).continuousLinearMapAt 𝕜 b).comp
       (φ.comp ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜 b)) := rfl
 
+omit [CompleteSpace 𝕜] in
 private theorem trivializationAt_homBundle_curry_eq_pt {n : ℕ}
     {b : M} (A : Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n 𝕜 E)
@@ -442,6 +456,7 @@ private theorem trivializationAt_homBundle_curry_eq_pt {n : ℕ}
   · intro k
     rfl
 
+omit [CompleteSpace 𝕜] in
 private theorem continuous_curry_of_continuous_base {P : Type*} [TopologicalSpace P]
     {n : ℕ} {b : P → M}
     {T : ∀ p : P, Tensor0SSpace (n + 1) I (b p)}
@@ -493,6 +508,7 @@ private theorem continuous_curry_of_continuous_base {P : Type*} [TopologicalSpac
   exact (trivializationAt_homBundle_curry_eq_pt (I := I) (M := M)
     (A := T p) (x₀ := b p₀) hp).symm
 
+omit [CompleteSpace 𝕜] in
 private theorem continuous_section_apply_base_aux {P : Type*} [TopologicalSpace P] :
     ∀ (n : ℕ)
     (b : P → M)
@@ -654,6 +670,7 @@ private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem continuous_section_apply_gen
     {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -671,6 +688,7 @@ theorem continuous_section_apply_gen
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem continuous_section_apply_base
     {P : Type*} [TopologicalSpace P] {n : ℕ}
     (b : P → M) (hb : Continuous b)
@@ -736,6 +754,7 @@ theorem contMDiff_tensor0SField_apply
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem contMDiffAt_curriedSection_of_contMDiffAt_section_gen {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E)) ∞
@@ -869,6 +888,7 @@ theorem contMDiffAt_section_apply_gen
   contMDiffAt_section_apply_aux n x₀ T hT v hv
 
 
+omit [CompleteSpace 𝕜] in
 theorem contMDiffAt_curriedSection_of_contMDiffAt_section_one {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hT : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel (n + 1) 𝕜 E))

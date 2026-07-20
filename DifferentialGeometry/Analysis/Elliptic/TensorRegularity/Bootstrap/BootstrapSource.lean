@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -231,6 +231,7 @@ private lemma exists_chartCutoff (α : M) {K : Set EuclN}
            hasCompactSupport := HasCompactSupport.of_support_subset_isCompact
              hL_compact ((subset_tsupport _).trans hζ_supp) }⟩
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
     {hK : IsCompact K} {hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α}
     (ζ : ChartCutoff (I := I) (M := M) α hK hK_target)
@@ -245,6 +246,7 @@ private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, zero_mul]
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {c : EuclN → ℝ}
@@ -326,6 +328,7 @@ lemma euclidPartial_hasCompactSupport {K : Set EuclN} (hK : IsCompact K)
     ((subset_tsupport _).trans
       ((euclidPartial_tsupport_subset (E := E) l).trans hv_K))
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma wkpNorm_euclidPartial_le {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
@@ -333,6 +336,7 @@ lemma wkpNorm_euclidPartial_le {m : ℕ} {Ω'' : Set EuclN}
       iteratedWeakSobolevNorm (d := dimE) (m + 1) 2 v Ω'' :=
   wkpNorm_classicalPartial_le (d := dimE) hΩ'' (by simpa using hv_smooth) hv l
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
@@ -355,6 +359,7 @@ lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s T α p hy]
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {c : EuclN → ℝ}
@@ -374,6 +379,7 @@ private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
   rw [h_eq]
   exact hζc_smooth.mul hv
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartCoeffSum_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {ι : Type*} (S : Finset ι) (c v : ι → EuclN → ℝ)
@@ -402,6 +408,7 @@ lemma chartCoeffSum_hasCompactSupport {K : Set EuclN}
     rw [image_eq_zero_of_notMem_tsupport (fun hy' => hyK (hv_K a ha hy')),
       mul_zero]))
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)
@@ -447,6 +454,7 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     Ka (fun a ha => hKa_nn a ha) D h_term_le).trans ?_
   rw [hD_def]
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)

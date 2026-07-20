@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

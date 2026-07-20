@@ -46,6 +46,8 @@ theorem mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp
   simp only [ContinuousLinearMap.id_apply]
   exact (chartCloseDop_apply (I := I) Φ_fam (Φ_fam t x) x s v).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem rawVariationalIdentity_of_manifoldFlowFamily_chartClose
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

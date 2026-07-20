@@ -12,8 +12,8 @@ namespace Geometry
 namespace Riemannian
 namespace NormalCoordinates
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -28,10 +28,12 @@ def expMapDiffeo (g : SmoothRiemannianMetric I M) (p : M) :
     PartialDiffeomorph 𝓘(ℝ, E) I E M 1 :=
   Classical.choose (exists_exp_pd_chart (I := I) g p)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma zero_mem_expMapDiffeo_source (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (expMapDiffeo (I := I) g p).source :=
   (Classical.choose_spec (exists_exp_pd_chart (I := I) g p)).1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma expMapDiffeo_apply_eq (g : SmoothRiemannianMetric I M) (p : M)
     {v : E} (hv : v ∈ (expMapDiffeo (I := I) g p).source) :
     expMapDiffeo (I := I) g p v =
@@ -40,16 +42,19 @@ lemma expMapDiffeo_apply_eq (g : SmoothRiemannianMetric I M) (p : M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma exp_target_sub_chart (g : SmoothRiemannianMetric I M) (p : M) :
     (expMapDiffeo (I := I) g p).target ⊆ (chartAt H p).source :=
   (Classical.choose_spec (exists_exp_pd_chart (I := I) g p)).2.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma expMapDiffeo_zero (g : SmoothRiemannianMetric I M) (p : M) :
     expMapDiffeo (I := I) g p (0 : E) = p := by
   classical
   rw [expMapDiffeo_apply_eq (I := I) g p (zero_mem_expMapDiffeo_source (I := I) g p)]
   exact expMap_zero (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma p_mem_expMapDiffeo_target (g : SmoothRiemannianMetric I M) (p : M) :
     p ∈ (expMapDiffeo (I := I) g p).target := by
   classical
@@ -62,29 +67,36 @@ def normalChartAt (g : SmoothRiemannianMetric I M) (p : M) :
     PartialDiffeomorph I 𝓘(ℝ, E) M E 1 :=
   (expMapDiffeo (I := I) g p).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalChartAt_source_eq (g : SmoothRiemannianMetric I M) (p : M) :
     (normalChartAt (I := I) g p).source = (expMapDiffeo (I := I) g p).target := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalChartAt_target_eq (g : SmoothRiemannianMetric I M) (p : M) :
     (normalChartAt (I := I) g p).target = (expMapDiffeo (I := I) g p).source := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalChartAt_toPartialEquiv (g : SmoothRiemannianMetric I M) (p : M) :
     (normalChartAt (I := I) g p).toPartialEquiv =
       (expMapDiffeo (I := I) g p).toPartialEquiv.symm := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_open_source (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (normalChartAt (I := I) g p).source :=
   (normalChartAt (I := I) g p).open_source
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_open_target (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (normalChartAt (I := I) g p).target :=
   (normalChartAt (I := I) g p).open_target
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_source (g : SmoothRiemannianMetric I M) (p : M) :
     p ∈ (normalChartAt (I := I) g p).source := by
   rw [normalChartAt_source_eq]
   exact p_mem_expMapDiffeo_target (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_centre (g : SmoothRiemannianMetric I M) (p : M) :
     normalChartAt (I := I) g p p = (0 : E) := by
   classical
@@ -94,11 +106,13 @@ theorem normalChartAt_centre (g : SmoothRiemannianMetric I M) (p : M) :
   rw [expMapDiffeo_zero] at h_inv
   exact h_inv
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma zero_mem_normalChartAt_target (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (normalChartAt (I := I) g p).target := by
   rw [normalChartAt_target_eq]
   exact zero_mem_expMapDiffeo_source (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M) :
     (normalChartAt (I := I) g p).symm (0 : E) = p := by
   classical
@@ -107,16 +121,19 @@ lemma normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M) :
   rw [this]
   exact expMapDiffeo_zero (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_left_inv (g : SmoothRiemannianMetric I M) (p : M)
     {q : M} (hq : q ∈ (normalChartAt (I := I) g p).source) :
     (normalChartAt (I := I) g p).symm (normalChartAt (I := I) g p q) = q :=
   (normalChartAt (I := I) g p).left_inv hq
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_right_inv (g : SmoothRiemannianMetric I M) (p : M)
     {y : E} (hy : y ∈ (normalChartAt (I := I) g p).target) :
     normalChartAt (I := I) g p ((normalChartAt (I := I) g p).symm y) = y :=
   (normalChartAt (I := I) g p).right_inv hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_symm_apply (g : SmoothRiemannianMetric I M) (p : M)
     {v : E} (hv : v ∈ (normalChartAt (I := I) g p).symm.source) :
     (normalChartAt (I := I) g p).symm v =
@@ -133,16 +150,19 @@ lemma normalChartAt_symm_apply (g : SmoothRiemannianMetric I M) (p : M)
   rw [h_fun]
   exact expMapDiffeo_apply_eq (I := I) g p hv'
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_contMDiffOn (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) 1 (normalChartAt (I := I) g p)
       (normalChartAt (I := I) g p).source :=
   (normalChartAt (I := I) g p).contMDiffOn_toFun
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalChartAt_symm_contMDiffOn (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn 𝓘(ℝ, E) I 1 (normalChartAt (I := I) g p).symm
       (normalChartAt (I := I) g p).target :=
   (normalChartAt (I := I) g p).contMDiffOn_invFun
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma expMapDiffeo_mdifferentiableAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     MDifferentiableAt 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) (0 : E) :=
@@ -151,6 +171,7 @@ private lemma expMapDiffeo_mdifferentiableAt_zero
       ((expMapDiffeo (I := I) g p).open_source.mem_nhds
         (zero_mem_expMapDiffeo_source (I := I) g p))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma normalChartAt_mdifferentiableAt_p
     (g : SmoothRiemannianMetric I M) (p : M) :
     MDifferentiableAt I 𝓘(ℝ, E) (normalChartAt (I := I) g p) p :=
@@ -159,6 +180,7 @@ private lemma normalChartAt_mdifferentiableAt_p
       ((normalChartAt (I := I) g p).open_source.mem_nhds
         (normalChartAt_source (I := I) g p))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mfderiv_expMapDiffeo_at_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) (0 : E) =
@@ -175,6 +197,7 @@ private lemma mfderiv_expMapDiffeo_at_zero
     exact expMapDiffeo_apply_eq (I := I) g p hv
   exact h_eventually.mfderiv_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mfderiv_expMapDiffeo_at_zero_eq_id
     (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I (expMapDiffeo (I := I) g p) (0 : E) =
@@ -182,6 +205,7 @@ private lemma mfderiv_expMapDiffeo_at_zero_eq_id
   rw [mfderiv_expMapDiffeo_at_zero (I := I) g p]
   exact mfderiv_expMap_at_zero (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mfderiv_normalChartAt_comp_expMapDiffeo
     (g : SmoothRiemannianMetric I M) (p : M) :
     (mfderiv I 𝓘(ℝ, E) (normalChartAt (I := I) g p) p).comp
@@ -217,6 +241,7 @@ private lemma mfderiv_normalChartAt_comp_expMapDiffeo
   rw [h_chain, h_mfderiv_id] at h_mfderiv_comp_eq
   exact h_mfderiv_comp_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mfderiv_normalChartAt_self (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv I 𝓘(ℝ, E) (normalChartAt (I := I) g p) p =
       ContinuousLinearMap.id ℝ E := by
@@ -225,6 +250,7 @@ theorem mfderiv_normalChartAt_self (g : SmoothRiemannianMetric I M) (p : M) :
   rw [mfderiv_expMapDiffeo_at_zero_eq_id (I := I) g p] at h
   simpa using h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mfderiv_normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I (normalChartAt (I := I) g p).symm (0 : E) =
       ContinuousLinearMap.id ℝ E := by
@@ -233,6 +259,7 @@ theorem mfderiv_normalChartAt_symm_zero (g : SmoothRiemannianMetric I M) (p : M)
   rw [h_eq]
   exact mfderiv_expMapDiffeo_at_zero_eq_id (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_metric_pullback_at_origin
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     g.inner p
@@ -242,6 +269,7 @@ theorem normalChartAt_metric_pullback_at_origin
   rw [mfderiv_normalChartAt_symm_zero (I := I) g p]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_metric_at_origin
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     g.inner p
@@ -250,6 +278,7 @@ theorem normalChartAt_metric_at_origin
       g.inner p v w :=
   normalChartAt_metric_pullback_at_origin (I := I) g p v w
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_expMap_smul
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (s : ℝ)
     (hsv : s • v ∈ (normalChartAt (I := I) g p).target) :
@@ -273,12 +302,14 @@ def radialChartCurve (g : SmoothRiemannianMetric I M) (p : M) (v : E) : ℝ → 
   fun s => normalChartAt (I := I) g p
     (expMap (I := I) g p (show TangentSpace I p from s • v))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma radialChartCurve_def
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (s : ℝ) :
     radialChartCurve (I := I) g p v s =
       normalChartAt (I := I) g p
         (expMap (I := I) g p (show TangentSpace I p from s • v)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialChartCurve_eq_linear
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (s : ℝ)
     (hsv : s • v ∈ (normalChartAt (I := I) g p).target) :
@@ -288,6 +319,7 @@ theorem radialChartCurve_eq_linear
 def radialDomain (g : SmoothRiemannianMetric I M) (p : M) (v : E) : Set ℝ :=
   {s : ℝ | s • v ∈ (normalChartAt (I := I) g p).target}
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma zero_mem_radialDomain (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     (0 : ℝ) ∈ radialDomain (I := I) g p v := by
   classical
@@ -295,6 +327,7 @@ lemma zero_mem_radialDomain (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
   rw [zero_smul]
   exact zero_mem_normalChartAt_target (I := I) g p
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma radialDomain_isOpen (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     IsOpen (radialDomain (I := I) g p v) := by
   classical
@@ -302,6 +335,7 @@ lemma radialDomain_isOpen (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     continuous_id.smul continuous_const
   exact (normalChartAt_open_target (I := I) g p).preimage h_cont
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialChartCurve_eventuallyEq
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     radialChartCurve (I := I) g p v =ᶠ[nhds (0 : ℝ)] (fun s : ℝ => s • v) := by
@@ -312,6 +346,7 @@ theorem radialChartCurve_eventuallyEq
   intro s hs
   exact radialChartCurve_eq_linear (I := I) g p v s hs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialChartCurve_hasDerivAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     HasDerivAt (radialChartCurve (I := I) g p v) v (0 : ℝ) := by
@@ -321,6 +356,7 @@ theorem radialChartCurve_hasDerivAt_zero
   exact h_linear.congr_of_eventuallyEq
     (radialChartCurve_eventuallyEq (I := I) g p v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialChartCurve_secondDeriv_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     HasDerivAt (fun s : ℝ => deriv (radialChartCurve (I := I) g p v) s)
@@ -348,12 +384,14 @@ theorem radialChartCurve_secondDeriv_zero
   have h_const : HasDerivAt (fun _ : ℝ => v) (0 : E) (0 : ℝ) := hasDerivAt_const 0 v
   exact h_const.congr_of_eventuallyEq h_deriv_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChartAt_radial_secondDeriv_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) :
     HasDerivAt (fun s : ℝ => deriv (radialChartCurve (I := I) g p v) s)
       (0 : E) (0 : ℝ) :=
   radialChartCurve_secondDeriv_zero (I := I) g p v
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem polarization_of_symm_quadratic_eventually_zero
     {F : Type*} [AddCommGroup F] [Module ℝ F]
     (B : E →ₗ[ℝ] E →ₗ[ℝ] F)

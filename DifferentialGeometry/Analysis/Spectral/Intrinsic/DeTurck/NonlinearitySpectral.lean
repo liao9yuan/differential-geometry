@@ -97,6 +97,7 @@ theorem firstOrderRemainder_lands_in_Ha
       _ = ‖R‖ := one_mul _
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem deTurckNonlinearitySpectral_principalPart_cancels
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

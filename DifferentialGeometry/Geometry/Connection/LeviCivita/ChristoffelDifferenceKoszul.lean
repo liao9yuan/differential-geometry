@@ -10,7 +10,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,6 +23,8 @@ def metricCovDeriv (g : Measure.SmoothRiemannianMetric I M)
     - g.inner x (cov.toFun Y x (X x)) (Z x)
     - g.inner x (Y x) (cov.toFun Z x (X x))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_self_eq_zero (g : Measure.SmoothRiemannianMetric I M)
     {X Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
@@ -32,6 +34,8 @@ theorem metricCovDeriv_self_eq_zero (g : Measure.SmoothRiemannianMetric I M)
   rw [directionalDeriv_eq, hmc]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_koszul (g₁ g₀ : SmoothRiemannianMetric I M)
     {X Y Z : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
@@ -84,6 +88,8 @@ def metricDiffCovDeriv (g₁ g₀ : SmoothRiemannianMetric I M)
   metricCovDeriv (I := I) g₁ (LeviCivita (I := I) g₀) X Y Z x
     - metricCovDeriv (I := I) g₀ (LeviCivita (I := I) g₀) X Y Z x
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricDiffCovDeriv_eq_metricCovDeriv (g₁ g₀ : SmoothRiemannianMetric I M)
     {X Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
@@ -92,6 +98,8 @@ theorem metricDiffCovDeriv_eq_metricCovDeriv (g₁ g₀ : SmoothRiemannianMetric
   unfold metricDiffCovDeriv
   rw [metricCovDeriv_self_eq_zero (I := I) g₀ hY hZ, sub_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_koszul_metricDiff (g₁ g₀ : SmoothRiemannianMetric I M)
     {X Y Z : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :

@@ -58,6 +58,7 @@ set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlot_sub_eq_curv
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : SmoothCcTensor g₀ 2 4,

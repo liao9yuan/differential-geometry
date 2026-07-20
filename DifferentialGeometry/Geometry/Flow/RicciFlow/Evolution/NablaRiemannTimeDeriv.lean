@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridg
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -129,6 +128,7 @@ def covDerivStepDt {r : ℕ}
 
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (A Adt : Real → M → (Fin r → Idx) → Real)
@@ -222,7 +222,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -246,6 +245,8 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_one_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M)

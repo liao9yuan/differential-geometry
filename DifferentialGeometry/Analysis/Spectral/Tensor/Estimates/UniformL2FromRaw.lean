@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem l2_bdd_of_raw {ι : Type*}
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : ι → SmoothCcTensor g r s) (B : ℝ) (hB : 0 ≤ B)

@@ -24,6 +24,7 @@ variable
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -121,6 +122,7 @@ theorem chartRHS_pou_lip
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

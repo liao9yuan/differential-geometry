@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -96,6 +95,7 @@ section FamilyAlgebraicRules
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -109,6 +109,7 @@ theorem driftTerm_sub_const
   simp
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_const_smul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -121,6 +122,7 @@ theorem driftTerm_const_smul
   simp
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem heatOperatorWithDrift_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -179,6 +181,7 @@ theorem laplacianAt_smul
     a hf hgrad
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem gradientAt_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -191,6 +194,7 @@ theorem gradientAt_mul
   exact gradientFun_mul (I := I) (G.metric t) hf hh
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem gradientAt_rpow
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M} (p : Real)
@@ -326,6 +330,7 @@ end FamilyAlgebraicRules
     gradientAt (I := I) G t f x = gradientFun (I := I) (G.metric t) f x := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem divergenceAt_eq
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x) (x : M) :

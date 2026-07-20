@@ -6,7 +6,6 @@ import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -32,7 +31,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -106,6 +104,7 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u c)) :
@@ -216,6 +215,7 @@ def InitialScalarMinimum (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
 
 namespace InitialScalarMinimum
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem lowerBound
     {scalar : Real -> M -> Real} {c0 : Real}
     (h : InitialScalarMinimum (M := M) scalar c0) :
@@ -225,6 +225,7 @@ theorem lowerBound
 
 end InitialScalarMinimum
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem initialScalarMinimum_of_isMinOn
     (scalar : Real -> M -> Real) {c0 : Real} {x0 : M}
     (hc0 : c0 = scalar 0 x0)
@@ -235,6 +236,7 @@ theorem initialScalarMinimum_of_isMinOn
   rw [hc0]
   exact hmin (by simp : x ∈ Set.univ)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem exists_initialScalarMinimum_of_continuous
     [CompactSpace M] [Nonempty M]
     (scalar : Real -> M -> Real)
@@ -394,6 +396,7 @@ def ScalarEvolutionAllTimesOn
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -446,6 +449,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -498,6 +502,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
     _ = DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := hparabolic.symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -519,6 +524,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     [I.Boundaryless]

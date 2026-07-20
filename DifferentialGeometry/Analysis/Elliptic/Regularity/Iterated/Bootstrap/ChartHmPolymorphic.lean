@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedChartHmBootstrapFinal
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,6 +123,7 @@ theorem chartPushed_memWkp_j_of_chartSideH2kBridge
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le hjk
     (h_bridge α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_succ_step
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (u_h : H1Compl (I := I) (M := M) g)

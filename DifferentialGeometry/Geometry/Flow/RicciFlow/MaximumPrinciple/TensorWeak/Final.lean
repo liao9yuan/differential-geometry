@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,13 +14,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -30,6 +27,7 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_first_null_of_failure
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -70,6 +68,7 @@ private theorem firstNullOrder
 
 
 
+omit [IsManifold I 2 M] in
 theorem tensor_first_null_contradiction
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -142,6 +141,7 @@ theorem tensor_first_null_contradiction
 
 
 
+omit [IsManifold I 2 M] in
 theorem shortSlab_cert
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -191,6 +191,7 @@ theorem shortSlab_cert
     (fun t ht => hreg.bilinear t (hsub ht))
     d (cert.signs hnull_slab d)
 
+omit [IsManifold I 2 M] in
 theorem tensorBarrier_nonnegative_on_short_slab
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -220,6 +221,7 @@ theorem tensorBarrier_nonnegative_on_short_slab
 
 
 
+omit [IsManifold I 2 M] in
 theorem tensor_wmp_of_barrier_limit
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -247,6 +249,7 @@ theorem tensor_wmp_of_barrier_limit
         hnull hinit_t0)
 
 
+omit [IsManifold I 2 M] in
 theorem wmp_of_cert
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -379,6 +382,7 @@ theorem tensor_wmp
 
 
 
+omit [IsManifold I 2 M] in
 theorem hamilton_tensor_wmp
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -407,6 +411,7 @@ theorem hamilton_tensor_wmp
 
 
 
+omit [IsManifold I 2 M] in
 theorem hamilton_tensor_wmp_section
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

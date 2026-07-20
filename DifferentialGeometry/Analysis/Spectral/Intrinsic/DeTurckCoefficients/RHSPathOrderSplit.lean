@@ -77,6 +77,8 @@ private theorem unitModel_sub_app
       ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
   rw [hfun, ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem ccBilin_sub
     [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -88,6 +90,8 @@ private theorem ccBilin_sub
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T' x v w]
   exact unitModel_sub_app (I := I) (M := M) g₀ T T' x ![v, w]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem symmS_eq_self
     [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
@@ -192,6 +196,7 @@ theorem deriv_rhsPath
     g_bg α i k hy (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩)).deriv
 
 
+omit [CompactSpace M] in
 theorem realizedFam_zero
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -206,6 +211,7 @@ theorem realizedFam_zero
     tensorSectionRealizeMetric_inner, convexPerturbation_zero]
 
 
+omit [CompactSpace M] in
 theorem realizedFam_one
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -330,6 +336,7 @@ def lieTopTailSwap
         (realizedFam (I := I) g₀ T T' hδ hδ' s) x k i
 
 omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieTopRaw_symm
     (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -470,6 +477,7 @@ def lieZeroSum
 
 
 
+omit [CompactSpace M] in
 theorem lieSum_eq_split [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -491,6 +499,7 @@ theorem lieSum_eq_split [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem ricciSum_eq_lin [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -515,6 +524,7 @@ theorem ricciSum_eq_lin [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem rhsSlope_eq_lin [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -715,6 +725,7 @@ theorem rhsSlope_eq_split [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem rhsSum_contDiffAt [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -778,6 +789,7 @@ theorem deriv_rhsSum [BoundarylessManifold I M]
     x v w (Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩)).deriv
 
 
+omit [CompactSpace M] in
 theorem rhsSum_continuous [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

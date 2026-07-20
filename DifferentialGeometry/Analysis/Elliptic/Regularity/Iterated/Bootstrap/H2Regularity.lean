@@ -12,7 +12,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,7 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_lp_class_locally_memLp_volume
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_lp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -55,6 +56,7 @@ private lemma chartPushed_lp_class_locally_memLp_volume
   exact memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     h_memLp_w hK_compact hK_compact.isClosed.measurableSet hK_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_zero_of_lp
     (g : SmoothRiemannianMetric I M)
     (u_lp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -104,6 +106,7 @@ theorem memWkpChart_zero_of_lp
       (Filter.Eventually.of_forall (fun y hy => h_pointwise_eq y hy))
   exact h_ind_memLp_chartTarget.ae_eq h_ae_eq.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedH2Regularity_zero
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) :

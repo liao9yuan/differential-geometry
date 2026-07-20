@@ -38,7 +38,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ def riemannPalatiniRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         (qB 0) (qB 1) (qB 2) (qB 3)))
 
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma riemannPalatiniRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -95,6 +96,7 @@ def deTurckLieCovDerivArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 @[simp] theorem deTurckLieCovDerivArmField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -110,6 +112,8 @@ def deTurckLieEndoArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := deTurckLieDLbFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem deTurckLieEndoArmField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -117,6 +121,7 @@ def deTurckLieEndoArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
         TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)) := rfl
 
 
+omit [I.Boundaryless] in
 theorem deTurckLieCoeffField_eq_covDerivArm_add_endoArm
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg =
@@ -498,6 +503,7 @@ private lemma outerPairBilinChartα_apply (g : SmoothRiemannianMetric I M) (α :
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma double_frame_bilin_trace_chartα
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -558,6 +564,7 @@ private def pairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     pairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -569,6 +576,7 @@ private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
     (g : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (σp : Equiv.Perm (Fin 4)) (α : M) {x : M}
@@ -624,6 +632,8 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
     ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private lemma curvatureRefoldMonomialBiContrFibAppY_chartCoord_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -741,6 +751,8 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_chartCoord_jointContMDiffOn
   rw [curvatureRefoldMonomialBiContrFib_toModel_chartα (I := I) (M := M)
     (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) W σp α hxbase]
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -844,6 +856,7 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
     · exact (Bcmm.equivFun.symm_apply_apply _).symm
   exact hfinal
 
+omit [BoundarylessManifold I M] in
 theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -876,6 +889,7 @@ theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
   rfl
 
 
+omit [BoundarylessManifold I M] in
 theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}

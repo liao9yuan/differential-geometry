@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace DifferentiatedCrossTermIBP
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -56,6 +56,7 @@ theorem chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialL
   hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
     (I := I) (M := M) g α hu_h i l
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))
@@ -99,6 +100,7 @@ lemma exists_smooth_global_extension
     rw [hη_one y hy]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma weightedInvGramDerivOnEuclid_contDiffOn_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :

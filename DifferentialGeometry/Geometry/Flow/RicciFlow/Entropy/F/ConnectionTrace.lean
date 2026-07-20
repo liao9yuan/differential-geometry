@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -48,6 +47,8 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceUTrace
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -188,6 +189,7 @@ theorem connTraceUTrace
 set_option maxHeartbeats 1600000 in
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceATrace
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -292,12 +294,14 @@ theorem connTraceATrace
       i j
   simpa [Acomp, Gamma] using h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem gInvFun_mdifferentiableAt
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     MDifferentiableAt I 𝓘(Real, Real) (gInvFun (I := I) g x i j) x :=
   (gInvComp_contMDiffAt (I := I) g x i j).mdifferentiableAt (by norm_num)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem compFun_mdifferentiableAt
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -310,6 +314,7 @@ private theorem compFun_mdifferentiableAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem compFun_center
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -340,6 +345,7 @@ private theorem compFun_center
   simp [hconst, component0S, coordinateFrameAt_basis_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem gInvFun_center
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -348,6 +354,7 @@ private theorem gInvFun_center
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem connTraceCoeff_one_center
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -370,6 +377,9 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem connTraceRawDiv_eq_productSum
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -510,6 +520,9 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTraceRaw_eq_gamma
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -658,6 +671,9 @@ theorem connTraceRaw_eq_gamma
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTraceRaw_of_components
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)

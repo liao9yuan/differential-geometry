@@ -64,6 +64,7 @@ def gradChartLocalWithin (g : SmoothRiemannianMetric I M)
     gradChartCoeffWithin (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma scalarOnE_mdifferentiableWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -129,6 +130,7 @@ private lemma mfderivWithin_chart_source_of_mdiff'
     mfderivWithin I 𝓘(ℝ, ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ, ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma mfderiv_factor_through_extChartAt'
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -204,6 +206,7 @@ private lemma mfderiv_factor_through_extChartAt'
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
+omit [InnerProductSpace ℝ E] in
 lemma mfderiv_chartBasisVecFiber_within_of_smooth
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -328,6 +331,7 @@ lemma inner_gradChartLocalWithin_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
+omit [InnerProductSpace ℝ E] in
 theorem gradChartLocalWithin_eq_gradFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -381,6 +385,7 @@ theorem gradChartLocalWithin_eq_gradFun
   rw [inner_gradChartLocalWithin_chartBasis (I := I) g α f hbase k,
     hmfderiv_basis k]
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradChartCoeffWithin_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -436,6 +441,7 @@ private lemma gradChartCoeffWithin_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradChartLocalWithin_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -490,6 +496,7 @@ private lemma extChartAt_mem_interior_target_of_interior
   extChartAt_mem_interior_target_of_isInteriorPoint
     (I := I) α hx_src hx_int
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -499,6 +506,7 @@ private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
   intro y hy
   exact (gradChartLocalWithin_eq_gradFun (I := I) g x₀ hf hy.1).symm
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -513,6 +521,7 @@ private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
   · rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy.1
   · exact extChartAt_mem_interior_target_of_interior (I := I) x₀ hy.1 hy.2
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -531,6 +540,7 @@ private lemma gradFun_contMDiffOn_chart_inter_interior
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g x₀ f y)
   rw [h]
 
+omit [InnerProductSpace ℝ E] in
 theorem gradFun_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -560,6 +570,7 @@ omit [InnerProductSpace ℝ E] in
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     grad_g_with_boundary (I := I) g f x = gradFun (I := I) g f x := rfl
 
+omit [InnerProductSpace ℝ E] in
 theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

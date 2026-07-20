@@ -30,12 +30,12 @@ abbrev TrivialBundle : M → Type _ := fun _ ↦  𝕜
 
 @[reducible]
 def Tensor0SModel (s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedField 𝕜]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] :=
+  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :=
   ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜
 
 @[reducible]
 def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedField 𝕜]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] :=
+  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :=
   (Tensor0SModel r 𝕜 E) →L[𝕜] (Tensor0SModel s 𝕜 E)
 
 @[nolint unusedArguments]
@@ -698,10 +698,12 @@ omit [FiniteDimensional 𝕜 E] in
 
 theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
     ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
+omit [FiniteDimensional 𝕜 E] in
 theorem TensorRSSpace.zero_apply (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x) :
     (0 : TensorRSSpace r s I x) A = 0 := rfl
 
+omit [FiniteDimensional 𝕜 E] in
 theorem TensorRSSpace.add_apply (r s : ℕ) (x : M)
     (T U : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
     (T + U) A = T A + U A := rfl

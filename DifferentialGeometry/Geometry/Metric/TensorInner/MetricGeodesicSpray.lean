@@ -16,8 +16,8 @@ noncomputable section
 
 namespace MetricKoszul
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [ContinuousDualEquiv E]
 
 noncomputable local instance sprayDualNormedGroup :
     NormedAddCommGroup (E →L[Real] Real) :=
@@ -90,15 +90,14 @@ private noncomputable def koszulRieszOp :
   (ContinuousLinearMap.compL Real E
       (E →L[Real] E →L[Real] Real) (E →L[Real] E)
       (ContinuousLinearMap.compL Real E (E →L[Real] Real) E
-        (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap)).comp
+        (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap)).comp
     koszulCovCLM
 
 @[simp] private theorem koszulRieszOp_apply
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     koszulRieszOp D u v =
-      (InnerProductSpace.toDual Real E).symm (koszulCov D u v) := by
+      (ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v) := by
   simp [koszulRieszOp]
-  rfl
 
 
 private noncomputable def postBilin :
@@ -113,18 +112,27 @@ private noncomputable def postBilin :
 private noncomputable def gramCLM :
     (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) :=
   ContinuousLinearMap.compL Real E (E →L[Real] Real) E
-    (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap
+    (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap
 
 @[simp] private theorem gramCLM_apply
     (B : E →L[Real] E →L[Real] Real) :
-    gramCLM B = InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B := by
+    gramCLM B =
+      (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap.comp B := by
   rfl
 
 private theorem gramCLM_isUnit
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B) :
     IsUnit (gramCLM B) := by
-  rw [gramCLM_apply]
-  exact ⟨hB.continuousLinearEquivOfBilin.toUnit, rfl⟩
+  let eB : E ≃L[Real] (E →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E ≃L[Real] E := eB.trans (ContinuousDualEquiv.equiv (E := E)).symm
+  refine ⟨e.toUnit, ?_⟩
+  change (ContinuousDualEquiv.equiv (E := E)).symm.toContinuousLinearMap.comp B =
+    gramCLM B
+  rfl
 
 
 noncomputable def raisedKoszulOp
@@ -132,25 +140,41 @@ noncomputable def raisedKoszulOp
     (D : E →L[Real] E →L[Real] E →L[Real] Real) :
     E →L[Real] E →L[Real] E :=
   postBilin
-    (Ring.inverse (InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B))
+    (Ring.inverse (gramCLM B))
     (koszulRieszOp D)
 
 @[simp] theorem raisedKoszulOp_apply
     (B : E →L[Real] E →L[Real] Real)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     raisedKoszulOp B D u v =
-      Ring.inverse (InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B)
-        ((InnerProductSpace.toDual Real E).symm (koszulCov D u v)) := by
+      Ring.inverse (gramCLM B)
+        ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)) := by
   rfl
 
 
 
 theorem raisedKoszulOp_eq
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v : E) :
     raisedKoszulOp B D u v = koszulVec hB D u v := by
-  rw [raisedKoszulOp_apply, ← hB.sharp_eq_inverse]
-  rfl
+  rw [raisedKoszulOp_apply]
+  let eB : E ≃L[Real] (E →L[Real] Real) :=
+    ContinuousLinearEquiv.ofBijective B
+      (LinearMap.ker_eq_bot.mpr hB.bilin_injective)
+      (LinearMap.range_eq_top.mpr (CoerciveBilinInverse.surjective hB))
+  let e : E ≃L[Real] E := eB.trans (ContinuousDualEquiv.equiv (E := E)).symm
+  change Ring.inverse (↑e.toUnit : E →L[Real] E)
+      ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)) = _
+  rw [Ring.inverse_unit]
+  apply hB.bilin_injective
+  rw [apply_koszulVec]
+  have he := e.apply_symm_apply
+    ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v))
+  change (ContinuousDualEquiv.equiv (E := E)).symm
+      (B (e.symm ((ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v)))) =
+    (ContinuousDualEquiv.equiv (E := E)).symm (koszulCov D u v) at he
+  exact (ContinuousDualEquiv.equiv (E := E)).symm.injective he
 
 
 
@@ -161,6 +185,7 @@ noncomputable def metricSpray
 
 
 theorem metricSpray_eq
+    [CompleteSpace E] [CoerciveBilinInverse E]
     (g : E → E →L[Real] E →L[Real] Real) (z : E × E)
     (hg : IsCoercive (g z.1)) :
     metricSpray g z =
@@ -303,7 +328,7 @@ theorem raisedKoszulOp_conv
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
 set_option maxHeartbeats 700000 in
-omit [CompleteSpace E] in
+omit [ContinuousDualEquiv E] in
 private theorem raisedDiag_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)

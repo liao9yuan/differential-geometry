@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ private lemma sq_add_le_two_mul_sq_add_sq_pou (a b : ℝ) :
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧
@@ -413,6 +414,7 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
         B * (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) ^ 2 *
             (Tcov_sum + Tchr_sum) := h_RHS_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧

@@ -13,13 +13,13 @@ namespace DeTurck
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartGramOnE_det_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -48,7 +48,7 @@ theorem chartGramOnE_det_continuous_in_metric_at
   intro t _
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartGramOnE_adjugate_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -102,6 +102,7 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
     rfl
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartInvGramOnE_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -156,6 +157,7 @@ theorem chartInvGramOnE_continuous_in_metric_at
   · exact chartGramOnE_adjugate_continuous_in_metric_at (I := I) g_DT α y s h_entry i j
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffel_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -196,6 +198,7 @@ theorem chartChristoffel_continuous_in_metric_at
     · exact h_partial l a b
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckVFComp_continuous_in_metric_at
     (g' : SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

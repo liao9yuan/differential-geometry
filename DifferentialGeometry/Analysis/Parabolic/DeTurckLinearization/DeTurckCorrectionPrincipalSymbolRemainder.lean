@@ -15,7 +15,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,7 +30,7 @@ def chartDeTurckCorrHessBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
        partialDeriv (E := E) d (partialDeriv (E := E) l (h a b)) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrHessBlock_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -50,7 +50,7 @@ def chartDeTurckCorrGramDerivBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) b (h l a) y -
        partialDeriv (E := E) l (h a b) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrGramDerivBlock_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -74,7 +74,7 @@ def chartDeTurckCorrPrincipalSymbolExpr (g g' : SmoothRiemannianMetric I M) (α 
           chartInvGramOnE (I := I) g α a b y *
             chartDeTurckCorrHessBlock (I := I) g g' α h j a b k y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -90,7 +90,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
               chartInvGramOnE (I := I) g α a b y *
                 chartDeTurckCorrHessBlock (I := I) g g' α h j a b k y) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrPrincipalSymbolExpr_eq_explicit
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -135,7 +135,7 @@ def chartDeTurckCorrFirstOrderRemainder (g g' : SmoothRiemannianMetric I M) (α 
             chartInvGramOnE (I := I) g α a b y *
               chartDeTurckCorrGramDerivBlock (I := I) g g' α h j a b k y)))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -158,6 +158,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
                   chartDeTurckCorrGramDerivBlock (I := I) g g' α h j a b k y))) := rfl
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k d : Fin (Module.finrank ℝ E)) {y : E}
@@ -223,6 +224,7 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -293,6 +295,7 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     [I.Boundaryless]
     (g g' : SmoothRiemannianMetric I M) (α : M)
@@ -310,7 +313,7 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_
   exact chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     (I := I) g g' α h i j hx_int
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -401,7 +404,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
 
 section BlockLinearity
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_zero
     (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p
@@ -413,14 +416,14 @@ private lemma partialDeriv_partialDeriv_zero
     rw [hconst, partialDeriv_const]
   rw [hinner, partialDeriv_const]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_zero_apply
     (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((0 : ChartMetricPerturbation E) a b) y = 0 := by
   have hconst : ((0 : ChartMetricPerturbation E) a b) = fun _ : E => (0 : ℝ) := rfl
   rw [hconst, partialDeriv_const]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((h₁ + h₂) a b)) y =
@@ -438,7 +441,7 @@ private lemma partialDeriv_partialDeriv_add_apply
         (partialDeriv_perturbation_differentiableAt h₁ q a b y)
         (partialDeriv_perturbation_differentiableAt h₂ q a b y)]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((h₁ + h₂) a b) y =
@@ -447,7 +450,7 @@ private lemma partialDeriv_add_apply
   rw [heq, partialDeriv_add (E := E) (h₁ a b) (h₂ a b)
         (h₁.differentiableAt a b y) (h₂.differentiableAt a b y)]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((c • h) a b)) y =
@@ -461,7 +464,7 @@ private lemma partialDeriv_partialDeriv_smul_apply
         (partialDeriv (E := E) q (h a b))
         (partialDeriv_perturbation_differentiableAt h q a b y), smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p ((c • h) a b) y =
@@ -470,7 +473,7 @@ private lemma partialDeriv_smul_apply
   rw [heq, partialDeriv_const_smul (E := E) c (h a b) (h.differentiableAt a b y),
     smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrHessBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -493,7 +496,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     ring
   rw [hzero, mul_zero]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -510,7 +513,7 @@ lemma chartDeTurckCorrHessBlock_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ d l a b y]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -536,7 +539,7 @@ lemma chartDeTurckCorrHessBlock_smul
     ring]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrGramDerivBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -555,7 +558,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     ring
   rw [hzero, mul_zero]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -571,7 +574,7 @@ lemma chartDeTurckCorrGramDerivBlock_add
     partialDeriv_add_apply h₁ h₂ l a b y]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -598,7 +601,7 @@ lemma chartDeTurckCorrGramDerivBlock_smul
 
 end BlockLinearity
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -618,7 +621,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
   rw [Finset.sum_eq_zero (fun k _ => by rw [hzero i k, mul_zero]),
     Finset.sum_eq_zero (fun k _ => by rw [hzero j k, mul_zero]), add_zero]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -683,7 +686,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_add
     rw [hsplit j k, mul_add]]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -734,7 +737,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     rw [hscale j k]; ring]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -763,6 +766,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
   rw [Finset.sum_eq_zero (fun k _ => by rw [hbranchA i k, hbranchB i k]; ring),
     Finset.sum_eq_zero (fun k _ => by rw [hbranchA j k, hbranchB j k]; ring), add_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrFirstOrderRemainder_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -862,6 +866,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_add
     rw [hA j k, hB j k]; ring]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrFirstOrderRemainder_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -938,7 +943,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     rw [hA j k, hB j k]; ring]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_symm
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :

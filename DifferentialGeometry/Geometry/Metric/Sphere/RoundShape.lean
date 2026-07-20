@@ -115,6 +115,7 @@ omit [FiniteDimensional ℝ E] in
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem ambDeriv_bracket_symm
     (Z X Y : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
     (x : sphere (0 : E) 1)
@@ -191,6 +192,7 @@ theorem ambDeriv_bracket_symm
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem inner_dIncl_metricCov
     {S : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x} {x : sphere (0 : E) 1}
     (hS : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
@@ -251,6 +253,7 @@ set_option maxHeartbeats 800000 in
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem inner_ambDeriv_nested
     (Z Yf : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
     (x : sphere (0 : E) 1) (v W : TangentSpace (𝓡 n) x)
@@ -353,6 +356,7 @@ theorem inner_ambDeriv_nested
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem ambDeriv_section_mdiffAt
     (Z Yf : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
     (x : sphere (0 : E) 1) :
@@ -403,6 +407,7 @@ set_option maxHeartbeats 800000 in
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem dIncl_curv_inner
     (Z X Y : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
     (x : sphere (0 : E) 1) (W : TangentSpace (𝓡 n) x)

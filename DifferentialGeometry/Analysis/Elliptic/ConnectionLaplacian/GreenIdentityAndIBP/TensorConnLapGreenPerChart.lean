@@ -83,6 +83,7 @@ def frameDirWeightDerivPairing
       * tangentSectionAction (I := I) (frameVF (I := I) (M := M) g α i)
           ((chartAtlasPOU I M α : M → ℝ)) b
 
+omit [I.Boundaryless] in
 private lemma perDirCross_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -90,6 +91,7 @@ private lemma perDirCross_continuous
     Continuous (frameDirGradPairing (I := I) (M := M) g T v α i) :=
   (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 2 _ _).continuous
 
+omit [I.Boundaryless] in
 private lemma perDirSecond_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -97,6 +99,7 @@ private lemma perDirSecond_continuous
     Continuous (frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i) :=
   (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 2 _ _).continuous
 
+omit [I.Boundaryless] in
 private lemma perDirInner_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)

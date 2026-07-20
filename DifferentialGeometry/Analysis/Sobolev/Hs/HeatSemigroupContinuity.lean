@@ -27,6 +27,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_heatSemigroupHsExt_sub_le_diff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {t t₀ : ℝ} (ht : 0 ≤ t) (ht₀ : 0 ≤ t₀)
@@ -152,6 +153,7 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
       _ = ‖heatSemigroupHsExt
               (I := I) (M := M) g σ |t - t₀| u - u‖ := by rw [h_abs]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {τ : ℝ} (hτ : 0 ≤ τ)
@@ -201,6 +203,7 @@ private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
   rw [h_zero]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tendsto_heatSemigroupHsExt_of_finite
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {u' : scalarHs (I := I) (M := M) g σ}
@@ -325,6 +328,7 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
   exact (Filter.tendsto_congr (fun τ => h_norm_eq_sqrt τ)).mpr
     h_sqrt_to_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tendsto_heatSemigroupHsExt_at_zero
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (u : scalarHs (I := I) (M := M) g σ) :
@@ -441,6 +445,7 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
   rw [h_sum_eq] at h_lt
   simpa [Real.dist_eq, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] using h_lt
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
     (σ : ℝ) (u : scalarHs (I := I) (M := M) g σ) :
     ContinuousOn (fun t : ℝ =>

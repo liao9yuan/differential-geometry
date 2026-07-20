@@ -12,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianTensorChartSmooth
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -71,6 +71,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
             ((toEuclidean (E := E)).symm y) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -90,6 +91,7 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
   rw [h_inv]
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedChristoffelCorrection_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -139,6 +141,7 @@ theorem chartPushedChristoffelCorrection_continuousOn
   exact h_chris_comp.mul h_pd_comp
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessianVOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -214,6 +217,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
                 chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -240,6 +244,7 @@ private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
   rfl
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothTensorPairingChart_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :

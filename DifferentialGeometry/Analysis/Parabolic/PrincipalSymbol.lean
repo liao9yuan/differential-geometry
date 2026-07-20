@@ -13,7 +13,7 @@ namespace DeTurck
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,7 +39,7 @@ def metricCovectorNormSq (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) : ℝ
       chartInvGramMatrix (I := I) g x x i j *
         ((chartModelBasis E).repr ξ i) * ((chartModelBasis E).repr ξ j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma metricCovectorNormSq_def (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     metricCovectorNormSq (I := I) g x ξ =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -47,12 +47,12 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
           chartInvGramMatrix (I := I) g x x i j *
             ((chartModelBasis E).repr ξ i) * ((chartModelBasis E).repr ξ j) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma metricCovectorNormSq_zero (g : SmoothRiemannianMetric I M) (x : M) :
     metricCovectorNormSq (I := I) g x 0 = 0 := by
   simp [metricCovectorNormSq]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInvGramMatrix_self_posDef (g : SmoothRiemannianMetric I M) (x : M) :
     (chartInvGramMatrix (I := I) g x x).PosDef := by
   have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
@@ -63,7 +63,7 @@ private lemma chartInvGramMatrix_self_posDef (g : SmoothRiemannianMetric I M) (x
   rw [chartInvGramMatrix]
   exact hG.inv
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma metricCovectorNormSq_eq_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     metricCovectorNormSq (I := I) g x ξ =
@@ -78,14 +78,14 @@ private lemma metricCovectorNormSq_eq_dotProduct_mulVec
   refine Finset.sum_congr rfl (fun j _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCovectorNormSq_nonneg (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     0 ≤ metricCovectorNormSq (I := I) g x ξ := by
   classical
   rw [metricCovectorNormSq_eq_dotProduct_mulVec]
   exact (chartInvGramMatrix_self_posDef (I := I) g x).posSemidef.dotProduct_mulVec_nonneg _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCovectorNormSq_pos (g : SmoothRiemannianMetric I M) (x : M)
     {ξ : E} (hξ : ξ ≠ 0) :
     0 < metricCovectorNormSq (I := I) g x ξ := by
@@ -106,12 +106,12 @@ def isotropicSymbol (F : M → Type*)
     OperatorSymbol (E := E) F :=
   fun x ξ => (c x ξ) • LinearMap.id
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
 @[simp] lemma isotropicSymbol_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (c : M → E → ℝ) (x : M) (ξ : E) :
     isotropicSymbol (E := E) F c x ξ = (c x ξ) • LinearMap.id := rfl
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
 @[simp] lemma isotropicSymbol_apply_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (c : M → E → ℝ) (x : M) (ξ : E)
     (v : F x) :
@@ -122,7 +122,7 @@ omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Finit
 def deTurckSymbolCoeff (g : SmoothRiemannianMetric I M) : M → E → ℝ :=
   fun x ξ => -metricCovectorNormSq (I := I) g x ξ
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma deTurckSymbolCoeff_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     deTurckSymbolCoeff (I := I) g x ξ = -metricCovectorNormSq (I := I) g x ξ := rfl
 
@@ -132,7 +132,7 @@ def IsStrictlyParabolic (F : M → Type*)
   ∀ x : M, ∀ ξ : E, ξ ≠ 0 →
     σ x ξ = isotropicSymbol (E := E) F (deTurckSymbolCoeff (I := I) g) x ξ
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma isStrictlyParabolic_iff (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)]
     (g : SmoothRiemannianMetric I M) (σ : OperatorSymbol (E := E) F) :
@@ -141,7 +141,7 @@ lemma isStrictlyParabolic_iff (F : M → Type*)
         σ x ξ = (-metricCovectorNormSq (I := I) g x ξ) • LinearMap.id :=
   Iff.rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isStrictlyParabolic_isotropic_deTurckSymbolCoeff (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (g : SmoothRiemannianMetric I M) :
     IsStrictlyParabolic (E := E) F g
@@ -158,7 +158,7 @@ def secondOrderSymbol (F : M → Type*)
           a x i j * ((chartModelBasis E).repr ξ i) * ((chartModelBasis E).repr ξ j)) •
       LinearMap.id
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
 @[simp] lemma secondOrderSymbol_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)]
     (a : M → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
@@ -169,7 +169,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace
             a x i j * ((chartModelBasis E).repr ξ i) *
               ((chartModelBasis E).repr ξ j)) • LinearMap.id := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
 @[simp] lemma secondOrderSymbol_apply_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)]
     (a : M → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
@@ -182,7 +182,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace
   rw [secondOrderSymbol_apply]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondOrderSymbol_invGram_eq_isotropic (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (g : SmoothRiemannianMetric I M) :
     secondOrderSymbol (E := E) F (fun x => chartInvGramMatrix (I := I) g x x) =
@@ -191,7 +191,7 @@ theorem secondOrderSymbol_invGram_eq_isotropic (F : M → Type*)
   rw [secondOrderSymbol_apply, isotropicSymbol_apply, deTurckSymbolCoeff_apply,
     metricCovectorNormSq_def]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondOrderSymbol_invGram_isStrictlyParabolic (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (g : SmoothRiemannianMetric I M) :
     IsStrictlyParabolic (E := E) F g
@@ -203,7 +203,7 @@ def laplacianSymbol (g : SmoothRiemannianMetric I M) : ScalarSymbol (E := E) M :
   secondOrderSymbol (E := E) (fun _ : M => ℝ)
     (fun x => chartInvGramMatrix (I := I) g x x)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma laplacianSymbol_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     laplacianSymbol (I := I) g x ξ =
       (-∑ i : Fin (Module.finrank ℝ E),
@@ -212,19 +212,19 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               ((chartModelBasis E).repr ξ i) *
                 ((chartModelBasis E).repr ξ j)) • LinearMap.id := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianSymbol_eq_isotropic (g : SmoothRiemannianMetric I M) :
     laplacianSymbol (I := I) g =
       isotropicSymbol (E := E) (fun _ : M => ℝ) (deTurckSymbolCoeff (I := I) g) := by
   rw [laplacianSymbol, secondOrderSymbol_invGram_eq_isotropic]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianSymbol_apply_eq (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     laplacianSymbol (I := I) g x ξ =
       (-metricCovectorNormSq (I := I) g x ξ) • LinearMap.id := by
   rw [laplacianSymbol_eq_isotropic, isotropicSymbol_apply, deTurckSymbolCoeff_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianSymbol_apply_apply (g : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : ℝ) :
     laplacianSymbol (I := I) g x ξ t =
@@ -232,13 +232,13 @@ theorem laplacianSymbol_apply_apply (g : SmoothRiemannianMetric I M)
   rw [laplacianSymbol_apply_eq]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianSymbol_isStrictlyParabolic (g : SmoothRiemannianMetric I M) :
     IsStrictlyParabolic (E := E) (fun _ : M => ℝ) g (laplacianSymbol (I := I) g) := by
   rw [laplacianSymbol_eq_isotropic]
   exact isStrictlyParabolic_isotropic_deTurckSymbolCoeff (E := E) (fun _ : M => ℝ) g
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianSymbol_neg_of_ne_zero (g : SmoothRiemannianMetric I M) (x : M)
     {ξ : E} (hξ : ξ ≠ 0) :
     laplacianSymbol (I := I) g x ξ =

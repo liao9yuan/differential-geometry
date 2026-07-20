@@ -21,7 +21,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -64,6 +64,7 @@ private lemma wkpNorm_sub_le
 
 omit [CompleteSpace E] in
 
+omit [CompactSpace M] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -78,6 +79,7 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 theorem eigenvectorVec_pou_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -110,6 +112,7 @@ theorem eigenvectorVec_pou_wkpNorm_le
   exact (eigenvectorVec_pou_memWkp_and_wkpNorm_le (I := I) (M := M)
     g r s i N β Q (h_pou β Q)).2
 
+omit [CompleteSpace E] in
 theorem eigenvectorVec_pou_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (N : ℕ)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,6 +32,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
+omit [CompactSpace M] in
 lemma tensorSobolevWeight_mid_eq_sqrt_mul_sqrt
     (i : TensorEigenIdx (I := I) (M := M) g r s) (a : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (a + 1) =
@@ -51,6 +52,7 @@ lemma tensorSobolevWeight_mid_eq_sqrt_mul_sqrt
   rw [hsqrt_u, hsqrt_l, ← Real.rpow_add hbase]
   congr 1; ring
 
+omit [CompactSpace M] in
 lemma crossPairing_summable
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -85,6 +87,7 @@ def crossPairing
     (w : tensorHs (I := I) (M := M) g r s a) : ℝ :=
   ∑' i, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (v.coeff i * w.coeff i)
 
+omit [CompactSpace M] in
 lemma crossPairing_add_left
     (v v' : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -96,6 +99,7 @@ lemma crossPairing_add_left
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.add_coeff]; ring
 
+omit [CompactSpace M] in
 lemma crossPairing_add_right
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w w' : tensorHs (I := I) (M := M) g r s a) :
@@ -107,6 +111,8 @@ lemma crossPairing_add_right
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.add_coeff]; ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma crossPairing_smul_left (c : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -117,6 +123,8 @@ lemma crossPairing_smul_left (c : ℝ)
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.smul_coeff]; ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma crossPairing_smul_right (c : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :

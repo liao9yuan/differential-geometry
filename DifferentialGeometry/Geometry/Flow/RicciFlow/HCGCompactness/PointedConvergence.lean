@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,7 +28,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -102,6 +101,7 @@ noncomputable def metricCovDeriv
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_apply_section
     (h gRef : SmoothRiemannianMetric I M)
     (X :
@@ -147,6 +147,7 @@ theorem metricCovDeriv_one_apply_section
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M)
     (X :
@@ -194,6 +195,7 @@ theorem metricCovDeriv_one_eval_smooth_slots
   rw [hdir, heval]
   simp [hzero, cov, Tensor0SBundle.metricTensorField_apply]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 private theorem extDerivFun_congr_eventually_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :
@@ -210,6 +212,7 @@ private theorem extDerivFun_congr_eventually_real
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_eval_localFrame
     {Idx : Type*} {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
@@ -352,6 +355,7 @@ theorem metricCovDeriv_one_eval_localFrame
 set_option linter.unusedFintypeInType false in
 set_option linter.unusedDecidableInType false in
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_localFrame
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
@@ -849,6 +853,7 @@ theorem targetDomSigmaOf
   change SigmaCompactSpace {x : (X.term (subseq k)).M // x ∈ Φ.target k}
   exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem contMDiff_openCod
     {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [TopologicalSpace N] [ChartedSpace H N]

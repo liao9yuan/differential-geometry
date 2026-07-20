@@ -21,7 +21,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedChartHmBootstrap
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem MemWkp_extend_via_cutoff_poly
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -180,6 +181,7 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
   rw [h_succ_eq] at h_next
   exact h_next
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -257,6 +259,7 @@ theorem chartPushed_memWkp_two_of_laplacianDomainPow_one
   have h := (iteratedH2Regularity_one (I := I) (M := M) g hu_h).1
   exact h α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_m_plus_two_step
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

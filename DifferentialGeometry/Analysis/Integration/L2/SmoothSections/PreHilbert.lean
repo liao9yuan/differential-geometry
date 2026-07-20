@@ -37,7 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section PreHilbert
 
-variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 
@@ -87,7 +87,7 @@ end PreHilbert
 
 section InstanceTests
 
-variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SeminormedAddCommGroup (SmoothCcTensor g r s) := inferInstance

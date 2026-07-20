@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace DiffChartBilinearH1ComplResidualMemW1p
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -76,6 +76,7 @@ private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
   · rw [smoothExt_apply_of_notMem (I := I) (M := M) α f hy]
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
     {α : M} {f : M → ℝ}
     {y : EuclN}
@@ -87,6 +88,7 @@ private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
       (I := I) (M := M) (u := f) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy_target
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_hasCompactSupport
     {α : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -113,6 +115,7 @@ private lemma chartPushedRaw_smooth_hasCompactSupport
   exact chartPushedRaw_smooth_eq_zero_off_image_tsupport
     (I := I) (M := M) (f := f) (α := α) hyK
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_continuous
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -190,6 +193,7 @@ private lemma chartPushedRaw_smooth_continuous
     · exact continuousAt_const
     · filter_upwards [hKc_nhds] with z hz using (h_eq_zero_on_Kc z hz).symm
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_smooth_memLp
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -209,6 +213,7 @@ private lemma chartPushedRaw_smooth_memLp
     hcont.memLp_of_hasCompactSupport (μ := volume) hcompact
   exact hmemLp_full.restrict _
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem memW1p_chartPushedRaw_of_contMDiff_tsupport
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -312,6 +317,7 @@ noncomputable def fHLeibnizResidualSmoothRep
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibnizResidualSmoothRep_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
@@ -346,6 +352,7 @@ lemma fHLeibnizResidualSmoothRep_contMDiff
     (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
   exact h_piece1.sub h_piece2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma fHLeibnizResidualSmoothRep_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
@@ -398,6 +405,7 @@ lemma fHLeibnizResidualSmoothRep_tsupport_subset
   exact h_tsupp_subset.trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memW1p_fChartResidual_smooth_aux
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -410,6 +418,7 @@ theorem memW1p_fChartResidual_smooth_aux
     (I := I) (M := M) (f := fHLeibnizResidualSmoothRep (I := I) (M := M) g α v)
     (α := α) h_smooth h_supp 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -488,6 +497,7 @@ theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
   simp only [Pi.smul_apply, smul_eq_mul, hx_grad]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memW1p_fChartResidual_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -566,6 +576,7 @@ theorem memW1p_fChartResidual_smoothToH1Compl
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     h_fChart_smooth_ae_vol.symm).mp h_smooth_w1p
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memW1p_fChartResidual_smoothCase
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2

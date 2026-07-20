@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Distances
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -40,7 +39,7 @@ open Bundle Manifold
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -88,6 +87,7 @@ noncomputable def chainComp' {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
         (N := Mf (j + 1)) (P := Mf m) (Ψ j) (ih (j + 1) m (by omega)))
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -98,6 +98,7 @@ theorem chainComp_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
   rfl
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_base {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -114,6 +115,7 @@ theorem chainComp_base {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_add_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -169,6 +171,7 @@ noncomputable def chainCompAssoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace 
     PartialDiffeomorph I I (Mf j) (Mf ((j + a) + b)) (∞ : WithTop ℕ∞) :=
   (Nat.add_assoc j a b).symm ▸ chainComp (I := I) (Mf := Mf) Ψ j (a + b)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 private theorem targetCast_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     {j l m : ℕ} (h : l = m)
@@ -178,6 +181,7 @@ private theorem targetCast_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace
   rfl
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainAssoc_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -189,6 +193,7 @@ theorem chainAssoc_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
       (chainComp (I := I) (Mf := Mf) Ψ j (a + b))
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainCompAssoc_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -208,6 +213,7 @@ theorem chainCompAssoc_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf 
   exact chainComp_add_apply (I := I) (Mf := Mf) Ψ j a b x
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainCompAssoc_eq {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -220,6 +226,7 @@ theorem chainCompAssoc_eq {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
   exact chainCompAssoc_apply (I := I) (Mf := Mf) Ψ j a b x
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp'_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -231,6 +238,7 @@ theorem chainComp'_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp'_apply_zero {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -245,6 +253,7 @@ theorem chainComp'_apply_zero {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp'_snoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞)) :
@@ -285,6 +294,7 @@ theorem chainComp'_snoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
       simp only [eqRec_eq_cast]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_eq_right {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
@@ -304,6 +314,7 @@ theorem chainComp_eq_right {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem chainComp_coe_head {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
     [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
     (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞)) :
@@ -361,6 +372,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem data_image_metric_ball
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -396,6 +408,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem data_image_metric_ball_of_superset
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -424,6 +437,7 @@ theorem data_image_metric_ball_of_superset
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem member_isRiemannian (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -447,9 +461,9 @@ end MemberBridge
 section DataTransport
 
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [MetricSpace M] [Nonempty M]
+  [SigmaCompactSpace M] [MetricSpace M] [Nonempty M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [T2Space N] [IsManifold I ∞ N]
-  [SigmaCompactSpace N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+  [SigmaCompactSpace N]
 
 
 noncomputable def PreApproxIsoDataOn.congr_eq {K : Set M} {ε : ℝ} {p : ℕ} {F F' : M → N}
@@ -531,6 +545,8 @@ theorem image_eq_of_fun_eq {α β : Type*} {s : Set α} {f g : α → β} (h : f
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [MetricSpace M] [Nonempty M] [T2Space N] [SigmaCompactSpace N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [IsManifold I ∞ N] in
 theorem symm_eventuallyEq_on_image
     {Φ Ψ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
     {U : TopologicalSpace.Opens M}
@@ -557,6 +573,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 theorem tensor02CovDeriv_metric_zero {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     [IsManifold I ∞ M'] [T2Space M'] [SigmaCompactSpace M']
     [IsManifold I 1 M'] [IsManifold I 2 M'] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
@@ -570,6 +588,8 @@ theorem tensor02CovDeriv_metric_zero {M' : Type u} [TopologicalSpace M'] [Charte
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     [IsManifold I ∞ M'] [T2Space M'] [SigmaCompactSpace M']
     [IsManifold I 1 M'] [IsManifold I 2 M'] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
@@ -647,6 +667,8 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     [IsManifold I ∞ M'] [T2Space M'] [SigmaCompactSpace M']
     [IsManifold I 1 M'] [IsManifold I 2 M'] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
@@ -841,6 +863,8 @@ theorem half_pow_succ_le_half (j : ℕ) :
   simpa using hpow
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem properMetric_isOpen_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) (x : Y.M) (r : ℝ) :
@@ -857,6 +881,7 @@ theorem properMetric_isOpen_ball
   exact hb
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetric_mem_ball_self
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) (x : Y.M) {r : ℝ} (hr : 0 < r) :
@@ -867,6 +892,7 @@ theorem properMetric_mem_ball_self
   exact Metric.mem_ball_self hr
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetric_ball_nonempty
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) (x : Y.M) {r : ℝ} (hr : 0 < r) :
@@ -892,6 +918,7 @@ def properMetricOpenBall
     properMetric_isOpen_ball (I := I) Y P x r⟩
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem properMetricOpenBall_nonempty
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) (x : Y.M) {r : ℝ} (hr : 0 < r) :

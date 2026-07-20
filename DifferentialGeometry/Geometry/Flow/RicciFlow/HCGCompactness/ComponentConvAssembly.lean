@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -37,19 +36,19 @@ open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
 
 
 
+omit [CompleteSpace E] in
 theorem exists_cInf_subseq_finiteFamily
     {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [FiniteDimensional Real F]
     {ι : Type*} (s : Finset ι) (Φ : ι → ℕ → E → F)
@@ -547,6 +546,7 @@ theorem componentConv_covDeriv_of_chartCInf
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem tangentConst_basis_expand (x₀ : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) (p : M) :
@@ -564,6 +564,7 @@ theorem tangentConst_basis_expand (x₀ : M)
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 theorem bz_eq_tangentConst (x : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) {z : M}
@@ -581,6 +582,8 @@ theorem bz_eq_tangentConst (x : M)
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem componentBz_eq_covDeriv
     (gRef : SmoothRiemannianMetric I M) (x : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
@@ -642,6 +645,7 @@ private def TowerExtractor
 
 
 
+omit [I.Boundaryless] in
 private theorem exists_patch_core
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hTower : TowerExtractor (I := I) gRef gSeq)

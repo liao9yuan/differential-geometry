@@ -16,7 +16,6 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -32,8 +31,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -48,6 +47,7 @@ section LengthBookkeeping
 
 
 set_option linter.unusedVariables false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
@@ -1429,6 +1429,7 @@ section LocalRadialIdentification
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
@@ -1543,6 +1544,7 @@ theorem edist_exp_eq_radius
     (mem_expDomain_of_norm_lt_radius (I := I) g p ha_eucl)
     (ball_subset_normalChartAt_target (I := I) g p ha_eucl) ha_small
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem exists_forward_confinement_to_smallBall
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} {t₀ : ℝ}
     (hγ : CMDiff[Set.Icc a b] 1 γ) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -1704,6 +1706,8 @@ theorem local_radial_identification_of_minimizer
     rw [hq_def]; exact this
 
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma norm_le_sqrt_inner_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (c : M) (x : E) :
     ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (gpCoerciveConst (I := I) g c) := by

@@ -11,7 +11,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 800000
@@ -64,14 +63,13 @@ open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -93,7 +91,11 @@ private def sRep
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_diffAt
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -108,7 +110,11 @@ private lemma sRep_diffAt
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_fderiv_germ
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -126,7 +132,12 @@ private lemma sRep_fderiv_germ
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_pd_val
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -151,7 +162,10 @@ private lemma sRep_pd_val
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towerStep_rep_split
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (p : ℕ)
@@ -183,7 +197,12 @@ private lemma towerStep_rep_split
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma sRep_pd2_val
+    [Module.Finite ℝ E]
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (W : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -276,7 +295,10 @@ private lemma sRep_pd2_val
 
 
 
-private lemma eval_le (s : ℕ) (slots : Fin s → TangentSpace I x) :
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma eval_le
+    [Module.Finite ℝ E]
+    (s : ℕ) (slots : Fin s → TangentSpace I x) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ T : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) s x,
@@ -296,7 +318,10 @@ private lemma eval_le (s : ℕ) (slots : Fin s → TangentSpace I x) :
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towVal_le
+    [Module.Finite ℝ E]
     (p : ℕ)
     (W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -392,7 +417,10 @@ private lemma towVal_le
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towVal_le'
+    [Module.Finite ℝ E]
     (p : ℕ)
     (W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -446,7 +474,10 @@ private lemma towVal_le'
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma gram_germ
+    [Module.Finite ℝ E]
     (u : SmoothRiemannianMetric I M)
     (i j : Fin (Module.finrank Real E))
     (σi σj : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -493,7 +524,11 @@ private lemma gram_germ
   congr 1
 
 
-private lemma gram0_le :
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma gram0_le
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 ≤ C ∧ ∀ (u u' : SmoothRiemannianMetric I M)
       (i j : Fin (Module.finrank Real E)),
       |chartGramMatrix (I := I) u x x i j - chartGramMatrix (I := I) u' x x i j| ≤
@@ -540,7 +575,12 @@ private lemma gram0_le :
     _ = (∑ t, Cf t) * metricDerivNorm (I := I) 0 u u' gRef x := rfl
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram_pd_eq
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -561,7 +601,12 @@ private lemma gram_pd_eq
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram_pd2_eq
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -602,7 +647,12 @@ private lemma gram_pd2_eq
   exact sRep_pd2_val gRef x _ ![σs i, σs j] m mm (σs m) (σs mm) (hσs m) (hσs mm)
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram1_le
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -650,7 +700,12 @@ private lemma gram1_le
   exact mul_le_mul_of_nonneg_right hle hnn
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private lemma gram2_le
+    [Module.Finite ℝ E]
     (σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (hσs : ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -832,7 +887,11 @@ variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
 
 
-private lemma exists_slotSections :
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 2 M] in
+private lemma exists_slotSections
+    [Module.Finite ℝ E]
+    :
     ∃ σs : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M → Type _),
       ∀ i, ∀ᶠ z in 𝓝ˢ ({x} : Set M),
@@ -852,7 +911,11 @@ private lemma exists_slotSections :
 
 
 
-theorem jet2Diff_le_dNorm :
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem jet2Diff_le_dNorm
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       chartMetricJet2DiffSup (I := I) (M := M) u u' x (extChartAt I x x) ≤
         C * ∑ a ∈ Finset.range 3, metricDerivNorm (I := I) a u u' gRef x := by
@@ -953,7 +1016,12 @@ theorem jet2Diff_le_dNorm :
 
 
 
-theorem gramJet_le_covNorm :
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I 2 M] in
+theorem gramJet_le_covNorm
+    [Module.Finite ℝ E]
+    :
     ∃ C : Real, 0 < C ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ m i j : Fin (Module.finrank Real E),
         |partialDeriv (E := E) m (chartGramOnE (I := I) u x i j) (extChartAt I x x)| ≤
@@ -1117,7 +1185,10 @@ open Matrix
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
 
-private lemma gram_quad_low :
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma gram_quad_low
+    [Module.Finite ℝ E]
+    :
     ∃ c0 : Real, 0 < c0 ∧ ∀ ξ : Fin (Module.finrank Real E) → Real,
       c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) gRef x x) *ᵥ ξ := by
   classical
@@ -1229,7 +1300,11 @@ private lemma gram_quad_low :
 
 
 
-theorem invGram_le_of_low (lam : Real) (hlam : 0 < lam) :
+omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+theorem invGram_le_of_low
+    [Module.Finite ℝ E]
+    (lam : Real) (hlam : 0 < lam) :
     ∃ Mb : Real, 0 ≤ Mb ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       ∀ k l : Fin (Module.finrank Real E),
@@ -1327,7 +1402,11 @@ private lemma abs_add_sub_le (A B C : Real) : |A + B - C| ≤ |A| + |B| + |C| :=
 
 
 
-theorem chartRicci_sub_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem chartRicci_sub_le
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -1645,7 +1724,11 @@ variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
 
 
-theorem ricciSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem ricciSub_le_dNorm
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
     (v w : TangentSpace I x) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
@@ -1720,7 +1803,10 @@ theorem ricciSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
 
 
 
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
 theorem ricciConv_of_dnConv
+    [Module.Finite ℝ E]
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)
     (β ψ lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
@@ -1782,7 +1868,11 @@ variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
 
 
-private lemma invGram_sub_le (lam : Real) (hlam : 0 < lam) :
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
+private lemma invGram_sub_le
+    [Module.Finite ℝ E]
+    (lam : Real) (hlam : 0 < lam) :
     ∃ C : Real, 0 ≤ C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -1856,7 +1946,11 @@ private lemma invGram_sub_le (lam : Real) (hlam : 0 < lam) :
 
 
 
-private lemma ricci_abs_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+private lemma ricci_abs_le
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
     (v w : TangentSpace I x) :
     ∃ C : Real, 0 ≤ C ∧ ∀ u : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
@@ -1938,7 +2032,11 @@ private lemma ricci_abs_le (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
 
 
 
-theorem scalarSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
+theorem scalarSub_le_dNorm
+    [Module.Finite ℝ E]
+    (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
@@ -2054,7 +2152,10 @@ theorem scalarSub_le_dNorm (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
 
 
 
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] in
 theorem scalarConv_of_dnConv
+    [Module.Finite ℝ E]
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)
     (β ψ lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)

@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -61,6 +61,7 @@ private lemma fin_init_cons
   · intro k
     simp [Fin.init, Fin.cons_succ]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -186,6 +187,7 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ (m + 1) dirs) Ω := h_final
 
+omit [CompleteSpace E] in
 private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -232,6 +234,7 @@ private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     rw [h_succ_eq] at h_next
     exact h_next
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

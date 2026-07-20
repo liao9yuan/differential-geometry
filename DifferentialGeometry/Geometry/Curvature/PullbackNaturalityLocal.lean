@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -33,7 +32,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
-variable [IsManifold I 1 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+variable [IsManifold I 1 N]
 variable [T2Space N] [SigmaCompactSpace N]
 
 
@@ -42,6 +41,8 @@ variable [T2Space N] [SigmaCompactSpace N]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace N] in
 theorem metricRm04StdAt_pullback_localDiffeo
     (g : SmoothRiemannianMetric I N)
     (V : TopologicalSpace.Opens N) [SigmaCompactSpace V] [T2Space V]

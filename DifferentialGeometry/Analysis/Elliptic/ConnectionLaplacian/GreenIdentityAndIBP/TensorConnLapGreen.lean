@@ -35,6 +35,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem pou_tangentSectionAction_finset_sum_eq_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (S : Finset M)
@@ -84,6 +85,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tangentSectionAction_smoothSmul
     (ρ : M → ℝ) (hρ : ContMDiff I 𝓘(ℝ) ∞ ρ)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
@@ -94,6 +96,7 @@ lemma tangentSectionAction_smoothSmul
   rw [(mfderiv I 𝓘(ℝ) f x).map_smul (ρ x) (B x)]
   rw [smul_eq_mul]
 
+omit [InnerProductSpace ℝ E] in
 theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (g : SmoothRiemannianMetric I M)
     (T v : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)

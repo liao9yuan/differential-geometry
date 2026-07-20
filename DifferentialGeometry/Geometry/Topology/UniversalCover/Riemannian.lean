@@ -128,6 +128,8 @@ noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem isRiemannianManifold
     (g : SmoothRiemannianMetric I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
@@ -171,6 +173,7 @@ theorem isRiemannianManifold
 
 
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
     RegularSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
@@ -187,6 +190,8 @@ theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem liftedMetric_inner_eq (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ∀ (v w : E),

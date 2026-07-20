@@ -21,7 +21,7 @@ namespace DeTurckCoefficients
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,7 +31,7 @@ private lemma abs_sub_le_abs_add_abs (a b : ℝ) : |a - b| ≤ |a| + |b| := by
     _ ≤ |a| + |(-b)| := abs_add_le _ _
     _ = |a| + |b| := by rw [abs_neg]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_bound_of_contDiffOn_int
     {f : E → ℝ} (α : M)
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -47,7 +47,7 @@ private lemma exists_bound_of_contDiffOn_int
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_uniform_bound_of_int_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
@@ -64,7 +64,7 @@ private lemma exists_uniform_bound_of_int_family
   · intro y hy i
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma partialDeriv_contDiffOn_int_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -75,6 +75,7 @@ private lemma partialDeriv_contDiffOn_int_of_contDiffOn
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partial_chartGramOnE_contDiffOn_int'
     (g : SmoothRiemannianMetric I M) (α : M)
     (a l b : Fin (Module.finrank ℝ E)) :
@@ -98,6 +99,7 @@ def chartRicciFirstOrderTerm (g : SmoothRiemannianMetric I M) (α : M)
         chartChristoffel (I := I) g α k m j y *
           chartChristoffel (I := I) g α i j m y)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciTensor_eq_secondOrder_add_firstOrder
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -110,6 +112,7 @@ theorem chartRicciTensor_eq_secondOrder_add_firstOrder
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [chartRiemannTensor_def]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -137,6 +140,7 @@ theorem chartRicciSecondOrderTerm_symm
     exact partialDeriv_contractedChristoffel_swap (I := I) g α i k hy
   rw [hT1, hT2]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciFirstOrderTerm_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -170,6 +174,7 @@ theorem chartRicciFirstOrderTerm_symm
     ring
   rw [hT3, hT4]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciTensor_diff_symm
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -191,7 +196,7 @@ def ricciDiffPrincipalSymbol (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
           (gramBracketDeriv (I := I) g₁ α k i j l y -
             gramBracketDeriv (I := I) g₂ α k i j l y))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciDiffPrincipalSymbol_def
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -206,7 +211,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               (gramBracketDeriv (I := I) g₁ α k i j l y -
                 gramBracketDeriv (I := I) g₂ α k i j l y)) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciDiffPrincipalSymbol_eq_invGram_weighted_d2_gram_diff
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -261,7 +266,7 @@ def chartRicciDiffFirstOrderRemainder (g₁ g₂ : SmoothRiemannianMetric I M) (
       chartRicciSecondOrderTerm (I := I) g₂ α i k y) -
     ricciDiffPrincipalSymbol (I := I) g₁ g₂ α i k y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_sub_eq_principalSymbol_add_remainder
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -272,6 +277,7 @@ theorem chartRicciSecondOrderTerm_sub_eq_principalSymbol_add_remainder
   rw [chartRicciDiffFirstOrderRemainder]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciTensor_sub_eq_principalSymbol_add_lowerOrder
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -327,7 +333,7 @@ private lemma exists_chartChristoffel_bound_on_compact
       hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy i j k => hC y hy ((i, j), k)⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Cdiff : ℝ}
@@ -370,7 +376,7 @@ theorem chartRicciSecondOrderTerm_sub_abs_le
     rw [show 2 * (Module.finrank ℝ E : ℝ) * Cdiff * jet2 =
           (Module.finrank ℝ E : ℝ) * (2 * Cdiff * jet2) by ring]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciFirstOrderTerm_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Clip Mg : ℝ} (hClip_nn : 0 ≤ Clip) (hMg_nn : 0 ≤ Mg)
@@ -505,6 +511,7 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
           (Module.finrank ℝ E : ℝ) *
             ((Module.finrank ℝ E : ℝ) * (4 * Clip * Mg * jet1)) by ring]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicci_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

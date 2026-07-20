@@ -24,7 +24,9 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +41,19 @@ noncomputable def rawTensorConnLapSmooth
   tensorConnLaplacian_of_contMDiff (I := I) g r s T
     (rawTensorConnLap_contMDiff (I := I) g r s (fun z : M => T.toSection z)
       T.toSection.contMDiff_toFun)
+
+end NormedSpaceModel
+
+section NormedSpaceModelLemmas
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma rawTensorConnLapSmooth_toSection_apply
@@ -73,6 +88,8 @@ lemma rawTensorConnLapIter_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawTensorConnLapIter (I := I) g r s 1 T =
       rawTensorConnLapSmooth (I := I) g r s T := rfl
+
+end NormedSpaceModelLemmas
 
 end Connection
 end Integral

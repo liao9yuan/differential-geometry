@@ -249,7 +249,6 @@ private lemma inner_cross_eq_zero_off_S_support
 
 
 theorem continuous_inner_self
-    [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
     Continuous (fun b : M =>
       tensorInnerPointwise (I := I) (M := M) g r s b
@@ -266,7 +265,6 @@ theorem continuous_inner_self
 
 
 theorem continuous_inner_cross
-    [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensor g r s) :
     Continuous (fun b : M =>
@@ -284,7 +282,7 @@ theorem continuous_inner_cross
 
 
 theorem aestronglyMeasurable_inner_self
-    [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+    [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
     MeasureTheory.AEStronglyMeasurable
       (fun x : M => tensorInnerPointwise (I := I) (M := M) g r s x
@@ -294,7 +292,7 @@ theorem aestronglyMeasurable_inner_self
 
 
 theorem aestronglyMeasurable_inner_cross
-    [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+    [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensor g r s) :
     MeasureTheory.AEStronglyMeasurable
@@ -305,7 +303,7 @@ theorem aestronglyMeasurable_inner_cross
 
 
 theorem integrable_inner_cross
-    [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+    [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensor g r s) :
     MeasureTheory.Integrable
@@ -320,7 +318,7 @@ theorem integrable_inner_cross
 
 
 theorem memL2_toFun
-    [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+    [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
     MemL2 (I := I) (M := M) g r s S.toFun :=
   integrable_inner_cross (I := I) (M := M) S S

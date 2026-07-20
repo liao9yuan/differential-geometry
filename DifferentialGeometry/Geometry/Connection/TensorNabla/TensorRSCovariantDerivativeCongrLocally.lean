@@ -18,7 +18,6 @@ open DifferentialGeometry.Integral.Measure
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
     [NeZero (Module.finrank ℝ E)]
   {H : Type*} [TopologicalSpace H]
@@ -26,6 +25,8 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRSCovariantDerivative_congr_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {σ σ' : Π b : M, TensorRSSpace r s I b}

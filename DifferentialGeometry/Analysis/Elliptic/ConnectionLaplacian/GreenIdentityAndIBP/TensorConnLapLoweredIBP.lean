@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E] [CompleteSpace E]
+  [Module.Finite ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,8 @@ def loweredCovDerivAlongVFraw
     Π y : M, Tensor0SSpace (r + s) I y :=
   fun y => loweredCovDerivAt (I := I) (M := M) g r s S y (X y)
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweredCovDerivAlongVFraw_eq_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -51,6 +53,9 @@ lemma loweredCovDerivAlongVFraw_eq_covApply
   funext y
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweredCovDerivAlongVFraw_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -82,6 +87,9 @@ lemma loweredCovDerivAlongVFraw_contMDiff
   rw [← contMDiffOn_univ]
   exact hOn
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -142,6 +150,9 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
   rw [hcov_zero]
   rfl
 
+omit [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweredCovDerivAlongVFraw_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -167,6 +178,9 @@ def loweredCovDerivAlongVF
     (fun y : M => loweredCovDerivAlongVFraw (I := I) (M := M) g r s S X y)
     (loweredCovDerivAlongVFraw_contMDiff (I := I) (M := M) g r s S X)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma loweredCovDerivAlongVF_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -174,6 +188,7 @@ def loweredCovDerivAlongVF
     loweredCovDerivAlongVF (I := I) (M := M) g r s S X y =
       loweredCovDerivAt (I := I) (M := M) g r s S y (X y) := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma tensorInnerScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -182,6 +197,7 @@ lemma tensorInnerScalar_contMDiff
   DifferentialGeometry.Tensor.tensorInnerPointwise_contMDiff_of_mdiff
     (I := I) (M := M) g r s W S
 
+omit [CompleteSpace E] in
 theorem integral_tensorInner_covDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -203,6 +219,7 @@ theorem integral_tensorInner_covDeriv_combined_eq_zero
     (I := I) (M := M) g r s W S V
     (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W S)
 
+omit [CompleteSpace E] in
 theorem integral_tensorInner_covDeriv_split_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

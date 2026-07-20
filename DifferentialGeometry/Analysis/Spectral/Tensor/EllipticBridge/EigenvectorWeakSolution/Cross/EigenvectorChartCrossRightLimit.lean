@@ -17,7 +17,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,6 +48,8 @@ private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivAt_zero_dir
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -145,6 +147,7 @@ private noncomputable def covDerivHomSection
     (fun y : M => S.toSection y) x
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivHomSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -152,6 +155,7 @@ private lemma covDerivHomSection_apply
       tensorCovDerivAt (I := I) (M := M) g r s S x v := rfl
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivHomSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -175,6 +179,7 @@ private lemma covDerivHomSection_contMDiff
   exact hop
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivAlong_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -219,6 +224,7 @@ private noncomputable def covDerivAlongSection
       (fun x : M => TensorRSSpace r s I x)⟯)
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivAlongSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -226,6 +232,8 @@ private lemma covDerivAlongSection_apply
     covDerivAlongSection (I := I) (M := M) g r s S V x =
       tensorCovDerivAt (I := I) (M := M) g r s S x (V x) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivAlongSection_toModel_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -237,6 +245,7 @@ private lemma covDerivAlongSection_toModel_eq_zero_off_tsupport
     tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s S hx (V x),
     TensorRSSpace.toModel_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivAlongSection_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -261,6 +270,7 @@ noncomputable def covDerivAlong
   hasCompactSupport :=
     covDerivAlongSection_hasCompactSupport (I := I) (M := M) g r s S V
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlong_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -268,6 +278,7 @@ lemma covDerivAlong_toSection_apply
     (covDerivAlong (I := I) (M := M) g r s S V).toSection x =
       tensorCovDerivAt (I := I) (M := M) g r s S x (V x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlong_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -277,6 +288,7 @@ lemma covDerivAlong_toFun_apply
         (tensorCovDerivAt (I := I) (M := M) g r s S x (V x)) := by
   rw [SmoothCcTensor.toFun_apply, covDerivAlong_toSection_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlong_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -299,6 +311,7 @@ noncomputable def covDerivAlongGrad
   covDerivAlong (I := I) (M := M) g r s S
     (grad_g (I := I) g ζ.contMDiff)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongGrad_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
@@ -307,6 +320,7 @@ lemma covDerivAlongGrad_toSection_apply
         (gradFun (I := I) g (ζ : M → ℝ) x) := by
   rw [covDerivAlongGrad, covDerivAlong_toSection_apply, grad_g_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongGrad_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
@@ -316,6 +330,7 @@ lemma covDerivAlongGrad_toFun_apply
           (gradFun (I := I) g (ζ : M → ℝ) x)) := by
   rw [SmoothCcTensor.toFun_apply, covDerivAlongGrad_toSection_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongGrad_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) :
@@ -368,6 +383,7 @@ private lemma tensorInnerPointwise_sum_sum_right
   exact map_sum (tensorInnerPointwiseRightHom (I := I) (M := M) g r s x A)
     (fun j => T i j) Finset.univ
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) :
@@ -445,6 +461,7 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
   rw [hlhs]
   rw [← gradFun_eq_gramInv_sum (I := I) g ζ x]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -461,6 +478,7 @@ theorem tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
   rw [tensorInnerPointwise_smul_right]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossRight_integral_eq_innerLow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) :
@@ -478,6 +496,7 @@ theorem tensorCovDerivCrossRight_integral_eq_innerLow
   exact tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
     (I := I) (M := M) g r s ζ w S x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossRight_integral_eq_chartPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (w S : SmoothCcTensor g r s) :

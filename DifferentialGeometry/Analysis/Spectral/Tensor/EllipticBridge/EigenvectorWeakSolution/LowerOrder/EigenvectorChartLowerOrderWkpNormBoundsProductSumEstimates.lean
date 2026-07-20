@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,6 +42,7 @@ section LowerOrderWkpNormBounds
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -166,6 +167,7 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] in
 lemma wkpNorm_indicatorFactor_mul_atom_le
     (α : M) (K : ℕ) {coef G : EuclN → ℝ}
     (hcoef : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -241,6 +243,7 @@ lemma memWkp_finsetSum
 omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma wkpNorm_finsetSum_le_const_mul_atomSum
     {α : M} {K : ℕ} {ι κ : Type*}
     (S : Finset ι) (T : Finset κ) (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ)

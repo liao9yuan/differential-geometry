@@ -40,7 +40,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (g0FlatCLM metricCompar
   gInvRaisedEndo_apply gInvRaisedEndo_eq_diff_add_id metricComparisonDiffEndo
   cotangentToDual_g0FlatCLM inverseMetricSharpFib_g0FlatCLM)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -930,6 +930,8 @@ theorem deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform
   have h14 := hcd (Equiv.refl (Fin 4)) lieArm1RhoSlot0
   linarith [htri1, htri2, htri3, hblock1, hblock2]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a - b) ≤
@@ -940,6 +942,8 @@ private theorem lieArm1_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [lieArm1_rfns_neg (I := I) (M := M) g r s x b] at h
   exact h
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_block6_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (b1 b2 b3 b4 b5 b6 : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (b1 - b2 - b3 - b4 - b5 - b6) ≤
@@ -958,6 +962,8 @@ private theorem lieArm1_rfns_block6_le (g : SmoothRiemannianMetric I M) (r s : �
   have hn6 := riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x b6
   linarith
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_block6_le' (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (b1 b2 b3 b4 b5 b6 : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (b1 + b2 - b3 - b4 - b5 - b6) ≤

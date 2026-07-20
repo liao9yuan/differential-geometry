@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -308,12 +307,11 @@ theorem shiftReactBlock3_nonneg
 
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -331,6 +329,7 @@ structure ShiftBlockAt
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem raw_null_of_smul
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v e : TangentSpace I x} {r : Real}
@@ -349,6 +348,7 @@ theorem raw_null_of_smul
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem shiftBlockOfNull
     {g : SmoothRiemannianMetric I M}
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -399,6 +399,7 @@ structure NullOrthonormalBasis3At
 
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem exists_nullOrthonormalBasis3At
     (g : SmoothRiemannianMetric I M) {x : M}
     {v : TangentSpace I x}
@@ -486,6 +487,7 @@ def shiftRic3At
     metricTensorField (I := I) g x
 
 
+omit [IsManifold I 2 M] in
 theorem metricTrace_metric3
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -504,6 +506,7 @@ theorem metricTrace_metric3
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftScalar_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -532,6 +535,7 @@ theorem shiftScalar_add_g
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftRic_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -552,6 +556,7 @@ theorem shiftRic_add_g
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftScalar3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -592,6 +597,7 @@ theorem shiftScalar3At_pinch
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftRic3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -610,6 +616,7 @@ theorem shiftRic3At_pinch
 
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem shiftScalar3At_of_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -631,6 +638,7 @@ theorem shiftScalar3At_of_shiftBlock
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftRic3At_comp_of_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -742,6 +750,7 @@ def tensor04Pair
   (Bundle.continuousMultilinearMap.product_fun
     (𝕜 := Real) (F := E) (E := TangentSpace I) (s := 2) (q := 2) A B).domDomCongr σ
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 theorem tensor04Pair_apply
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
     (σ : Equiv.Perm (Fin 4)) (slots : Fin 4 -> TangentSpace I x) :
@@ -753,6 +762,7 @@ theorem tensor04Pair_apply
   rw [Bundle.continuousMultilinearMap.product_fun_apply]
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem tensor04Pair_perm0213_vec4
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
@@ -764,6 +774,7 @@ theorem tensor04Pair_perm0213_vec4
     simp [perm0213, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
       DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem tensor04Pair_perm0312_vec4
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
@@ -775,6 +786,7 @@ theorem tensor04Pair_perm0312_vec4
     simp [perm0312, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
       DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem tensor04Pair_perm1203_vec4
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
@@ -786,6 +798,7 @@ theorem tensor04Pair_perm1203_vec4
     simp [perm1203, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
       DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem tensor04Pair_perm1302_vec4
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
@@ -816,6 +829,7 @@ def rm04OfRic3At
 
 
 
+omit [IsManifold I 2 M] in
 theorem rm04OfRic3At_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -854,6 +868,7 @@ def ricciEndCLMAt
   ⟨DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric,
     LinearMap.continuous_of_finiteDimensional _⟩
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem ricciEndCLMAt_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -876,6 +891,7 @@ def ricciQuadAt
       else
         ContinuousLinearMap.id Real (TangentSpace I x))
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem ricciQuadAt_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -901,6 +917,7 @@ def rm04Mid02At
     ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 3 x
       (Rm04.domDomCongr perm0213)) X)) Y
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem rm04Mid02At_apply
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -926,6 +943,7 @@ def rm04MidCLMAt
     ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 3 x)
       (Rm04.domDomCongr perm0213))
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
 theorem rm04MidCLMAt_apply
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -943,6 +961,7 @@ def inner02RightCLM
   LinearMap.toContinuousLinearMap
     ((flat0S (I := I) g x 2) A)
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem inner02RightCLM_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -990,6 +1009,7 @@ def rm04ContrRightCLM
               (rm04Mid02At (I := I) (M := M) Rm04 X Y)
         rw [map_smul] }
 
+omit [IsManifold I 2 M] in
 @[simp]
 theorem rm04ContrRightCLM_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -1063,6 +1083,7 @@ def rm04RicciContrAt
     (𝕜 := Real) (n := 1) (Ei := fun _ : Fin 2 => TangentSpace I x) (G := Real)
     (rm04ContrCurried (I := I) (M := M) g Rm04 Ric)
 
+omit [IsManifold I 2 M] in
 @[simp]
 theorem rm04RicciContrAt_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -1118,6 +1139,7 @@ def shiftNRaw (delta : Real) : TwoTensorReaction (I := I) (M := M) :=
   Tensor02ReactionAt.toRawSymm (I := I) (M := M)
     (shiftNAt (I := I) (M := M) delta)
 
+omit [IsManifold I 2 M] in
 theorem shiftNRaw_symmInputOn
     (G : Real -> SmoothRiemannianMetric I M) (U : Set Real) (delta : Real) :
     TensorReactionSymmInputOn (I := I) (M := M) G
@@ -1127,6 +1149,7 @@ theorem shiftNRaw_symmInputOn
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNAt_pinch
     {δ t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1143,24 +1166,28 @@ theorem shiftNAt_pinch
             metricTracePair0SAt (I := I) g Ric • Ric) := by
   rw [shiftNAt, shiftRic3At_pinch (I := I) (M := M) basis horth hδ Ric]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem finCons1_eq_vec2
     {x : M} (X Y : TangentSpace I x) :
     Fin.cons X (fun _ : Fin 1 => Y) = vec2 (I := I) X Y := by
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem fin2_const_eq_vec2
     {x : M} (X : TangentSpace I x) :
     (fun _ : Fin 2 => X) = vec2 (I := I) X X := by
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem fin2_if_eq_vec2
     {x : M} (X Y : TangentSpace I x) :
     (fun q : Fin 2 => if q = 0 then X else Y) = vec2 (I := I) X Y := by
   funext q
   fin_cases q <;> rfl
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciEnd_repr_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1176,6 +1203,7 @@ theorem ricciEnd_repr_orthonormal
   fin_cases k <;>
     simp [DifferentialGeometry.Integral.Connection.delta3, DifferentialGeometry.Integral.Connection.ricciEnd_inner]
 
+omit [IsManifold I 2 M] in
 theorem ricciQuadAt_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1229,6 +1257,7 @@ theorem ricciQuadAt_comp_orthonormal
   simp [ricciEnd_repr_orthonormal (I := I) (M := M) basis horth Ric,
     ricciSq3]
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciNorm3_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1244,6 +1273,7 @@ theorem ricciNorm3_comp_orthonormal
     vec2, DifferentialGeometry.Integral.Connection.vec2]
   simp [fin2_const_eq_vec2, fin2_if_eq_vec2]
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem metricTrace_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1258,6 +1288,7 @@ theorem metricTrace_comp_orthonormal
     DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, ricciScal3]
 
+omit [IsManifold I 2 M] in
 theorem rm04Contr_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1279,6 +1310,7 @@ theorem rm04Contr_comp_orthonormal
   simp [fin2_const_eq_vec2, fin2_if_eq_vec2, rm04Mid02At_apply]
   ring_nf
 
+omit [IsManifold I 2 M] in
 theorem ricciReaction3At_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1308,6 +1340,7 @@ theorem ricciReaction3At_comp_orthonormal
     ricciQuadAt_comp_orthonormal (I := I) (M := M) basis horth]
   simp only [nsmul_eq_mul, Nat.cast_ofNat]
 
+omit [IsManifold I 2 M] in
 theorem shiftNAt_comp_orthonormal
     {delta t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1339,6 +1372,7 @@ theorem shiftNAt_comp_orthonormal
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_comp
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -1400,6 +1434,7 @@ theorem shiftNAt_add_g_comp
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_quad
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (hdelta : delta < (1 : Real) / 3)
@@ -1506,6 +1541,7 @@ theorem shiftNAt_add_g_quad
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNAt_comp_shiftBlock
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1540,6 +1576,7 @@ theorem shiftNAt_comp_shiftBlock
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNRaw_realizes_block
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1573,6 +1610,7 @@ theorem shiftNRaw_realizes_block
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNRaw_null_symm_of_lt
     {G : Real -> SmoothRiemannianMetric I M} {U : Set Real} {delta : Real}
     (hdelta13 : delta < (1 : Real) / 3)
@@ -1622,6 +1660,7 @@ theorem shiftNRaw_null_symm_of_lt
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNRaw_null_symm
     {G : Real -> SmoothRiemannianMetric I M} {U : Set Real} {delta : Real}
     (_hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3)
@@ -1642,6 +1681,7 @@ def tensor02FromBasis
   (coordEquiv0S (I := I) basis 2).symm
     (fun slots : Fin 2 -> Fin 3 => C (slots 0) (slots 1))
 
+omit [IsManifold I 2 M] in
 @[simp]
 theorem tensor02FromBasis_component
     {x : M}
@@ -1654,6 +1694,7 @@ theorem tensor02FromBasis_component
     (tensor02FromBasis (I := I) (M := M) basis C)]
   simp [tensor02FromBasis, slots2]
 
+omit [IsManifold I 2 M] in
 @[simp]
 theorem tensor02FromBasis_apply
     {x : M}
@@ -1667,6 +1708,7 @@ theorem tensor02FromBasis_apply
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02_smul2
     {x : M} (T : Tensor02At (I := I) (M := M) x)
     (r : Real) (X Y : TangentSpace I x) :
@@ -1709,6 +1751,7 @@ theorem tensor02_smul2
   ring
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNScaled
     {delta t : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1743,6 +1786,7 @@ def shiftNAtBasis
         (fun a b c d => Rm (vec4 (I := I) (basis a) (basis b) (basis c) (basis d)))
         (fun a b => Ric (vec2 (I := I) (basis a) (basis b))) i j)
 
+omit [IsManifold I 2 M] in
 @[simp]
 theorem shiftNAtBasis_apply_basis
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
@@ -1763,6 +1807,7 @@ theorem shiftNAtBasis_apply_basis
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNAtBasis_comp_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}
@@ -1795,6 +1840,7 @@ theorem shiftNAtBasis_comp_shiftBlock
 
 
 
+omit [IsManifold I 2 M] in
 theorem shiftNBasisScaled
     {delta : Real} {g : SmoothRiemannianMetric I M}
     {Araw : RawTwoTensorField (I := I) (M := M)} {x : M}

@@ -5,7 +5,6 @@ import Mathlib.Topology.Connected.Clopen
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,7 +28,7 @@ open Set
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -40,6 +39,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem compact_of_ricci
     [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
     [I.Boundaryless]

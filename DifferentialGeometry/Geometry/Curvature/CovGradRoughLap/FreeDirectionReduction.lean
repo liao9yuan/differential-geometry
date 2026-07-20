@@ -22,8 +22,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SNabla
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -49,7 +49,7 @@ lemma covGrad_rawConnLap_unit_eval_curry
         tensorCovDerivAt (I := I) (M := M) g 0 2
           (rawTensorConnLapSmooth g 0 2 T₀) x w)
         (unitZeroSec (I := I) (M := M) x) := by
-  have := curry_covGrad_unit_eval (I := I) (M := M) g
+  have := curry_covGrad_unit_eval_general (I := I) (M := M) g 2
     (rawTensorConnLapSmooth g 0 2 T₀) x w
   exact this
 
@@ -196,6 +196,7 @@ lemma curry_unitGradAbstractRoughLap_along
   rw [curry_abstract_covDeriv_unitGrad_unfold' (I := I) (M := M) g T₀ hC hW]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDeriv_unit_eval_eq_two
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

@@ -184,6 +184,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [CompactSpace M] in
 theorem eigenvalueTailSummable_of_polynomial_counting_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (q : ℕ) (A : ℝ) (hA : 0 ≤ A)

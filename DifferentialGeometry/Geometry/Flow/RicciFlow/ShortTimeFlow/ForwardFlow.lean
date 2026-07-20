@@ -35,7 +35,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -248,6 +248,7 @@ private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     rw [hrw]
     exact hϕ
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem forward_flow_existence_smooth_neighborhood_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -341,6 +342,7 @@ theorem forward_flow_existence_smooth_neighborhood_of_jointsmooth_field
     have hcontOn := hsecOn.continuousOn
     exact hcontOn.mono (Set.prod_mono hIcoSub (subset_refl _))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

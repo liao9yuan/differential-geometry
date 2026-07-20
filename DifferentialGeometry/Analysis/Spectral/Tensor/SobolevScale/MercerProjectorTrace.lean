@@ -19,7 +19,7 @@ namespace Analysis
 namespace Spectral
 namespace Mercer
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ lemma mem_eigenSubLevel (g : SmoothRiemannianMetric I M) (Λ : ℝ)
   rw [Set.Finite.mem_toFinset]
   rfl
 
+omit [BoundarylessManifold I M] in
 private lemma finiteEigenCombo_toSection_apply (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (x : M) :
@@ -341,6 +342,7 @@ private theorem eigenSmooth_toL2_norm_eq_one (g : SmoothRiemannianMetric I M)
   rw [hbi]
   exact b.orthonormal.norm_eq_one i
 
+omit [BoundarylessManifold I M] in
 private theorem integral_riemannianFiberNormSq_eigenSmooth_eq_one
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :

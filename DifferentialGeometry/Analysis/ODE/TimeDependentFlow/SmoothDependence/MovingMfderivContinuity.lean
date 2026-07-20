@@ -28,7 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -37,6 +36,7 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem slice_mfderiv_continuousAt_of_jointFlow
     (Φg : M → ℝ → M) {O : Set ℝ} (hO : IsOpen O) {s₀ : ℝ} (hs₀ : s₀ ∈ O)
     (hΦg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φg q.2 q.1) (O ×ˢ Set.univ))

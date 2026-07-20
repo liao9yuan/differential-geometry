@@ -74,6 +74,7 @@ theorem contDiffOn_partial_fderiv_of_succ
   exact hcomp_Ck.congr heq
 
 
+omit [CompleteSpace E] in
 lemma partial_fderiv_eq_comp_inr_on_open
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
     (hf : ContDiffOn ℝ 1 (uncurry f) Ω) :
@@ -88,6 +89,7 @@ lemma partial_fderiv_eq_comp_inr_on_open
 
 
 
+omit [CompleteSpace E] in
 theorem contDiffOn_partial_fderiv_of_succ_local
     {k : ℕ∞} {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
     (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) Ω) :

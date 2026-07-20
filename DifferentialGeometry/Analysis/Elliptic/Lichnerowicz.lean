@@ -22,7 +22,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem integral_Δ_g_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -43,6 +44,7 @@ private theorem integral_Δ_g_eq_zero
     ∫ x, Δ_g (I := I) g hφ x ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   exact integral_divergence_eq_zero_of_compact (I := I) g (grad_g (I := I) g hφ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -57,6 +59,7 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hf hf_cs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lichnerowicz_inequality
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -324,7 +327,7 @@ theorem lichnerowicz_inequality
   rw [h_rearrange1, h_rearrange2] at h_n_chain
   exact le_of_mul_le_mul_right (by linarith [h_n_chain]) h_factor_pos
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem g_inner_self_eq_sum_sq_inner_orthonormal
     (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x)
@@ -502,6 +505,7 @@ private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
   rw [frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x] at hCS
   exact hCS
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciTensor_grad_grad_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -525,6 +529,7 @@ private theorem ricciTensor_grad_grad_contMDiff
   rw [Bundle.contMDiffAt_totalSpace] at hpm
   exact hpm.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciTensor_grad_grad_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

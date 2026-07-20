@@ -111,6 +111,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private lemma riemannianFiberNormSq_eq_bundle_norm_sq_gen
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -133,6 +134,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_tensorRS_clm_apply_le
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ) (x : M)
     (φ : TensorRSSpace r₁ s₁ I x →L[ℝ] TensorRSSpace r₂ s₂ I x) :
@@ -157,6 +159,8 @@ theorem riemannianFiberNormSq_tensorRS_clm_apply_le
           · exact φg.le_opNorm v
     _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_contract_trace_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ Cφ : ℝ, 0 ≤ Cφ ∧ ∀ T : TensorRSSpace (1 + r) (s + 1) I x,
@@ -166,6 +170,8 @@ theorem riemannianFiberNormSq_contract_trace_le
   riemannianFiberNormSq_tensorRS_clm_apply_le (I := I) (M := M) g (1 + r) (s + 1) r s x
     (Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_contractCcTensor_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ Cφ : ℝ, 0 ≤ Cφ ∧ ∀ T : SmoothCcTensor g (1 + r) (s + 1),

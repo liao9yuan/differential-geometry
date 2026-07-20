@@ -16,7 +16,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -240,8 +239,7 @@ end TimeSmoothness
 
 section IntervalSmoothness
 
-variable [Module.Finite Real E] [FiniteDimensional Real E]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [FiniteDimensional Real E]
 
 
 
@@ -643,6 +641,7 @@ noncomputable def metricCoeff
     (x : M) (X Y : TangentSpace I x) : Real -> Real :=
   fun t => (G.metric t).inner x X Y
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem metricCoeff_eq
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

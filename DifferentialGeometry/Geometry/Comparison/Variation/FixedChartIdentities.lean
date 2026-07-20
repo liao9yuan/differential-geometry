@@ -192,9 +192,10 @@ private lemma chartPulled_contDiffAt
     exact hcomp
   exact key.of_le (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 8))
 
-omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem commute_ds_dt_fixed_chart_C2
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (s t : ℝ)
@@ -239,7 +240,8 @@ theorem commute_ds_dt_fixed_chart_C2
       (fderiv ℝ (fun v : ℝ => F s v) t (1 : ℝ)) (F s t)
   rw [hsec, hChristoffel]
 
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem commute_ds_dt_fixed_chart
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -720,6 +722,7 @@ lemma partialDeriv_chartChristoffel_symm
   rw [hfun]
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma curvPart_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (x : M) (D₁ D₂ Yv : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -981,6 +984,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma commutator_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t))
@@ -1124,6 +1128,9 @@ lemma commutator_eq_chartRiemannCLM
 
 end Aux7
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)

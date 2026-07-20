@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -49,6 +49,7 @@ private lemma finrank_tensor0SModel_eq_cfec (t : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma finrank_tensorRSSpace_zero_eq (t : ℕ) (x : M) :
     Module.finrank ℝ (TensorRSSpace 0 t I x) = (Module.finrank ℝ E) ^ t := by
   rw [(tensorRSSpace_continuousLinearEquiv (𝕜 := ℝ) (E := E) (I := I) (M := M)
@@ -65,6 +66,7 @@ private lemma finrank_tensorRSSpace_zero_eq (t : ℕ) (x : M) :
   rw [φ.finrank_eq, Module.finrank_linearMap, finrank_tensor0SModel_eq_cfec,
     finrank_tensor0SModel_eq_cfec, pow_zero, one_mul]
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma orthonormal_rfns_exists_basis
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (ht : 1 ≤ t)
     {n : ℕ} (e : Fin n → TangentSpace I x)

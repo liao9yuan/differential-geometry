@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasur
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 set_option linter.style.longLine false
 
 
@@ -31,7 +30,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 

@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -52,6 +51,7 @@ def leibnizLeftEquiv (s q : ℕ) : Fin (s + 1 + q) ≃ Fin (s + q + 1) :=
 
 
 
+omit [CompleteSpace E] in
 theorem nabla0S_product_realizes {s q : ℕ}
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

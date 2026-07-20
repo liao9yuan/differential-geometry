@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainVariationalIdentityIntegralForm
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -438,6 +438,7 @@ noncomputable def chartPushedLpFromLp
     (Lp.stronglyMeasurable u).measurable
     (Lp.memLp u)).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedLpFromLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -451,6 +452,7 @@ lemma chartPushedLpFromLp_coeFn
   unfold chartPushedLpFromLp
   exact MemLp.coeFn_toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedLpFromLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -602,6 +604,7 @@ private lemma smooth_lhs_mass_integral_eq_weighted
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α v.toFun y * ψ y)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedLpFromLp_smoothToLp_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
@@ -692,6 +695,7 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
         (chartAtlasPOU I M) α v.toFun y = 0 := hy
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -804,6 +808,7 @@ private lemma smooth_lhs_principal_per_i_tendsto
     rw [h_per_n n, h_smooth_case_eq n]]
   exact h_inner_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_mass_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -953,6 +958,7 @@ private lemma general_lhs_principal_per_i_eq_inner
   rw [h_Py]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1143,6 +1149,7 @@ private lemma general_lhs_principal_eq_sum_inner
   rw [h_Py]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)

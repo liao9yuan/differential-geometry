@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,8 @@ def homDerivModeCoeff {a : ℝ}
       (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * u₀.coeff i))
     (Continuous.continuousOn (by fun_prop))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem homDerivModeCoeff_eq_smul
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -76,6 +78,7 @@ theorem homDerivModeCoeff_eq_smul
   filter_upwards [hderiv, hmode, hsmul] with t htderiv htmode htsmul
   rw [htderiv, htsmul, Pi.smul_apply, htmode, smul_eq_mul]
 
+omit [CompactSpace M] in
 theorem norm_homModeCoeff_sq_le (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -119,6 +122,7 @@ theorem norm_homModeCoeff_sq_le (hT : 0 ≤ T)
     _ = T * (u₀.coeff i) ^ 2 := by
         rw [mul_pow, Real.sq_sqrt hT, sq_abs]
 
+omit [CompactSpace M] in
 theorem weighted_homModeCoeff_le (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -136,6 +140,7 @@ theorem weighted_homModeCoeff_le (hT : 0 ≤ T)
     _ = T * (tensorSobolevWeight (I := I) (M := M) i (a + 2) * (u₀.coeff i) ^ 2) := by
         ring
 
+omit [CompactSpace M] in
 theorem summable_homModeCoeff (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
@@ -148,6 +153,7 @@ theorem summable_homModeCoeff (hT : 0 ≤ T)
       (sq_nonneg _)
   · exact weighted_homModeCoeff_le (I := I) (M := M) (a := a) (T := T) hT u₀ i
 
+omit [CompactSpace M] in
 theorem weighted_homDerivModeCoeff_le (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -201,6 +207,7 @@ theorem weighted_homDerivModeCoeff_le (hT : 0 ≤ T)
     _ = T * (tensorSobolevWeight (I := I) (M := M) i (a + 2) * (u₀.coeff i) ^ 2) := by
         rw [← hweight]; ring
 
+omit [CompactSpace M] in
 theorem summable_homDerivModeCoeff (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i a *

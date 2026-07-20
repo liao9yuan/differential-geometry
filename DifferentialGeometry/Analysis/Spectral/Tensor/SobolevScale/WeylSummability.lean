@@ -13,7 +13,19 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section
+
+variable {E : Type*} [AddCommGroup E] [Module ℝ E]
+
+def weylSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
+
+lemma weylSobolevExp_gt_finrank :
+    Module.finrank ℝ E < weylSobolevExp (E := E) := by
+  unfold weylSobolevExp; omega
+
+end
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -152,13 +164,6 @@ private theorem exists_growth_of_counting_bound
         ≤ (K * 2 ^ p) ^ (-(1 / p)) * ((K * 2 ^ p) ^ (1 / p) * w i) :=
           mul_le_mul_of_nonneg_left hpow (by positivity)
       _ = w i := hC
-
-def weylSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-lemma weylSobolevExp_gt_finrank :
-    Module.finrank ℝ E < weylSobolevExp (E := E) := by
-  unfold weylSobolevExp; omega
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma weylSobolevExp_eq_mercerSobolevExp :

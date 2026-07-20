@@ -37,7 +37,16 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+section NormedL2Identity
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +66,11 @@ theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
   rw [hfun]
   exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g r s _
 
+end NormedL2Identity
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem norm_le_of_pointwise_fiberNormSq_bound_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C : SmoothCcTensor g r s) (B : ℝ)
@@ -81,7 +95,20 @@ theorem norm_le_of_pointwise_fiberNormSq_bound_rs
         rw [MeasureTheory.integral_const, smul_eq_mul,
           MeasureTheory.measureReal_def, mul_comm]
 
+section NormedIntegralBound
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C : SmoothCcTensor g r s) (F : M → ℝ)
     (hF_int : MeasureTheory.Integrable F (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -99,6 +126,9 @@ theorem normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g r s C
   exact MeasureTheory.integral_mono hint hF_int (fun x => hpt x)
 
+end NormedIntegralBound
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_gInvDiffSlotCoeff_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
@@ -131,7 +161,19 @@ theorem riemannianFiberNormSq_gInvDiffSlotCoeff_le
     _ ≤ ((Module.finrank ℝ E : ℝ) * (δ / (1 - δ))) ^ 2 := hbase
     _ ≤ ((Module.finrank ℝ E : ℝ)) ^ 2 := hmono
 
+section NormedSlotCoefficientIdentity
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem gInvDiffSlotCoeff_eq_slotInsertEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     gInvDiffSlotCoeff (I := I) g₀ g₁ =
       endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 (gInvDiffRaisedEndoField (I := I) g₀ g₁) := by
@@ -140,7 +182,10 @@ theorem gInvDiffSlotCoeff_eq_slotInsertEndoCc (g₀ g₁ : SmoothRiemannianMetri
   intro x
   rfl
 
+end NormedSlotCoefficientIdentity
+
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoCompSection_contMDiff
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -171,12 +216,14 @@ def endoCompField (A B : ContMDiffSection I (E →L[ℝ] E) ∞
   toFun := fun x : M => (A x).comp (B x)
   contMDiff_toFun := endoCompSection_contMDiff (I := I) (M := M) A B
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma endoCompField_apply
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) (x : M) :
     (endoCompField (I := I) (M := M) A B x) = (A x).comp (B x) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem endoCovariantDerivative_comp
     (g₀ : SmoothRiemannianMetric I M)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -225,6 +272,17 @@ theorem endoCovariantDerivative_comp
     ContinuousLinearMap.comp_apply, endoCompField_apply, ContinuousLinearMap.comp_apply]
   rw [hAonBY', hBgrad, map_add]
   abel
+
+section HilbertFirstDerivativeBound
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -300,6 +358,8 @@ theorem riemannianFiberNormSq_covGrad_gInvDiffSlotCoeff_le
         (Module.finrank ℝ E : ℝ) ^ 3 * (4 * C₀ * G) ^ 2 := by ring
     rw [hlhs, hrhs]
 
+end HilbertFirstDerivativeBound
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -316,6 +376,8 @@ theorem norm_toSection_eq_sqrt_riemannianFiberNormSq
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_zero
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
@@ -337,6 +399,17 @@ theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_zero
           ((gInvDiffSlotCoeff (I := I) g₀ g₁).toSection x))
       ≤ Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) := Real.sqrt_le_sqrt hb
     _ = (Module.finrank ℝ E : ℝ) := Real.sqrt_sq hfr0
+
+section HilbertFirstDerivativeEnvelope
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -380,7 +453,10 @@ theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_one
     _ ≤ C * (1 + R) := by
         refine mul_le_mul_of_nonneg_left ?_ hC0; linarith
 
+end HilbertFirstDerivativeEnvelope
+
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem covGrad_gInvDiffSlotCoeff_eq_covGrad_slotInsertEndoCc
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) =
@@ -389,6 +465,7 @@ theorem covGrad_gInvDiffSlotCoeff_eq_covGrad_slotInsertEndoCc
   rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g₀ g₁]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_toSection_eval
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 3 → TangentSpace I x) :
@@ -405,6 +482,9 @@ theorem covGrad_gInvDiffSlotCoeff_toSection_eval
     (gInvDiffRaisedEndoField (I := I) g₀ g₁) x D v
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_endoCov_apply
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
@@ -447,6 +527,7 @@ private lemma tensor0SOne_apply_smul_comp (x : M) (om : Tensor0SSpace 1 I x)
       (fun _ => c • a) = _
   rw [hca, ha, map_smul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SOne_apply_neg_comp (x : M) (om : Tensor0SSpace 1 I x)
     (a : TangentSpace I x) :
     om (fun _ : Fin 1 => -a) = -om (fun _ : Fin 1 => a) := by
@@ -498,6 +579,7 @@ def connDiffGInvCompositePairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M
           (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)).comp
           (continuous_pi (fun _ => hbil))) } : Tensor0SSpace 2 I x)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma gInvCompPairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     (connDiffGInvCompositePairing (I := I) g₀ g₁ x om) YZ =
@@ -505,6 +587,7 @@ def connDiffGInvCompositePairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x
           (metricComparisonEndo (I := I) g₀ g₁ x (YZ 0)) (YZ 1)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gInvCompPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om om' : Tensor0SSpace 1 I x) :
     connDiffGInvCompositePairing (I := I) g₀ g₁ x (om + om') =
@@ -513,6 +596,7 @@ lemma gInvCompPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   intro YZ
   exact ContinuousMultilinearMap.add_apply om om' _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gInvCompPairing_smul (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) :
     connDiffGInvCompositePairing (I := I) g₀ g₁ x (c • om) =
@@ -529,6 +613,7 @@ def connDiffGInvCompositeFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
         map_add' := gInvCompPairing_add (I := I) g₀ g₁ x
         map_smul' := gInvCompPairing_smul (I := I) g₀ g₁ x })
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffGInvCompositeFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -536,6 +621,7 @@ def connDiffGInvCompositeFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
       connDiffGInvCompositePairing (I := I) g₀ g₁ x om := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem gInvRaisedEndo_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -545,6 +631,8 @@ private theorem gInvRaisedEndo_section_contMDiff (g₀ g₁ : SmoothRiemannianMe
   rw [gInvRaisedEndo_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem connDiffGInvCompositeFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
@@ -615,11 +703,15 @@ def connDiffGInvComposite (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTen
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma connDiffGInvComposite_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffGInvComposite (I := I) g₀ g₁).toSection x =
       connDiffGInvCompositeFib (I := I) g₀ g₁ x := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connDiffGInvComposite_pairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -630,6 +722,8 @@ lemma connDiffGInvComposite_pairing_apply (g₀ g₁ : SmoothRiemannianMetric I 
   rw [connDiffGInvComposite_toSection, connDiffGInvCompositeFib_apply, gInvCompPairing_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x)
@@ -655,6 +749,9 @@ theorem covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite
 open TensorMultilinear
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem endoCov_gInvDiffRaisedField_fibrewise
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 w : TangentSpace I x) :
@@ -678,6 +775,8 @@ def connArmEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
       (metricComparisonEndo (I := I) g₀ g₁ x)).comp
       (PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connArmEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 w : TangentSpace I x) :
     connArmEndo (I := I) g₀ g₁ x v0 w =
@@ -693,6 +792,9 @@ def sharpArmEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
       (gInvDiffRaisedEndoField (I := I) g₀ g₁) x
     - connArmEndo (I := I) g₀ g₁ x
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma sharpArmEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 w : TangentSpace I x) :
     sharpArmEndo (I := I) g₀ g₁ x v0 w =
@@ -704,6 +806,9 @@ lemma sharpArmEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     connArmEndo_apply, endoCov_gInvDiffRaisedField_fibrewise (I := I) g₀ g₁ x v0 w]
   abel
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma endoCov_eq_connArm_add_sharpArm (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 : TangentSpace I x) :
     (endoCovariantDerivative (I := I) (M := M) g₀)
@@ -713,8 +818,10 @@ lemma endoCov_eq_connArm_add_sharpArm (g₀ g₁ : SmoothRiemannianMetric I M) (
   rw [ContinuousLinearMap.add_apply, connArmEndo_apply, sharpArmEndo_apply,
     endoCov_gInvDiffRaisedField_fibrewise (I := I) g₀ g₁ x v0 w]
 
-omit [CompactSpace M] [I.Boundaryless] in
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem leviCivitaSection_contMDiff_aux (g : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)) :
@@ -730,6 +837,8 @@ private theorem leviCivitaSection_contMDiff_aux (g : SmoothRiemannianMetric I M)
   exact LeviCivita_section_contMDiffOn_univ (I := I) g hσ'
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem connArmEndo_inner_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (V0 W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -746,6 +855,8 @@ theorem connArmEndo_inner_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem sharpArmEndo_inner_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (V0 W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -807,11 +918,15 @@ def sharpArmCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma connArmCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connArmCc (I := I) g₀ g₁).toSection x =
       TensorRSSpace.ofCLM (bilinearSlotInsertCLM (I := I) (M := M) 1 x (connArmEndo (I := I) g₀ g₁ x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma sharpArmCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (sharpArmCc (I := I) g₀ g₁).toSection x =
       TensorRSSpace.ofCLM (bilinearSlotInsertCLM (I := I) (M := M) 1 x (sharpArmEndo (I := I) g₀ g₁ x)) := rfl
@@ -837,11 +952,15 @@ def sharpArmEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma connArmEndoCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connArmEndoCc (I := I) g₀ g₁).toSection x =
       TensorRSSpace.ofCLM (bilinearSlotInsertCLM (I := I) (M := M) 0 x (connArmEndo (I := I) g₀ g₁ x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma sharpArmEndoCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (sharpArmEndoCc (I := I) g₀ g₁).toSection x =
       TensorRSSpace.ofCLM (bilinearSlotInsertCLM (I := I) (M := M) 0 x (sharpArmEndo (I := I) g₀ g₁ x)) := rfl
@@ -861,7 +980,8 @@ instance bilinEndoCovariantDerivative_contMDiff (g : SmoothRiemannianMetric I M)
     (E →L[ℝ] E) (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
     (LeviCivita (I := I) g) (endoCovariantDerivative (I := I) (M := M) g)
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem bilinEndoCovariantDerivative_apply (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -902,6 +1022,7 @@ def armSlotEndoCc (g : SmoothRiemannianMetric I M) (s : ℕ)
           (fun V0 W => armField_inner_contMDiff (I := I) (M := M) Arm V0 W) }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma armSlotEndoCc_toSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -910,6 +1031,7 @@ def armSlotEndoCc (g : SmoothRiemannianMetric I M) (s : ℕ)
       TensorRSSpace.ofCLM (bilinearSlotInsertCLM (I := I) (M := M) s x (Arm x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem bilinEndoField_contMDiff
     (Arm : Π x : M, TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (harm : ∀ (V0 W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
@@ -947,13 +1069,19 @@ def sharpArmEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
     bilinEndoField_contMDiff (I := I) (M := M) (fun x : M => sharpArmEndo (I := I) g₀ g₁ x)
       (sharpArmEndo_inner_contMDiff (I := I) g₀ g₁)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma connArmEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     connArmEndoField (I := I) g₀ g₁ x = connArmEndo (I := I) g₀ g₁ x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma sharpArmEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     sharpArmEndoField (I := I) g₀ g₁ x = sharpArmEndo (I := I) g₀ g₁ x := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connArmCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     connArmCc (I := I) g₀ g₁ = armSlotEndoCc (I := I) (M := M) g₀ 1 (connArmEndoField (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -962,6 +1090,8 @@ lemma connArmCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [connArmCc_toSection, armSlotEndoCc_toSection, connArmEndoField_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma sharpArmCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     sharpArmCc (I := I) g₀ g₁ = armSlotEndoCc (I := I) (M := M) g₀ 1 (sharpArmEndoField (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -970,6 +1100,8 @@ lemma sharpArmCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [sharpArmCc_toSection, armSlotEndoCc_toSection, sharpArmEndoField_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connArmEndoCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     connArmEndoCc (I := I) g₀ g₁ = armSlotEndoCc (I := I) (M := M) g₀ 0 (connArmEndoField (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -978,6 +1110,8 @@ lemma connArmEndoCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [connArmEndoCc_toSection, armSlotEndoCc_toSection, connArmEndoField_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma sharpArmEndoCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     sharpArmEndoCc (I := I) g₀ g₁ = armSlotEndoCc (I := I) (M := M) g₀ 0 (sharpArmEndoField (I := I) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -985,6 +1119,7 @@ lemma sharpArmEndoCc_eq_armSlotEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro x
   rw [sharpArmEndoCc_toSection, armSlotEndoCc_toSection, sharpArmEndoField_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma curry_armSlotFib_eq_slotInsert (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (A : Tensor0SSpace (s + 1) I x) (v0 : TangentSpace I x) :
@@ -997,6 +1132,7 @@ lemma curry_armSlotFib_eq_slotInsert (s : ℕ) (x : M)
   simp only [Fin.cons_zero]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_sub_left (s : ℕ) (k : Fin s) (x : M)
     (Λ₁ Λ₂ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (Λ₁ - Λ₂) =
@@ -1011,6 +1147,7 @@ lemma slotInsertEndoFib_sub_left (s : ℕ) (k : Fin s) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorCovDerivAt_armSlotEndoCc_curry_eq_slotInsertEndoFib (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -1168,6 +1305,7 @@ private theorem tensorCovDerivAt_armSlotEndoCc_curry_eq_slotInsertEndoFib (g : S
   rw [hbilin]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_armSlotEndoCc_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -1192,6 +1330,7 @@ theorem tensorCovDerivAt_armSlotEndoCc_eq (g : SmoothRiemannianMetric I M) (s : 
   rw [show Matrix.vecTail (Fin.cons (m 0) (Matrix.vecTail m)) = Matrix.vecTail m from by
     funext k; rfl]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_armSlotEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -1209,6 +1348,7 @@ theorem covGrad_armSlotEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (s :
   rw [tensorCovDerivAt_armSlotEndoCc_eq (I := I) (M := M) g s Arm x (v 0)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_eq_slotInsert_section
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) =
@@ -1243,6 +1383,7 @@ theorem covGrad_gInvDiffSlotCoeff_eq_slotInsert_section
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply,
     Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_succ_le_arms
     (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + (m + 1)) x
@@ -1257,7 +1398,19 @@ theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_succ_le_arms
   rw [iteratedCovGrad_add]
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 ((2 + 1) + m) x _ _
 
+section NormedDomReindexing
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem rsDomDomCongrFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (R : SmoothCcTensor g r s) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1319,10 +1472,13 @@ def rsDomDomCongrSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := rsDomDomCongrFib_contMDiff (I := I) (M := M) g r s σ R }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma rsDomDomCongrSection_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (R : SmoothCcTensor g r s) (x : M) :
     (rsDomDomCongrSection (I := I) (M := M) g r s σ R).toSection x =
       tensorRS_domDomCongr σ (R.toSection x) := rfl
+
+end NormedDomReindexing
 
 def armSlotEndoPassZeroCc (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -1331,6 +1487,7 @@ def armSlotEndoPassZeroCc (g : SmoothRiemannianMetric I M)
   rsDomDomCongrSection (I := I) (M := M) g 2 3 (finRotate 3)
     (armSlotEndoCc (I := I) (M := M) g 1 Arm)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma armSlotEndoPassZeroCc_toSection (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -1339,6 +1496,7 @@ def armSlotEndoPassZeroCc (g : SmoothRiemannianMetric I M)
       tensorRS_domDomCongr (finRotate 3)
         ((armSlotEndoCc (I := I) (M := M) g 1 Arm).toSection x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem toModel_appCcRS_armSlotEndoPassZeroCc_eval (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
@@ -1385,6 +1543,7 @@ theorem toModel_appCcRS_armSlotEndoPassZeroCc_eval (g : SmoothRiemannianMetric I
     change v (finRotate 3 2) = v 0
     rw [hr2]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_iteratedCovGrad_armSlotEndoPassZeroCc_toSection_eq
     (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -1464,6 +1623,7 @@ private lemma metricCovDeriv_symm_right
   rw [g.symm x (cov.toFun Y x (X x)) (Z x), g.symm x (Y x) (cov.toFun Z x (X x))]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metricDiffCovDeriv_symm_right
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) :
@@ -1473,6 +1633,9 @@ private lemma metricDiffCovDeriv_symm_right
   rw [metricCovDeriv_symm_right (I := I) g₁ (LeviCivita (I := I) g₀) X Y Z x,
     metricCovDeriv_symm_right (I := I) g₀ (LeviCivita (I := I) g₀) X Y Z x]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem endoCovariantDerivative_gInvDiffRaisedEndoField_resolvent
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (V W Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -1529,6 +1692,17 @@ theorem endoCovariantDerivative_gInvDiffRaisedEndoField_resolvent
   simp only [] at hk1 hk2
   linarith [hk1, hk2, hsym]
 
+section NormedReindexingNorm
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 theorem rfns_iteratedCovGrad_rsDomDomCongr_both_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ' : Equiv.Perm (Fin r)) (σ : Equiv.Perm (Fin s))
@@ -1547,6 +1721,7 @@ theorem rfns_iteratedCovGrad_rsDomDomCongr_both_eq
       rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotInsertEndoCc_succ_eq_reindex_slotExtend
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -1663,6 +1838,8 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
               ((iteratedCovGrad (I := I) g₀ 1 1 i
                 (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 Λ)).toSection x) := by
           rw [pow_succ]; ring
+
+end NormedReindexingNorm
 
 end Connection
 end Integral

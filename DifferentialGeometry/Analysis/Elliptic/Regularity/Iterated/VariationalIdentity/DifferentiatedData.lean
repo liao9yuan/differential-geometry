@@ -21,7 +21,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedDifferentiatedData
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,6 +123,7 @@ def IteratedDiffChartBilinearData.mk_from_hypotheses
 
 namespace IteratedDiffChartBilinearData
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma m_zero_principal_integrand_eq
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g}
@@ -137,6 +138,7 @@ private lemma m_zero_principal_integrand_eq
   rw [chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -314,6 +316,7 @@ end IteratedDiffChartBilinearData
 
 namespace IteratedDiffChartBilinearData
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -325,6 +328,7 @@ private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
   · rfl
   · rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_one_const_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -404,6 +408,7 @@ end IteratedDiffChartBilinearData
 
 namespace IteratedDiffChartBilinearData
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_three_cons_two_eq_chosenThird
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -416,6 +421,7 @@ private lemma chosenMthMixed_three_cons_two_eq_chosenThird
   · rfl
   · rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_two_pair_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

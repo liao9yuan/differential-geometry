@@ -18,7 +18,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem iteratedCovGradSobolevNorm_zero
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGradSobolevNorm g r s k 0 T =
@@ -33,6 +34,7 @@ omit [BoundarylessManifold I M] in
   unfold iteratedCovGradSobolevNorm
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem toHs_norm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (σ : ℕ)
     (T' : SmoothCcTensor g r s) :
@@ -43,6 +45,7 @@ private theorem toHs_norm_le_succ
   exact (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g (σ + 1) T').ne
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem toHs_norm_mono_order
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {σ τ : ℕ} (hστ : σ ≤ τ)
     (T' : SmoothCcTensor g r s) :
@@ -58,6 +61,7 @@ theorem toHs_norm_mono_order
       exact toHs_norm_le_succ (I := I) (M := M) g (σ + d) T'
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGradSobolevNorm_le_topOrder
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGradSobolevNorm g r s k j T ≤
@@ -70,6 +74,7 @@ theorem iteratedCovGradSobolevNorm_le_topOrder
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
@@ -117,6 +122,7 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2_of_rankBound
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4)

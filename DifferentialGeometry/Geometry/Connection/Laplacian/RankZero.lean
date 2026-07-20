@@ -172,6 +172,7 @@ private noncomputable def orthoFrameBasis
       (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j))
     (by rw [Fintype.card_fin]; rfl)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 private theorem orthoBasis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -246,6 +247,7 @@ theorem rawLap_toRS0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem cov0_diag_hess
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -312,6 +314,7 @@ private theorem cov0_diag_hess
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondRS_scalar
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally

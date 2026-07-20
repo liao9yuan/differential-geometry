@@ -16,7 +16,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,7 @@ section LowerOrderWkpNormBoundsUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
+omit [CompleteSpace E] in
 theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)

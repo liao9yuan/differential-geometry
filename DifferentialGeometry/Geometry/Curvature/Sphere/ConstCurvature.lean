@@ -37,7 +37,9 @@ variable {n : ℕ} [Fact (finrank ℝ E = n + 1)] [NeZero n]
 
 
 
-theorem metricRm04_round_invariant (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1)
+omit [NeZero n] in
+theorem metricRm04_round_invariant [NeZero n]
+    (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1)
     (X Y Z W : TangentSpace (𝓡 n) x) :
     metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Z W
       = metricRm04StdAt (roundMetric (E := E) (n := n)) (sphereDiffeo (n := n) e x)
@@ -63,7 +65,10 @@ set_option maxHeartbeats 800000 in
 
 
 
-theorem roundMetric_sec_value (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x) :
+omit [NeZero n] in
+omit [FiniteDimensional ℝ E] in
+theorem roundMetric_sec_value [NeZero n]
+    (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x) :
     metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
       = (roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x Y Y
         - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x X Y := by
@@ -101,7 +106,9 @@ theorem roundMetric_sec_value (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n
 
 
 
-theorem roundMetric_constPosSec :
+omit [NeZero n] in
+omit [FiniteDimensional ℝ E] in
+theorem roundMetric_constPosSec [NeZero n] :
     ∃ c : ℝ, 0 < c ∧ ∀ (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x),
       metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
         = c * ((roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x Y Y

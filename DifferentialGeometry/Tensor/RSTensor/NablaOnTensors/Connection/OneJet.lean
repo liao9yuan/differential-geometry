@@ -14,7 +14,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -32,6 +31,8 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
 
+omit [I.Boundaryless] [T2Space M] [IsManifold I ∞ M]
+  [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I] in
 private theorem tangentFieldModelInChart_sum_tangentConst_model
     (x₀ : M) (F : E -> E) {y : E} (hy : y ∈ (extChartAt I x₀).target) :
     tangentFieldModelInChart (𝕜 := Real) (I := I) x₀
@@ -76,6 +77,7 @@ private theorem tangentFieldModelInChart_sum_tangentConst_model
 
 
 
+omit [I.Boundaryless] in
 theorem exists_cov_zero_at
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (_hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
@@ -364,6 +366,7 @@ theorem exists_cov_zero_at
 
 
 
+omit [I.Boundaryless] in
 theorem exists_cov_zero_at_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)

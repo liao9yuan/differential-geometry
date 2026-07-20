@@ -20,12 +20,14 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_isPointwiseSymm
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     deTurckRicciRHS (I := I) g_bg g x v w =
@@ -56,6 +58,7 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 variable [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
     (p : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p
@@ -121,6 +124,7 @@ private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
   · intro b _ hb; rw [if_neg (Ne.symm hb)]; ring
   · intro hp; exact absurd (Finset.mem_univ p) hp
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (p q c d : Fin (Module.finrank ℝ E)) :
@@ -189,6 +193,7 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
   rw [hL, partialDeriv_testLinearForm x ξ p (extChartAt I x x)]
   rw [hK]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -205,6 +210,7 @@ private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht j l i k,
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht k i l j]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma chartDeTurckCorrPrincipalSymbolExpr_symbolTestPerturbation
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -226,6 +232,7 @@ private lemma chartDeTurckCorrPrincipalSymbolExpr_symbolTestPerturbation
       partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht j b l a,
       partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht j l a b]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem deTurckRicciRHS_test_perturbation_readoff
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -346,6 +353,8 @@ private theorem deTurckRicciRHS_test_perturbation_readoff
   simp only [LinearMap.smul_apply, smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_chartLinearization_and_readoff
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     IsChartLinearizationSecondOrderPart (I := I)
@@ -375,6 +384,8 @@ theorem deTurckRicciRHS_chartLinearization_and_readoff
 
 end ReadOff
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_chartSecondOrderPart_spec [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     IsChartLinearizationSecondOrderPart (I := I)
@@ -393,6 +404,7 @@ theorem deTurckRicciRHS_chartSecondOrderPart_spec [I.Boundaryless]
   rw [DifferentialGeometry.PDE.DeTurck.isotropicSymbol_apply_apply,
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckRicciRHS_principal_symbol_equals_deTurckSymbol
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
@@ -409,6 +421,8 @@ theorem deTurckRicciRHS_principal_symbol_equals_deTurckSymbol
     (I := I) g₀ g_bg x ξ t ht]
   rw [neg_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_hasPrincipalSymbol_at_self [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     HasPrincipalSymbol (I := I)
@@ -421,6 +435,8 @@ theorem deTurckRicciRHS_hasPrincipalSymbol_at_self [I.Boundaryless]
     (deTurckRicciRHS_chartSecondOrderPart_spec (I := I) g₀ g_bg).1,
     (deTurckRicciRHS_chartSecondOrderPart_spec (I := I) g₀ g_bg).2⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_isStrictlyParabolic_at_self [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     IsStrictlyParabolicMetricRHS (I := I)

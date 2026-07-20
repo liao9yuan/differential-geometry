@@ -39,7 +39,7 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem leviCivitaConnectionOfMetric_apply_eq_leviCivita
     (g : Measure.SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x} {x : M} (hσ : MDiffAt (T% σ) x)

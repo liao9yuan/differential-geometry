@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompact
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -87,6 +86,8 @@ private structure D6ChainData
 
 
 
+omit [I.Boundaryless] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem alignedProper
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} (k : ℕ)
     (P : ProperMetricOn (I := I) (X.obj k)) :

@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 lemma eLpNorm_iteratedPartial_succ_le
     (a : Fin (Module.finrank ℝ E)) :
     eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -95,6 +96,7 @@ lemma eLpNorm_iteratedPartial_succ_le
   exact eLpNorm_le_wkpNorm (d := Module.finrank ℝ E) 2 2
     (chartTargetEuclid (I := I) (M := M) α) _
 
+omit [CompleteSpace E] in
 lemma eLpNorm_iteratedPartial_le :
     eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m (Fin.init l)) 2
@@ -123,6 +125,7 @@ lemma eLpNorm_iteratedPartial_le :
   exact eLpNorm_le_wkpNorm (d := Module.finrank ℝ E) 2 2
     (chartTargetEuclid (I := I) (M := M) α) _
 
+omit [CompleteSpace E] in
 lemma eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
     (a b : Fin (Module.finrank ℝ E)) :
     eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
@@ -155,6 +158,7 @@ lemma eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
 
 end AtomBoundsUnconditional
 
+omit [CompleteSpace E] in
 lemma iter_memLp_volume_restrict
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

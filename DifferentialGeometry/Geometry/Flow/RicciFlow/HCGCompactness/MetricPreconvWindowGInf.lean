@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -31,20 +30,22 @@ open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 set_option maxHeartbeats 800000 in
 
 
-theorem metricPreconvFull (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem metricPreconvFull
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (p : Nat)
     (gRef : SmoothRiemannianMetric I M) (gSeq : Nat -> SmoothRiemannianMetric I M)
     (hbdd : forall q : Nat, forall K' : Set M, IsCompact K' -> exists C : Real,
@@ -116,7 +117,10 @@ set_option maxHeartbeats 800000 in
 
 
 
-theorem metricPreconvNorm (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem metricPreconvNorm
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (p : Nat)
     (gRef : SmoothRiemannianMetric I M) (gSeq : Nat -> SmoothRiemannianMetric I M)
     (hbdd : forall q : Nat, forall K' : Set M, IsCompact K' -> exists C : Real,
@@ -183,7 +187,10 @@ theorem metricPreconvNorm (hne : Nonempty M)
 
 
 
-theorem netNormDiag (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem netNormDiag
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (p : Nat)
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M) (e : Nat -> Real)
@@ -235,7 +242,10 @@ theorem netNormDiag (hne : Nonempty M)
 
 
 
-theorem netFullDiag (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem netFullDiag
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (p : Nat)
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M) (e : Nat -> Real)
@@ -297,7 +307,9 @@ theorem netFullDiag (hne : Nonempty M)
   exact ⟨phi, hphi, gNet, fun n => (hgNet n).1, fun n => (hgNet n).2⟩
 
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem normSq0S_neg
+    [Module.Finite ℝ E]
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (T : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) s x) :
@@ -317,7 +329,11 @@ theorem normSq0S_neg
   simp [Tensor0SBundle.component0S_apply]
 
 
+omit [Module.Finite ℝ E] [IsManifold I 1 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_symm
+    [Module.Finite ℝ E]
     (a : Nat) (A B gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a A B gRef x =
       metricDerivNorm (I := I) a B A gRef x := by
@@ -331,7 +347,12 @@ theorem metricDerivNorm_symm
 
 
 
+omit [Module.Finite ℝ E] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem netCauchyAt
+    [Module.Finite ℝ E]
     (K : Set M) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (gNet : Nat -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
@@ -395,7 +416,11 @@ theorem netCauchyAt
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem fullOfSubseq
+    [Module.Finite ℝ E]
     (K : Set M) (p : Nat)
     (gSeq : Nat -> SmoothRiemannianMetric I M)
     (gLim gRef : SmoothRiemannianMetric I M) (psi : Nat -> Nat) (hpsi : StrictMono psi)
@@ -425,7 +450,12 @@ theorem fullOfSubseq
 
 
 
+omit [Module.Finite ℝ E] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem infLipOfConv
+    [Module.Finite ℝ E]
     (K : Set M) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (gInf : Real -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
@@ -470,7 +500,11 @@ theorem infLipOfConv
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem windowOfNet
+    [Module.Finite ℝ E]
     (K : Set M) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (gInf : Real -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
@@ -518,7 +552,10 @@ structure WindowGInfOut
 
 
 
-theorem windowGInf (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem windowGInf
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M)
@@ -616,7 +653,10 @@ theorem windowGInf (hne : Nonempty M)
   exact ⟨phi', hphi', gInf, hwin⟩
 
 
-theorem windowGInfOut (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem windowGInfOut
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M)

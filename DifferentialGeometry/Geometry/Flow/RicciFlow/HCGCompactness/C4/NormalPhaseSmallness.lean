@@ -24,7 +24,7 @@ open scoped Manifold ContDiff NNReal Topology
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -95,6 +95,7 @@ end NormalRadiusProfile
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalPhaseK_zero
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) : normalPhaseK h 0 = 0 := by
@@ -104,6 +105,7 @@ end NormalRadiusProfile
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseK_cont
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) :
@@ -114,6 +116,7 @@ theorem normalPhaseK_cont
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseK_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) :
@@ -124,6 +127,7 @@ theorem normalPhaseK_lim
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseErr_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) :
@@ -133,6 +137,7 @@ theorem normalPhaseErr_lim
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseErr_lt_ev
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -144,6 +149,7 @@ theorem normalPhaseErr_lt_ev
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem exists_normal_q_lt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)

@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open TensorMultilinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -61,6 +61,7 @@ def tensorLeadingPairSlotEvalCLM (s : ℕ) (x : M) (p q : TangentSpace I x) :
   (tensorLeadingSlotEvalCLM (I := I) (M := M) s x q).comp
     (tensorLeadingSlotEvalCLM (I := I) (M := M) (s + 1) x p)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma leadingPairFeedFib_toModel (s : ℕ) (x : M) (p q : TangentSpace I x)
     (G : Tensor0SSpace (s + 2) I x) (v : Fin s → E) :
     Tensor0SSpace.toModel (tensorLeadingPairSlotEvalCLM (I := I) (M := M) s x p q G) v =
@@ -111,16 +112,19 @@ def tensorRank4PermuteCLM (x : M) (σ : Equiv.Perm (Fin 4)) :
         rw [Tensor0SSpace.toModel_smul, domDomCongr4_smul, ofModel4_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotPerm4Fib_apply (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
     tensorRank4PermuteCLM (I := I) (M := M) x σ G =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
         (ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma slotPerm4Fib_toModel (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
     Tensor0SSpace.toModel (tensorRank4PermuteCLM (I := I) (M := M) x σ G) =
       ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G) := by
   rw [slotPerm4Fib_apply, Tensor0SSpace.toModel_ofModel]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem slotPerm4Fib_apply_section_contMDiff (σ : Equiv.Perm (Fin 4))
     (Y : Cₛ^∞⟮I; Tensor0SModel 4 ℝ E, fun x : M => Tensor0SSpace 4 I x⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -171,12 +175,14 @@ def curvatureActionMonomialCLM (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
   tw • ((tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x p q).comp
     (tensorRank4PermuteCLM (I := I) (M := M) x σ))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma curvatureRefoldMonomialFib_apply (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) :
     curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q G =
       tw • (tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x p q)
         (tensorRank4PermuteCLM (I := I) (M := M) x σ G) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q G) v =
@@ -186,6 +192,7 @@ lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fi
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, leadingPairFeedFib_toModel,
     slotPerm4Fib_toModel, ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma curvatureRefoldMonomialFib_zero_weight (x : M) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) :
     curvatureActionMonomialCLM (I := I) (M := M) x 0 σ p q = 0 := by
@@ -200,6 +207,7 @@ def curvatureActionKernelCLM (x : M) (tw : ℝ)
       - curvatureActionMonomialCLM (I := I) (M := M) x tw σ₃ p q
       - curvatureActionMonomialCLM (I := I) (M := M) x tw σ₄ p q)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma curvatureRefoldKernelFib_zero_weight (x : M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
     curvatureActionKernelCLM (I := I) (M := M) x 0 σ₁ σ₂ σ₃ σ₄ p q = 0 := by
@@ -269,6 +277,7 @@ private lemma outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem double_frame_bilin_trace_eq_fixed
     (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -296,6 +305,7 @@ private theorem double_frame_bilin_trace_eq_fixed
   refine Finset.sum_congr rfl (fun n _ => ?_)
   rw [outerPairBilin_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem double_frame_bilin_trace_indep
     (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -338,6 +348,7 @@ private def pairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     pairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -357,6 +368,7 @@ def curvatureActionMonomialFrameTrace (W : Π b : M, Tensor0SSpace 2 I b)
     curvatureActionMonomialCLM (I := I) (M := M) x
       (Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)]) σ (B a x) (B b x)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem curvatureRefoldMonomialFibFixedFrame_toModel (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -377,6 +389,7 @@ theorem curvatureRefoldMonomialFibFixedFrame_toModel (W : Π b : M, Tensor0SSpac
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, curvatureRefoldMonomialFib_toModel]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -497,6 +510,7 @@ def curvatureActionMonomialTrace (g₁ : SmoothRiemannianMetric I M)
   curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
     (smoothOrthoFrame (I := I) g₁ x) x
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
     (g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4)) (x₀ : M) {y : M}
@@ -538,6 +552,7 @@ theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem curvatureRefoldMonomialBiContrFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -593,6 +608,7 @@ def curvatureActionMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
         g₁ W hW σ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] theorem curvatureRefoldMonomialCoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -604,6 +620,7 @@ def curvatureActionMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
         TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M)
           g₁ W σ x)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma curvatureRefoldMonomialBiContrFib_zero_weight (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) {x : M}
     (hx : W x = 0) :
@@ -630,6 +647,7 @@ def curvatureActionKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
       - curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₄)
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞

@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -173,6 +173,7 @@ private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
   have h_half : ε / 2 + ε / 2 = ε := ENNReal.add_halves ε
   exact h_tri.trans (h_sum.trans (le_of_eq h_half))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorL2_diff_sq_le_const_mul_sum_componentDiff_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

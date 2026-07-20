@@ -13,7 +13,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,11 +23,15 @@ def deTurckVF (g g' : SmoothRiemannianMetric I M) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨fun x : M => deTurckFun (I := I) g g' x, deTurckFun_contMDiff_total (I := I) g g'⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem deTurckVF_apply (g g' : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g g' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       deTurckFun (I := I) g g' x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_self (g : SmoothRiemannianMetric I M) :
     deTurckVF (I := I) g g = 0 := by
   ext x
@@ -35,6 +39,8 @@ theorem deTurckVF_self (g : SmoothRiemannianMetric I M) :
   rw [ContMDiffSection.coe_zero]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_apply_eq (g g' : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g g' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),

@@ -11,7 +11,6 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -84,6 +83,8 @@ def RicciTensorRealizesRm04FirstTraceInFrameOnRegular
     DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame
       (I := I) (S.ricci (t : Real)) (Rm04 (t : Real)) (gInv (t : Real)) frame
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem ricciCompInFrame_eq_rm04_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -103,6 +104,7 @@ theorem ricciCompInFrame_eq_rm04_trace
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem metricInverseInBasis_of_solution_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -122,6 +124,7 @@ private theorem metricInverseInBasis_of_solution_frame
       (hinv t x hx i j).2
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_of_local
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -145,6 +148,7 @@ theorem metricInverseInBasis_of_local
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -198,6 +202,7 @@ def ConnectionLocallySmoothOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem connSmoothOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -212,6 +217,7 @@ theorem connSmoothOfSol
 
 
 
+omit [SigmaCompactSpace M] in
 theorem connCurvOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -229,6 +235,7 @@ theorem connCurvOfSol
     (I := I) (S.family.connection s) htop x₀
 
 
+omit [SigmaCompactSpace M] in
 theorem rm13OfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -241,6 +248,7 @@ theorem rm13OfSol
       (metricCurvData (I := I) (M := M) (S.base.metric s)).h_rm13
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciTraceOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -260,6 +268,7 @@ def RicciSymmetricInFrameOnRegular
     ricciCompInFrame (I := I) S frame (t : Real) x i j =
       ricciCompInFrame (I := I) S frame (t : Real) x j i
 
+omit [SigmaCompactSpace M] in
 theorem lcAt_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -415,6 +424,7 @@ theorem rm04InputSkew_regular
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciSymm_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

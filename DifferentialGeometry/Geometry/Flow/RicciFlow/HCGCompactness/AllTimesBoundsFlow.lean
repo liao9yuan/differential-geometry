@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -28,7 +27,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
@@ -38,6 +37,7 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciFlow_metric_hasDerivAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -56,6 +56,8 @@ theorem ricciFlow_metric_hasDerivAt
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 theorem twoTensorQuadBound_of_unit_bound
     (K : Set M) (β ψ A : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -78,6 +80,7 @@ theorem twoTensorQuadBound_of_unit_bound
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_quadFormDiff
     {K : Set M} {g h : SmoothRiemannianMetric I M} {δ : Real}
     (hδ0 : 0 <= δ) (hδ1 : δ < 1)
@@ -108,6 +111,7 @@ theorem metricUniformEquivalentOn_of_quadFormDiff
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricQuadFormDiff_le_metricDerivNorm
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     |gk.inner x v v - gInf.inner x v v|
@@ -152,6 +156,7 @@ theorem metricQuadFormDiff_le_metricDerivNorm
   exact hbound
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
     g.inner x (a + b) (a + b)
@@ -167,6 +172,7 @@ theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_zero_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
@@ -202,6 +208,7 @@ theorem metricDiffCovDerivAt_zero_apply
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDiff_abs_le
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -224,6 +231,7 @@ theorem metricDiff_abs_le
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricDiff_comp_le
     (gk gInf : SmoothRiemannianMetric I M) {C : Real} (hCge : (1 : Real) ≤ C)
     (y : M) {n : ℕ} (basis : Module.Basis (Fin n) Real (TangentSpace I y))
@@ -268,6 +276,7 @@ theorem metricDiff_comp_le
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_le_of_equiv
     (gk gInf : SmoothRiemannianMetric I M) {C : Real} (hCge : (1 : Real) ≤ C)
     (hbounds : ∀ (y : M) (v : TangentSpace I y),
@@ -346,6 +355,7 @@ theorem metricDerivNorm_le_of_equiv
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_metricDerivNorm
     {K : Set M} (gk gInf : SmoothRiemannianMetric I M) {δ : Real}
     (hδ0 : 0 <= δ) (hδ1 : δ < 1)
@@ -371,6 +381,7 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
 
 
 
+omit [CompleteSpace E] in
 theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
     (gRef h : SmoothRiemannianMetric I M) :
     ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
@@ -476,6 +487,7 @@ theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem log_integrable_of_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -531,7 +543,9 @@ variable [SigmaCompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricLogDerivativeInput_of_solutions
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
@@ -563,7 +577,9 @@ theorem metricLogDerivativeInput_of_solutions
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
@@ -603,7 +619,9 @@ theorem metricUniformEquivalentOnWindow_of_solutions
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions'
+    [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))

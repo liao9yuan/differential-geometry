@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -31,6 +30,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsion_free_at_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {x : M}
@@ -49,6 +49,7 @@ theorem torsion_free_at_apply
   exact sub_eq_zero.mp hzero
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsion_free_apply
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (htf : IsTorsionFree (I := I) cov)
@@ -58,6 +59,7 @@ theorem torsion_free_apply
   torsion_free_at_apply (I := I) (htf x) hX hY
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsion_free_family_apply
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
@@ -71,6 +73,7 @@ theorem torsion_free_family_apply
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem coordinate_basis_coord_eq_sum_inv_metric_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -107,6 +110,7 @@ theorem coordinate_basis_coord_eq_sum_inv_metric_inner
     _ = basis.coord a V := by
       simp
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulScalar_coordinateFrame_eq_metric_derivs_of_mem
     (g : SmoothRiemannianMetric I M)
     (x0 : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x0)
@@ -142,6 +146,7 @@ theorem koszulScalar_coordinateFrame_eq_metric_derivs_of_mem
     coordinateFrameAt_bracket_zero_of_mem (I := I) hx j l,
     coordinateFrameAt_bracket_zero_of_mem (I := I) hx l i]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_coordinateFrame_eq_metric_derivs
     (g : SmoothRiemannianMetric I M)
     (x0 : M) (i j l : CoordinateIdx (𝕜 := Real) E) :
@@ -166,6 +171,7 @@ private theorem koszulScalar_coordinateFrame_eq_metric_derivs
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulScalar_coordinateFrame_symm
     (g : SmoothRiemannianMetric I M)
     (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E)
@@ -184,6 +190,7 @@ theorem koszulScalar_coordinateFrame_symm
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordinate_torsion_coeff_eq_christoffel_skew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -205,6 +212,7 @@ theorem coordinate_torsion_coeff_eq_christoffel_skew
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordinate_christoffel_symm_of_torsionFree
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (htf : IsTorsionFree (I := I) cov)
@@ -226,6 +234,7 @@ theorem coordinate_christoffel_symm_of_torsionFree
   exact sub_eq_zero.mp hskew.symm
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g
@@ -252,6 +261,7 @@ theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
     christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) g)
@@ -268,6 +278,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
     (g : SmoothRiemannianMetric I M) (x0 : M)
     (gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
@@ -359,6 +370,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
           rw [koszulScalar_coordinateFrame_eq_metric_derivs (I := I) g x0 i j l]
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero
     (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g).torsion x0
@@ -381,6 +393,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero
   simpa [hframe, hx, IsLocalFrameOn.coeff] using hcoeff
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_isTorsionFree
     (g : SmoothRiemannianMetric I M) :
     IsTorsionFree (I := I) (leviCivitaConnectionOfMetric (I := I) g) := by
@@ -401,6 +414,7 @@ theorem leviCivitaConnectionOfMetric_isTorsionFree
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_isLeviCivita
     (g : SmoothRiemannianMetric I M) :
     IsLeviCivita (I := I) (leviCivitaConnectionOfMetric (I := I) g) g :=

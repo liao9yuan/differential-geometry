@@ -77,6 +77,7 @@ theorem frameSummand_leadingSlot_secondOrder_commutation_orthoFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [SigmaCompactSpace M] in
 theorem frame_cyclic_second_bianchi_orthoFrame
     (g : SmoothRiemannianMetric I M)
     {Z W : Π b : M, TangentSpace I b} {x : M}

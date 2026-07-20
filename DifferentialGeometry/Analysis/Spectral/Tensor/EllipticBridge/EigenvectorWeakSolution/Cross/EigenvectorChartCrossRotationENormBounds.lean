@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,7 @@ section CrossRotationENormBounds
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_indicatorFactor_mul_atom_le
     (g : SmoothRiemannianMetric I M) (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -190,6 +191,7 @@ section CrossRotationENormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_indicatorFactor_mul_atom_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :
@@ -241,6 +243,7 @@ section CrossRotationENormBoundsUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
+omit [CompleteSpace E] in
 theorem eLpNorm_crossLeftLimitComponent_le_uniform
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -260,6 +263,7 @@ theorem eLpNorm_crossLeftLimitComponent_le_uniform
   exact hC_bd (tensorCovGradL2Compl (I := I) (M := M) g r s
     (eigenvectorResolvent (I := I) (M := M) g r s i))
 
+omit [CompleteSpace E] in
 theorem eLpNorm_crossRightLimitComponent_le_uniform
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -279,6 +283,7 @@ theorem eLpNorm_crossRightLimitComponent_le_uniform
   exact hC_bd (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
     (eigenvectorResolvent (I := I) (M := M) g r s i))
 
+omit [CompleteSpace E] in
 private lemma partialLpLimit_ae_zero_off_chartPouKernel_weighted
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
@@ -338,6 +343,7 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel_weighted
   filter_upwards [h_smul_w, h_weak_w] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
+omit [CompleteSpace E] in
 private lemma partialLpLimit_memLp_weighted
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
@@ -394,6 +400,7 @@ private lemma partialLpLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     h_atom_zero h_plain
 
+omit [CompleteSpace E] in
 theorem eLpNorm_covPrincipalRotationCoeffLimit_le_uniform
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧

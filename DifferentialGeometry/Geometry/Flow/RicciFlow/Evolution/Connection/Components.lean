@@ -15,7 +15,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -37,7 +36,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -78,6 +77,7 @@ def christoffelEvolutionRHSInFrame
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelRHS_id
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -107,6 +107,7 @@ def christoffelVariationRHSFromLoweredInFrame
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * loweredRHS t x i j l
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem christoffelEvolutionRHSInFrame_eq_coordinates_rhs
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -169,6 +170,8 @@ def connectionDiffLoweredInFrame
     (connectionDiffVectorInFrame (I := I) S frame base var x i j)
     (frame l x)
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem connectionDiffVectorInFrame_self
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -177,6 +180,8 @@ def connectionDiffLoweredInFrame
     connectionDiffVectorInFrame (I := I) S frame base base x i j = 0 := by
   simp [connectionDiffVectorInFrame]
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem connectionDiffLoweredInFrame_self
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -213,6 +218,7 @@ def finiteDifferenceKoszulRHSInFrame
     metricCovDerivCompInFrameAtBase (I := I) S frame base var x j i l -
       metricCovDerivCompInFrameAtBase (I := I) S frame base var x l i j
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 private theorem localFrame_mdiffAt
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -220,6 +226,8 @@ private theorem localFrame_mdiffAt
     MDiffAt (T% (frame i)) x :=
   (hframe.contMDiffAt hu hx i).mdifferentiableAt one_ne_zero
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 private theorem connectionDiffVectorInFrame_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -263,6 +271,8 @@ private theorem connectionDiffVectorInFrame_symm
     _ = 0 := by
         rw [hdiff, sub_self]
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 private theorem connectionDiffLoweredInFrame_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -281,6 +291,8 @@ private theorem connectionDiffLoweredInFrame_symm
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -321,6 +333,8 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem finiteDifferenceKoszulInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -569,6 +583,7 @@ structure Nabla2RicciComponentsRegularInFrameOnLocal
     Nabla2RicciComponentsByConnectionInFrameOn
       (I := I) S frame u hframe nablaRic nabla2Ric
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :
     MetricCovDerivDerivativeIsRicciFlowInFrame
@@ -579,6 +594,9 @@ theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
 
 
 
+omit [DecidableEq Idx] in
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivOfMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -713,6 +731,7 @@ theorem metricCovDerivOfMix
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivDerivativeComponents_of_ricciFlow
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -811,6 +830,8 @@ theorem metricCovDerivDerivativeComponents_of_ricciFlow
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

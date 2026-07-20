@@ -4,7 +4,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -23,7 +22,7 @@ open scoped Manifold Topology ContDiff ENNReal Matrix BigOperators
 namespace DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -60,7 +59,7 @@ theorem injective_of_ball_ne_zero (L : E →L[ℝ] F) {r : ℝ} (hr : 0 < r)
 end LinearAlgebra
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -74,6 +73,7 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem mfderiv_exp_injective_of_jacobi
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) {r : ℝ} (hr : 0 < r)

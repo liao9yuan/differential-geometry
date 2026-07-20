@@ -15,7 +15,7 @@ namespace Geometry
 namespace Riemannian
 namespace Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,16 +26,16 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 def chartCoord (i : Fin (Module.finrank ℝ E)) (v : E) : ℝ :=
   (chartModelBasis E).repr v i
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartCoord_def (i : Fin (Module.finrank ℝ E)) (v : E) :
     chartCoord (E := E) i v = (chartModelBasis E).repr v i := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_smul (i : Fin (Module.finrank ℝ E)) (a : ℝ) (v : E) :
     chartCoord (E := E) i (a • v) = a * chartCoord (E := E) i v := by
   simp [chartCoord, map_smul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_zero (i : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) i (0 : E) = 0 := by
   simp [chartCoord]
@@ -48,7 +48,7 @@ def chartChristoffelContraction (g : SmoothRiemannianMetric I M) (α : M)
           chartCoord (E := E) i v * chartCoord (E := E) j w) •
       chartModelBasis E k
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartChristoffelContraction_def
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α v w y =
@@ -58,6 +58,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               chartCoord (E := E) i v * chartCoord (E := E) j w) •
           chartModelBasis E k := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_symm
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α v w y =
@@ -75,7 +76,7 @@ lemma chartChristoffelContraction_symm
   rw [chartChristoffel_symm (I := I) g α j i k y]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_zero_left
     (g : SmoothRiemannianMetric I M) (α : M) (w : E) (y : E) :
     chartChristoffelContraction (I := I) g α (0 : E) w y = 0 := by
@@ -93,7 +94,7 @@ lemma chartChristoffelContraction_zero_left
     simp
   rw [this, zero_smul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_smul_smul
     (g : SmoothRiemannianMetric I M) (α : M) (a : ℝ) (v : E) (y : E) :
     chartChristoffelContraction (I := I) g α (a • v) (a • v) y =
@@ -124,7 +125,7 @@ lemma chartChristoffelContraction_smul_smul
         intro j _
         ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_neg
     (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) :
     chartChristoffelContraction (I := I) g α (-v) (-v) y =
@@ -138,26 +139,26 @@ def geodesicVectorField (g : SmoothRiemannianMetric I M)
   (p.2, - chartChristoffelContraction (I := I) g p.proj p.2 p.2
       (extChartAt I p.proj p.proj))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma geodesicVectorField_def
     (g : SmoothRiemannianMetric I M) (p : TangentBundle I M) :
     geodesicVectorField (I := I) g p =
       (p.2, - chartChristoffelContraction (I := I) g p.proj p.2 p.2
           (extChartAt I p.proj p.proj)) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma geodesicVectorField_fst
     (g : SmoothRiemannianMetric I M) (p : TangentBundle I M) :
     (geodesicVectorField (I := I) g p).1 = p.2 := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma geodesicVectorField_snd
     (g : SmoothRiemannianMetric I M) (p : TangentBundle I M) :
     (geodesicVectorField (I := I) g p).2 =
       - chartChristoffelContraction (I := I) g p.proj p.2 p.2
           (extChartAt I p.proj p.proj) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma geodesicVectorField_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) :
     geodesicVectorField (I := I) g (⟨α, (0 : E)⟩ : TangentBundle I M) =
@@ -170,7 +171,7 @@ lemma geodesicVectorField_zero_section
 def chartLocalCurve (γ : ℝ → M) (t : ℝ) : ℝ → E :=
   fun s => extChartAt I (γ t) (γ s)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartLocalCurve_def (γ : ℝ → M) (t s : ℝ) :
     chartLocalCurve (I := I) γ t s = extChartAt I (γ t) (γ s) := rfl
 
@@ -187,7 +188,7 @@ def HasGeodesicEquationAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
 def chartFiberCoord (α : M) (p : TangentBundle I M) : E :=
   (trivializationAt E (TangentSpace I) α p).2
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFiberCoord_def (α : M) (p : TangentBundle I M) :
     chartFiberCoord (I := I) α p =
       (trivializationAt E (TangentSpace I) α p).2 := rfl
@@ -198,7 +199,7 @@ def geodesicVectorFieldChartFiber (g : SmoothRiemannianMetric I M) (α : M)
   (v, - chartChristoffelContraction (I := I) g α v v
     (extChartAt I α p.proj))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma geodesicVectorFieldChartFiber_def
     (g : SmoothRiemannianMetric I M) (α : M) (p : TangentBundle I M) :
     geodesicVectorFieldChartFiber (I := I) g α p =
@@ -215,22 +216,22 @@ def geodesicVectorFieldChart (g : SmoothRiemannianMetric I M) (α : M)
 def geodesicChartDomain (α : M) : Set (TangentBundle I M) :=
   (Bundle.TotalSpace.proj : TangentBundle I M → M) ⁻¹' (chartAt H α).source
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma geodesicChartDomain_isOpen (α : M) :
     IsOpen (geodesicChartDomain (I := I) (M := M) α) :=
   (chartAt H α).open_source.preimage (FiberBundle.continuous_proj E (TangentSpace I))
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma mem_geodesicChartDomain_of_proj {α : M} {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) : p ∈ geodesicChartDomain (I := I) α :=
   hp
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma proj_mem_chartAt_source_of_mem_geodesicChartDomain {α : M}
     {p : TangentBundle I M} (hp : p ∈ geodesicChartDomain (I := I) α) :
     p.proj ∈ (chartAt H α).source := hp
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma geodesicChartDomain_eq_trivBaseSet (α : M) :
     geodesicChartDomain (I := I) α =
       (trivializationAt (E × E) (TangentSpace I.tangent)
@@ -244,7 +245,7 @@ lemma geodesicChartDomain_eq_trivBaseSet (α : M) :
   exact (TangentBundle.mem_chart_source_iff (I := I) (M := M) p
     (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartFiberCoord_self_zero (α : M) :
     chartFiberCoord (I := I) α
       (⟨α, (0 : E)⟩ : TangentBundle I M) = 0 := by
@@ -258,7 +259,7 @@ lemma chartFiberCoord_self_zero (α : M) :
       (⟨α, (0 : TangentSpace I α)⟩ : TangentBundle I M)).2 = 0
   rw [hzero']
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma geodesicVectorFieldChart_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) :
     geodesicVectorFieldChart (I := I) g α
@@ -297,7 +298,7 @@ def IsGeodesicAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
 def IsGeodesic (g : SmoothRiemannianMetric I M) (γ : ℝ → M) : Prop :=
   ∀ t : ℝ, HasGeodesicEquationAt (I := I) g γ t
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesic.hasGeodesicEquationAt {g : SmoothRiemannianMetric I M}
     {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (t : ℝ) :
     HasGeodesicEquationAt (I := I) g γ t :=
@@ -307,27 +308,27 @@ def IsGeodesicOn (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (s : Set ℝ) : Prop :=
   ∀ t ∈ s, HasGeodesicEquationAt (I := I) g γ t
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOn.hasGeodesicEquationAt {g : SmoothRiemannianMetric I M}
     {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hγ : IsGeodesicOn (I := I) g γ s) (ht : t ∈ s) :
     HasGeodesicEquationAt (I := I) g γ t :=
   hγ t ht
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOn.mono {g : SmoothRiemannianMetric I M}
     {γ : ℝ → M} {s s' : Set ℝ}
     (hγ : IsGeodesicOn (I := I) g γ s) (hs : s' ⊆ s) :
     IsGeodesicOn (I := I) g γ s' :=
   fun t ht => hγ t (hs ht)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesic.isGeodesicOn {g : SmoothRiemannianMetric I M}
     {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (s : Set ℝ) :
     IsGeodesicOn (I := I) g γ s :=
   fun t _ => hγ t
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesic_const (g : SmoothRiemannianMetric I M) (p : M) :
     IsGeodesic (I := I) g (fun _ : ℝ => p) := by
   classical
@@ -348,7 +349,7 @@ theorem isGeodesic_const (g : SmoothRiemannianMetric I M) (p : M) :
   · rw [chartChristoffelContraction_zero_left]
     simp
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem IsGeodesicAt.const (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
     IsGeodesicAt (I := I) g (fun _ : ℝ => p) t := by
   classical
@@ -357,7 +358,7 @@ theorem IsGeodesicAt.const (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
   refine (isMIntegralCurve_const ?_).isMIntegralCurveAt t
   exact geodesicVectorFieldChart_zero_section (I := I) g p
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesic_comp_add
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (b : ℝ) :
@@ -395,12 +396,12 @@ theorem isGeodesic_comp_add
     exact ha.comp_add_const t b
   · exact hgeo
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma chartLocalCurve_comp_neg (γ : ℝ → M) (τ : ℝ) :
     chartLocalCurve (I := I) (fun s => γ (-s)) τ =
       (fun s => chartLocalCurve (I := I) γ (-τ) (-s)) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasGeodesicEquationAt_comp_neg
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {τ : ℝ}
     (hγ : HasGeodesicEquationAt (I := I) g γ (-τ)) :
@@ -435,7 +436,7 @@ theorem hasGeodesicEquationAt_comp_neg
   · rw [chartChristoffelContraction_neg (I := I) g _ v]
     exact hgeo
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesic_comp_neg
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) :
@@ -443,7 +444,7 @@ theorem isGeodesic_comp_neg
   intro τ
   exact hasGeodesicEquationAt_comp_neg (I := I) (hγ (-τ))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_comp_neg
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
     (hγ : IsGeodesicOn (I := I) g γ s) :
@@ -455,6 +456,7 @@ theorem isGeodesicOn_comp_neg
 
 
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma chartLocalCurve_comp_affine (γ : ℝ → M) (c d t : ℝ) :
     chartLocalCurve (I := I) (fun s => γ (c * s + d)) t =
       (fun s => chartLocalCurve (I := I) γ (c * t + d) (c * s + d)) := rfl
@@ -466,6 +468,7 @@ lemma chartLocalCurve_comp_affine (γ : ℝ → M) (c d t : ℝ) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasGeodesicEquationAt_comp_affine
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {c d t : ℝ}
     (hγ : HasGeodesicEquationAt (I := I) g γ (c * t + d)) :
@@ -510,6 +513,7 @@ theorem hasGeodesicEquationAt_comp_affine
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_comp_affine
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ} {c d : ℝ}
     (hγ : IsGeodesicOn (I := I) g γ s) :
@@ -521,13 +525,13 @@ section ChartFixedSmoothness
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma trivializationAt_source_eq (α : M) :
     (trivializationAt E (TangentSpace I) α).source =
       geodesicChartDomain (I := I) (M := M) α := by
   rw [Trivialization.source_eq]; rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartFiberCoord_contMDiffOn (α : M) :
     ContMDiffOn I.tangent 𝓘(ℝ, E) ∞
       (chartFiberCoord (I := I) (α := α)) (geodesicChartDomain (I := I) α) := by
@@ -546,13 +550,13 @@ lemma chartFiberCoord_contMDiffOn (α : M) :
       (geodesicChartDomain (I := I) α) := contMDiffOn_id
   exact (hiff.mp hid).2
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma proj_contMDiffOn (s : Set (TangentBundle I M)) :
     ContMDiffOn I.tangent I ∞
       (Bundle.TotalSpace.proj : TangentBundle I M → M) s :=
   (Bundle.contMDiff_proj (TangentSpace I) (n := (∞ : WithTop ℕ∞))).contMDiffOn
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma extChartAt_proj_contMDiffOn (α : M) :
     ContMDiffOn I.tangent 𝓘(ℝ, E) ∞
       (fun p : TangentBundle I M => extChartAt I α p.proj)
@@ -569,6 +573,7 @@ lemma extChartAt_proj_contMDiffOn (α : M) :
     fun _ hp => hp
   exact hchart.comp hproj hsubset
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffel_extChartAt_proj_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -597,6 +602,7 @@ lemma chartChristoffel_extChartAt_proj_contMDiffOn
   have := (hΓ_at.contMDiffAt).comp_contMDiffWithinAt p hbase
   exact this
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_scalarCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -636,6 +642,7 @@ lemma chartChristoffelContraction_scalarCoeff_contMDiffOn
     exact (hCLM_j.contMDiffAt).comp_contMDiffWithinAt _ (hv p hp)
   exact (hΓ.mul hci).mul hcj
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffelContraction_chartFiber_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I.tangent 𝓘(ℝ, E) ∞
@@ -654,6 +661,7 @@ lemma chartChristoffelContraction_chartFiber_contMDiffOn
       (geodesicChartDomain (I := I) α) := contMDiffOn_const
   exact hscalar.smul hconst
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma geodesicVectorFieldChartFiber_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I.tangent 𝓘(ℝ, E × E) ∞
@@ -686,7 +694,7 @@ private instance trivializationAt_tangent_tangent_isAtlas (α : M) :
         (⟨α, (0 : E)⟩ : TangentBundle I M)) :=
   ⟨FiberBundle.trivialization_mem_atlas (E × E) (TangentSpace I.tangent) _⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma trivializationAt_apply_geodesicVectorFieldChart
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M} (hp : p ∈ geodesicChartDomain (I := I) α) :
@@ -702,6 +710,7 @@ lemma trivializationAt_apply_geodesicVectorFieldChart
     (⟨α, (0 : E)⟩ : TangentBundle I M)).apply_mk_symm hp'
       (geodesicVectorFieldChartFiber (I := I) g α p)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesicVectorFieldChart_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I.tangent I.tangent.tangent ∞
@@ -741,6 +750,7 @@ theorem geodesicVectorFieldChart_contMDiffOn
       geodesicVectorFieldChartFiber_contMDiffOn (I := I) g α
     exact hsmooth.congr heq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesicVectorFieldChart_contMDiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {p₀ : TangentBundle I M}

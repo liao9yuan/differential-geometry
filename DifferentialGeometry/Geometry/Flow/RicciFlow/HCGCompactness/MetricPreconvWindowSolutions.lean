@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -26,13 +25,12 @@ open DifferentialGeometry.PDE.RicciFlow
 noncomputable section
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
@@ -158,7 +156,9 @@ inductive WindowMetricPreconvConclusion : Type _ where
       (gRef : SmoothRiemannianMetric I M)
       (out : WindowGInfOut (E := E) (H := H) (I := I) (M := M) K beta psiT p gSeq gRef)
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private lemma metricTensorField_eq_metricTensor0S
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.metricTensorField (I := I) g x =
       metricTensor0S (I := I) g x := by
@@ -166,7 +166,10 @@ private lemma metricTensorField_eq_metricTensor0S
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem covZeroBdd
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -214,7 +217,9 @@ theorem covZeroBdd
   exact le_trans hcomp (by rw [hself])
 
 
+omit [Module.Finite ℝ E] in
 theorem covBddAllSol
+    [Module.Finite ℝ E]
     {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -248,7 +253,11 @@ theorem covBddAllSol
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem hgLip0Sol
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -314,7 +323,11 @@ theorem hgLip0Sol
     s hs t ht x hx
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem hgLipFinSol
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real} {p : Nat}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -400,7 +413,10 @@ theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
 
 
 
-theorem winGInfOfSol (hne : Nonempty M)
+omit [Module.Finite ℝ E] in
+theorem winGInfOfSol
+    [Module.Finite ℝ E]
+    (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT t0 : Real) (hbeta : beta <= psiT)
     (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)

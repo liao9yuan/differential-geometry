@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,6 +69,8 @@ def cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   toSection := cometricRaiseSlot0FieldSection (I := I) (M := M) g₀ s S
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma cometricRaiseSlot0Field_toSection (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     (cometricRaiseSlot0Field (I := I) (M := M) g₀ s S).toSection x =
@@ -94,6 +96,8 @@ noncomputable def koszulCovecCc (g₀ : SmoothRiemannianMetric I M)
         - domDomCongrSection (I := I) g₀ (Equiv.swap (1 : Fin 3) 2)
           (symmSCovGrad3 (I := I) g₀ T))
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ T) x ![c, a, b] =

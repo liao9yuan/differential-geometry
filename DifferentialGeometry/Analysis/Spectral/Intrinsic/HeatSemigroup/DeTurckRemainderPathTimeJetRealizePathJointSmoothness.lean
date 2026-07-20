@@ -29,7 +29,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,6 +123,7 @@ private theorem contMDiffWithinAt_curriedSection_prod_full {n : ℕ}
           (fun y : M => Tensor0SBundle.Tensor0SSpace (n + 1) I y) p₀.1 ⟨p₀.1, T p₀⟩).2)
     exact hpt
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem contMDiffWithinAt_section_apply_prod_full : ∀ (n : ℕ)
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace n I p.1)
@@ -218,6 +219,7 @@ private theorem contMDiffWithinAt_section_apply_prod_full : ∀ (n : ℕ)
       · simp [Fin.cons_zero]
       · intro k; simp [Fin.cons_succ]
 
+omit [CompactSpace M] in
 theorem deTurckRHSField_realizePath_jointContMDiffOn
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ}
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -487,6 +489,7 @@ theorem chartTensorInnerPointwise_0s_jointContMDiffOn_smooth_args
           rw [heq']
           exact hS ψ'
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem loweredCompose_zero_basis_eval_jointContMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) {T : ℝ}
     (Tval : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace 2 I p.1)

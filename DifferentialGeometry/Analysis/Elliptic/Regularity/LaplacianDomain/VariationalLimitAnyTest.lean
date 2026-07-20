@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainVariationalLimitGeneral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -218,6 +218,7 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
   rw [h_lap_v_eq]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibniz_smoothCase_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((leibnizCompensatedSource (I := I) (M := M) g α
@@ -320,6 +321,7 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
   rw [smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[

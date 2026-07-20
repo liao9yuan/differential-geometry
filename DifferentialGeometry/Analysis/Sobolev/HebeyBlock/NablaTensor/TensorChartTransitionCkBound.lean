@@ -43,6 +43,7 @@ omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Bo
         (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source :=
   Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
     IsOpen (chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β) := by
   classical
@@ -124,6 +125,7 @@ lemma transitionCoeffOnEuclid_contDiffOn
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
 set_option maxHeartbeats 800000 in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact
     (r s k : ℕ) (α β : M)
     {K_E : Set EuclN} (hK_compact : IsCompact K_E)
@@ -228,6 +230,7 @@ theorem tensorChartTransition_Ck_bound_on_compact
 
 set_option maxHeartbeats 800000 in
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact_manifold
     (r s k : ℕ) (α β : M)
     {K_M : Set M} (hK_compact : IsCompact K_M)

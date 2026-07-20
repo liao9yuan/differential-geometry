@@ -329,6 +329,7 @@ private theorem rawConnLap_innerWith_sqrt_finrank_bound
         exact mul_le_mul_of_nonneg_right hsqrt_bound (Real.sqrt_nonneg _)
     _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt aw * Real.sqrt cw := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem prependCovGradSlot_fiberNormSq_frame_sum
     (g : SmoothRiemannianMetric I M) (t : ℕ) (ζ : C^∞⟮I, M; ℝ⟯)
     (S : Integral.L2.SmoothCcTensor g 0 t) (x : M) :
@@ -381,6 +382,7 @@ private theorem prependCovGradSlot_fiberNormSq_frame_sum
   rw [he_def]
   ring
 
+omit [CompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner
     (g : SmoothRiemannianMetric I M) (p : ℕ)
     (Q : Integral.L2.SmoothCcTensor g 0 p) (x : M) (v : TangentSpace I x) :
@@ -1149,6 +1151,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
 
 set_option maxHeartbeats 1200000 in
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem weightedCovIBP_lpFiberJet_fin_regLimit
     (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
     (w : Integral.L2.SmoothCcTensor g 0 m) :

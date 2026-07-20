@@ -72,7 +72,6 @@ import Mathlib.LinearAlgebra.Trace
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSimpArgs false
@@ -112,7 +111,7 @@ open scoped Manifold ContDiff Topology BigOperators
 
 variable {K : Type*} [NontriviallyNormedField K] [CompleteSpace K]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace K E]
-variable [Module.Finite K E] [FiniteDimensional K E]
+variable [FiniteDimensional K E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners K E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -164,6 +163,7 @@ theorem component13_apply
     · simp [h0, h1]
 
 
+omit [CompleteSpace K] [FiniteDimensional K E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component02_apply
     (A : Tensor0SSpace 2 I x) (i j : Idx) :
@@ -176,6 +176,7 @@ theorem component02_apply
   by_cases h0 : q = 0 <;> simp [h0]
 
 
+omit [CompleteSpace K] [FiniteDimensional K E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component04_apply
     (A : Tensor0SSpace 4 I x) (i j k l : Idx) :

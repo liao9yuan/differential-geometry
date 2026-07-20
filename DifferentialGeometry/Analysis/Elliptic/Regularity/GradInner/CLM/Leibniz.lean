@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerCLMLeibniz
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,12 +45,14 @@ noncomputable def gradRhoSqSmooth
     normGradSqFun_contMDiff (I := I) g ρα.contMDiff⟩
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradRhoSqSmooth_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
     (gradRhoSqSmooth (I := I) (M := M) g ρα : M → ℝ) x =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g ρα x) := rfl
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInner_leibniz_pointwise
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -69,6 +71,7 @@ lemma gradInner_leibniz_pointwise
   simp only [smul_eq_mul, gradRhoSqSmooth_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInner_leibniz_smooth_Lp
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulLp (I := I) (M := M) g ρα
@@ -139,6 +142,7 @@ noncomputable def leibnizLhsCLM
   (smoothMulLp (I := I) (M := M) g ρα).comp
     (gradInnerCLM (I := I) (M := M) g ρα)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma leibnizLhsCLM_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     leibnizLhsCLM (I := I) (M := M) g ρα u_h =
@@ -154,6 +158,7 @@ noncomputable def leibnizRhsCLM
     (gradRhoSqSmooth (I := I) (M := M) g ρα)).comp
     (H1ComplToLp (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma leibnizRhsCLM_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     leibnizRhsCLM (I := I) (M := M) g ρα u_h =
@@ -165,6 +170,7 @@ noncomputable def leibnizRhsCLM
   unfold leibnizRhsCLM
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma leibnizCLM_agree_on_smooth
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     leibnizLhsCLM (I := I) (M := M) g ρα
@@ -188,6 +194,7 @@ private lemma denseRange_smoothToH1Compl_aux
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem leibnizLhsCLM_eq_leibnizRhsCLM
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     leibnizLhsCLM (I := I) (M := M) g ρα =
@@ -215,6 +222,7 @@ theorem leibnizLhsCLM_eq_leibnizRhsCLM
     exact h_eq_on_range v
   exact congr_fun h_eq_funs u_h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInner_leibniz_H1Compl
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     smoothMulLp (I := I) (M := M) g ρα
@@ -229,10 +237,9 @@ theorem gradInner_leibniz_H1Compl
   rw [leibnizLhsCLM_apply, leibnizRhsCLM_apply] at h
   exact h
 
-variable [NeZero (Module.finrank ℝ E)]
-
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawLpFromLp_coeFn_sub
-    (g : SmoothRiemannianMetric I M) (α : M)
+    (g : SmoothRiemannianMetric I M) (_h : NeZero (Module.finrank ℝ E)) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     ((chartPushedRawLpFromLp (I := I) (M := M) g α (F - G) :
         Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -244,7 +251,8 @@ lemma chartPushedRawLpFromLp_coeFn_sub
           (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y -
         ((chartPushedRawLpFromLp (I := I) (M := M) g α G :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+          (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+  letI := _h
   classical
   have h_FG_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α (F - G)
   have h_F_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α F
@@ -291,8 +299,10 @@ lemma chartPushedRawLpFromLp_coeFn_sub
   rw [hy_FG, hy_chart, h_chartPushedRaw_diff_pointwise y]
   rw [← hy_F, ← hy_G]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
-    (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
+    (g : SmoothRiemannianMetric I M) (_h : NeZero (Module.finrank ℝ E))
+    (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     ((chartPushedRawLpFromLp (I := I) (M := M) g α
         (smoothMulLp (I := I) (M := M) g φ F) :
@@ -305,6 +315,7 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
         ((chartPushedRawLpFromLp (I := I) (M := M) g α F :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+  letI := _h
   classical
   have h_smoothMulLp_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α
     (smoothMulLp (I := I) (M := M) g φ F)
@@ -356,8 +367,10 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
   rw [hy_smoothMul, hy_chart, h_pointwise y]
   rw [← hy_F]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
-    (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
+    (g : SmoothRiemannianMetric I M) (_h : NeZero (Module.finrank ℝ E))
+    (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
     ((chartPushedRawLpFromLp (I := I) (M := M) g α
         (smoothMulLp (I := I) (M := M) g ρα
@@ -377,26 +390,29 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
         ((chartPushedRawLpFromLp (I := I) (M := M) g α
           (H1ComplToLp (I := I) (M := M) g u_h) :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+          (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+  letI := _h
   classical
   have h_M_eq := gradInner_leibniz_H1Compl (I := I) (M := M) g ρα u_h
   rw [h_M_eq]
   have h_sub_chartPushed := chartPushedRawLpFromLp_coeFn_sub
-    (I := I) (M := M) g α
+    (I := I) (M := M) g inferInstance α
     (gradInnerCLM (I := I) (M := M) g ρα
       (smoothMulH1Compl (I := I) (M := M) g ρα u_h))
     (smoothMulLp (I := I) (M := M) g
       (gradRhoSqSmooth (I := I) (M := M) g ρα)
       (H1ComplToLp (I := I) (M := M) g u_h))
   have h_smoothMul_chartPushed := chartPushedRawLpFromLp_smoothMulLp_coeFn
-    (I := I) (M := M) g α (gradRhoSqSmooth (I := I) (M := M) g ρα)
+    (I := I) (M := M) g inferInstance α (gradRhoSqSmooth (I := I) (M := M) g ρα)
     (H1ComplToLp (I := I) (M := M) g u_h)
   filter_upwards [h_sub_chartPushed, h_smoothMul_chartPushed]
     with y hy_sub hy_smooth
   rw [hy_sub, hy_smooth]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
-    (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
+    (g : SmoothRiemannianMetric I M) (_h : NeZero (Module.finrank ℝ E))
+    (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     ((chartPushedRawLpFromLp (I := I) (M := M) g α
         (smoothMulLp (I := I) (M := M) g ρα
@@ -416,10 +432,12 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
         ((chartPushedRawLpFromLp (I := I) (M := M) g α
           (smoothToLp (I := I) (M := M) g v) :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+          (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
+  letI := _h
   classical
   have h_gen := chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
-    (I := I) (M := M) g α ρα (smoothToH1Compl (I := I) (M := M) g v)
+    (I := I) (M := M) g inferInstance α ρα
+      (smoothToH1Compl (I := I) (M := M) g v)
   have h_grad_smooth : gradInnerCLM (I := I) (M := M) g ρα
         (smoothToH1Compl (I := I) (M := M) g v) =
       gradInnerSmooth (I := I) (M := M) g ρα v :=

@@ -18,7 +18,7 @@ namespace HCGCompactness
 
 open scoped ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [CompleteSpace E] [FiniteDimensional Real E]
 
 

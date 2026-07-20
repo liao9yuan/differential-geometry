@@ -164,6 +164,8 @@ theorem realize_eval_carrier_factorization
   exact (ccTensorBilinSymm_hasSum_eigenRealizeEval
     (I := I) (M := M) g_bg a ha T_z x v w).tsum_eq
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem pointwise_deriv_through_realize
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)

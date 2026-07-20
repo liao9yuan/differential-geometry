@@ -59,7 +59,6 @@ namespace Tensor0SBundle
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -189,6 +188,7 @@ noncomputable def constInChart (s : ℕ) (x₀ : M)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem trivializationAt_apply (s : ℕ)
     (_hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -206,6 +206,7 @@ theorem trivializationAt_apply (s : ℕ)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem continuousLinearEquivAt_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -224,6 +225,7 @@ theorem continuousLinearEquivAt_apply (s : ℕ)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem continuousLinearMapAt_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : Tensor0SSpace s I x) (v : Fin s → E) :
@@ -244,6 +246,7 @@ theorem continuousLinearMapAt_apply (s : ℕ)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem constInChart_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (β : Tensor0SModel s 𝕜 E) (v : Fin s → TangentSpace I x) :
@@ -273,6 +276,7 @@ namespace TensorRSSpace
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem trivializationAt_apply (r s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (T : TensorRSSpace r s I x) (β : Tensor0SModel r 𝕜 E) (v : Fin s → E) :

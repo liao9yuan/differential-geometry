@@ -19,7 +19,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,6 +32,7 @@ section ChartTargetInterior
 
 variable [I.Boundaryless]
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma extChartAt_self_mem_interior_target (p : M) :
     extChartAt I p p ∈ interior (extChartAt I p).target := by
   have hsrc : p ∈ (extChartAt I p).source :=
@@ -46,6 +47,7 @@ section ZeroSectionWitness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlow_combined_witness
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -116,6 +118,7 @@ section ReductionToMatch
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem hasChartFlowGeodesicMatchData_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match t' ρ' : ℝ),
@@ -167,6 +170,8 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : HasChartFlowGeodesicMatchData (I := I) g p) :

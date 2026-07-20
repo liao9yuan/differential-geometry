@@ -13,7 +13,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -22,7 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricci_identity_vector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y V : Π b : M, TangentSpace I b) (x : M) :
@@ -38,6 +38,7 @@ private noncomputable def iterCotangentCov
   ((cotangentCov cov).toFun
     (fun b : M => (cotangentCov cov).toFun θ b (Y b)) x (X x)) (W x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricci_identity_oneForm
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -258,7 +259,7 @@ noncomputable def localConnLap_vector
     (cov.toFun (covApply cov (B i) V) x (B i x) -
       cov.toFun V x (cov.toFun (B i) x (B i x)))
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma localConnLap_vector_def
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -268,6 +269,8 @@ lemma localConnLap_vector_def
         (cov.toFun (covApply cov (B i) V) x (B i x) -
           cov.toFun V x (cov.toFun (B i) x (B i x))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_gradFun_eq_frame_sum_riemannSec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -297,6 +300,8 @@ noncomputable def ricciSharpVec
     TangentSpace I x :=
   metricSharp (I := I) g x ((ricciTensor (I := I) g x v).toLinearMap)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricciSharpVec
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -304,6 +309,8 @@ lemma inner_ricciSharpVec
   unfold ricciSharpVec
   exact inner_metricSharp (I := I) g x ((ricciTensor (I := I) g x v).toLinearMap) w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricciSharpVec_right
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -311,6 +318,8 @@ lemma inner_ricciSharpVec_right
   rw [g.symm x w (ricciSharpVec (I := I) g x v)]
   exact inner_ricciSharpVec (I := I) g x v w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciSharpVec_unique
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)
     {W : TangentSpace I x}
@@ -323,6 +332,8 @@ lemma ricciSharpVec_unique
   rw [hW w]
   exact (inner_ricciSharpVec (I := I) g x v w).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciSharpVec_add
     (g : SmoothRiemannianMetric I M) (x : M) (v v' : TangentSpace I x) :
     ricciSharpVec (I := I) g x (v + v') =
@@ -340,6 +351,8 @@ lemma ricciSharpVec_add
         ricciTensor (I := I) g x v w + ricciTensor (I := I) g x v' w from by
       rw [map_add, ContinuousLinearMap.add_apply]]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciSharpVec_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     ricciSharpVec (I := I) g x (c • v) = c • ricciSharpVec (I := I) g x v := by
@@ -365,10 +378,14 @@ noncomputable def ricciSharp
       map_smul' := fun c v => by
         simpa using ricciSharpVec_smul (I := I) g x c v }
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciSharp_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     ricciSharp (I := I) g x v = ricciSharpVec (I := I) g x v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_ricciSharp
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -376,6 +393,8 @@ theorem inner_ricciSharp
   rw [ricciSharp_apply]
   exact inner_ricciSharpVec (I := I) g x v w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_ricciSharp_right
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -383,6 +402,8 @@ theorem inner_ricciSharp_right
   rw [ricciSharp_apply]
   exact inner_ricciSharpVec_right (I := I) g x v w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -439,6 +460,8 @@ theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
   rw [hkey]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_cov_gradFun_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -457,6 +480,8 @@ theorem inner_cov_gradFun_symm [I.Boundaryless]
       exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
     simpa using h1)) (X x) (Y x)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_cov_gradFun_symm_globally [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -470,6 +495,8 @@ theorem inner_cov_gradFun_symm_globally [I.Boundaryless]
   funext b
   exact inner_cov_gradFun_symm (I := I) g hf hX hY
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -485,6 +512,8 @@ theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (gradFun_contMDiff_total_section (I := I) g hf) hB
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] in
 lemma vector_eq_iff_inner_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     (LHS RHS : TangentSpace I x) :
@@ -495,6 +524,8 @@ lemma vector_eq_iff_inner_eq
   rw [metricFlatLinear_apply, metricFlatLinear_apply]
   exact h w
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -537,6 +568,8 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
   rw [hu_def]
   rw [map_sub, ContinuousLinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem localConnLap_vector_eq_bochnerFormula_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)

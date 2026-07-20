@@ -37,6 +37,7 @@ section SmoothSide
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem norm_appFullRS_sq_eq_integral
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -60,6 +61,7 @@ theorem norm_appFullRS_sq_eq_integral
   simp only [appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem integrable_riemannianFiberNormSq_appFullRS
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -92,6 +94,7 @@ theorem integrable_riemannianFiberNormSq_toSection
     (W.toSection x)).symm
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem norm_appFullRS_le_sqrt_mul
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -148,6 +151,7 @@ def fibreFieldMulSmoothCLM
     (Real.sqrt C)
     (fun W => norm_appFullRS_le_sqrt_mul (I := I) (M := M) Ψ hΨ hC hbound W)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp] theorem fibreFieldMulSmoothCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -183,6 +187,7 @@ def fibreFieldMulL2
   SmoothCcTensor.mapL2 (fibreFieldMulSmoothCLM (I := I) (M := M) g r s Ψ hΨ hC hbound)
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp] theorem fibreFieldMulL2_apply_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -202,6 +207,7 @@ def fibreFieldMulL2
     fibreFieldMulSmoothCLM_apply (I := I) (M := M) g r s Ψ hΨ hC hbound S]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem fibreFieldMulL2_opNorm_le_sqrt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)

@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -63,6 +63,7 @@ lemma euclidPartial_contDiff_of_contDiff'
     (EuclideanSpace.single k 1)).contDiff.comp hfd
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -78,6 +79,7 @@ private lemma cutoffComponentEuclid_contDiff
       (I := I) (M := M) g r s S α Idx Jdx)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -92,6 +94,7 @@ private lemma cutoffComponentEuclid_hasCompactSupport
       (I := I) (M := M) g r s S α Idx Jdx)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -105,6 +108,8 @@ private lemma cutoffComponentEuclid_tsupport_subset
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -145,6 +150,7 @@ lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
   funext y
   rw [euclidPartial_def]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_rawComponent_continuousOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -158,6 +164,7 @@ lemma chartPushedRaw_rawComponent_continuousOn'
     (I := I) (M := M) g r s S α Idx Jdx).continuousOn
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -172,6 +179,8 @@ lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
   (euclidPartial_chartPushedRaw_contDiffOn
     (I := I) (M := M) g r s S α k Idx Jdx).continuousOn
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoffComponentEuclid_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

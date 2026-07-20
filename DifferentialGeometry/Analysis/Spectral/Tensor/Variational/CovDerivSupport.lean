@@ -40,7 +40,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -81,6 +83,8 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
   rw [hcongr, hcov_zero]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
@@ -108,6 +112,8 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
   exact tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (I := I) (M := M) g r s S x hev v
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -124,6 +130,8 @@ private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
   rw [hSi, TensorRSSpace.toModel_zero, tensorInnerPointwise_zero_left]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -136,6 +144,8 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -147,6 +157,8 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_left
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

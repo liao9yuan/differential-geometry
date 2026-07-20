@@ -23,7 +23,7 @@ namespace PDE
 namespace RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,7 @@ private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem _root_.IsLocalFrameOn.pushforward
     {ι : Type*} {frame : ι → (x : M) → TangentSpace I x} {u : Set M}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (Φ : M ≃ₘ⟮I, I⟯ N) :
@@ -87,6 +88,7 @@ theorem _root_.IsLocalFrameOn.pushforward
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem gradientFun_pullback
     [SigmaCompactSpace M] [T2Space M] [SigmaCompactSpace N] [T2Space N]
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) (f : N → ℝ) (y : M)
@@ -111,6 +113,7 @@ theorem gradientFun_pullback
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 theorem mfderiv_symm_apply
     (Φ : M ≃ₘ⟮I, I⟯ N) (y : M) (v : TangentSpace I (Φ y)) :
     (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v
@@ -146,6 +149,7 @@ def solutionOn_pullback [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem pullback_coeff_eq
     [SigmaCompactSpace M] [T2Space M] [SigmaCompactSpace N] [T2Space N]
     {D : RealTimeInterval}
@@ -161,6 +165,7 @@ private theorem pullback_coeff_eq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem metricFamilySmoothOn_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -229,6 +234,8 @@ theorem metricFamilySmoothOn_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricVariationEquation_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -260,6 +267,8 @@ theorem metricVariationEquation_pullback
 set_option maxHeartbeats 1000000 in
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalar_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -274,6 +283,8 @@ theorem scalar_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarCont_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -296,6 +307,8 @@ theorem scalarCont_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTime_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -316,6 +329,8 @@ theorem scalarTime_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRicci_pullback_eval
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -347,6 +362,8 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciNorm_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -371,6 +388,8 @@ theorem ricciNorm_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciNormSpace_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -391,6 +410,8 @@ theorem ricciNormSpace_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciCont_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -412,6 +433,8 @@ theorem ricciCont_pullback
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRm04_pullback_eval
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -446,6 +469,8 @@ theorem metricRm04_pullback_eval
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rm04Cont_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -466,6 +491,7 @@ theorem rm04Cont_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem smoothConnection_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -487,6 +513,9 @@ theorem smoothConnection_pullback
 
 
 
+omit [FiniteDimensional ℝ E] in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isSolutionOn_pullback
     [FiniteDimensional ℝ E]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -25,18 +24,18 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
 
+omit [IsManifold I ∞ M] in
 theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (alpha : OneFormSection (I := I) (M := M))
@@ -65,7 +64,9 @@ theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
 
 
 
+omit [IsManifold I ∞ M] in
 theorem traceNablaHessianRealizesDLapAt_of_leviCivita
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
@@ -88,7 +89,9 @@ theorem traceNablaHessianRealizesDLapAt_of_leviCivita
 
 
 
+omit [IsManifold I ∞ M] in
 theorem lc_lapTrace
+    [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
     (duSec : OneFormSection (I := I) (M := M))
@@ -112,7 +115,9 @@ theorem lc_lapTrace
 
 
 
+omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -189,7 +194,9 @@ theorem fundamental_bochner_of_leviCivita_terms
 
 
 
+omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -281,7 +288,9 @@ theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
 
 
 
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_dlap
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -372,7 +381,9 @@ theorem lc_bochner_dlap
 
 
 
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_norm
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -472,7 +483,9 @@ theorem lc_bochner_norm
 
 
 
+omit [IsManifold I ∞ M] in
 theorem lc_bochner_rm04
+    [IsManifold I ∞ M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)

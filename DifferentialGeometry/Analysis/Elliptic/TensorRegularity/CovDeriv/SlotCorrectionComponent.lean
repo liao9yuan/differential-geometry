@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -411,6 +411,7 @@ theorem chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel
     exact absurd (Finset.mem_univ q) h
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaParallelCLM_coordEntry_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -538,6 +539,7 @@ lemma inputSlotCoeff_eq_entry_mul_const
       chartFrameMatrixEntry_id (I := I) (M := M) α hb_base]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inputSlotCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (k : Fin r)
@@ -706,6 +708,7 @@ lemma outputSlotCoeff_eq_entry_mul_const
       chartFrameMatrixEntry_id (I := I) (M := M) α hb_base]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem outputSlotCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (l : Fin s)

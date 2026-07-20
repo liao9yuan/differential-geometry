@@ -27,13 +27,14 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
 omit [I.Boundaryless] in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFrame_mdiffAt
     {Idx : Type} [Fintype Idx]
     (g : SmoothRiemannianMetric I M)
@@ -60,6 +61,8 @@ theorem ricciFrame_mdiffAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailFrameSpaceReg
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}

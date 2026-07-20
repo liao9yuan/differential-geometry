@@ -17,7 +17,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Endomorphi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -41,6 +40,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 private theorem mdifferentiableAt_tangentConstAt_of_mem
     (x₀ : M) (v : TangentSpace I x₀) {p : M}
     (hp : p ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -51,6 +51,7 @@ private theorem mdifferentiableAt_tangentConstAt_of_mem
   exact TensorLieDeriv.mdifferentiableAt_tangentConstInChart_of_mem
     (𝕜 := Real) (I := I) (x₀ := x₀) (p := p) v hp
 
+omit [FiniteDimensional ℝ E] in
 private theorem contMDiffAt_tangentConstAt_self_minTwo
     (x₀ : M) (v : TangentSpace I x₀) :
     ContMDiffAt I (I.prod 𝓘(Real, E)) (2 : ℕ∞)
@@ -355,6 +356,7 @@ def FirstBianchiAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
   ∀ X Y Z W : TangentSpace I x,
     Rm04 (vec4 X Y Z W) + Rm04 (vec4 Y Z X W) + Rm04 (vec4 Z X Y W) = 0
 
+omit [FiniteDimensional ℝ E] in
 theorem first_bianchi {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (h : FirstBianchiAt (I := I) Rm04)
     (X Y Z W : TangentSpace I x) :
@@ -450,6 +452,7 @@ def curvCommAt
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem curvComm_eq_deriv
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z W :
@@ -895,6 +898,7 @@ def SecondBianchiAt {x : M}
       nablaRm04 (vec5 X Y A Z W) +
         nablaRm04 (vec5 Y A X Z W) = 0
 
+omit [FiniteDimensional ℝ E] in
 theorem second_bianchi {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -912,6 +916,7 @@ def SecondBianchiSection
     Prop :=
   ∀ x : M, SecondBianchiAt (I := I) (nablaRm04 x)
 
+omit [FiniteDimensional ℝ E] in
 theorem second_bianchi_apply
     (nablaRm04 : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -939,6 +944,7 @@ def ContractedBianchiAt
       gInv i j * nablaRic (vec3 (basis i) (basis j) X)) =
         (1 / 2 : Real) * dScalar (fun _ : Fin 1 => X)
 
+omit [FiniteDimensional ℝ E] in
 theorem contracted_bianchi
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -960,6 +966,7 @@ theorem contracted_bianchi
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem dR_zero_nablaEin3
     {x : M}
     (g : SmoothMetric_gen I M)
@@ -1048,6 +1055,7 @@ def ContrBianchiSec
   ∀ x : M,
     ContractedBianchiAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x)
 
+omit [FiniteDimensional ℝ E] in
 theorem contrBianchi_apply
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1090,6 +1098,7 @@ def DScalarTraceSec
     Prop :=
   ∀ x : M, DScalarTraceAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x)
 
+omit [FiniteDimensional ℝ E] in
 theorem dScalarTrace_apply
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1131,6 +1140,7 @@ def NablaRicTraceSec
     Prop :=
   ∀ x : M, NablaRicTraceAt (I := I) (basis x) (gInv x) (nablaRm04 x) (nablaRic x)
 
+omit [FiniteDimensional ℝ E] in
 theorem nablaRicTrace_apply
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1161,6 +1171,7 @@ def NablaRicSymmSec
     Prop :=
   ∀ x : M, NablaRicSymmAt (I := I) (nablaRic x)
 
+omit [FiniteDimensional ℝ E] in
 theorem nablaRicSymm_apply
     (nablaRic : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -1191,6 +1202,7 @@ def NablaRmSymmSec
     Prop :=
   ∀ x : M, NablaRmSymmAt (I := I) (nablaRm04 x)
 
+omit [FiniteDimensional ℝ E] in
 theorem nablaRmSymm_apply
     (nablaRm04 : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -1218,6 +1230,7 @@ private theorem trace_swap_symm
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem contractTracesAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1304,6 +1317,7 @@ def ContrOfSecondSec
     ContractedBianchiOfSecondAt (I := I) (basis x) (gInv x)
       (nablaRm04 x) (nablaRic x) (dScalar x)
 
+omit [FiniteDimensional ℝ E] in
 theorem contrOfSecond_apply
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1478,6 +1492,7 @@ private theorem sum4_kjli
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem contractSum
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1603,6 +1618,7 @@ theorem contractSum
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem contractOfSecond
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1651,6 +1667,7 @@ theorem contractOfSecond
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [hRicTrace X (basis i) (basis j)]
 
+omit [FiniteDimensional ℝ E] in
 theorem contracted_bianchi_of_second
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1667,6 +1684,7 @@ theorem contracted_bianchi_of_second
     ContractedBianchiAt (I := I) basis gInv nablaRic dScalar :=
   hcontract hsecond
 
+omit [FiniteDimensional ℝ E] in
 theorem contrOfSecond_sec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))

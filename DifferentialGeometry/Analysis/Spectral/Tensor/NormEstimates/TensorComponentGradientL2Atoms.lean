@@ -43,7 +43,7 @@ open DifferentialGeometry.Integral.Connection
 
 section RawAtoms
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -55,6 +55,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -76,6 +77,7 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport
   exact scalarOnE_extChartAt (I := I) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_sq_le_const_mul_tensorInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -137,6 +139,7 @@ private lemma scalarOnE_raw_sq_le_const_mul_tensorInner_on_pouTsupport
             (S.toFun b) (S.toFun b) := by ring
   linarith [h_chain_sq, h_reassoc.le, h_reassoc.symm.le]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma indicator_scalarOnE_raw_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -220,6 +223,7 @@ lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sq_eLpNorm_indicator_raw_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -295,6 +299,7 @@ private lemma sq_eLpNorm_indicator_raw_le_const_mul_tensorL2Inner
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem indicator_eLpNorm_raw_le_const_mul_tensorL2Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -346,6 +351,7 @@ private theorem indicator_eLpNorm_raw_le_const_mul_tensorL2Norm
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
   exact h_eLpNorm_le
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorL2Norm_eq_norm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -379,6 +385,8 @@ private lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ofReal_tensorL2Norm_le_norm_ennreal
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -392,6 +400,7 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
   rw [coe_nnnorm_eq_ofReal_norm S]
   exact ENNReal.ofReal_le_ofReal h_l2_le_h1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -462,6 +471,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompleteSpace E] in
 theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) :

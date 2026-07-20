@@ -14,7 +14,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,7 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 lemma SmoothScalar.memLp_two {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     MemLp f.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -51,12 +51,12 @@ noncomputable def smoothToLpLin (g : SmoothRiemannianMetric I M) :
     rw [h_lhs_rfl, MemLp.toLp_const_smul]
     rfl
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 @[simp] lemma smoothToLpLin_apply (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
     smoothToLpLin (I := I) (M := M) g f = f.memLp_two.toLp f.toFun := rfl
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 lemma SmoothScalar.norm_smoothToLp_sq {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖smoothToLpLin (I := I) (M := M) g f‖ ^ 2 =

@@ -12,7 +12,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -251,6 +250,7 @@ theorem inner02_eq_coord_direct
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricInverseInBasis_of_frame
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
@@ -341,6 +341,7 @@ def tensorNormSqInFrame
     Time -> M -> Real :=
   fun t x => ∑ I : Comp, weight t x I * component t x I * component t x I
 
+omit [TopologicalSpace M] in
 @[simp] theorem tensorNormSqInFrame_apply
     (weight component : Time -> M -> Comp -> Real)
     (t : Time) (x : M) :
@@ -354,6 +355,7 @@ def roughLapTensorInnerInFrame
     Time -> M -> Real :=
   fun t x => ∑ I : Comp, weight t x I * roughLap t x I * component t x I
 
+omit [TopologicalSpace M] in
 @[simp] theorem roughLapTensorInnerInFrame_apply
     (weight roughLap component : Time -> M -> Comp -> Real)
     (t : Time) (x : M) :
@@ -373,6 +375,7 @@ def nablaTensorNormSqInFrame
     ∑ a : Dir, ∑ I : Comp,
       weight t x I * nablaComponent t x a I * nablaComponent t x a I
 
+omit [TopologicalSpace M] in
 @[simp] theorem nablaTensorNormSqInFrame_apply
     (weight : Time -> M -> Comp -> Real)
     (nablaComponent : Time -> M -> Dir -> Comp -> Real)
@@ -401,6 +404,7 @@ def TensorNormBochnerComponentsInFrame
     lapNormSq t x = 2 * roughLapInner t x + 2 * nablaNormSq t x
 
 
+omit [TopologicalSpace M] in
 theorem tensorNormBochnerComponentsInFrame_of_coordinate_expansion
     (lapNormSq : Time -> M -> Real)
     (weight roughLap component : Time -> M -> Comp -> Real)
@@ -436,6 +440,7 @@ theorem tensorNormBochnerComponentsInFrame_of_coordinate_expansion
   rw [hrough, hnabla]
 
 
+omit [TopologicalSpace M] in
 theorem tensor_norm_laplacian_eq_of_bochner_components
     (lapNormSq roughLapInner nablaNormSq : Time -> M -> Real)
     (h : TensorNormBochnerComponentsInFrame lapNormSq roughLapInner nablaNormSq)
@@ -462,6 +467,7 @@ def raisedRicciComponentsInFrame
     ∑ a : Idx, ∑ b : Idx,
       gInv t x i a * gInv t x j b * Ric t x (frame a x) (frame b x)
 
+omit [IsManifold I ∞ M] in
 @[simp] theorem raisedRicciComponentsInFrame_apply
     (Ric : Time -> RawTwoTensorField (I := I) (M := M))
     (gInv : Time -> InverseMetricComponents M Idx)
@@ -484,6 +490,7 @@ def ricciNormSqInFrame
       Ric t x (frame i x) (frame j x) *
         raisedRicciComponentsInFrame (I := I) Ric gInv frame t x i j
 
+omit [IsManifold I ∞ M] in
 @[simp] theorem ricciNormSqInFrame_apply
     (Ric : Time -> RawTwoTensorField (I := I) (M := M))
     (gInv : Time -> InverseMetricComponents M Idx)
@@ -507,6 +514,7 @@ def roughLapRicciInnerInFrame
       roughLapRic t x i j *
         raisedRicciComponentsInFrame (I := I) Ric gInv frame t x i j
 
+omit [IsManifold I ∞ M] in
 @[simp] theorem roughLapRicciInnerInFrame_apply
     (roughLapRic : Time -> M -> Idx -> Idx -> Real)
     (Ric : Time -> RawTwoTensorField (I := I) (M := M))
@@ -530,6 +538,7 @@ def nablaRicciNormSqInFrame
       gInv t x a b * gInv t x i k * gInv t x j l *
         nablaRic t x a i j * nablaRic t x b k l
 
+omit [TopologicalSpace M] in
 @[simp] theorem nablaRicciNormSqInFrame_apply
     (nablaRic : Time -> M -> Idx -> Idx -> Idx -> Real)
     (gInv : Time -> InverseMetricComponents M Idx)
@@ -546,6 +555,7 @@ section Tensor02Product
 
 variable [FiniteDimensional Real E]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_apply_cons_local
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -563,6 +573,7 @@ private theorem tensor0S_curry_apply_cons_local
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+omit [IsManifold I ∞ M] [FiniteDimensional ℝ E] in
 private theorem fin_cons_vec2_eq_vec3
     {x : M} (X Y Z : TangentSpace I x) :
     Fin.cons X (vec2 (I := I) Y Z) =
@@ -570,6 +581,7 @@ private theorem fin_cons_vec2_eq_vec3
   funext a
   fin_cases a <;> rfl
 
+omit [IsManifold I ∞ M] [FiniteDimensional ℝ E] in
 private theorem fin_cons_vec3_eq_vec4
     {x : M} (X Y Z W : TangentSpace I x) :
     Fin.cons X (vec3 (I := I) Y Z W) =
@@ -577,6 +589,7 @@ private theorem fin_cons_vec3_eq_vec4
   funext a
   fin_cases a <;> rfl
 
+omit [IsManifold I ∞ M] [FiniteDimensional ℝ E] in
 private theorem metricTraceInput_vec2_eq_vec4
     {x : M} (X Y Z W : TangentSpace I x) :
     metricTraceInput (I := I) X Y (vec2 (I := I) Z W) =
@@ -741,6 +754,7 @@ def tensor02FreezeNabla
     (X : TangentSpace I x) : Tensor02At (I := I) x :=
   freezeLastTwo0S3 (I := I) nablaA X
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensor02FreezeNabla_apply
     {x : M}
     (nablaA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -749,6 +763,7 @@ def tensor02FreezeNabla
       nablaA (vec3 (I := I) X Y Z) := by
   exact freezeLastTwo0S3_apply (I := I) nablaA X Y Z
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor02FreezeNabla_eq_curry
     {x : M}
     (nablaA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -988,6 +1003,7 @@ def tensor02FreezeNabla2
   freezeLastTwo0S3 (I := I)
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 3 x nabla2A X) Y
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensor02FreezeNabla2_apply
     {x : M}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
@@ -1429,6 +1445,7 @@ def Tensor02NormSecondProductInBasis
 
 set_option maxHeartbeats 800000 in
 
+omit [FiniteDimensional ℝ E] in
 theorem Tensor02NormSecondProductInBasis.of_hessian_product
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1663,6 +1680,7 @@ variable [FiniteDimensional Real E]
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule
     (ricciNormLap : Time -> M -> Real)
     (roughLapRic : Time -> M -> Idx -> Idx -> Real)
@@ -1815,6 +1833,7 @@ def curvRicciRicciReactionInFrame
       Riemann04 t x (frame i x) (frame k x) (frame j x) (frame l x) *
         RicRaised t x i j * RicRaised t x k l
 
+omit [IsManifold I ∞ M] in
 @[simp] theorem curvRicciRicciReactionInFrame_apply
     (Riemann04 : Time -> RawFourTensorField (I := I) (M := M))
     (RicRaised : Time -> M -> Idx -> Idx -> Real)
@@ -1846,6 +1865,7 @@ def RicciNormLaplacianComponentsInFrame
 
 
 
+omit [IsManifold I ∞ M] in
 theorem ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
     (ricciNormLap : Time -> M -> Real)
     (roughLapRic : Time -> M -> Idx -> Idx -> Real)
@@ -1865,6 +1885,7 @@ theorem ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
 
 
 
+omit [TopologicalSpace M] in
 theorem ricci_norm_heat_eq_of_bochner_components
     (ricciNormDt ricciNormLap roughLapInner nablaRicNormSq reaction : Time -> M -> Real)
     (h_dt : RicciNormTimeDerivativeComponentsInFrame

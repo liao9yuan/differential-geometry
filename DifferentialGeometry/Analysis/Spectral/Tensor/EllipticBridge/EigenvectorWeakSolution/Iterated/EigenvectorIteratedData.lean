@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
@@ -52,6 +53,7 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_subset (α : M) :
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
     (α : M) {u : EuclN → ℝ}
     (hu_ae : u =ᵐ[(volume : Measure EuclN).restrict
@@ -112,6 +114,7 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -201,6 +204,7 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -236,6 +240,7 @@ lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
   intro hy_V
   exact hy hy_V hy_V.2
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -256,6 +261,7 @@ lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
       exact chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
         α (ih (Fin.init l)) (l (Fin.last m))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma crossLeftTestCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) (Q : TensorCompIdx (E := E) r (s + 1))
@@ -265,6 +271,7 @@ lemma crossLeftTestCoeff_eq_zero_off_chartPouKernel
     euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
       (I := I) (M := M) α (Q.2 0) hy, zero_mul]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -277,6 +284,7 @@ lemma gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
   rw [euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) α j hy, mul_zero]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) (Q : TensorCompIdx (E := E) r s)
@@ -290,6 +298,7 @@ lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -458,6 +467,7 @@ private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
+omit [CompleteSpace E] in
 lemma tensorChartBilinear_chartComponent_regularity_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

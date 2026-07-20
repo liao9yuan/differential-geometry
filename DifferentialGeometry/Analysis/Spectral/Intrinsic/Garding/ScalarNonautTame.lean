@@ -53,6 +53,7 @@ noncomputable def traceCast
 
 
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem trace_retag_eq
     (q h : SmoothRiemannianMetric I M) :
     traceCast (I := I) q h =
@@ -72,6 +73,8 @@ theorem trace_retag_eq
   exact trace_slot_flat (I := I) q h x D
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceCast_self (q : SmoothRiemannianMetric I M) :
     traceCast (I := I) q q = cometricDoubleTraceField (I := I) q 0 := by
   apply SmoothCcTensor.ext
@@ -86,6 +89,7 @@ noncomputable def scalarFluxCoeff
   sharpFlatEndoCc (I := I) q h - sharpFlatEndoCc (I := I) q q
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarFlux_eval (q h : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     cotangentToDual (I := I)
@@ -118,6 +122,7 @@ theorem scalarFlux_eval (q h : SmoothRiemannianMetric I M) (x : M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cc_flux_slot (q h : SmoothRiemannianMetric I M)
     (A : SmoothCcTensor q 0 1) :
     operatorFieldApply (I := I) (M := M) q 1 1 (scalarFluxCoeff (I := I) q h) A =
@@ -149,6 +154,7 @@ theorem cc_flux_slot (q h : SmoothRiemannianMetric I M)
 
 
 
+omit [BoundarylessManifold I M] in
 theorem cc_top_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -237,6 +243,7 @@ theorem cc_top_pair
 
 
 
+omit [BoundarylessManifold I M] in
 theorem cc_last_pair
     (q h : SmoothRiemannianMetric I M)
     (k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -353,6 +360,7 @@ noncomputable def scalarTraceCoeff
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalar_trace_factor
     (q h : SmoothRiemannianMetric I M) :
     scalarTraceCoeff (I := I) q h =
@@ -753,6 +761,7 @@ noncomputable def scalarLapDiffCc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_add
     (q h : SmoothRiemannianMetric I M) (U V : SmoothCcTensor q 0 0) :
     scalarLapDiffCc (I := I) q h (U + V) =
@@ -762,6 +771,7 @@ theorem scalarLapDiff_add
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_smul
     (q h : SmoothRiemannianMetric I M) (c : ℝ) (U : SmoothCcTensor q 0 0) :
     scalarLapDiffCc (I := I) q h (c • U) = c • scalarLapDiffCc (I := I) q h U := by
@@ -858,6 +868,7 @@ theorem cc_lap_pair
     _ = D + (Cp + Cc) * J := by ring
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceCast_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 2) (x : M) :
     Tensor0SSpace.toModel
@@ -878,6 +889,7 @@ theorem traceCast_apply
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem scalarTrace_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 2) (x : M) :
     Tensor0SSpace.toModel
@@ -915,6 +927,8 @@ theorem scalarTrace_apply
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTrace_apply
     (q h : SmoothRiemannianMetric I M) (W : SmoothCcTensor q 0 1) (x : M) :
     Tensor0SSpace.toModel
@@ -938,6 +952,7 @@ theorem connTrace_apply
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarLapDiff_apply
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     Tensor0SSpace.toModel

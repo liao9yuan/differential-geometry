@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -91,6 +92,7 @@ private noncomputable def perAlphaGradConstant
     (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaGradConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     0 ≤ perAlphaGradConstant (I := I) (M := M) g r s α :=
@@ -98,6 +100,7 @@ private lemma perAlphaGradConstant_intrinsic_nonneg
     (exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α)).1
 
+omit [CompleteSpace E] in
 private lemma perAlphaGradConstant_intrinsic_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s)
@@ -123,6 +126,7 @@ private noncomputable def totalActiveGradConstant
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
     perAlphaGradConstant (I := I) (M := M) g r s α
 
+omit [CompleteSpace E] in
 private lemma totalActiveGradConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActiveGradConstant (I := I) (M := M) g r s := by
@@ -131,6 +135,7 @@ private lemma totalActiveGradConstant_intrinsic_nonneg
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaGradConstant_le_totalActiveGradConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
@@ -153,6 +158,7 @@ private lemma perAlphaGradConstant_le_totalActiveGradConstant
       perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
 
+omit [CompleteSpace E] in
 theorem tensorChartComponentScalar_grad_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C_grad : ℝ, 0 ≤ C_grad ∧

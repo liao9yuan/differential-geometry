@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorSectionMDiffAt_curriedSection_apply_loc
     (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -64,6 +65,7 @@ private def bilinCurriedSec (V : Π b : M, Tensor0SSpace 2 I b)
   fun b => Tensor0SNabla.curriedSection I M
     (fun y : M => Tensor0SNabla.curriedSection I M V y (Y y)) b (Z b)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma scalarFn_bilinCurriedSec
     (V : Π b : M, Tensor0SSpace 2 I b)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -81,6 +83,8 @@ private lemma scalarFn_bilinCurriedSec
         (T := V b) (v0 := Y b) (vs := Fin.cons (Z b) (fun i => Fin.elim0 i))]
   congr 1
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensor0SCovariantDerivative02_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 2 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 2 V x)
@@ -138,6 +142,7 @@ private theorem tensor0SCovariantDerivative02_consEval_leibnizDefect
   rw [hpeel2, hbase, hcorr2]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad02_unitModel_eval_eq_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (v : TangentSpace I x)
@@ -178,6 +183,8 @@ theorem covGrad02_unitModel_eval_eq_leibnizDefect
   exact tensor0SCovariantDerivative02_consEval_leibnizDefect (I := I) (M := M) g₀
     (unitEvalSection (I := I) (M := M) g₀ 2 S) hV Y Z v
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitEvalSection_toModel_eq_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : TangentSpace I b) :
@@ -193,6 +200,7 @@ private lemma unitEvalSection_toModel_eq_ccTensorBilin
   funext k
   fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -253,6 +261,7 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
   rw [metricCovDeriv, metricCovDeriv]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -275,12 +284,14 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
         (Y := fun b => Y b) (Z := fun b => Z b) Y.mdifferentiableAt Z.mdifferentiableAt]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma bilinEvalFn_unitEvalSection_eq_unitModel
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     bilinEvalFn (I := I) (M := M) (unitEvalSection (I := I) (M := M) g₀ 2 S) Y Z b =
       unitModel (I := I) (M := M) g₀ 2 S b (Fin.cons (Y b) ![Z b]) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_domDomCongrSection_swap_eval
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (v : TangentSpace I x)

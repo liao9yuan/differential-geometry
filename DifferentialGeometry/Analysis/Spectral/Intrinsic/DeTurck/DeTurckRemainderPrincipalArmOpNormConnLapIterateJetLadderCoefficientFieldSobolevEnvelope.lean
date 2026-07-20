@@ -40,7 +40,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -156,6 +156,8 @@ lemma bal_sqrt_mono_pair {x' x y' y : ℝ} (hx' : 0 ≤ x') (hy' : 0 ≤ y')
   linarith
 
 set_option maxHeartbeats 1600000 in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bal_h1_sum (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
     (F : ℕ → SmoothCcTensor g₀ 0 2) :
     Real.sqrt (‖∑ i ∈ Finset.range n, F i‖ ^ 2 +
@@ -224,6 +226,7 @@ lemma tensorHs_norm_mul_le_ball_mul_tensorHs (g₀ : SmoothRiemannianMetric I M)
       _ ≤ R₀ * f γ := mul_le_mul_of_nonneg_left h2 hR₀
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedCovGrad_le_of_sq_envelope_bound (g₀ : SmoothRiemannianMetric I M)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa)
     (C₀ : SmoothCcTensor g₀ 2 2) (T₀ : SmoothCcTensor g₀ 0 2)
@@ -273,6 +276,7 @@ lemma exists_iteratedCovGrad_le_const_mul_tensorHs (g₀ : SmoothRiemannianMetri
     (f := fun b => ‖iteratedCovGrad (I := I) g₀ 0 2 b T‖)
     (fun b _ => norm_nonneg _) (Finset.mem_range.mpr (by omega))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma tensorL2NormSq_le_of_pointwise_fiberNormSq_le_two_sum (g : SmoothRiemannianMetric I M)
     {rz sz : ℕ} (Z : SmoothCcTensor g rz sz)
     (n1 n2 : ℕ) (c1 c2 : ℕ → ℝ) (_hc1 : ∀ i, 0 ≤ c1 i) (_hc2 : ∀ i, 0 ≤ c2 i)

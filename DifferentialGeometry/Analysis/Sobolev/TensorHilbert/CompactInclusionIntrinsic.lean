@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smooth_close_to_TensorH1_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) {δ : ℝ} (hδ : 0 < δ) :
@@ -56,6 +58,7 @@ private lemma exists_smooth_close_to_TensorH1_intrinsic
 
 set_option maxHeartbeats 4000000 in
 
+omit [CompleteSpace E] in
 theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) := by

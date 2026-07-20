@@ -17,7 +17,6 @@ set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 6400000
 set_option synthInstance.maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
@@ -34,7 +33,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -60,6 +59,8 @@ noncomputable def lieCorr0NEndo
       ((PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) x)
     - deTurckLieWEndo (I := I) g₁ g₀ x
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0NEndo_homSection_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -91,6 +92,8 @@ noncomputable def lieCorr0InsertFib
   slotInsertEndoFib (I := I) (M := M) 2 0 x (lieCorr0NEndo (I := I) g₀ g₁ g_bg x) +
     slotInsertEndoFib (I := I) (M := M) 2 1 x (lieCorr0NEndo (I := I) g₀ g₁ g_bg x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0InsertFib_toModel
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -103,6 +106,8 @@ theorem lieCorr0InsertFib_toModel
     ContinuousMultilinearMap.add_apply,
     slotInsertEndoFib_apply_eval, slotInsertEndoFib_apply_eval]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0InsertFib_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -188,6 +193,9 @@ noncomputable def lieCorr0RiemQuadlin
         (TangentSpace I x →L[ℝ] ℝ) (g₀.inner x))).comp
     (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieCorr0RiemQuadlin_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 u w : TangentSpace I x) :
@@ -220,6 +228,9 @@ noncomputable def lieCorr0RiemLoweredFib
   Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
     (lieCorr0Quadlin4ToModel (TangentSpace I x) (lieCorr0RiemQuadlin (I := I) g₀ x))
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieCorr0RiemLoweredFib_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M) (v : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel (lieCorr0RiemLoweredFib (I := I) g₀ x) v =
@@ -242,6 +253,7 @@ noncomputable def lieCorr0RiemFib
       (tensor0SProdKappaFib (I := I) (p := 2) (q := 4) x
         (lieCorr0RiemLoweredFib (I := I) g₀ x))))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem lieCorr0_ddc_section_contMDiff
     {d : ℕ} (ρ : Equiv.Perm (Fin d)) (Z : ∀ x : M, Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -271,6 +283,7 @@ theorem lieCorr0_ddc_section_contMDiff
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem lieCorr0_prod_section_contMDiff
     {p q : ℕ} (Y : ∀ x : M, Tensor0SSpace p I x) (K : ∀ x : M, Tensor0SSpace q I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel p ℝ E)) ∞
@@ -322,6 +335,8 @@ theorem lieCorr0_prod_section_contMDiff
     (E := fun z : M => Tensor0SSpace (p + q) I z) x t) ?_
   rw [tensor0SProdKappaFib_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem lieCorr0TraceStep_section_contMDiff
     (g : SmoothRiemannianMetric I M) (p : ℕ) (σ : Equiv.Perm (Fin (p + 2)))
     (Z : ∀ x : M, Tensor0SSpace (p + 2) I x)
@@ -341,6 +356,8 @@ theorem lieCorr0TraceStep_section_contMDiff
   rw [lieCorr0TraceStep, ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0VBFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -384,6 +401,8 @@ theorem lieCorr0VBFib_contMDiff
   rw [lieCorr0VBFib]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0AMixHalfFib_section_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
@@ -420,6 +439,8 @@ theorem lieCorr0AMixHalfFib_section_contMDiff
   rw [lieCorr0AMixHalfFib]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0AMixFib_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -461,6 +482,9 @@ theorem lieCorr0AMixFib_contMDiff
   rw [lieCorr0AMixFib]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieCorr0RiemLoweredFib_section_contMDiff
     (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -497,6 +521,9 @@ theorem lieCorr0RiemLoweredFib_section_contMDiff
   rw [lieCorr0RiemLoweredFib_toModel]
   rw [hframe' 0, hframe' 1, hframe' 2, hframe' 3]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieCorr0RiemFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -538,6 +565,7 @@ noncomputable def lieCorr0TotalFib
   lieCorr0InsertFib (I := I) g₀ g₁ g_bg x + lieCorr0VBFib (I := I) g₀ g₁ x +
     lieCorr0AMixFib (I := I) g₀ g₁ g_bg x + lieCorr0RiemFib (I := I) g₀ g₁ x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0TotalFib_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -590,6 +618,7 @@ def lieCorr0Field (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0Field_apply
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg).toSection x =

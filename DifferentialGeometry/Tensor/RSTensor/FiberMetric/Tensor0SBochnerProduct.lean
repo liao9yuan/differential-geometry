@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
@@ -63,7 +62,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+  [SigmaCompactSpace M] [T2Space M]
 
 
 
@@ -96,6 +95,7 @@ noncomputable def partialEval0SField {s : ℕ}
     letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
     Cₛ^∞⟮I; Tensor0SModel s Real E, (fun x : M => Tensor0SSpace s I x)⟯)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem partialEval0SField_apply {s : ℕ}
     (nablaT : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -110,6 +110,7 @@ noncomputable def partialEval0SField {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inner0S_mdiff {s : ℕ}
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -248,6 +249,7 @@ theorem inner0S_mdiff {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem nabla_partialEval0S {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (nablaT : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -398,6 +400,7 @@ theorem nabla_partialEval0S {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem freeze0S_deriv {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -486,6 +489,7 @@ theorem freeze0S_deriv {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem du_norm0S {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -540,6 +544,7 @@ theorem du_norm0S {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem hess_norm0S {s : ℕ}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -679,6 +684,7 @@ theorem hess_norm0S {s : ℕ}
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem tensorNormBochnerSplit_mc {s : ℕ}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -85,6 +85,7 @@ lemma eLpNorm_bdd_mul_le
           eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) := by
         rw [Real.enorm_eq_ofReal hC]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tendsto_bdd_mul
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (hc_meas : AEStronglyMeasurable c (chartL2Measure (I := I) (M := M) α))
@@ -164,6 +165,7 @@ lemma tendsto_bdd_mul
         mul_lt_mul_of_pos_left hd hCpos
     _ = ε := by field_simp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartComponent_contDiff'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -174,6 +176,7 @@ lemma tensorChartComponent_contDiff'
   (contMDiff_iff_contDiff (n := (⊤ : ℕ∞))).mp
     (tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponent_tsupport_subset_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -192,6 +195,7 @@ lemma tensorChartComponent_tsupport_subset_chartPouKernel
   exact closure_minimal hsupp
     (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma chosenWeakPartial'_tensorChartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -251,6 +255,7 @@ lemma coeFn_finsetSum_lp
       filter_upwards [ih] with y hy
       rw [Pi.add_apply, hy, Finset.sum_insert ha]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma coeFn_finsetSum_toLp
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -268,6 +273,7 @@ lemma coeFn_finsetSum_toLp
       filter_upwards [ih, MemLp.coeFn_toLp (hf a)] with y hy hya
       rw [Finset.sum_insert ha, Finset.sum_insert ha, hya, hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toLp_finsetSum_congr
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -282,6 +288,7 @@ lemma toLp_finsetSum_congr
   exact (MemLp.coeFn_toLp hF).trans
     (hFeq.trans (coeFn_finsetSum_toLp (I := I) (M := M) α s hf).symm)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tendsto_toLp_finsetSum
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → ℕ → EuclN → ℝ} {flim : ι → EuclN → ℝ}
@@ -313,6 +320,7 @@ lemma tendsto_toLp_finsetSum
       (fun n => ∑ a ∈ s, (hf a n).toLp (f a n)) from funext h_n, h_lim]
   exact tendsto_finset_sum s (fun a _ => h_tendsto a)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma memLp_indicatorFactor_mul_lp
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -331,6 +339,7 @@ lemma memLp_indicatorFactor_mul_lp
   exact memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc) (Lp.memLp G)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tendsto_sumToLp
     (α : M) {ι : Type*} [Fintype ι]
     {f : ι → ℕ → EuclN → ℝ} {flim : ι → EuclN → ℝ}
@@ -353,6 +362,7 @@ lemma tendsto_sumToLp
       Finset.univ (fun a _ => hflim a))
     (fun _ => Filter.EventuallyEq.rfl) Filter.EventuallyEq.rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_finsetSum
     (l : Fin (Module.finrank ℝ E)) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ} {y : EuclN}
@@ -363,6 +373,7 @@ lemma euclidPartial_finsetSum
   rw [euclidPartial_def, fderiv_fun_sum hf, ContinuousLinearMap.sum_apply]
   exact Finset.sum_congr rfl (fun a _ => by rw [euclidPartial_def])
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tendsto_sum4
     (α : M) {κ₁ κ₂ κ₃ κ₄ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃] [Fintype κ₄]
@@ -414,6 +425,7 @@ lemma tendsto_sum4
           (hf := fun d n => hf a b c d n) (hflim := fun d => hflim a b c d)
           (h_tendsto a b c))))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tendsto_sum5
     (α : M) {κ₁ κ₂ κ₃ κ₄ κ₅ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃] [Fintype κ₄] [Fintype κ₅]
@@ -473,6 +485,7 @@ lemma differentiableAt_of_contDiffOn_chartTarget
       (I := I) (M := M) α
   exact (hc.contDiffAt (hopen.mem_nhds hy)).differentiableAt (by simp)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma differentiableAt_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

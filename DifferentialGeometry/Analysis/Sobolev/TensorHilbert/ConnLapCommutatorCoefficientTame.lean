@@ -41,7 +41,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private lemma weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -329,6 +330,8 @@ private lemma hs_extreme_interp {f : ℕ → ℝ} (hf_nn : ∀ k, 0 ≤ f k)
   · exact hkey α β hab hαγ hβγ hsum
   · rw [mul_comm]; exact hkey β α hab hβγ hαγ (by omega)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedCovGrad_norm_comp (g₀ : SmoothRiemannianMetric I M) (r s l m : ℕ)
     (Ψ : SmoothCcTensor g₀ r s) :
     ‖iteratedCovGrad (I := I) g₀ r (s + l) m (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ =
@@ -380,6 +383,7 @@ private lemma iteratedCovGrad_slotExtend_norm_le (g₀ : SmoothRiemannianMetric 
   rw [mul_pow, Real.sq_sqrt (by positivity : (0:ℝ) ≤ (Module.finrank ℝ E : ℝ))]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s Φ (W₁ - W₂) =
@@ -391,6 +395,8 @@ private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     abel
   exact eq_sub_of_add_eq h
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma coeffContraction_secondCovGrad_sub (g₀ : SmoothRiemannianMetric I M)
     (C : SmoothCcTensor g₀ (2 + 2) 2) (u v : SmoothCcTensor g₀ 0 2) :
     operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C (iteratedCovGrad (I := I) g₀ 0 2 2 (u - v)) =
@@ -398,12 +404,14 @@ private lemma coeffContraction_secondCovGrad_sub (g₀ : SmoothRiemannianMetric 
         operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C (iteratedCovGrad (I := I) g₀ 0 2 2 v) := by
   rw [iteratedCovGrad_sub, appCc_sub_right]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma rawConnLap_oneMinusConnLap_comm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     rawTensorConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) =
       oneMinusConnLapSmooth (I := I) g₀ 0 2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) := by
   rw [oneMinusConnLapSmooth, oneMinusConnLapSmooth, rawTensorConnLapSmooth_sub]
 
+omit [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma coeffContraction_slotExtend_l2_le_of_pointwise (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g₀ r s) {B : ℝ} (hB_nn : 0 ≤ B)
     (hC : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (Φ.toSection x) ≤ B ^ 2)
@@ -441,6 +449,7 @@ private lemma coeffContraction_slotExtend_l2_le_of_pointwise (g₀ : SmoothRiema
   rw [mul_pow]
   exact hsq
 
+omit [BoundarylessManifold I M] in
 private lemma jet_fibreNormSq_sup_le_sharp (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ Cemb : ℕ → ℝ, (∀ l, 0 ≤ Cemb l) ∧ ∀ (Ψ : SmoothCcTensor g₀ r s) (l : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ r (s + l) x

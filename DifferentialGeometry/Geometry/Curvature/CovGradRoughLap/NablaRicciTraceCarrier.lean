@@ -34,6 +34,9 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] in
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicci_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -77,6 +80,7 @@ theorem nablaRicci_contMDiff
 
 
 omit [CompactSpace M] in
+omit [I.Boundaryless] in
 theorem nablaRicciBilin_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -126,6 +130,7 @@ theorem nablaRicciBilin_chartBasis_contMDiffOn
   exact hAt.contMDiffWithinAt
 
 
+omit [CompactSpace M] in
 theorem nablaRicciEndo_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -176,6 +181,7 @@ def nablaRicSlotOpFib (g : SmoothRiemannianMetric I M)
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] in
+omit [I.Boundaryless] in
 @[simp] lemma nablaRicSlotOpFib_apply (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) :
@@ -188,6 +194,8 @@ omit [CompactSpace M] in
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
+omit [I.Boundaryless] in
 lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :
@@ -207,6 +215,7 @@ lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
 theorem nablaRicSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel (s + 1) (s + 1) ℝ E)) ∞
@@ -339,6 +348,7 @@ theorem nablaRicTraceSection_apply_leadingSlot
       (unitZeroSec (I := I) (M := M) x)) (nablaRicciEndo (I := I) g X x v0) vs]
 
 
+omit [CompactSpace M] in
 theorem leviCivita_covDeriv_ricEndoRaisedFib (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (LeviCivita (I := I) g).toFun (fun y : M => ricEndoRaisedFib (I := I) g y (Y y)) x (X x) =
@@ -534,6 +544,7 @@ theorem tensorCovDerivAt_ricSlotOpField_eq_nablaRicSlotOpFib
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_ricTraceSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) :
     covGrad (I := I) (M := M) g 0 (s + 1) (ricTraceSection (I := I) (M := M) g s S) =

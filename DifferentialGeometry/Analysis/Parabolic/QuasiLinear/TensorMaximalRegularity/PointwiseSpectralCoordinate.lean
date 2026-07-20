@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
+omit [CompactSpace M] in
 private theorem homModeCoeff_zero (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     homModeCoeff (I := I) (M := M) (a := a) (T := T)
@@ -47,6 +48,7 @@ private theorem homModeCoeff_zero (hT : 0 ≤ T)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) i), hsq]
   exact norm_eq_zero.mp hnorm
 
+omit [CompactSpace M] in
 private theorem homDerivModeCoeff_zero (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     homDerivModeCoeff (I := I) (M := M) (a := a) (T := T)

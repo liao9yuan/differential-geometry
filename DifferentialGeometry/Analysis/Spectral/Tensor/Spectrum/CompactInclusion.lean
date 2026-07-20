@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,8 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_TensorH1ComplToTensorL2_apply_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) :
@@ -62,6 +64,8 @@ lemma norm_TensorH1ComplToTensorL2_apply_le
     exact SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) a
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma denseRange_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange (smoothToTensorH1Compl (I := I) (M := M) g r s) := by
@@ -75,6 +79,8 @@ lemma denseRange_smoothToTensorH1Compl
   exact UniformSpace.Completion.denseRange_coe
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smooth_close_to_TensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) {δ : ℝ} (hδ : 0 < δ) :

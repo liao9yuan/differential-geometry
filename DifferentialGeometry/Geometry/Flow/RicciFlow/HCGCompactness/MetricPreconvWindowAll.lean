@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -41,18 +40,18 @@ open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metric_ext_inner
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (h : forall x : M, g₁.inner x = g₂.inner x) :
@@ -65,6 +64,8 @@ theorem metric_ext_inner
 
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInnerApply_diff_le
     (A B gRef : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |A.inner x v w - B.inner x v w|
@@ -114,6 +115,8 @@ theorem metricInnerApply_diff_le
 
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCInf_inner
     (gSeq : ℕ → SmoothRiemannianMetric I M) (gInf gRef : SmoothRiemannianMetric I M)
     (hconv : MetricCInfConvOnCompacts (I := I) gSeq gInf gRef)
@@ -159,6 +162,8 @@ theorem metricCInf_inner
 
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCInf_unique
     (gSeq : ℕ → SmoothRiemannianMetric I M)
     (A B gRefA gRefB : SmoothRiemannianMetric I M)
@@ -173,6 +178,8 @@ theorem metricCInf_unique
 
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInner_cauchy
     (gk : Nat -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x)
@@ -228,6 +235,7 @@ theorem metricInner_cauchy
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metricLimit_uniq
     (gk : Nat -> SmoothRiemannianMetric I M) (A B : SmoothRiemannianMetric I M)
     (hcauchy : forall x : M, forall v w : TangentSpace I x,

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -25,7 +24,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -101,6 +100,8 @@ def RicciEvolutionEquationInFrameOnLocal
         D.carrier
         (t : Real)
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "use the OnLocal predicate or a pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciVariationFormulaInFrameOn_of_local_cover
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -458,6 +459,7 @@ private theorem trace23_contract_covD_of_inv_zero
 
 end RaisedContractAlgebra
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem ricci_mdiffAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -476,6 +478,7 @@ private theorem ricci_mdiffAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -507,6 +510,7 @@ theorem ricci_extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_mul
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -522,6 +526,7 @@ theorem ricci_extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_add
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -532,6 +537,7 @@ theorem ricci_extDerivFun_add
     (I := I) (g := f) (g' := g) (x := x) hf hg) v)
   simpa [Pi.add_apply] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_neg
     {f : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
@@ -547,6 +553,7 @@ theorem ricci_extDerivFun_neg
     hf v
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul] using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_sub
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -559,6 +566,7 @@ theorem ricci_extDerivFun_sub
     (x := x) hf hg.neg) v)
   simpa [Pi.add_apply, sub_eq_add_neg, hneg] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ricci_extDerivFun_congr_eventually
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -568,6 +576,8 @@ theorem ricci_extDerivFun_congr_eventually
   unfold extDerivFun
   rw [hmf, hx]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace13CovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -686,6 +696,8 @@ theorem contractedTrace13CovDeriv_eq_nabla2RicTrace
           refine Finset.sum_congr rfl fun l _ => ?_
           dsimp [covD3, Γ, G, N, dN, ricciSecondCovDerivCompInFrame]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace23CovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -804,6 +816,8 @@ theorem contractedTrace23CovDeriv_eq_nabla2RicTrace
           refine Finset.sum_congr rfl fun l _ => ?_
           dsimp [covD3, Γ, G, N, dN, ricciSecondCovDerivCompInFrame]
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTraceBianchiCovDeriv_eq_nabla2RicTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -925,6 +939,8 @@ theorem contractedTraceBianchiCovDeriv_eq_nabla2RicTrace
           dsimp [covD3, Γ, G, N, dN, B, dB, ricciSecondCovDerivCompInFrame]
           ring
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contractedTrace23_mdiffAt
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)

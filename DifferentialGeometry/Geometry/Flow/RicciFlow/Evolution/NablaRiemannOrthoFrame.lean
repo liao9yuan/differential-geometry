@@ -4,7 +4,6 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -99,7 +98,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -159,6 +157,9 @@ def nablaLapCommReactionTermF
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_pointwise
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -214,6 +215,9 @@ def nablaRoughLapRmCompF
 
 
 
+omit [DecidableEq Idx] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -243,6 +247,8 @@ theorem nablaLapCommF_trace
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_orthonormalTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -293,6 +299,8 @@ section OrthonormalFrame
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem exists_orthoFrameAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :
@@ -349,6 +357,7 @@ def deltaInvMetric {Idx : Type*} [DecidableEq Idx] :
     Real → DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx :=
   fun _ _ i j => if i = j then 1 else 0
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem deltaInvMetric_apply {Idx : Type*} [DecidableEq Idx]
     (t : Real) (x : M) (i j : Idx) :
     deltaInvMetric (M := M) (Idx := Idx) t x i j = if i = j then 1 else 0 := rfl
@@ -356,6 +365,7 @@ def deltaInvMetric {Idx : Type*} [DecidableEq Idx] :
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem deltaInvMetric_orthonormal {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (t : Real) (x : M) :
     InverseMetricOrthonormalAt (M := M) (Idx := Idx) (deltaInvMetric (M := M)) t x := by
@@ -385,6 +395,8 @@ theorem deltaInvMetric_orthonormal {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaLapComm_orthoFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

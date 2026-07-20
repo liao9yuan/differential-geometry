@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedFChartEffStepRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -145,6 +145,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenMthMixed_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -214,6 +215,7 @@ private structure SmoothExt (α : M) (f : EuclN → ℝ) where
   ext_eq_on_cthick : ∀ y ∈ Metric.cthickening δ (Kα (I := I) (M := M) α),
     ext y = f y
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothExt_of_contDiffOn (α : M) {f : EuclN → ℝ}
     (hf : ContDiffOn ℝ (⊤ : ℕ∞) f (Ωα (I := I) (M := M) α)) :
     Nonempty (SmoothExt (I := I) (M := M) α f) := by
@@ -273,6 +275,7 @@ private lemma memWkp_finset_sum_univ
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_coef_mul_factor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -385,6 +388,7 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α) h_ae_eq).mp
     h_prod_memWkp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_A_pair_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -454,6 +458,7 @@ private lemma layer_A_pair_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_A_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -501,6 +506,7 @@ private lemma layer_A_memWkp
           (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs) y)
     (fun i _hi => h_inner_sum i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_B_pair_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -557,6 +563,7 @@ private lemma layer_B_pair_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_B_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -604,6 +611,7 @@ private lemma layer_B_memWkp
           (Fin.cons i (Fin.snoc dirs j)) y)
     (fun i _hi => h_inner_sum i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_C_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -654,6 +662,7 @@ private lemma layer_C_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_D_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (K : ℕ)
@@ -675,6 +684,7 @@ private lemma layer_D_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_prev_memWkp_K h_prev_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layer_E_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (K : ℕ)
@@ -728,6 +738,7 @@ private lemma layer_E_memWkp
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -788,6 +799,7 @@ private lemma fChartEffStepNumerator_memWkp
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -972,6 +984,7 @@ private lemma fChartEffStepNumerator_ae_zero_off_Kα
           (Ωα (I := I) (M := M) α) y) = 0
   rw [hA, hB, hC, hD, hE]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -987,6 +1000,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
       (Ωα (I := I) (M := M) α) := contDiffOn_const
   exact h_const.div h_dens_smooth h_ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_div_density_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -1042,6 +1056,7 @@ private lemma fChartEffStepNumerator_div_density_memWkp
     (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_num_memWkp h_num_ae_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memWkp_K_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m K : ℕ)
@@ -1153,6 +1168,7 @@ theorem fChartEffStep_memWkp_K_two
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α)
     h_fStep_ae_eq_Q).mpr hQ_memWkp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

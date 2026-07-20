@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -109,6 +109,7 @@ noncomputable def galerkinCoordEmbed
   (galerkinCoordEmbedLM (I := I) (M := M) g₀ a S).toContinuousLinearMap
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 @[simp] lemma galerkinCoordEmbed_coeff
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
@@ -163,6 +164,7 @@ noncomputable def galerkinCoordDiag
   (galerkinCoordDiagLM (I := I) (M := M) g₀ S).toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 @[simp] lemma galerkinCoordDiag_apply
     (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))

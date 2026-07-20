@@ -27,29 +27,31 @@ open DifferentialGeometry.Integral.Measure
 open CovariantDerivative
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
 
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita_contMDiffCovariantDerivativeLocally (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally (LeviCivita (I := I) g) ∞ := by
   simpa [LeviCivita, metricCov] using (metricCov_smooth (I := I) g)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita
     (g : SmoothRiemannianMetric I M)
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -60,11 +62,12 @@ theorem connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita
         (fun p => X p) (fun p => Y p) (fun p => Z p) x := by
   simp [LeviCivita]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem riemannCurvatureAt_lcOfMetric_eq_leviCivita
     (g : SmoothRiemannianMetric I M)
     (x : M) :
@@ -98,7 +101,7 @@ theorem riemannCurvatureAt_lcOfMetric_eq_leviCivita
   exact congrArg _
     (connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita (I := I) g X Y Z x)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 
 
 
@@ -108,6 +111,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 
 
 
+omit [SigmaCompactSpace M] in
 theorem riemannCurvatureAux_tangentConst_eq_riemannOp
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -140,6 +144,8 @@ theorem riemannCurvatureAux_tangentConst_eq_riemannOp
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciCurvatureAt_leviCivita_apply_eq_ricciTensor
     (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
@@ -164,6 +170,8 @@ theorem ricciCurvatureAt_leviCivita_apply_eq_ricciTensor
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricRicciAt_apply_eq_ricciTensor
     (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
@@ -175,11 +183,12 @@ theorem metricRicciAt_apply_eq_ricciTensor
   rw [metricRicciAt, ricciCurvatureAt_eq_trace, key, ← ricciCurvatureAt_eq_trace]
   exact ricciCurvatureAt_leviCivita_apply_eq_ricciTensor (I := I) g x v w
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricRm13At_eq_riemannCurvatureAt
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm13At (I := I) g x
@@ -190,12 +199,13 @@ theorem metricRm13At_eq_riemannCurvatureAt
           (leviCivita_contMDiffCovariantDerivativeLocally (I := I) g) x
   exact riemannCurvatureAt_lcOfMetric_eq_leviCivita (I := I) g x
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricRm04At_eq_riemannCurvature04At
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm04At (I := I) g x

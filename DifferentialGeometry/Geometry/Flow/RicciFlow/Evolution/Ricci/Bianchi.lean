@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaCoord
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -25,7 +24,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -87,6 +86,7 @@ def ricciVariationExpandedRHSInFrame
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -229,6 +229,7 @@ def ScalarHessianFromNabla2RicSymmetricInFrame
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem contractedNabla2RicTraceRightNatural_eq_traceB
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -292,6 +293,7 @@ def HessSymmLoc
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem traceRightNatLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -322,6 +324,7 @@ theorem traceRightNatLoc
     _ = contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j := hB.symm
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[deprecated "use DifferentiatedContractedBianchiInFrameOnLocal or a pointwise producer" (since := "2026-05-22")]
 theorem DifferentiatedContractedBianchiInFrame.of_local_cover
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -337,6 +340,8 @@ theorem DifferentiatedContractedBianchiInFrame.of_local_cover
   intro t x i j
   exact h t x (hcover x) i j
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem differentiatedContractedBianchiInFrameOnLocal_of_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -668,6 +673,8 @@ def RicciCurvatureCommutatorsInFrame
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem RicciCurvatureCommutatorsInFrame_of_differentiatedBianchi_and_secondCommutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

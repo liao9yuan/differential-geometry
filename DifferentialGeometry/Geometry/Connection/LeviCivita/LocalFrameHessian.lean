@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,11 +28,11 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped BigOperators Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E] [Module.Finite Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -73,7 +72,9 @@ def scalHessFrame
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem scalHessFrameSymm
+    [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M)
     {x₀ : M} {C : LocalChartAt (I := I) x₀} (F : C.Frame)
     {x : M} (hx : x ∈ F.domain)
@@ -102,7 +103,9 @@ def frameInvMetric
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 theorem frameInvMetric_real
+    [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M)
     {x₀ : M} {C : LocalChartAt (I := I) x₀} (F : C.Frame)
     {x : M} (hx : x ∈ F.domain) :
@@ -123,7 +126,9 @@ def frameScalHess
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem frameScalHess_symm
+    [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M)
     {x₀ : M} {C : LocalChartAt (I := I) x₀} (F : C.Frame)
     {x : M} (hx : x ∈ F.domain)

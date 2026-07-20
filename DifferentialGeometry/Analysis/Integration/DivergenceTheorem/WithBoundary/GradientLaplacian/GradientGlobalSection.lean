@@ -23,6 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+omit [InnerProductSpace ℝ E] in
 private lemma partialDerivWithin_scalarOnE_contMDiffOn_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -47,6 +48,7 @@ private lemma extChartAt_contMDiffOn_chart_source (α : M) :
     ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E) (chartAt H α).source :=
   contMDiffOn_extChartAt
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chart_source_subset_preimage_target (α : M) :
     (chartAt H α).source ⊆
       (extChartAt I α : M → E) ⁻¹' (extChartAt I α).target := by
@@ -55,6 +57,7 @@ private lemma chart_source_subset_preimage_target (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hxsrc
 
+omit [InnerProductSpace ℝ E] in
 lemma gradChartCoeffWithin_contMDiffOn_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -85,6 +88,7 @@ lemma gradChartCoeffWithin_contMDiffOn_full
       chart_source_subset_preimage_target (I := I) α
     exact hpartialM.comp hchart hsubset
 
+omit [InnerProductSpace ℝ E] in
 lemma gradChartLocalWithin_contMDiffOn_total_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -113,6 +117,7 @@ lemma gradChartLocalWithin_contMDiffOn_total_full
     exact (hcoeff i).smul_section (hbasis i)
   exact ContMDiffOn.sum_section (fun i _ => hsmul i)
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_eq_gradChartLocalWithin_on_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -121,6 +126,7 @@ private lemma gradFun_eq_gradChartLocalWithin_on_chart_source
   intro y hy
   exact (gradChartLocalWithin_eq_gradFun (I := I) g α hf hy).symm
 
+omit [InnerProductSpace ℝ E] in
 lemma gradFun_contMDiffOn_chart_source_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -138,6 +144,7 @@ lemma gradFun_contMDiffOn_chart_source_full
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g α f y)
   rw [h]
 
+omit [InnerProductSpace ℝ E] in
 theorem gradFun_contMDiff_total_full
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

@@ -598,7 +598,9 @@ theorem triv_fwdEquiv_eq (s q : ℕ) (x₀ x : B)
   exact (triv_toTensor_eq_modelFromTensorEquiv_symm (Module.finBasis 𝕜 F) s q x₀ x hx t).symm
 
 
-theorem multilinearTensorFiberwiseEquiv_smooth :
+omit [ContMDiffVectorBundle n F E IB] in
+theorem multilinearTensorFiberwiseEquiv_smooth
+    (_hE : ContMDiffVectorBundle n F E IB) :
     ContMDiff
       (IB.prod 𝓘(𝕜, MLF (s + q)))
       (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))
@@ -609,6 +611,7 @@ theorem multilinearTensorFiberwiseEquiv_smooth :
           TotalSpace ((MLF s) ⊗[𝕜] (MLF q))
             (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                        Bundle.continuousMultilinearMap 𝕜 q F E x))) := by
+  letI := _hE
   haveI : ContMDiffVectorBundle n
       ((MLF s) ⊗[𝕜] (MLF q))
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
@@ -636,7 +639,9 @@ theorem multilinearTensorFiberwiseEquiv_smooth :
 
 set_option maxHeartbeats 400000 in
 
-theorem multilinearTensorFiberwiseEquiv_symm_smooth :
+omit [ContMDiffVectorBundle n F E IB] in
+theorem multilinearTensorFiberwiseEquiv_symm_smooth
+    (_hE : ContMDiffVectorBundle n F E IB) :
     ContMDiff
       (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))
       (IB.prod 𝓘(𝕜, MLF (s + q)))
@@ -647,6 +652,7 @@ theorem multilinearTensorFiberwiseEquiv_symm_smooth :
         (⟨p.1, (multilinearTensorFiberwiseEquiv s q p.1).symm p.2⟩ :
           TotalSpace (MLF (s + q))
             (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x))) := by
+  letI := _hE
   haveI : ContMDiffVectorBundle n
       ((MLF s) ⊗[𝕜] (MLF q))
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
@@ -684,8 +690,8 @@ noncomputable def multilinearBundle_tensorProduct_equiv :
                  Bundle.continuousMultilinearMap 𝕜 q F E x) :=
   ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
     (fun x => multilinearTensorFiberwiseEquiv s q x)
-    (multilinearTensorFiberwiseEquiv_smooth n)
-    (multilinearTensorFiberwiseEquiv_symm_smooth n)
+    (multilinearTensorFiberwiseEquiv_smooth n inferInstance)
+    (multilinearTensorFiberwiseEquiv_symm_smooth n inferInstance)
 
 noncomputable def toTensorProduct
     (α : MultilinearSection 𝕜 F IB E n (s + q)) :
@@ -693,7 +699,7 @@ noncomputable def toTensorProduct
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                  Bundle.continuousMultilinearMap 𝕜 q F E x) :=
   ⟨fun x => multilinearTensorFiberwiseEquiv s q x (α x),
-   ((multilinearTensorFiberwiseEquiv_smooth n).comp α.contMDiff).congr fun _ => rfl⟩
+   ((multilinearTensorFiberwiseEquiv_smooth n inferInstance).comp α.contMDiff).congr fun _ => rfl⟩
 
 noncomputable def fromTensorProduct
     (γ : ContMDiffSection IB ((MLF s) ⊗[𝕜] (MLF q)) n
@@ -701,7 +707,7 @@ noncomputable def fromTensorProduct
                        Bundle.continuousMultilinearMap 𝕜 q F E x)) :
     MultilinearSection 𝕜 F IB E n (s + q) :=
   ⟨fun x => (multilinearTensorFiberwiseEquiv s q x).symm (γ x),
-   ((multilinearTensorFiberwiseEquiv_symm_smooth n).comp γ.contMDiff).congr fun _ => rfl⟩
+   ((multilinearTensorFiberwiseEquiv_symm_smooth n inferInstance).comp γ.contMDiff).congr fun _ => rfl⟩
 
 theorem fromTensorProduct_toTensorProduct
     (α : MultilinearSection 𝕜 F IB E n (s + q)) (x : B) :

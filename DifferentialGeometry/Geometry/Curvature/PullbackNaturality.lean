@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -31,6 +30,7 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by
   decide
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 private theorem mfderiv_eq_cle_apply
     (Phi : M ≃ₘ⟮I, I⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zero x v =
@@ -39,6 +39,7 @@ private theorem mfderiv_eq_cle_apply
     Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
   exact congrArg (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f v) h
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 theorem mpullback_symm_apply
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     VectorField.mpullback I I (Phi.symm : N -> M) X (Phi x) =
@@ -85,6 +86,7 @@ private abbrev pushFwdField
     (q : N) -> TangentSpace I q :=
   VectorField.mpullback I I (Phi.symm : N -> M) X
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 @[simp] private theorem pushFwdField_apply_at_image
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     pushFwdField (I := I) Phi X (Phi x) =
@@ -110,6 +112,7 @@ noncomputable def pushFwdSection
       exact ContinuousLinearMap.isInvertible_equiv
     · simp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 @[simp] theorem pushFwdSection_apply_at_image
     [IsManifold I 1 M] [IsManifold I 1 N]
     (Phi : M ≃ₘ⟮I, I⟯ N)
@@ -122,6 +125,7 @@ noncomputable def pushFwdSection
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem directionalDeriv_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
@@ -173,6 +177,7 @@ theorem directionalDeriv_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem inner_bracket_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
@@ -219,6 +224,7 @@ private theorem inner_bracket_pullback_pushFwd
   rw [pushFwdSection_apply_at_image]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem koszulScalar_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
     [IsManifold I 1 M] [IsManifold I 1 N]
@@ -245,6 +251,7 @@ private theorem koszulScalar_pullback_pushFwd
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCov_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -319,6 +326,7 @@ theorem metricCov_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem connectionRiemannCurvatureField_pullback_pushFwd
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -476,6 +484,7 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
   rw [hZY, hZX, hbr]
   simp [covg]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRm04Std_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]

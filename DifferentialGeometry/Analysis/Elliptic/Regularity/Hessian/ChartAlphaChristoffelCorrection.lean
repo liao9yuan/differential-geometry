@@ -12,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianChartAlphaChristoffelDischarge
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -52,6 +52,7 @@ def christoffelDischargeSmoothCase
           smoothPairingChristoffelDiff (I := I) (M := M) g α φ v
             ((toEuclidean (E := E)) (extChartAt I α x)) = 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma christoffelDischargeSmoothCase_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     christoffelDischargeSmoothCase (I := I) (M := M) g φ v ↔

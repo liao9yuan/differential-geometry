@@ -17,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -63,6 +63,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hg_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_of_contDiffOn_chartTarget
     (α : M)
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -102,6 +103,7 @@ private lemma euclidPartial_contDiffOn_chartTarget
       (EuclideanSpace.single l 1)).contDiff.contDiffAt.comp x hfd
   exact hat.contDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_coeff_mul_test
     (α : M)
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -115,6 +117,7 @@ private lemma contDiff_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiff_coeff_mul_partial_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -174,6 +177,7 @@ lemma hasCompactSupport_partial_coeff_mul_test
     HasCompactSupport (fun y => euclidPartial (E := E) l f y * g y) :=
   hg_supp.mul_left
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem chartTarget_integral_byParts
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}

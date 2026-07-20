@@ -61,6 +61,7 @@ variable {X : Type*} [TopologicalSpace X] [Inhabited X]
 
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_sheet_bijection_on_good_U
     (p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
     (U : Set X) (hU : IsOpen U) (hp : p.1 ∈ U)
@@ -140,6 +141,7 @@ theorem uc_sheet_bijection_on_good_U
 
 
 
+omit [Inhabited X] [ConnectedSpace X] in
 private theorem uc_good_nhd_exists (x : X) :
     ∃ (U : Set X), IsOpen U ∧ x ∈ U ∧ IsPathConnected U ∧
       ∀ γ : _root_.Path x x, (∀ t, γ t ∈ U) →
@@ -158,6 +160,7 @@ private theorem uc_good_nhd_exists (x : X) :
   exact hUsub (ht ▸ this)
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 private theorem uc_sheet_disjoint
     {U : Set X} (hU : IsOpen U)
     {p₁ p₂ :
@@ -223,6 +226,7 @@ private theorem uc_sheet_disjoint
     _ = c₂ := _root_.Path.Homotopic.Quotient.trans_refl c₂
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 private theorem uc_sheet_exhaust
     (x : X) {U : Set X} (hU : IsOpen U) (hxU : x ∈ U) (hUpc : IsPathConnected U)
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
@@ -243,6 +247,7 @@ private theorem uc_sheet_exhaust
     _root_.Path.Homotopic.Quotient.symm_trans]
 
 
+omit [ConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 private theorem uc_sheet_proj_isOpenMap
     {p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X}
     {U : Set X} (hU : IsOpen U) (hp : p.1 ∈ U)
@@ -289,6 +294,7 @@ set_option linter.dupNamespace false in
 
 
 
+omit [ConnectedSpace X] in
 theorem UniversalCover.proj_isCoveringMap :
     IsCoveringMap (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) := by
@@ -516,6 +522,7 @@ def uc_subpathLift {x : X} (γ : _root_.Path (default : X) x)
 
 
 
+omit [ConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
     Continuous (uc_subpathLift γ) := by
   refine continuous_iff_continuousAt.mpr fun s₀ => ?_
@@ -584,6 +591,7 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
     exact _root_.Path.Homotopic.Quotient.trans_assoc _ _ _
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_subpathLift_zero {x : X} (γ : _root_.Path (default : X) x) :
     uc_subpathLift γ 0 = basePoint := by
   change (⟨γ 0,
@@ -601,6 +609,7 @@ theorem uc_subpathLift_zero {x : X} (γ : _root_.Path (default : X) x) :
   exact γ.source
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_subpathLift_one {x : X} (γ : _root_.Path (default : X) x) :
     uc_subpathLift γ 1 =
       ⟨x, _root_.Path.Homotopic.Quotient.mk γ⟩ := by
@@ -617,6 +626,7 @@ theorem uc_subpathLift_one {x : X} (γ : _root_.Path (default : X) x) :
     Set.Icc.convexCombo_zero_one]
 
 
+omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_subpathLift_proj {x : X} (γ : _root_.Path (default : X) x)
     (s : unitInterval) : proj (uc_subpathLift γ s) = γ s := rfl
 
@@ -624,6 +634,7 @@ theorem uc_subpathLift_proj {x : X} (γ : _root_.Path (default : X) x)
 
 
 
+omit [ConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_joined_basePoint
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :
     Joined (basePoint (X := X)) q := by
@@ -653,6 +664,7 @@ instance UniversalCover.pathConnectedSpace :
 
 
 
+omit [ConnectedSpace X] in
 theorem uc_basePoint_loops_nullhomotopic
     (δ : _root_.Path (basePoint (X := X)) basePoint) :
     _root_.Path.Homotopic δ (_root_.Path.refl basePoint) := by

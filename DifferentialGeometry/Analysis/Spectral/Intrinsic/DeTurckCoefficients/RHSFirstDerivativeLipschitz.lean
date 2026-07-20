@@ -97,6 +97,7 @@ private lemma sum_pair_sub_bnd
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD2_sub
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -302,6 +303,7 @@ theorem deTurckVFD2_sub
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannD_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -462,6 +464,7 @@ theorem chartRiemannD_sub
       ring
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciD_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -506,6 +509,7 @@ theorem chartRicciD_sub
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLieD_sub
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)

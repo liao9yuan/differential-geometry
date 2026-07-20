@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6Isometry
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -38,6 +37,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem H6Isometry.normalTrans_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U V : Set E}
@@ -97,6 +97,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem NormalCoordMetricEquivOn.symm_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) {c : Y.M} {U : Set E}

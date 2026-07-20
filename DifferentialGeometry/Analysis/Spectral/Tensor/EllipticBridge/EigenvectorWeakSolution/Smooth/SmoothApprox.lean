@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,8 @@ abbrev TensorEigenIdx
     Fin (Module.finrank ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inner_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensorH1 g r s) :
@@ -43,6 +45,8 @@ private lemma inner_smoothToTensorH1Compl
   rw [UniformSpace.Completion.inner_coe]
   exact SmoothCcTensorH1.inner_def S T
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inner_smoothToTensorH1Compl_eq_l2_add_dirichlet
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensorH1 g r s) :

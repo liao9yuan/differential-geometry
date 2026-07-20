@@ -41,6 +41,7 @@ noncomputable instance tensorRSCovariantDerivative_contMDiff (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
 
+omit [CompleteSpace E] in
 theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -61,6 +62,7 @@ theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
     τ w x v
 
+omit [CompleteSpace E] in
 theorem tensorRSCovariantDerivative_apply_of_mdifferentiableAt (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

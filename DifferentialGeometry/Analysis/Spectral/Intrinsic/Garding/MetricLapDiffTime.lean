@@ -51,6 +51,8 @@ noncomputable def lapDiffA2
     (G.metric ((T : Real) - s))
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem lapDiff_rho
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -74,6 +76,8 @@ private theorem lapDiff_rho
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lapDiff_fibreSmall
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -114,6 +118,8 @@ theorem lapDiff_fibreSmall
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lapDiff_short
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

@@ -17,7 +17,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,7 @@ private noncomputable def smoothOrthoFrameAsSection
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨smoothOrthoFrame (I := I) g y i, smoothOrthoFrame_smooth (I := I) g y i⟩
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 private lemma smoothOrthoFrameAsSection_toFun
     (g : SmoothRiemannianMetric I M) (y : M)
@@ -38,6 +39,7 @@ private lemma smoothOrthoFrameAsSection_toFun
     (smoothOrthoFrameAsSection (I := I) g y i).toFun =
       smoothOrthoFrame (I := I) g y i := rfl
 
+omit [CompleteSpace E] in
 theorem rawTensorConnLap_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

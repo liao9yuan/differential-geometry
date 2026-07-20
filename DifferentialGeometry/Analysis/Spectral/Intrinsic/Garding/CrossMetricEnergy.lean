@@ -85,6 +85,8 @@ private theorem add_sq_le (a b : Real) :
   nlinarith [sq_nonneg (a - b)]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem cross_point_le
     (q k : SmoothRiemannianMetric I M) (Ce R : Real)
     (hEq : DifferentialGeometry.HCGCompactness.MetricUniformEquivalentOn

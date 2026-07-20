@@ -49,6 +49,7 @@ private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -126,6 +127,7 @@ private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     exact hsum_zero i]
   rw [zero_div]
 
+omit [InnerProductSpace ℝ E] in
 lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -136,6 +138,7 @@ lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
     (mem_chart_source H x) hev
 
 
+omit [InnerProductSpace ℝ E] in
 lemma support_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -153,6 +156,7 @@ lemma support_divergence_g_with_boundary_subset_of_interior_support
     exact hy (subset_tsupport _ hyS)
   exact hx (divergence_g_with_boundary_zero_of_eventuallyEq_zero (I := I) g X hev)
 
+omit [InnerProductSpace ℝ E] in
 lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -163,6 +167,7 @@ lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int) (isClosed_tsupport _)
 
+omit [InnerProductSpace ℝ E] in
 lemma hasCompactSupport_divergence_g_with_boundary
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -173,6 +178,7 @@ lemma hasCompactSupport_divergence_g_with_boundary
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int)
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_continuous_of_interior_support
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -445,6 +451,7 @@ private lemma integral_riemannianVolume_compactSupport_finset_sum
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
 
+omit [InnerProductSpace ℝ E] in
 private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -520,6 +527,7 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     exact ρ.sum_finsupport' x (mem_univ x) hfins
   rw [hsum_one, mul_one]
 
+omit [InnerProductSpace ℝ E] in
 private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -595,6 +603,7 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
       exact hxK (subset_tsupport _ hne)
     rw [hh_zero, zero_mul]
 
+omit [InnerProductSpace ℝ E] in
 theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -850,6 +859,7 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
       = (fun _ : M => (0 : ℝ)) from funext h_pt]
   rw [integral_zero, neg_zero]
 
+omit [InnerProductSpace ℝ E] in
 theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

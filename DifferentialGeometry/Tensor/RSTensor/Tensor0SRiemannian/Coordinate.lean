@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -65,6 +64,7 @@ theorem sum_fin_one_fun {Idx : Type*} [Fintype Idx]
   funext a
   simpa [Equiv.funUnique] using congrArg I0 (Subsingleton.elim a (0 : Fin 1))
 
+omit [FiniteDimensional ℝ E] in
 theorem basis_repr_eq_sum_inv_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -146,6 +146,7 @@ theorem basis_repr_eq_sum_inv_inner
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem linearMap_trace_eq_sum_inv_inner_apply
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -325,6 +326,7 @@ theorem homCLM_inner_eq_basis
         gInv i j * D.inner (A (basis i)) (B (basis j)) := by
   exact hom_inner_eq_basis (I := I) g x basis gInv hinv D A.toLinearMap B.toLinearMap
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor0S_curry_one_apply
     {x : M} (A : Tensor0SSpace 2 I x)
     (X Y : TangentSpace I x) :
@@ -344,6 +346,7 @@ theorem tensor0S_curry_one_apply
   funext a
   fin_cases a <;> simp [Fin.cons_zero]
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor0S_curry_apply_cons
     {x : M} (s : Nat) (A : Tensor0SSpace (s + 1) I x)
     (X : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
@@ -360,6 +363,7 @@ theorem tensor0S_curry_apply_cons
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_zero_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -373,6 +377,7 @@ theorem coordInner0S_zero_eq
     Finset.sum_singleton]
   congr <;> funext a <;> exact Fin.elim0 a
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_one_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -392,6 +397,7 @@ theorem coordInner0S_one_eq
   intro j _
   simp [cotangentToDual_apply_gen]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_succ_summand_eq
     {Idx : Type*}  {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -427,6 +433,7 @@ theorem coordInner0S_succ_summand_eq
   rw [hA, hB]
   simp [Fin.cons_zero, Fin.cons_succ]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_succ_eq
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -505,6 +512,7 @@ theorem coordInner0S_succ_eq
           intro tailJ _
           ring
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_smul_smul
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -517,6 +525,7 @@ theorem coordInner0S_smul_smul
   unfold coordInner0S tensor0SComponent
   simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_smul_right
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -529,6 +538,7 @@ theorem coordInner0S_smul_right
   unfold coordInner0S tensor0SComponent
   simp [Finset.mul_sum, mul_left_comm, mul_comm]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_smul_left
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -541,6 +551,7 @@ theorem coordInner0S_smul_left
   unfold coordInner0S tensor0SComponent
   simp [Finset.mul_sum, mul_left_comm, mul_comm]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_zero_left
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -551,6 +562,7 @@ theorem coordInner0S_zero_left
   unfold coordInner0S tensor0SComponent
   simp
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_add_left
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -563,6 +575,7 @@ theorem coordInner0S_add_left
   unfold coordInner0S tensor0SComponent
   simp [Finset.sum_add_distrib, mul_add, mul_left_comm, mul_comm]
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_sum_left
     {Idx ι : Type*} [Fintype Idx] [Fintype ι] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -595,6 +608,7 @@ theorem coordInner0S_sum_left
           rw [coordInner0S_smul_left (I := I) s gInv (A a) B basis]
           rw [hS])
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor0S_curry_product_one_two
     {x : M}
     (α : Tensor0SSpace 1 I x) (A : Tensor0SSpace 2 I x)

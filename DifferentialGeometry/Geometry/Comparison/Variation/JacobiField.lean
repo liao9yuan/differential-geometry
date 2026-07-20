@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCu
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -66,6 +65,9 @@ def IsJacobiAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   ∀ t : ℝ, IsJacobiAt (I := I) g γ J t
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) :
     IsJacobiAlong (I := I) g γ J ↔
@@ -96,6 +98,9 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ode_bound_of_isJacobiAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {K t : ℝ}

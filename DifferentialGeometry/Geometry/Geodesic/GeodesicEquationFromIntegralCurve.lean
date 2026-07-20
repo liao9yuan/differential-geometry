@@ -17,7 +17,7 @@ namespace Geometry
 namespace Riemannian
 namespace Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Measure
 
 section ChartPushedDecomp
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushLift_fst_eq
     (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
     (chartPushLift (I := I) f t₀ t).1 =
@@ -38,7 +38,7 @@ lemma chartPushLift_fst_eq
   simp only [PartialEquiv.trans_apply, PartialEquiv.prod_coe]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushLift_fst_eq_chartLocalCurve
     {f : ℝ → TangentBundle I M} {γ : ℝ → M}
     (hproj : ∀ t, (f t).proj = γ t) (t₀ t : ℝ) :
@@ -50,7 +50,7 @@ end ChartPushedDecomp
 
 section ChartPushVFSelf
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushVF_self
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
@@ -69,6 +69,7 @@ section ChartCenteredLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma exists_chartCenteredLift_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (t₀ : ℝ) :
     ∃ f : ℝ → TangentBundle I M,
@@ -93,6 +94,7 @@ section FirstDerivative
 variable [I.Boundaryless] [CompleteSpace E]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -122,6 +124,7 @@ theorem hasDerivAt_chartLocalCurve_of_chartCentered
   exact hfst
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem eventually_hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -158,6 +161,7 @@ section ConditionalHeadline
 variable [I.Boundaryless] [CompleteSpace E]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -268,6 +272,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 variable [I.Boundaryless] [CompleteSpace E]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -301,6 +306,7 @@ theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
     (f := f) (t₀ := t₀) hft₀_proj s hs
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasGeodesicEquationAt_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -314,6 +320,7 @@ theorem hasGeodesicEquationAt_of_chartCentered
       (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (h : ∃ f : ℝ → TangentBundle I M,
@@ -326,6 +333,7 @@ theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
     (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem IsGeodesicAt.hasGeodesicEquationAt_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀)
@@ -343,7 +351,7 @@ section CrossVFReduction
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t₀ : ℝ}
     (hγt₀ : γ t₀ = γ' t₀)
@@ -376,6 +384,7 @@ theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
   · rw [hγt₀]
     exact halg
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma exists_chartCenteredLift_at_lift_eq
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -389,6 +398,7 @@ lemma exists_chartCenteredLift_at_lift_eq
   rw [hf₁_init, ← hproj_t₀]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (_hγ : IsGeodesicAt (I := I) g γ t₀)

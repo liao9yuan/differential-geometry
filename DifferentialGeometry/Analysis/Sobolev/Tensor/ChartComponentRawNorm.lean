@@ -98,6 +98,7 @@ theorem wkpNormChartRaw_zero_section
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (α : M) (ρ u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -122,6 +123,7 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy]
     rw [mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
     (α : M) (ρ u : M → ℝ) :
     (chartPushedRaw (I := I) (M := M) α (fun x : M => ρ x * u x)) =
@@ -132,6 +134,7 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
   exact chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (I := I) (M := M) α ρ u y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_eq_chartSmoothExt_mul_chartPushedRaw_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -228,12 +231,14 @@ theorem chartSmoothExt_chartAtlasPOU_contDiff (α : M) :
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   contDiff_chartSmoothExt_chartAtlasPOU (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartSmoothExt_chartAtlasPOU_hasCompactSupport (α : M) :
     HasCompactSupport
       (chartSmoothExt (I := I) (M := M) α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   hasCompactSupport_chartSmoothExt_chartAtlasPOU (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_iteratedFDeriv_bound_chartSmoothExt_chartAtlasPOU
     (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

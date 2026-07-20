@@ -36,13 +36,11 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ∞ M]
 
 private theorem fderivWithin_eq_sum_basis_coord
     {F : E -> E} {u : Set E} {y Xy : E}
@@ -104,6 +102,7 @@ private theorem fderivWithin_eq_sum_basis_coord
   · intro hi
     simp at hi
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 private theorem fderivWithin_chart_scalar_eq_extDerivFun
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (φ : E -> 𝕜) (f : M -> 𝕜)
@@ -254,6 +253,7 @@ theorem covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
           (extChartAt I x₀ x₀)) := by
           rw [hderiv]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 private theorem tangentFieldModelInChart_center_symmL
     (V : (x : M) -> TangentSpace I x) (x₀ : M) :
     (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
@@ -270,6 +270,7 @@ private theorem tangentFieldModelInChart_center_symmL
   exact e.symmL_continuousLinearMapAt
     (R := 𝕜) (FiberBundle.mem_baseSet_trivializationAt' x₀) (V x₀)
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModelInChart_apply_modelSlots_center {s : ℕ}
     (A : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) s x)
@@ -286,6 +287,7 @@ private theorem tensor0SModelInChart_apply_modelSlots_center {s : ℕ}
   funext a
   exact tangentFieldModelInChart_center_symmL (I := I) (V a) x₀
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModelInChart_apply_update_modelSlot_center {s : ℕ}
     (A : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) s x)
@@ -316,6 +318,7 @@ private theorem tensor0SModelInChart_apply_update_modelSlot_center {s : ℕ}
       Function.comp_apply, Function.update_of_ne hb, Trivialization.symmL_apply]
     exact tangentFieldModelInChart_center_symmL (I := I) (V b) x₀
 
+omit [CompleteSpace 𝕜] in
 private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -361,6 +364,7 @@ private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s :
   exact fderivWithin_chart_scalar_eq_extDerivFun
     (I := I) X x₀ φ f hpair heq
 
+omit [CompleteSpace 𝕜] in
 private theorem fderivWithin_localTensor0S_eval_modelSlots_center_eq_extDerivFun {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
@@ -407,6 +411,7 @@ private theorem fderivWithin_localTensor0S_eval_modelSlots_center_eq_extDerivFun
     (I := I) X x₀ φ f hpair heq
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompleteSpace 𝕜] in
 private theorem fderivWithin_tensorRS_eval_modelSlots_center_eq_extDerivFun {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -664,6 +669,7 @@ theorem localCovariantDerivTensor0SAt_eval_moving_raw {r : ℕ}
           rw [hcorr_sum]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompleteSpace 𝕜] in
 private theorem tensorRSModelInChart_apply_modelSlots_center {r s : ℕ}
     (A : (x : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) r s x)
@@ -684,6 +690,7 @@ private theorem tensorRSModelInChart_apply_modelSlots_center {r s : ℕ}
     (FiberBundle.mem_baseSet_trivializationAt' x₀) (A x₀) βm slots
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompleteSpace 𝕜] in
 private theorem tensorRSModelInChart_apply_update_modelOutputSlot_center {r s : ℕ}
     (A : (x : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) r s x)

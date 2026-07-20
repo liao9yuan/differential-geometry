@@ -33,7 +33,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
     deTurckLieFib deTurckLieCoeffField deTurckLieCoeffField_toSection
     deTurckConnDiffCovDeriv connDiff_pairing_mdiffAt connDiffCovDerivOp dLaCovKernel_apply_extend)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,7 @@ def deTurckLieConnDiffDerivCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 @[simp] theorem deTurckLieDLaCoeffField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -65,12 +66,15 @@ def deTurckLieDLbCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := deTurckLieDLbFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem deTurckLieDLbCoeffField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)) := rfl
 
+omit [I.Boundaryless] in
 theorem deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -85,6 +89,7 @@ theorem deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem connDiff_cocycle (gA gB gC : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v + PDE.DeTurck.connDiff (I := I) gB gC x u v =
@@ -99,6 +104,8 @@ theorem connDiff_cocycle (gA gB gC : SmoothRiemannianMetric I M) (x : M)
     PDE.DeTurck.connDiff_apply (I := I) gA gC hσ v]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckLieCovDerivA_backgroundSplit
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (X P Q : Π b : M, TangentSpace I b) (x : M)
@@ -240,6 +247,8 @@ theorem deTurckLieCovDerivA_backgroundSplit
   rw [hout', hinnP', hinnQ', hsplitT2, hsplitT3, hT2c, hT3c, hsplit, hA, hB]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem dLaCovKernel_backgroundSplit (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
     connDiffCovDerivOp (I := I) g₁ g_bg x v0 p q =
@@ -278,6 +287,7 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     |g.inner x u v| ≤ Real.sqrt (g.inner x u u) * Real.sqrt (g.inner x v v) := by
@@ -288,6 +298,7 @@ private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
   refine le_trans (Real.sqrt_le_sqrt h2) ?_
   rw [Real.sqrt_mul (metric_inner_self_nonneg (I := I) (M := M) g x u)]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem sqrt_metric_inner_add_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     Real.sqrt (g.inner x (u + v) (u + v)) ≤
@@ -310,6 +321,7 @@ private theorem sqrt_metric_inner_add_le (g : SmoothRiemannianMetric I M) (x : M
   refine le_trans (Real.sqrt_le_sqrt hsq) ?_
   rw [Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem sqrt_metric_inner_sub_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     Real.sqrt (g.inner x (u - v) (u - v)) ≤
@@ -337,6 +349,7 @@ theorem gFibreOpBound_mono_of_le (g₀ : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_right hle hnn
     _ = δ' * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -354,6 +367,7 @@ private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M
     mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   nlinarith [h1, h2, hnn]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem coframeS_one_eq_g0FlatCLM_local
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
@@ -369,6 +383,7 @@ private theorem coframeS_one_eq_g0FlatCLM_local
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 2 → Fin n)
     (p q : TangentSpace I x) :
@@ -381,6 +396,7 @@ private theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 1 2 I x) (d a b : TangentSpace I x) :
@@ -578,6 +594,7 @@ private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_fixed_connDiff_sqrt_bound (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (x : M) (v w : TangentSpace I x),
       Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g_bg g₀ x v w)
@@ -652,6 +669,7 @@ private theorem exists_fixed_connDiff_sqrt_bound (g₀ g_bg : SmoothRiemannianMe
         have hprod_nn : 0 ≤ Sv * Sw := mul_nonneg hSv_nn hSw_nn
         nlinarith [hWnorm, hprod_nn, hSv_nn, hSw_nn, hNW_nn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covGrad_connDiffSection_flat_eval_eq_inner_local
     (g₀ g_c : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -708,6 +726,7 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner_local
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_fixed_covDerivConnDiff_sqrt_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (x : M) (v w u : TangentSpace I x),

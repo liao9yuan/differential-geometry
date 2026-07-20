@@ -20,7 +20,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,7 +35,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private def chartImageOfTsupport (α : M) (φ : M → ℝ) : Set E :=
   (extChartAt I α) '' tsupport φ
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isCompact
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -49,7 +49,7 @@ private lemma chartImageOfTsupport_isCompact
     exact hφ_supp hx
   exact (hφ_compactSupp : IsCompact (tsupport φ)).image_of_continuousOn hcontOn
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_subset_target
     (α : M) {φ : M → ℝ}
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
@@ -63,7 +63,7 @@ private lemma chartImageOfTsupport_subset_target
     (extChartAt I α).map_source hxsrc
   rwa [hxy] at this
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartImageOfTsupport_isClosed
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -78,7 +78,6 @@ private def vwIntegrandOnE
   fun y => (extChartAt I α).target.indicator
     (fun z => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y
 
-omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -88,7 +87,6 @@ private lemma vwIntegrandOnE_apply_of_mem
       chartCoeffOnE (I := I) α X i y * chartDensityOnE (I := I) g α y :=
   Set.indicator_of_mem hy _
 
-omit [InnerProductSpace ℝ E] in
 private lemma vwIntegrandOnE_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -114,19 +112,19 @@ private def phiOnE (α : M) (φ : M → ℝ) : E → ℝ :=
   fun y => (extChartAt I α).target.indicator
     (fun z => φ ((extChartAt I α).symm z)) y
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_mem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = φ ((extChartAt I α).symm y) :=
   Set.indicator_of_mem hy _
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_notMem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = 0 :=
   Set.indicator_of_notMem hy _
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_eq_scalarOnE_on_target
     (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -134,7 +132,7 @@ private lemma phiOnE_eq_scalarOnE_on_target
   rw [phiOnE_apply_of_mem (I := I) α φ hy]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma phiOnE_contDiffOn_target [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ) :
     ContDiffOn ℝ ∞ (phiOnE (I := I) α φ) (extChartAt I α).target := by
@@ -145,7 +143,7 @@ private lemma phiOnE_contDiffOn_target [I.Boundaryless]
   intro y hy
   exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hy
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma contDiff_of_smooth_on_open_zero_outside
     {U : Set E} (hU : IsOpen U) {K : Set E} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : E → ℝ}
@@ -165,7 +163,7 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_support_subset_chartImage
     (α : M) (φ : M → ℝ) :
     Function.support (phiOnE (I := I) α φ) ⊆ chartImageOfTsupport (I := I) α φ := by
@@ -179,7 +177,7 @@ private lemma phiOnE_support_subset_chartImage
   · rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
     exact (hy rfl).elim
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_tsupport_subset_chartImage
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -188,7 +186,7 @@ private lemma phiOnE_tsupport_subset_chartImage
   refine closure_minimal (phiOnE_support_subset_chartImage (I := I) α φ) ?_
   exact chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -206,7 +204,7 @@ private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     exact hy this
   · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma phiOnE_contDiff [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (hφ_compactSupp : HasCompactSupport φ)
@@ -241,7 +239,7 @@ private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     vwIntegrandOnE_contDiffOn_target (I := I) g α X i y hy
   exact ((h_at.contDiffAt (hOpen.mem_nhds hy)).differentiableAt (by simp))
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     (α : M) (φ : M → ℝ)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -431,7 +429,6 @@ private theorem ibp_per_index [I.Boundaryless]
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
 
-omit [InnerProductSpace ℝ E] in
 private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -448,7 +445,7 @@ private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     exact vwIntegrandOnE_apply_of_mem (I := I) g α X i hz
   rw [h_eq.fderiv_eq]
 
-omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
+omit [IsManifold I ∞ M] in
 private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
     (α : M) (φ : M → ℝ) (i : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ (extChartAt I α).target) :

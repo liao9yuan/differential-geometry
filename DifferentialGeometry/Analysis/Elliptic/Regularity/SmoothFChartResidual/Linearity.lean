@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualLinearity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalar_eq_sub_of_toFun_eq
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -46,6 +47,7 @@ private lemma smoothScalar_eq_sub_of_toFun_eq
   rw [h_diff]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothToH1Compl_eq_sub
     (g : SmoothRiemannianMetric I M)
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -56,6 +58,7 @@ private lemma smoothToH1Compl_eq_sub
   rw [smoothScalar_eq_sub_of_toFun_eq v₁ v₂ v_diff h_diff]
   exact map_sub (smoothToH1Compl (I := I) (M := M) g) v₁ v₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibnizResidualLp_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (u₁ u₂ : H1Compl (I := I) (M := M) g) :
@@ -93,6 +96,7 @@ private lemma fHLeibnizResidualLp_sub
   rw [smul_sub, neg_sub]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -169,7 +173,7 @@ theorem smoothFChartResidual_ae_sub
               (smoothToH1Compl (I := I) (M := M) g v₂)) := by
     rw [h_residual_sub_at]
   have h_coeFn_sub :=
-    chartPushedRawLpFromLp_coeFn_sub (I := I) (M := M) g α
+    chartPushedRawLpFromLp_coeFn_sub (I := I) (M := M) g inferInstance α
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
         (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v₁))

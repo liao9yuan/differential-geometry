@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -56,6 +56,7 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   rw [hrw]
   exact hfderiv.clm_apply contDiffOn_const
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannTensor_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
@@ -93,6 +94,7 @@ theorem chartRiemannTensor_contDiffOn_interior
   rw [hrw]
   exact (hdΓ1.sub hdΓ2).add hΓΓ
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :

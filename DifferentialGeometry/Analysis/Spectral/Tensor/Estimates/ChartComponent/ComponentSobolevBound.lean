@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -154,6 +154,7 @@ theorem tensorChartComponentScalar_wkpNormChart_lt_top
     (tensorChartComponent_memWkpChart_one_two
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponent_wkpNormChart_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -192,6 +193,7 @@ theorem tensorChartComponent_wkpNormChart_le_per_section
           mul_le_mul_of_nonneg_left h_one_le (by exact zero_le _)
   exact h1.trans h2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponent_wkpNormChart_le_per_section_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)

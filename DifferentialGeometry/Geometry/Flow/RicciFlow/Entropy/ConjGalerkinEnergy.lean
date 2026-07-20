@@ -56,6 +56,7 @@ theorem galVec_norm_sq
 
 omit [BoundarylessManifold I M] in
 open scoped Classical in
+omit [CompactSpace M] in
 private theorem gal_crit_nf
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))

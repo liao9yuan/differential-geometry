@@ -15,7 +15,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,7 +33,7 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
           (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
         chartGramOnE (I := I) g α i j y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartInnerOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) (y : E) :
@@ -46,6 +46,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
             chartGramOnE (I := I) g α i j y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartInnerOnE_eq_g_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) {b : M}
@@ -76,7 +77,7 @@ lemma chartInnerOnE_eq_g_inner
   rw [hG i j]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_repr_comp
     {f : E → E} {y : E} (hf : DifferentiableAt ℝ f y)
     (i : Fin (Module.finrank ℝ E)) :
@@ -86,6 +87,7 @@ private lemma differentiableAt_repr_comp
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramOnE_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -101,6 +103,7 @@ lemma chartGramOnE_differentiableAt_int
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInnerOnE_eventuallyEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) {x : M}
@@ -124,7 +127,7 @@ private def chartReprComp
   ((chartModelBasis E).repr
       (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartReprComp_apply
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -132,6 +135,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
       ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartReprComp_differentiableAt
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -145,6 +149,7 @@ private lemma chartReprComp_differentiableAt
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hY
   exact differentiableAt_repr_comp hY_pull i
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartReprComp_fderiv_apply
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -169,6 +174,7 @@ private lemma chartReprComp_fderiv_apply
   rw [hfun, hcomp, hci_fderiv]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInnerOnE_summand_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -191,6 +197,7 @@ private lemma chartInnerOnE_summand_differentiableAt
       (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx)
   exact (hYi.mul hZj).mul hG
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInnerOnE_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -205,6 +212,7 @@ private lemma chartInnerOnE_differentiableAt
   intro j _
   exact chartInnerOnE_summand_differentiableAt (I := I) g α hx hY hZ i j
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInnerOnE_summand_fderiv_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -263,6 +271,7 @@ private lemma chartInnerOnE_summand_fderiv_apply
   simp only [smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInnerOnE_fderiv_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -303,6 +312,7 @@ private lemma chartInnerOnE_fderiv_apply
   refine Finset.sum_congr rfl (fun j _ => ?_)
   exact chartInnerOnE_summand_fderiv_apply (I := I) g α hx hY hZ i j w
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -354,7 +364,7 @@ private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     rw [(extChartAt I α).right_inv hy_tgt]
   rw [Filter.EventuallyEq.fderiv_eq hev_pull]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -378,6 +388,7 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
   rw [map_smul, smul_eq_mul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christoffelCorrection_repr_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :
@@ -413,6 +424,7 @@ private lemma christoffelCorrection_repr_apply
   · intro habs
     exact absurd (Finset.mem_univ i) habs
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mfderiv_g_inner_chart_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -503,6 +515,7 @@ private lemma mfderiv_g_inner_chart_expand
     rw [partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k
       hx_int]]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma g_inner_chartLeviCivita_Y_Z_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -576,6 +589,7 @@ private lemma g_inner_chartLeviCivita_Y_Z_expand
   rw [christoffelCorrection_repr_apply (I := I) g α x
     (chartE_section_repr (I := I) α Y x) v i]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma g_inner_Y_chartLeviCivita_Z_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -839,6 +853,7 @@ private lemma christoffel_match
     ring
   rw [hMatch_Y, hMatch_Z]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivita_isMetricCompatibleOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     IsMetricCompatibleOn (chartLeviCivita (I := I) g α) g

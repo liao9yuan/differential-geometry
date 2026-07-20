@@ -44,7 +44,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 800000
@@ -77,6 +76,8 @@ def nablaCovTensor (g : SmoothRiemannianMetric I M)
   (((continuousMultilinearCurryFin1 ℝ (TangentSpace I b) ℝ).symm.toContinuousLinearMap).comp
     ((g.inner b).comp ((LeviCivita (I := I) g).toFun Z.toFun b))).uncurryLeft
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma nablaCovTensor_apply (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M)
     (v : Fin 2 → TangentSpace I b) :
@@ -88,6 +89,7 @@ def nablaCovTensor (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartInvGram_metricInverse (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     MetricInverseInBasis_gen (I := I) g b (chartBasisFamily (I := I) α hb)
@@ -111,6 +113,8 @@ private lemma chartInvGram_metricInverse (g : SmoothRiemannianMetric I M) (α : 
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma metricTracePair0SAt_nablaCov_eq_chartSum
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
@@ -130,6 +134,7 @@ private lemma metricTracePair0SAt_nablaCov_eq_chartSum
   simp only [vec2]
   norm_num
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma self_mem_goodSet (x : M) :
     x ∈ chartLeviCivitaGoodSet (I := I) x := by
   rw [mem_chartLeviCivitaGoodSet_iff]
@@ -141,6 +146,9 @@ private lemma self_mem_goodSet (x : M) :
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricTracePair0SAt_nablaCov_eq_divergence
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -179,6 +187,9 @@ theorem metricTracePair0SAt_nablaCov_eq_divergence
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem divergence_g_eq_finBasis_metricTrace
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -210,6 +221,7 @@ theorem divergence_g_eq_finBasis_metricTrace
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma coeff_cov_eq_deriv_add_christoffel
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -375,6 +387,7 @@ private lemma coeff_cov_eq_deriv_add_christoffel
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma inner_cov_frame_eq
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -414,6 +427,9 @@ private lemma inner_cov_frame_eq
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem divergence_g_eq_coordinateFrame_covariant_divergence
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

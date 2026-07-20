@@ -4,7 +4,6 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -103,7 +102,7 @@ section Interval
 
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [SigmaCompactSpace M] [T2Space M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
 
 
@@ -138,6 +137,7 @@ structure IsRealizedRicciFlowSolutionOn
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] in
 theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -153,6 +153,7 @@ theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] in
 theorem metric_derivWithin_eq_neg_two_ricci_of_isRealizedRicciFlowSolutionOn
     {D : RealTimeInterval}
     (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D)

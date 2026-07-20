@@ -70,12 +70,16 @@ noncomputable def localSection
   Classical.choose
     ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma mem_source_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     xt ∈ (localSection xt).source :=
   (Classical.choose_spec
     ((UniversalCover.proj_isCoveringMap (X := M)).isLocalHomeomorph xt)).1
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma proj_eq_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     (proj :
@@ -118,6 +122,8 @@ noncomputable instance instChartedSpace :
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma coverChartAt_target_eq
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a) :
@@ -130,6 +136,8 @@ lemma coverChartAt_target_eq
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma coverChartAt_source_eq
     (b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt b) :
@@ -143,6 +151,8 @@ lemma coverChartAt_source_eq
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 lemma localSection_collapse
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {y : M} (hy : y ∈ (localSection a).target) :
@@ -249,6 +259,8 @@ instance instIsManifold :
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem proj_contMDiff :
     ContMDiff I I ∞
       (proj :
@@ -663,6 +675,7 @@ instance instSigmaCompactSpace :
 
 
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [LocPathConnectedSpace M] [SemilocallySimplyConnectedSpace M] [Inhabited M] [SecondCountableTopology M] [Nonempty M] in
 theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :
     LocallyCompactSpace M :=
   Manifold.locallyCompact_of_finiteDimensional I

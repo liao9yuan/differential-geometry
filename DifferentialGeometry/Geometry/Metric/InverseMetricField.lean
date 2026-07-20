@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -170,6 +170,7 @@ def inverseMetricSharpField (g : SmoothRiemannianMetric I M) :
   toFun := fun x : M => inverseMetricSharpFib (I := I) g x
   contMDiff_toFun := inverseMetricSharpField_contMDiff (I := I) g
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp] lemma inverseMetricSharpField_apply (g : SmoothRiemannianMetric I M) (x : M) :
     inverseMetricSharpField (I := I) g x = inverseMetricSharpFib (I := I) g x := rfl
 

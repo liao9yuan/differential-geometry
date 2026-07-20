@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,6 +48,7 @@ lemma riemannianFiberNormSq_le_frameScalar_sq
   unfold riemannianFrameScalar
   simp only [Nat.mul_zero, pow_zero, one_mul, Nat.zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_riemannOp_tensorCov_le_witness
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) (T : TensorRSSpace 0 2 I x) :
@@ -67,6 +68,7 @@ noncomputable def curvatureFiberNormBoundSq
     riemannianFrameScalar (I := I) (M := M) g x
       (riemannOp (tensorCov (I := I) g 0 2) x (X x) (Y x) (T x)) ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curvatureFiberNormBoundSq_nonneg
     (g : SmoothRiemannianMetric I M)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace 0 2 I b)
@@ -75,6 +77,7 @@ lemma curvatureFiberNormBoundSq_nonneg
   unfold curvatureFiberNormBoundSq
   exact mul_nonneg (sq_nonneg _) (sq_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_riemannOp_tensorCov_le_curvatureFiberNormBoundSq
     (g : SmoothRiemannianMetric I M)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace 0 2 I b)
@@ -85,6 +88,7 @@ theorem riemannianFiberNormSq_riemannOp_tensorCov_le_curvatureFiberNormBoundSq
   riemannianFiberNormSq_riemannOp_tensorCov_le_witness (I := I) (M := M) g x
     (X x) (Y x) (T x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannianFiberNormSq_riemannOp_tensorCov
     [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

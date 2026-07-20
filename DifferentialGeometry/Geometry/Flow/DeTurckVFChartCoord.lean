@@ -16,13 +16,13 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_eq_chartParallelExtend_on_baseSet
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -46,7 +46,7 @@ lemma chartBasisVecFiber_eq_chartParallelExtend_on_baseSet
   rw [hround]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_eventuallyEq_chartParallelExtend
     (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -64,7 +64,7 @@ lemma chartBasisVecFiber_eventuallyEq_chartParallelExtend
   intro b' hb'
   exact chartBasisVecFiber_eq_chartParallelExtend_on_baseSet (I := I) α hb_base j b' hb'
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_mdifferentiableAt
     (α : M) (j : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -78,6 +78,9 @@ lemma chartBasisVecFiber_mdifferentiableAt
     (hcontMDiff_on b hb).contMDiffAt (hopen.mem_nhds hb)
   exact hcontMDiff_at.mdifferentiableAt (by norm_num)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_chartBasisVecFiber_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -139,6 +142,9 @@ lemma LeviCivita_chartBasisVecFiber_eq
     exact trivToE_trivFromE (I := I) α hb_base ((chartModelBasis E) j)
   rw [htriv]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connDiff_chartBasis_pair_eq
     (g g' : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -164,6 +170,7 @@ lemma connDiff_chartBasis_pair_eq
   rw [LeviCivita_chartBasisVecFiber_eq (I := I) g' α hx j
         (chartBasisVecFiber (I := I) α k x)]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma coord_christoffelCorrection_chartBasis_pair
     (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -220,7 +227,7 @@ lemma coord_christoffelCorrection_chartBasis_pair
   · intro h
     exact absurd (Finset.mem_univ k) h
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tangent_vector_eq_chartBasisVecFiber_sum
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -245,7 +252,7 @@ private lemma tangent_vector_eq_chartBasisVecFiber_sum
   rw [ContinuousLinearMap.map_smul]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma trivFromE_eq_chartBasisVecFiber_sum
     (α : M) (x : M) (y : E) :
     trivFromE (I := I) α x y =
@@ -264,6 +271,9 @@ private lemma trivFromE_eq_chartBasisVecFiber_sum
   rw [ContinuousLinearMap.map_smul]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connDiff_chartBasis_pair_eq_sum
     (g g' : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -297,6 +307,9 @@ lemma connDiff_chartBasis_pair_eq_sum
   rw [coord_christoffelCorrection_chartBasis_pair (I := I) g α hx j k p]
   rw [coord_christoffelCorrection_chartBasis_pair (I := I) g' α hx j k p]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckChartLocal_eq_chartDeTurckVFComp_sum
     (g g' : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -398,6 +411,8 @@ theorem deTurckChartLocal_eq_chartDeTurckVFComp_sum
   rw [chartChristoffel_symm (I := I) g α b a p (extChartAt I α x)]
   rw [chartChristoffel_symm (I := I) g' α b a p (extChartAt I α x)]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_apply_eq_chartDeTurckVFComp_sum
     (g g' : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -412,6 +427,8 @@ theorem deTurckVF_apply_eq_chartDeTurckVFComp_sum
   rw [← deTurckChartLocal_eq_deTurckFun (I := I) g g' α hxα_base]
   exact deTurckChartLocal_eq_chartDeTurckVFComp_sum (I := I) g g' α hx
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_apply_eq_chartDeTurckVFComp_sum_self
     (g g' : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g g' :

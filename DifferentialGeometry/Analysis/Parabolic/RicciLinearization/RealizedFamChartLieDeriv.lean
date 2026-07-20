@@ -24,12 +24,13 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 theorem hasDerivAt_realizedFam_chartLieDeTurckComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -122,6 +123,7 @@ private lemma hasDerivAt_fderiv_comm_at' (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y
   rw [rhs_eq]
   exact h_sv'.congr_of_eventuallyEq lhs_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_partialDeriv_comm_at'
     (Φ : ℝ × E → ℝ) (p : Fin (Module.finrank ℝ E)) (s₀ : ℝ) (y₀ : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :
@@ -131,6 +133,7 @@ private lemma hasDerivAt_partialDeriv_comm_at'
   unfold partialDeriv
   exact hasDerivAt_fderiv_comm_at' Φ s₀ y₀ (chartModelBasis E p) hΦ
 
+omit [CompactSpace M] in
 theorem hasDerivAt_realizedFam_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -203,6 +206,7 @@ theorem hasDerivAt_realizedFam_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric
     Finset.sum_add_distrib]
   ring
 
+omit [CompactSpace M] in
 theorem hasDerivAt_realizedFam_partial_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -254,6 +258,7 @@ def lieDeTurckChartSlope (g₀ : SmoothRiemannianMetric I M)
   lieDeTurckSlopeExprRaw (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x
     (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x) i j y
 
+omit [CompactSpace M] in
 theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -352,6 +357,7 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiem
   refine htotal.congr_deriv ?_
   rw [lieDeTurckChartSlope, lieDeTurckSlopeExprRaw]
 
+omit [CompactSpace M] in
 theorem deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -372,6 +378,7 @@ theorem deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope (g₀ : SmoothRieman
   exact (hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (I := I) g₀ T T'
     hδ_lt hδ hδ'_lt hδ' g_bg x i j hy hmem).deriv
 
+omit [CompactSpace M] in
 private lemma realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -394,6 +401,7 @@ private lemma realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric
   unfold realizedGramDeriv
   exact h1.sub h2
 
+omit [CompactSpace M] in
 private lemma partial_realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -425,6 +433,7 @@ private lemma partial_realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemanni
     exact hfderiv.clm_apply contDiffOn_const
   exact (hpd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [CompactSpace M] in
 theorem lieDeTurckChartSlope_eq_orderSplit (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

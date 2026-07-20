@@ -14,8 +14,8 @@ universe u v
 open scoped Manifold ContDiff Topology
 open Bundle MeasureTheory
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
- [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+ [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

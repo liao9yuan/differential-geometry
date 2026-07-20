@@ -11,7 +11,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -38,6 +37,7 @@ section SmoothVectorFieldRSNabla
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
+omit [CompleteSpace 𝕜] in
 theorem tensor0SModelAt_apply (s : ℕ) (x₀ x : M)
     (A : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s → E) :
@@ -52,6 +52,7 @@ theorem tensor0SModelAt_apply (s : ℕ) (x₀ x : M)
   rw [Bundle.Trivialization.continuousMultilinearMap_apply]
   rfl
 
+omit [CompleteSpace 𝕜] in
 theorem tensor0SModelInChart_center_eq_tensor0SModelAt (s : ℕ) (x₀ : M)
     (A : (x : M) →
       Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x) :
@@ -63,6 +64,7 @@ theorem tensor0SModelInChart_center_eq_tensor0SModelAt (s : ℕ) (x₀ : M)
   rw [extChartAt_to_inv]
 
 
+omit [CompleteSpace 𝕜] in
 theorem tensor0SModelInChart_apply (s : ℕ) (x₀ : M)
     (A : (x : M) →
       Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x)
@@ -85,6 +87,7 @@ noncomputable def tensorRSModelAt (r s : ℕ) (x₀ x : M)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
     (T : TensorRSModel r s 𝕜 E) :
     letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s

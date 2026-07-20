@@ -32,11 +32,11 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ric_trace
     (g : SmoothRiemannianMetric I M)
     (Rm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -73,6 +73,7 @@ theorem exists_ric_trace
 
 
 
+omit [SigmaCompactSpace M] in
 theorem iterRic_normSq_le
     (g : SmoothRiemannianMetric I M)
     (Rm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -108,6 +109,8 @@ theorem iterRic_normSq_le
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm_eq_iterCov
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : Nat) :

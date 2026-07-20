@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannCommut
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -81,7 +80,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -95,6 +93,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
 theorem solution_rm04LowersRm13At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -126,6 +125,7 @@ theorem solution_rm04LowersRm13At
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem rm13_apply_eq_rm04_raise
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm13 : Tensor13At (I := I) (M := M) x)
@@ -169,6 +169,7 @@ theorem rm13_apply_eq_rm04_raise
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_eq_rm04_raise
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -214,6 +215,7 @@ theorem curvatureAction0SAt_eq_rm04_raise
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem nablaLapComm_secondTerm_eq_rm04_raise
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)

@@ -139,6 +139,7 @@ theorem component0S_apply
 
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 theorem component0S_congr_slots
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) {slots slots' : Fin s -> Idx}

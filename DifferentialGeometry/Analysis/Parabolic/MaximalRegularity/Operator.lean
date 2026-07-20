@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace MaximalRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -168,6 +168,7 @@ theorem norm_derivModeCoeff_le (hT : 0 ≤ T)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
 
+omit [CompactSpace M] in
 private theorem tensorSobolevWeight_add_two
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ + 2) =
@@ -214,6 +215,7 @@ theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
     _ = (1 + T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
+omit [CompactSpace M] in
 private theorem tensorSobolevWeight_add_one
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ + 1) =

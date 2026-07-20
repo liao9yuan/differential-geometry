@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.Bianchi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -148,6 +147,7 @@ def ricciQuadraticAt
       A (vec2 (basis k) (basis b))
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem raised02CompAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -177,6 +177,7 @@ private theorem raised02CompAt_symm
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem ricciQuadraticAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -219,6 +220,7 @@ private theorem ricciQuadraticAt_symm
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem rm04RicciContractionAt_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -260,6 +262,7 @@ private theorem rm04RicciContractionAt_symm
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem rm04_slot1_trace_eq_neg_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -303,6 +306,7 @@ private theorem rm04_slot1_trace_eq_neg_ricci
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem rm04_trace_first_third_eq_neg_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -337,6 +341,7 @@ theorem rm04_trace_first_third_eq_neg_ricci
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem contracted_slot1_eq_quadratic
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -460,6 +465,7 @@ private theorem contracted_slot1_eq_quadratic
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 private theorem contracted_slot0_eq_neg_rm04RicciContraction
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -556,6 +562,7 @@ private theorem contracted_slot0_eq_neg_rm04RicciContraction
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem metricTrace_rm04RicciContractionAt_eq_neg_inner
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -830,6 +837,7 @@ theorem contracted_curvatureAction0SAt_vec2_eq
           ring
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem curvature_ricci_rhs_symm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)

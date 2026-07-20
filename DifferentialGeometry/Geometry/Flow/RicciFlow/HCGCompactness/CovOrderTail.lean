@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -28,22 +27,27 @@ open DifferentialGeometry.PDE.RicciFlow
 section ZeroOrder
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private theorem metricField_zero
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.metricTensorField (I := I) g x = metricTensor0S (I := I) g x := by
   ext v
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem covOrder_zero_point
+    [Module.Finite ℝ E]
     (g gRef : SmoothRiemannianMetric I M) (x : M) {C : Real} (hC1 : 1 ≤ C)
     (hpair : ∀ v : TangentSpace I x,
       C⁻¹ * g.inner x v v ≤ gRef.inner x v v ∧
@@ -90,7 +94,11 @@ private theorem covOrder_zero_point
 
 
 
+omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem covOrder_zero_le
+    [Module.Finite ℝ E]
     {K : Set M} (g gRef : SmoothRiemannianMetric I M) {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K gRef g C) :
     MetricCovDerivOrderBoundOn (I := I) K 0 g gRef
@@ -102,19 +110,22 @@ theorem covOrder_zero_le
 end ZeroOrder
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
-theorem exists_initC [CompactSpace M]
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
+theorem exists_initC
+    [Module.Finite ℝ E]
+    [CompactSpace M]
     (g gRef : SmoothRiemannianMetric I M) :
     ∃ initC : Nat → Real, (∀ r : Nat, 0 ≤ initC r) ∧
       ∀ r : Nat, ∀ x : M,
@@ -133,7 +144,11 @@ theorem exists_initC [CompactSpace M]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covOrder_stage_const
+    [Module.Finite ℝ E]
     {K U : Set M} {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
     (N : Nat) (hN : 1 ≤ N)
@@ -184,7 +199,11 @@ theorem covOrder_stage_const
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covOrder_tower_const
+    [Module.Finite ℝ E]
     {K U : Set M} {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
     (N : Nat)
@@ -272,7 +291,11 @@ theorem covOrder_tower_const
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covOrder_Ico_tail
+    [Module.Finite ℝ E]
     {K U : Set M} {t0 omega : Real}
     {gSeq : Nat → Real → SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}

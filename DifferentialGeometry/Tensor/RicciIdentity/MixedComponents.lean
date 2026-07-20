@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -420,6 +419,7 @@ theorem mixedRicciIdentityCoord_of_second_product_identities
 
 
 
+omit [IsManifold I ∞ M] in
 theorem coordDeriv_applyInput_eq_contractUpper
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I (∞ : WithTop ℕ∞) M]

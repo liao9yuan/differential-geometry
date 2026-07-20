@@ -20,7 +20,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ noncomputable def curvValueFrameScalar
   (exists_fiberNormSq_le_factor (I := I) (M := M) g r s x
     (riemannOp (tensorCov (I := I) g r s) x v w T)).choose
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curvValueFrameScalar_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v w : TangentSpace I x) (T : TensorRSSpace r s I x) :
@@ -51,6 +52,7 @@ lemma curvValueFrameScalar_nonneg
   (exists_fiberNormSq_le_factor (I := I) (M := M) g r s x
     (riemannOp (tensorCov (I := I) g r s) x v w T)).choose_spec.1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannOp_tensorCov_fiberNormSq_le_frameScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v w : TangentSpace I x) (T : TensorRSSpace r s I x) :
@@ -68,6 +70,7 @@ noncomputable def curvContractionFiberNormBoundSq
   ‖riemannOp (tensorCov (I := I) g r s) x (X x) (Y x) (Z x)‖ ^ 2 *
     curvValueFrameScalar (I := I) (M := M) g r s x (X x) (Y x) (Z x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curvContractionFiberNormBoundSq_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (Z : Π b : M, TensorRSSpace r s I b)
@@ -77,6 +80,7 @@ lemma curvContractionFiberNormBoundSq_nonneg
   exact mul_nonneg (sq_nonneg _)
     (curvValueFrameScalar_nonneg (I := I) (M := M) g r s x (X x) (Y x) (Z x))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannOp_tensorCov_fiberNormSq_le_boundSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (Z : Π b : M, TensorRSSpace r s I b)
@@ -87,6 +91,7 @@ theorem riemannOp_tensorCov_fiberNormSq_le_boundSq
   riemannOp_tensorCov_fiberNormSq_le_frameScalar (I := I) (M := M) g r s x
     (X x) (Y x) (Z x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannOp_tensorCov_fiberNormSq
     [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

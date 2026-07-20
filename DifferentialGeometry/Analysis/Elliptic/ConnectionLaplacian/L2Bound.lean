@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapSecondOrderGardingSobolevCurv
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CurvatureDefect
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 
 
@@ -20,7 +21,17 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+section NormedL2Bounds
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -36,22 +47,8 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-theorem integrable_riemannianFiberNormSq_toSection
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
-    MeasureTheory.Integrable
-      (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))
-      (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  have hmem := SmoothCcTensor.memL2_toFun (I := I) (M := M) S
-  have hmem' :
-      MeasureTheory.Integrable
-        (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) (S.toFun x))
-        (riemannianVolumeMeasure (I := I) (M := M) g) := hmem
-  refine hmem'.congr (Filter.Eventually.of_forall (fun x => ?_))
-  simp only [SmoothCcTensor.toFun_apply]
-  exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
-    (S.toSection x)).symm
-
-
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
@@ -183,6 +180,15 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
         mul_nonneg hnGrad_nn hnHess_nn]
     nlinarith [mul_le_mul_of_nonneg_left hcross (sq_nonneg C₀), sq_nonneg C₀]
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C₀ * (nT + nGrad + nHess))]
+
+end NormedL2Bounds
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
 
 
 theorem secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound

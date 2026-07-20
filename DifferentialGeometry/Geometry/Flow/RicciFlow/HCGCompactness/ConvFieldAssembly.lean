@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -65,7 +64,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -226,6 +225,7 @@ noncomputable def gSeqExt (R : letI : TopologicalSpace P.M := P.topology;
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
   classical
   letI : TopologicalSpace P.M := P.topology
@@ -326,6 +326,7 @@ variable (R : letI : TopologicalSpace P.M := P.topology;
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem gSeqExt_inner_of_mem (k : Nat) (t : Real)
     (x : P.M) (hx : letI : TopologicalSpace P.M := P.topology; x ∈ Φ.source k)
     (v w : letI : TopologicalSpace P.M := P.topology;
@@ -362,6 +363,7 @@ theorem gSeqExt_inner_of_mem (k : Nat) (t : Real)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem gSeqExt_inner_of_notMem (k : Nat) (t : Real)
     (x : P.M) (hx : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -399,6 +401,7 @@ section Low
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hlow_gSeqExt
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -487,6 +490,7 @@ section Bdd
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hbdd_gSeqExt
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -574,6 +578,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hgLip_gSeqExt
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;

@@ -12,7 +12,7 @@ namespace Geometry
 namespace Riemannian
 namespace CovariantDerivativeAlong
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,6 +23,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christoffelCorrection_eq_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α x : M) (Y : E) (v : TangentSpace I x) :
     christoffelCorrection (I := I) g α x Y v =
@@ -72,7 +73,7 @@ private lemma christoffelCorrection_eq_chartChristoffelContraction
     rw [Finset.sum_comm]
   rw [hLHS, hRHS]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartRepAt_restrict_eq_comp
     (γ : ℝ → M) (X : ∀ y : M, TangentSpace I y) (r₀ : ℝ) :
     chartRepAt (I := I) γ (fun r => X (γ r)) r₀ =
@@ -80,6 +81,7 @@ private lemma chartRepAt_restrict_eq_comp
   funext s
   rfl
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_chartE_repr_comp_curve_eq
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (γ : ℝ → M) (X : ∀ y : M, TangentSpace I y) (r₀ : ℝ)
@@ -117,6 +119,7 @@ private lemma deriv_chartE_repr_comp_curve_eq
   rw [← heq.deriv_eq]
   exact hcomp_hd.deriv
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_restrict_eq_leviCivita
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (X : ∀ y : M, TangentSpace I y) (r₀ : ℝ)

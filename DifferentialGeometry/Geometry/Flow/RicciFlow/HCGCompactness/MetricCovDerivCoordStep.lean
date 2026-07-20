@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.CoordFrameStep
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,17 +28,18 @@ open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_apply_section
     (h gRef : SmoothRiemannianMetric I M) (a : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -57,6 +57,8 @@ theorem metricCovDeriv_succ_apply_section
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M) (a : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -84,6 +86,9 @@ theorem metricCovDeriv_succ_eval_smooth_slots
 
 
 
+omit [IsManifold I 1 M] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_component_coordFrame
     (h gRef : SmoothRiemannianMetric I M) (a : Nat) (x : M)
     (I0 : Fin (a + 3) → CoordinateIdx (𝕜 := Real) E) :

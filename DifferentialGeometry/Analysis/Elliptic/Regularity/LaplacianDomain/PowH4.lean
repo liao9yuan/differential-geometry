@@ -13,7 +13,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -101,6 +101,7 @@ theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
     (by norm_num : (1 : ℕ) ≤ 4) h.memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     MemLp

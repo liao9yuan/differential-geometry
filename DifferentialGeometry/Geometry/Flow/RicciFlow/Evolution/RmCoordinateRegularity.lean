@@ -70,6 +70,7 @@ omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
 
 
+omit [SigmaCompactSpace M] in
 theorem solnChartGramSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -132,6 +133,7 @@ private lemma jet2GramD2Local
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChrDerivJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
@@ -157,6 +159,7 @@ private lemma chartChrDerivJet
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRmEqJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
@@ -183,6 +186,8 @@ private lemma chartRmEqJet
 omit [CompleteSpace E] in
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRmSmoothAt [CompactSpace M]
     (g : Real -> SmoothRiemannianMetric I M)
     (a b : Real) (x0 : M)
@@ -279,6 +284,8 @@ theorem chartRmSmoothAt [CompactSpace M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem coordRmSmoothInf [CompactSpace M]
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -362,6 +369,8 @@ theorem coordRmSmoothInf [CompactSpace M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem coordRmFinSmooth [CompactSpace M]
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

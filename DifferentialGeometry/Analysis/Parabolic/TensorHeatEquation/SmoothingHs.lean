@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -215,6 +215,7 @@ theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
     _ ≤ tensorSmoothingConst μ * t' ^ (-μ) :=
           tensorSmoothingScalarBound hμ ht'_pos ht'_le_one hlam
 
+omit [CompactSpace M] in
 private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (i : TensorEigenIdx (I := I) (M := M) g r s)
     (a b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ) :
@@ -284,6 +285,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma heatHs_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>

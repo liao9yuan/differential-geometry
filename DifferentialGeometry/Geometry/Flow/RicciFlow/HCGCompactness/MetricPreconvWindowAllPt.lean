@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -38,19 +37,21 @@ open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem derivNorm_le_cov_add
+    [Module.Finite ℝ E]
     (a : Nat) (g h gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a g h gRef x <=
       metricCovDerivNorm (I := I) a g gRef x + metricCovDerivNorm (I := I) a h gRef x := by
@@ -70,7 +71,10 @@ theorem derivNorm_le_cov_add
 
 
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem derivNorm_le_sup_sing
+    [Module.Finite ℝ E]
     (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (z : M)
     (a : Nat) (ha : a <= p) :
     metricDerivNorm (I := I) a gk gInf gRef z <=
@@ -97,7 +101,9 @@ theorem derivNorm_le_sup_sing
 
 
 
+omit [Module.Finite ℝ E] in
 theorem windowGInfAll_pt
+    [Module.Finite ℝ E]
     [WeaklyLocallyCompactSpace M]
     (hne : Nonempty M)
     (beta psiT : Real)

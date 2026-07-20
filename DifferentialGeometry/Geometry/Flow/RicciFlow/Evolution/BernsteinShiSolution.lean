@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -85,6 +84,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 theorem towerReactionSum_mono_const
     (w : ℕ -> Real -> M -> Real) {c c' : Real} (hcc : c <= c')
     (k : ℕ) (t : Real) (x : M) :
@@ -105,6 +105,7 @@ theorem towerReactionSum_mono_const
 
 
 
+omit [DecidableEq Idx] in
 theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
     2 * (Fintype.card Idx : Real) ^ (6 + k) <= 2 * (Fintype.card Idx : Real) ^ (6 + m) := by
   have hcard : (0 : Real) <= (Fintype.card Idx : Real) := by positivity
@@ -136,6 +137,7 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
 
 
 
+omit [DecidableEq Idx] in
 theorem bernsteinShi_solution_estimate
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

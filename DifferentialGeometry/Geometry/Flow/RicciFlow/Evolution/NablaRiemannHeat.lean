@@ -6,7 +6,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -460,6 +459,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormSqInFrame_eq_compNormSq5
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -521,6 +521,7 @@ def nablaRmReactionInFrame
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_nablaRmReactionInFrame_le
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -577,6 +578,7 @@ def NablaRm04NormHeatEquationOn
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundSharp_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
@@ -631,6 +633,7 @@ theorem nablaRm04NormHeatBoundSharp_of_components
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundOn_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))

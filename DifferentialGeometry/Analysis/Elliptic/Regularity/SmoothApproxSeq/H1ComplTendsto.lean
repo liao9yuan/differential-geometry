@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothApproxSeqH1ComplTendsto
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -106,6 +106,7 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
   exact hbound f.smooth
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 private lemma eLpNorm_sq_toReal_eq_integral_sq
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
     (eLpNorm f.toFun 2

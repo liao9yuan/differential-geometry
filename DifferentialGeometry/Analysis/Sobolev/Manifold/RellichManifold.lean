@@ -19,7 +19,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -303,6 +303,7 @@ lemma chartPushedRaw_sub
 
 omit [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 
+omit [IsManifold I ∞ M] [T2Space M] in
 lemma chartPushedRaw_pullbackToM_apply
     (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -325,6 +326,8 @@ lemma chartPushedRaw_pullbackToM_apply
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     rw [Set.indicator_of_notMem hy]
 
+omit [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
+omit [IsManifold I ∞ M] [T2Space M] in
 lemma chartPushedRaw_pullbackToM_eq_indicator
     (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
@@ -391,6 +394,7 @@ lemma pullbackToM_tsupport_subset_of_supp_in_chartCompact
     exact h_P_closed.closure_subset_iff.mpr h_supp_sub
   exact h_tsupp_sub_P.trans hP_subset_source
 
+omit [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 lemma pullbackToM_eq_zero_off_chart_source
     (α : M) (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) {x : M}
     (hx : x ∉ (chartAt H α).source) :

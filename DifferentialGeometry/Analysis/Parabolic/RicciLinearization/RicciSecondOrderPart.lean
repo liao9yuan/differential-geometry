@@ -14,7 +14,7 @@ namespace RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 section Differentiability
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -37,7 +38,7 @@ lemma chartInvGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_contDiff_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i u) := by
@@ -46,19 +47,20 @@ lemma partialDeriv_contDiff_of_contDiff
   unfold partialDeriv
   exact hfderiv.clm_apply contDiff_const
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_perturbation_contDiff
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_perturbation_differentiableAt
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) (y : E) :
     DifferentiableAt ℝ (partialDeriv (E := E) i (h a b)) y :=
   ((partialDeriv_perturbation_contDiff h i a b).differentiable (by simp)).differentiableAt
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartLinearizedChristoffelPrincipal_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -75,7 +77,7 @@ lemma chartLinearizedChristoffelPrincipal_differentiableAt
     hcd.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_partialDeriv_perturbation_swap
     (h : ChartMetricPerturbation E) (a b p q : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q (h a b)) y =
@@ -117,7 +119,7 @@ def chartRicciSecondOrderPart (g : SmoothRiemannianMetric I M) (α : M)
       partialDeriv (E := E) k
         (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h i j j y') y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -139,7 +141,7 @@ def chartRicciSecondOrderPrincipalSymbol (g : SmoothRiemannianMetric I M) (α : 
          partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) y -
          partialDeriv (E := E) k (partialDeriv (E := E) i (h l j)) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPrincipalSymbol_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -168,7 +170,7 @@ def chartRicciFirstOrderRemainder (g : SmoothRiemannianMetric I M) (α : M)
          partialDeriv (E := E) j (h l i) y -
          partialDeriv (E := E) l (h i j) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciFirstOrderRemainder_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -188,6 +190,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
   rfl
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_chartLinearizedChristoffelPrincipal
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (a b j d : Fin (Module.finrank ℝ E)) {y : E}
@@ -261,6 +264,7 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipal
   rw [hSderiv, hS]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -395,6 +399,7 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
   rw [hrem, hsymbol, add_comm]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -411,7 +416,7 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciSecondOrderPart_eq_principalSymbol_add_remainder (I := I) g α h i k hx_int
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciFirstOrderRemainder_eq_first_order_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -445,7 +450,7 @@ theorem chartRicciFirstOrderRemainder_eq_first_order_sum
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPart_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -470,6 +475,8 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     rw [hik, hij, partialDeriv_const, partialDeriv_const, sub_zero]
   rw [Finset.sum_congr rfl (fun j _ => hzero j), Finset.sum_const_zero]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderPart_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -518,6 +525,8 @@ theorem chartRicciSecondOrderPart_add
   rw [hadd_ik, hadd_ij]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderPart_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -557,7 +566,7 @@ theorem chartRicciSecondOrderPart_smul
   rw [hsmul_ik, hsmul_ij]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciSecondOrderPrincipalSymbol_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -592,7 +601,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     Finset.sum_congr rfl (fun l _ => hzero j l))]
   rw [Finset.sum_const_zero, Finset.sum_const_zero, mul_zero]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_add_apply
     (h₁ h₂ : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((h₁ + h₂) a b)) y =
@@ -610,7 +619,7 @@ private lemma partialDeriv_partialDeriv_add_apply
         (partialDeriv_perturbation_differentiableAt h₁ q a b y)
         (partialDeriv_perturbation_differentiableAt h₂ q a b y)]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_partialDeriv_smul_apply
     (c : ℝ) (h : ChartMetricPerturbation E) (p q a b : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p (partialDeriv (E := E) q ((c • h) a b)) y =
@@ -624,6 +633,7 @@ private lemma partialDeriv_partialDeriv_smul_apply
         (partialDeriv (E := E) q (h a b))
         (partialDeriv_perturbation_differentiableAt h q a b y), smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPrincipalSymbol_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -643,6 +653,7 @@ theorem chartRicciSecondOrderPrincipalSymbol_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ k i l j y]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPrincipalSymbol_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -687,7 +698,7 @@ theorem chartRicciSecondOrderPrincipalSymbol_smul
   rw [Finset.sum_congr rfl (fun j _ => hinner j), ← Finset.mul_sum]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRicciFirstOrderRemainder_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -725,6 +736,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     Finset.sum_congr rfl (fun l _ => hzero2 j l))]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciFirstOrderRemainder_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -805,6 +817,7 @@ theorem chartRicciFirstOrderRemainder_add
     Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciFirstOrderRemainder_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -876,6 +889,7 @@ theorem chartRicciFirstOrderRemainder_smul
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderPrincipalSymbol_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :

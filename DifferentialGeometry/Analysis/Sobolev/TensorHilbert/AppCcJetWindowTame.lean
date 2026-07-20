@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckPrincipalCometricCoeff
     deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
@@ -67,6 +68,7 @@ theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left
   rw [mul_pow]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
@@ -107,6 +109,7 @@ theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right
   rw [mul_pow]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
@@ -116,6 +119,7 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W B hB hΦ
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
@@ -262,6 +266,8 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_ballUniform_generic
     le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) hi
   exact hKslot g₁ P hδ_le hδ htie hPball j hj_le
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem productGridTerm_integral_le_topOrderJetSq
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -1058,7 +1064,6 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     _ ≤ Real.sqrt (Ktot * (1 + H ^ 2)) := Real.sqrt_le_sqrt hnorm_sq
     _ = Real.sqrt Ktot * Real.sqrt (1 + H ^ 2) := Real.sqrt_mul hKtot_nn _
     _ ≤ Real.sqrt Ktot * (1 + H) := mul_le_mul_of_nonneg_left hsqrt_le (Real.sqrt_nonneg _)
-set_option linter.unusedSectionVars false in
 
 
 theorem appCc_jet_l2Sq_le

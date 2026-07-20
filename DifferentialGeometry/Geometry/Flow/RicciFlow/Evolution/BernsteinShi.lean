@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -60,6 +59,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -171,6 +171,7 @@ theorem parabolicOperatorWithDrift_affine_sub
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -223,11 +224,15 @@ theorem laplacianAt_linear_combo
   unfold DifferentialGeometry.Integral.Connection.laplacian
   rw [hgrad_eq]
   rw [DifferentialGeometry.Integral.Connection.divergence_add (I := I) (G.connection t)
+      inferInstance
       (hgradf.smul_const_section (a := c1)) (hgradg.smul_const_section (a := c2))]
-  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I) (G.connection t) c1 hgradf]
-  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I) (G.connection t) c2 hgradg]
+  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I)
+    (G.connection t) inferInstance c1 hgradf]
+  rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I)
+    (G.connection t) inferInstance c2 hgradg]
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem heatOperator_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

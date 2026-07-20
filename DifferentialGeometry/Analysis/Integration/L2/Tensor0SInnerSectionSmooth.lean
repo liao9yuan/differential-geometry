@@ -38,6 +38,7 @@ private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
 
+omit [IsManifold I ∞ M] in
 lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
     {n : ℕ} {U : Set M} {Φ : M → Tensor0SModel n ℝ E}
     (hΦ : ContMDiffOn I 𝓘(ℝ, Tensor0SModel n ℝ E) ∞ Φ U)
@@ -219,7 +220,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 theorem tensorInnerPointwise_contMDiff_of_mdiff
-    [InnerProductSpace ℝ E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -239,7 +239,6 @@ theorem tensorInnerPointwise_contMDiff_of_mdiff
 
 
 theorem tensorInnerPointwise_contMDiff
-    [InnerProductSpace ℝ E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
     ContMDiff I 𝓘(ℝ) ∞ (fun b : M =>

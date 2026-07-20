@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -535,6 +536,7 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     simpa using h_sum
   exact ge_of_tendsto h_rhs_tendsto (Filter.Eventually.of_forall h_v_bound)
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_chartTransitionTransportCLM_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (k : ℕ) :
@@ -806,6 +808,7 @@ private lemma wkpNorm_double_sum_le
   exact wkpNorm_sum_le (d := d) hp hΩ (Finset.univ : Finset κ)
     (fun j => F i j) (fun j _ => hF i hi j)
 
+omit [CompleteSpace E] in
 theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -942,6 +945,7 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     rw [Finset.mul_sum]
   rw [Finset.sum_congr rfl h_inner_factor, ← Finset.mul_sum]
 
+omit [CompleteSpace E] in
 theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (k : ℕ) :

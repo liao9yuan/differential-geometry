@@ -385,6 +385,7 @@ theorem MemW1pIntrinsicLp_withBoundary.zero
   rw [hcongr]
   exact MemLp.zero
 
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp_withBoundary.const
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (c : ℝ) :
@@ -423,6 +424,7 @@ theorem HasWeakRiemannianGradLp_withBoundary.const
     rw [hdiv_zero]
     ring
 
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsicLp_withBoundary_const
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (c : ℝ) :
@@ -444,6 +446,7 @@ theorem MemW1pIntrinsicLp_withBoundary_const
     rw [hcongr]
     exact MemLp.zero
 
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp_withBoundary.add
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -596,6 +599,7 @@ theorem HasWeakRiemannianGradLp_withBoundary.add
     intro x
     ring
 
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp_withBoundary.const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -670,6 +674,7 @@ theorem HasWeakRiemannianGradLp_withBoundary.const_smul
     rw [hcong, integral_const_mul]
     ring
 
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsicLp_withBoundary.const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -690,6 +695,7 @@ theorem MemW1pIntrinsicLp_withBoundary.const_smul
     rw [hcongr]
     exact hG_p.const_mul (|c|)
 
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp_withBoundary.neg
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -709,6 +715,7 @@ theorem HasWeakRiemannianGradLp_withBoundary.neg
   rw [h_G] at h1
   exact h1
 
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsicLp_withBoundary.neg
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)

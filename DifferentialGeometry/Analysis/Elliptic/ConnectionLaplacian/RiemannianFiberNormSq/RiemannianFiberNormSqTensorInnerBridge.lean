@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [CompleteSpace E]
+  [Module.Finite ℝ E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -33,7 +33,7 @@ private noncomputable def mixedGram
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i a => g.inner x ((chartModelBasis E) i) (frame a)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 @[simp] private lemma mixedGram_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -41,7 +41,7 @@ omit [InnerProductSpace ℝ E] [CompleteSpace E] in
     mixedGram (I := I) (M := M) g x frame i a =
       g.inner x ((chartModelBasis E) i) (frame a) := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [CompleteSpace E] in
+omit [Module.Finite ℝ E] [CompleteSpace E] in
 private lemma orthoFrame_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -67,7 +67,7 @@ private lemma orthoFrame_expansion
   · intro hb
     exact absurd (Finset.mem_univ a) hb
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma gramMatrixAt_eq_mixedGram_mul_transpose
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -95,7 +95,7 @@ private lemma gramMatrixAt_eq_mixedGram_mul_transpose
           mixedGram_apply, Matrix.transpose_apply, mixedGram_apply]
         ring
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma mixedGram_isUnit
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -113,7 +113,7 @@ private lemma mixedGram_isUnit
   rw [h] at hdetG
   simp at hdetG
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma mixedGram_transpose_mul_inv_mul
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -135,7 +135,7 @@ private lemma mixedGram_transpose_mul_inv_mul
   rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_nonsing_inv Sᵀ hSTdet,
     Matrix.one_mul, Matrix.nonsing_inv_mul S hSdet]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma tensorInnerPointwise_0s_sum_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
@@ -151,7 +151,7 @@ private lemma tensorInnerPointwise_0s_sum_smul_left
       rw [Finset.sum_insert hi, tensorInnerPointwise_0s_add_left,
         tensorInnerPointwise_0s_smul_left, ih, Finset.sum_insert hi]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma tensorInnerPointwise_0s_sum_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
@@ -167,7 +167,7 @@ private lemma tensorInnerPointwise_0s_sum_smul_right
       rw [Finset.sum_insert hi, tensorInnerPointwise_0s_add_right,
         tensorInnerPointwise_0s_smul_right, ih, Finset.sum_insert hi]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma tensorInnerPointwise_0s_bisum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (c d : ι → ℝ)
@@ -184,7 +184,7 @@ private lemma tensorInnerPointwise_0s_bisum
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [CompleteSpace E] in
+omit [Module.Finite ℝ E] [CompleteSpace E] in
 private lemma curryLeft_sum_smul {s : ℕ}
     (P : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     {ι : Type*} (A : Finset ι) (c : ι → ℝ) (w : ι → E) :
@@ -196,7 +196,7 @@ private lemma curryLeft_sum_smul {s : ℕ}
   | insert a A ha ih =>
       rw [Finset.sum_insert ha, map_add, map_smul, ih, Finset.sum_insert ha]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma tensorInnerPointwise_0s_succ_orthoFrame
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -329,7 +329,7 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
   · intro ha
     exact absurd (Finset.mem_univ a) ha
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
     (g : SmoothRiemannianMetric I M) (x : M) (N : ℕ)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -391,7 +391,7 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
         (fun p => rfl)]
       rw [Fintype.sum_prod_type]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma lower_toModel_append_eq_fiberNormSqComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
     (n : ℕ) (e : Fin n → TangentSpace I x)
@@ -406,7 +406,7 @@ private lemma lower_toModel_append_eq_fiberNormSqComponent
   unfold fiberNormSqComponent separableFormAt
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 private lemma riemannianFiberNormSq_frame_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x)
@@ -449,7 +449,7 @@ private lemma riemannianFiberNormSq_frame_witness
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
     rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_eq_tensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (T : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x T =
@@ -499,7 +499,7 @@ theorem riemannianFiberNormSq_eq_tensorInnerPointwise
       exact (lower_toModel_append_eq_fiberNormSqComponent (I := I) (M := M) g r s x T
         (Module.finrank ℝ E) e p.1 p.2).symm
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 theorem tensorInnerPointwise_eq_sum_componentS_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -558,7 +558,7 @@ theorem tensorInnerPointwise_eq_sum_componentS_mul
         (Module.finrank ℝ E) e p.1 p.2).symm
 
 open MeasureTheory in
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 theorem tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

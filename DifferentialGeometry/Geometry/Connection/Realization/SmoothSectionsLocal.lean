@@ -27,7 +27,6 @@ import Mathlib.Geometry.Manifold.BumpFunction
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open scoped Manifold ContDiff Topology
 open Bundle
@@ -43,6 +42,7 @@ variable
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_dual_apply
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)
     {V : (y : M) → TangentSpace I y} {u : Set M}
@@ -61,6 +61,7 @@ theorem contMDiffOn_dual_apply
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem extDerivFun_congr_nhds
     {f g : M → ℝ} {x : M} (V : TangentSpace I x) (h : f =ᶠ[𝓝 x] g) :
     extDerivFun (I := I) f x V = extDerivFun (I := I) g x V := by
@@ -75,6 +76,7 @@ private theorem extDerivFun_congr_nhds
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem contMDiffAt_extDerivFun_apply
     {u : Set M} (hu : IsOpen u) {x : M} (hx : x ∈ u)
     {f : M → ℝ} (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f u)

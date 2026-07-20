@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,6 +46,8 @@ private lemma packageAsCc_toSection
                 fun b : M => TensorRSSpace r s I b⟯) :
     (packageAsCc (I := I) (M := M) g r s S).toSection = S := rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

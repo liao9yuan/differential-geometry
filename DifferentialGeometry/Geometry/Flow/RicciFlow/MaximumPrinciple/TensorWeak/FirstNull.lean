@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,13 +14,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -49,6 +46,7 @@ structure TensorFirstNullData
 
 
 
+omit [IsManifold I 2 M] in
 theorem firstNullKernel_left
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -145,6 +143,7 @@ theorem firstNullKernel_left
     _ = 0 := hkernel w
 
 
+omit [IsManifold I 2 M] in
 theorem firstNullKernel_right
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -177,6 +176,7 @@ theorem firstNullKernel_right
 
 
 
+omit [IsManifold I 2 M] in
 theorem firstNullFieldKerL
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -203,6 +203,7 @@ theorem firstNullFieldKerL
 
 
 
+omit [IsManifold I 2 M] in
 theorem firstNullFieldKerR
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
@@ -279,6 +280,7 @@ private theorem deriv_nonpos_of_nonneg_left
   exact nonpos_of_mul_nonneg_right hnonneg_deriv (sub_neg.mpr hmt)
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem firstNullTime_nonpos
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -1505,6 +1507,7 @@ theorem nablaEval_zero
 
 
 
+omit [IsManifold I 2 M] in
 theorem firstNullLocalMin
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}

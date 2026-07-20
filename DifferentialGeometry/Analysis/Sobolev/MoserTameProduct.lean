@@ -16,13 +16,15 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Integral.Connection
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (p q k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -141,6 +143,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
         rw [hexp]; linarith
 
 set_option maxHeartbeats 1600000 in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (p q r k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -364,6 +368,8 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
         linarith
 
 set_option maxHeartbeats 1600000 in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) {n : ℕ} (hn : 0 < n) (p : Fin n → ℕ) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -786,6 +792,7 @@ private theorem l2jet_logConvex_iteratedCovGrad
     _ ≤ (K * aHess) * aS := mul_le_mul_of_nonneg_right htr haS_nn
     _ = K * aS * aHess := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem l2Norm_le_sup_mul_sqrt_vol
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ) (hΛ₀ : 0 ≤ Λ₀)

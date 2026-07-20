@@ -20,7 +20,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
     (Φ : TangentSpace I b →L[ℝ] Tensor0SSpace s I b)
     (v : TangentSpace I b) (m : Fin s → TangentSpace I b) :
@@ -57,6 +58,10 @@ private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
   rw [hroundtrip] at this
   exact this.symm
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_chartParallelExtend_eq_parallelCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -76,6 +81,8 @@ private lemma LeviCivita_chartParallelExtend_eq_parallelCLM
   rw [chartLeviCivita_chartParallelExtend_symm (I := I) g α hb v X]
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X v]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) (T : Π b' : M, Tensor0SSpace (s + 1) I b')
@@ -476,6 +483,8 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     rw [hCurryFactor]
     abel
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensor0SCovariantDerivative_eq_abstract_succ
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T :

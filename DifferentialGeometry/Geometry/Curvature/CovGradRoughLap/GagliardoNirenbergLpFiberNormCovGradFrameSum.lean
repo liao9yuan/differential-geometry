@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -108,6 +108,7 @@ theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x)
@@ -178,6 +179,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
   conv_rhs => rw [Finset.sum_comm]
   exact (Finset.sum_congr rfl (fun K _ => hperK K)).symm
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x) (b : ℝ)

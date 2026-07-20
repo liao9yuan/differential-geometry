@@ -24,7 +24,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -232,6 +232,7 @@ private lemma s_contDiffAt_adjugate
     exact s_contDiffAt_chartGramOnE (I := I) hfam (σ k) k hy
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma s_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -257,6 +258,7 @@ private lemma s_contDiffAt_chartInvGramOnE
   exact (contDiffAt_inv _ hdet_ne).comp 0 hdet_smooth
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma s_differentiableAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -267,6 +269,7 @@ private lemma s_differentiableAt_chartInvGramOnE
   (s_contDiffAt_chartInvGramOnE (I := I) hfam k l hy).differentiableAt (by simp)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma joint_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -383,6 +386,7 @@ private lemma joint_contDiffAt_gramBracket
     (joint_contDiffAt_partial_chartGramOnE (I := I) hfam i j l hy)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma joint_contDiffAt_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -453,6 +457,7 @@ private lemma hasDerivAt_partial2_chartGramOnE
   hfam.2.2.2.2 i j p q hy
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -572,6 +577,7 @@ def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
       gramBracket (I := I) g₀ α i j l y
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -668,6 +674,7 @@ private lemma hasDerivAt_gramBracketDeriv
   rw [heq]; exact hsum
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_partial_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -721,6 +728,7 @@ private lemma hasDerivAt_partial_chartInvGramOnE
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partial_chartGramOnE_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (p l b : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -740,6 +748,7 @@ private lemma partial_chartGramOnE_differentiableAt
   exact (hpd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christoffelFirstOrderCorr_differentiableAt
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {i j k : Fin (Module.finrank ℝ E)} {y₀ : E}
@@ -765,6 +774,7 @@ private lemma christoffelFirstOrderCorr_differentiableAt
     · exact partial_chartGramOnE_differentiableAt (I := I) g₀ α l i j hy
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_partial_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -832,6 +842,7 @@ def ricciDerivFirstOrderRemainder (g₀ : SmoothRiemannianMetric I M) (α : M)
             christoffelFirstOrderCorr (I := I) g₀ α h i j m y))))
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -852,6 +863,7 @@ private lemma chartChristoffel_differentiableAt
     (partial_chartGramOnE_differentiableAt (I := I) g α l i j hy)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hasDerivAt_chartRicciTensor
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -958,6 +970,7 @@ lemma hasDerivAt_chartRicciTensor
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma joint_contDiffAt_const_s_chartChristoffel
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -996,6 +1009,7 @@ private lemma joint_contDiffAt_const_s_chartChristoffel
   exact hcdat.comp (0, y₀) contDiffAt_snd
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma joint_contDiffAt_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1029,6 +1043,7 @@ def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
         christoffelFirstOrderCorr (I := I) g₀ α h a b k y)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1080,6 +1095,7 @@ private lemma hasDerivAt_chartDeTurckVFComp
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma deTurckVFFirstOrderCorr_differentiableAt
     {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {k : Fin (Module.finrank ℝ E)} {y₀ : E}
@@ -1103,6 +1119,7 @@ private lemma deTurckVFFirstOrderCorr_differentiableAt
       (christoffelFirstOrderCorr_differentiableAt (I := I) (g₀ := g₀) hy)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_partial_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1166,6 +1183,7 @@ def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M
             (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hasDerivAt_chartLieDeTurckComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1265,6 +1283,8 @@ private lemma chartPushforwardFrameVec_eq_chartBasisVecFiber
     DifferentialGeometry.PDE.RicciFlow.chartPushforwardFrameVec (I := I) α i x =
       chartBasisVecFiber (I := I) α i x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma chartFComponentOnE_deTurckRicciRHS_eq
     (g_bg g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -1292,6 +1312,8 @@ def metricFamilyDeTurckRicciFirstOrderRemainder
   (-2 : ℝ) * ricciDerivFirstOrderRemainder (I := I) g₀ α h i j y +
     lieDerivFirstOrderRemainder (I := I) g₀ g_bg α h i j y
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hasDerivAt_chartFComponentOnE_deTurckRicciRHS
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1377,6 +1399,7 @@ private lemma deTurckVFFirstOrderCorr_vanish
   rw [hc]; ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_invGram_h_invGram_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a b c d : Fin (Module.finrank ℝ E)) :
@@ -1394,6 +1417,7 @@ private lemma partialDeriv_invGram_h_invGram_vanish
   ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christoffelCorrCoeff_partial_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a l : Fin (Module.finrank ℝ E)) :
@@ -1425,6 +1449,7 @@ private lemma christoffelCorrCoeff_partial_vanish
   exact partialDeriv_invGram_h_invGram_vanish hval hjet hy p a r q l
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_christoffelFirstOrderCorr_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a b k : Fin (Module.finrank ℝ E)) :
@@ -1475,6 +1500,7 @@ private lemma partialDeriv_christoffelFirstOrderCorr_vanish
   rw [hCval, hCpartial]; ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p k : Fin (Module.finrank ℝ E)) :
@@ -1553,6 +1579,7 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
   rw [hCval, hCpartial, hcorrval, hcorrpartial]; ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ricciDerivFirstOrderRemainder_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -1594,6 +1621,7 @@ private lemma ricciDerivFirstOrderRemainder_vanish
   rw [h1, h2]; ring
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieDerivFirstOrderRemainder_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -1632,6 +1660,7 @@ private lemma lieDerivFirstOrderRemainder_vanish
 end FirstOrderVanish
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricFamilyDeTurckRicciFirstOrderRemainder_vanish
     {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E} {y : E}
     (hy : y ∈ interior (extChartAt I α).target)

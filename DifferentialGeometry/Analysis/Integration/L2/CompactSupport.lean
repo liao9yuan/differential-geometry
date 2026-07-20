@@ -151,6 +151,7 @@ private lemma vectorFieldAction_eq_zero_of_vectorField_eq_zero
     vectorFieldAction I M X f x = 0 := by
   simp [vectorFieldAction, hx]
 
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem compactlySupportedSmoothTangentSections_action_mem
     {X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯}
     (hX : X ∈ compactlySupportedSmoothTangentSections I M)
@@ -203,6 +204,7 @@ section CovariantDerivativeClosure
 
 variable [T2Space M] [SigmaCompactSpace M]
 
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -222,6 +224,7 @@ theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     simp [concreteConn_apply, hXx']
   simpa using this
 
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

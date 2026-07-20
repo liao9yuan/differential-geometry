@@ -93,8 +93,8 @@ open scoped Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -114,6 +114,7 @@ private instance tangentSpace_finiteDimensional (x : M) :
   inferInstanceAs (FiniteDimensional ℝ E)
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma metricFlatLinear_finrank_eq (x : M) :
     Module.finrank ℝ (TangentSpace I x) =
       Module.finrank ℝ (TangentSpace I x →ₗ[ℝ] ℝ) :=
@@ -122,6 +123,7 @@ private lemma metricFlatLinear_finrank_eq (x : M) :
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma hasMFDerivAt_rexp
     {f : M → ℝ} {x : M} {f' : TangentSpace I x →L[ℝ] ℝ}
     (hf : HasMFDerivAt I 𝓘(ℝ, ℝ) f x f') :
@@ -131,6 +133,7 @@ private lemma hasMFDerivAt_rexp
   simpa [writtenInExtChartAt, Function.comp_def] using hf.2.exp
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma mfderiv_exp_neg_toLinearMap
     {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
@@ -190,6 +193,7 @@ private lemma chartGramMatrixOnE_entry_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
+omit [FiniteDimensional ℝ E] in
 private lemma hasDerivAt_line_of_differentiableAt
     {F : E → ℝ} {y₀ : E} (v : E)
     (hF : DifferentiableAt ℝ F y₀) :

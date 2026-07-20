@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -86,6 +86,8 @@ private lemma frame03_data
   · intro S
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor03_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 3 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -105,6 +107,8 @@ private lemma tensor03_component_eq_toModel
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 3 I x) (a b c : TangentSpace I x) :
@@ -270,6 +274,8 @@ private lemma frame04_data
   · intro S
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor04_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 4 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -289,6 +295,8 @@ private lemma tensor04_component_eq_toModel
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem abs_tensor04_unit_eval_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 4 I x) (a b c d : TangentSpace I x) :
@@ -402,17 +410,6 @@ theorem abs_tensor04_unit_eval_le_fibreNorm_mul_sqrt
       Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
     ring
 
-lemma g0FlatCLM_inverseMetricSharpFib
-    (g₀ : SmoothRiemannianMetric I M) (x : M) (θ : Tensor0SSpace 1 I x) :
-    g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₀ x θ) = θ := by
-  apply cotangentToDualLinear_injective (I := I) (x := x)
-  rw [cotangentToDualLinear_apply, cotangentToDualLinear_apply]
-  ext w
-  rw [cotangentToDual_g0FlatCLM (I := I) g₀ x
-    (inverseMetricSharpFib (I := I) g₀ x θ) w]
-  rw [inverseMetricSharpFib_inner (I := I) g₀ x θ w]
-  rw [cotangentToDualLinear_apply]
-
 private def covGrad3Eval
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
@@ -422,6 +419,7 @@ private def covGrad3Eval
       (unitZeroSec (I := I) (M := M) x))
     (Fin.cons (P x) (Fin.cons (Q x) ![R x]))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGrad3Eval_eq_metricDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -442,6 +440,7 @@ private lemma covGrad3Eval_eq_metricDiff
     unfold metricDiffCovDeriv; rw [sub_self]
   rw [hzero, sub_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiff_inner_eq_half_covGrad3Eval
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -459,6 +458,8 @@ private lemma connDiff_inner_eq_half_covGrad3Eval
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_covGrad3Eval_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -480,6 +481,7 @@ private lemma abs_covGrad3Eval_le
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_covGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     letI : Bundle.RiemannianBundle
@@ -541,6 +543,7 @@ private lemma norm_covGrad_symmS_le
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiff_gFibreNorm_le_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -708,6 +711,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (_hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -873,6 +877,8 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
   rw [hfinal]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_connDiffFib
     (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (e : Fin n → TangentSpace I x)
@@ -899,6 +905,7 @@ private lemma fiberNormSqComponent_connDiffFib
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -982,6 +989,7 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)

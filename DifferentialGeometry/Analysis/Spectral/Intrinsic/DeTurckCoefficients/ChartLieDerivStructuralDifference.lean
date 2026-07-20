@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,7 +27,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundar
 
 omit [I.Boundaryless] in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -50,6 +50,7 @@ theorem chartDeTurckVFComp_sub_eq
 omit [BoundarylessManifold I M] in
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_chartDeTurckVFComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -79,7 +80,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_eq
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
 theorem chartLieDeTurckCompAdvectionTerm_sub_eq
@@ -103,7 +104,7 @@ theorem chartLieDeTurckCompAdvectionTerm_sub_eq
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
 theorem chartLieDeTurckCompIDerivTerm_sub_eq
@@ -126,7 +127,7 @@ theorem chartLieDeTurckCompIDerivTerm_sub_eq
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
 theorem chartLieDeTurckCompJDerivTerm_sub_eq
@@ -151,7 +152,7 @@ theorem chartLieDeTurckCompJDerivTerm_sub_eq
 
 omit [BoundarylessManifold I M] in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartLieDeTurckComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :

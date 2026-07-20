@@ -19,8 +19,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -28,6 +27,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 lemma self_mem_chartLeviCivitaGoodSet (α : M) :
     α ∈ chartLeviCivitaGoodSet (I := I) α := by
   classical
@@ -37,6 +37,7 @@ lemma self_mem_chartLeviCivitaGoodSet (α : M) :
   · have hint : I.IsInteriorPoint α := BoundarylessManifold.isInteriorPoint
     exact (ModelWithCorners.isInteriorPoint_iff).mp hint
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 lemma iUnion_chartLeviCivitaGoodSet :
     (⋃ α : M, chartLeviCivitaGoodSet (I := I) α) = (Set.univ : Set M) := by
   classical
@@ -45,6 +46,8 @@ lemma iUnion_chartLeviCivitaGoodSet :
   refine mem_iUnion.mpr ⟨x, ?_⟩
   exact self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
 
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartLeviCivita_chart_overlap
     (g : SmoothRiemannianMetric I M) (α β : M)
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -95,6 +98,8 @@ def leviCivitaStitched (g : SmoothRiemannianMetric I M) :
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :=
   fun σ x => chartLeviCivita (I := I) g x σ x
 
+omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma leviCivitaStitched_eq_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -106,6 +111,8 @@ lemma leviCivitaStitched_eq_chart
   exact chartLeviCivita_chart_overlap (I := I) g x α
     (self_mem_chartLeviCivitaGoodSet (I := I) (α := x)) hxα hY v
 
+omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma leviCivitaStitched_add_on_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {σ σ' : Π x : M, TangentSpace I x} {x : M}
@@ -125,6 +132,8 @@ lemma leviCivitaStitched_add_on_goodSet
       ← leviCivitaStitched_eq_chart (I := I) g α hx hσ' v]
   rfl
 
+omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma leviCivitaStitched_leibniz_on_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {σ : Π x : M, TangentSpace I x} {f : M → ℝ} {x : M}
@@ -146,6 +155,8 @@ lemma leviCivitaStitched_leibniz_on_goodSet
   simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
+omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma leviCivitaStitched_isCovariantDerivativeOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
@@ -153,6 +164,8 @@ lemma leviCivitaStitched_isCovariantDerivativeOn
   add hσ hσ' hx := leviCivitaStitched_add_on_goodSet (I := I) g α hσ hσ' hx
   leibniz hσ hf hx := leviCivitaStitched_leibniz_on_goodSet (I := I) g α hσ hf hx
 
+omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma leviCivitaStitched_isCovariantDerivativeOn_univ
     (g : SmoothRiemannianMetric I M) :
     IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
@@ -166,12 +179,16 @@ def LeviCivita (g : SmoothRiemannianMetric I M) :
     CovariantDerivative I E (TangentSpace I : M → Type _) :=
   leviCivitaConnectionOfMetric (I := I) g
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem LeviCivita_eq_leviCivitaConnectionOfMetric (g : SmoothRiemannianMetric I M) :
     LeviCivita (I := I) g = leviCivitaConnectionOfMetric (I := I) g := rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_chart_apply (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
     {σ : Π x : M, TangentSpace I x} (hσ : MDiffAt (T% σ) x)
@@ -217,6 +234,8 @@ theorem LeviCivita_chart_apply (g : SmoothRiemannianMetric I M) (α : M)
     koszul_local_uniqueness (s := s) hTF₁ hTF₂ hMC₁ hMC₂ hX hσ hxs
   simpa [hXx] using hloc
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_torsion_eq_zero (g : SmoothRiemannianMetric I M) :
     (LeviCivita (I := I) g).torsion = 0 := by
   classical
@@ -228,6 +247,8 @@ theorem LeviCivita_torsion_eq_zero (g : SmoothRiemannianMetric I M) :
       LeviCivita_chart_apply (I := I) g x hx hX (Y x)]
   exact chartLeviCivita_torsion_free_on (I := I) g x hX hY hx
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_isMetricCompatible (g : SmoothRiemannianMetric I M) :
     IsMetricCompatible (LeviCivita (I := I) g) g := by
   classical
@@ -240,6 +261,8 @@ theorem LeviCivita_isMetricCompatible (g : SmoothRiemannianMetric I M) :
       LeviCivita_chart_apply (I := I) g α hxα hZ v]
   exact chartLeviCivita_isMetricCompatibleOn (I := I) g α hY hZ hxα v
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_section_contMDiffOn_univ (g : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% σ) Set.univ) :
@@ -283,6 +306,8 @@ instance LeviCivita_isContMDiff (g : SmoothRiemannianMetric I M) :
   contMDiff :=
     { contMDiff := fun hσ => LeviCivita_section_contMDiffOn_univ (I := I) g hσ }
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_unique (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0) (hmc : IsMetricCompatible cov g)

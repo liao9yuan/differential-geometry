@@ -17,7 +17,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -159,6 +160,7 @@ def covGradAggregate
         ∑ Q : TensorCompIdx (E := E) r s,
           chartCompNorm (I := I) (M := M) g r s i K β' Q
 
+omit [CompleteSpace E] in
 lemma chartCompNorm_center_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -172,6 +174,7 @@ lemma chartCompNorm_center_le_covGradAggregate
       chartCompNorm (I := I) (M := M) g r s i K β Q')
     (fun _ _ => zero_le _) (Finset.mem_univ Q)
 
+omit [CompleteSpace E] in
 lemma chartCompNorm_transport_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)

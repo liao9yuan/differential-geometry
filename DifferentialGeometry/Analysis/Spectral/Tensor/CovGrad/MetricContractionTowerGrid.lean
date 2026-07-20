@@ -36,6 +36,8 @@ def fixedCoeffTowerOp (g : SmoothRiemannianMetric I M)
         castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (fixedCoeffTowerOp g Φ₀ p (r + 1) (covGrad (I := I) (M := M) g 0 r W))
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fixedCoeffTower_covGrad_op (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0))
     (p r : ℕ) (W : SmoothCcTensor g 0 r) :
@@ -52,6 +54,8 @@ theorem fixedCoeffTower_covGrad_op (g : SmoothRiemannianMetric I M)
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fixedCoeffTower_base_appCc (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0))
     (r : ℕ) (W : SmoothCcTensor g 0 r) :
@@ -79,6 +83,7 @@ def fixedCoeffDiffOp (g : SmoothRiemannianMetric I M)
         (exists_jet_bound_of_normalForm (I := I) (M := M) g op p r (hNF p r))).2 W x }
 
 
+omit [CompleteSpace E] in
 theorem fixedCoeffDiffOp_iteratedCovGrad_singleSum_le (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0))
     (x₀ : M) (r : ℕ) (W : SmoothCcTensor g 0 r) (a : ℕ) :

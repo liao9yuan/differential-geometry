@@ -3,7 +3,6 @@ import DifferentialGeometry.Integration.Volume.Family.Base
 import DifferentialGeometry.Integration.Volume.Family.Variation
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.Integral.Measure
 
@@ -14,7 +13,7 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 

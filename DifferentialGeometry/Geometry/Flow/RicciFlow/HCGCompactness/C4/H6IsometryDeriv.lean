@@ -2020,6 +2020,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normalTrans_isom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -2125,6 +2126,7 @@ theorem normalTrans_isom
 
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_bij
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U : Set E'} (hx : NormalCoordMetricEquivOn (I := I) Y x U) :
@@ -2157,6 +2159,7 @@ theorem normal_fderiv_bij
 
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_le_two
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U V : Set E'}

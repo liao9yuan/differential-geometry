@@ -73,6 +73,7 @@ set_option linter.unusedVariables false in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem forcing_continuous_interior
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

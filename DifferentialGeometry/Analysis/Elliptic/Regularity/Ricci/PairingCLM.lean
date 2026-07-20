@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace RicciPairingCLM
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,12 +40,14 @@ noncomputable def ricciPairingSmooth
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   smoothRicciPairingLp (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciPairingSmooth_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     ricciPairingSmooth (I := I) (M := M) g φ v =
       smoothRicciPairingLp (I := I) (M := M) g φ v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingSmooth_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -58,6 +60,8 @@ lemma ricciPairingSmooth_coeFn
   smoothRicciPairingLp_coeFn (I := I) (M := M) g φ v
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciPairingSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) (b : M) :
@@ -76,6 +80,9 @@ lemma ricciPairingSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) b)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciPairingSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (b : M) :
@@ -91,6 +98,7 @@ lemma ricciPairingSmooth_pt_smul
   rw [hgrad_smul]
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciPairingSmooth_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) :
@@ -110,6 +118,7 @@ theorem ricciPairingSmooth_add
   rw [h_sum, Pi.add_apply, h_v_eq, h_w_eq]
   exact (ricciPairingSmooth_pt_add (I := I) (M := M) g φ v w b).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciPairingSmooth_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -134,6 +143,7 @@ noncomputable def ricciPairingSmoothLin
   map_add' v w := ricciPairingSmooth_add (I := I) (M := M) g φ v w
   map_smul' c v := ricciPairingSmooth_smul (I := I) (M := M) g φ c v
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciPairingSmoothLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -148,6 +158,7 @@ noncomputable def ricciPairingCLMOnSmoothOfBound
     SmoothScalar g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (ricciPairingSmoothLin (I := I) (M := M) g φ).mkContinuous C hC_bound
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciPairingCLMOnSmoothOfBound_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (C : ℝ) (hC_nn : 0 ≤ C)
@@ -189,6 +200,7 @@ noncomputable def ricciPairingCLMOfBound
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem ricciPairingCLMOfBound_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (C : ℝ) (hC_nn : 0 ≤ C)
@@ -205,12 +217,14 @@ noncomputable def ricciPairingCLMOfBound
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingSmooth_norm_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     0 ≤ ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ :=
   norm_nonneg _
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothRicciPairing_continuous
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -220,6 +234,7 @@ lemma smoothRicciPairing_continuous
 
 open DifferentialGeometry.Analysis.Laplacian.RicciDualNorm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingSmooth_norm_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ ^ 2 =
@@ -253,6 +268,8 @@ lemma ricciPairingSmooth_norm_sq
   exact h.symm
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciPairing_sq_le_C_mul_grad
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_bound : ∀ b : M,
@@ -275,6 +292,7 @@ lemma ricciPairing_sq_le_C_mul_grad
             (gradFun (I := I) g v.toFun b) :=
         mul_le_mul_of_nonneg_right (hC_bound b) h_grad_nn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingSmooth_norm_sq_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_nn : 0 ≤ C) (hC_bound : ∀ b : M,
@@ -319,6 +337,7 @@ lemma ricciPairingSmooth_norm_sq_le
   have h_grad_int_le := integral_inner_grad_self_le_h1_norm_sq (g := g) v
   exact le_trans h_int_le (mul_le_mul_of_nonneg_left h_grad_int_le hC_nn)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingSmooth_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_nn : 0 ≤ C) (hC_bound : ∀ b : M,
@@ -338,6 +357,7 @@ lemma ricciPairingSmooth_norm_le
     mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_ricciPairing_lipschitz_bound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ v : SmoothScalar g,
@@ -358,6 +378,7 @@ noncomputable def ricciPairingCLMOnSmooth
     (Classical.choose_spec
       (exists_ricciPairing_lipschitz_bound (I := I) (M := M) g φ)).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciPairingCLMOnSmooth_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -374,6 +395,7 @@ noncomputable def ricciPairingCLM
     (Classical.choose_spec
       (exists_ricciPairing_lipschitz_bound (I := I) (M := M) g φ)).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem ricciPairingCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ricciPairingCLM (I := I) (M := M) g φ

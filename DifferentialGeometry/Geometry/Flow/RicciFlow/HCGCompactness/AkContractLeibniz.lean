@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -56,6 +55,7 @@ def dStarAg (A dA : ι → ι → ι → Real) (g dg : ι → ι → Real) (i j 
 
 
 
+omit [DecidableEq ι] in
 theorem covD3_starAg_leibniz
     (Γ : ι → ι → Real) (A dA : ι → ι → ι → Real) (g dg : ι → ι → Real)
     (i j d : ι) :

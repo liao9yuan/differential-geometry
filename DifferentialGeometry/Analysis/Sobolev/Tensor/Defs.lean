@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -78,6 +78,7 @@ theorem MemWtwokTwo_zero
   exact (hcont.memLp_of_hasCompactSupport (μ := volume.restrict
     (chartTargetEuclid (I := I) (M := M) α)) hcs)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem MemWtwokTwo_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k (0 : SmoothCcTensor g r s) := by
@@ -86,6 +87,7 @@ theorem MemWtwokTwo_zero_section
   exact MemWkp_zero_fun (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem MemWtwokTwo_add
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T₁ T₂ : SmoothCcTensor g r s}
@@ -104,6 +106,7 @@ theorem MemWtwokTwo_add
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (h₁ α Idx Jdx) (h₂ α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem MemWtwokTwo_smul
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     (c : ℝ) {T : SmoothCcTensor g r s}
@@ -121,6 +124,7 @@ theorem MemWtwokTwo_smul
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (h α Idx Jdx) c
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem MemWtwokTwo_neg
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -129,6 +133,7 @@ theorem MemWtwokTwo_neg
   have hsmul := MemWtwokTwo_smul (I := I) (M := M) g (-1 : ℝ) h
   rwa [neg_one_smul] at hsmul
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem MemWtwokTwo_sub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T₁ T₂ : SmoothCcTensor g r s}
@@ -146,6 +151,7 @@ def wtwokTwoSubmodule
   add_mem' := fun h₁ h₂ => MemWtwokTwo_add (I := I) (M := M) g h₁ h₂
   smul_mem' := fun c _ h => MemWtwokTwo_smul (I := I) (M := M) g c h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] lemma mem_wtwokTwoSubmodule
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -195,6 +201,7 @@ theorem wtwokTwoNorm_nonneg
     0 ≤ wtwokTwoNorm (I := I) (M := M) g k T :=
   zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem wtwokTwoNorm_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     wtwokTwoNorm (I := I) (M := M) g k (0 : SmoothCcTensor g r s) = 0 := by
@@ -217,6 +224,7 @@ theorem wtwokTwoNorm_zero_section
   rw [tsum_congr hpt]
   exact tsum_zero
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem wtwokTwoNorm_add_le
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T₁ T₂ : SmoothCcTensor g r s}
@@ -246,6 +254,7 @@ theorem wtwokTwoNorm_add_le
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (h₁ α Idx Jdx) (h₂ α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem wtwokTwoNorm_smul
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     (c : ℝ) {T : SmoothCcTensor g r s}
@@ -293,6 +302,7 @@ theorem MemWtwokTwo.le_of_le
   have hle : 2 * k ≤ 2 * k' := by omega
   exact MemWkp.le_of_le (d := Module.finrank ℝ E) hle (h α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem wtwokTwoSubmodule_le_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     wtwokTwoSubmodule (I := I) (M := M) g r s (k + 1) ≤

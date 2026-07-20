@@ -39,7 +39,7 @@ open DifferentialGeometry.Integral.Connection
 
 section AtomMeasurability
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +57,7 @@ private lemma pouTsupport_measurableSet_meas (α : M) :
   (isClosed_tsupport _).measurableSet
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -79,6 +80,7 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma tensorChartComponentRaw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -101,6 +103,7 @@ private lemma tensorChartComponentRaw_continuousOn_pouTsupport
   exact hb_base
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma scalarOnE_raw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -122,6 +125,7 @@ private lemma scalarOnE_raw_continuousOn_pouTsupport
     (I := I) (M := M) g r s α S Idx Jdx hb
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma abs_scalarOnE_raw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -236,6 +240,7 @@ private lemma triv_continuousLinearMapAt_eq_triv_snd
   exact congrFun hcoe _
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (k : Fin r) :
     ContinuousOn (fun b : M => trivInput (I := I) g r s α j S.toSection b k)
@@ -253,6 +258,7 @@ private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b k)
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma trivOutput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (l : Fin s) :
     ContinuousOn (fun b : M => trivOutput (I := I) g r s α j S.toSection b l)
@@ -270,6 +276,7 @@ private lemma trivOutput_continuousOn_chartSource (S : SmoothCcTensor g r s)
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b l)
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma christoffelAtomIntegrand_continuousOn_chartSource
     (S : SmoothCcTensor g r s) :
     ContinuousOn (christoffelAtomIntegrand (I := I) g r s α j S.toSection)
@@ -294,6 +301,7 @@ private lemma christoffelAtomIntegrand_continuousOn_chartSource
   exact h_pou.mul h_sqrt
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma christoffelAtomIntegrand_continuousOn_pouTsupport
     (S : SmoothCcTensor g r s) :
     ContinuousOn (christoffelAtomIntegrand (I := I) g r s α j S.toSection)
@@ -334,6 +342,7 @@ private lemma christoffelAtomIntegrand_eq_indicator
     exact christoffelAtomIntegrand_zero_outside_pouTsupport (I := I) T hb
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma christoffelAtomIntegrand_aestronglyMeasurable_restrict_pouTsupport
     (S : SmoothCcTensor g r s) :
     AEStronglyMeasurable
@@ -349,6 +358,7 @@ private lemma christoffelAtomIntegrand_aestronglyMeasurable_restrict_pouTsupport
 
 end ChristoffelAtomMeasurability
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E))

@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -43,6 +42,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_nonneg
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -52,6 +52,7 @@ theorem metricInner_nonneg
   · exact (g.pos x v hv).le
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_mono
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C C' : Real}
@@ -74,6 +75,7 @@ theorem metricEquiv_mono
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_trans
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h k : SmoothRiemannianMetric I M} {C₁ C₂ : Real}
@@ -103,6 +105,7 @@ theorem metricEquiv_trans
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricEquiv_comp_eps
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {K : Set M} {g h k : SmoothRiemannianMetric I M} {eps₀ eps₁ : Real}
@@ -135,6 +138,7 @@ theorem compEpsAccum {C : Real} {e δ : Nat → Real}
 
 
 
+omit [CompleteSpace E] in
 theorem exists_bump_one_on {K U : Set M} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) :
     ∃ χ : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 K ∧
       tsupport χ ⊆ U ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
@@ -166,6 +170,7 @@ variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ 
 
 
 
+omit [CompleteSpace E] in
 theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)) {K : Set M}
     (hK : IsCompact K) (hKs : K ⊆ Φ.source) (h : SmoothRiemannianMetric I N) :
     ∃ (χ : M → ℝ) (P : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ),
@@ -276,6 +281,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem pullInner_pos (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {x : M} (hx : x ∈ Φ.source) (h : SmoothRiemannianMetric I N)
     (v : TangentSpace I x) (hv : v ≠ 0) :

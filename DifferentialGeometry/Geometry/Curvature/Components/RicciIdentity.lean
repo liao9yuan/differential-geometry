@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.Christoffel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -31,12 +30,6 @@ section CoordinateChristoffelCurvature
 
 open DifferentialGeometry.Tensor.Coordinates
 
-variable [Module.Finite Real E] [CompleteSpace Real]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-
-
-
 def tensor0SRicciIdentityCoordInput {s : ℕ}
     (i j : CoordinateIdx (𝕜 := Real) E)
     (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
@@ -47,8 +40,10 @@ def tensor0SRicciIdentityCoordInput {s : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
     [T2Space M]
+    (_h : FiniteDimensional ℝ E)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
@@ -68,6 +63,7 @@ theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
         -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
             coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+  letI := _h
   classical
   let slots : Fin s -> TangentSpace I x0 :=
     fun q => coordinateFrameAt (I := I) x0 (ks q) x0
@@ -104,8 +100,10 @@ theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
     [T2Space M]
+    (_h : FiniteDimensional ℝ E)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
@@ -129,6 +127,7 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
         -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
             coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+  letI := _h
   classical
   let slots : Fin s -> TangentSpace I x0 :=
     fun q => coordinateFrameAt (I := I) x0 (ks q) x0
@@ -184,7 +183,7 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
             coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
           simpa [slots] using
             curvatureAction0SAt_coordFrame_of_christoffelCurv
-              (I := I) cov hcov Rm13 x0 alpha hRm hcurv i j ks
+              (I := I) inferInstance cov hcov Rm13 x0 alpha hRm hcurv i j ks
 
 
 
@@ -215,8 +214,10 @@ def OneFormThirdCommChristoffelCoordAt
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem one_form_third_comm_coord_of_christoffelCurv
     [T2Space M]
+    (_h : FiniteDimensional ℝ E)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
@@ -230,6 +231,7 @@ theorem one_form_third_comm_coord_of_christoffelCurv
     (hcurv : ConnectionCurvatureCoordAt (I := I) cov x₀)
     (hcoord : OneFormThirdCommChristoffelCoordAt (I := I) cov x₀ alpha nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha := by
+  letI := _h
   refine one_form_third_comm_of_coord_ijk (I := I) Rm13 alpha
     (coordinateFrameAt_toBasis (I := I) x₀) nabla2Alpha ?_
   intro i k j

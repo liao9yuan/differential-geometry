@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompLi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -41,6 +40,7 @@ def contrTail {p q : ℕ}
       A (Fin.snoc (fun i : Fin p => idx (Fin.castAdd q i)) c) *
         B (Fin.snoc (fun j : Fin q => idx (Fin.natAdd p j)) c)
 
+omit [DecidableEq Idx] in
 @[simp] theorem contrTail_apply {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real)
     (idx : Fin (p + q) → Idx) :
@@ -50,10 +50,12 @@ def contrTail {p q : ℕ}
           B (Fin.snoc (fun j : Fin q => idx (Fin.natAdd p j)) c) := rfl
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem castAdd_append {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (i : Fin p) : (Fin.append aPart bPart) (Fin.castAdd q i) = aPart i := by
   simp [Fin.append_left]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem natAdd_append {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (j : Fin q) : (Fin.append aPart bPart) (Fin.natAdd p j) = bPart j := by
   simp [Fin.append_right]
@@ -67,6 +69,7 @@ private theorem castAdd_ne_natAdd {p q : ℕ} (i : Fin p) (j : Fin q) :
   omega
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (i : Fin p) (v : Idx) :
     Function.update (Fin.append aPart bPart) (Fin.castAdd q i) v =
@@ -81,6 +84,7 @@ private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart
   · rw [Fin.append_right, Function.update_of_ne (castAdd_ne_natAdd i j').symm, Fin.append_right]
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_natAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (j : Fin q) (v : Idx) :
     Function.update (Fin.append aPart bPart) (Fin.natAdd p j) v =
@@ -96,10 +100,12 @@ private theorem update_append_natAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart 
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem snoc_cons_zero {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx) :
     (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) 0 = d := by
   rw [show (0 : Fin (p + 2)) = Fin.castSucc 0 from by simp, Fin.snoc_castSucc, Fin.cons_zero]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem tail_snoc_cons {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx) :
     Fin.tail (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) =
       (Fin.snoc Y c : Fin (p + 1) → Idx) := by
@@ -110,6 +116,7 @@ private theorem tail_snoc_cons {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx)
   · rw [Fin.succ_castSucc, Fin.snoc_castSucc, Fin.cons_succ, Fin.snoc_castSucc]
   · rw [Fin.succ_last, Fin.snoc_last, Fin.snoc_last]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_snoc_last {p : ℕ} (Y : Fin p → Idx) (c a : Idx) :
     Function.update (Fin.snoc Y c : Fin (p + 1) → Idx) (Fin.last p) a =
       (Fin.snoc Y a : Fin (p + 1) → Idx) := by
@@ -118,6 +125,7 @@ private theorem update_snoc_last {p : ℕ} (Y : Fin p → Idx) (c a : Idx) :
   · rw [Function.update_of_ne (Fin.castSucc_lt_last j).ne, Fin.snoc_castSucc, Fin.snoc_castSucc]
   · rw [Function.update_self, Fin.snoc_last]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_snoc_castSucc {p : ℕ} (Y : Fin p → Idx) (c a : Idx) (j : Fin p) :
     Function.update (Fin.snoc Y c : Fin (p + 1) → Idx) (Fin.castSucc j) a =
       (Fin.snoc (Function.update Y j a) c : Fin (p + 1) → Idx) := by
@@ -152,6 +160,7 @@ def covDerivStepCompU {p : ℕ}
 
 
 
+omit [DecidableEq Idx] in
 theorem contrTail_contracted_cancel {p q : ℕ}
     (chr : Idx → Idx → Idx → Real) (d : Idx)
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real)
@@ -170,6 +179,7 @@ theorem contrTail_contracted_cancel {p q : ℕ}
 
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}
     (extA : (Fin (p + 1) → Idx) → Idx → Real)
     (extB : (Fin (q + 1) → Idx) → Idx → Real)

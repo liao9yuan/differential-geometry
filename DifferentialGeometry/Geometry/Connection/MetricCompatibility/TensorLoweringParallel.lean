@@ -22,13 +22,13 @@ open Tensor0SNabla
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
@@ -42,7 +42,7 @@ lemma separableFormAt_zero
   rw [separableFormAt_apply]
   simp
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -55,7 +55,7 @@ lemma lowerAllUpperIndices_eq_zero_iff
       (h.trans (map_zero _).symm)
   · rw [h, map_zero]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -63,7 +63,7 @@ lemma finrank_tensor0SModel_eq (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) = (Module.finrank ℝ E) ^ n := by
   exact finrank_continuousMultilinearMap (𝕜 := ℝ) (F := E) n
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -72,7 +72,7 @@ lemma finrank_tensorRSModel_eq_finrank_tensor0SModel (r s : ℕ) :
       Module.finrank ℝ (Tensor0SModel (r + s) ℝ E) := by
   rw [finrank_tensorRSModel, finrank_tensor0SModel_eq]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -91,7 +91,7 @@ def lowerAllUpperIndicesEquiv
       (lowerAllUpperIndices (I := I) (M := M) g r s x).toLinearMap
       (lowerAllUpperIndices_bijective (I := I) (M := M) g r s x)).toContinuousLinearEquiv
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -102,7 +102,7 @@ lemma lowerAllUpperIndicesEquiv_apply
     lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x T =
       lowerAllUpperIndices (I := I) (M := M) g r s x T := rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -114,7 +114,7 @@ lemma lowerAllUpperIndicesEquiv_coe
   ext T
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -127,7 +127,7 @@ lemma lowerAllUpperIndicesEquiv_symm_apply_apply
   have h := (lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x).symm_apply_apply T
   rwa [lowerAllUpperIndicesEquiv_apply] at h
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -140,6 +140,7 @@ lemma lowerAllUpperIndicesEquiv_apply_symm_apply
   have h := (lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x).apply_symm_apply U
   rwa [lowerAllUpperIndicesEquiv_apply] at h
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_liftedTensorSection_eq_equiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -149,6 +150,7 @@ lemma toModel_liftedTensorSection_eq_equiv
         (TensorRSSpace.toModel (S y)) := by
   rw [toModel_liftedTensorSection, lowerAllUpperIndicesEquiv_apply]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_eq_symm_liftedTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -159,9 +161,10 @@ lemma toModel_eq_symm_liftedTensorSection
   rw [toModel_liftedTensorSection_eq_equiv,
     ContinuousLinearEquiv.symm_apply_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] in
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma contMDiff_unitZeroSection :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
@@ -172,7 +175,7 @@ lemma contMDiff_unitZeroSection :
   rw [scalarFn_unitZero (I := I) (M := M)]
   exact contMDiff_const
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E]
+omit [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
@@ -193,7 +196,7 @@ lemma toModel_tensorRS_apply
   rw [hD]
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_tensorRS_comp_apply
     (r s : ℕ) (x : M)
     (A : Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x)
@@ -209,6 +212,7 @@ lemma toModel_tensorRS_comp_apply
   rw [Tensor0SSpace.toModel_ofModel] at h2
   rw [← h2, ContinuousLinearMap.comp_apply, h1]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma liftedTensorSection_zero_eq_apply_unit
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -235,6 +239,8 @@ lemma liftedTensorSection_zero_eq_apply_unit
   funext j
   exact congrArg u (Fin.ext (by simp))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -295,6 +301,7 @@ noncomputable def metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
   fun y => Tensor0SSpace.ofModel
     (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 lemma toModel_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -323,14 +330,14 @@ private noncomputable def evalAtBasisCLE_loc (n : ℕ) :
     (LinearEquiv.ofBijective L
       ⟨hinj, (LinearMap.injective_iff_surjective_of_finrank_eq_finrank h_eq).mp hinj⟩)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma evalAtBasisCLE_loc_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisCLE_loc (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_loc
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -352,7 +359,7 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_loc
   intro b _
   exact ((evalAtBasisCLE_loc (E := E) n).symm_apply_apply (Φ b)).symm
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma contMDiffOn_metricFormFun_baseSet
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (α : M) :
@@ -414,7 +421,7 @@ private lemma contMDiffOn_metricFormFun_baseSet
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
   exact hpb.2
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma contMDiff_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
@@ -432,7 +439,7 @@ noncomputable def metricFormSection
     Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯ :=
   ⟨metricFormFun (I := I) (M := M) g r Y, contMDiff_metricFormFun (I := I) (M := M) g r Y⟩
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 lemma metricFormSection_apply
     (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -440,6 +447,7 @@ lemma metricFormSection_apply
     metricFormSection (I := I) (M := M) g r Y y =
       metricFormFun (I := I) (M := M) g r Y y := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 lemma toModel_metricFormSection
     (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -448,13 +456,14 @@ lemma toModel_metricFormSection
       separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y) := by
   rw [metricFormSection_apply, toModel_metricFormFun]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricFormFun_tensorSectionMDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     TensorSectionMDiffAt (I := I) r (metricFormFun (I := I) (M := M) g r Y) x :=
   (contMDiff_metricFormFun (I := I) (M := M) g r Y x).mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma curriedSection_metricFormFun_succ
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin (r + 1) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) (v : E) :
@@ -482,7 +491,7 @@ noncomputable def rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
   fun y => Tensor0SSpace.ofModel
     (lowerAllUpperIndices (I := I) (M := M) g r s y (TensorRSSpace.toModel (T y)))
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp]
 lemma toModel_rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π y : M, TensorRSSpace r s I y) (y : M) :
@@ -490,6 +499,7 @@ lemma toModel_rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
       lowerAllUpperIndices (I := I) (M := M) g r s y (TensorRSSpace.toModel (T y)) := by
   rw [rawLiftFun, Tensor0SSpace.toModel_ofModel]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma separableFormAt_succ_cons_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ) (f : Fin (r + 1) → E)
     (w : Fin (r + 1) → E) :
@@ -499,6 +509,8 @@ lemma separableFormAt_succ_cons_apply
           (fun i : Fin r => f i.succ) (fun i : Fin r => w i.succ) := by
   rw [separableFormAt_apply, separableFormAt_apply, Fin.prod_univ_succ]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
     ∀ (r : ℕ) (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
       (x : M) (v : TangentSpace I x),
@@ -677,7 +689,7 @@ noncomputable def prependMetricCLM
           (g.inner y (X y))).comp
         (tensor0SSpace_continuousLinearEquiv (I := I) r y).toContinuousLinearMap))
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_prependMetricCLM
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M)
@@ -711,6 +723,7 @@ lemma toModel_prependMetricCLM
   rw [hzcons, hcurry]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensor0SCovDeriv_cast_transport
     {a b : ℕ} (g : SmoothRiemannianMetric I M) (h : a = b)
     (W : Π y : M, Tensor0SSpace b I y) (x : M) (v : TangentSpace I x) :
@@ -720,7 +733,7 @@ private lemma tensor0SCovDeriv_cast_transport
         (tensor0SCovariantDerivative I M b (LeviCivita (I := I) g) W x v) := by
   subst h; rfl
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma toModel_cast_transport
     {a b : ℕ} (h : a = b) {x : M} (T : Tensor0SSpace b I x) :
     Tensor0SSpace.toModel (cast (congrArg (fun n => Tensor0SSpace n I x) h.symm) T) =
@@ -730,7 +743,7 @@ private lemma toModel_cast_transport
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensorSectionMDiffAt_cast_transport
     {a b : ℕ} (h : a = b) (W : Π y : M, Tensor0SSpace b I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) b W x) :
@@ -738,6 +751,7 @@ private lemma tensorSectionMDiffAt_cast_transport
       (fun y : M => cast (congrArg (fun n => Tensor0SSpace n I y) h.symm) (W y)) x := by
   cases h; exact hW
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensorSectionMDiffAt_curriedSection_applyVF
     (s : ℕ) (W : Π y : M, Tensor0SSpace (s + 1) I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -758,6 +772,7 @@ private lemma tensorSectionMDiffAt_curriedSection_applyVF
     (b := id) (ϕ := fun y : M => curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π y : M, TensorRSSpace (r + 1) s I y)
@@ -842,6 +857,8 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     simp only [Fin.cons_succ]
   rw [hform]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I M) :
     ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
       (_hLiftDiff : ∀ z : M, TensorSectionMDiffAt (I := I) (r + s)
@@ -1116,6 +1133,8 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
 
     rw [hgoalCorr, hIHcorr, hk0, add_comm, ← Fin.sum_univ_succ]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
     ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
       (_hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1141,6 +1160,8 @@ lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
   intro z
   exact (contMDiff_lifted_section (I := I) (M := M) g r s ⟨T, hT⟩ z).mdifferentiableAt (by simp)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -1213,6 +1234,8 @@ theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
   conv_lhs => rw [hbracket (metricFormSection (I := I) (M := M) g r Y)]
   rw [hWform_x]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace DiffChartBilinearH1Compl
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -726,6 +726,7 @@ noncomputable def fHLeibnizResidualLp
       (laplacianOfChartPOU (I := I) (M := M) g α)
       (H1ComplToLp (I := I) (M := M) g u_h)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fHLeibniz_eq_piecePreimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -751,6 +752,7 @@ private lemma fHLeibniz_eq_piecePreimage_add_residual
   rw [h_diff_eq]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRawLpFromLp_coeFn_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -824,6 +826,7 @@ private lemma chartPushedRawLpFromLp_coeFn_add
   rw [hy_FG, hy_chart, h_chartPushedRaw_sum_pointwise y]
   rw [← hy_F, ← hy_G]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRawLpFromLp_smoothMulLpRhoPreimage_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -935,6 +938,7 @@ private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
   filter_upwards [h_chartPushedRaw_add_ae, h_piece1] with y hy_add hy_piece1
   rw [hy_add, hy_piece1]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma vol_abs_chartPulledWeighted_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

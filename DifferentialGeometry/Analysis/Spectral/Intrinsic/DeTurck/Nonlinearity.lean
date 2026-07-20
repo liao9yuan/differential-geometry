@@ -34,7 +34,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -68,6 +68,7 @@ private def retag (g₀ : SmoothRiemannianMetric I M)
   toSection := S.toSection
   hasCompactSupport := S.hasCompactSupport
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private theorem retag_toFun (g₀ : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
     (retag (I := I) g₀ S).toFun = S.toFun := rfl
@@ -85,15 +86,18 @@ private def rhsDiffGNorm (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M) :
   tensorPointwiseNorm (I := I) (M := M) g₀ 0 2 y
     ((rhsDiffSection (I := I) g_bg g g' g₀).toFun y)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem rhsDiffGNorm_nonneg
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M) :
     0 ≤ rhsDiffGNorm (I := I) g_bg g g' g₀ y :=
   Real.sqrt_nonneg _
 
-set_option linter.unusedSectionVars false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem continuous_rhsDiffGNorm_sq
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
     Continuous (fun y : M =>
@@ -103,9 +107,10 @@ private theorem continuous_rhsDiffGNorm_sq
   SmoothCcTensor.continuous_inner_self (I := I) (M := M)
     (rhsDiffSection (I := I) g_bg g g' g₀)
 
-set_option linter.unusedSectionVars false in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem continuous_rhsDiffGNorm
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
     Continuous (rhsDiffGNorm (I := I) g_bg g g' g₀) :=
@@ -127,11 +132,14 @@ private theorem continuous_rhsDiffGNorm
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem bddAbove_gNorm_range (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
     BddAbove (Set.range (rhsDiffGNorm (I := I) g_bg g g' g₀)) :=
   (isCompact_range (continuous_rhsDiffGNorm (I := I) g_bg g g' g₀)).bddAbove
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem rhsDiffSection_toModel_apply
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M)
     (v : Fin 2 → TangentSpace I y) :
@@ -176,6 +184,7 @@ private theorem rhsDiffSection_toModel_apply
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz
     (g_bg g₀ : SmoothRiemannianMetric I M) :
     ∃ L : ℝ, 0 ≤ L ∧

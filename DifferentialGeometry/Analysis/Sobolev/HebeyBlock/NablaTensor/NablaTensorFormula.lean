@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
-
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle DifferentialGeometry
@@ -17,13 +16,14 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open scoped Manifold ContDiff BigOperators ENNReal
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem nabla_equals_partial_plus_christoffel_on_tensors
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (T : Π b : M, TensorRSSpace r s I b)
@@ -49,6 +49,7 @@ private lemma nabla_tensor_toEucl_symm_preimage_target (α : M) :
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
     rw [Set.mem_preimage, h_eq]; exact hz_tgt
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma nabla_tensor_raw_pull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -310,6 +311,7 @@ private lemma nabla_tensor_pouPull_contOn (α : M) :
   exact hPOU_cont.comp_continuousOn' h_inner
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma per_alpha_j_basis_integral_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -646,6 +648,7 @@ private lemma per_alpha_j_basis_integral_bound
     _ = _ := h_pull_const
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hs_le_pou_uniform
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -801,6 +804,7 @@ private theorem hs_le_pou_uniform
         rw [ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nabla_tensor_single_step_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -810,6 +814,7 @@ theorem nabla_tensor_single_step_formula
   hs_le_pou_uniform (I := I) (M := M) g r s k
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nabla_tensor_iterated_Hk_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -33,6 +33,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
   [FiniteDimensional ℝ F]
 
+omit [SigmaCompactSpace M] in
 theorem riemannSec_eq_riemannOp_smooth
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -43,6 +44,7 @@ theorem riemannSec_eq_riemannOp_smooth
     riemannSec cov X Y Z x = riemannOp cov x (X x) (Y x) (Z x) :=
   (riemannOp_apply_smooth (cov := cov) hX hY hZ).symm
 
+omit [SigmaCompactSpace M] in
 theorem cov_commutator_eq_riemannOp_smooth
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -61,7 +63,7 @@ end General
 section TensorBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -71,6 +73,8 @@ noncomputable abbrev tensorCov (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     CovariantDerivative I (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
   TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRicciCommutator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -82,6 +86,7 @@ theorem tensorRicciCommutator
       riemannSec (tensorCov (I := I) g r s) X Y T x :=
   (riemannSec_def (tensorCov (I := I) g r s) X Y T x).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricci_identity_tensor_commutator_eq_riemannOp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {T : Π b : M, TensorRSSpace r s I b} {x : M}
@@ -99,6 +104,8 @@ theorem ricci_identity_tensor_commutator_eq_riemannOp
   rw [tensorRicciCommutator (I := I) g r s X Y T x]
   exact riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g r s) hX hY hT
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRicciCommutator_swap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -106,6 +113,8 @@ theorem tensorRicciCommutator_swap
       - riemannSec (tensorCov (I := I) g r s) Y X T x :=
   riemannSec_swap (tensorCov (I := I) g r s) X Y T x
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorRicciCommutator_self
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -119,6 +128,8 @@ noncomputable def tensorSecondCovDeriv
   (tensorCov (I := I) g r s).toFun (covApply (tensorCov (I := I) g r s) Y T) x (X x) -
     (tensorCov (I := I) g r s).toFun T x ((LeviCivita (I := I) g).toFun Y x (X x))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSecondCovDeriv_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -126,6 +137,7 @@ lemma tensorSecondCovDeriv_def
       (tensorCov (I := I) g r s).toFun (covApply (tensorCov (I := I) g r s) Y T) x (X x) -
         (tensorCov (I := I) g r s).toFun T x ((LeviCivita (I := I) g).toFun Y x (X x)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorSecondCovDeriv_antisymm_eq_riemannSec
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} (T : Π b : M, TensorRSSpace r s I b) {x : M}
@@ -154,6 +166,7 @@ theorem tensorSecondCovDeriv_antisymm_eq_riemannSec
           cov.toFun T x ((LeviCivita (I := I) g).toFun X x (Y x))) from by abel]
   rw [hsub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorSecondCovDeriv_antisymm_eq_riemannOp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {T : Π b : M, TensorRSSpace r s I b} {x : M}
@@ -169,6 +182,8 @@ theorem tensorSecondCovDeriv_antisymm_eq_riemannOp
         ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]
   exact riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g r s) hX hY hT
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_eq_frame_trace_secondCovDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 800000
 
@@ -46,6 +45,7 @@ noncomputable def lowerAllSpace
 
 
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem normSqRS_eq_normSq0S_lowerAllSpace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)

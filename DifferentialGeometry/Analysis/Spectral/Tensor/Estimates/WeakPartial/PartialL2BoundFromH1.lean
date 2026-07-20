@@ -37,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -88,6 +89,7 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
     hB.trans (mul_le_mul_of_nonneg_left h_l2_le_h1 (by exact zero_le _))
   exact hB'
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k : Fin (Module.finrank ℝ E))

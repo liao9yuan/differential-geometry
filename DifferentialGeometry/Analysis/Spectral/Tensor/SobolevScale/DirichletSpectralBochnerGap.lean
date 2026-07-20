@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open Tensor0SBundle
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -440,6 +440,8 @@ private theorem covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd_local
     · exact (ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i + 1 : ℕ) : ℝ) S).weighted_summable
   exact le_of_sq_le_sq hsq hnn
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_comp_local
     (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ =
@@ -468,6 +470,7 @@ private theorem norm_iteratedCovGrad_comp_local
   nlinarith [hsq, h1, h2]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_order_eq_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :
@@ -489,6 +492,7 @@ private lemma contract_eq_covGradBundleEquiv_symm_local
   rw [Tensor0SBundle.covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 s x A v D m]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)
@@ -509,6 +513,7 @@ private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [← hAeq, contract_eq_covGradBundleEquiv_symm_local (I := I) (M := M) s x (e a) A, hΦ_def]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_contract_le_succ_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)
@@ -525,6 +530,7 @@ private lemma riemannianFiberNormSq_contract_le_succ_local
       (Tensor0SBundle.contract_covariant 0 s x (e a) A))
     (fun a _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 s x _) (Finset.mem_univ i)
 
+omit [CompactSpace M] in
 private lemma covDivergenceRaw_eq_sum_contract_covDeriv_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) (b : M) :
     covDivergenceRaw (I := I) (M := M) g₀ s V b =

@@ -15,7 +15,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,6 +27,8 @@ section LipschitzOnCompact
 
 variable [I.Boundaryless]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPhaseVF_exists_lipschitzOnWith_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {z : E × E} (hz : z ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
@@ -41,6 +43,8 @@ lemma chartPhaseVF_exists_lipschitzOnWith_at
     hC1.contDiffAt (hopen.mem_nhds hz)
   exact hC1_at.exists_lipschitzOnWith
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPhaseVF_locallyLipschitzOn_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -52,6 +56,8 @@ lemma chartPhaseVF_locallyLipschitzOn_of_compact
   refine ⟨L, t, ?_, hL⟩
   exact mem_nhdsWithin_of_mem_nhds ht
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_lipschitzOnWith_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -67,6 +73,8 @@ section UniformUniqueness
 
 variable [I.Boundaryless]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -111,6 +119,8 @@ section UniformAgainstFlow
 
 variable [I.Boundaryless]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_solution_eq_chartFlowOrbit_on_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -138,6 +148,8 @@ section UniformOnClosedBall
 
 variable [I.Boundaryless]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     {z₀ : E × E} {r : ℝ}

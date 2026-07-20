@@ -20,7 +20,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open TensorMultilinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,6 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cometricDoubleTraceFib_eq_sum_curry (g₀ : SmoothRiemannianMetric I M) (b : ℕ)
     (x : M) (D : Tensor0SSpace (b + 2) I x) :
     (show Tensor0SSpace (b + 2) I x →L[ℝ] Tensor0SSpace b I x from
@@ -65,6 +67,7 @@ theorem cometricDoubleTraceFib_eq_sum_curry (g₀ : SmoothRiemannianMetric I M) 
         ((Module.finBasis ℝ E).cDualBasis k)))
     (vs := Fin.cons ((Module.finBasis ℝ E) k) m)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (x : M) (D : Tensor0SSpace (b + 2) I x) (a c : E)
     (m : Fin s → E) :
@@ -96,6 +99,8 @@ theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : 
     (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) c m]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cometricDoubleTraceFib_comp_slotExtend_two_eq (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (x : M) :
     (show Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace s I x from
@@ -135,6 +140,8 @@ theorem cometricDoubleTraceFib_comp_slotExtend_two_eq (g₀ : SmoothRiemannianMe
         ((Module.finBasis ℝ E).cDualBasis k)))
     ((Module.finBasis ℝ E) k) m]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (V : SmoothCcTensor g₀ 0 (b + 2)) :
     operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)

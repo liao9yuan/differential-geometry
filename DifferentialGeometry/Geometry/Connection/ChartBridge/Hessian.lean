@@ -14,7 +14,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,8 @@ def abstractHessianLin (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) 
       change L (c • v) w = c * L v w
       rw [map_smul]; rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma abstractHessianLin_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) (v w : TangentSpace I x) :
     abstractHessianLin (I := I) g f x v w =
@@ -49,11 +51,15 @@ def abstractHessianBilin (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     pointwiseBilin (M := M) I :=
   fun x => abstractHessianLin (I := I) g f x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma abstractHessianBilin_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) (v w : TangentSpace I x) :
     abstractHessianBilin (I := I) g f x v w =
       abstractHessian (I := I) g f x v w := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessianLin_symm
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} {x : M} (hf : ContMDiffAt I 𝓘(ℝ) 2 f x) (v w : TangentSpace I x) :
@@ -61,6 +67,8 @@ theorem abstractHessianLin_symm
       abstractHessianLin (I := I) g f x w v :=
   abstractHessian_symm (I := I) g hf v w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessianBilin_isPointwiseSymm
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) :
@@ -72,6 +80,8 @@ theorem abstractHessianBilin_isPointwiseSymm
       exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
     simpa using h1)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessian_eq_inner_cov_gradFun_extend [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M) (v w : TangentSpace I x) :
@@ -132,6 +142,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_extend [I.Boundaryless]
   rw [hkey]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -143,6 +155,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
       abstractHessian (I := I) g f x (X x) (Y x) :=
   inner_cov_gradFun_eq_abstractHessian (I := I) g hf hX hY
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma traceFun_abstractHessianBilin_def
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
@@ -152,6 +166,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
   unfold traceFun
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma frobeniusSqFun_abstractHessianBilin_def
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     frobeniusSqFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
@@ -162,6 +178,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
   unfold frobeniusSqFun
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_abstractHessianBilin_sq_le_dim_mul_frobeniusSqFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x)^2 ≤
@@ -170,6 +188,8 @@ theorem traceFun_abstractHessianBilin_sq_le_dim_mul_frobeniusSqFun
   traceFun_sq_le_dim_mul_frobeniusSqFun
     (I := I) (M := M) (abstractHessianBilin (I := I) g f) x
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_abstractHessianBilin_sq_div_dim_le_frobeniusSqFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x)^2 /
@@ -185,6 +205,8 @@ def chartHessianMatrixIdentity
         ((chartModelBasis E) i) ((chartModelBasis E) j) =
       chartHessianTensor (I := I) g x f i j x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem hessFun_eq_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x)
@@ -252,6 +274,8 @@ theorem hessFun_eq_abstractHessianBilin_of_matrix_identity
   intro j _
   rw [hM i j, mul_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem traceFun_hessFun_eq_traceFun_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x) :
@@ -264,6 +288,8 @@ theorem traceFun_hessFun_eq_traceFun_abstractHessianBilin_of_matrix_identity
   exact hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
     ((chartModelBasis E) i) ((chartModelBasis E) i)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (hM : chartHessianMatrixIdentity (I := I) g f x) :
@@ -278,6 +304,8 @@ theorem frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_
   rw [hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
     ((chartModelBasis E) i) ((chartModelBasis E) j)]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartHessianTensor_eq_inner_cov_gradFun_basis_of_matrix_identity
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -292,7 +320,7 @@ theorem chartHessianTensor_eq_inner_cov_gradFun_basis_of_matrix_identity
   exact (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x
     ((chartModelBasis E) i) ((chartModelBasis E) j)).symm
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma trivToE_self_eq_id (x : M) :
     (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -304,13 +332,13 @@ lemma trivToE_self_eq_id (x : M) :
   rw [h]
   exact mfderiv_extChartAt_self (I := I) (x := x)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   rw [trivToE_self_eq_id (I := I) x]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
@@ -319,7 +347,7 @@ lemma trivFromE_self_apply (x : M) (w : E) :
   have h := trivToE_trivFromE (I := I) x hbase w
   rwa [trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_self
     (x : M) (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) x i x = (chartModelBasis E) i := by
@@ -327,7 +355,7 @@ lemma chartBasisVecFiber_self
   change trivFromE (I := I) x x ((chartModelBasis E) i) = (chartModelBasis E) i
   exact trivFromE_self_apply (I := I) x ((chartModelBasis E) i)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_apply
     (x : M) (j : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -344,7 +372,7 @@ private lemma chartE_section_repr_chartBasisVec_apply
   rw [heq]
   exact h
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_pullback_constOn
     (x : M) (j : Fin (Module.finrank ℝ E)) {y : E}
     (hy : (extChartAt I x).symm y ∈
@@ -358,7 +386,7 @@ private lemma chartE_section_repr_chartBasisVec_pullback_constOn
     (chartModelBasis E) j
   exact chartE_section_repr_chartBasisVec_apply (I := I) x j hy
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartBasisVec_mdifferentiableAt_self
     (x : M) (j : Fin (Module.finrank ℝ E)) :
     MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) x j b)) x := by
@@ -374,6 +402,7 @@ private lemma chartBasisVec_mdifferentiableAt_self
     (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
   exact hcontMDiff_at.mdifferentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -388,6 +417,7 @@ private lemma extDerivFun_chartBasisVec_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) x hf_at
     hb_chart hb_int j
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_eventuallyEq
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -424,6 +454,7 @@ private lemma extDerivFun_chartBasisVec_eventuallyEq
   obtain ⟨hb_chart, hb_int⟩ := hb
   exact extDerivFun_chartBasisVec_apply_of_mem (I := I) hf x j hb_chart hb_int
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_pairing_chartBasisVec_apply_basis
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -508,7 +539,7 @@ private lemma extDerivFun_pairing_chartBasisVec_apply_basis
   rw [Filter.EventuallyEq.mfderiv_eq hev]
   exact hg_value
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma fderiv_chartE_chartBasisVec_self_eq_zero
     [I.Boundaryless]
     (x : M) (j : Fin (Module.finrank ℝ E)) :
@@ -559,7 +590,7 @@ private lemma fderiv_chartE_chartBasisVec_self_eq_zero
   rw [hev.fderiv_eq]
   exact fderiv_const_apply ((chartModelBasis E) j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma christoffelCorrection_self_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -614,6 +645,8 @@ private lemma christoffelCorrection_self_basis_apply
     simp
   · exact (hi_mem (Finset.mem_univ i)).elim
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_chartBasisVec_self_basis_apply
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -648,6 +681,8 @@ private lemma LeviCivita_chartBasisVec_self_basis_apply
   rw [trivFromE_self_apply (I := I) x ((chartModelBasis E) k)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -702,6 +737,8 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [h_summand k]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M) :
@@ -733,6 +770,8 @@ theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
   rw [hLHS, hRHS_2]
   rw [chartHessianTensor_def]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_abstract [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -744,6 +783,8 @@ theorem hessFun_eq_abstract [I.Boundaryless]
       (chartHessianMatrixIdentity_holds (I := I) g hf x) v w
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_cov_grad [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -755,6 +796,7 @@ theorem hessFun_eq_cov_grad [I.Boundaryless]
   exact (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x v w).symm
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hessFun_congr
     (g : SmoothRiemannianMetric I M) {f f' : M → ℝ} {x : M}
     (h : f =ᶠ[𝓝 x] f') :
@@ -812,6 +854,8 @@ theorem hessFun_congr
   rw [htensor i j]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessFun_eq_cov_local [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U)
@@ -859,6 +903,7 @@ theorem hessFun_eq_cov_local [I.Boundaryless]
     _ = g.inner x ((LeviCivita (I := I) g).toFun
           (fun b => gradFun (I := I) g f b) x v) w := by rw [hcov]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -876,6 +921,7 @@ private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α hf_at
     hb_chart hb_int j
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {x : M}
@@ -891,6 +937,7 @@ private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
   filter_upwards [hnhd] with b hb
   exact extDerivFun_chartBasisVec_alpha_apply_of_mem (I := I) hf α j hb
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -988,7 +1035,7 @@ private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
   rw [Filter.EventuallyEq.mfderiv_eq hev]
   exact hg_value
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVec_alpha_mdifferentiableAt
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1004,7 +1051,7 @@ lemma chartBasisVec_alpha_mdifferentiableAt
     (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
   exact hcontMDiff_at.mdifferentiableAt (by simp)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1059,7 +1106,7 @@ lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_const_apply ((chartModelBasis E) j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartE_section_repr_chartBasisVec_alpha_apply
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -1077,7 +1124,7 @@ lemma chartE_section_repr_chartBasisVec_alpha_apply
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   exact trivToE_trivFromE (I := I) α hbase ((chartModelBasis E) j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma christoffelCorrection_alpha_basis_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1130,6 +1177,9 @@ private lemma christoffelCorrection_alpha_basis_apply
     simp
   · exact (hi_mem (Finset.mem_univ i)).elim
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -1161,6 +1211,9 @@ lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
   rw [(trivFromE (I := I) α x).map_smul]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma extDerivFun_LeviCivita_chartBasisVec_alpha_basis [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
@@ -1203,6 +1256,9 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_alpha_basis [I.Boundaryless]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [h_summand k]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds_on_goodSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -1241,6 +1297,9 @@ theorem chartAlphaMatrixIdentity_holds_on_goodSet [I.Boundaryless]
   rw [hLHS, hRHS_2]
   rw [chartHessianTensor_def]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}

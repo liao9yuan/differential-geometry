@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -44,6 +43,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_connTraceField
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -140,6 +140,7 @@ theorem formula510_of_connTraceField
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_trace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -234,6 +235,7 @@ theorem formula510_of_trace
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_components
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -408,6 +410,7 @@ theorem formula510_of_components
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_producer
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

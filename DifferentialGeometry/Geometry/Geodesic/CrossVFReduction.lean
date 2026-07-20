@@ -26,12 +26,13 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] in
 private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (x y : M) (z : M) :
     tangentCoordChange I x y z =
@@ -45,6 +46,7 @@ private def applyJac (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   chartTransitionAt (I := I) p.proj α z.1 z.2
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] in
 private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -86,6 +88,7 @@ private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
   exact (extChartAt I p.proj).right_inv hz_tgt
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] in
 private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) :
     DifferentiableAt ℝ (fun z => chartTransitionAt (I := I) α β z) x := by
@@ -97,6 +100,7 @@ private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
   exact (hsmooth.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] in
 private lemma fderiv_applyJac_apply [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -653,7 +657,7 @@ theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
 
 end MovingFootToFixedChart
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasGeodesicEquationAt_comp_sub_const
     {g : SmoothRiemannianMetric I M} {η : ℝ → M} {T t : ℝ}
     (h : HasGeodesicEquationAt (I := I) g η (t - T)) :
@@ -682,6 +686,7 @@ private lemma hasGeodesicEquationAt_comp_sub_const
     rw [hd2]; exact ha.comp_sub_const t T
   · exact hgeo
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
@@ -729,6 +734,7 @@ theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_t hηeq
     simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt hgt))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_glue_at_limit_Ioo [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {a T δ : ℝ} (hδ : 0 < δ) (haT : a < T)

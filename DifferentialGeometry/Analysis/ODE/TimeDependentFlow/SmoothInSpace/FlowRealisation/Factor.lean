@@ -26,6 +26,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] in
 theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -71,6 +72,7 @@ theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
   have := hGfd.comp_hasDerivAt t hc
   simpa using this
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartCloseFactors_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}
@@ -95,6 +97,7 @@ theorem chartCloseFactors_of_chart_realisation
   exact chartCloseFderiv_hasDerivAt_of_eucl (I := I) Φ_fam (Φ_fam t x) x t Φ_eucl
     hx_src heucl heucl_diff hagree
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ) (v : TangentSpace I x)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}
@@ -128,6 +131,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem leviCivita_flowBasepoint_eq_chartFderiv_add_corrections
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -156,6 +162,8 @@ theorem leviCivita_flowBasepoint_eq_chartFderiv_add_corrections
     (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x u)
     hα (X.mdifferentiableAt) hRdiff hCdiff
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem variational_flow_flat_paired_residual_of_chart_realisation
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

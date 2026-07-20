@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace ManifoldH2NonSmooth
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -84,6 +84,7 @@ theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_succ h.memWkp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothPOUWitness (I := I) (M := M) g u α) :
     MemLp

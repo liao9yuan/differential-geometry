@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,6 +26,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] in
 lemma tensorSobolevWeight_mono {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {τ σ : ℝ} (hτσ : τ ≤ σ) :
     tensorSobolevWeight (I := I) (M := M) i τ ≤
@@ -38,6 +39,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -59,10 +61,12 @@ def inclusionFun {τ σ : ℝ} (hτσ : τ ≤ σ)
   coeff := T.coeff
   weighted_summable := weighted_summable_of_le (I := I) (M := M) hτσ T
 
+omit [CompactSpace M] in
 @[simp] lemma inclusionFun_coeff {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     (inclusionFun (I := I) (M := M) hτσ T).coeff = T.coeff := rfl
 
+omit [CompactSpace M] in
 lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     inclusionFun (I := I) (M := M) hτσ (S + T) =
@@ -71,6 +75,7 @@ lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
   ext i
   simp only [inclusionFun_coeff, add_coeff]
 
+omit [CompactSpace M] in
 lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     inclusionFun (I := I) (M := M) hτσ (c • T) =
@@ -228,6 +233,7 @@ def finiteSupportSubmodule (σ : ℝ) :
     intro hcon
     exact hi (by rw [hcon, mul_zero])
 
+omit [CompactSpace M] in
 @[simp] lemma mem_finiteSupportSubmodule {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ) :
     T ∈ finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s) σ ↔

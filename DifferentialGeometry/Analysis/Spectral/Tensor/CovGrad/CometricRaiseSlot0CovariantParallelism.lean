@@ -23,7 +23,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open Tensor0SNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,7 @@ private lemma interior_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) :
     Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D =
@@ -56,6 +57,8 @@ private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentS
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := D) (v0 := (show E from v)) (vs := fun k => (show E from w k))]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDeriv_one_eq_dualToCotangent_cotangentCov
     (g₀ : SmoothRiemannianMetric I M)
     (w : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun y : M => Tensor0SSpace 1 I y))
@@ -99,6 +102,8 @@ private lemma covDeriv_one_eq_dualToCotangent_cotangentCov
   rw [hbridge, hpair]
   simp only [add_sub_cancel_right, ContinuousLinearMap.coe_coe]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDeriv_sharp_field_eq (g₀ : SmoothRiemannianMetric I M)
     (w : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun y : M => Tensor0SSpace 1 I y))
     {x : M} (v0 : TangentSpace I x)
@@ -113,6 +118,7 @@ private lemma covDeriv_sharp_field_eq (g₀ : SmoothRiemannianMetric I M)
   rw [inverseMetricSharpField_covGrad_eq_zero (I := I) g₀ (fun y : M => w y) hsharp v0]
   rw [covDeriv_one_eq_dualToCotangent_cotangentCov (I := I) (M := M) g₀ w x v0]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) (x : M) (v : E) :
     tensorCovDerivAt (I := I) (M := M) g₀ 1 (s + 1)
@@ -198,6 +204,7 @@ theorem tensorCovDerivAt_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetr
     (hYsharp_smooth.contMDiffAt.mdifferentiableAt (by simp))]
   rw [add_sub_cancel_right, hDderiv, hYsharp_app x]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) :
     covGrad (I := I) (M := M) g₀ 1 (s + 1) (cometricRaiseSlot0Field (I := I) (M := M) g₀ s S) =

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -246,6 +245,8 @@ open DifferentialGeometry.Integral.Connection
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_comp {s : Nat} {x : M}
     (nablaT : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 1) x)
@@ -267,6 +268,8 @@ private theorem tensor0S_curry_comp {s : Nat} {x : M}
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] in
 private theorem freezeFirstTwoArgs0S_comp {s : Nat} {x : M}
     (nabla2T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -291,6 +294,8 @@ private theorem freezeFirstTwoArgs0S_comp {s : Nat} {x : M}
 
 
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] in
 private theorem metricTrace0S2TensorInBasis_comp {s : Nat} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -361,6 +366,8 @@ def TensorNormHessianProductInBasis {s : Nat} {x : M}
 
 
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] in
 theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)

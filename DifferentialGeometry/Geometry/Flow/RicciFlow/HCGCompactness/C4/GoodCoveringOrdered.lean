@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -38,6 +37,7 @@ def availSet (O : M) (lam : ℝ → ℝ) (U : Set M) : Set M :=
 
 
 
+omit [ProperSpace M] in
 theorem isClosed_availSet (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (U : Set M) :
     IsClosed (availSet O lam U) := by
   rcases U.eq_empty_or_nonempty with rfl | hUne
@@ -167,6 +167,7 @@ theorem mem_netList_succ (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α
 
 
 
+omit [ProperSpace M] in
 theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
     (hp : p ∉ availSet O lam (forbidden O lam l)) :
     ∃ c ∈ l,
@@ -178,6 +179,7 @@ theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
 
 
 
+omit [ProperSpace M] in
 theorem dist_lt_two_lam {lam : ℝ → ℝ} (hanti : Antitone lam) {O p c : M}
     (hcd : dist c O ≤ dist p O)
     (hmeet : ¬ Disjoint (Metric.ball p (lam (dist p O))) (Metric.ball c (lam (dist c O)))) :
@@ -268,11 +270,13 @@ theorem netList_cover (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (hanti
           exact hc
 
 
+omit [ProperSpace M] in
 theorem availSet_antitone (O : M) (lam : ℝ → ℝ) {U V : Set M} (hUV : U ⊆ V) :
     availSet O lam V ⊆ availSet O lam U :=
   fun _ hx => hx.mono_right hUV
 
 
+omit [ProperSpace M] in
 theorem forbidden_mono (O : M) (lam : ℝ → ℝ) {l l' : List M} (h : ∀ a ∈ l, a ∈ l') :
     forbidden O lam l ⊆ forbidden O lam l' := by
   intro z hz
@@ -711,12 +715,12 @@ section Instantiation
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
     (ip : InnerProductSpace Real E)
     [I.Boundaryless]
@@ -785,6 +789,7 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
 
 
 
+omit [CompleteSpace E] in
 theorem exists_proper_realization {I : ModelWithCorners Real E H}
     [InnerProductSpace Real E]
     [I.Boundaryless]
@@ -823,6 +828,7 @@ structure ProperMetricOn {I : ModelWithCorners Real E H}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) :
@@ -897,6 +903,7 @@ noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (k : Nat) (x y : (X.obj k).M) :
@@ -911,6 +918,7 @@ theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem packingBound_pack (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) {D : Real} (pb : hd.PackingBound D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :

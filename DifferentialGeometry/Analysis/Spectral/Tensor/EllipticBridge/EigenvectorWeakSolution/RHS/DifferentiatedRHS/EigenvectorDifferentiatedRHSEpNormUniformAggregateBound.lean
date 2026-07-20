@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,6 +42,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section MainBoundUniformUnconditional
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -169,6 +170,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
       exact le_trans (eLpNorm_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a) (h_atom_le i a)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -282,6 +284,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
       exact le_trans (eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a b) (h_atom_le i a)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -328,6 +331,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform
   exact le_trans (eLpNorm_iteratedPartial_le
     (I := I) (M := M) g r s i α P₀ m l) (h_atom_le i)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -369,6 +373,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_uniform
   gcongr
   exact h_atom_le i
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -419,6 +424,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
     hΩ_open _ (l (Fin.last m))) (h_atom_le i)
 
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

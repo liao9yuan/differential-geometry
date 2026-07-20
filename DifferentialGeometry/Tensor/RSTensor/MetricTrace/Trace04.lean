@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -20,7 +19,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,12 +37,14 @@ theorem metricTrace_metricField_eq0S
   intro slots
   simp [Tensor0SBundle.component0S_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTrace_finCons_vec2_eq_vec3 {x : M}
     (X Y Z : TangentSpace I x) :
     Fin.cons X (vec2 (I := I) Y Z) = vec3 (I := I) X Y Z := by
   funext a
   fin_cases a <;> rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTrace_finCons_vec3_eq_vec4 {x : M}
     (X Y Z U : TangentSpace I x) :
     Fin.cons X (vec3 (I := I) Y Z U) = vec4 (I := I) X Y Z U := by
@@ -60,6 +61,7 @@ def trace04Perm : Equiv.Perm (Fin 4) where
   right_inv q := by
     fin_cases q <;> simp
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_tensor0S_curry_apply_cons
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -77,6 +79,7 @@ theorem metricTrace_tensor0S_curry_apply_cons
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_tensor0S_update_zero {s : ℕ} {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s -> TangentSpace I x) (a : Fin s) :

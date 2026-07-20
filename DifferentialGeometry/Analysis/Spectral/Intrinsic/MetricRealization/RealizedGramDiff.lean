@@ -61,7 +61,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -70,6 +70,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorMultilinear_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (S - T) x : Tensor0SSpace 2 I x)
@@ -89,6 +90,7 @@ theorem ccTensorMultilinear_sub (g : SmoothRiemannianMetric I M)
   rw [ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorModel_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (S - T) x =
@@ -98,6 +100,7 @@ theorem ccTensorModel_sub (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g (S - T) x v w =
@@ -107,6 +110,7 @@ theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (S - T) x v w =
@@ -126,6 +130,7 @@ def realizableRepr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
 
 
 
+omit [BoundarylessManifold I M] in
 theorem realizeMetricAt_inner_eq_repr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u : tensorHs (I := I) (M := M) g_bg 0 2 σ}
     (hu : isRealizableMetricPerturbationAt (I := I) g_bg u) (x : M) (v w : TangentSpace I x) :
@@ -155,6 +160,7 @@ theorem realizeMetricAt_inner_eq_repr (g_bg : SmoothRiemannianMetric I M) {σ : 
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiff
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -175,6 +181,7 @@ theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiff
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartGramOnE_realizeMetricAt_sub_eq_reprDiff
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}

@@ -188,7 +188,6 @@ def CurvatureCrossTermBound (g : SmoothRiemannianMetric I M) (Ccross : ℝ) : Pr
             tensorL2Norm (I := I) (M := M) g 0 (s + 1)
               (covGrad (I := I) (M := M) g 0 s S).toFun)
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -210,9 +209,10 @@ theorem order2GardingFamily_of_curvatureCrossTermBound
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross
     (hcrossS s S)
 
-set_option linter.unusedSectionVars false in
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedCovGrad_norm_eq_tensorL2Norm
     (g : SmoothRiemannianMetric I M) (j : ℕ) (U : SmoothCcTensor g 0 2) :
     ‖iteratedCovGrad g 0 2 j U‖ =
@@ -220,9 +220,9 @@ private lemma iteratedCovGrad_norm_eq_tensorL2Norm
         (iteratedCovGrad g 0 2 j U).toFun :=
   SmoothCcTensor.norm_def (I := I) (M := M) (iteratedCovGrad g 0 2 j U)
 
-set_option linter.unusedSectionVars false in
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma rawTensorConnLapIter_norm_eq_toL2
     (g : SmoothRiemannianMetric I M) (i : ℕ) (U : SmoothCcTensor g 0 2) :
     ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ =
@@ -231,7 +231,6 @@ private lemma rawTensorConnLapIter_norm_eq_toL2
   (SmoothCcTensor.norm_toL2 (I := I) (M := M)
     (rawTensorConnLapIter (I := I) g 0 2 i U)).symm
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -541,7 +540,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         rw [hLHS, hRHS]
         exact hfinal
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -621,7 +619,6 @@ theorem allOrder_covGrad_l2Norm_le_lapIter_sum
     _ = (∑ j ∈ Finset.range (2 * k + 1), Cmix j) * Sk := by rw [Finset.sum_mul]
     _ = Cmax * Sk := by rw [hCmax_def]
 
-set_option linter.unusedSectionVars false in
 
 
 theorem order1Control_rank_two
@@ -633,7 +630,6 @@ theorem order1Control_rank_two
     SmoothCcTensor.norm_def (I := I) (M := M) S]
   exact covGrad_l2NormSq_le_rawConnLap_mul_self (I := I) (M := M) g S
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -649,7 +645,6 @@ theorem order1ControlFamily_holds (g : SmoothRiemannianMetric I M) :
     SmoothCcTensor.norm_def (I := I) (M := M) S]
   exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g s S
 
-set_option linter.unusedSectionVars false in
 
 
 

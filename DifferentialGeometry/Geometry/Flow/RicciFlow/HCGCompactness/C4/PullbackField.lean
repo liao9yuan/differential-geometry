@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -50,6 +49,7 @@ set_option synthInstance.maxHeartbeats 200000 in
 
 
 
+omit [CompleteSpace E] in
 theorem exists_pullbackField
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)) {K : Set M}
@@ -128,6 +128,7 @@ omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem contMDiffAt_codRestr {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N']
     {V' : TopologicalSpace.Opens N'} {f : M → N'}
     (hmem : ∀ y, f y ∈ V') {x : M}
@@ -147,6 +148,7 @@ open TopologicalSpace Topology
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem image_opens_isOpen (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {V : Opens M} (hV : (V : Set M) ⊆ Φ.source) :
     IsOpen ((Φ : M → N) '' (V : Set M)) := by
@@ -223,6 +225,7 @@ noncomputable def PartialDiffeomorph.toOpensDiffeo
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensDiffeo_mfderiv
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source) (p : U) (v : TangentSpace I p) :
@@ -266,6 +269,7 @@ noncomputable def PartialDiffeomorph.opensMap
   fun x => ⟨(Φ : M → N) x, hUV ⟨x, x.2, rfl⟩⟩
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_isOpenEmb
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} {V : Opens N} (hU : (U : Set M) ⊆ Φ.source)
@@ -283,6 +287,7 @@ theorem PartialDiffeomorph.opensMap_isOpenEmb
   exact hinc.comp F.toHomeomorph.isOpenEmbedding
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_contMDiff
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} {V : Opens N} (hU : (U : Set M) ⊆ Φ.source)
@@ -299,6 +304,7 @@ theorem PartialDiffeomorph.opensMap_contMDiff
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_mfderiv
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} {V : Opens N} (hU : (U : Set M) ⊆ Φ.source)
@@ -332,6 +338,7 @@ theorem PartialDiffeomorph.opensMap_mfderiv
     mfderiv_subtype_val (I := I) V (F p), mfderiv_subtype_val (I := I) U p] using happ
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_inv_mdiff
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} {V : Opens N} [Nonempty U] (hU : (U : Set M) ⊆ Φ.source)
@@ -377,6 +384,8 @@ theorem PartialDiffeomorph.opensMap_inv_mdiff
 
 
 
+omit [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem invSubtype_mdiff (U : Opens N) [Nonempty U] :
     ContMDiffOn I I ∞ (Function.invFun (Subtype.val : U → N))
       (Set.range (Subtype.val : U → N)) := by
@@ -448,18 +457,27 @@ noncomputable def PartialDiffeomorph.liftTargetOpen
     exact (hΦAt.comp y hinvAt).contMDiffWithinAt
 
 
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem PartialDiffeomorph.liftOpen_source
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).source = Φ.source := rfl
 
 
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem PartialDiffeomorph.liftOpen_target
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).target = (U : Set N) := rfl
 
 
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem PartialDiffeomorph.liftOpen_apply
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) (x : M) :
@@ -467,6 +485,9 @@ noncomputable def PartialDiffeomorph.liftTargetOpen
 
 
 
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem PartialDiffeomorph.liftOpen_mfderiv
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) {x : M} (hx : x ∈ Φ.source)
@@ -497,6 +518,7 @@ open TopologicalSpace
 
 
 
+omit [SigmaCompactSpace M] in
 theorem tensor02_eq_covDOF
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -513,6 +535,7 @@ theorem tensor02_eq_covDOF
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem srm_ext {M' : Type*} [TopologicalSpace M'] [ChartedSpace H M']
     [IsManifold I ∞ M'] {g g' : SmoothRiemannianMetric I M'}
     (h : ∀ (x : M') (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) : g = g' := by
@@ -534,6 +557,7 @@ private theorem srm_ext {M' : Type*} [TopologicalSpace M'] [ChartedSpace H M']
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space N] [SigmaCompactSpace N]
     [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -731,6 +755,7 @@ section TowerZero
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [SigmaCompactSpace M] in
 theorem covStep_zero (gRef : SmoothRiemannianMetric I M) (s : Nat)
     [SigmaCompactSpace M] :
     covStep (I := I) gRef s
@@ -778,6 +803,7 @@ theorem iterCov_metric_zero (g : SmoothRiemannianMetric I M) (a : Nat) :
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [SigmaCompactSpace M] in
 theorem iterCov_sub (gRef : SmoothRiemannianMetric I M) (r : Nat)
     (A0 B0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r)
@@ -791,6 +817,7 @@ theorem iterCov_sub (gRef : SmoothRiemannianMetric I M) (r : Nat)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [SigmaCompactSpace M] in
 theorem covDOF_zero (gRef : SmoothRiemannianMetric I M) (a : Nat) :
     covDerivOfField (I := I) gRef
         (0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -804,6 +831,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [SigmaCompactSpace M] in
 theorem t02Norm_eq_iterCov [I.Boundaryless] {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -833,6 +861,7 @@ section C0Equiv
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inner_le_of_c0
     (Gm g : SmoothRiemannianMetric I M) {K : Set M} {ε : ℝ}
     (hc0 : ∀ x ∈ K, metricTensorErrorNorm (I := I)
@@ -887,6 +916,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sqrt_normSq_two_le
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)

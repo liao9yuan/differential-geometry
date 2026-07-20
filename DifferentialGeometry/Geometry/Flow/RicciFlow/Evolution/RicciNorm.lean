@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -24,7 +23,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
 
 
@@ -210,6 +209,7 @@ theorem ricciHeat_of_data
       h.laplacian
 
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem ricciPair04_apply {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -279,6 +279,7 @@ private theorem sumPairProd {Idx : Type*} [Fintype Idx]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [Finset.mul_sum]
 
+omit [FiniteDimensional ℝ E] in
 private theorem pairSum_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -316,6 +317,7 @@ private theorem pairSum_eq
         gInv k b * gInv l d *
           Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b) (basis d)))).symm
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordPair4_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)

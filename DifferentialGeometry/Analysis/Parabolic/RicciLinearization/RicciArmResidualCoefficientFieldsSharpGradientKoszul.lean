@@ -35,7 +35,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -60,6 +60,8 @@ private lemma vec3_upd_two {F : Type*} (a b c z : F) :
   fin_cases k <;> simp [Function.update]
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u u' ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (u + u') ζ =
@@ -83,6 +85,8 @@ lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (c • u) ζ =
@@ -105,6 +109,8 @@ lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (ζ + ζ') =
@@ -128,6 +134,8 @@ lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (c • ζ) =
@@ -150,6 +158,8 @@ lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma linearizedKoszulCovec_zero_weight (g' : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' (0 : SmoothCcTensor g' 0 2) x u ζ = 0 := by
@@ -175,6 +185,8 @@ def sharpRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcT
   DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
     (linearizedKoszulCovec (I := I) g₀ S x u ζ)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_add_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u u' ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x (u + u') ζ =
@@ -186,6 +198,8 @@ lemma sharpRaisedKoszulVec_add_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_add]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_smul_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x (c • u) ζ =
@@ -194,6 +208,8 @@ lemma sharpRaisedKoszulVec_smul_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_smul]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_add_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x u (ζ + ζ') =
@@ -205,6 +221,8 @@ lemma sharpRaisedKoszulVec_add_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_add]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_smul_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x u (c • ζ) =
@@ -213,6 +231,8 @@ lemma sharpRaisedKoszulVec_smul_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
     DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_smul]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ (0 : SmoothCcTensor g₀ 0 2) x u ζ = 0 := by
@@ -251,6 +271,8 @@ def sharpGradKoszulKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M)
           ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.comp_smul]
         rw [smul_sub, smul_add, smul_add] }
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma sharpGradKoszulKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     sharpGradKoszulKernelBilin (I := I) g₀ g₁ S x p q v0 v1 =
@@ -318,6 +340,8 @@ def frameSharpGradKoszulKernel (g₀ g₁ : SmoothRiemannianMetric I M)
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma frameSharpGradKoszulKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v0 v1 p q : TangentSpace I x) :
     frameSharpGradKoszulKernel (I := I) g₀ g₁ S x v0 v1 p q =
@@ -340,6 +364,8 @@ def sharpGradKoszulSummandFib (g₀ g₁ : SmoothRiemannianMetric I M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma sharpGradKoszulSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -358,6 +384,8 @@ def sharpGradKoszulBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     sharpGradKoszulSummandFib (I := I) g₀ g₁ S x (B a x) (B b x)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpGradKoszulBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -379,6 +407,8 @@ lemma sharpGradKoszulBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianM
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, sharpGradKoszulSummandFib_toModel]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma unitValueCovGrad3_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
@@ -399,6 +429,8 @@ private lemma unitValueCovGrad3_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (covGrad (I := I) (M := M) g₀ 0 2 S).toSection.contMDiff
     (unitZeroSec (I := I) (M := M)).contMDiff
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma linearizedKoszulCovec_basis_contMDiffOn_generic
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -491,6 +523,8 @@ private lemma linearizedKoszulCovec_basis_contMDiffOn_generic
     fin_cases i <;> rfl
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpRaisedKoszulVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (U Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -502,6 +536,7 @@ lemma sharpRaisedKoszulVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric
   intro α j
   exact linearizedKoszulCovec_basis_contMDiffOn_generic (I := I) (M := M) g₀ S Z U α j
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sharpGradKoszulKernelBilin_homSection_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     {p q : Π b : M, TangentSpace I b}
@@ -589,6 +624,7 @@ theorem sharpGradKoszulKernelBilin_homSection_contMDiff
   rw [sharpGradKoszulKernelBilin_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sharpGradKoszulBiContrFibFixedFrame_apply_section_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -677,6 +713,7 @@ theorem sharpGradKoszulBiContrFibFixedFrame_apply_section_contMDiff
   rw [hgoal]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sharpGradKoszulBiContrFibFixedFrame_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -699,6 +736,7 @@ def sharpGradKoszulBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M)
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   sharpGradKoszulBiContrFibFixedFrame (I := I) g₀ g₁ S (smoothOrthoFrame (I := I) g₁ x) x
 
+omit [BoundarylessManifold I M] in
 theorem sharpGradKoszulBiContrFib_eq_fixedFrame_on_nbhd
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :

@@ -12,7 +12,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -20,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma christoffelCorrection_symm_cancel
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (v w : TangentSpace I x) :
     christoffelCorrection (I := I) g α x (trivToE (I := I) α x w) v =
@@ -35,6 +36,7 @@ lemma christoffelCorrection_symm_cancel
   ring
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ {X Y : Π x : M, TangentSpace I x} {x : M},
       MDiffAt (T% X) x → MDiffAt (T% Y) x →

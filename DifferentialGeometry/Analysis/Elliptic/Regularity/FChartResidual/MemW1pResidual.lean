@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace MemW1pFChartResidual
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -184,7 +184,7 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
     rw [h_residual_eq]
   have h_coeFn_sub :=
     DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.chartPushedRawLpFromLp_coeFn_sub
-    (I := I) (M := M) g α preimage_smHC_Lp smoothMul_Lp
+    (I := I) (M := M) g inferInstance α preimage_smHC_Lp smoothMul_Lp
   have h_coeFn_eq :
       ((chartPushedRawLpFromLp (I := I) (M := M) g α
           (fHLeibnizResidualLp (I := I) (M := M) g α u_h) :

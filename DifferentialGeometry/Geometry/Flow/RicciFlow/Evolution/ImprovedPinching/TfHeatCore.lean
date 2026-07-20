@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.D
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -18,12 +17,11 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -33,7 +31,9 @@ def scalarSqLap
   fun t x => 2 * scalar t x * scalarLap t x + 2 * gradScalarNormSq t x
 
 
+omit [Module.Finite ℝ E] in
 theorem sqLap_at
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) {f : M -> Real} {x : M}
@@ -71,7 +71,9 @@ theorem sqLap_at
 
 
 
+omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap gradScalarNormSq : Real -> M -> Real)
@@ -137,6 +139,7 @@ def scalarSqHeatOn
 
 
 
+omit [TopologicalSpace M] in
 theorem sqHeat_of_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap gradScalarNormSq ricciNormSq : Real -> M -> Real)
@@ -173,6 +176,7 @@ def tfRicHeatOn
 
 
 
+omit [TopologicalSpace M] in
 theorem tfRicHeat_alg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar ricciNormSq ricciNormLap scalarSqLap tfLap
@@ -239,6 +243,7 @@ theorem tfRicHeat_alg
 
 
 
+omit [TopologicalSpace M] in
 theorem tfHeat_base
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap

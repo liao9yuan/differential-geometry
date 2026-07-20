@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
     chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -55,6 +56,7 @@ private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     · exact toEuclidean.apply_symm_apply y
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ htar
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) (k : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
@@ -88,6 +90,7 @@ private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKer
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -120,6 +123,7 @@ private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
   · intro z _; rw [euclidPartial_def]
   · rw [euclidPartial_def]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_bound_euclidPartial_chartPushedRaw_chartAtlasPOU
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ chartPouKernel (I := I) (M := M) β,
@@ -135,6 +139,7 @@ private def crossMultiplier
     (euclidPartial (E := E) k
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma crossMultiplier_eq
     (β : M) (k : Fin (Module.finrank ℝ E)) (y : EuclN) :
     crossMultiplier (I := I) (M := M) β k y =
@@ -148,6 +153,7 @@ private lemma crossMultiplier_eq
     exact (euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hy).symm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_bound_crossMultiplier
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y : EuclN,
@@ -161,6 +167,7 @@ private lemma exists_bound_crossMultiplier
   · rw [Set.indicator_of_mem hy]; exact hC y hy
   · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC0
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma aestronglyMeasurable_crossMultiplier
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     AEStronglyMeasurable (crossMultiplier (I := I) (M := M) β k)
@@ -168,6 +175,7 @@ private lemma aestronglyMeasurable_crossMultiplier
   aestronglyMeasurable_indicator_mul (I := I) (M := M) β
     (contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU (I := I) (M := M) β k)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β : M)
@@ -211,6 +219,7 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
   · rw [euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hker, zero_mul, zero_mul]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β : M)
@@ -247,6 +256,7 @@ noncomputable def covGradPouLeibnizCrossLimit
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -276,6 +286,7 @@ theorem covGradPouLeibnizCrossLimit_memLp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma cutoffComponent_smoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -359,6 +370,7 @@ private def crossTermCutoff
           g r s i n).toCcTensor) : TensorL2 r s g) β P₀ :
         EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 private lemma crossTermCutoff_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -374,6 +386,7 @@ private lemma crossTermCutoff_memLp
       (((eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor) : TensorL2 r s g) β P₀))
 
+omit [CompleteSpace E] in
 private lemma crossTermApprox_ae_eq_crossTermCutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -398,6 +411,7 @@ private lemma crossTermApprox_ae_eq_crossTermCutoff
     (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
     β P₀.1 P₀.2 k hy, crossMultiplier_eq (I := I) (M := M) β k y, hy_coe]
 
+omit [CompleteSpace E] in
 private lemma crossTermApprox_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -411,6 +425,7 @@ private lemma crossTermApprox_memLp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -485,6 +500,7 @@ theorem covGradPouLeibnizCrossLimit_tendsto
     (crossTermApprox_ae_eq_crossTermCutoff (I := I) (M := M)
       g r s i β P₀ k n)).symm
 
+omit [CompleteSpace E] in
 private lemma covGrad_chartComponent_ae_decompose
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -530,6 +546,7 @@ private lemma covGrad_chartComponent_ae_decompose
   simp only [crossTermApprox]
   ring
 
+omit [CompleteSpace E] in
 private lemma principalTerm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

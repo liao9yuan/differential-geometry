@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -62,6 +62,8 @@ private def secondCovDerivChartGlobalValueCorrectionCoeff
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α l Idx p.1 Jdx p.2 y *
         covDerivLowerOrderCoeff (I := I) (M := M) g r s α k p.1 I' p.2 J' y
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma GlobalCorr_eu_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -101,6 +103,8 @@ private lemma GlobalCorr_eu_contDiffOn
       exact contDiffOn_const
   exact h1.add h2
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma GlobalCorr0_eu_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -147,6 +151,8 @@ private lemma packageAsCcG_toSection
                 fun b : M => TensorRSSpace r s I b⟯) :
     (packageAsCcG (I := I) (M := M) g r s S).toSection = S := rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRaw_S_k_packed_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -335,6 +341,8 @@ private lemma chartPushedRaw_S_k_packed_eqOn
     rw [hσ'_eq_packed] at hcov_loc
     exact hcov_loc
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma LHS_eq_covDerivComponentEuclid_S_k_packed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -433,6 +441,8 @@ private lemma euclidPartial_eqOn_of_eqOn_openG
     Filter.EventuallyEq.fderiv_eq hVeq
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

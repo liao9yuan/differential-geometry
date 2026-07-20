@@ -30,7 +30,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,6 +69,8 @@ def eigenvectorRotatedTestSection
     (chartTestPullback_contMDiffOn (I := I) (M := M) α hψ)
     (chartTestPullback_tsupport_subset_source (I := I) (M := M) α hψ_cs hψ_supp)
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorComponentEuclid_eigenvectorRotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -90,6 +92,8 @@ private lemma tensorComponentEuclid_eigenvectorRotatedTestSection_eqOn
       P hy,
     chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α ψ hy]
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenvectorRotatedTestSection_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -139,6 +143,7 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma eigenvectorMainDir_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -310,6 +315,7 @@ lemma eigenvectorMainDir_tendsto
   rw [← h_eq]
   exact h_dir
 
+omit [CompleteSpace E] in
 private lemma crossLeftPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -377,6 +383,7 @@ private lemma crossLeftPairing_integrable
     (I := I) (M := M) g r s α P₀ hψ hψ_cs hψ_supp Q hy]
   ring
 
+omit [CompleteSpace E] in
 lemma crossLeftLimitPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -421,6 +428,7 @@ lemma crossLeftLimitPairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
+omit [CompleteSpace E] in
 lemma eigenvectorCrossLeft_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -698,6 +706,7 @@ lemma eigenvectorCrossLeft_tendsto
   rw [← h_limit_eq]
   exact h_sum_tendsto
 
+omit [CompleteSpace E] in
 private lemma crossRightValuePairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -750,6 +759,7 @@ private lemma crossRightValuePairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
+omit [CompleteSpace E] in
 lemma crossRightValueLimitPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -794,6 +804,7 @@ lemma crossRightValueLimitPairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
+omit [CompleteSpace E] in
 lemma eigenvectorCrossRight_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1040,6 +1051,7 @@ lemma eigenvectorCrossRight_tendsto
   rw [← h_limit_eq]
   exact h_sum_tendsto
 
+omit [CompleteSpace E] in
 lemma eigenvectorCrossRightGrad_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1138,6 +1150,7 @@ lemma eigenvectorCrossRightGrad_tendsto
   intro n
   exact (h_int_n n).symm
 
+omit [CompleteSpace E] in
 lemma eigenvectorSource_integral_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1242,6 +1255,7 @@ lemma eigenvectorSource_integral_split
         ∫ x, Cright x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
         rw [MeasureTheory.integral_sub hAmain_int hBleft_int]
 
+omit [CompleteSpace E] in
 private lemma density_crossRightTestGradTerm_partialTest_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1291,6 +1305,7 @@ private lemma density_crossRightTestGradTerm_partialTest_integrable
     hasCompactSupport_mul_chartTest (E := E) hdψ_cs
   exact (hcd.continuous.integrable_of_hasCompactSupport hcs).restrict
 
+omit [CompleteSpace E] in
 private lemma density_crossRightValueSum_test_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1332,6 +1347,7 @@ private lemma density_crossRightValueSum_test_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   simp only [Finset.mul_sum, Finset.sum_mul]
 
+omit [CompleteSpace E] in
 private lemma tensorL2ChartComponentCutoff_smoothApprox_ae_all
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1351,6 +1367,7 @@ private lemma tensorL2ChartComponentCutoff_smoothApprox_ae_all
       g r s (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P)
 
+omit [CompleteSpace E] in
 lemma eigenvectorCrossRight_integral_eq_value_plus_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

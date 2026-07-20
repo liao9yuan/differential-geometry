@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.TraceOneForm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -28,6 +27,7 @@ variable {x : M}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricInverseInBasis_of_orthonormal
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -166,6 +166,7 @@ def RicciRealizesRm04FirstTraceAt
 
 
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem ricciSymm_of_rm04
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -269,6 +270,7 @@ def ScalarRealizesRicciTraceAt
   scalar =
     ∑ i : Idx, ∑ j : Idx, gInv i j * Ric (vec2 (basis i) (basis j))
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem ricciComp_eq_trace_rm04
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -283,6 +285,7 @@ theorem ricciComp_eq_trace_rm04
   simp_rw [rm04CompAt_apply]
   exact hRic (basis i) (basis j)
 
+omit [FiniteDimensional ℝ E] [DecidableEq Idx] in
 theorem scalar_eq_trace_ricci
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (scalar : Real)

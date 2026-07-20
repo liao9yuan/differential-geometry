@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -49,6 +48,7 @@ def LeviCivitaConnectionUniqueOnSmooth
                   cov Y x v = cov' Y x v
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita_inner_eq_half_koszul
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -95,6 +95,7 @@ theorem leviCivita_inner_eq_half_koszul
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     (g : SmoothRiemannianMetric I M)
@@ -201,6 +202,7 @@ theorem coordinateFrame_christoffel_formula_point_of_isLeviCivita
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita_apply_eq_of_smooth
     {cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -230,6 +232,7 @@ theorem leviCivita_apply_eq_of_smooth
   exact hleft.trans hright.symm
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita_apply_eq_of_smooth_direction
     {cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -253,6 +256,7 @@ theorem leviCivita_apply_eq_of_smooth_direction
   exact h
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionUniqueOnSmooth
     (g : SmoothRiemannianMetric I M) :
     LeviCivitaConnectionUniqueOnSmooth (I := I) g := by

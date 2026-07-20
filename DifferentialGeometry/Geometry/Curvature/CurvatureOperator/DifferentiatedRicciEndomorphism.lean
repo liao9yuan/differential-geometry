@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle Tensor0SNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,7 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma extDerivFunApply_contMDiff
@@ -84,6 +83,7 @@ private lemma exists_globalSmoothScalar_eqOn_nhd
   · filter_upwards [χ.eventuallyEq_one] with b hb
     rw [hb, Pi.one_apply, one_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannSec_add_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -114,6 +114,7 @@ private lemma riemannSec_add_acted_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private lemma riemannSec_smul_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -189,6 +190,9 @@ private lemma riemannSec_smul_acted_smooth
     hZ_at hcXZ_at hcYZ_at hcXfZ_at hcYfZ_at hYf_at hXf_at
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaCurvSec_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -272,6 +276,9 @@ private lemma nablaCurvSec_add_acted
   rw [h1, h2, h3, h4]
   abel
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaCurvSec_smul_acted
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -342,6 +349,9 @@ private lemma nablaCurvSec_smul_acted
   simp only [smul_sub]
   abel
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaCurvSec_finsetSum_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -374,6 +384,8 @@ private lemma nablaCurvSec_finsetSum_acted
         Finset.sum_insert ha]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaCurvSec_acted_eventuallyEq
     (g : SmoothRiemannianMetric I M)
     {X Y Z W W' : Π b : M, TangentSpace I b} {x : M}
@@ -449,6 +461,9 @@ private lemma nablaCurvSec_acted_eventuallyEq
     riemannSec_eq_of_Z_eventuallyEq (cov := cov) hY hZ hcXW_le hcXW'_le hev_cXW
   rw [hT4]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaCurvSec_vanish_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -509,6 +524,9 @@ private lemma nablaCurvSec_vanish_acted
     simp only [hΔx, map_zero]
   rw [hfix, zero_smul]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma nablaCurvSec_eq_of_acted_eq
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -531,6 +549,9 @@ lemma nablaCurvSec_eq_of_acted_eq
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply, hWW', sub_self]
   rw [hsplit, hvanish, add_zero]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaBaseSlotCurv_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u v : TangentSpace I x) :
@@ -560,6 +581,9 @@ theorem nablaBaseSlotCurv_add_acted
   rw [nablaCurvSec_eq_of_acted_eq (g := g) X Y Z euv (eu + ev) x hval]
   exact nablaCurvSec_add_acted (g := g) X Y Z eu ev x
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaBaseSlotCurv_smul_acted
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -614,6 +638,9 @@ def nablaBaseSlotCurvFrameSumLinear
   map_smul' c u := by
     simp only [nablaBaseSlotCurv_smul_acted, RingHom.id_apply, Finset.smul_sum]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma nablaBaseSlotCurvFrameSumLinear_apply
     (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
     (B : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -629,6 +656,9 @@ noncomputable def nablaBaseSlotCurvFrameSumCLM
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   LinearMap.toContinuousLinearMap (nablaBaseSlotCurvFrameSumLinear (I := I) g B Vb x)
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma nablaBaseSlotCurvFrameSumCLM_apply
     (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
     (B : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -637,6 +667,8 @@ noncomputable def nablaBaseSlotCurvFrameSumCLM
       ∑ i : ι, nablaBaseSlotCurv (I := I) g (B i) (B i) Vb x w := rfl
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicci_symm
     (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) :
@@ -651,6 +683,8 @@ theorem nablaRicci_symm
     ricciTensor_symm (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))]
   ring
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicci_add_right_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -676,6 +710,8 @@ private lemma nablaRicci_add_right_raw
         (smoothOrthoFrame_smooth (I := I) g x i)) V W W' x
   rw [hadd, (g.inner x).map_add, ContinuousLinearMap.add_apply]
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicci_smul_right_raw
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -706,6 +742,8 @@ private lemma nablaRicci_smul_right_raw
     simpa only [ContMDiffSection.coeFn_mk] using h
   rw [hsmul, (g.inner x).map_smul, ContinuousLinearMap.smul_apply]
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma nablaRicci_eq_of_W_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -725,6 +763,8 @@ lemma nablaRicci_eq_of_W_eq_raw
         (smoothOrthoFrame_smooth (I := I) g x i)) V W W' x hWW'
   exact congrArg (fun t => g.inner x t (smoothOrthoFrame (I := I) g x i x)) hcc
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma nablaRicci_eq_of_V_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -736,6 +776,7 @@ lemma nablaRicci_eq_of_V_eq_raw
     nablaRicci_symm (I := I) g (fun b => X b) (fun b => V' b) (fun b => W b) x]
   exact nablaRicci_eq_of_W_eq_raw (g := g) X W V V' x hVV'
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 lemma nablaRicci_eq_of_VW_eq
     (g : SmoothRiemannianMetric I M)
     (X V V₀ W W₀ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -747,6 +788,8 @@ lemma nablaRicci_eq_of_VW_eq
   rw [nablaRicci_eq_of_V_eq_raw (g := g) X V V₀ W x hVV₀,
     nablaRicci_eq_of_W_eq_raw (g := g) X V₀ W W₀ x hWW₀]
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicci_add_left_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -759,6 +802,8 @@ private lemma nablaRicci_add_left_raw
     nablaRicci_symm (I := I) g (fun b => X b) (fun b => V' b) (fun b => W b) x]
   exact nablaRicci_add_right_raw (g := g) X W V V' x
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicci_smul_left_raw
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -774,6 +819,7 @@ private noncomputable abbrev extSec (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma nablaRicciBilinAux_add_left
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v v' w : TangentSpace I x) :
@@ -792,6 +838,7 @@ private lemma nablaRicciBilinAux_add_left
     (extSec (I := I) x w) x
   exact hdet.trans hadd
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma nablaRicciBilinAux_smul_left
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (v w : TangentSpace I x) :
@@ -807,6 +854,8 @@ private lemma nablaRicciBilinAux_smul_left
   exact hdet.trans (nablaRicci_smul_left_raw (g := g) c X (extSec (I := I) x v)
     (extSec (I := I) x w) x)
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicciBilinAux_add_right
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v w w' : TangentSpace I x) :
@@ -825,6 +874,8 @@ private lemma nablaRicciBilinAux_add_right
     (extSec (I := I) x w') x
   exact hdet.trans hadd
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma nablaRicciBilinAux_smul_right
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (v w : TangentSpace I x) :
@@ -861,6 +912,8 @@ noncomputable def nablaRicciEndo
   LinearMap.toContinuousLinearMap
     (((metricFlatMap (I := I) g x).symm.toLinearMap).comp (nablaRicciBilin (I := I) g X x))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma inner_nablaRicciEndo
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v w : TangentSpace I x) :
@@ -869,6 +922,8 @@ lemma inner_nablaRicciEndo
   change g.inner x (metricSharp (I := I) g x (nablaRicciBilin (I := I) g X x v)) w = _
   exact inner_metricSharp (I := I) g x (nablaRicciBilin (I := I) g X x v) w
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma inner_nablaRicciEndo_smooth
     (g : SmoothRiemannianMetric I M)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

@@ -12,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedVariationalIdentityStep
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -191,6 +191,7 @@ private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -252,6 +253,7 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -400,6 +402,7 @@ private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
       Fin.cons i (Fin.snoc dirs l) :=
   (Fin.cons_snoc_eq_snoc_cons (β := β) i dirs l).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ibp_principal_pair
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -489,6 +492,7 @@ private theorem ibp_principal_pair
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ibp_mass
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -524,6 +528,7 @@ private theorem ibp_mass
     (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ibp_inner_j
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)

@@ -126,8 +126,9 @@ end Algebra
 
 section JointCont
 
-variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+variable [NeZero (Module.finrank ℝ E)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ContinuousOn

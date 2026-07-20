@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -31,8 +30,8 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -45,18 +44,22 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 def radialCurve (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) : M :=
   expMap (I := I) g p (show TangentSpace I p from (t • x))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) :
     radialCurve (I := I) g p x t =
       expMap (I := I) g p (show TangentSpace I p from (t • x)) :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_one
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     radialCurve (I := I) g p x 1 =
       expMap (I := I) g p (show TangentSpace I p from x) := by
   simp [radialCurve]
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma radialCurve_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     radialCurve (I := I) g p x 0 = p := by
@@ -66,6 +69,8 @@ def radialCurve (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) : M :
 
 
 
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_diff
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
@@ -83,6 +88,7 @@ theorem exists_radialJacobi_diff
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem radial_mem_expBall
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {ρ b : Real} (hxρ : ‖x‖ < ρ) (hb : b ≤ 1) :
@@ -105,6 +111,8 @@ theorem radial_mem_expBall
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space (TangentBundle I M)] in
 lemma exists_radialFrame
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {b : ℝ} (hb : 0 < b)
@@ -136,6 +144,7 @@ lemma exists_radialFrame
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffAt_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb : b ≤ 1)
@@ -161,6 +170,7 @@ lemma radialCurve_contMDiffAt_Icc
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -183,6 +193,7 @@ lemma radialCurve_contMDiffOn_Icc
       (I := I) g p x t hnorm).contMDiffWithinAt
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialC2OnBallIcc
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) (hb : b ≤ 1) :
@@ -200,6 +211,7 @@ lemma radialC2OnBallIcc
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_clip
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
@@ -246,6 +258,7 @@ lemma exists_radial_clip
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rclip_nbhd
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb1 : b ≤ 1)
@@ -305,6 +318,7 @@ lemma exists_rclip_nbhd
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radial_clip_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (tau : ℝ → ℝ)
     (htau : ContDiff ℝ (∞ : WithTop ℕ∞) tau)
@@ -328,6 +342,7 @@ lemma radial_clip_contMDiff
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_ext
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
@@ -347,6 +362,7 @@ lemma exists_radial_ext
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rext_nbhd
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
     (hb1 : b ≤ 1)
@@ -367,6 +383,7 @@ lemma exists_rext_nbhd
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_sq_eq
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) {t : ℝ}
@@ -381,6 +398,7 @@ theorem radial_speed_sq_eq
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_le
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) {Vb b : ℝ}
@@ -396,6 +414,7 @@ theorem radial_speed_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem exists_gON_tangentBasis_E
     (g : SmoothRiemannianMetric I M) (y : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
@@ -407,6 +426,7 @@ private theorem exists_gON_tangentBasis_E
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_jacobi_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
@@ -421,6 +441,9 @@ theorem exists_jacobi_Ioo
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialJacobi_ode_of_curv
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ico (0 : ℝ) b,
@@ -463,6 +486,9 @@ theorem radialJacobi_ode_of_curv
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ode_Ico_of_Ioo_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ioo (0 : ℝ) b,
@@ -518,6 +544,8 @@ theorem ode_Ico_of_Ioo_zero
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ode_Ico_of_Ioo_d2
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : ℝ}
     (hJac : ∀ t ∈ Ioo (0 : ℝ) b,
@@ -574,6 +602,8 @@ theorem ode_Ico_of_Ioo_d2
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem d2_zero_of_jac0
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     (hJac0 : IsJacobiAt (I := I) g (radialCurve (I := I) g p x)
@@ -605,6 +635,7 @@ theorem d2_zero_of_jac0
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : ℝ}, b ≤ 1 →
@@ -653,6 +684,7 @@ theorem exists_ode_Ico
     (hJac x w hx hw hb) hcurv h0
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_self_nonneg
     (g : SmoothRiemannianMetric I M) {q : M} (u : TangentSpace I q) :
     0 <= g.inner q u u := by
@@ -661,6 +693,7 @@ private lemma inner_self_nonneg
   · exact (g.pos q u hu).le
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_sq_le_of_sqrt_le
     (g : SmoothRiemannianMetric I M) {q : M} {u v : TangentSpace I q} {K : Real}
     (hK : 0 ≤ K)
@@ -703,6 +736,9 @@ private def radialCurvTermFlat
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_inner
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     Tensor0SBundle.cotangentInner_gen (I := I) g
@@ -720,6 +756,9 @@ private theorem radialCurvTermFlat_inner
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (W : TangentSpace I (radialCurve (I := I) g p x t)) :
@@ -745,6 +784,9 @@ private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -763,6 +805,9 @@ private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_normSq_eq_cotangentInner
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     Tensor0SBundle.normSq0S (I := I) g (radialCurve (I := I) g p x t) 1
@@ -777,6 +822,9 @@ private theorem radialCurvTermFlat_normSq_eq_cotangentInner
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abs_flat_apply_le_rm04
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -816,6 +864,9 @@ theorem abs_flat_apply_le_rm04
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_normSq_le_card
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -886,6 +937,7 @@ theorem radialCurvTermFlat_normSq_le_card
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotProd_basis_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
@@ -909,6 +961,7 @@ private theorem radialSlotProd_basis_le
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotBound_basis_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
@@ -960,6 +1013,9 @@ private theorem radialSlotBound_basis_le
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_normSq_le_card_of_bounds
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -1011,6 +1067,9 @@ private theorem sqrt_le_sqrt_mul_of_sq_le {A C B : Real}
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_sqrt_le_card_of_velocity_bound
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -1055,6 +1114,9 @@ theorem radialCurvTermFlat_sqrt_le_card_of_velocity_bound
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem radialCurvTermFlat_sqrt_le_K
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
@@ -1101,6 +1163,8 @@ theorem radialCurvTermFlat_sqrt_le_K
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_flat_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1128,6 +1192,8 @@ theorem curv_sq_of_flat_Ioo
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_fiber_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1153,6 +1219,9 @@ theorem curv_sq_of_fiber_Ioo
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_rm04_velocity_Ioo
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K Vb b : Real}
@@ -1188,6 +1257,8 @@ theorem curv_sq_of_rm04_velocity_Ioo
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
+omit [SigmaCompactSpace M] in
 theorem curv_sq_of_norm_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) {K b : Real}
     (hK : 0 ≤ K)
@@ -1210,6 +1281,7 @@ theorem curv_sq_of_norm_Ioo
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_curvNorm
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1249,6 +1321,7 @@ theorem exists_ode_Ico_of_curvNorm
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_flat
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1289,6 +1362,7 @@ theorem exists_ode_Ico_of_flat
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_fiber
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {K b : Real},
@@ -1332,6 +1406,7 @@ theorem exists_ode_Ico_of_fiber
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_velocity
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1383,6 +1458,7 @@ theorem exists_ode_Ico_of_rm04_velocity
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_launch
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1437,6 +1513,7 @@ theorem exists_ode_Ico_of_rm04_launch
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1490,6 +1567,7 @@ theorem exists_ode_Ico_of_rm04
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_norm
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1543,6 +1621,7 @@ theorem exists_ode_Ico_of_rm04_norm
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_d2
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1591,6 +1670,7 @@ theorem exists_ode_rm04_d2
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_jac0
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1846,6 +1926,8 @@ theorem exists_rm04_pack
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04_Ioo_of_region
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {R b : Real} {U : Set M}
@@ -1907,6 +1989,7 @@ theorem exists_ode_rm04_on
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_expBall
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1942,6 +2025,8 @@ theorem exists_ode_expBall
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04Exp_of_global
     (g : SmoothRiemannianMetric I M) (p : M) {R ρ : Real}
     (hRm : ∀ q : M,
@@ -1960,6 +2045,7 @@ theorem rm04Exp_of_global
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_ode_global
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -1995,6 +2081,7 @@ private noncomputable def coeffModelCLM :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] E :=
   (toEuclidean (E := E)).symm.toContinuousLinearMap
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma coeffModelCLM_eq_sum
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     coeffModelCLM (E := E) v = ∑ i, v i • (chartModelBasis E) i := by
@@ -2012,6 +2099,8 @@ private lemma coeffModelCLM_eq_sum
     _ = ∑ i, v i • (chartModelBasis E) i := by
           simp only [chartModelBasis_apply]
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 private lemma sqrt_coercive_mul_norm_le
     (g : SmoothRiemannianMetric I M) (p : M)
     (x : E) :
@@ -2026,6 +2115,7 @@ private lemma sqrt_coercive_mul_norm_le
   rw [hlhs_eq]
   exact Real.sqrt_le_sqrt hcoerc
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_le_opNorm_sq
     (g : SmoothRiemannianMetric I M) (p : M)
     (x : E) :
@@ -2048,6 +2138,8 @@ private lemma inner_le_opNorm_sq
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem exists_unitCoeff_ge
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ B : ℝ, 0 < B ∧
@@ -2099,6 +2191,7 @@ theorem exists_unitCoeff_ge
         rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem exists_unitCoeff_le
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ D : ℝ, 0 ≤ D ∧
@@ -2133,6 +2226,8 @@ theorem exists_unitCoeff_le
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem exists_unitCoeff_bounds
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ B₀ D : ℝ, 0 < B₀ ∧ 0 ≤ D ∧
@@ -2150,6 +2245,7 @@ theorem exists_unitCoeff_bounds
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma unitDirScaleSmall {r : ℝ} (hr : 0 < r) :
     ∃ a : ℝ, 0 < a ∧
       ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
@@ -2181,6 +2277,7 @@ lemma unitDirScaleSmall {r : ℝ} (hr : 0 < r) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma dir_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
     (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -2202,6 +2299,8 @@ lemma dir_deriv_radius
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma dir_init_ge
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {B : ℝ}
     (hB : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
@@ -2231,6 +2330,7 @@ lemma dir_init_ge
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem exists_dirInit_ge
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (hderiv : ∀ v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)), ‖v‖ = 1 →
@@ -2260,6 +2360,8 @@ theorem exists_dirInit_ge
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_bounds_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -2333,6 +2435,8 @@ theorem radialJacobi_bounds_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_bounds
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -2407,6 +2511,8 @@ theorem radialJacobi_bounds
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_bounds_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2480,6 +2586,8 @@ theorem radialJacobi_one_bounds_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_bounds
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2548,6 +2656,8 @@ theorem radialJacobi_one_bounds
   exact hγ.contMDiffAt
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_le_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2625,6 +2735,8 @@ theorem radialJacobi_one_le_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_le
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2697,6 +2809,8 @@ theorem radialJacobi_one_le
   exact hupper.trans hB
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_ge_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2774,6 +2888,8 @@ theorem radialJacobi_one_ge_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_one_ge
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -2846,6 +2962,8 @@ theorem radialJacobi_one_ge
   exact hB.trans hlower
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_sq_ge_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hB_nonneg : 0 ≤ B)
@@ -2924,6 +3042,8 @@ theorem radialJacobi_sq_ge_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_sq_ge
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {K b B : ℝ} (hB_nonneg : 0 ≤ B)
@@ -2997,6 +3117,8 @@ theorem radialJacobi_sq_ge
   simpa [hq, hJdef] using hsq.trans_eq (Real.sq_sqrt hJ_nonneg)
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_dir_ge_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b B : ℝ} (hB_nonneg : 0 ≤ B)
@@ -3076,6 +3198,8 @@ theorem radialJacobi_dir_ge_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_dir_ge
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b B : ℝ} (hB_nonneg : 0 ≤ B)
@@ -3149,6 +3273,8 @@ theorem radialJacobi_dir_ge
     (hDJdiff v hv) (hODE v hv) (hB v hv)
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3210,6 +3336,8 @@ theorem radialJacobi_fin_le_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3267,6 +3395,8 @@ theorem radialJacobi_fin_le
     hcard F hpar hON hFdiff (hJdiff k) (hDJdiff k) (hODE k) (hB k)
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_init_bound_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3347,6 +3477,8 @@ theorem radialJacobi_fin_le_of_init_bound_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_init_bound
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3427,6 +3559,8 @@ theorem radialJacobi_fin_le_of_init_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma radialJacobi_init_le_of_deriv_eq
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {A : ℝ}
     (hderiv : ∀ k : Fin (Module.finrank ℝ E),
@@ -3452,6 +3586,7 @@ lemma radialJacobi_init_le_of_deriv_eq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma fin_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
     (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -3467,6 +3602,7 @@ lemma fin_deriv_radius
   intro k
   simpa [radialCurve] using hderivRadius x ((chartModelBasis E) k) hx (hbasisSmall k)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_of_smul_le
     (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
     {a B : ℝ} (ha : 0 < a)
@@ -3484,6 +3620,7 @@ private lemma sqrt_inner_le_of_smul_le
   rw [hscale, hsqrt] at h
   exact (le_of_mul_le_mul_left h ha)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma le_sqrt_inner_of_smul_ge
     (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
     {a B : ℝ} (ha : 0 < a)
@@ -3508,6 +3645,7 @@ private lemma le_sqrt_inner_of_smul_ge
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one_le_of_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a B : ℝ} (ha : 0 < a)
@@ -3528,6 +3666,7 @@ lemma radialJacobi_one_le_of_smul
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one_ge_of_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a B : ℝ} (ha : 0 < a)
@@ -3595,6 +3734,7 @@ lemma basisScaleSmall {r : ℝ} (hr : 0 < r) :
           mul_lt_mul_of_pos_left hk_lt hscale_pos
     _ = r := by field_simp [ne_of_gt hden_pos]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma scaleSmall_of_le {a b r : ℝ} {v : E}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a ≤ b) (hsmall : ‖b • v‖ < r) :
     ‖a • v‖ < r := by
@@ -3632,6 +3772,7 @@ lemma basisUnitScaleSmall {r : ℝ} (hr : 0 < r) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma basisInit_smul_le
     (g : SmoothRiemannianMetric I M) (p : M) {a A : ℝ} (ha : 0 < a)
     (hbasis : ∀ k : Fin (Module.finrank ℝ E),
@@ -3672,6 +3813,7 @@ lemma model_le_smul {a K b A B : ℝ} (ha : 0 < a)
   nlinarith
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma basisModel_le_smul
     (g : SmoothRiemannianMetric I M) (p : M) {a K b A B : ℝ} (ha : 0 < a)
     (hbasis : ∀ k : Fin (Module.finrank ℝ E),
@@ -3684,6 +3826,8 @@ lemma basisModel_le_smul
   exact ⟨basisInit_smul_le (I := I) g p ha hbasis, model_le_smul ha hmodel⟩
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_deriv_eq_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3744,6 +3888,8 @@ theorem radialJacobi_fin_le_of_deriv_eq_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_deriv_eq
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3798,6 +3944,8 @@ theorem radialJacobi_fin_le_of_deriv_eq
     hderiv hbasis hmodel
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_radius_deriv_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {r K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3859,6 +4007,8 @@ theorem radialJacobi_fin_le_of_radius_deriv_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radialJacobi_fin_le_of_radius_deriv
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {r K b A B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b) (h1b : (1 : ℝ) ≤ b)
@@ -3921,6 +4071,7 @@ theorem radialJacobi_fin_le_of_radius_deriv
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_one_le_of_scaled_radius_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4019,6 +4170,7 @@ theorem radialJacobi_one_le_of_scaled_radius_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_one_le_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4077,6 +4229,7 @@ theorem radialJacobi_one_le_of_scaled_radius
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_one_ge_of_scaled_radius_at
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a r K b B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4148,6 +4301,7 @@ theorem radialJacobi_one_ge_of_scaled_radius_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_one_ge_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     {a r K b B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4208,6 +4362,7 @@ theorem radialJacobi_one_ge_of_scaled_radius
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_dir_ge_of_scaled_radius_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {a r K b B : ℝ} (ha : 0 < a) (hB_nonneg : 0 ≤ B)
@@ -4308,6 +4463,7 @@ theorem radialJacobi_dir_ge_of_scaled_radius_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_dir_ge_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {a r K b B : ℝ} (ha : 0 < a) (hB_nonneg : 0 ≤ B)
@@ -4384,6 +4540,7 @@ theorem radialJacobi_dir_ge_of_scaled_radius
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma model_ge_of_smul
     (g : SmoothRiemannianMetric I M) (p : M) (w : E)
     {a K b B : ℝ} (ha : 0 < a)
@@ -4417,6 +4574,7 @@ lemma model_ge_of_smul
   nlinarith
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma dirModel_ge_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b B : ℝ} (ha : 0 < a)
@@ -4442,6 +4600,7 @@ lemma dirModel_ge_smul
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma dirModel_ge_of_bounds
     (g : SmoothRiemannianMetric I M) (p : M)
     {K b B₀ D B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4482,6 +4641,8 @@ lemma dirModel_ge_of_bounds
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 lemma exists_dirModel_ge
     (g : SmoothRiemannianMetric I M) (p : M)
     {K : ℝ} (hK : 0 ≤ K) :
@@ -4502,6 +4663,8 @@ lemma exists_dirModel_ge
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 lemma exists_dirModel_ge1
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ K B : ℝ, 0 < K ∧ 0 < B ∧
@@ -4542,6 +4705,7 @@ lemma exists_dirModel_ge1
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_fin_le_of_scaled_radius_at
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4605,6 +4769,7 @@ theorem radialJacobi_fin_le_of_scaled_radius_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radialJacobi_fin_le_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {a r K b A B : ℝ} (ha : 0 < a) (hK : 0 ≤ K) (hb : 0 ≤ b)

@@ -10,7 +10,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -34,6 +33,7 @@ variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
 
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 theorem modelAt_mcovRS {r s : ℕ}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (ΓX : E → E →L[𝕜] E)
@@ -57,6 +57,8 @@ theorem modelAt_mcovRS {r s : ℕ}
   rfl
 
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
+omit [CompleteSpace 𝕜] in
 theorem mcovariantDeriv_tensor0SWithin_apply_slots {s : ℕ}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (ΓX : E → E →L[𝕜] E)

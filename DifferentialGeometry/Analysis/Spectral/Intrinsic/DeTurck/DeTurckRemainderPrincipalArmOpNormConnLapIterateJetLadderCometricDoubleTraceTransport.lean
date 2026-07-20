@@ -38,7 +38,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -96,6 +96,8 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 open Tensor0SBundle in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (K : SmoothCcTensor g r (s + 2)) (x : M) (D : Tensor0SSpace r I x)
     (m : Fin s → TangentSpace I x) :
@@ -159,6 +161,7 @@ theorem rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs
   intro x
   exact bal_rawLap_toSection_eq_cometric (I := I) g r s Φ x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma bal_appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (A B : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s Φ (A - B) =
@@ -170,6 +173,7 @@ private lemma bal_appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     appCc_smul_right (I := I) (M := M) g r s (-1 : ℝ) Φ B,
     neg_one_smul, ← sub_eq_add_neg]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma oneMinusConnLapSmoothIter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ) (q : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s q (A - B) =
@@ -184,6 +188,7 @@ lemma oneMinusConnLapSmoothIter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [rawTensorConnLapSmooth_sub]
     abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bal_lap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s (A + B) =
@@ -201,6 +206,7 @@ private lemma bal_lap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [sub_neg_eq_add, hneg, sub_neg_eq_add] at this
   exact this
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bal_P_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmooth (I := I) g r s (A + B) =

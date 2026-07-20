@@ -42,7 +42,6 @@ import Mathlib.Algebra.BigOperators.Fin
 
 
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.Dim3Reaction
 

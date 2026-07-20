@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,7 @@ def rawTensorConnLap
           (smoothOrthoFrame (I := I) g x i) x
           (smoothOrthoFrame (I := I) g x i x)))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rawTensorConnLap_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -63,6 +64,7 @@ def rawTensorConnLap
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem rawTensorConnLap_zero [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     rawTensorConnLap (I := I) g r s
@@ -101,6 +103,7 @@ def rawTensorConnLap
   rw [h_first_zero, h_second_zero]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_add [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T T' : Π b : M, TensorRSSpace r s I b}
@@ -186,6 +189,7 @@ theorem rawTensorConnLap_add [CompleteSpace E]
   simp only [ContinuousLinearMap.add_apply]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_smul [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b} (c : ℝ)
@@ -247,7 +251,7 @@ theorem rawTensorConnLap_smul [CompleteSpace E]
   rw [h_second_smul, h_smulT]
   simp only [ContinuousLinearMap.smul_apply, smul_sub]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cov_eq_zero_of_eventually_zero_on_open
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
@@ -279,6 +283,7 @@ private lemma cov_eq_zero_of_eventually_zero_on_open
   rw [h_eq]
   exact congrArg (fun φ => φ y) cov.zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_eq_zero_of_eventually_zero [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -352,6 +357,7 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero [CompleteSpace E]
   rw [h_first_zero, h_second_zero]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_neg [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -373,6 +379,7 @@ theorem rawTensorConnLap_neg [CompleteSpace E]
   simp only [neg_smul, one_smul, neg_smul] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_frame_trace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -395,7 +402,7 @@ section CompactSupport
 
 variable [CompleteSpace E]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
         (fun x : M => TensorRSSpace r s I x)⟯)
@@ -406,6 +413,8 @@ private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
   classical
   exact (T.contMDiff x).mdifferentiableAt (by simp)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rawTensorConnLap_covApply_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -680,6 +689,8 @@ noncomputable def rawTensorConnLap_fixedFrame
         T x
         ((LeviCivita (I := I) g).toFun (B i) x (B i x)))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rawTensorConnLap_fixedFrame_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -696,6 +707,8 @@ noncomputable def rawTensorConnLap_fixedFrame
             T x
             ((LeviCivita (I := I) g).toFun (B i) x (B i x))) := rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rawTensorConnLap_fixedFrame_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -703,6 +716,8 @@ lemma rawTensorConnLap_fixedFrame_smoothOrthoFrame
         (smoothOrthoFrame (I := I) g x) T x =
       rawTensorConnLap (I := I) g r s T x := rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rawTensorConnLap_fixedFrame_covApply_T_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -737,6 +752,8 @@ private lemma rawTensorConnLap_fixedFrame_covApply_T_contMDiff
   intro b
   exact hOn.contMDiffAt (Filter.univ_mem)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rawTensorConnLap_fixedFrame_firstSummand_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -786,6 +803,8 @@ private lemma rawTensorConnLap_fixedFrame_firstSummand_contMDiff
   convert hAt
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma rawTensorConnLap_fixedFrame_covBB_contMDiff
     (g : SmoothRiemannianMetric I M)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -808,6 +827,8 @@ private lemma rawTensorConnLap_fixedFrame_covBB_contMDiff
   intro b
   exact hOn.contMDiffAt (Filter.univ_mem)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rawTensorConnLap_fixedFrame_secondSummand_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -852,6 +873,8 @@ private lemma rawTensorConnLap_fixedFrame_secondSummand_contMDiff
     hOn.contMDiffAt (Filter.univ_mem)
   convert hAt
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_fixedFrame_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -904,6 +927,8 @@ section RawPsiTensorial
 
 variable [CompleteSpace E]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covRS_T_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -937,6 +962,8 @@ private lemma covRS_T_mdiff_at
       (σ := T) hT_plus.contMDiffOn
   exact ((hcov_sec.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covApply_covRS_X_T_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -956,6 +983,8 @@ private lemma covApply_covRS_X_T_mdiff_at
   have := MDifferentiableAt.clm_bundle_apply (b := id) hHom hX
   exact this
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rawTensorConnLap_psi_tensorialAt_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1050,6 +1079,8 @@ private theorem rawTensorConnLap_psi_tensorialAt_left
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rawTensorConnLap_psi_tensorialAt_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1128,6 +1159,8 @@ noncomputable def tensorHessianBilinAt
     (fun X hX =>
       rawTensorConnLap_psi_tensorialAt_right g r s T hT_total y (X := X) hX)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHessianBilinAt_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1154,6 +1187,7 @@ theorem tensorHessianBilinAt_apply
   unfold tensorHessianBilinAt
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
+omit [CompleteSpace E] in
 theorem rawTensorConnLap_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1311,6 +1345,7 @@ section UnconditionalSmoothness
 
 variable [CompleteSpace E]
 
+omit [CompleteSpace E] in
 theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1352,6 +1387,7 @@ theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
   rw [Finset.sum_congr rfl (fun i _ => h_summand_eq i)]
   rfl
 
+omit [CompleteSpace E] in
 private theorem rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1368,6 +1404,7 @@ private theorem rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) y
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j)
 
+omit [CompleteSpace E] in
 theorem rawTensorConnLap_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

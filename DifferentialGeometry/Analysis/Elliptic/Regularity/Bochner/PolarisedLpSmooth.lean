@@ -12,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace BochnerPolarisedLpSmooth
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,7 @@ lemma contMDiff_phi_sub_v
   φ.contMDiff.sub v.contMDiff
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma contMDiff_g_inner_grad_phi_grad_v
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) :
     ContMDiff I 𝓘(ℝ) ∞ (fun b : M => g.inner b
@@ -103,6 +104,7 @@ theorem bochner_polarised_pointwise_oneSubLap_smoothCase
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ v) x
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmoothBundle_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (b : M) :
     (gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun b =
@@ -112,6 +114,7 @@ lemma gradInnerSmoothBundle_toFun
   rfl
 
 omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma Δ_g_gradInnerSmoothBundle_eq_contMDiff_g_inner
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (x : M) :
     Δ_g (I := I) g (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth x =

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -51,6 +51,7 @@ theorem metricFlatModelInChart_component_center
   rw [metricFlatContinuousEquiv_apply (I := I) g x₀
     ((Module.finBasis Real E) i) ((Module.finBasis Real E) j), hi, hj]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventually_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) {y₀ : E}
@@ -166,6 +167,7 @@ private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventua
   rfl
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -184,6 +186,7 @@ theorem metricFlatModelInChart_component_contDiffWithinAt
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
@@ -234,6 +237,7 @@ theorem metricFlatModelInChart_component_deriv_center
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
@@ -276,6 +280,7 @@ noncomputable def leviCivitaChristoffelModelRHS
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -298,6 +303,7 @@ theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
@@ -355,6 +361,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
     rw [h₁, h₂, h₃]
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_apply_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) (v w : E) :
@@ -382,6 +389,7 @@ theorem metricFlatModelInChart_apply_of_mem
   simp [hom_trivializationAt, Trivialization.continuousLinearMap_apply]
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -419,6 +427,8 @@ theorem metricFlatModelInChart_component_of_mem
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) :
@@ -578,6 +588,7 @@ private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
     [I.Boundaryless]
     {f : M -> Real} {x₀ x : M}
@@ -648,6 +659,7 @@ private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
     exact Filter.univ_mem
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_of_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
@@ -706,6 +718,7 @@ theorem metricFlatModelInChart_component_deriv_of_mem
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
@@ -789,6 +802,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -807,6 +821,7 @@ theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -830,6 +845,8 @@ theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 theorem metricFlatModelInChart_isInvertible_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) :
@@ -875,6 +892,7 @@ theorem metricFlatModelInChart_isInvertible_of_mem
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)
@@ -913,6 +931,7 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target)

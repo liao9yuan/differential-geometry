@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
 import Mathlib.Analysis.Calculus.MeanValue
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -48,6 +47,7 @@ def reverseFamily
   connection := fun s => G.connection (T - s)
   metricCompatible := fun s => G.metricCompatible (T - s)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] theorem reverse_metric
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -59,12 +59,14 @@ def reverseFamily
 def reverseHeat (T : Real) (u : Real → M → Real) : Real → M → Real :=
   fun s x => u (T - s) x
 
+omit [TopologicalSpace M] in
 @[simp] theorem reverse_heat_apply
     (T : Real) (u : Real → M → Real) (s : Real) (x : M) :
     reverseHeat T u s x = u (T - s) x := by
   rfl
 
 
+omit [TopologicalSpace M] in
 theorem reverse_deriv
     (T : Real) (u : Real → M → Real) (s : Real) (x : M)
     (hu : DifferentiableAt Real (fun t : Real => u t x) (T - s)) :
@@ -78,6 +80,7 @@ theorem reverse_deriv
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_forward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -103,6 +106,7 @@ theorem conj_heat_forward
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_backward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -127,6 +131,7 @@ theorem conj_heat_backward
   ring
 
 
+omit [TopologicalSpace M] in
 @[simp] theorem reverse_heat_reverse
     (T : Real) (u : Real → M → Real) :
     reverseHeat T (reverseHeat T u) = u := by
@@ -146,6 +151,7 @@ def IsConjHeatOn
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_of_pot
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -158,6 +164,7 @@ theorem conj_heat_of_pot
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem heat_pot_to_conj
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -190,6 +197,7 @@ theorem heat_pot_to_conj
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_deriv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -236,6 +244,7 @@ theorem conj_heat_mass_deriv
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -276,6 +285,7 @@ theorem conj_heat_mass_eq
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

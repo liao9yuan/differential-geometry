@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarSum2
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unnecessarySeqFocus false
@@ -34,12 +33,11 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
@@ -96,6 +94,7 @@ theorem sigmaCurvPos_nat_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem wRoute_val {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x)) (k : ℕ) (i j : Idx)
     (m : Fin (4 + (k + 1)) → Idx) (idx : Fin (((4 + (k + 1)) + 2) + 2)) :
@@ -124,7 +123,12 @@ theorem wRoute_val {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
 
 set_option maxHeartbeats 1000000 in
 
-theorem curvactStarPos {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem curvactStarPos
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -255,7 +259,12 @@ theorem sigmaCurv0_nat_val (k : ℕ) (p : Fin (4 + 0)) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem curvactStar0 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem curvactStar0
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -384,7 +393,12 @@ theorem sigmaDiffA_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem slotdiffStarA {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem slotdiffStarA
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j) =
@@ -532,7 +546,12 @@ theorem sigmaDiffB_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + (k + 1))) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem slotdiffStarB {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem slotdiffStarB
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j) =
@@ -698,7 +717,12 @@ theorem sigmaRic1_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem slotRic1 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem slotRic1
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j) =
@@ -833,7 +857,12 @@ theorem sigmaRic2_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem slotRic2 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem slotRic2
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j) =
@@ -968,7 +997,12 @@ theorem sigmaRic3_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
 
 set_option maxHeartbeats 1000000 in
 
-theorem slotRic3 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem slotRic3
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j) =

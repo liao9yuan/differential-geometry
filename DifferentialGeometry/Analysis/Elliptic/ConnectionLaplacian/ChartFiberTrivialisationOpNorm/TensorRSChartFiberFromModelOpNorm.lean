@@ -24,8 +24,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
-  [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
@@ -35,6 +34,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_W_and_constant_symmL
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α y₀ : M) (h_y₀_α : y₀ ∈ (chartAt H α).source) :
@@ -200,6 +201,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)

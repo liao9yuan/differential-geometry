@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -135,6 +134,7 @@ def ricciFromRiemann04TraceInFrame
   fun x X Y =>
     ∑ k : Idx, ∑ l : Idx, gInv x k l * Riemann04 x (frame k x) X Y (frame l x)
 
+omit [IsManifold I ∞ M] in
 @[simp]
 theorem ricciFromRiemann04TraceInFrame_apply
     (Riemann04 : RawFourTensorField (I := I) (M := M))
@@ -153,6 +153,7 @@ def scalarFromRicciTraceInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x) : M -> Real :=
   fun x => ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x)
 
+omit [IsManifold I ∞ M] in
 @[simp]
 theorem scalarFromRicciTraceInFrame_apply
     (Ric : RawTwoTensorField (I := I) (M := M))

@@ -22,7 +22,7 @@ open Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -48,6 +48,7 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
+omit [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -71,6 +72,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) h
 
 omit [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
 lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -146,6 +148,7 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
     (I := I) (M := M) g α i k hb
 
 omit [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -232,6 +235,7 @@ private lemma chartBasisVecFiber_mdiffAt
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -337,6 +341,7 @@ private lemma finsum_smul_section_mdiffAt
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -423,6 +428,7 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
+omit [I.Boundaryless] in
 theorem cov_RS_covApply_frameVec_eq_coord_expansion
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

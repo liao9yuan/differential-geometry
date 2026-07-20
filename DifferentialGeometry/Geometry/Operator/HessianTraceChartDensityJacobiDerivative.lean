@@ -13,8 +13,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -23,6 +22,7 @@ open DifferentialGeometry.Integral.Measure
 private noncomputable def basisDirectionLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     ℝ → E := fun s => y₀ + s • (chartModelBasis E) l
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
     (s : ℝ) :
     HasDerivAt (basisDirectionLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
@@ -51,6 +51,7 @@ private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
   rw [← hfun_eq]
   exact h'
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_comp_jacobiLine
     {y₀ : E} {l : Fin (Module.finrank ℝ E)} {F : E → ℝ}
     (hF : DifferentiableAt ℝ F y₀) :
@@ -72,6 +73,7 @@ private noncomputable def gramJacobiFamily
   fun s => Matrix.of fun i j =>
     chartGramOnE (I := I) g α i j (basisDirectionLine (E := E) y₀ l s)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramJacobiFamily_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
@@ -81,6 +83,7 @@ private lemma gramJacobiFamily_zero
   ext i j
   simp [zero_smul, add_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramAtY_eq_chartGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) (y₀ : E) :
     (Matrix.of fun i j => chartGramOnE (I := I) g α i j y₀) =
@@ -88,6 +91,7 @@ private lemma gramAtY_eq_chartGramMatrix
   ext i j
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_gramJacobiFamily_entry
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -102,6 +106,7 @@ private lemma hasDerivAt_gramJacobiFamily_entry
   simp only [Matrix.of_apply]
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramJacobiFamily_det_pos
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -117,6 +122,7 @@ private lemma gramJacobiFamily_det_pos
     exact hsource
   exact chartGramMatrix_det_pos (I := I) g α hbase
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_det_chartGramOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -190,6 +196,7 @@ private lemma partialDeriv_det_chartGramOnE
   rw [hGf_zero_eq] at heq
   exact heq.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_chartDensityOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))

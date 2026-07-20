@@ -38,7 +38,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -64,6 +63,7 @@ section ModelCovariantDerivative
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelAt_apply_slots {s : ℕ}
     (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (ΓX : E →L[𝕜] E)
@@ -85,6 +85,7 @@ theorem covariantDeriv_tensor0SModelAt_apply_slots {s : ℕ}
     simp
   · simp [Function.update, hb]
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_apply_slots {s : ℕ}
     (X : E → E) (ΓX : E → E →L[𝕜] E)
     (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s) (u : Set E) (x : E)
@@ -120,6 +121,7 @@ theorem lieDeriv_correctionL_apply_slots {s : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
     (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (L : Fin s → E → 𝕜 →L[𝕜] E)
@@ -178,6 +180,7 @@ theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensor0SModel_eval_slots {s : ℕ}
     (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
     (V : Fin s → E → E)

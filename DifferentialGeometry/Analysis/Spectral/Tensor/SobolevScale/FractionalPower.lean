@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,19 +37,26 @@ def cast {σ τ : ℝ} (h : σ = τ)
   weighted_summable := by
     subst h; exact T.weighted_summable
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cast_coeff {σ τ : ℝ} (h : σ = τ)
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (cast (I := I) (M := M) h T).coeff i = T.coeff i := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cast_coeff_fun {σ τ : ℝ} (h : σ = τ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     (cast (I := I) (M := M) h T).coeff = T.coeff := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cast_rfl {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ) :
     cast (I := I) (M := M) (rfl : σ = σ) T = T := rfl
 
+omit [CompactSpace M] in
 lemma cast_add {σ τ : ℝ} (h : σ = τ)
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     cast (I := I) (M := M) h (S + T) =
@@ -57,6 +64,8 @@ lemma cast_add {σ τ : ℝ} (h : σ = τ)
   ext i
   simp only [cast_coeff, add_coeff]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cast_smul {σ τ : ℝ} (h : σ = τ) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     cast (I := I) (M := M) h (c • T) =
@@ -64,6 +73,7 @@ lemma cast_smul {σ τ : ℝ} (h : σ = τ) (c : ℝ)
   ext i
   simp only [cast_coeff, smul_coeff]
 
+omit [CompactSpace M] in
 lemma norm_cast {σ τ : ℝ} (h : σ = τ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖cast (I := I) (M := M) h T‖ = ‖T‖ := by
@@ -91,6 +101,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma tensorSobolevWeight_add (i : TensorEigenIdx (I := I) (M := M) g r s)
     (σ τ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ + τ) =
@@ -100,6 +111,7 @@ lemma tensorSobolevWeight_add (i : TensorEigenIdx (I := I) (M := M) g r s)
   exact Real.rpow_add
     (lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i)) σ τ
 
+omit [CompactSpace M] in
 lemma tensorSobolevWeight_neg (i : TensorEigenIdx (I := I) (M := M) g r s)
     (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (-σ) =
@@ -108,6 +120,7 @@ lemma tensorSobolevWeight_neg (i : TensorEigenIdx (I := I) (M := M) g r s)
   exact Real.rpow_neg
     (le_trans zero_le_one (one_le_one_add_lambda (I := I) (M := M) i)) σ
 
+omit [CompactSpace M] in
 lemma tensorSobolevWeight_sub (i : TensorEigenIdx (I := I) (M := M) g r s)
     (σ τ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ - τ) =
@@ -122,6 +135,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma fractionalPower_weight_term (i : TensorEigenIdx (I := I) (M := M) g r s)
     (θ σ : ℝ) (c : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ - 2 * θ) *
@@ -147,6 +161,7 @@ lemma fractionalPower_weight_term (i : TensorEigenIdx (I := I) (M := M) g r s)
     _ = tensorSobolevWeight (I := I) (M := M) i σ * c ^ 2 := by
           rw [hsum]
 
+omit [CompactSpace M] in
 lemma fractionalPower_weighted_summable {σ : ℝ} (θ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -169,12 +184,14 @@ def fractionalPowerFun {σ : ℝ} (θ : ℝ)
   coeff i := tensorSobolevWeight (I := I) (M := M) i θ * T.coeff i
   weighted_summable := fractionalPower_weighted_summable (I := I) (M := M) θ T
 
+omit [CompactSpace M] in
 @[simp] lemma fractionalPowerFun_coeff {σ : ℝ} (θ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (fractionalPowerFun (I := I) (M := M) θ T).coeff i =
       tensorSobolevWeight (I := I) (M := M) i θ * T.coeff i := rfl
 
+omit [CompactSpace M] in
 lemma fractionalPowerFun_add {σ : ℝ} (θ : ℝ)
     (S T : tensorHs (I := I) (M := M) g r s σ) :
     fractionalPowerFun (I := I) (M := M) θ (S + T) =
@@ -184,6 +201,7 @@ lemma fractionalPowerFun_add {σ : ℝ} (θ : ℝ)
   simp only [fractionalPowerFun_coeff, add_coeff]
   ring
 
+omit [CompactSpace M] in
 lemma fractionalPowerFun_smul {σ : ℝ} (θ : ℝ) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     fractionalPowerFun (I := I) (M := M) θ (c • T) =
@@ -397,6 +415,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma lambdaPower_weighted_summable {σ : ℝ} (sh : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>

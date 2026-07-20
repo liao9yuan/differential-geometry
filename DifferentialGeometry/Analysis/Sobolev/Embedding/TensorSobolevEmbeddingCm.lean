@@ -17,7 +17,9 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +33,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
 omit [I.Boundaryless] in
+omit [BoundarylessManifold I M] in
 theorem tensorPouSobolevHilbert_embedding_Ck
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
@@ -43,6 +46,16 @@ theorem tensorPouSobolevHilbert_embedding_Ck
           C *
             ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ :=
   tensorPouSobolevHilbert_embedding_Ck_gNorm (I := I) (M := M) g r s k m h_super
+
+end
+
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_embedding_C0
@@ -92,6 +105,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorFiberNorm_sq_le_chartCenterComponents
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (T : SmoothCcTensor g r s) (x : M) :

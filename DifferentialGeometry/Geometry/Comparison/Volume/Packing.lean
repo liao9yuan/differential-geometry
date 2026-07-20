@@ -4,7 +4,6 @@ import Mathlib.Tactic
 import Mathlib.Topology.MetricSpace.Basic
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

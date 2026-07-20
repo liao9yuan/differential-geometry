@@ -90,7 +90,7 @@ theorem memWkp_of_iterClassicalPartial_memWkp_two
 
 end GenericRaiser
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -103,6 +103,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] in
 theorem iterClassicalPartial_memWkp_two_of_weakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -167,6 +168,7 @@ theorem iterClassicalPartial_memWkp_two_of_weakSolution
       hΩ''_compact_closure
   exact (h_engine h_weak_sol h_w_cpt h_s_cd h_s_cpt).1
 
+omit [CompleteSpace E] in
 theorem tensorComponent_memWkp_allOrders_interior
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

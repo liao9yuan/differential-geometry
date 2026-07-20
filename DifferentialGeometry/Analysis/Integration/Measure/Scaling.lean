@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

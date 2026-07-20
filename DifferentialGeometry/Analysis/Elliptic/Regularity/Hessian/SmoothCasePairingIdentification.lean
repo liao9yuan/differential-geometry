@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianBridge
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -125,6 +125,7 @@ noncomputable def chartPushedEuclidHessian
       (chartTargetEuclid (I := I) (M := M) α))
     (chartTargetEuclid (I := I) (M := M) α) y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma chartPushedEuclidHessian_def
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -160,6 +161,7 @@ noncomputable def smoothEuclidHessianPairingChart
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartPushedEuclidHessian (I := I) (M := M) (g := g) α v k l y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothEuclidHessianPairingChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -173,6 +175,7 @@ noncomputable def smoothEuclidHessianPairingChart
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 chartPushedEuclidHessian (I := I) (M := M) (g := g) α v k l y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -229,6 +232,7 @@ noncomputable def hessPairingSmoothOnEuclid
     (smoothScalarToContMDiffMap (I := I) (g := g) v)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma hessPairingSmoothOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -237,6 +241,7 @@ noncomputable def hessPairingSmoothOnEuclid
         (smoothScalarToContMDiffMap (I := I) (g := g) v)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingChartLocal_smoothCase_aeEq_smoothOnEuclid_of_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)

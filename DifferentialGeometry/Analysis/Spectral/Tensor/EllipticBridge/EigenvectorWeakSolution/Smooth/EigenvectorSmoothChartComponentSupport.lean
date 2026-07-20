@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,6 +30,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -48,6 +49,7 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
         g r s) i) α Q
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -61,6 +63,7 @@ theorem eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
       (I := I) (M := M) g r s i α Q] with y hy hy_zero
   rw [hy, hy_zero, zero_mul]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -24,7 +24,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -49,13 +48,10 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 def gradNormSq (g : SmoothRiemannianMetric I M) (u : M -> Real) : M -> Real :=
@@ -270,12 +266,14 @@ private theorem metricTensorField_eq_metricTensor0S
   intro slots
   simp [component0S_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem fin_cons_vec2_eq_vec3_local {x : M}
     (X Y Z : TangentSpace I x) :
     Fin.cons X (vec2 (I := I) Y Z) = vec3 (I := I) X Y Z := by
   funext a
   fin_cases a <;> rfl
 
+omit [FiniteDimensional ℝ E] in
 private theorem curry_three_apply_vec2 {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (X Y Z : TangentSpace I x) :
@@ -632,6 +630,7 @@ def ricGradCoord
     (k : Idx) : Real :=
   ricciVectorCoord (I := I) Ric basis (gradientFun (I := I) g u x) k
 
+omit [FiniteDimensional ℝ E] in
 theorem nabla2DuTrailingSymmCoord_of_tensor
     {Idx : Type*}
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -795,6 +794,7 @@ def MetricTraceInnerProductRuleAt
       (oneFormRoughInnerCoord (I := I) basis gInv alphaX nabla2Alpha +
         oneFormNablaNormCoord (I := I) basis gInv nablaAlphaX)
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_inner_product_rule
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -816,6 +816,7 @@ theorem metricTrace_inner_product_rule
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricTrace_inner_product_rule_of_second_product
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))

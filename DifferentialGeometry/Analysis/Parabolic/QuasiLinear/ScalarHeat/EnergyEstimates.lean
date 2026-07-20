@@ -25,6 +25,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mild_solution_norm_le
     {g : SmoothRiemannianMetric I M} {σ : ℝ} (u₀ : scalarHs (I := I) (M := M) g σ)
     {N : scalarHs (I := I) (M := M) g σ → scalarHs (I := I) (M := M) g σ}
@@ -155,6 +156,7 @@ theorem mild_solution_norm_le
   exact integral_gronwall_le_affine (T := T) (A := ‖u₀‖) (B := ‖N 0‖) (K := (L : ℝ))
     hT hu₀_nn hN0_nn hL_nn (f := f) hf_cont hf_nn hf_int t ht
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalar_quasilinear_local_existence_with_norm_bound
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (u₀ : scalarHs (I := I) (M := M) g σ)
@@ -175,6 +177,7 @@ theorem scalar_quasilinear_local_existence_with_norm_bound
   exact mild_solution_norm_le (I := I) (M := M) (g := g) (σ := σ) u₀ hN
     hT_pos.le hu_cont hu_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalar_quasilinear_local_existence_with_norm_bound_Hk
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (u₀ : HkScalar (I := I) (M := M) g k)

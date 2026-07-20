@@ -14,7 +14,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,13 +24,11 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 private theorem fderivWithin_eq_sum_basis_coord
     {F : E -> E} {u : Set E} {y Xy : E}
@@ -93,6 +90,8 @@ private theorem fderivWithin_eq_sum_basis_coord
   · intro hi
     simp at hi
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 private theorem fderivWithin_chart_scalar_eq_extDerivFun
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (φ : E -> 𝕜) (f : M -> 𝕜)
@@ -127,6 +126,8 @@ private theorem fderivWithin_chart_scalar_eq_extDerivFun
   rw [hX, hf.mfderiv, hfd]
   rfl
 
+omit [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 private theorem tangentFieldModelInChart_fderivWithin_eq_sum_extDerivFun_coord
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
@@ -182,6 +183,7 @@ private theorem tangentFieldModelInChart_fderivWithin_eq_sum_extDerivFun_coord
   exact fderivWithin_chart_scalar_eq_extDerivFun
     (I := I) X x₀ φ f (hcoord i) heq
 
+omit [IsManifold I ∞ M] in
 theorem covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -243,6 +245,8 @@ theorem covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
           (extChartAt I x₀ x₀)) := by
           rw [hderiv]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
+omit [IsManifold I ∞ M] in
 private theorem tangentFieldModelInChart_center_symmL
     (V : (x : M) -> TangentSpace I x) (x₀ : M) :
     (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
@@ -259,6 +263,8 @@ private theorem tangentFieldModelInChart_center_symmL
   exact e.symmL_continuousLinearMapAt
     (R := 𝕜) (FiberBundle.mem_baseSet_trivializationAt' x₀) (V x₀)
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] [IsManifold I ∞ M] in
 private theorem tensor0SModelInChart_apply_modelSlots_center {s : ℕ}
     (A : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) s x)
@@ -275,6 +281,8 @@ private theorem tensor0SModelInChart_apply_modelSlots_center {s : ℕ}
   funext a
   exact tangentFieldModelInChart_center_symmL (I := I) (V a) x₀
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] [IsManifold I ∞ M] in
 private theorem tensor0SModelInChart_apply_update_modelSlot_center {s : ℕ}
     (A : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) s x)
@@ -305,6 +313,8 @@ private theorem tensor0SModelInChart_apply_update_modelSlot_center {s : ℕ}
       Function.comp_apply, Function.update_of_ne hb, Trivialization.symmL_apply]
     exact tangentFieldModelInChart_center_symmL (I := I) (V b) x₀
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] [IsManifold I ∞ M] in
 private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -358,6 +368,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [IsManifold I ∞ M] in
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -489,6 +500,7 @@ theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
               ((cov (V a) x₀) (X x₀))) := by
           rw [hcorr_sum]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -563,6 +575,7 @@ private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 private theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -573,6 +586,7 @@ private theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMD
   exact (tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (I := I) V x₀ hV).differentiableWithinAt (by simp)
 
+omit [IsManifold I 2 M] in
 private theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -623,6 +637,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [IsManifold I 2 M] in
 theorem tensor0S_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -651,6 +666,8 @@ theorem tensor0S_eval_coordinateFrame_contMDiffAt
     (hv := hframe)
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -693,6 +710,7 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [IsManifold I 2 M] in
 theorem tensor0S_eval_coordinateFrame_covariantDerivative_slot_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -164,6 +165,7 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -191,6 +193,7 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma wkpNorm_sum_le_const_mul_aggregate
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -275,6 +278,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layerA_coeff_contDiffOn
     (a b : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -302,6 +306,7 @@ end LayerBounds
 
 section MainBoundUniform
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -429,6 +434,7 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] {ν : Type*} (F : ι → ν → EuclN → ℝ)
     (A : ν → ℝ≥0∞)
@@ -513,6 +519,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_iteratedPartial_succ_le
     (a : Fin (Module.finrank ℝ E)) :
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
@@ -525,6 +532,7 @@ private lemma wkpNorm_iteratedPartial_succ_le
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_iteratedPartial_le :
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -536,6 +544,7 @@ private lemma wkpNorm_iteratedPartial_le :
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_chosenWeakPartial_iteratedPartial_succ_le
     (a b : Fin (Module.finrank ℝ E)) :
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
@@ -563,6 +572,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -685,6 +695,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -820,6 +831,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
           (chartTargetEuclid (I := I) (M := M) α) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter_m : MemWkp (d := Module.finrank ℝ E) (2 + K) 2
@@ -864,6 +876,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -900,6 +913,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_add_self
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -1101,6 +1115,7 @@ end MainBoundUnconditional
 
 section MainBoundUniformUnconditional
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1251,6 +1266,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1417,6 +1433,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1472,6 +1489,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1515,6 +1533,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_add_self
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

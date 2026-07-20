@@ -13,7 +13,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -22,6 +22,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_repr_eventuallyEq_const
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -57,6 +59,8 @@ lemma chartParallelExtend_repr_eventuallyEq_const
       ((extChartAt I α).symm y) = trivToE (I := I) α b v
   exact chartE_section_repr_chartParallelExtend (I := I) α b v hy_U
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -69,6 +73,8 @@ lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) (w : E) :
@@ -78,6 +84,8 @@ lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
   rw [chartParallelExtend_repr_pullback_fderiv_eq_zero (I := I) α hb v]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem chartLeviCivita_chartParallelExtend
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -105,6 +113,8 @@ theorem chartLeviCivita_chartParallelExtend
   rw [hfderiv, hrepr]
   rw [zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem chartLeviCivita_chartParallelExtend_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -119,6 +129,7 @@ theorem chartLeviCivita_chartParallelExtend_symm
   congr 1
   exact (christoffelCorrection_symm_cancel (I := I) g α b v (X b)).symm
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :

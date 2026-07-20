@@ -11,7 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -132,6 +131,7 @@ theorem metricFlatModelInChart_center_eq
     _ = g.inner x₀ v w := by
           exact congrArg (fun z => g.inner x₀ v z) (hsymmL w)
 
+omit [FiniteDimensional ℝ E] in
 theorem flatChart_apply
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) (v w : E) :
@@ -246,6 +246,7 @@ theorem metricFlatModelInChart_center_isInvertible
   exact ContinuousLinearMap.isInvertible_equiv
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricFlatModelInChart_contDiffWithinAt
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x₀ : M) :

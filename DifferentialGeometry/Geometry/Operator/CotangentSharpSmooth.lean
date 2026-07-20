@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -63,7 +62,7 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -78,6 +77,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_eq_metricSharp
     (g : SmoothRiemannianMetric I M) (x : M)
     (β : Tensor0SSpace 1 I x) :
@@ -92,6 +92,7 @@ theorem cotangentSharp_gen_eq_metricSharp
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem cotangentToDual_gen_chartBasis_eval
     (α : M) (j : Fin (Module.finrank ℝ E))
     (β : Π b : M, Tensor0SSpace 1 I b) (b : M) :
@@ -109,6 +110,7 @@ theorem cotangentToDual_gen_chartBasis_eval
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {β : Π b : M, Tensor0SSpace 1 I b}
@@ -156,6 +158,7 @@ theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_mdiffAt [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {β : Π b : M, Tensor0SSpace 1 I b}

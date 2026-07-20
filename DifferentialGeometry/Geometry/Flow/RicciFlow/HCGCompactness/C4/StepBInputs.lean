@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInput
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -57,7 +56,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -106,6 +105,7 @@ noncomputable def normalCoordMetric
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMapDiffeo_contMDiffOn_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -135,6 +135,7 @@ theorem expMapDiffeo_contMDiffOn_ball
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (z v w : E) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -155,6 +156,7 @@ theorem normalCoordMetric_apply
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalMetric_zero
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (c : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -237,6 +239,7 @@ theorem radialEnorm_normal
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem expMapDiffeo_pushforward_section_contMDiffOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {U : Set E}
     (hU : IsOpen U)
@@ -289,6 +292,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_of_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {S : Set E}
     (hU : IsOpen S)
@@ -355,6 +359,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -383,6 +388,7 @@ theorem normalCoordMetric_contDiffOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     ∃ r : ℝ, 0 < r ∧
@@ -483,6 +489,7 @@ namespace NormalCoordMetricEquivOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coercive
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -494,6 +501,7 @@ theorem coercive
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sharp_norm_le
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -509,6 +517,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem abs_apply_le
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
     {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
@@ -629,6 +638,7 @@ theorem half_le_gpConst
 set_option synthInstance.maxHeartbeats 800000 in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_apply_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -659,6 +669,7 @@ theorem fderiv_apply_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -681,6 +692,7 @@ theorem koszulVec_norm_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_pair_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -734,6 +746,7 @@ theorem koszulVec_pair_le
       ring
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
     (hG : DifferentiableAt Real (fderiv Real G) q)

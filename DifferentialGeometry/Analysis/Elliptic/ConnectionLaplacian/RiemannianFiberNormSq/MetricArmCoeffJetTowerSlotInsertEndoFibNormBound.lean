@@ -32,7 +32,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,6 +41,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberComponent_slotInsertEndoFib_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -68,6 +69,7 @@ private lemma fiberComponent_slotInsertEndoFib_eq
   rw [g₀.symm x (e (K 0)) (Λ (e (J 0))), horth (K 1) (J 1)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (B : ℝ)
@@ -137,6 +139,7 @@ lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
           Fintype.card_fin, nsmul_eq_mul, ← hnE]
         push_cast; ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberComponent_slotInsertEndoFib_eq_general
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -172,6 +175,7 @@ private lemma fiberComponent_slotInsertEndoFib_eq_general
   have hlk : l ≠ k := Finset.ne_of_mem_erase hl
   rw [Function.update_of_ne hlk, horth (K l) (J l)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sum_compSq_slotInsertEndoFib_eq_normSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -250,6 +254,7 @@ private lemma sum_compSq_slotInsertEndoFib_eq_normSq
   exact hpars (Λ (e (J k)))
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul_general
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (B : ℝ)

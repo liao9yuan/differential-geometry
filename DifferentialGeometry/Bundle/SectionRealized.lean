@@ -525,8 +525,8 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
 
   exact ⟨_root_.id, fun p => ⟨p.proj, φ p.proj p.2⟩, Φ_smooth, φ, fun _ _ => rfl⟩
 
-set_option linter.unusedSectionVars false in
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_baseMap_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) :
     (ofLinearMapSection_gen F).baseMap = _root_.id := rfl
@@ -535,6 +535,7 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_baseMap_gen
 
 
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) (σ) :
     F σ = (ofLinearMapSection_gen F).mapSection (ofLinearMapSection_baseMap_gen F) σ := by
@@ -545,11 +546,11 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec_gen
   exact (linearMap_acts_pointwise_gen F σ _ x
     (ContMDiffSection.exists_eq_at_gen x (σ x)).choose_spec.symm)
 
-set_option linter.unusedSectionVars false in
 omit h1n in
 
 
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_mapSection_gen
     (Φ Ψ : ContMDiffVectorBundleHom ℝ I n F₁ E₁ F₂ E₂)
     (hΦ : Φ.baseMap = _root_.id) (hΨ : Ψ.baseMap = _root_.id)

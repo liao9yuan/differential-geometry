@@ -21,7 +21,7 @@ namespace Analysis
 namespace Laplacian
 namespace TwiceDifferentiatedVariationalIdentity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -160,6 +160,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_u_h_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -309,6 +310,7 @@ private lemma weakPartial_ae_zero_on_open_subset_of_ae_zero
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_locally_memLp_two_chart
     (_g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}
@@ -374,6 +376,7 @@ private lemma chosenThird_ae_zero_off_K_α
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li ?_
   exact hf_ae
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma vol_restrict_chart_target_absCont_weighted (α : M)
     (g : SmoothRiemannianMetric I M) :
     (volume : Measure EuclN).restrict

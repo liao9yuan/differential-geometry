@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -53,6 +52,7 @@ def christoffelAlongInFrame
     (x : M) (X : TangentSpace I x) (j k : Idx) : 𝕜 :=
   hframe.coeff k x ((cov (frame j) x) X)
 
+omit [CompleteSpace 𝕜] in
 @[simp] theorem christoffelSymbolInFrame_eval
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -62,6 +62,7 @@ def christoffelAlongInFrame
       hframe.coeff k x ((cov (frame j) x) (frame i x)) := by
   rfl
 
+omit [CompleteSpace 𝕜] in
 @[simp] theorem christoffelAlongInFrame_eval
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -73,6 +74,7 @@ def christoffelAlongInFrame
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem christoffelAlongInFrame_frame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -83,6 +85,7 @@ theorem christoffelAlongInFrame_frame
   rfl
 
 
+omit [CompleteSpace 𝕜] in
 theorem christoffelAlongInFrame_eq_sum_coeff
     [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -110,6 +113,7 @@ theorem christoffelAlongInFrame_eq_sum_coeff
           simp [map_sum, map_smul, christoffelSymbolInFrame]
 
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDerivative_eq_sum_christoffel
     [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -213,6 +217,7 @@ def christoffelSymbolTimeDerivativeInFrame
     (t : Time) (x : M) (i j k : Idx) : 𝕜 :=
   td.dt_apply (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) t
 
+omit [CompleteSpace 𝕜] in
 @[simp] theorem christoffelSymbolTimeDerivativeInFrame_eval
     (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -234,6 +239,7 @@ def ChristoffelSymbolEvolutionEquationInFrame
     christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
       rhs t x i j k
 
+omit [CompleteSpace 𝕜] in
 theorem christoffelSymbolEvolution_from_equation
     (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -269,6 +275,7 @@ def RicciFlowChristoffelSymbolEvolutionEquationInFrame
   ChristoffelSymbolEvolutionEquationInFrame td covFam frame hframe
     (ricciFlowChristoffelEvolutionRHSInFrame nablaRicLastRaised nablaRicDirectionRaised)
 
+omit [CompleteSpace 𝕜] in
 theorem ricciFlow_christoffelSymbolEvolution_from_equation
     (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))

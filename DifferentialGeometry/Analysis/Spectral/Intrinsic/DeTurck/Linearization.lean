@@ -19,6 +19,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_ricci_rhs_linearization_at_g0 [I.Boundaryless]
     (g_bg g₀ : SmoothRiemannianMetric I M) :
     ∃ σ : DifferentialGeometry.PDE.DeTurck.TensorSymbol (E := E) I M,

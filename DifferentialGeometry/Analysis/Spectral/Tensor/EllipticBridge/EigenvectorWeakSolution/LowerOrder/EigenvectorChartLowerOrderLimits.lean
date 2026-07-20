@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,6 +53,7 @@ noncomputable def covPrincipalRotationCoeffLimit
               (partialLpLimit (I := I) (M := M) g r s i α P k :
                 EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -83,6 +84,7 @@ private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
   rw [principalRotationFactor]
   ring
 
+omit [CompleteSpace E] in
 theorem covPrincipalRotationCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -111,6 +113,7 @@ theorem covPrincipalRotationCoeff_pouSmul_memLp
     covPrincipalRotationCoeff_pouSmul_eq_sum (I := I) (M := M)
       g r s i α P₀ n y))
 
+omit [CompleteSpace E] in
 theorem covPrincipalRotationCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -132,6 +135,7 @@ theorem covPrincipalRotationCoeffLimit_memLp
               g r s α P₀ P Q k l)
             (partialLpLimit (I := I) (M := M) g r s i α P k)))))
 
+omit [CompleteSpace E] in
 theorem covPrincipalRotationCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -233,6 +237,7 @@ noncomputable def weightedGradCoeffLimit
               (componentLpLimit (I := I) (M := M) g r s i α p :
                 EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeff_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -267,6 +272,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn
   rw [weightedGradFactor]
   ring
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -300,6 +306,7 @@ theorem weightedGradCoeff_pouSmul_memLp
     weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
       g r s i α P₀ l n hy)
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -322,6 +329,7 @@ theorem weightedGradCoeffLimit_memLp
               g r s α P₀ l P Q k p)
             (componentLpLimit (I := I) (M := M) g r s i α p)))))
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -435,6 +443,7 @@ noncomputable def weightedGradCoeffDivLimit
                   (partialLpLimit (I := I) (M := M) g r s i α p l :
                     EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -505,6 +514,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
       hy)
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeffDivLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -539,6 +549,7 @@ theorem weightedGradCoeffDivLimit_memLp
                 g r s α P₀ l P Q k p)
               (partialLpLimit (I := I) (M := M) g r s i α p l)))))
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeffDiv_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -686,6 +697,7 @@ theorem weightedGradCoeffDiv_tendsto
       from funext h_termN, h_termLim]
   exact h_add
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeffDivSum_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -726,6 +738,7 @@ noncomputable def covLowerOrderRotationValueCoeffLimit
                     (componentLpLimit (I := I) (M := M)
                       g r s i α p : EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -796,6 +809,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
       hy)
 
+omit [CompleteSpace E] in
 theorem covLowerOrderRotationValueCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -832,6 +846,7 @@ theorem covLowerOrderRotationValueCoeffLimit_memLp
                 (componentLpLimit (I := I) (M := M)
                   g r s i α p))))))
 
+omit [CompleteSpace E] in
 theorem covLowerOrderRotationValueCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

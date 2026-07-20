@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -133,6 +133,8 @@ lemma covLowerOrderRotationValueCoeff_def
                         lowerOrderRotationLOCoeff (I := I) (M := M)
                           g r s α P₀ l Q y) := rfl
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivLowerOrderTerm_rotatedTestSection_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -151,6 +153,8 @@ private lemma covDerivLowerOrderTerm_rotatedTestSection_eq
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt p hy]
   ring
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderIntegrand_rotated_collapse
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -387,6 +391,8 @@ lemma euclidPartial_contDiffOn_target
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lowerOrderRotationLOCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -399,6 +405,8 @@ lemma lowerOrderRotationLOCoeff_contDiffOn
       g r s α l Q.1 p.1 Q.2 p.2).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α p P₀)
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivLowerOrderTerm_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -412,6 +420,8 @@ private lemma covDerivLowerOrderTerm_contDiffOn
     (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
       (I := I) (M := M) g r s T α Idx' Jdx')
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderRotationGradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -429,6 +439,8 @@ theorem covLowerOrderRotationGradCoeff_contDiffOn
       (covDerivLowerOrderTerm_contDiffOn (I := I) (M := M) g r s T α k P.1 P.2)).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderRotationValueCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -544,6 +556,8 @@ lemma covPrincipalRotationRemainder_eq_coeff_mul
     ring
   rw [hinner, ← mul_assoc]
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covPrincipalRotationCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -580,6 +594,8 @@ lemma weightedGradCoeff_eq
         covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y) :=
   rfl
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weightedGradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -685,6 +701,7 @@ private lemma euclidPartial_eq_zero_of_open_zero
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorComponentEuclid_eq_zero_off_image
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -733,6 +750,8 @@ private lemma image_tsupport_subset_target
     exact hS_supp hx
   exact (extChartAt I α).map_source hx_src
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorComponentWeakRHS_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

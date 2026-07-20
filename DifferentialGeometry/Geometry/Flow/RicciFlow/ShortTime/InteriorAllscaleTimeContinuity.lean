@@ -55,6 +55,8 @@ variable
 
 
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem heatTraceWeighted_summable_of_tailSummable
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (htail : EigenvalueTailSummable (I := I) (M := M) g r s)
@@ -87,6 +89,8 @@ theorem heatTraceWeighted_summable_of_tailSummable
           exact Real.rpow_nonneg hbase_pos.le _
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hom_integral_eq
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -198,6 +202,7 @@ private theorem duhamel_integral_abs_le
   exact hbound
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private theorem u0_coeff_sq_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :
@@ -211,6 +216,7 @@ private theorem u0_coeff_sq_summable
         mul_le_mul_of_nonneg_right hw (sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private theorem hom_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -370,6 +376,7 @@ private theorem norm_singleModeCLM_eq
 
 
 
+omit [BoundarylessManifold I M] in
 theorem interior_allscale_time_continuity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

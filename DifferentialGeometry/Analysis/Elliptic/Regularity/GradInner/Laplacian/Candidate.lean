@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerLaplacianCandidate
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothRicciPairing_contMDiff
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M =>
@@ -71,6 +72,7 @@ noncomputable def smoothRicciPairingBundle
   smooth := smoothRicciPairing_contMDiff (I := I) (M := M) g φ v
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smoothRicciPairingBundle_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (b : M) :
@@ -83,6 +85,7 @@ noncomputable def smoothRicciPairingLp
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   smoothToLp (I := I) (M := M) g (smoothRicciPairingBundle g φ v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smoothRicciPairingLp_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothRicciPairingLp (I := I) (M := M) g φ v =
@@ -104,6 +107,7 @@ noncomputable def gradInnerLaplacianCandidate
     - (2 : ℝ) • h_ricci_part
     - (2 : ℝ) • h_hess_part
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem gradInnerLaplacianCandidate_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -120,6 +124,7 @@ noncomputable def gradInnerLaplacianCandidate
         - (2 : ℝ) • h_ricci_part
         - (2 : ℝ) • h_hess_part := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerLaplacianCandidate_ricci_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -135,6 +140,7 @@ theorem gradInnerLaplacianCandidate_ricci_add
   rw [smul_add]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerLaplacianCandidate_hess_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -150,6 +156,7 @@ theorem gradInnerLaplacianCandidate_hess_add
   rw [smul_add]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerLaplacianCandidate_norm_lt_top
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -162,6 +169,7 @@ theorem gradInnerLaplacianCandidate_norm_lt_top
         (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
   (Lp.memLp _).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerLaplacianCandidate_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -239,6 +247,7 @@ theorem gradInnerLaplacianCandidate_norm_le
     norm_nonneg ((2 : ℝ) • h_ricci_part),
     norm_nonneg ((2 : ℝ) • h_hess_part)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothRicciPairingLp_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (smoothRicciPairingLp (I := I) (M := M) g φ v :

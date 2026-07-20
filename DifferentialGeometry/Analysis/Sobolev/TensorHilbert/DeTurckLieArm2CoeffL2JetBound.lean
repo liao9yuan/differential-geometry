@@ -32,7 +32,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
     exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,8 @@ private theorem traceHessianSlotPerm_inv_mul_apply (σ : Equiv.Perm (Fin 4)) (j 
     traceHessianSlotPerm ((traceHessianSlotPerm⁻¹ * σ) j) = σ j := by
   rw [Equiv.Perm.mul_apply, Equiv.Perm.inv_def, Equiv.apply_symm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem deTurckLieTraceCoeff_eq_reindex_traceHessianCoeff
     (g₀ g₁ : SmoothRiemannianMetric I M) (σ ρ : Equiv.Perm (Fin 4))
     (hcomp : ∀ j : Fin 4, traceHessianSlotPerm (ρ j) = σ j) :
@@ -72,6 +74,7 @@ private theorem deTurckLieTraceCoeff_eq_reindex_traceHessianCoeff
     rw [hcomp j]
   rw [harg]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem normSq_iteratedCovGrad_reindexCoeffGen_eq
     (g₀ : SmoothRiemannianMetric I M) (R : SmoothCcTensor g₀ 4 2)
     (ρ : Equiv.Perm (Fin 4)) (i : ℕ) :
@@ -88,6 +91,7 @@ private theorem normSq_iteratedCovGrad_reindexCoeffGen_eq
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rfns_toSection_reindexCoeffGen_eq
     (g₀ : SmoothRiemannianMetric I M) (R : SmoothCcTensor g₀ 4 2)
     (ρ : Equiv.Perm (Fin 4)) (x : M) :
@@ -176,6 +180,7 @@ theorem deTurckLieArm2PrincipalCoeff_realizedFam_jetL2_perOrder_ballUniform
     mul_le_mul htri htri (norm_nonneg (X + Y - Z))
       (add_nonneg (add_nonneg (norm_nonneg X) (norm_nonneg Y)) (norm_nonneg Z))]
 
+omit [BoundarylessManifold I M] in
 theorem deTurckLieArm2PrincipalCoeff_realizedFam_rfns_order0_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

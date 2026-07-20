@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open Tensor0SBundle Tensor0SNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,8 @@ private lemma metric_inner_self_nonneg
   · exact (g.pos x v hv0).le
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_eq_of_leftMidRight
     (g : SmoothRiemannianMetric I M)
     (X X' Y Y' Z Z' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -63,6 +65,8 @@ private lemma nablaBaseSlotCurv_eq_of_leftMidRight
   exact nablaBaseSlotCurv_eq_of_leftMid (I := I) g X' X' Z Z' Y' x rfl hZZ' u
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -132,6 +136,8 @@ private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
     hXp_sm hXq_sm hXr_sm hXs_sm hU_open hxU hU_good hXp_eqU hXq_eqU hXr_eqU hXs_eqU
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_zero_left
     (g : SmoothRiemannianMetric I M)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -141,6 +147,8 @@ private lemma nablaBaseSlotCurv_zero_left
   exact add_eq_left.mp h.symm
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_zero_Z
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -162,6 +170,8 @@ private lemma nablaBaseSlotCurv_zero_Z
   rw [add_eq_left.mp h.symm, neg_zero]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_finsetSum_left
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -175,6 +185,8 @@ private lemma nablaBaseSlotCurv_finsetSum_left
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_left, ih, Finset.sum_insert ha]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_finsetSum_right
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -193,6 +205,8 @@ private lemma nablaBaseSlotCurv_finsetSum_right
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_right, ih, Finset.sum_insert ha]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_smul_Z
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -210,6 +224,8 @@ private lemma nablaBaseSlotCurv_smul_Z
   rw [hswap (c • Z), nablaBaseSlotCurv_smul_right, hswap Z, smul_neg]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_finsetSum_Z
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -244,6 +260,9 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
   rw [← hswap (Z i)]
 
 omit [CompactSpace M] in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_finsetSum_smul_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -276,6 +295,8 @@ private lemma chartFrameExtSection_value
   rw [smoothExtensionTangent_eq]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_chartCoord_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -441,6 +462,7 @@ private def nablaChartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
   fun y => nablaChartRiemannCoeff (I := I) g α p q r s l (toEuclidean.symm y)
 
 omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma nablaChartRiemannEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) :
@@ -525,7 +547,7 @@ private lemma pouTsupport_subset_goodSet (α : M) :
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have heq : chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
-    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
           (I := I) α]
     exact extChartAt_source_eq_chartAt_source (I := I) α
   rw [heq]
@@ -608,6 +630,8 @@ private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) 
   rw [hq, ← Finset.sum_mul, ← Finset.sum_mul, ← Finset.sum_mul]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma W_chartFrame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -648,6 +672,8 @@ private lemma diffCurv_arith_core
     _ = CR ^ 2 * (N ^ 6 * G ^ 4) * U := by ring
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_frameSum_normSq_le_chartConstants_mul_normSq_u
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)

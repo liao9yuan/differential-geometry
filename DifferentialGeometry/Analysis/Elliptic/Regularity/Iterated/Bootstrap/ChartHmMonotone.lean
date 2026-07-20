@@ -26,7 +26,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedChartHmBootstrapStrongInduction
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,6 +83,7 @@ theorem chartPushed_memWkp_j_of_chartSideH2kBridge_at
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le hjk
     (h_bridge α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (α : M) {k m : ℕ} (hm : m + 2 ≤ 2 * k)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -235,6 +236,7 @@ theorem memWkpChart_two_min_k_two
   exact chartPushed_memWkp_two_min_k_two
     (I := I) (M := M) g α k hu_h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_succ_step_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (α : M) {k m : ℕ} (hm : m + 2 ≤ 2 * k)
     {u_h : H1Compl (I := I) (M := M) g}

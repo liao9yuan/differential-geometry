@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -58,6 +57,7 @@ structure InverseMetricTimeRegularityBlackBoxInFrameOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_timeRegularityBlackBox
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -94,6 +94,8 @@ structure ConnectionVariationBlackBoxInFrameOn
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem variableMetricConnectionDiffDerivative_of_blackBox
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -111,6 +113,7 @@ theorem variableMetricConnectionDiffDerivative_of_blackBox
 
 
 
+omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_blackBox
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -154,6 +157,8 @@ structure RicciEvolutionTimeRegularityBlackBoxInFrameOn
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolution_of_timeRegularityBlackBox
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

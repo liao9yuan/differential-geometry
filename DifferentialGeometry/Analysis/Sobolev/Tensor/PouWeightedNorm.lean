@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -75,6 +75,7 @@ theorem tensorPouSobolevNorm_nonneg
     0 ≤ tensorPouSobolevNorm (I := I) (M := M) g k T :=
   zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -99,6 +100,7 @@ private lemma tensorChartComponentRaw_zero_section
   rw [h0]
   exact map_zero _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_comp_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -111,6 +113,7 @@ private lemma tensorChartComponentRaw_comp_zero_section
       (0 : SmoothCcTensor g r s) α Idx Jdx ((extChartAt I α).symm x) = 0
   rw [tensorChartComponentRaw_zero_section (I := I) (M := M) g r s α Idx Jdx]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevNorm_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     tensorPouSobolevNorm (I := I) (M := M) g k

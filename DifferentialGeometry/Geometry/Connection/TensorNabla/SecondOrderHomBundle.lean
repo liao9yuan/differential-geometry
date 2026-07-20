@@ -19,7 +19,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensio
 
 @[nolint unusedArguments]
 def HomTensorRSModel (r a c : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedField 𝕜]
-    [NormedAddCommGroup E] [NormedSpace 𝕜 E] [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] :=
+    [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :=
   TensorRSModel r a 𝕜 E →L[𝕜] TensorRSModel r c 𝕜 E
 
 private instance tensor0SModel_smulCommClass (s : ℕ) :
@@ -164,6 +164,7 @@ noncomputable instance homTensorRSCovariantDerivative_contMDiff (r a c : ℕ)
     (TensorRSNabla.tensorRSCovariantDerivative I M r a cov)
     (TensorRSNabla.tensorRSCovariantDerivative I M r c cov)
 
+omit [CompleteSpace E] in
 theorem homTensorRSCovariantDerivative_apply (r a c : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -184,6 +185,7 @@ theorem homTensorRSCovariantDerivative_apply (r a c : ℕ)
     (TensorRSNabla.tensorRSCovariantDerivative I M r c cov)
     Ψ W x v
 
+omit [CompleteSpace E] in
 theorem homTensorRSCovariantDerivative_apply_of_mdifferentiableAt (r a c : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

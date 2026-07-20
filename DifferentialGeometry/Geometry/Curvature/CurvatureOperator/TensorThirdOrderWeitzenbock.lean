@@ -203,7 +203,7 @@ end IteratedSmooth
 section TensorBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -228,6 +228,8 @@ noncomputable def tensorThirdOrderCurvatureDefect
             (smoothOrthoFrame (I := I) g x i) W T b) x
           (smoothOrthoFrame (I := I) g x i x))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma Tensor3rdCurv_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -247,6 +249,8 @@ lemma Tensor3rdCurv_def
                 (smoothOrthoFrame (I := I) g x i) W T b) x
               (smoothOrthoFrame (I := I) g x i x)) := rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covApplyRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -303,6 +307,7 @@ theorem frame_trace_thirdCovDeriv_swap
   rw [hstep]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_eq_riemannOp_tensorCov
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X W : Π b : M, TangentSpace I b} {Z : Π b : M, TensorRSSpace r s I b} {x : M}

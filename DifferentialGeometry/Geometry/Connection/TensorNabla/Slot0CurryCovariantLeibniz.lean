@@ -23,7 +23,7 @@ open Tensor0SNabla
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,7 +33,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor00Scalar_unitZeroSec (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
   rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
@@ -43,7 +44,8 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
         tensor0SToTensorRS (I := I) (M := M) x C)
@@ -56,6 +58,7 @@ private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x)
   rw [tensor00Scalar_unitZeroSec (I := I) (M := M) x, one_smul]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma contMDiff_tensor00Scalar_read
     (Y : Cₛ^∞⟮I; Tensor0SModel 0 ℝ E, (fun z : M => Tensor0SSpace 0 I z)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
@@ -67,6 +70,7 @@ private lemma contMDiff_tensor00Scalar_read
   rw [heq]
   exact (Tensor0SNabla.contMDiff_scalarFn_iff_section I M (fun y : M => Y y)).mpr Y.contMDiff
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma contMDiff_tensor0SAsRS_wrap (t : ℕ) {C : Π y : M, Tensor0SSpace t I y}
     (hC : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel t ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel t ℝ E)
@@ -88,7 +92,8 @@ private lemma contMDiff_tensor0SAsRS_wrap (t : ℕ) {C : Π y : M, Tensor0SSpace
   rw [← tensor0SAsRS_apply (I := I) (M := M) y (C y) (Y y)]
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma contMDiff_unitEvalSection (g : SmoothRiemannianMetric I M) (k : ℕ)
     (Z : SmoothCcTensor g 0 k) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel k ℝ E)) ∞
@@ -111,6 +116,7 @@ private lemma contMDiff_unitEvalSection (g : SmoothRiemannianMetric I M) (k : �
     (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel k ℝ E) hϕ hv
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma contMDiff_slot0Read (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 (s + 1)) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -144,6 +150,8 @@ private lemma contMDiff_slot0Read (g : SmoothRiemannianMetric I M) (s : ℕ)
       (F₁ := E) (F₂ := Tensor0SModel s ℝ E) hcur hX
   exact contMDiff_tensor0SAsRS_wrap (I := I) (M := M) s hCs
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor0S_curry_covApply_slot0_leibniz_fib
     (g : SmoothRiemannianMetric I M) (s : ℕ) (Z : SmoothCcTensor g 0 (s + 1))
     {V X : Π b : M, TangentSpace I b}
@@ -258,6 +266,8 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
   simp only [ContMDiffSection.coeFn_mk, Tensor0SNabla.curriedSection_apply] at hfinal
   rw [hfinal, ← hC2]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor0S_curry_covApply_slot0_leibniz
     (g : SmoothRiemannianMetric I M) (s : ℕ) (Z : SmoothCcTensor g 0 (s + 1))
     {V X : Π b : M, TangentSpace I b}

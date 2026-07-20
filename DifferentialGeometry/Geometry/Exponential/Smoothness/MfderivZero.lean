@@ -13,7 +13,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,6 +28,7 @@ section ChartPhaseVFLinearization
 
 variable [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartChristoffel_scalarSummand_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {x : E}
@@ -95,6 +96,7 @@ private lemma chartChristoffel_scalarSummand_hasFDerivAt_zero
   rw [hAB0, hC0, zero_smul, zero_smul, zero_add] at this
   exact this
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartChristoffelContraction_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target) :
@@ -175,6 +177,7 @@ private lemma chartChristoffelContraction_hasFDerivAt_zero
   rw [hfn_eq]
   exact hsum
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPhaseVF_hasFDerivAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target) :
@@ -194,6 +197,7 @@ lemma chartPhaseVF_hasFDerivAt_zero_section
   have hcombined := hfst.prodMk hsnd
   exact hcombined
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPhaseVFCutoff_eventuallyEq_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (α : M)
     {z₀ : E × E} (b : ContDiffBump z₀)
@@ -211,6 +215,7 @@ private lemma chartPhaseVFCutoff_eventuallyEq_chartPhaseVF
   exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α z₀ b
     (Metric.mem_closedBall.mpr hw_z₀)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPhaseVFCutoff_hasFDerivAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target)
@@ -230,6 +235,7 @@ section CombinedData
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_combined_chartFlow_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E)
@@ -416,6 +422,7 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mfderiv_expMap_at_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I

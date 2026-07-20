@@ -23,7 +23,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -48,6 +47,7 @@ noncomputable def localFrameInv
       else 0
 
 omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem localFrameInv_of_mem
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -61,6 +61,7 @@ omit [Fintype Idx] [DecidableEq Idx] in
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_real
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -74,6 +75,7 @@ theorem localFrameInv_real
   simpa [metricCompInFrame, localFrameInv_of_mem (I := I) S frame hframe hx,
     hframe.toBasisAt_coe] using hreal i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem frameGram_time
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -94,6 +96,7 @@ private theorem frameGram_time
 omit [Fintype Idx] [DecidableEq Idx] in
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_time
     [Finite Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -159,6 +162,7 @@ noncomputable def localFrameInvDt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameTimeReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

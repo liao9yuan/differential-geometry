@@ -23,13 +23,13 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma exists_bound_of_contDiffOn_int
     {f : E → ℝ} (α : M)
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -45,7 +45,7 @@ private lemma exists_bound_of_contDiffOn_int
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma exists_uniform_bound_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
@@ -63,6 +63,7 @@ private lemma exists_uniform_bound_family
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) :
@@ -71,6 +72,7 @@ private lemma chartChristoffel_contDiffOn_int
   chartChristoffel_contDiffOn_interior (I := I) g α a b k
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartDeTurckVFComp_contDiffOn_int
     (g g_bg : SmoothRiemannianMetric I M) (α : M) (k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (chartDeTurckVFComp (I := I) g g_bg α k)
@@ -78,6 +80,7 @@ private lemma chartDeTurckVFComp_contDiffOn_int
   chartDeTurckVFComp_contDiffOn_interior (I := I) g g_bg α k
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partial_chartDeTurckVFComp_contDiffOn_int
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) :
@@ -91,6 +94,7 @@ private lemma partial_chartDeTurckVFComp_contDiffOn_int
   exact hfderiv.clm_apply contDiffOn_const
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) {y : E}
@@ -100,6 +104,7 @@ private lemma chartChristoffel_differentiableAt_int
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInvGramOnE_differentiableAt_int'
     (g : SmoothRiemannianMetric I M) (α : M) (a b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -108,6 +113,7 @@ private lemma chartInvGramOnE_differentiableAt_int'
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_chartDeTurckVFComp_eq
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -378,6 +384,7 @@ private lemma exists_partial_chartDeTurckVFComp_bound_on_compact
     (fun p => partial_chartDeTurckVFComp_contDiffOn_int (I := I) g g_bg α p.1 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy m k => hC y hy (m, k)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartDeTurckVFComp_sub_abs_le
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Cinv CΓ M_b P : ℝ}
@@ -456,6 +463,7 @@ theorem chartDeTurckVFComp_sub_abs_le
         (Module.finrank ℝ E : ℝ) *
           ((Module.finrank ℝ E : ℝ) * ((Cinv * P + M_b * CΓ) * jet1)) by ring]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem deTurckVF_abs_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) (y : E)
     (k : Fin (Module.finrank ℝ E)) {M_b P : ℝ}
@@ -494,6 +502,7 @@ theorem deTurckVF_abs_le
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD_abs_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -547,9 +556,10 @@ theorem deTurckVFD_abs_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma symm_image_compact_subset_source
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -563,6 +573,7 @@ private lemma symm_image_compact_subset_source
     (extChartAt I α).map_target (hKsub_target hzK)
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hsource
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem exists_chartDeTurckVFComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -604,6 +615,7 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
   exact mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -748,6 +760,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * C0 * jet2 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (C0 * jet2)) by ring]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) (m : Fin (Module.finrank ℝ E))
     {K : Set E} (hK : IsCompact K)
@@ -831,7 +844,7 @@ def chartLieDeTurckComp (g g_bg : SmoothRiemannianMetric I M) (α : M)
       chartGramOnE (I := I) g α i k y *
         partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g g_bg α k) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 @[simp] lemma chartLieDeTurckComp_def
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -879,6 +892,8 @@ private lemma sum_prod_sub_abs_le
   · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
 
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLie_sub_abs_le
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) (y : E)
     (i j : Fin (Module.finrank ℝ E))
@@ -989,6 +1004,7 @@ theorem chartLie_sub_abs_le
 
 set_option linter.unusedFintypeInType false in
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -1014,6 +1030,7 @@ private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     refine mul_le_mul_of_nonneg_right (Finset.le_sup' C (Finset.mem_univ m)) ?_
     exact chartMetricJet2DiffSup_nonneg _ _ _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLie_pou_lip
     [CompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -1280,6 +1297,7 @@ theorem chartLie_pou_lip
     hV (fun a c => hQ₀ α hα k₂ b hb a c) hCdw
   exact hpoint.trans (mul_le_mul_of_nonneg_right (by dsimp [C]; linarith) hjet2_nn)
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem exists_chartLieDeTurckComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

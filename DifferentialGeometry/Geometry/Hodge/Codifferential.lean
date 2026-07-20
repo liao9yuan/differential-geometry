@@ -32,6 +32,7 @@ omit [InnerProductSpace ℝ E] in
     codifferentialOfVectorField (I := I) g X y =
       -divergence_g (I := I) g X y := rfl
 
+omit [InnerProductSpace ℝ E] in
 theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -42,6 +43,7 @@ theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     hdiv.neg
   exact hneg
 
+omit [InnerProductSpace ℝ E] in
 theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -53,6 +55,7 @@ theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
   rw [divergence_g_add (I := I) g X Y y]
   ring
 
+omit [InnerProductSpace ℝ E] in
 @[simp] theorem codifferentialOfVectorField_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (y : M) :
     codifferentialOfVectorField (I := I) g
@@ -74,6 +77,7 @@ omit [InnerProductSpace ℝ E] in
     formLaplacianScalar (I := I) g hf y =
       codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf) y := rfl
 
+omit [InnerProductSpace ℝ E] in
 theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
@@ -84,12 +88,14 @@ theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
   rw [codifferentialOfVectorField_def (I := I) g (grad_g (I := I) g hf) y]
   rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hf y]
 
+omit [InnerProductSpace ℝ E] in
 theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ) ∞ (formLaplacianScalar (I := I) g hf) :=
   codifferentialOfVectorField_contMDiff (I := I) g (grad_g (I := I) g hf)
 
+omit [InnerProductSpace ℝ E] in
 @[simp] theorem formLaplacianScalar_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (h0 : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (0 : ℝ))) (y : M) :
@@ -110,6 +116,7 @@ theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
   rw [divergence_g_zero (I := I) g y]
   exact neg_zero
 
+omit [InnerProductSpace ℝ E] in
 theorem formLaplacianScalar_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}

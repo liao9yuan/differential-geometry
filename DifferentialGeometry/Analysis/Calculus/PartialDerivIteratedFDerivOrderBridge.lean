@@ -16,10 +16,9 @@ namespace DeTurckCoefficients
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 
-omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_contDiffOn_of_isOpen
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (hu : ContDiffOn ℝ ∞ u s)
     (i : Fin (Module.finrank ℝ E)) :
@@ -29,7 +28,6 @@ lemma partialDeriv_contDiffOn_of_isOpen
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_sub_eqOn
     {u v : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (hv : ContDiffOn ℝ ∞ v s)
@@ -47,14 +45,12 @@ lemma partialDeriv_sub_eqOn
     simpa using this
   rw [hfd, ContinuousLinearMap.sub_apply]
 
-omit [InnerProductSpace ℝ E] in
 theorem partial_eq_iter1 (u : E → ℝ) (i : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) i u y =
       iteratedFDeriv ℝ 1 u y ![(chartModelBasis E) i] := by
   rw [iteratedFDeriv_one_apply]
   rfl
 
-omit [InnerProductSpace ℝ E] in
 theorem partial2_eq_iter2 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
     (m l : Fin (Module.finrank ℝ E)) :
     partialDeriv (E := E) m (partialDeriv (E := E) l u) y =
@@ -73,7 +69,6 @@ theorem partial2_eq_iter2 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
   rw [fderiv_clm_apply hfderiv_diff (differentiableAt_const _)]
   simp [ContinuousLinearMap.flip_apply]
 
-omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_eqOn_fderivWithin_apply
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (i : Fin (Module.finrank ℝ E)) :
     EqOn (partialDeriv (E := E) i u)
@@ -81,7 +76,6 @@ lemma partialDeriv_eqOn_fderivWithin_apply
   intro y hy
   simp only [partialDeriv, fderivWithin_of_isOpen hs hy]
 
-omit [InnerProductSpace ℝ E] in
 theorem partial3_eq_iter3 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
     (n m l : Fin (Module.finrank ℝ E)) :
     partialDeriv (E := E) n (partialDeriv (E := E) m (partialDeriv (E := E) l u)) y =
@@ -132,7 +126,6 @@ theorem partial3_eq_iter3 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
           ![(chartModelBasis E) n, (chartModelBasis E) m, (chartModelBasis E) l] := by
       rw [iteratedFDerivWithin_of_isOpen 3 hs_open hys]
 
-omit [InnerProductSpace ℝ E] in
 theorem norm_iteratedFDerivWithin_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))
@@ -157,7 +150,6 @@ theorem norm_iteratedFDerivWithin_partialDeriv_le
     norm_iteratedFDerivWithin_fderivWithin hs.uniqueDiffOn hy
   rw [heq]
 
-omit [InnerProductSpace ℝ E] in
 theorem iteratedFDerivSeminorm_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))

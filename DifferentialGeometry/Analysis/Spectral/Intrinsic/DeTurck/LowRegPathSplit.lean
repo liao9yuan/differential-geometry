@@ -99,6 +99,7 @@ private theorem norm_sq_sub_le
   have hAB : 0 ≤ ‖A - B‖ := norm_nonneg _
   nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem reindex_norm_sq
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
@@ -108,6 +109,7 @@ private theorem reindex_norm_sq
   rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
     norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reindex_sub
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :

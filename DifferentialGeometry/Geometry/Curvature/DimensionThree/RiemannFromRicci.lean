@@ -12,7 +12,6 @@ import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -103,6 +102,7 @@ private theorem sum_fin_four_fun {α : Type*} [AddCommMonoid α]
       exact fin4SlotsEquiv.left_inv I0
     rw [hslot]
 
+omit [FiniteDimensional ℝ E] in
 private theorem inner_eq_sum_repr3
     {g : SmoothRiemannianMetric I M}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -147,6 +147,7 @@ private theorem inner_eq_sum_repr3
           have h22 := horth 2 2
           simp [Fin.sum_univ_three, delta3, h00, h01, h02, h10, h11, h12, h20, h21, h22]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem vec2_update_zero {x : M}
     (X Y X' : TangentSpace I x) :
     Function.update (vec2 (I := I) X Y) (0 : Fin 2) X' =
@@ -154,6 +155,7 @@ private theorem vec2_update_zero {x : M}
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem vec2_update_one {x : M}
     (X Y Y' : TangentSpace I x) :
     Function.update (vec2 (I := I) X Y) (1 : Fin 2) Y' =
@@ -162,6 +164,7 @@ private theorem vec2_update_one {x : M}
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
 
 
+omit [FiniteDimensional ℝ E] in
 theorem ricciSym_of_basis
     {Idx : Type*} [Finite Idx]
     {x : M}
@@ -332,6 +335,7 @@ def ricciCovAt
       fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
     simpa [hleft, hY] using hmap
 
+omit [FiniteDimensional ℝ E] in
 private theorem ricciCovAt_add
     (Ric : Tensor02At (I := I) (M := M) x)
     (X Y : TangentSpace I x) :
@@ -353,6 +357,7 @@ private theorem ricciCovAt_add
     fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
   simpa [ricciCovAt, hleft, hX, hY] using hmap
 
+omit [FiniteDimensional ℝ E] in
 private theorem ricciCovAt_smul
     (Ric : Tensor02At (I := I) (M := M) x)
     (c : Real) (X : TangentSpace I x) :
@@ -421,6 +426,7 @@ theorem ricciEnd_inner
     g.inner x (ricciEndAt (I := I) g Ric X) Y = Ric (vec2 X Y) := by
   simp [ricciEndAt, ricciCovAt, cotangentSharp_inner_gen]
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem standardRmCompAt_apply
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -436,6 +442,7 @@ theorem standardRmCompAt_apply
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     {Rm04 : Tensor04At (I := I) (M := M) x}
@@ -558,6 +565,7 @@ structure RiemannFromRicci3DTraceDataAt
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem firstTrace_delta3_eq_neg_stdRicci3
     {Rm04 : Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -606,6 +614,7 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem traceDataOfFirst
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -660,6 +669,7 @@ theorem traceDataOfFirst
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_displayedRiemannFromRicci3D_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -688,6 +698,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}

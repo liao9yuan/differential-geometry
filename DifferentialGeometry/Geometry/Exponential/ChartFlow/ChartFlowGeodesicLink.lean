@@ -31,6 +31,7 @@ section ChartPhaseODE
 
 variable [I.Boundaryless]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPhaseVFTime_eq_chartPhaseVF_of_mem_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) {z : E × E}
@@ -49,10 +50,13 @@ def chartPhaseVFAuto (g : SmoothRiemannianMetric I M) (α : M) :
     ℝ → (E × E) → E × E :=
   fun _ z => chartPhaseVF (I := I) g α z
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma chartPhaseVFAuto_apply
     (g : SmoothRiemannianMetric I M) (α : M) (t : ℝ) (z : E × E) :
     chartPhaseVFAuto (I := I) g α t z = chartPhaseVF (I := I) g α z := rfl
 
+omit [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPhaseVF_lipschitzOnWith_locally
     (g : SmoothRiemannianMetric I M) (α : M)
     {z : E × E} (hz : z ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
@@ -67,6 +71,8 @@ lemma chartPhaseVF_lipschitzOnWith_locally
     hC1.contDiffAt (hopen.mem_nhds hz)
   exact hC1_at.exists_lipschitzOnWith
 
+omit [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_orbit_uniqueness
     {g : SmoothRiemannianMetric I M} {α : M}
     {c₁ c₂ : ℝ → E × E} {z₀ : E × E}
@@ -156,6 +162,7 @@ section ChartFlowExistencePackaging
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlowGeodesicCurve
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),
@@ -183,6 +190,7 @@ section OrbitODE
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem chartFlowOrbit_hasDerivAt_chartPhaseVF_of_isLocalFlow
     {g : SmoothRiemannianMetric I M} {α : M}
     {z₀ : E × E} {b : ContDiffBump z₀} {r : ℝ≥0} {ε : ℝ}
@@ -211,6 +219,7 @@ section ChartCoordBridge
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlow_orbit_eq_chartPhase_solution_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {c : ℝ → E × E}
@@ -299,6 +308,7 @@ section ManifoldBridge
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowGeodesicCurve_eq_of_chartPhase_solution_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {γ : ℝ → M}
@@ -335,6 +345,7 @@ theorem chartFlowGeodesicCurve_eq_of_chartPhase_solution_eventually
   rw [← hγ_recover, ht_eq_fst]
   rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [CompleteSpace E] in
 @[simp] theorem chartFlowGeodesicCurve_zero_velocity_eq_const
     (p : M) {Φ : (E × E) × ℝ → E × E}
     (hinit : Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =

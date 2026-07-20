@@ -124,6 +124,8 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [HasSmoothBoundary E H I] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
 theorem bochner_pointwise_concrete_metric_withBoundary
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -148,6 +150,8 @@ theorem bochner_pointwise_concrete_metric_withBoundary
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [HasSmoothBoundary E H I] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
 theorem bochner_pointwise_concrete_metric_withBoundary_eqOn
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)

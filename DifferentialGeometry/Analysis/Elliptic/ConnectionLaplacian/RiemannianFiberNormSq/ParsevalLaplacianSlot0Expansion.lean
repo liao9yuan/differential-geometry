@@ -133,6 +133,7 @@ private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t
 
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_succ_eq_parseval_sum_slot0
     (g : SmoothRiemannianMetric I M) {N : ℕ}
     (V : Fin N → Π b : M, TangentSpace I b)

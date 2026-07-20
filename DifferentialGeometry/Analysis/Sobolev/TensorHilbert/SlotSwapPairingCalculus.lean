@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -76,6 +76,7 @@ private lemma cons_cons_comp_decomposeFin_double {α : Type*} {t : ℕ}
     · rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self]
       simp only [Equiv.refl_apply, Fin.cons_succ]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem unitModel_appFullSec_swap_eq_domDomCongr
     (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
@@ -102,6 +103,7 @@ theorem unitModel_appFullSec_swap_eq_domDomCongr
   exact hF y (U.toSection y) (unitTensor (I := I) (M := M) y) (w 0) (Matrix.vecTail w 0)
     (Matrix.vecTail (Matrix.vecTail w))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma appFullSec_add_right_cc (g : SmoothRiemannianMetric I M) (a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) 0 a c I) (A B : SmoothCcTensor g 0 a) :
     homTensorRSFieldApply (I := I) (M := M) g 0 a c Q (A + B) =
@@ -117,6 +119,7 @@ private lemma appFullSec_add_right_cc (g : SmoothRiemannianMetric I M) (a c : �
   rw [show ((A + B).toSection x : TensorRSSpace 0 a I x) = A.toSection x + B.toSection x from rfl]
   exact map_add _ _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem appFullSec_swap_norm_eq (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (hF : ∀ (x : M) (T : TensorRSSpace 0 (t + 2) I x) (D : Tensor0SSpace 0 I x)
@@ -152,6 +155,8 @@ theorem appFullSec_swap_norm_eq (g : SmoothRiemannianMetric I M) (t : ℕ)
   have h2 : (0 : ℝ) ≤ ‖U‖ := norm_nonneg _
   rw [← Real.sqrt_sq h1, ← Real.sqrt_sq h2, hsq]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem appFullSec_swap_involutive (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (hF : ∀ (x : M) (T : TensorRSSpace 0 (t + 2) I x) (D : Tensor0SSpace 0 I x)
@@ -176,6 +181,7 @@ theorem appFullSec_swap_involutive (g : SmoothRiemannianMetric I M) (t : ℕ)
   funext k
   rw [Equiv.swap_apply_self]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem appFullSec_swap_l2Inner_hop (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (hF : ∀ (x : M) (T : TensorRSSpace 0 (t + 2) I x) (D : Tensor0SSpace 0 I x)
@@ -211,6 +217,7 @@ theorem appFullSec_swap_l2Inner_hop (g : SmoothRiemannianMetric I M) (t : ℕ)
   rw [appFullSec_swap_norm_eq (I := I) (M := M) g t F hF A]
   rw [appFullSec_swap_norm_eq (I := I) (M := M) g t F hF B]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem unitModel_covGrad_of_unitModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -306,6 +313,7 @@ theorem appFullSec_swap_rawConnLap_comm (g : SmoothRiemannianMetric I M) (t : �
     (fun j => (v j : E))] at h2x
   exact h2x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem unitModel_appCc_slotInsertEndoCc_cons
     (g : SmoothRiemannianMetric I M) (s' : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -339,6 +347,7 @@ theorem unitModel_appCc_slotInsertEndoCc_cons
     exact Fin.update_cons_zero _ _ _]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem unitModel_appCc_slotExtend_slotInsertEndoCc_cons
     (g : SmoothRiemannianMetric I M) (s' : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -385,6 +394,7 @@ theorem unitModel_appCc_slotExtend_slotInsertEndoCc_cons
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem appCc_slotExtend_slotInsert_appFullSec_swap_conj
     (g : SmoothRiemannianMetric I M) (s' : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞

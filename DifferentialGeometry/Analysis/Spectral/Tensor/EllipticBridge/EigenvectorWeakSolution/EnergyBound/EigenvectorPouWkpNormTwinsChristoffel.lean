@@ -18,7 +18,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -67,6 +67,7 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi_mem hsum
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -193,6 +194,7 @@ private lemma wkpNorm_coef_mul_factor_le
 
 omit [CompleteSpace E] in
 
+omit [CompactSpace M] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -203,6 +205,7 @@ private lemma eigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (K : ℕ) (α : M) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -318,6 +321,7 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 lemma covGradChristoffelLimit_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -496,6 +500,7 @@ lemma covGradChristoffelLimit_memWkp_and_wkpNorm_le
     _ = ENNReal.ofReal (∑ p : TensorCompIdx (E := E) r s, Cf p) * Saggr := by
       rw [ENNReal.ofReal_sum_of_nonneg (fun p _ => hCf_nn p)]
 
+omit [CompleteSpace E] in
 lemma covGradChristoffelLimit_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -16,7 +16,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,7 +29,7 @@ section ChartCoordSlice
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma contDiffAt_chartFlow_slice_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -51,6 +51,7 @@ lemma contDiffAt_chartFlow_slice_zero
     exact ⟨Metric.mem_ball_self hρ, ht'⟩
   exact hΦ_cda.comp (0 : E) hpair_cd.contDiffAt
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma contDiffAt_chartFlow_slice_fst_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -72,13 +73,13 @@ def chartFlowCandidate (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) :
     E → M :=
   fun v => (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
 @[simp] lemma chartFlowCandidate_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) (v : E) :
     chartFlowCandidate (I := I) Φ p t' v =
       (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1 := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
 lemma chartFlowCandidate_zero_at_initial
     {Φ : (E × E) × ℝ → E × E} {p : M}
     (hinit : Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
@@ -94,6 +95,8 @@ section CandidateChartCoord
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma extChartAt_symm_comp_chartFlowCandidate_at_zero
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -134,6 +137,8 @@ lemma extChartAt_symm_comp_chartFlowCandidate_at_zero
   simp only [chartFlowCandidate_apply]
   exact (extChartAt I p).right_inv hv
 
+omit [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma chartFlowCandidate_chart_contDiffAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -162,6 +167,7 @@ section Headline
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlow_slice_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),
@@ -191,6 +197,7 @@ theorem exists_chartFlow_slice_contDiffAt_zero
   exact contDiffAt_chartFlow_slice_fst_zero (Φ := Φ) (x₀ := x₀)
     (ρ := ρ) (T := T) (t' := t') hρ_pos ht' hcd
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlowCandidate_chart_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E),
@@ -206,6 +213,8 @@ theorem exists_chartFlowCandidate_chart_contDiffAt_zero
       (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) hρ_pos hT_pos hinit hcd
   · exact chartFlowCandidate_zero_at_initial (I := I) (Φ := Φ) (p := p) hinit
 
+omit [IsManifold I ∞ M] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma chartFlowCandidate_continuousAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -242,6 +251,8 @@ lemma chartFlowCandidate_continuousAt_zero_at_origin
     exact hsymm_at_x₀
   exact hcomp_step
 
+omit [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma chartFlowCandidate_contMDiffAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
     (hρ : 0 < ρ) (hT : 0 < T)
@@ -284,6 +295,7 @@ lemma chartFlowCandidate_contMDiffAt_zero_at_origin
     rw [hgoal_eq]
     exact hchart_cd.contDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlowCandidate_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E),

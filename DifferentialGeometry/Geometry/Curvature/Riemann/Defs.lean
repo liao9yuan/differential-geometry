@@ -10,7 +10,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,6 +27,7 @@ def chartRiemannTensor (g : SmoothRiemannianMetric I M) (α : M)
         chartChristoffel (I := I) g α k m l y *
           chartChristoffel (I := I) g α i j m y))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartRiemannTensor_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -39,6 +40,7 @@ def chartRiemannTensor (g : SmoothRiemannianMetric I M) (α : M)
             chartChristoffel (I := I) g α k m l y *
               chartChristoffel (I := I) g α i j m y)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannTensor_antisymm_jk
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -69,6 +71,7 @@ def chartRicciTensor (g : SmoothRiemannianMetric I M) (α : M)
   ∑ j : Fin (Module.finrank ℝ E),
     chartRiemannTensor (I := I) g α i j k j y
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartRicciTensor_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -142,6 +145,7 @@ def ricciFun (g : SmoothRiemannianMetric I M) :
       intro k _
       ring)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciFun_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciFun (I := I) g x v w =
@@ -152,6 +156,7 @@ lemma ricciFun_apply (g : SmoothRiemannianMetric I M) (x : M)
             chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciFun_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -189,6 +194,7 @@ lemma ricciFun_basis_apply
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFun_symm_of_chartRicciTensor_symm
     (g : SmoothRiemannianMetric I M)
     (h_chart_symm : ∀ x : M, ∀ i k : Fin (Module.finrank ℝ E),

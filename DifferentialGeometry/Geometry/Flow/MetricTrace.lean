@@ -16,7 +16,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,6 +30,8 @@ def deTurckChartLocal (g g' : SmoothRiemannianMetric I M) (α : M) (x : M) :
         (chartBasisVecFiber (I := I) α j x)
         (chartBasisVecFiber (I := I) α k x)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M) :
     deTurckChartLocal (I := I) g g' α x =
       ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -38,7 +40,7 @@ lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M)
             (chartBasisVecFiber (I := I) α j x)
             (chartBasisVecFiber (I := I) α k x) := rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_vector
     {x : M}
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -60,7 +62,7 @@ private lemma clm_bilinear_expand_two_sums_vector
   intro q _
   rw [map_smul, smul_smul]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_scalar
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (a b : Fin n → ℝ) (u w : Fin n → TangentSpace I x) :
@@ -89,7 +91,7 @@ private def deTurckCobMatrix (α : M) (x : M) :
     (chartModelBasis E).repr
       ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x) =
@@ -102,7 +104,7 @@ private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x))).symm
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
     deTurckCobMatrix (I := I) α x =
       ((chartModelBasis E).toMatrix
@@ -113,7 +115,7 @@ private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
   ext i k
   rw [Matrix.transpose_apply, Module.Basis.toMatrix_apply, Matrix.of_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     IsUnit (deTurckCobMatrix (I := I) α x) := by
@@ -136,7 +138,7 @@ private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
   rw [Matrix.isUnit_iff_isUnit_det] at hbase_unit ⊢
   rwa [Matrix.det_transpose]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x : M)
     (k l : Fin (Module.finrank ℝ E)) :
     chartGramMatrix (I := I) g x x k l =
@@ -145,7 +147,7 @@ private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x 
   rw [chartGramMatrix_apply, chartBasisVecFiber_self (I := I) x k,
     chartBasisVecFiber_self (I := I) x l]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramMatrix_eq_cob_conj (g : SmoothRiemannianMetric I M)
     (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -204,6 +206,8 @@ private lemma transpose_mul_conj_inv_mul
   rw [Matrix.mul_nonsing_inv _ hPtdet, Matrix.nonsing_inv_mul _ hPdet,
     Matrix.one_mul, Matrix.mul_one]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private lemma deTurckChartLocal_eq_modelTrace (g g' : SmoothRiemannianMetric I M)
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -304,9 +308,13 @@ def deTurckFun (g g' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x :=
   deTurckChartLocal (I := I) g g' x x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 lemma deTurckFun_def (g g' : SmoothRiemannianMetric I M) (x : M) :
     deTurckFun (I := I) g g' x = deTurckChartLocal (I := I) g g' x x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem deTurckChartLocal_eq_deTurckFun (g g' : SmoothRiemannianMetric I M)
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -318,6 +326,8 @@ theorem deTurckChartLocal_eq_deTurckFun (g g' : SmoothRiemannianMetric I M)
   rw [deTurckChartLocal_eq_modelTrace (I := I) g g' α hx,
     deTurckChartLocal_eq_modelTrace (I := I) g g' x hbase_x]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem deTurckChartLocal_eq_deTurckFun_of_mem_source
     (g g' : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -325,6 +335,8 @@ theorem deTurckChartLocal_eq_deTurckFun_of_mem_source
   refine deTurckChartLocal_eq_deTurckFun (I := I) g g' α ?_
   rwa [trivializationAt_baseSet_eq_chartAt_source]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 lemma deTurckChartLocal_self (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     deTurckChartLocal (I := I) g g α x = (0 : TangentSpace I x) := by
   classical
@@ -333,6 +345,8 @@ lemma deTurckChartLocal_self (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
   rw [connDiff_self (I := I) g]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem deTurckFun_self (g : SmoothRiemannianMetric I M) :
     deTurckFun (I := I) g g = fun x => (0 : TangentSpace I x) := by
@@ -340,6 +354,8 @@ theorem deTurckFun_self (g : SmoothRiemannianMetric I M) :
   rw [deTurckFun_def]
   exact deTurckChartLocal_self (I := I) g x x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem deTurckFun_self_apply (g : SmoothRiemannianMetric I M) (x : M) :
     deTurckFun (I := I) g g x = (0 : TangentSpace I x) := by
   rw [deTurckFun_self]

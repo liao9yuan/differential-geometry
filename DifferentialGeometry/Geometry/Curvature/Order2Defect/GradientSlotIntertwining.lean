@@ -37,6 +37,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensor0S_curry_covGradBundleEquiv_unit
     (x : M) (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 2 I x)
     (v : TangentSpace I x) :
@@ -71,6 +72,7 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
   rw [hzero, htail]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

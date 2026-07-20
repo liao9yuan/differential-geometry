@@ -52,6 +52,7 @@ noncomputable def conjCoeff
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem conjCoeff_apply
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
@@ -115,6 +116,7 @@ noncomputable def conjA1
 
 
 
+omit [BoundarylessManifold I M] in
 theorem conjA1_cont
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) {A : Set Real}
@@ -168,6 +170,7 @@ theorem conjA1_cont
 
 
 
+omit [BoundarylessManifold I M] in
 theorem conjA1_short
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -290,6 +293,7 @@ omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
 
 
+omit [SigmaCompactSpace M] in
 theorem conjCoeff_bound
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

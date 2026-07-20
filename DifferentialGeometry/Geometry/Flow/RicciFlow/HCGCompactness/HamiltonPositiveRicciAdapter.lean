@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPosit
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -32,7 +31,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -126,6 +124,7 @@ structure Ham3SourceLink
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem Ham3SourceLink.realizes
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -179,6 +178,7 @@ def HamCGHConclusion
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem baseScalarConv_of_smoothCGH
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -224,6 +224,7 @@ theorem baseScalarConv_of_smoothCGH
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem toHam3Exists
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)

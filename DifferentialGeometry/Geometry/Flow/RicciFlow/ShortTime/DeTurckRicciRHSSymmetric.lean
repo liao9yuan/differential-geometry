@@ -17,7 +17,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -25,6 +25,8 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_symm
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     deTurckRicciRHS (I := I) g_bg g x v w =
@@ -43,11 +45,14 @@ noncomputable def deTurckRHSSectionBg (g_bg g : SmoothRiemannianMetric I M) :
   hasCompactSupport := (deTurckRHSSection (I := I) g_bg g).hasCompactSupport
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem deTurckRHSSectionBg_toSection
     (g_bg g : SmoothRiemannianMetric I M) :
     (deTurckRHSSectionBg (I := I) g_bg g).toSection =
       (deTurckRHSSection (I := I) g_bg g).toSection := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckRHSSectionBg_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -57,6 +62,7 @@ theorem deTurckRHSSectionBg_toModel_apply
       deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) :=
   deTurckRHSSection_toModel_apply (I := I) g_bg g x v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g_bg (deTurckRHSSectionBg (I := I) g_bg g) x v w =

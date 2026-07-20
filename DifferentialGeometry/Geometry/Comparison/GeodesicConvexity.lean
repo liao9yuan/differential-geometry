@@ -59,7 +59,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -70,11 +70,12 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 def smallNormalBall (p : M) (ρ : ℝ) : Set M :=
   {q : M | riemannianEDist I p q < ENNReal.ofReal ρ}
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 @[simp] lemma mem_smallNormalBall {p q : M} {ρ : ℝ} :
     q ∈ smallNormalBall (I := I) p ρ ↔ riemannianEDist I p q < ENNReal.ofReal ρ :=
   Iff.rfl
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma centre_mem_smallNormalBall (p : M) {ρ : ℝ} (hρ : 0 < ρ) :
     p ∈ smallNormalBall (I := I) p ρ := by
   rw [mem_smallNormalBall, riemannianEDist_self]
@@ -167,6 +168,8 @@ theorem minJoin_edist_le
       (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b)
         (s := 0) (t := t) ht
 
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 private lemma intrinsicGeodesic_speedSq_const
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -189,6 +192,8 @@ private lemma intrinsicGeodesic_speedSq_const
     intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p v
   exact congrArg₂ (fun (x : M) (w : E) => g.inner x w w) h0 hvelE
 
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 private lemma intrinsicGeodesic_velocity_enorm_le'
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -213,6 +218,8 @@ private lemma intrinsicGeodesic_velocity_enorm_le'
       = Real.sqrt (c ^ 2) := by rw [hspeedSq]
     _ = c := Real.sqrt_sq hc_nn
 
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_riemannianEDist_le_radius
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -257,6 +264,8 @@ theorem intrinsicGeodesic_riemannianEDist_le_radius
     _ ≤ pathELength I γ 0 t := h_dist_le
     _ ≤ ENNReal.ofReal (c * t) := h_pathLen_le
 
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem smallNormalBall_radial_confined
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -275,6 +284,8 @@ theorem smallNormalBall_radial_confined
         exact mul_le_mul_of_nonneg_left ht1 hc_nn
     _ = c := mul_one c
 
+omit [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem joinedIn_centre_smallNormalBall
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

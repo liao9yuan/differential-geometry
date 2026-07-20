@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_isLeviCivita_smoothFile
     (g : SmoothRiemannianMetric I M) :
     IsLeviCivita (I := I) (leviCivitaConnectionOfMetric (I := I) g) g :=
@@ -52,6 +52,7 @@ private def localMetricCoeff
     (i j : ι) (y : M) : Real :=
   g.inner y (e.localFrame b i y) (e.localFrame b j y)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localFrame_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -61,6 +62,7 @@ private theorem localFrame_contMDiffAt
   (e.isLocalFrameOn_localFrame_baseSet I ∞ b).contMDiffAt
     e.open_baseSet hx i
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localMetricCoeff_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -91,6 +93,7 @@ private theorem localMetricCoeff_contMDiffAt
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localMetricCoeff_deriv_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -109,6 +112,7 @@ private theorem localMetricCoeff_deriv_contMDiffAt
     (localMetricCoeff_contMDiffAt (I := I) e b g hx i j)
     (localFrame_contMDiffAt (I := I) e b hx a)
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localMetricBracket_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -156,6 +160,7 @@ private theorem localMetricBracket_contMDiffAt
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_localFrame_contMDiffAt
     {ι : Type*}
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -185,6 +190,7 @@ private noncomputable def basisBilin {ι : Type*} (b : Module.Basis ι Real E) (
     E →L[Real] E →L[Real] Real :=
   (coordCLM (E := E) b i).smulRight (coordCLM (E := E) b j)
 
+omit [CompleteSpace E] in
 private theorem basisBilin_apply {ι : Type*} (b : Module.Basis ι Real E) (i j : ι)
     (v w : E) :
     basisBilin (E := E) b i j v w = b.coord i v * b.coord j w := by
@@ -201,6 +207,8 @@ noncomputable def localMetricFlatBasis {ι : Type*} [Fintype ι]
   ∑ i : ι, ∑ j : ι,
     localMetricCoeff (I := I) e b g i j y • basisBilin (E := E) b i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 private theorem localMetricFlatBasis_apply {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -210,6 +218,7 @@ private theorem localMetricFlatBasis_apply {ι : Type*} [Fintype ι]
         localMetricCoeff (I := I) e b g i j y * b.coord i v * b.coord j w := by
   simp [localMetricFlatBasis, basisBilin_apply, mul_assoc]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localFrame_sum_coord_smul
     {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -233,6 +242,8 @@ private theorem localFrame_sum_coord_smul
             simp [b.sum_repr v]
           rw [hsum]
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 theorem localMetricFlatBasis_eq_inner {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -252,6 +263,8 @@ theorem localMetricFlatBasis_eq_inner {ι : Type*} [Fintype ι]
     _ = g.inner x (e.symmL Real x v) (e.symmL Real x w) := by
           rw [hv, hw]
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 theorem localMetricFlatBasis_isInvertible {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -307,6 +320,7 @@ theorem localMetricFlatBasis_isInvertible {ι : Type*} [Fintype ι]
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem localMetricFlatBasis_contMDiffAt {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -327,6 +341,8 @@ private noncomputable def localInvMetricCoeff {ι : Type*} [Fintype ι]
     ((ContinuousLinearMap.inverse (localMetricFlatBasis (I := I) e b g y))
       (coordCLM (E := E) b l))
 
+omit [CompleteSpace E] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem localInvMetricCoeff_contMDiffAt_of_isInvertible {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -353,6 +369,7 @@ private theorem localInvMetricCoeff_contMDiffAt_of_isInvertible {ι : Type*} [Fi
   simpa [localInvMetricCoeff, εk, εl, coordCLM] using
     (contMDiffAt_const (c := εk)).clm_apply happ
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localInvMetricCoeff_contMDiffAt {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -364,6 +381,7 @@ private theorem localInvMetricCoeff_contMDiffAt {ι : Type*} [Fintype ι]
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem coordGInvMdiff
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -401,6 +419,7 @@ theorem coordGInvMdiff
     simp [e, b, coordCLM]
   exact hlocal.congr_of_eventuallyEq heq
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem localMetricFlatBasis_eq_dual_sum {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -426,6 +445,8 @@ private theorem localMetricFlatBasis_eq_dual_sum {ι : Type*} [Fintype ι]
         localMetricFlatBasis (I := I) e b g x v (b l) • coordCLM (E := E) b l) w := by
           simp [coordCLM, smul_eq_mul]
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 private theorem basis_coord_eq_sum_localInvMetric_flat {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -454,6 +475,8 @@ private theorem basis_coord_eq_sum_localInvMetric_flat {ι : Type*} [Fintype ι]
           intro l _
           simp [A, localInvMetricCoeff, mul_comm]
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] in
 private theorem localFrame_coeff_eq_sum_localInvMetric_inner {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -493,6 +516,7 @@ private theorem localFrame_coeff_eq_sum_localInvMetric_inner {ι : Type*} [Finty
   intro l _
   rw [hflat l, g.symm x V (e.localFrame b l x)]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem lc_christoffel_eq_koszul_sum {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -553,6 +577,7 @@ private theorem lc_christoffel_eq_koszul_sum {ι : Type*} [Fintype ι]
           intro l _
           ring
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lc_christoffel_contMDiffAt {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)

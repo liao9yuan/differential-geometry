@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -94,6 +94,7 @@ theorem allHs_of_weighted_summable_pub
   have hrhs : (b.repr u) i = tensorL2Coeff (I := I) (M := M) hc u i := rfl
   rw [hlhs, hrhs, tensorHsToL2_tensorL2Coeff]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_toSection_congr
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -148,6 +149,7 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
     _ = C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by ring
 
+omit [BoundarylessManifold I M] in
 theorem ccTensorBilinSymm_finiteEigenCombo_eq_sum_eigenBilinScalar
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))

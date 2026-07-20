@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -195,6 +195,7 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
   rw [h_weight, one_smul]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s)
@@ -263,6 +264,7 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
   exact integral_zero EuclN ℝ
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (w : TensorL2 r s g)
     (hw : ∀ (α : M) (Q : CompIdx E r s),
@@ -315,6 +317,7 @@ private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
   exact congrFun h_zero w
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2_eq_of_chartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u v : TensorL2 r s g)
     (h : ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),

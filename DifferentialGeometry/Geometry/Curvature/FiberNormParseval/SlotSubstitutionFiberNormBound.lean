@@ -22,14 +22,14 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
 lemma gFrame_adjoint_parseval_le
@@ -105,6 +105,8 @@ def embedRS (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) : TensorRSSpace 0 s I x
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from embedRS (I := I) (M := M) x s A0)
       (unitZeroSec (I := I) (M := M) x) = A0 := by
@@ -118,6 +120,7 @@ lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x)
     (A0 : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x) :
@@ -140,6 +143,8 @@ lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fiberNormSqComponent_embedRS
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n) :
@@ -167,7 +172,7 @@ lemma fiberNormSqComponent_embedRS
   rw [hscal, embedRS_unitZeroSec_apply]
   rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
 lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : Fin s)
@@ -183,7 +188,7 @@ lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : 
   rw [← smul_eq_mul]
   exact (Tensor0SSpace.toModel A0).map_update_smul m k (a j) (e j)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
 private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
@@ -207,7 +212,7 @@ private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
   · intro l _ hl; rw [horth j l, if_neg (fun h => hl h.symm), mul_zero]
   · intro h; exact absurd (Finset.mem_univ j) h
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
 private lemma frame_double_sum_slotSub_le
@@ -298,6 +303,7 @@ private lemma frame_double_sum_slotSub_le
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_slotSub_apply (x : M) (s : ℕ)
     (A0 : Tensor0SSpace s I x) (W : TangentSpace I x →L[ℝ] TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin s → Fin n) :
@@ -318,6 +324,9 @@ private lemma toModel_slotSub_apply (x : M) (s : ℕ)
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [toModel_tensorSlotSubstCLM_apply]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_slotSub_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x) (Kw : ℝ) (hKw : 0 ≤ Kw)

@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -104,6 +104,7 @@ private lemma smoothRep_apply (g : SmoothRiemannianMetric I M) (α : M)
         (gradFun (I := I) g v.toFun x)) -
       (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {x : M}
     (hx : x ∉ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
@@ -168,6 +169,7 @@ private lemma etaTimesV_eq_of_eventuallyOne
   change chartStrictCutoff (I := I) (M := M) α x * v x = v x
   rw [h_self]; ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothRep_eq_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (x : M) :
     smoothRep (I := I) (M := M) g α v x =
@@ -250,6 +252,7 @@ lemma lapPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
       (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
         etaTimesV (I := I) (M := M) α v x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothRep_eq_pieces
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothRep (I := I) (M := M) g α v =
@@ -259,6 +262,7 @@ lemma smoothRep_eq_pieces
   rw [smoothRep_eq_etaTimesV (I := I) (M := M) g α v x]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
@@ -353,6 +357,7 @@ lemma tsupport_lapPiece_subset_source
   (tsupport_lapPiece_subset (I := I) (M := M) g α v).trans
     (tsupport_etaTimesV_subset (I := I) (M := M) α v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRaw_gradInnerPiece_eq_rhs
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -383,6 +388,7 @@ private lemma chartPushedRaw_gradInnerPiece_eq_rhs
     simpa using this
   rw [h_inner_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_lapPiece_factor
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ)
     {b : M → ℝ}

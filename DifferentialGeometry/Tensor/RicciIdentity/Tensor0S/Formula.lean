@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -1017,6 +1016,7 @@ def RicciIdentity0SAt {x : M} {s : ℕ}
     Prop :=
   comm = curvatureAction
 
+omit [FiniteDimensional ℝ E] in
 theorem ricci_identity_0s {x : M} {s : ℕ}
     (comm curvatureAction :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x)

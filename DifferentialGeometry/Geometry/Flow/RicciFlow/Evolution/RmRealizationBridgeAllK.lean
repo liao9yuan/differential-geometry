@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridg
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -57,7 +56,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -94,10 +92,14 @@ def nablaKRm04Field
           (4 + k) (S.family.connection t) (connSmoothInf (I := I) S t)
           (nablaKRm04Field S t k))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem nablaKRm04Field_zero
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     nablaKRm04Field (I := I) S t 0 = S.base.rm04 t := rfl
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04Field_succ
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     nablaKRm04Field (I := I) S t (k + 1) =
@@ -111,6 +113,8 @@ theorem nablaKRm04Field_succ
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04Field_realizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -149,6 +153,8 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_eq_nablaKRm04Field
     (S : SolutionOn (I := I) (M := M) D)
     (x₀ : M) (t : Real) :
@@ -215,6 +221,8 @@ theorem iteratedRmComp_eq_nablaKRm04Field
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_one_eq_nablaKRm04Field
     (S : SolutionOn (I := I) (M := M) D)
     (x₀ : M) (t : Real)
@@ -237,6 +245,8 @@ theorem iteratedRmComp_one_eq_nablaKRm04Field
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iterRmLF_eq_nabla
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -313,6 +323,8 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04_nabla0SSectionRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     DifferentialGeometry.Integral.Connection.Nabla0SSectionRealizes (I := I) (4 + k)
@@ -326,6 +338,8 @@ theorem nablaKRm04_nabla0SSectionRealizes
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04_nabla20SRealizesAt
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (x : M) :
     DifferentialGeometry.Integral.Connection.Nabla20SRealizesAt (I := I) (4 + k)
@@ -342,6 +356,8 @@ theorem nablaKRm04_nabla20SRealizesAt
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04_ricciIdentityAt
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

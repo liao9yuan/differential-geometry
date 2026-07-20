@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -81,6 +81,7 @@ def truncatedNonlin (N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a :=
   fun v => N (recenteredBallRetraction u₀' R v)
 
+omit [CompactSpace M] in
 theorem truncatedNonlin_eq_of_mem
     {u₀' : tensorHs (I := I) (M := M) g r s (a + 1)} {R : ℝ}
     {v : tensorHs (I := I) (M := M) g r s (a + 1)}
@@ -88,6 +89,7 @@ theorem truncatedNonlin_eq_of_mem
     truncatedNonlin (I := I) (M := M) N u₀' R v = N v := by
   rw [truncatedNonlin, recenteredBallRetraction_eq_self_of_mem hv]
 
+omit [CompactSpace M] in
 theorem truncatedNonlin_lipschitzWith {L_R : ℝ≥0}
     {u₀' : tensorHs (I := I) (M := M) g r s (a + 1)} {R : ℝ} (hR : 0 ≤ R)
     (hN : LipschitzOnWith L_R N (Metric.closedBall u₀' R)) :

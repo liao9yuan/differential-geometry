@@ -48,7 +48,6 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -90,6 +89,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {s : Nat} {x : M}
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tensor0S_sum_apply {ι : Type*} [Fintype ι]
     (T : ι -> Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
     ((∑ i : ι, T i) v) = ∑ i : ι, (T i) v := by

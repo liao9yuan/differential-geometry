@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ParamEvaluation
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -28,8 +27,8 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -53,6 +52,8 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
 def normalChartDensity (g : SmoothRiemannianMetric I M) (p : M) : E → ℝ :=
   paramDensity (I := I) g (expMapDiffeo (I := I) g p)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalChartDensity_apply
     (g : SmoothRiemannianMetric I M) (p : M) (w : E) :
     normalChartDensity (I := I) g p w =
@@ -64,6 +65,8 @@ def normalGramMatrix (g : SmoothRiemannianMetric I M) (p : M) :
     E → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   paramGramMatrix (I := I) g (expMapDiffeo (I := I) g p)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma normalGram_apply
     (g : SmoothRiemannianMetric I M) (p : M) (w : E)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -75,6 +78,8 @@ def normalGramMatrix (g : SmoothRiemannianMetric I M) (p : M) :
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma normalDensity_det
     (g : SmoothRiemannianMetric I M) (p : M) (w : E) :
     normalChartDensity (I := I) g p w =
@@ -94,6 +99,9 @@ def radialJacobiField (g : SmoothRiemannianMetric I M) (p : M)
       (show TangentSpace I p from (t • (x + s • w))) : M)) 0 (1 : ℝ)
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma radialJacobi_zero
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) :
     radialJacobiField (I := I) g p x w 0 = 0 := by
@@ -101,6 +109,7 @@ lemma radialJacobi_zero
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_zero (I := I) g p x w
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_radius
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ t₀ ∈ Set.Ioo (0 : ℝ) 1,
@@ -131,6 +140,8 @@ theorem exists_radialJacobi_zero_radius
 
 
 
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -149,6 +160,7 @@ def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
       (radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1)
       (radialJacobiField (I := I) g p x ((chartModelBasis E) j) 1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] lemma radialJacobiGram_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -159,6 +171,7 @@ def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
   rfl
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -169,6 +182,7 @@ lemma radialJacobi_one
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_one (I := I) g p x w hx
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (a : ℝ)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -181,6 +195,7 @@ lemma radialJacobi_one_smul
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobi_one_sum
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (c : Fin (Module.finrank ℝ E) → ℝ)
@@ -201,6 +216,8 @@ lemma radialJacobi_one_sum
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma expDiffeo_mfderiv
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : x ∈ (expMapDiffeo (I := I) g p).source) :
@@ -219,6 +236,7 @@ lemma expDiffeo_mfderiv
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalGram_radial
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -248,6 +266,7 @@ lemma normalGram_radial
   rw [← radialJacobi_one (I := I) g p x ((chartModelBasis E) j) hxrad]
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalGram_radialMat
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -257,6 +276,7 @@ lemma normalGram_radialMat
   exact normalGram_radial (I := I) g p hxsrc hxrad i j
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_radial
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (expMapDiffeo (I := I) g p).source)
@@ -274,6 +294,7 @@ lemma normalDensity_radial
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalChart_volume_eq
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)

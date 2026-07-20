@@ -66,6 +66,7 @@ theorem heatSemigroupHsExt_of_nonpos {g : SmoothRiemannianMetric I M}
   have : ¬ 0 < t := not_lt.mpr ht
   simp [this]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_add {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {t s : ℝ} (ht : 0 ≤ t) (hs : 0 ≤ s) :
     heatSemigroupHsExt (I := I) (M := M) g σ (t + s) =
@@ -83,6 +84,7 @@ theorem heatSemigroupHsExt_add {g : SmoothRiemannianMetric I M} {σ : ℝ}
           heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) hs_pos]
       exact heatSemigroupHs_add (I := I) (M := M) (g := g) ht_pos hs_pos (a := σ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHsExt_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : 0 ≤ t) :
     ‖heatSemigroupHsExt (I := I) (M := M) g σ t‖ ≤ 1 := by

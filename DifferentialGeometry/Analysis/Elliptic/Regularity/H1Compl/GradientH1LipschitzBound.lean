@@ -20,7 +20,7 @@ namespace Analysis
 namespace Laplacian
 namespace H1ComplGradientH1LipschitzBound
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -247,6 +247,7 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
   rw [h_pow_eq, smul_eq_mul]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 private lemma lintegral_enorm_v_toFun_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     ∫⁻ x, ‖v.toFun x‖ₑ ^ (2 : ℝ)

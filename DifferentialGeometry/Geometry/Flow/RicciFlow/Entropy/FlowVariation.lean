@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Regularity
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

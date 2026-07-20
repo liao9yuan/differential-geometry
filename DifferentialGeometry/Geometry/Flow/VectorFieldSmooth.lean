@@ -14,19 +14,21 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 private lemma exists_bump_tsupport_subset {U : Set M} (hU : IsOpen U) {x₀ : M}
     (hx₀ : x₀ ∈ U) :
     ∃ χ : SmoothBumpFunction I x₀, tsupport (χ : M → ℝ) ⊆ U := by
   have hUnhds : U ∈ 𝓝 x₀ := hU.mem_nhds hx₀
   exact (SmoothBumpFunction.nhds_basis_support (I := I) (c := x₀) hUnhds).ex_mem
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_contMDiffOn_local (g g' : SmoothRiemannianMetric I M)
     {U : Set M} (hU : IsOpen U) {σ τ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ) U)
@@ -77,6 +79,8 @@ theorem connDiff_contMDiffOn_local (g g' : SmoothRiemannianMetric I M)
     hConnAt.congr_of_eventuallyEq heventuallyEq
   exact hGoalAt.contMDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M)
     (α : M) (j k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -99,6 +103,7 @@ private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M
     exact h
   exact connDiff_contMDiffOn_local (I := I) g g' hopen (hframe j) (hframe k)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartInvGramMatrix_entry_contMDiffOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k : Fin (Module.finrank ℝ E)) :
@@ -108,6 +113,8 @@ private lemma chartInvGramMatrix_entry_contMDiffOn_source
   have h := chartInvGramMatrix_entry_contMDiffOn (I := I) g α j k
   rwa [trivializationAt_baseSet_eq_chartAt_source] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x (deTurckChartLocal (I := I) g g' α x))
@@ -159,6 +166,8 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
   refine houter.congr (fun x _hx => ?_)
   rw [deTurckChartLocal_def]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckFun_contMDiff_total (g g' : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x (deTurckFun (I := I) g g' x)) := by

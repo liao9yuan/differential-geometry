@@ -8,13 +8,14 @@ open Set Function Bundle
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartE_jointReading_contMDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -46,6 +47,7 @@ theorem chartE_jointReading_contMDiffOn
   · exact Set.prod_mono (subset_refl _) (subset_univ _)
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem partitionOfUnity_assembled_section_contMDiff
     {ι : Type*} {ρ : SmoothPartitionOfUnity ι I M (univ : Set M)} {U : ι → Set M}
     (hsub : ρ.IsSubordinate U) (hU : ∀ i, IsOpen (U i))
@@ -146,6 +148,7 @@ theorem partitionOfUnity_assembled_section_contMDiff
       (tsupport_smul_subset_left (fun q : ℝ × M => ρ i q.2) (g i)) hi) ∞
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartE_euclideanReading_contDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -180,6 +183,7 @@ private theorem chartE_euclideanReading_contDiffOn
   exact hcomp
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem lift_extended_reading_contMDiffOn
     (α : M) (gext : ℝ → E → E) (V : Set E)
     (hgext : ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V)) :
@@ -234,6 +238,7 @@ private theorem lift_extended_reading_contMDiffOn
     = gext q.1 (extChartAt I α q.2)
   rw [trivToE_trivFromE (I := I) α hq2]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem seeley_time_extend
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

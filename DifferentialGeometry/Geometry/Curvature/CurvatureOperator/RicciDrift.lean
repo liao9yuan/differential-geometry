@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -37,7 +36,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
@@ -51,6 +50,7 @@ noncomputable def ricGradForm [I.Boundaryless]
   partialEval0SField (I := I) (metricRicci (I := I) (M := M) g)
     (grad_g (I := I) g hf)
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradForm_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -73,6 +73,7 @@ noncomputable def ricGradVec [I.Boundaryless]
           cotangentSection_chartComponent_contMDiffOn
             (I := I) (ricGradForm (I := I) g hf) a j))
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -93,6 +94,7 @@ noncomputable def ricDriftVec [I.Boundaryless]
       ((contMDiff_const.mul (metricScalar_smooth (I := I) (M := M) g)).smul_section
         (grad_g (I := I) g hf).contMDiff))
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricDriftVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -326,7 +328,7 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
         a x * divergence (I := I) cov (fun y : M => G y) x +
           extDerivFun (I := I) a x (G x) := by
     simpa only [Pi.smul_apply] using
-      (divergence_smul (I := I) (X := fun y : M => G y) (x := x) cov haMD
+      (divergence_smul (I := I) (X := fun y : M => G y) (x := x) cov inferInstance haMD
         (G.contMDiff.contMDiffAt.mdifferentiableAt (by simp)))
   have hLap :
       divergence (I := I) cov (fun y : M => G y) x = Δ_g (I := I) g hf x := by
@@ -359,6 +361,7 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricDriftAct [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :

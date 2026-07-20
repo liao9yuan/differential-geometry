@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -132,19 +131,19 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma frameVec_eq_tangentConst (x₀ : M) (i : Fin (Module.finrank Real E)) :
     Geometry.frameVec (I := I) x₀ i
       = tangentConstInChart (𝕜 := Real) (I := I) x₀ (Module.finBasis Real E i) := rfl
@@ -204,6 +203,7 @@ include I in
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_chart_cover (hne : Nonempty M) :
     ∃ (c : ℕ → M) (K : ℕ → Set M),
       (∀ k, IsCompact (K k)) ∧ (∀ k, K k ⊆ (chartAt H (c k)).source) ∧
@@ -233,6 +233,7 @@ include I in
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_gm_symm_pos
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M) (φ : ℕ → ℕ)
     (hconv : ∀ x : M, ∃ Lx : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real,
@@ -271,6 +272,8 @@ lemma exists_gm_symm_pos
     exact lt_of_lt_of_le (mul_pos hc (gRef.pos x v hv)) hle
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 lemma covDerivOfField_zero (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2) :
@@ -281,6 +284,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -325,6 +329,7 @@ lemma exists_engine_frameConv
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_frame_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -383,6 +388,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameCInfConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -428,6 +434,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma exists_engine_frameCInfConv_eq_gm
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -475,6 +482,7 @@ lemma exists_engine_frameCInfConv_eq_gm
 include I in
 
 
+omit [IsManifold I 2 M] in
 lemma exists_refine_componentConv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -491,6 +499,7 @@ lemma exists_refine_componentConv
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_comp_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -511,6 +520,7 @@ include I in
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_frameVec_basis (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet) :
     ∃ b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x),
@@ -525,6 +535,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma exists_refine_allComponents
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -559,6 +570,7 @@ lemma exists_refine_allComponents
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_allcomp_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -599,6 +611,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma exists_limit_gm (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -643,6 +656,7 @@ lemma exists_limit_gm (hne : Nonempty M)
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma exists_limit_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -697,6 +711,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 lemma frameComp_contMDiffOn
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -738,6 +753,7 @@ lemma frameComp_contMDiffOn
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma frame_smooth_refs
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -789,6 +805,7 @@ include I in
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricPreconv_gInf (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -807,6 +824,7 @@ theorem metricPreconv_gInf (hne : Nonempty M)
 
 include I in
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metricPreconv_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)
     (gRef : ℕ → SmoothRiemannianMetric I M)
@@ -840,6 +858,8 @@ include I in
 
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 lemma componentConv_covDeriv_zero
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -31,6 +30,7 @@ section LocalFrame
 
 variable {u : Set M}
 
+omit [Fintype Idx] [DecidableEq Idx] in
 theorem ricciCompAt_eq_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -43,6 +43,7 @@ theorem ricciCompAt_eq_frame
   funext a
   fin_cases a <;> simp [IsLocalFrameOn.toBasisAt_coe]
 
+omit [Fintype Idx] [DecidableEq Idx] in
 theorem rm04CompAt_eq_frame
     (Rm04 : Tensor04Section (I := I) (M := M))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -55,6 +56,7 @@ theorem rm04CompAt_eq_frame
   funext a
   fin_cases a <;> simp [IsLocalFrameOn.toBasisAt_coe]
 
+omit [DecidableEq Idx] in
 theorem ricciTraceAt_of_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -83,6 +85,7 @@ def RicciTensorRealizesRm04FirstTraceInFrame
 
 
 
+omit [DecidableEq Idx] in
 theorem ricciFirstTraceAt_of_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -98,6 +101,7 @@ theorem ricciFirstTraceAt_of_frame
     using hRic x i j
 
 
+omit [DecidableEq Idx] in
 theorem ricciComp_eq_firstTrace_rm04_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -116,6 +120,7 @@ theorem ricciComp_eq_firstTrace_rm04_frame
   simp_rw [rm04CompAt_apply]
   exact hAt i j
 
+omit [DecidableEq Idx] in
 theorem scalarTraceAt_of_frame
     (scalar : M -> Real)
     (Ric : Tensor02Section (I := I) (M := M))
@@ -129,6 +134,7 @@ theorem scalarTraceAt_of_frame
   simpa [ScalarRealizesRicciTraceAt, ScalarSectionRealizesRicciTraceInFrame,
     tensor02ToField, IsLocalFrameOn.toBasisAt_coe] using hScalar x
 
+omit [DecidableEq Idx] in
 theorem ricciComp_eq_trace_rm04_frame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -144,6 +150,7 @@ theorem ricciComp_eq_trace_rm04_frame
   exact ricciComp_eq_trace_rm04 (I := I) (hframe.toBasisAt hx) (Ric x) (Rm04 x)
     (gInv x) (ricciTraceAt_of_frame (I := I) Ric Rm04 gInv frame hframe hRic hx) i j
 
+omit [DecidableEq Idx] in
 theorem scalar_eq_trace_ricci_frame
     (scalar : M -> Real)
     (Ric : Tensor02Section (I := I) (M := M))

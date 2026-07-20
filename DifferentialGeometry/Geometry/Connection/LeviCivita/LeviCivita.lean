@@ -15,11 +15,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem levi_civita_pullback_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)
       = pullback_connection_construct g Φ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem levi_civita_pullback_conjugation_symm
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     pullback_connection_construct g Φ

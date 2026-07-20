@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ private lemma wrappedComponentProj_section_eq_tensorChartComponentRaw
   rfl
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorInnerPointwise_chart_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Sg T : SmoothCcTensor g r s) (α : M)
@@ -119,6 +120,7 @@ private lemma pairingIntegrand_tsupport_subset
     exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x))
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Inner_chartSupported_chart_pull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Sg T : SmoothCcTensor g r s) (α : M)
@@ -154,6 +156,7 @@ theorem tensorL2Inner_chartSupported_chart_pull
   rw [tensorInnerPointwise_chart_eq_component_sum (I := I) (M := M)
     g r s Sg T α hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorComponentEuclid_pouSmul_eq_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (P : CompIdx E r s) :
@@ -164,6 +167,7 @@ private lemma tensorComponentEuclid_pouSmul_eq_tensorChartComponent
     (I := I) (M := M) g r s α Sg P).symm
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma componentSum_pouSmul_reassoc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg T : SmoothCcTensor g r s)
@@ -200,6 +204,7 @@ private lemma componentSum_pouSmul_reassoc
   ring
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorChartComponent_aeEq_tensorL2ChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (Q : CompIdx E r s) :
@@ -218,6 +223,7 @@ private lemma chartL2Measure_eq_volume_restrict (α : M) :
         (chartTargetEuclid (I := I) (M := M) α) := rfl
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPull_integrand_aeEq_abstract
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg T : SmoothCcTensor g r s) :
@@ -260,6 +266,7 @@ private lemma chartPull_integrand_aeEq_abstract
   rw [hy Q]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2Inner_pouSmul_smooth_chart_pull
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg T : SmoothCcTensor g r s) :
@@ -298,6 +305,7 @@ private noncomputable def chartPullCoeff
       tensorComponentEuclid (I := I) (M := M) g r s Sg α P y
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPullCoeff_summand_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (P Q : CompIdx E r s)
@@ -342,6 +350,7 @@ private lemma chartPullCoeff_summand_continuous
   exact hcontOn.continuous_of_tsupport_subset hopen hsupp_subset
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPullCoeff_summand_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (P Q : CompIdx E r s)
@@ -361,6 +370,7 @@ private lemma chartPullCoeff_summand_hasCompactSupport
   exact hy (by rw [hzero, mul_zero])
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPullCoeff_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (Q : CompIdx E r s)
@@ -372,6 +382,7 @@ private lemma chartPullCoeff_continuous
     chartPullCoeff_summand_continuous (I := I) (M := M) g r s α Sg P Q hSg)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPullCoeff_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (Q : CompIdx E r s)
@@ -403,6 +414,7 @@ private lemma chartPullCoeff_hasCompactSupport
       tensorComponentEuclid (I := I) (M := M) g r s Sg α P y) (hy_notin P)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPullCoeff_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (Q : CompIdx E r s)
@@ -424,6 +436,7 @@ private noncomputable def chartPullCoeffLp
   (chartPullCoeff_memLp (I := I) (M := M) g r s α Sg Q hSg).toLp _
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private lemma inner_chartPullCoeffLp_eq_integral
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (Q : CompIdx E r s)
@@ -445,6 +458,7 @@ private lemma inner_chartPullCoeffLp_eq_integral
   rw [RCLike.inner_apply, conj_trivial, hy, mul_comm]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma continuous_chartPullCoeff_pairing
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (Q : CompIdx E r s)
@@ -469,6 +483,7 @@ private lemma continuous_chartPullCoeff_pairing
     (chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg)).continuous
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPull_integrand_eq_coeff_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (u : TensorL2 r s g) (y : EuclN) :
@@ -516,6 +531,7 @@ private lemma chartPull_integrand_eq_coeff_mul
   rw [hlhs, hrhs, Finset.sum_comm]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPull_summand_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (u : TensorL2 r s g) (Q : CompIdx E r s)
@@ -538,6 +554,7 @@ private lemma chartPull_summand_integrable
   exact hint
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPull_integral_eq_sum_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (u : TensorL2 r s g)
@@ -600,6 +617,7 @@ private lemma continuous_lhs
     TensorL2 r s g)).continuous
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma continuous_rhs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s)
@@ -612,6 +630,7 @@ private lemma continuous_rhs
     continuous_chartPullCoeff_pairing (I := I) (M := M) g r s α Sg Q hSg)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma headline_on_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s)
@@ -634,6 +653,7 @@ private lemma headline_on_smooth
     (T : TensorL2 r s g) hSg
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma headline_fun_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s)
@@ -655,6 +675,7 @@ private lemma headline_fun_eq
   exact headline_on_smooth (I := I) (M := M) g r s α Sg hSg T
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Inner_pouSmul_tensorL2ChartComponent_pull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (u : TensorL2 r s g) (Sg : SmoothCcTensor g r s)

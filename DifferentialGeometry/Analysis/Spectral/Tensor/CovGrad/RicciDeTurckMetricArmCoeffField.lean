@@ -21,7 +21,9 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,8 +47,21 @@ def gInvDiffMetricArmCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     | 2 => gInvDiffSlotCoeff (I := I) g₀ g₁
     | _ => 0
 
+end NormedSpaceModel
+
+section InnerProductSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+variable [CompleteSpace E]
+
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompleteSpace E] in
 theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M) (W : SmoothCcTensor g₀ 0 2) (a : ℕ) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x₀
@@ -64,6 +79,7 @@ theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
 
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetric I M) :
     ∃ Cnorm : ℝ, 0 ≤ Cnorm ∧
       ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -80,6 +96,8 @@ theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetri
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_toSection_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x =
@@ -90,6 +108,8 @@ theorem covGrad_gInvDiffSlotCoeff_toSection_eq
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (w : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, (fun x : M => Tensor0SSpace 2 I x)⟯)
@@ -107,6 +127,8 @@ theorem covGrad_gInvDiffSlotCoeff_leibniz
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz_value
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) :
@@ -126,6 +148,8 @@ theorem covGrad_gInvDiffSlotCoeff_leibniz_value
   rw [← hw, tensorCovDerivAt_def]
   exact tensorRSCovariantDerivative_apply I M 2 2 (LeviCivita (I := I) g₀)
     (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection w x v
+
+end InnerProductSpaceModel
 
 end Connection
 end Integral

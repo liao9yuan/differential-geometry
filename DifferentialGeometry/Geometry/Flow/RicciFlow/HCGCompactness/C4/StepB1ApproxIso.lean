@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -55,7 +54,7 @@ open scoped Manifold ContDiff BigOperators Topology
 open DifferentialGeometry.Geometry.Riemannian
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -64,9 +63,9 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 section Glue
 
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [MetricSpace M] [Nonempty M]
+  [SigmaCompactSpace M] [MetricSpace M] [Nonempty M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [T2Space N] [IsManifold I ∞ N]
-  [SigmaCompactSpace N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+  [SigmaCompactSpace N]
 
 
 
@@ -98,6 +97,8 @@ noncomputable def PreApproxIsoDataOn.congr {K : Set M} {ε : Real} {p : Nat} {F 
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [SigmaCompactSpace N] in
 theorem stepB1_glue
     (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
     (Ok : M) (Oℓ : N) (r : Real) (ε : Real) (p : Nat)
@@ -194,7 +195,11 @@ structure StepB1RawInput (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) : 
 
 
 
-theorem stepB1_of_raw (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+theorem stepB1_of_raw
+    [FiniteDimensional Real E]
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (B : StepB1RawInput (X := X) P)
     (r : Real) (hr : 0 < r) (ε : Real) (hε : 0 < ε) (hε1 : ε < 1) (p : Nat) :
     ∃ k₀ : Nat, ∀ k ℓ : Nat, k₀ ≤ k → k₀ ≤ ℓ →

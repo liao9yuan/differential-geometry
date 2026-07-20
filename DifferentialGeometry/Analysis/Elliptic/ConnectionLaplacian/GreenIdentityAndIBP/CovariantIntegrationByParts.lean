@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E] [CompleteSpace E]
+  [Module.Finite ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ def tensorInnerScalar
   fun y => tensorInnerPointwise (I := I) (M := M) g r s y
     (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp]
 lemma tensorInnerScalar_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -48,6 +49,8 @@ lemma tensorInnerScalar_apply
       tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y)) := rfl
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
 lemma tangentSectionAction_tensorInnerScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -68,6 +71,7 @@ lemma tangentSectionAction_tensorInnerScalar
   exact tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r s W S x (V x)
 
+omit [CompleteSpace E] in
 theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -188,6 +192,7 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
   rw [integral_add hAB_int hC_int, hsum]
   ring
 
+omit [CompleteSpace E] in
 theorem integral_tensorInner_covDeriv_integrationByParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,6 +32,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_succ_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -116,6 +117,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_succ_le
   · refine Finset.sum_le_sum (fun a _ => ?_)
     rw [h_succ_eq a]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -185,6 +187,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
         rw [h_eq] at h_inner_norm
         exact h_inner_norm
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_one_two_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -248,6 +251,7 @@ def eigenvectorIteratedW2Aggregate
         g r s i α P₀ m idx)
       (chartTargetEuclid (I := I) (M := M) α)
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_one_le_eigenvectorIteratedW1Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -281,6 +285,7 @@ private lemma wkpNorm_one_le_eigenvectorIteratedW1Aggregate
         (chartTargetEuclid (I := I) (M := M) α))
     (s := Finset.univ) (fun _ _ => zero_le _) (Finset.mem_univ dirs)
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_two_le_eigenvectorIteratedW2Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -304,6 +309,7 @@ private lemma wkpNorm_two_le_eigenvectorIteratedW2Aggregate
         (chartTargetEuclid (I := I) (M := M) α))
     (fun _ _ => zero_le _) (Finset.mem_univ dirs)
 
+omit [CompleteSpace E] in
 private theorem eigenvectorIteratedPartial_wkpNorm_gapInduction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

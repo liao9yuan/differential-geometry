@@ -36,7 +36,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_zero_weight (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
@@ -88,6 +89,8 @@ def ricciFoldKernelBilin (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
         rw [← smul_add, smul_comm] }
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciFoldKernelBilin_apply (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     ricciFoldKernelBilin (I := I) g₀ S x p q v0 v1 =
@@ -110,6 +113,9 @@ def frameRicciFoldKernel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
       + (smoothCcTensorBilinForm (I := I) g₀ S x).flip.comp
           ((riemannOp (LeviCivita (I := I) g₀) x v0).flip v1))
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma frameRicciFoldKernel_apply (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v0 v1 p q : TangentSpace I x) :
     frameRicciFoldKernel (I := I) g₀ S x v0 v1 p q =
@@ -135,6 +141,8 @@ def ricciFoldSummandFib (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor 
           RingHom.id_apply, mul_smul] }
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciFoldSummandFib_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -153,6 +161,9 @@ def ricciFoldBiContrFibFixedFrame (g₀ : SmoothRiemannianMetric I M)
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     ricciFoldSummandFib (I := I) g₀ S x (B a x) (B b x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciFoldBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -170,6 +181,8 @@ lemma ricciFoldBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMetric I M)
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, ricciFoldSummandFib_toModel]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFoldKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     {p q : Π b : M, TangentSpace I b}
@@ -220,6 +233,8 @@ theorem ricciFoldKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric
     riemannOp_apply_smooth (cov := LeviCivita (I := I) g₀) V0.contMDiff hp W.contMDiff]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFoldBiContrFibFixedFrame_apply_section_contMDiff
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -308,6 +323,8 @@ theorem ricciFoldBiContrFibFixedFrame_apply_section_contMDiff
     Finset.sum_congr rfl (fun a _ => ContinuousLinearMap.sum_apply _ _ _)]
   rw [← hval]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFoldBiContrFibFixedFrame_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -328,6 +345,8 @@ def ricciFoldBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTe
     (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   ricciFoldBiContrFibFixedFrame (I := I) g₀ S (smoothOrthoFrame (I := I) g₁ x) x
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ricciFoldBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
@@ -365,6 +384,7 @@ theorem ricciFoldBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianM
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem ricciFoldBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
@@ -397,6 +417,7 @@ def ricciArmRicciFoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M)
       contMDiff_toFun := ricciFoldBiContrFib_contMDiff (I := I) g₀ g₁ S }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 @[simp] theorem ricciArmRicciFoldRemainderField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
     (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S).toSection x =
@@ -404,6 +425,7 @@ def ricciArmRicciFoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M)
         TensorRSSpace.ofCLM (ricciFoldBiContrFib (I := I) g₀ g₁ S x)) := rfl
 
 
+omit [I.Boundaryless] in
 theorem ricciArmRicciFoldRemainderField_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁
       (0 : SmoothCcTensor g₀ 0 2) = 0 := by

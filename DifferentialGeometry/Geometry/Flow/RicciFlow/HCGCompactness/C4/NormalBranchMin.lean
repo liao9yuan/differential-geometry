@@ -38,6 +38,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normalTan_metric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) :

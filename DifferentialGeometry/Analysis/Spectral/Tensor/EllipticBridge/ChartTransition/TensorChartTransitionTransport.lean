@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -213,6 +213,7 @@ private lemma cutoffComponentScalar_eq_pou_transport_sum
       sum_chartAtlasPOU_transportChartCenters_eq_one (I := I) (M := M) α hχα,
       one_mul]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_finsetSum
     (α : M) {ι : Type*} (s : Finset ι) (F : ι → M → ℝ) (y : EuclN) :
     chartPushedRaw I α (fun x : M => ∑ a ∈ s, F a x) y =
@@ -226,6 +227,7 @@ lemma chartPushedRaw_finsetSum
     refine (Finset.sum_eq_zero (fun a _ => ?_)).symm
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_eq_pou_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -282,6 +284,7 @@ lemma finsetSum_ae_eq
       filter_upwards [hfh_a, ih hfh_t] with y hya hyt
       rw [Finset.sum_insert ha, Finset.sum_insert ha, hya, hyt]
 
+omit [CompleteSpace E] in
 private lemma tensorL2ChartComponentCutoff_smooth_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -359,6 +362,7 @@ private lemma continuous_transport_sum
   exact (chartTransitionTransportCLM (I := I) (M := M) g r s β α P₀ Q).continuous.comp
     (continuous_tensorL2ChartComponent (I := I) (M := M) g r s β Q)
 
+omit [CompleteSpace E] in
 theorem tensorL2ChartComponentCutoff_eq_pou_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -401,6 +405,7 @@ theorem tensorL2ChartComponentCutoff_eq_pou_transport_sum
   exact tensorL2ChartComponentCutoff_smooth_eq_transport_sum
     (I := I) (M := M) g r s S α P₀
 
+omit [CompleteSpace E] in
 theorem tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)

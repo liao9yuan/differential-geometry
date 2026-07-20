@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -28,7 +27,7 @@ section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -41,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem firstVariationIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -127,6 +127,7 @@ theorem firstVariationIntegral_eq_pre510
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem closedIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -197,6 +198,7 @@ theorem closedIntegral_eq_pre510
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem firstVar_pre510_closed
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -325,6 +327,7 @@ theorem bracketClosed_eventually
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem closedCompare
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -458,6 +461,7 @@ theorem closedCompare
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem firstVar_pre510_weighted
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -554,6 +558,7 @@ theorem firstVar_pre510_weighted
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem firstVar_pre510_ibp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -674,6 +679,7 @@ theorem firstVar_pre510_ibp
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem formula510_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

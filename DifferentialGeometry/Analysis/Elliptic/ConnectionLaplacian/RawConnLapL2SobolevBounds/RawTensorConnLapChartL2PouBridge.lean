@@ -57,6 +57,7 @@ noncomputable def chartSobolevRawNormPou
       ∂(volume : Measure EuclN)
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartSobolevRawNormPou_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevRawNormPou (I := I) (M := M) g r s T =
@@ -196,6 +197,7 @@ private lemma sum_finset_sq_le_card_mul_sum_sq
     nlinarith
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma normSq_le_card_mul_sum_pou_sq_mul_normSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -229,6 +231,7 @@ private lemma normSq_le_card_mul_sum_pou_sq_mul_normSq
           ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 := hCS
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma manifold_lintegral_pou_sq_normSq_eq_chartTarget
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -284,6 +287,7 @@ private lemma manifold_lintegral_pou_sq_normSq_eq_chartTarget
       (I := I) (M := M) g α hF_meas]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -343,6 +347,7 @@ private lemma density_pou_sq_le
     exact mul_le_mul_of_nonneg_right hbound hρ_sq_nn
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma manifold_lintegral_pou_sq_normSq_eq_zero_of_empty
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -363,6 +368,7 @@ private lemma manifold_lintegral_pou_sq_normSq_eq_zero_of_empty
   rw [hρ_zero]; simp
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

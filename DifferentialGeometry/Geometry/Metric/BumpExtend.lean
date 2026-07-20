@@ -53,7 +53,7 @@ open scoped Manifold Topology ContDiff Classical
 
 namespace DifferentialGeometry
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -68,6 +68,7 @@ def extZeroForm (U : Opens M)
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   if hx : x ∈ U then gU.inner ⟨x, hx⟩ else 0
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma extZeroForm_of_mem (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) {x : M} (hx : x ∈ U)
@@ -76,6 +77,7 @@ def extZeroForm (U : Opens M)
   have h : extZeroForm (I := I) U gU x = gU.inner ⟨x, hx⟩ := dif_pos hx
   exact DFunLike.congr_fun (DFunLike.congr_fun h v) w
 
+omit [FiniteDimensional ℝ E] in
 lemma extZeroForm_of_not_mem (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) {x : M} (hx : x ∉ U)
@@ -92,6 +94,7 @@ def bumpForm (R : SmoothRiemannianMetric I M) (U : Opens M)
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   χ x • extZeroForm (I := I) U gU x + (1 - χ x) • R.inner x
 
+omit [FiniteDimensional ℝ E] in
 lemma bumpForm_apply (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (χ : M → ℝ) (x : M) (v w : TangentSpace I x) :
@@ -100,6 +103,7 @@ lemma bumpForm_apply (R : SmoothRiemannianMetric I M) (U : Opens M)
   simp [bumpForm, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
 
 
+omit [FiniteDimensional ℝ E] in
 lemma bumpForm_symm (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (χ : M → ℝ) (x : M) (v w : TangentSpace I x) :
@@ -111,6 +115,7 @@ lemma bumpForm_symm (R : SmoothRiemannianMetric I M) (U : Opens M)
   · rw [extZeroForm_of_not_mem (I := I) U gU hx v w, extZeroForm_of_not_mem (I := I) U gU hx w v]
 
 
+omit [FiniteDimensional ℝ E] in
 lemma bumpForm_pos (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (χ : M → ℝ)

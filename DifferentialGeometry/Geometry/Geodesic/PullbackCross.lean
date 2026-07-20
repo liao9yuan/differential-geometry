@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.PullbackCross
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -24,16 +23,17 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-  [Module.Finite ℝ F] [FiniteDimensional ℝ F] [CompleteSpace F]
+  [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem velocity_rep_diffAt
     (gamma : ℝ → M) (t : ℝ)
     (hgamma : ContMDiffAt 𝓘(ℝ, ℝ) I ∞ gamma t) :
@@ -85,6 +85,7 @@ private theorem velocity_rep_diffAt
     exact happ
   exact hdu.congr_of_eventuallyEq (by simpa [a, u] using hev)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem geoEq_of_covVel_C2
     (g : SmoothRiemannianMetric I M) (gamma : ℝ → M) (t : ℝ)
     (hgamma : ContMDiffAt 𝓘(ℝ, ℝ) I 2 gamma t)
@@ -172,6 +173,7 @@ private theorem geoEq_of_covVel_C2
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCrossAt
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -248,6 +250,7 @@ theorem geoEq_mapCrossAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -265,6 +268,7 @@ theorem geoEq_mapCross
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesic_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -279,6 +283,7 @@ theorem geodesic_mapCross
   fun t => geoEq_mapCross (I := I) (J := J) g Phi gamma t hgamma (hgeo t)
 
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapCross
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -295,6 +300,7 @@ theorem geodesicOn_mapCross
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapLocal
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

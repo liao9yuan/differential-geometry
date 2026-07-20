@@ -12,7 +12,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -605,7 +605,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -617,6 +617,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartAtlasPOU_measurable_aux (α : M) :
     Measurable
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -624,12 +625,14 @@ private lemma chartAtlasPOU_measurable_aux (α : M) :
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma pou_mul_measurable_aux (α : M) {u : M → ℝ} (hu : Measurable u) :
     Measurable (fun x : M =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) :=
   (chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
     (hu : Measurable u) (hv : Measurable v) :
     Measurable (fun x : M =>
@@ -640,6 +643,7 @@ private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
   ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu).sub
     ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hv)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma tsupport_pou_mul_subset_tsupport_pou_aux
     (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -657,6 +661,7 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_aux
   rw [h_eq]
   exact tsupport_smul_subset_left _ _
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
     (α : M) (u v : M → ℝ) :
     tsupport (fun x : M =>
@@ -758,6 +763,7 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
   apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
   exact h_raw_memLp.2
 
+omit [I.Boundaryless] in
 private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1179,7 +1185,7 @@ private lemma exists_riemannianMeasure_limit_pou_mul
 set_option maxHeartbeats 1000000 in
 
 theorem rellich_kondrachov_chart_seq
-    {E H : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

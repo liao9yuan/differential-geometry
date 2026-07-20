@@ -12,7 +12,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -21,11 +21,13 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem connLaplacian_function_eq_chartLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     connLaplacian_function (I := I) g hf x = Δ_g (I := I) g hf x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
@@ -47,6 +49,7 @@ theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
     chartHessTrace_eq_laplacian_pointwise_of_boundaryless (I := I) g hf x
   rw [← h1, h2, h3]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem traceFun_abstractHessian_eq_connLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)

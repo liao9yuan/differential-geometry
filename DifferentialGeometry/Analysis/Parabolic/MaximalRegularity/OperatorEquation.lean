@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace MaximalRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,12 +32,14 @@ variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 variable {τ : ℝ}
 
+omit [CompactSpace M] in
 private theorem lambda_sq_le (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 ≤
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 := by
   have hlam := tensor_lambda_nonneg (I := I) (M := M) i
   nlinarith
 
+omit [CompactSpace M] in
 private theorem scaleLaplacianWeightMulTwo
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i τ *
@@ -50,6 +52,7 @@ private theorem scaleLaplacianWeightMulTwo
     ← Real.rpow_add hbase_pos]
   norm_num
 
+omit [CompactSpace M] in
 private theorem weightLambdaMulSqLe
     (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -70,6 +73,7 @@ private theorem weightLambdaMulSqLe
     _ = tensorSobolevWeight (I := I) (M := M) i (τ + 2) * (v.coeff i) ^ 2 := by
         rw [← mul_assoc, scaleLaplacianWeightMulTwo (I := I) (M := M) i]
 
+omit [CompactSpace M] in
 private theorem scaleLaplacianWeightedSummable
     (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i τ *

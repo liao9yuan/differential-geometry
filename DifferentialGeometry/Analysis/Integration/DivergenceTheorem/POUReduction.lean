@@ -19,8 +19,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -31,7 +30,7 @@ def smoothSmul (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨fun x : M => φ x • X x, hφ.smul_section X.contMDiff⟩
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 @[simp] lemma smoothSmul_apply (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (smoothSmul (I := I) φ hφ X) x = φ x • X x := rfl
@@ -231,7 +230,7 @@ theorem divergence_g_smoothSmul [I.Boundaryless] [T2Space M]
   rw [divergence_g_def, divergence_g_def]
   exact localDivergence_at_self_smoothSmul (I := I) g x φ hφ X
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 theorem tangentSectionAction_finset_sum
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {ι : Type*} (s : Finset ι) (f : ι → M → ℝ) (x : M)
@@ -279,7 +278,7 @@ theorem tangentSectionAction_finset_sum
     rw [ContinuousLinearMap.add_apply]
     rw [ih_eq]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 @[simp] theorem tangentSectionAction_const
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (c : ℝ) (x : M) :
     tangentSectionAction (I := I) X (fun _ => c) x = 0 := by
@@ -287,12 +286,13 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
   rw [mfderiv_const]
   rfl
 
+omit [Module.Finite ℝ E] in
 @[simp] theorem tangentSectionAction_zero_fun
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     tangentSectionAction (I := I) X (fun _ : M => (0 : ℝ)) x = 0 :=
   tangentSectionAction_const (I := I) X 0 x
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma pou_tsum_eq_finset_sum_eventually
     (ρ : SmoothPartitionOfUnity M I M univ) (x : M) :
     (fun y : M => ∑' α : M, (ρ α : M → ℝ) y) =ᶠ[𝓝 x]
@@ -307,7 +307,7 @@ private lemma pou_tsum_eq_finset_sum_eventually
     exact hne
   exact hα (hy hα_finsupp)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 theorem tangentSectionAction_pou_tsum_eq_zero
     (ρ : SmoothPartitionOfUnity M I M univ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

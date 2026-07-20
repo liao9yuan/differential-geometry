@@ -73,6 +73,7 @@ private theorem time_patch
 
 
 
+omit [SigmaCompactSpace M] in
 theorem scalar_unif
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

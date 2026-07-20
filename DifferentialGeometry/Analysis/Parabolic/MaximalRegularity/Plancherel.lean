@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace MaximalRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompactSpace M] in
 lemma countable_tensorEigenIdx
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
@@ -409,6 +410,8 @@ def timeModeSynthesisPointwise {b : ℝ}
   coeff := cFam
   weighted_summable := hsum
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma timeModeSynthesisPointwise_coeff {b : ℝ}
     (cFam : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (hsum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i b *

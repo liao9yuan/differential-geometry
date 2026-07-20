@@ -20,12 +20,14 @@ noncomputable def pullback_connection_construct
     CovariantDerivative I E (TangentSpace I : M → Type _) :=
   LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_connection_torsion_free
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M) :
     (pullback_connection_construct g Φ).torsion = 0 :=
   LeviCivita_torsion_eq_zero (I := I) (Diffeomorph.pullbackMetric g Φ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_connection_metric_compatible
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M) :

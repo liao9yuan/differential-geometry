@@ -15,7 +15,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -66,13 +65,12 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
@@ -82,6 +80,7 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
+omit [CompleteSpace E] in
 theorem opNorm_le_sum_coord {n : ℕ}
     (bE : Module.Basis (Fin n) Real E) (L : E →L[Real] Real) :
     ‖L‖ ≤ ∑ i : Fin n, ‖LinearMap.toContinuousLinearMap (bE.coord i)‖ * |L (bE i)| := by
@@ -107,6 +106,7 @@ theorem opNorm_le_sum_coord {n : ℕ}
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem exists_ON_tangentBasis (gRef : SmoothRiemannianMetric I M) (y : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I y),
       ∀ i j, gRef.inner y (b i) (b j) = if i = j then (1 : Real) else 0 := by
@@ -124,6 +124,7 @@ theorem exists_ON_tangentBasis (gRef : SmoothRiemannianMetric I M) (y : M) :
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_section_eqOn_compact
     (x₀ : M) (v : E) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
@@ -166,6 +167,7 @@ theorem exists_section_eqOn_compact
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_sqrtInner_bound (gRef : SmoothRiemannianMetric I M)
     {Kc : Set M} (hKc : IsCompact Kc)
     (s : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
@@ -203,6 +205,7 @@ theorem exists_sqrtInner_bound (gRef : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_family_bound (gRef : SmoothRiemannianMetric I M)
     {Kc : Set M} (hKc : IsCompact Kc)
     {ι : Type*} [Fintype ι]
@@ -226,6 +229,7 @@ theorem exists_family_bound (gRef : SmoothRiemannianMetric I M)
 
 
 
+omit [IsManifold I 2 M] in
 theorem fderiv_comp_le_tower
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -436,6 +440,7 @@ theorem fderiv_comp_le_tower
 
 
 
+omit [CompleteSpace E] in
 theorem clm_eq_sum_coord {m : ℕ}
     (bE : Module.Basis (Fin m) Real E) (L : E →L[Real] Real) :
     L = ∑ i : Fin m, (L (bE i)) • LinearMap.toContinuousLinearMap (bE.coord i) := by
@@ -453,6 +458,8 @@ theorem clm_eq_sum_coord {m : ℕ}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem extDerivFun_tower_step
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -489,6 +496,7 @@ theorem extDerivFun_tower_step
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem contDiffAt_chartRep
     (f : M → Real) (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)
     (x₀ : M) {y : M} (hy : y ∈ (chartAt H x₀).source) :
@@ -513,6 +521,7 @@ theorem contDiffAt_chartRep
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem writtenInExtChartAt_real_apply (x₀ : M) (g : M → Real) (z : E) :
     writtenInExtChartAt I 𝓘(Real, Real) x₀ g z = g ((extChartAt I x₀).symm z) := by
   simp [writtenInExtChartAt]
@@ -541,6 +550,8 @@ noncomputable def towerStep (gRef : SmoothRiemannianMetric I M)
 
 
 
+omit [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem fderiv_chartRep_eq_towerStep
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -592,6 +603,8 @@ theorem fderiv_chartRep_eq_towerStep
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_contMDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -607,6 +620,7 @@ theorem covDerivOfField_eval_contMDiff
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
     (c : E →L[Real] Real) (hg : ContDiffAt Real (∞ : WithTop ℕ∞) g z₀) :
     ‖iteratedFDeriv Real rr (fun z : E => g z • c) z₀‖
@@ -629,6 +643,7 @@ theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
 
 
 
+omit [IsManifold I 2 M] in
 theorem iteratedFDeriv_comp_le_tower
     (gRef : SmoothRiemannianMetric I M)
     {x₀ : M} {Kc : Set M} (hKc : IsCompact Kc)
@@ -861,6 +876,7 @@ theorem iteratedFDeriv_comp_le_tower
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem bumpMul_contDiff {χ g : E → Real} {U : Set E} (hU : IsOpen U)
     (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (htsupp : tsupport χ ⊆ U)
     (hg : ContDiffOn Real (∞ : WithTop ℕ∞) g U) :
@@ -880,6 +896,7 @@ theorem bumpMul_contDiff {χ g : E → Real} {U : Set E} (hU : IsOpen U)
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
     (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (hgg : ContDiff Real (∞ : WithTop ℕ∞) gg)
     {Bχ Bg : Real} (hBχ0 : 0 ≤ Bχ) (hBg0 : 0 ≤ Bg)
@@ -916,6 +933,7 @@ theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricComp_iter_le
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -982,6 +1000,8 @@ theorem metricComp_iter_le
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem chartGram_germ
     (gRef g : SmoothRiemannianMetric I M) (x₀ : M) {Kc : Set M}
     (hKchart : Kc ⊆ (chartAt H x₀).source) {y : M} (hy : y ∈ Kc)
@@ -1036,6 +1056,7 @@ theorem chartGram_germ
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_iter_le
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -1075,6 +1096,7 @@ theorem chartGram_iter_le
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_of_orders
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -1092,6 +1114,7 @@ theorem chartGram_of_orders
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_le
     [CompactSpace M]
     {ι : Type*}
@@ -1140,6 +1163,7 @@ theorem chartGram_pou_le
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_bnd
     [CompactSpace M]
     {ι : Type*}
@@ -1166,6 +1190,7 @@ theorem chartGram_pou_bnd
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d1
     [CompactSpace M]
     {ι : Type*}
@@ -1206,6 +1231,7 @@ theorem chartGram_pou_d1
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d2
     [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
     {ι : Type*}
@@ -1267,6 +1293,7 @@ theorem chartGram_pou_d2
 
 
 
+omit [IsManifold I 2 M] in
 theorem chartGram_pou_d3
     [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
     {ι : Type*}
@@ -1346,6 +1373,7 @@ theorem chartGram_pou_d3
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricComp_iteratedFDeriv_le
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1367,6 +1395,7 @@ theorem metricComp_iteratedFDeriv_le
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricComp_iter_refs
     (gRef : ℕ → SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1437,6 +1466,7 @@ theorem metricComp_iter_refs
 
 
 
+omit [IsManifold I 2 M] in
 theorem exists_chart_engineInput
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -1575,6 +1605,7 @@ theorem exists_chart_engineInput
 
 
 
+omit [IsManifold I 2 M] in
 theorem exists_chart_cInfConv
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)

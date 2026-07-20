@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,6 +41,8 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 local notation "dimE" => Module.finrank ℝ E
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero dimE] in
 private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -127,6 +129,8 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero dimE] in
 private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -232,6 +236,8 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero dimE] in
 private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -456,6 +462,8 @@ private noncomputable def weightedGradChartCoeff
       a.1.1 a.2.2.2.1 a.1.2 a.2.2.2.2 y *
     covChartMetricGramInv (I := I) (M := M) g r s α y a.2.1 P₀
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero dimE] in
 private lemma weightedGradChartCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P₀ : CompIdx E r s)
     (l : Fin dimE)
@@ -508,6 +516,8 @@ private lemma weightedGradCoeff_eq_chartCoeffSum
   unfold weightedGradChartCoeff
   ring
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero dimE] in
 private lemma exists_gradientGroup_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -660,6 +670,8 @@ private lemma exists_gradientGroup_wkpNorm_le
     h_partial_le).trans ?_
   rw [ENNReal.ofReal_sum_of_nonneg (fun l _ => hKl_nn l)]
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero dimE] in
 theorem tensorComponentWeakRHS_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)

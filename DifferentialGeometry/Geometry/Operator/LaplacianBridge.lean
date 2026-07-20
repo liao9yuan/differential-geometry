@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvari
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -34,6 +33,8 @@ variable [T2Space M] [SigmaCompactSpace M]
 omit [NeZero (Module.finrank Real E)] in
 
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem divergence_levi_eq
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -99,6 +100,8 @@ theorem divergence_levi_eq
 omit [NeZero (Module.finrank Real E)] in
 
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem laplacian_levi_eq
     (g : SmoothRiemannianMetric I M) {f : M → Real}
     (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
@@ -110,6 +113,8 @@ theorem laplacian_levi_eq
 omit [NeZero (Module.finrank Real E)] in
 
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta
     (G : RealizedMetricFamily (I := I) (M := M) Real) (t : Real)
     {f : M → Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)

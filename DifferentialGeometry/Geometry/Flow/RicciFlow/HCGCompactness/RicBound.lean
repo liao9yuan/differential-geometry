@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -63,20 +62,21 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 open DifferentialGeometry.PDE.RicciFlow in
 
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem normSq0S_nonneg'
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     0 ≤ Tensor0SBundle.normSq0S (I := I) g x s A := by
@@ -94,7 +94,12 @@ private theorem normSq0S_nonneg'
 
 
 
+omit [Module.Finite ℝ E] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [IsManifold I 1 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem mcdNorm_eq_at
+    [Module.Finite ℝ E]
     (h gRef : SmoothRiemannianMetric I M) (N : Nat) (x : M) :
     metricCovDerivNorm (I := I) N h gRef x =
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
@@ -156,7 +161,11 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem perDomain
+    [Module.Finite ℝ E]
     (gRef : SmoothRiemannianMetric I M)
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -519,7 +528,11 @@ private theorem perDomain
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ric_tower_const
+    [Module.Finite ℝ E]
     {K U : Set M}
     {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
@@ -737,7 +750,11 @@ private theorem ric_tower_const
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ric_bound
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -777,7 +794,11 @@ noncomputable def nablaRicReal
     (ricCovTower (I := I) (gSeq i s) gRef p x).domDomCongr (acEquiv p)
 
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicReal_normSq
+    [Module.Finite ℝ E]
     (gSeq : Nat → Real → SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M) (p i : Nat) (s : Real) (x : M) :
     Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
@@ -799,7 +820,11 @@ theorem nablaRicReal_normSq
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ric_bound_const
+    [Module.Finite ℝ E]
     {K U : Set M}
     {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
@@ -832,7 +857,11 @@ theorem ric_bound_const
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ric_bound_field
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -865,7 +894,11 @@ theorem ric_bound_field
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem normsq_evol_of_comp
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {p : Nat}
@@ -1039,7 +1072,11 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem hevComp_of_solutions
+    [Module.Finite ℝ E]
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M} {N : Nat}
@@ -1104,7 +1141,11 @@ theorem hevComp_of_solutions
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covOrderBound_stage
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1158,7 +1199,11 @@ theorem covOrderBound_stage
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covOrderBound_tower
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}
@@ -1233,7 +1278,10 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem covOrderBound_of_soln
+    [Module.Finite ℝ E]
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
     {gRef : SmoothRiemannianMetric I M}

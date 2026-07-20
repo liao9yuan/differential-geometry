@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenc
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -35,16 +34,17 @@ open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle TensorLieDeriv
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem chartRep_towerScalar_contDiffOn
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -73,6 +73,8 @@ theorem chartRep_towerScalar_contDiffOn
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerScalar_contDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -94,6 +96,8 @@ theorem bumpTowerScalar_contDiff
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpFderiv_eq_chartTowerStep
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -138,6 +142,8 @@ theorem bumpFderiv_eq_chartTowerStep
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_chartConv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -180,6 +186,7 @@ theorem bumpTowerStep_chartConv
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
     (hf : ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f (chartAt H x₀).source) :
     ContDiffOn Real (∞ : WithTop ℕ∞)
@@ -209,6 +216,8 @@ set_option linter.unusedVariables false in
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTower_slotExpand_conv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -317,6 +326,8 @@ theorem bumpTower_slotExpand_conv
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_split
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -361,6 +372,8 @@ theorem bumpTowerStep_split
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerStepScalar_contDiff
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -417,6 +430,8 @@ theorem bumpTowerStepScalar_contDiff
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCons_conv
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -497,6 +512,8 @@ theorem bumpTowerCons_conv
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCarrier_step
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -578,6 +595,8 @@ theorem bumpTowerCarrier_step
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem bumpTowerCarrier_all
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -632,6 +651,7 @@ theorem bumpTowerCarrier_all
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
     ∃ (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -679,6 +699,8 @@ theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem hbase_of_framePairs
     (gRef : SmoothRiemannianMetric I M)
     (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -762,6 +784,8 @@ theorem hbase_of_framePairs
 
 
 
+omit [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem engine_input_family
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)

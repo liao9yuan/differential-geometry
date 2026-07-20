@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,8 @@ noncomputable def chartFrameVec (α : M) (i : Fin (Module.finrank ℝ E))
     (x : M) : TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturckvf_chart_smooth_in_g_jet
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -47,6 +49,8 @@ theorem deturckvf_chart_smooth_in_g_jet
       : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturckvf_chart_component_smooth_in_g_input
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -60,6 +64,7 @@ theorem deturckvf_chart_component_smooth_in_g_input
     (deTurckVF (I := I) g g_bg
       : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem liederivmetric_chart_smooth_in_g_w_jet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -69,6 +74,8 @@ theorem liederivmetric_chart_smooth_in_g_w_jet [I.Boundaryless]
       (chartAt H α).source :=
   chartLieDerivMetricMatrix_contMDiffOn (I := I) g W α i j
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem liederivmetric_chart_component_smooth_in_g_w_input
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -190,6 +197,8 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
     rw [hb i, hb j]
   exact h_chart_at.contMDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_chartFrameComponent_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -228,6 +237,8 @@ theorem ricciTensor_chartFrameComponent_contMDiffOn
     rw [hb i, hb j]
   exact h_chart_at.contMDiffWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem combine_smoothness_of_summands
     (g_bg g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -273,6 +284,8 @@ theorem combine_smoothness_of_summands
   refine ContMDiffOn.congr ?_ (fun x _ => (h_unfold x).symm)
   exact ((contMDiffOn_const (c := (-2 : ℝ))).mul hRic).add hLie
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem linearity_in_second_derivatives
     (g_bg g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -283,6 +296,8 @@ theorem linearity_in_second_derivatives
       (chartAt H α).source :=
   combine_smoothness_of_summands (I := I) g_bg g α i j
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_isSmoothQuasilinear [I.Boundaryless]
     (g_bg : SmoothRiemannianMetric I M) :
     IsSmoothQuasilinearMetricRHS (I := I)

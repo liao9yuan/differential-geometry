@@ -4,7 +4,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -24,12 +23,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -71,6 +69,7 @@ def rawRightTensor1
   (continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
     (rawRightCLM (I := I) (M := M) A hA v)
 
+omit [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem rawRightTensor1_apply
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
@@ -117,6 +116,7 @@ def tensor02OfRawAt
 
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02OfRawAt_realizes
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -126,6 +126,7 @@ theorem tensor02OfRawAt_realizes
   rfl
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02_realizes_ext
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {T U : Tensor02At (I := I) (M := M) x}
@@ -140,6 +141,7 @@ theorem tensor02_realizes_ext
   rw [hm, hT, hU]
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_idem
     (A : RawTwoTensorField (I := I) (M := M)) :
     rawSym2 (I := I) (M := M) (rawSym2 (I := I) (M := M) A) =
@@ -149,6 +151,7 @@ theorem rawSym2_idem
   ring
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_eq_of_symm
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x) :
@@ -181,6 +184,7 @@ def Tensor02ReactionAt.toRawSymm
       0
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_eval_of_bilin
     (N : Tensor02ReactionAt (I := I) (M := M))
     (t : Real) (g : SmoothRiemannianMetric I M)
@@ -198,6 +202,7 @@ theorem Tensor02ReactionAt.toRawSymm_eval_of_bilin
 
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_symmInputOn
     (G : Real -> SmoothRiemannianMetric I M)
     (N : Tensor02ReactionAt (I := I) (M := M)) (U : Set Real) :
@@ -215,6 +220,7 @@ def TensorReactionOutputBilinearOn
     TwoTensorBilinearAt (I := I) (M := M) (N t (G t) A) x
 
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_output_bilin
     (G : Real -> SmoothRiemannianMetric I M)
     (N : Tensor02ReactionAt (I := I) (M := M)) (U : Set Real) :

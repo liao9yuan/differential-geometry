@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -36,12 +35,12 @@ open scoped Manifold ContDiff Topology BigOperators
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [I.Boundaryless]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
@@ -53,7 +52,11 @@ def acEquiv : (m : ℕ) → Fin (2 + m) ≃ Fin (m + 2)
 
 
 
-theorem metricCovDerivStep_eq_covStep (gRef : SmoothRiemannianMetric I M) (a : ℕ)
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem metricCovDerivStep_eq_covStep
+    [FiniteDimensional Real E]
+    (gRef : SmoothRiemannianMetric I M) (a : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (a + 2)) :
     metricCovDerivStep (I := I) gRef a A = covStep (I := I) gRef (a + 2) A := by
@@ -63,7 +66,12 @@ theorem metricCovDerivStep_eq_covStep (gRef : SmoothRiemannianMetric I M) (a : �
 
 
 
-theorem covDerivOfField_eq_iterCov (gRef : SmoothRiemannianMetric I M)
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem covDerivOfField_eq_iterCov
+    [FiniteDimensional Real E]
+    (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2) (m : ℕ) :
     covDerivOfField (I := I) gRef A0 m =
@@ -83,7 +91,12 @@ theorem covDerivOfField_eq_iterCov (gRef : SmoothRiemannianMetric I M)
 
 
 
-theorem metricCovDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] [IsManifold I 1 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem metricCovDerivNorm_eq_iterCov
+    [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) (N : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
@@ -107,7 +120,12 @@ theorem metricCovDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq I
 
 
 
-theorem metricDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem metricDerivNorm_eq_iterCov
+    [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gk gInf gRef : SmoothRiemannianMetric I M) (N : ℕ) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
@@ -142,7 +160,10 @@ theorem metricDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem diffNorm_zero_change
+    [FiniteDimensional Real E]
     (A B gNorm gBase : SmoothRiemannianMetric I M) (x : M) {C : Real}
     (hC : 1 ≤ C)
     (hequiv : ∀ v : TangentSpace I x,
@@ -163,7 +184,11 @@ theorem diffNorm_zero_change
 
 
 
-theorem metricDerivNorm_self (a : Nat) (g gRef : SmoothRiemannianMetric I M) (x : M) :
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem metricDerivNorm_self
+    [FiniteDimensional Real E]
+    (a : Nat) (g gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a g g gRef x = 0 := by
   classical
   unfold metricDerivNorm

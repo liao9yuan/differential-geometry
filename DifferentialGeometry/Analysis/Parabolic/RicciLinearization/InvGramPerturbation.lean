@@ -17,7 +17,7 @@ namespace RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,7 +27,7 @@ section PartialDerivAlgebra
 
 variable {i : Fin (Module.finrank ℝ E)} {y : E}
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_add (u v : E → ℝ)
     (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
     partialDeriv (E := E) i (fun y => u y + v y) y =
@@ -36,7 +36,7 @@ lemma partialDeriv_add (u v : E → ℝ)
   rw [fderiv_fun_add hu hv]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_sub (u v : E → ℝ)
     (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
     partialDeriv (E := E) i (fun y => u y - v y) y =
@@ -45,7 +45,7 @@ lemma partialDeriv_sub (u v : E → ℝ)
   rw [fderiv_fun_sub hu hv]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_smul (c u : E → ℝ)
     (hc : DifferentiableAt ℝ c y) (hu : DifferentiableAt ℝ u y) :
     partialDeriv (E := E) i (fun y => c y • u y) y =
@@ -54,7 +54,7 @@ lemma partialDeriv_smul (c u : E → ℝ)
   rw [fderiv_fun_smul hc hu]
   simp [ContinuousLinearMap.smulRight_apply, smul_eq_mul, mul_comm]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_const_smul (c : ℝ) (u : E → ℝ)
     (hu : DifferentiableAt ℝ u y) :
     partialDeriv (E := E) i (fun y => c • u y) y =
@@ -63,7 +63,7 @@ lemma partialDeriv_const_smul (c : ℝ) (u : E → ℝ)
   rw [fderiv_fun_const_smul hu c]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_const_mul (c : ℝ) (u : E → ℝ)
     (hu : DifferentiableAt ℝ u y) :
     partialDeriv (E := E) i (fun y => c * u y) y =
@@ -72,7 +72,7 @@ lemma partialDeriv_const_mul (c : ℝ) (u : E → ℝ)
   rw [fderiv_const_mul hu c]
   simp [ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_mul (u v : E → ℝ)
     (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
     partialDeriv (E := E) i (fun y => u y * v y) y =
@@ -82,7 +82,7 @@ lemma partialDeriv_mul (u v : E → ℝ)
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_sum {ι : Type*} (s : Finset ι) (A : ι → E → ℝ)
     (hA : ∀ k ∈ s, DifferentiableAt ℝ (A k) y) :
     partialDeriv (E := E) i (fun y => ∑ k ∈ s, A k y) y =
@@ -91,7 +91,7 @@ lemma partialDeriv_sum {ι : Type*} (s : Finset ι) (A : ι → E → ℝ)
   rw [fderiv_fun_sum hA]
   rw [ContinuousLinearMap.sum_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma partialDeriv_const (c : ℝ) :
     partialDeriv (E := E) i (fun _ : E => c) y = 0 := by
   unfold partialDeriv
@@ -115,25 +115,25 @@ instance : CoeFun (ChartMetricPerturbation E)
     (fun _ => Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → (E → ℝ)) :=
   ⟨ChartMetricPerturbation.toFun⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_mk
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → (E → ℝ))
     (hsymm : ∀ i j y, f i j y = f j i y) (hsmooth : ∀ i j, ContDiff ℝ ∞ (f i j)) :
     ⇑(ChartMetricPerturbation.mk f hsymm hsmooth) = f := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma symm (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
     h i j y = h j i y := h.symm' i j y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma symm_fun (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) :
     h i j = h j i := funext (h.symm i j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smooth (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (h i j) := h.smooth' i j
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma differentiableAt (h : ChartMetricPerturbation E)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     DifferentiableAt ℝ (h i j) y :=
@@ -144,11 +144,11 @@ instance : Zero (ChartMetricPerturbation E) :=
      symm' := fun _ _ _ => rfl
      smooth' := fun _ _ => contDiff_const }⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma zero_apply (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (0 : ChartMetricPerturbation E) i j y = 0 := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[ext] lemma ext {h h' : ChartMetricPerturbation E}
     (hyp : ∀ i j, (h i j) = (h' i j)) : h = h' := by
   cases h; cases h'; congr 1; funext i j; exact hyp i j
@@ -162,20 +162,20 @@ def raisedCovectorComp (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   ∑ n : Fin (Module.finrank ℝ E),
     chartInvGramMatrix (I := I) g x x m n * (chartModelBasis E).repr ξ n
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedCovectorComp_def (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (m : Fin (Module.finrank ℝ E)) :
     raisedCovectorComp (I := I) g x ξ m =
       ∑ n : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x m n * (chartModelBasis E).repr ξ n := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedCovectorComp_zero (g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin (Module.finrank ℝ E)) :
     raisedCovectorComp (I := I) g x (0 : E) m = 0 := by
   simp [raisedCovectorComp]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma sum_raisedCovectorComp_mul_repr
     (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     ∑ m : Fin (Module.finrank ℝ E),
@@ -193,7 +193,7 @@ def metricTrace (g : SmoothRiemannianMetric I M) (x : M)
     ∑ n : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g x x m n * h m n (extChartAt I x x)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma metricTrace_def (g : SmoothRiemannianMetric I M) (x : M)
     (h : ChartMetricPerturbation E) :
     metricTrace (I := I) g x h =
@@ -201,12 +201,12 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
         ∑ n : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x m n * h m n (extChartAt I x x) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma metricTrace_zero (g : SmoothRiemannianMetric I M) (x : M) :
     metricTrace (I := I) g x (0 : ChartMetricPerturbation E) = 0 := by
   simp [metricTrace]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricTrace_congr (g : SmoothRiemannianMetric I M) (x : M)
     {h h' : ChartMetricPerturbation E}
     (hyp : ∀ m n, h m n (extChartAt I x x) = h' m n (extChartAt I x x)) :
@@ -215,7 +215,7 @@ lemma metricTrace_congr (g : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun m _ =>
     Finset.sum_congr rfl (fun n _ => by rw [hyp m n]))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricTrace_eq_sum (g : SmoothRiemannianMetric I M) (x : M)
     (h : ChartMetricPerturbation E) :
     metricTrace (I := I) g x h =
@@ -235,7 +235,7 @@ def invGramPerturbation (g : SmoothRiemannianMetric I M) (α : M)
       chartInvGramOnE (I := I) g α l a y *
         chartInvGramOnE (I := I) g α b m y * h a b y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma invGramPerturbation_def (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (l m : Fin (Module.finrank ℝ E)) (y : E) :
     invGramPerturbation (I := I) g α h l m y =
@@ -244,13 +244,14 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
           chartInvGramOnE (I := I) g α l a y *
             chartInvGramOnE (I := I) g α b m y * h a b y := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma invGramPerturbation_zero (g : SmoothRiemannianMetric I M) (α : M)
     (l m : Fin (Module.finrank ℝ E)) (y : E) :
     invGramPerturbation (I := I) g α (0 : ChartMetricPerturbation E) l m y = 0 := by
   simp [invGramPerturbation]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramPerturbation_symm (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (l m : Fin (Module.finrank ℝ E)) (y : E) :
     invGramPerturbation (I := I) g α h l m y =

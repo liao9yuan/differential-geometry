@@ -12,7 +12,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -20,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma g_inner_eq_chartGramMatrix_basis
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -29,6 +30,7 @@ lemma g_inner_eq_chartGramMatrix_basis
       chartGramMatrix (I := I) g α x i j :=
   (chartGramMatrix_apply (I := I) g α x i j).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartBasisVecFiber_recompose
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -57,6 +59,7 @@ lemma chartBasisVecFiber_recompose
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [map_smul, hbasis i]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem g_inner_eq_chart_sum
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -106,6 +109,7 @@ theorem g_inner_eq_chart_sum
   rw [hchart i j, g_inner_eq_chartGramMatrix_basis (I := I) g α x i j]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sum_chartInvGramOnE_chartGramOnE_left
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -136,6 +140,7 @@ private lemma sum_chartInvGramOnE_chartGramOnE_left
   · rw [if_neg hmj]
     exact Matrix.one_apply_ne hmj
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sum_chartInvGramOnE_chartGramOnE_right
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -155,6 +160,7 @@ private lemma sum_chartInvGramOnE_chartGramOnE_right
         rw [chartInvGramOnE_symm (I := I) g α l m y])]
   exact sum_chartInvGramOnE_chartGramOnE_left (I := I) g α hy m j
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartGramOnE_swap_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (k a b : Fin (Module.finrank ℝ E)) (y : E) :
@@ -164,6 +170,7 @@ private lemma partialDeriv_chartGramOnE_swap_indices
   funext y'
   exact chartGramOnE_symm (I := I) g α a b y'
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}

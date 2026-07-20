@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -73,7 +72,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -96,6 +95,7 @@ private def freezeAllButSlots
       (TangentSpace I : M → Type _) :=
   Function.update Y q Z
 
+omit [FiniteDimensional ℝ E] in
 private theorem freezeAllButSlots_apply
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -427,12 +427,11 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -448,6 +447,8 @@ def rmFrozenSlotField
       (n := (∞ : WithTop ℕ∞)) 1 :=
   freezeAllBut04Field (I := I) (M := M) (S.base.rm04 t) q Y
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem rmFrozenSlotField_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -458,6 +459,8 @@ def rmFrozenSlotField
       oneFormAtSlot0S (I := I) (S.base.rm04 t x) (fun i : Fin 4 => Y i x) q :=
   rfl
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rmFrozenSlotField_apply_vec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -469,6 +472,8 @@ theorem rmFrozenSlotField_apply_vec
   freezeAllBut04Field_apply_vec (I := I) (M := M) (S.base.rm04 t) q Y x W
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem rmFrozen_connSmoothInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -495,6 +500,8 @@ def nablaRmFrozenSlotField
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRmFrozenSlotField_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -523,6 +530,7 @@ theorem nablaRmFrozenSlotField_realizes
 
 
 
+omit [SigmaCompactSpace M] in
 theorem nablaRmFrozenSlot_eval
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

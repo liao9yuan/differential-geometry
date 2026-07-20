@@ -15,7 +15,7 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +57,7 @@ theorem eigenSpan_pouHs_le_spectral (k : ℕ) :
   exact eigenSpan_pouHs_le_spectral_of_elliptic (I := I) (M := M) g F c k hC_nn
     (hC (finiteEigenCombo (I := I) (M := M) g F c))
 
+omit [BoundarylessManifold I M] in
 theorem finiteEigenComboHs_tensorHsToL2_eq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -133,6 +134,7 @@ def spectralPartialSum (u : TensorL2 0 2 g) (n : ℕ) : SmoothCcTensor g 0 2 :=
     (fun i => tensorL2Coeff (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i)
 
+omit [BoundarylessManifold I M] in
 theorem spectralPartialSum_toL2_tendsto (u : TensorL2 0 2 g) :
     Tendsto (fun n => (spectralPartialSum (I := I) (M := M) g u n : TensorL2 0 2 g))
       atTop (𝓝 u) := by
@@ -174,6 +176,7 @@ private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
 
 open scoped Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
     SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) k
@@ -260,6 +263,7 @@ private lemma weightedPartial_cauchySeq (u : TensorL2 0 2 g) (k : ℕ)
 
 open scoped Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
     ‖finiteEigenComboHs (I := I) (M := M) g
@@ -276,6 +280,7 @@ private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m 
 
 open scoped Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma dist_toHs_spectralPartialSum_le (u : TensorL2 0 2 g) (k : ℕ)
     {C : ℝ} (hC :
       ∀ (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))

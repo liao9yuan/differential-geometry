@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -36,12 +35,12 @@ open scoped Manifold ContDiff Topology BigOperators
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
@@ -53,7 +52,11 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem comp_cov_le
+    [FiniteDimensional Real E]
     {u : Set M} (hu : IsOpen u)
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (δ₀ δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -164,7 +167,11 @@ theorem comp_cov_accum {C : Real} {e δ : Nat → Real}
 
 
 
-theorem comp_cov_le_unif (p : ℕ) :
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+theorem comp_cov_le_unif
+    [FiniteDimensional Real E]
+    (p : ℕ) :
     ∃ Cp : Real, 0 ≤ Cp ∧
       ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
         [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']

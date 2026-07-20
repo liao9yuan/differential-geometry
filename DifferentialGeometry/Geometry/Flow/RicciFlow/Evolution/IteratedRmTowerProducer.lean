@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -94,12 +93,11 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -122,7 +120,10 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inner0S_orthoBasis_eq_compContract
+    [Module.Finite ℝ E]
     (g : SmoothMetric_gen I M) {x : M} {s : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -243,6 +244,7 @@ def ricStarArray {s : ℕ}
 
 
 
+omit [DecidableEq Idx] in
 theorem abs_ricStarArray_le {s : ℕ}
     (ric : Idx → Idx → Real) (cB : (Fin s → Idx) → Real)
     (Rbnd : Real) (hRbnd_nonneg : (0 : Real) ≤ Rbnd)
@@ -431,7 +433,11 @@ def combinedStarArray {s : ℕ}
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04Reaction_orthoBasis_eq_compContract
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (basis : (x : M) → Module.Basis Idx Real (TangentSpace I x))
@@ -502,7 +508,11 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKReactionAt_eq
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Tactic
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -514,6 +513,7 @@ theorem metricTrace_pos_of_posDef
     · exact ⟨⟨0, by simp [hdim]⟩, Finset.mem_univ _⟩
   rwa [metricTrace_eq_ricciEnd (I := I) g Ric]
 
+omit [FiniteDimensional ℝ E] in
 private theorem scalar_eq_of_trace_diag
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -540,6 +540,7 @@ private theorem scalar_eq_of_trace_diag
     _ = scalar0 := hscalar0.symm
 
 
+omit [FiniteDimensional ℝ E] in
 theorem orthonormal_invBasis3
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -600,6 +601,7 @@ theorem stdRmNormSq3_diag
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem stdRmComp_eq_diag
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -642,6 +644,7 @@ theorem stdRmComp_eq_diag
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem stdRmNormSq3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -662,6 +665,7 @@ theorem stdRmNormSq3_at
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_four_delta3_eq_stdRmNormSq3
     {Rm04 : Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)} :
@@ -742,6 +746,7 @@ theorem rmSqLe100ScalSq3
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem stdRmNormSq3_at_le
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -802,6 +807,7 @@ theorem normSqLeOfRicNonneg
   exact normSq0S_four_at_le (I := I) htrace_basis hdiag h1 h2 h3
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem ricciDiagAt_neg
     {Ric : Tensor02At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
@@ -819,6 +825,7 @@ private theorem ricciDiagAt_neg
     rw [hij]
     fin_cases i <;> fin_cases j <;> simp [ricciDiag3]
 
+omit [FiniteDimensional ℝ E] in
 private theorem scalar_eq_of_signed_trace_diag
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}

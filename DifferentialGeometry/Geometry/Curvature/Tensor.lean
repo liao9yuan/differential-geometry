@@ -75,7 +75,6 @@ import DifferentialGeometry.Tensor.RSTensor.Field
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unnecessarySimpa false
 
 
@@ -211,6 +210,7 @@ def tensor04StdOfOutAt {x : M} (Rm04Out : Tensor04At (I := I) (M := M) x) :
     Tensor04At (I := I) (M := M) x :=
   Rm04Out.domDomCongr tensor04StdToOutPerm
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem tensor04StdAt_apply
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -218,6 +218,7 @@ theorem tensor04StdAt_apply
     tensor04StdAt (I := I) (M := M) Rm04 X Y Z W =
       Rm04 (vec4 X Y Z W) := rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem tensor04OutAt_apply
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -225,6 +226,7 @@ theorem tensor04OutAt_apply
     tensor04OutAt (I := I) (M := M) Rm04 W X Y Z =
       Rm04 (vec4 X Y Z W) := rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem tensor04StdOfOutAt_apply
     {x : M} (Rm04Out : Tensor04At (I := I) (M := M) x)

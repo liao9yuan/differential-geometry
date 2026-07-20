@@ -17,7 +17,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,7 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 private lemma vec_norm_eq_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -65,6 +66,7 @@ private lemma vec_norm_eq_one_local
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
+omit [CompleteSpace E] in
 private lemma eigenval_pos_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -80,6 +82,7 @@ private lemma eigenval_pos_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
+omit [CompleteSpace E] in
 private lemma eigenval_le_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -95,6 +98,7 @@ private lemma eigenval_le_one_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).2
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -137,6 +141,7 @@ theorem eigenvector_chartComponent_perK_from_uniform_β_unconditional
       (chartTargetEuclid (I := I) (M := M) α)
   exact h_mono.trans (hCN_bd α P₀ i)
 
+omit [CompleteSpace E] in
 private lemma resolvent_eq_mul_eigenvector
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -150,6 +155,7 @@ private lemma resolvent_eq_mul_eigenvector
   rw [eigenvector_eq_resolvent_smul (I := I) (M := M) g r s i,
     smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
 
+omit [CompleteSpace E] in
 private lemma resolvent_chartComponent_eq_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -168,6 +174,7 @@ private lemma resolvent_chartComponent_eq_smul
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
         g r s) i) β Q
 
+omit [CompleteSpace E] in
 private lemma resolvent_chartComponent_coe_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

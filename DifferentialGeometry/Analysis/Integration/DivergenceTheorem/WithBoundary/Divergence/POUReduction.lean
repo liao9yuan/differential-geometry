@@ -38,6 +38,7 @@ example (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (smoothSmul
         (I := I) φ hφ X) x = φ x • X x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma scalarOnE_mdifferentiableWithinAt_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -104,6 +105,7 @@ private lemma mfderivWithin_chart_source_of_mdiff
     mfderivWithin I 𝓘(ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma mfderiv_factor_through_extChartAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -179,6 +181,7 @@ private lemma mfderiv_factor_through_extChartAt
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
+omit [InnerProductSpace ℝ E] in
 private lemma mfderiv_chartBasisVecFiber_within
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -193,6 +196,7 @@ private lemma mfderiv_chartBasisVecFiber_within
   rw [mfderiv_extChartAt_chartBasisVecFiber (I := I) α hx i]
   rfl
 
+omit [InnerProductSpace ℝ E] in
 theorem tangentSectionAction_chartLocal_within
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -217,6 +221,7 @@ theorem tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within (I := I) α hf hx i]
   exact smul_eq_mul ..
 
+omit [InnerProductSpace ℝ E] in
 private lemma chartCoeffOnE_mul_chartDensityOnE_differentiableWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -243,6 +248,7 @@ private lemma scalarOnE_differentiableWithinAt
     scalarOnE_contDiffOn (I := I) α hφ
   exact (hsmooth y hy).differentiableWithinAt (by simp)
 
+omit [InnerProductSpace ℝ E] in
 private lemma localDivergenceWithin_at_self_smoothSmul
     (g : SmoothRiemannianMetric I M) (x : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -381,6 +387,7 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     intro i _
     rw [hchartCoeff i]
 
+omit [InnerProductSpace ℝ E] in
 theorem divergence_g_with_boundary_smoothSmul [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -395,6 +402,7 @@ theorem divergence_g_with_boundary_smoothSmul [T2Space M]
   rw [divergence_g_with_boundary_def, divergence_g_with_boundary_def]
   exact localDivergenceWithin_at_self_smoothSmul (I := I) g x φ hφ X
 
+omit [InnerProductSpace ℝ E] in
 theorem divergence_g_with_boundary_add [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -495,6 +503,7 @@ theorem divergence_g_with_boundary_add [T2Space M]
         Finset.sum_congr rfl (fun i _ => hpartial_split i)]
   rw [Finset.sum_add_distrib, add_div]
 
+omit [InnerProductSpace ℝ E] in
 @[simp] theorem divergence_g_with_boundary_zero [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     ∀ x : M, divergence_g_with_boundary (I := I) g
@@ -570,6 +579,7 @@ theorem divergence_g_with_boundary_add [T2Space M]
         Finset.sum_eq_zero (fun i _ => hpartial_zero i)]
   rw [zero_div]
 
+omit [InnerProductSpace ℝ E] in
 theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)

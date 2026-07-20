@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] in
 private lemma exists_perAlphaSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -56,6 +57,7 @@ private noncomputable def perAlphaSobolevConstant
   Classical.choose
     (exists_perAlphaSobolevConstant (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     0 ≤ perAlphaSobolevConstant (I := I) (M := M) g r s α :=
@@ -63,6 +65,7 @@ private lemma perAlphaSobolevConstant_intrinsic_nonneg
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).1
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_intrinsic_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s)
@@ -78,6 +81,7 @@ private lemma perAlphaSobolevConstant_intrinsic_bound
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -102,6 +106,7 @@ private noncomputable def totalActiveSobolevConstant
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
     perAlphaSobolevConstant (I := I) (M := M) g r s α
 
+omit [CompleteSpace E] in
 private lemma totalActiveSobolevConstant_intrinsic_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActiveSobolevConstant (I := I) (M := M) g r s := by
@@ -110,6 +115,7 @@ private lemma totalActiveSobolevConstant_intrinsic_nonneg
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s α)
 
+omit [CompleteSpace E] in
 private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
@@ -132,6 +138,7 @@ private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
       perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
 
+omit [CompleteSpace E] in
 theorem tensorChartComponent_wkpNormChart_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

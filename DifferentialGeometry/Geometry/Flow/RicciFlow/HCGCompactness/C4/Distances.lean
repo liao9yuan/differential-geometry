@@ -306,7 +306,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 theorem speed_le_of_c0
@@ -361,13 +360,13 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
   [IsManifold I ∞ M] [SigmaCompactSpace M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 
 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem data_image_ball
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M]

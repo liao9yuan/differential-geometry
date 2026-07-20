@@ -94,6 +94,7 @@ theorem scalarLapHs_core
 
 
 
+omit [CompactSpace M] in
 theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))

@@ -225,6 +225,7 @@ private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_symm_contDiffOn_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -277,6 +278,7 @@ lemma chartAtlasPOU_symm_differentiableAt
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -295,6 +297,7 @@ lemma tensorChartComponentRaw_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorChartComp_eq_pou_mul_raw_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -311,6 +314,7 @@ private lemma tensorChartComp_eq_pou_mul_raw_pulled
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -331,6 +335,7 @@ private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
     (I := I) (M := M) g r s T α Idx Jdx hy, h_eq]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pou_mul_raw_eq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -359,6 +364,7 @@ private lemma chartPouEucl_toEuclidean_eq_pou_symm
   rw [chartPouEucl_apply_of_mem (I := I) (M := M) α hy, h_eq]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -379,6 +385,7 @@ private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he'
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -397,6 +404,7 @@ lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
   (pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he).fderiv_eq
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

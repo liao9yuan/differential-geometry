@@ -37,12 +37,15 @@ section RankCast
 
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covGrad_heq_congr_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad g r a Y) (covGrad g r b Z) := by
   subst h
   rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))
@@ -66,6 +69,8 @@ private theorem rfns_toSection_heq_congr_lg (g : SmoothRiemannianMetric I M)
   subst h
   rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rfns_iteratedCovGrad_covGrad_comm_lg (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (W : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r ((s + 1) + m) x
@@ -81,6 +86,7 @@ private def castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
 
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rfns_iteratedCovGrad_castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (b + j) x
@@ -105,11 +111,13 @@ def diffCurvOp : ∀ (p r : ℕ) (_ : SmoothCcTensor g 0 r), SmoothCcTensor g 0 
           (diffCurvOp p (r + 1) (covGrad (I := I) (M := M) g 0 r W))
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffCurvOp_zero (r : ℕ) (W : SmoothCcTensor g 0 r) :
     diffCurvOp (I := I) (M := M) g hX hY 0 r W =
       curvatureContraction (I := I) (M := M) g r W hX hY := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
     covGrad (I := I) (M := M) g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
       diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W +
@@ -122,6 +130,7 @@ theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffCurvOp_isOrderZeroCurvFactor :
     IsPointwiseLinearLocalOperator (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) where
   linear := by
@@ -160,6 +169,7 @@ noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -208,6 +218,7 @@ noncomputable def diffCurvPhi0 (g : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -427,6 +438,7 @@ variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
 
 include hkappa_nn hkappa in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + j) x

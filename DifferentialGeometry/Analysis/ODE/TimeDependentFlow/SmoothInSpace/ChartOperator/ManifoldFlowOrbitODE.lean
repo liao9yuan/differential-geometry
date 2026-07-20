@@ -87,6 +87,8 @@ theorem chartCloseDop_deriv_basepoint_apply
     exact chartCloseDop_basepoint_apply_eq_mfderiv (I := I) Φ_fam t x v
   rw [hPv]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem rawVariationalIdentity_of_orbitODE_factors
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -60,6 +60,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [PseudoEMetricSpace M] [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem hasMFDerivAt_proj
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     HasMFDerivAt I I
@@ -116,6 +119,10 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [Nonempty M] in
+omit [PseudoEMetricSpace M] [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 private theorem proj_pathELength_eq
     (g : SmoothRiemannianMetric I M)
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -177,6 +184,10 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [Nonempty M] in
+omit [SecondCountableTopology M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem proj_lipschitzWith_one [RegularSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -253,6 +264,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -498,6 +511,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M] [SecondCountableTopology M] in
 theorem sheet_homeomorph [Nonempty M] (y : M) :
     ∃ (U : Set M) (_hU : IsOpen U) (_hyU : y ∈ U)
       (y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -539,6 +553,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem lift_the_limit [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)
@@ -597,6 +613,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem completeSpace_of_complete [Nonempty M] [CompleteSpace M]
     [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
     (g : SmoothRiemannianMetric I M)

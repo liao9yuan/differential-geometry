@@ -61,11 +61,11 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 
 
 private lemma sphere_isCompact :
@@ -475,9 +475,6 @@ theorem chartInvGram_quad_le
           chartInvGramMatrix (I := I) g α b i j * ξ i * ξ j) := by
       rw [hcoord]
       simp
-
-omit [InnerProductSpace ℝ E] in
-
 
 theorem chartInvGram_ent_le
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}

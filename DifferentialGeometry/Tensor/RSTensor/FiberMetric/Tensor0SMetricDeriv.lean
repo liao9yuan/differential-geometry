@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.Deriv.Prod
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -184,6 +183,7 @@ theorem hasDerivWithinAt_coordContract {s : Nat}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordContract_eq_coordInner0S {s : Nat} {x : M}
     (gInv : Idx -> Idx -> Real)
     (A B : Tensor0SSpace s I x)
@@ -280,6 +280,7 @@ private theorem sum_one_idx {Idx : Type*} [Fintype Idx]
   funext a
   simpa [Equiv.funUnique] using congrArg I0 (Subsingleton.elim a (0 : Fin 1))
 
+omit [FiniteDimensional ℝ E] in
 private theorem eval2_sum_left {Idx : Type*} [Fintype Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Q : Tensor0SSpace 2 I x) (c : Idx -> Real)
@@ -317,6 +318,7 @@ private theorem eval2_sum_left {Idx : Type*} [Fintype Idx] {x : M}
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hupdate]
 
+omit [FiniteDimensional ℝ E] in
 private theorem eval2_sum_right {Idx : Type*} [Fintype Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Q : Tensor0SSpace 2 I x) (X : TangentSpace I x)

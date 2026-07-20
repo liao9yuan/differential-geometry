@@ -9,7 +9,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -49,6 +48,7 @@ section ConnectionEndomorphism
 
 variable [IsManifold I 2 M]
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 private theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (t : Finset ι) (σ : ι → (x : M) → TangentSpace I x)
@@ -80,6 +80,7 @@ omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 
 
 
+omit [IsManifold I n M] in
 lemma covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
@@ -629,6 +630,7 @@ theorem covariantDerivative_modelInChart_eq_sum
 
 
 
+omit [IsManifold I n M] in
 lemma connectionEndomorphismInChart_apply_contDiffWithinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
@@ -718,6 +720,7 @@ lemma connectionEndomorphismInChart_apply_contDiffWithinAt
 
 
 
+omit [IsManifold I n M] in
 lemma connectionEndomorphismInChart_contDiffWithinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)

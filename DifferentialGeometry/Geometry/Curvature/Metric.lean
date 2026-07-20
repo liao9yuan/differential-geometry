@@ -16,7 +16,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -39,7 +38,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -48,6 +47,7 @@ noncomputable def metricCov (g : SmoothRiemannianMetric I M) :
   DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (I := I) (E := E) (M := M) (metricCov (I := I) (M := M) g) ∞ := by
@@ -57,6 +57,7 @@ theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCov_congr_nhds
     (g : SmoothRiemannianMetric I M)
     {Y Y' : (y : M) → TangentSpace I y} {x : M}
@@ -101,6 +102,7 @@ noncomputable def metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) :
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricRicciAt_eq_trace (g : SmoothRiemannianMetric I M) (x : M) :
     metricRicciAt (I := I) g x
       = DifferentialGeometry.Integral.Connection.ricciFromRm13At
@@ -109,6 +111,7 @@ theorem metricRicciAt_eq_trace (g : SmoothRiemannianMetric I M) (x : M) :
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricScalarAt_def (g : SmoothRiemannianMetric I M) (x : M) :
     metricScalarAt (I := I) g x
       = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g
@@ -146,12 +149,14 @@ noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
     (I := I) (M := M) (metricCov (I := I) (M := M) g)
     (metricCov_smooth (I := I) (M := M) g)
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRm04_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm04 (I := I) (M := M) g x =
       metricRm04At (I := I) (M := M) g x := by
   simp [metricRm04, metricRm04At]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem metricRm04StdAt_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -189,6 +194,7 @@ noncomputable def metricRm04LastDualAt
             (vec4 (I := I) X Y Z W)
     convert h using 1
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem metricRm04LastDualAt_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -196,12 +202,14 @@ noncomputable def metricRm04LastDualAt
       metricRm04StdAt (I := I) (M := M) g x X Y Z W := by
   rfl
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRm13_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm13 (I := I) (M := M) g x =
       metricRm13At (I := I) (M := M) g x := by
   simp [metricRm13, metricRm13At]
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRicci_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRicci (I := I) (M := M) g x =
@@ -234,6 +242,7 @@ noncomputable def metricCurvData
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricScalar_smooth
     (g : SmoothRiemannianMetric I M) :
     ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
@@ -245,6 +254,7 @@ theorem metricScalar_smooth
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricScalar_const_of_dScalar_zero
     [I.Boundaryless] [ConnectedSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -283,6 +293,7 @@ theorem metricScalar_const_of_dScalar_zero
 
 
 
+omit [SigmaCompactSpace M] in
 theorem nablaRic_ein3
     (g : SmoothRiemannianMetric I M)
     (hEin : ∀ x : M, ∀ v w : TangentSpace I x,

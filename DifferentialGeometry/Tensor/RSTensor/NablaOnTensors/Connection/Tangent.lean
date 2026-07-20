@@ -12,7 +12,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -31,6 +30,7 @@ section TangentCovariantDerivative
 
 variable [IsManifold I 1 M]
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 theorem covariantDeriv_vectorField_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (∞ : WithTop ℕ∞))
@@ -58,6 +58,7 @@ noncomputable def covSection
     simpa [covariantDeriv_vectorField] using
       covariantDeriv_vectorField_contMDiff (I := I) cov hcov X Y
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 @[simp] theorem covSection_apply
     [VectorBundle 𝕜 E (TangentSpace I : M → Type _)]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -76,6 +77,7 @@ noncomputable def tangentFieldModelInChart (x₀ : M)
 
 
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 theorem tangentFieldModelInChart_tangentConstInChart_apply_of_mem
     (x₀ : M) {y : E} (hy : y ∈ (extChartAt I x₀).target) (v : E) :
     tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀
@@ -91,6 +93,7 @@ theorem tangentFieldModelInChart_tangentConstInChart_apply_of_mem
 
 
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 theorem tangentConstInChart_self_continuousLinearMapAt
     (x : M) (v : TangentSpace I x) :
     tangentConstInChart (𝕜 := 𝕜) (I := I) x
@@ -105,6 +108,7 @@ theorem tangentConstInChart_self_continuousLinearMapAt
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem tangentField_eq_sum_modelCoord_tangentConst_eventually_of_mem
     (x₀ : M) (V : (x : M) → TangentSpace I x) {p₀ : M}
     (hp₀ : p₀ ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet) :
@@ -159,6 +163,7 @@ theorem tangentField_eq_sum_modelCoord_tangentConst_eventually_of_mem
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem tangentField_eq_sum_modelCoord_tangentConst_eventually
     (x₀ : M) (V : (x : M) → TangentSpace I x) :
     V =ᶠ[𝓝 x₀]
@@ -175,6 +180,7 @@ theorem tangentField_eq_sum_modelCoord_tangentConst_eventually
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 
 
+omit [IsManifold I n M] in
 lemma tangentConstInChart_contMDiffOn_baseSet (x₀ : M) (v : E)
     [IsManifold I (n + 1) M] :
     CMDiff[(trivializationAt E (TangentSpace I) x₀).baseSet] n

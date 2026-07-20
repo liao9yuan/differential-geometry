@@ -103,7 +103,17 @@ theorem exists_frame_offDiag_curvature_sum_fiberNormSq_bound
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * Cx, ?_, hbound⟩
   positivity
 
+section FrozenFrame
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem frozenFrameTrace_eq_rawTensorConnLap_fixedFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x y : M) :
@@ -113,6 +123,7 @@ theorem frozenFrameTrace_eq_rawTensorConnLap_fixedFrame
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorSecondCovDeriv_def]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frozenFrameTrace_eq_rawTensorConnLap_of_mem_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -127,6 +138,7 @@ theorem frozenFrameTrace_eq_rawTensorConnLap_of_mem_nbhd
     (fun i => smoothOrthoFrame_smooth (I := I) g x i) y
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g x hy i j)).symm
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem rawTensorConnLap_eventuallyEq_frozenFrameTrace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -138,6 +150,8 @@ theorem rawTensorConnLap_eventuallyEq_frozenFrameTrace
       frozenFrameTrace (I := I) g r s T x y := by
   filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x] with y hy
   exact (frozenFrameTrace_eq_rawTensorConnLap_of_mem_nbhd (I := I) g r s T hT_total x hy).symm
+
+end FrozenFrame
 
 end Connection
 end Integral

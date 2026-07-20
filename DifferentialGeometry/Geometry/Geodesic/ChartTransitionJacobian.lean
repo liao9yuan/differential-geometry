@@ -21,7 +21,7 @@ namespace Geometry
 namespace Riemannian
 namespace Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,7 @@ def chartTransitionJacEntry (α β : M) (x : E)
   (chartModelBasis E).repr
     (chartTransitionAt (I := I) α β x ((chartModelBasis E) a)) i
 
+omit [IsManifold I ∞ M] in
 @[simp] lemma chartTransitionJacEntry_def (α β : M) (x : E)
     (i a : Fin (Module.finrank ℝ E)) :
     chartTransitionJacEntry (I := I) α β x i a =

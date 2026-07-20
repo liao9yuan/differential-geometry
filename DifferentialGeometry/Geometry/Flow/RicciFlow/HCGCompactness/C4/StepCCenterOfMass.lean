@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInput
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -30,7 +29,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -110,6 +109,7 @@ variable {g : SmoothRiemannianMetric I M} {ι : Type} [Fintype ι]
   (h : CenterInput (I := I) g μ pts join p r)
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem grad_half_self (q : M)
     (hdiff :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -228,6 +228,7 @@ theorem dist_le {qstar : M} {ε : ℝ} (hε : 0 ≤ ε)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_diff {x : M}
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

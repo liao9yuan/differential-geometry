@@ -25,8 +25,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SNabla
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,15 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+section MetricTraceAlgebra
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
 noncomputable def metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -49,6 +58,7 @@ noncomputable def metricTraceHessian
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma metricTraceHessian_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -58,6 +68,7 @@ lemma metricTraceHessian_def
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -73,6 +84,7 @@ noncomputable def firstSlotHessMap
     (tensorCov (I := I) g r s).toFun T x ∘L (LeviCivita (I := I) g).toFun Y x
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma firstSlotHessMap_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M)
@@ -84,6 +96,7 @@ omit [CompactSpace M] [I.Boundaryless] in
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorSecondCovDeriv_eq_firstSlotHessMap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -91,6 +104,7 @@ theorem tensorSecondCovDeriv_eq_firstSlotHessMap
       firstSlotHessMap (I := I) g r s Y T x (X x) := by
   rw [tensorSecondCovDeriv_def, firstSlotHessMap_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem metricTraceHessian_eq_gWeighted_firstSlot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -124,6 +138,7 @@ theorem metricTraceHessian_eq_gWeighted_firstSlot
       (smoothOrthoFrame (I := I) g x j x))]
   rw [if_pos (Finset.mem_univ i)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem thirdOrder_ricci_identity_firstSlot
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} {x : M}
@@ -139,6 +154,8 @@ theorem thirdOrder_ricci_identity_firstSlot
   exact tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 3
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
+
+end MetricTraceAlgebra
 
 theorem secondCovGrad_globalL2Bound_of_pointwise_curvatureBound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
@@ -162,6 +179,13 @@ theorem secondCovGrad_globalL2Bound_of_pointwise_curvatureBound
   secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound (I := I) (M := M) g T₀ C₀ hC₀ hpt
 
 section ChartInvGramBilinearTrace
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in

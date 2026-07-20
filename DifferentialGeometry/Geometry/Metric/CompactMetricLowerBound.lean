@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

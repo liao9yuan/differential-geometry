@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Chri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -33,7 +32,7 @@ open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable [InnerProductSpace ℝ E]
-variable [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable [FiniteDimensional ℝ E] [CompleteSpace E]
 variable [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
@@ -99,6 +98,8 @@ private lemma traceChristoffelAlg
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] in
 theorem lcTrace_halfTrace
     (g : SmoothRiemannianMetric I M) (x : M)
     (p : Fin (Module.finrank ℝ E)) :
@@ -170,6 +171,8 @@ theorem lcTrace_halfTrace
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] in
 theorem lcTrace_logDensity
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)

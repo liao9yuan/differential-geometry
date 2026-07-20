@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -149,6 +149,7 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     exact mul_le_mul_of_nonneg_right h1 hwsq_nn
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -197,6 +198,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b).map_add]
   exact norm_add_sq_le_two_mul_sq_add_sq _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

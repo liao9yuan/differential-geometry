@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -161,6 +161,7 @@ lemma approxPartialLp_tendsto
         g r s i α P k n) from funext h_term] at h_tendsto
   exact h_tendsto
 
+omit [CompleteSpace E] in
 lemma tendsto_componentSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -231,6 +232,7 @@ lemma tendsto_componentSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
+omit [CompleteSpace E] in
 lemma tendsto_partialSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -307,6 +309,7 @@ lemma tendsto_partialSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
+omit [CompleteSpace E] in
 lemma euclidPartial_tensorChartComponent_approx_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -326,6 +329,7 @@ lemma euclidPartial_tensorChartComponent_approx_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
       α P.1 P.2 k)
 
+omit [CompleteSpace E] in
 lemma memLp_factor_mul_componentAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -368,6 +372,7 @@ lemma memLp_factor_mul_componentAtom
       (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P.1 P.2)
 
+omit [CompleteSpace E] in
 lemma memLp_factor_mul_partialAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

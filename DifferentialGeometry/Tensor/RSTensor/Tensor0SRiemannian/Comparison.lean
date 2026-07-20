@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -85,6 +84,7 @@ private theorem prod_mu_le_pow
 variable [Fintype Idx]
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_eq_sum
     (s : Nat) (μ : Idx -> Real)
     (A : Tensor0SSpace s I x)
@@ -110,6 +110,7 @@ theorem coordInner0S_diagonal_eq_sum
     exact False.elim (hnotmem (Finset.mem_univ I0))
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum_sq
     (s : Nat) (A : Tensor0SSpace s I x)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -125,6 +126,7 @@ theorem coordInner0S_identity_eq_sum_sq
   simp
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum
     (s : Nat) (A B : Tensor0SSpace s I x)
     (basis : Module.Basis Idx Real (TangentSpace I x)) :
@@ -286,6 +288,7 @@ theorem normSq0S_three_identity_eq_sum
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_le_pow_identity
     (s : Nat) (μ : Idx -> Real) (C : Real)
     (hμ_nonneg : forall i : Idx, 0 <= μ i)
@@ -310,6 +313,7 @@ theorem coordInner0S_diagonal_le_pow_identity
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_diagonal
     (s : Nat) (μ : Idx -> Real) (m : Real) (hm : 0 < m)
     (hμ_lb : forall i : Idx, m <= μ i)
@@ -366,6 +370,7 @@ theorem normSq0S_diag_le
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_quad
     (s : Nat) (Q : Idx -> Idx -> Real) (C : Real) (hC : 0 < C)
     (hQsymm : forall i j : Idx, Q i j = Q j i)
@@ -600,6 +605,7 @@ theorem exists_diagInv_of_equiv
   exact ⟨mu, basis, hginv, hhinv, hmu_nonneg, hmu_le⟩
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metric_equiv_symm
     (g h : SmoothMetric_gen I M) (x : M) {C : Real}
     (hC : 1 <= C)

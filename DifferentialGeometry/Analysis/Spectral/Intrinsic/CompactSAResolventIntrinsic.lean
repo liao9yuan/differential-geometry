@@ -18,7 +18,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,6 +29,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] in
 theorem tensorResolventL2_isCompactOperator
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=
@@ -37,6 +38,7 @@ theorem tensorResolventL2_isCompactOperator
     (tensorH1ComplToTensorL2_isCompactOperator_intrinsic
       (I := I) (M := M) g r s)
 
+omit [CompleteSpace E] in
 theorem tensorResolventL2_isCompactOperator_isSelfAdjoint_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) ∧

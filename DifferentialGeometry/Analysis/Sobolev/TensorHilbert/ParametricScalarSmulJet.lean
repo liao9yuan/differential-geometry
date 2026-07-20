@@ -129,6 +129,7 @@ theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
       exact mul_inv_cancel₀ hvol.ne'
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem app_scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) :
     operatorFieldApply (I := I) (M := M) g 0 0 (scalarCc (I := I) (M := M) g zeta) U =

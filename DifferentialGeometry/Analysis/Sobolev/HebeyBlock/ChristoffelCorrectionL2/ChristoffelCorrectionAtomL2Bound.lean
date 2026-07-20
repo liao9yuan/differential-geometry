@@ -193,6 +193,7 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma g_inner_sum_smul_chartBasisVec_self_eq_double_sum
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (a : Fin (Module.finrank ℝ E) → ℝ) :
@@ -224,6 +225,7 @@ private lemma g_inner_sum_smul_chartBasisVec_self_eq_double_sum
   ring
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma g_inner_Phi_eq_double_sum
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)

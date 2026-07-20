@@ -25,7 +25,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ private noncomputable def covGradGradSection
     (fun y : M => w.toSection y) x
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradGradSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -51,6 +52,7 @@ private lemma covGradGradSection_apply
       tensorCovDerivAt (I := I) (M := M) g r s w x v := rfl
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradGradSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
@@ -120,6 +122,7 @@ private noncomputable def covGradSmoothSection
       (fun x : M => TensorRSSpace r (s + 1) I x)⟯)
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradSmoothSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) :
@@ -127,6 +130,8 @@ private lemma covGradSmoothSection_apply
       covGradBundleEquiv (I := I) (M := M) r s x
         (covGradGradSection (I := I) (M := M) g r s w x) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradSmoothSection_toModel_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport w.toFun) :
@@ -139,6 +144,7 @@ private lemma covGradSmoothSection_toModel_eq_zero_off_tsupport
     exact tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s w hx v
   rw [covGradSmoothSection_apply, hgrad_zero, map_zero, TensorRSSpace.toModel_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradSmoothSection_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
@@ -160,12 +166,14 @@ noncomputable def covGrad (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       hasCompactSupport :=
         covGradSmoothSection_hasCompactSupport (I := I) (M := M) g r s w }
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
     (covGrad (I := I) (M := M) g r s w).toSection =
       covGradSmoothSection (I := I) (M := M) g r s w := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) :
@@ -176,6 +184,7 @@ theorem covGrad_toSection_apply
   rw [covGrad_toSection, covGradSmoothSection_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_toSection_apply_eval
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M)
@@ -192,6 +201,8 @@ theorem covGrad_toSection_apply_eval
     (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
       (fun y : M => w.toSection y) x) D v
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradGradSection_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w₁ w₂ : SmoothCcTensor g r s) (x : M) :
@@ -204,6 +215,8 @@ private lemma covGradGradSection_add
     covGradGradSection_apply, covGradGradSection_apply]
   exact tensorCovDerivAt_add (I := I) (M := M) g r s w₁ w₂ x v
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradGradSection_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) (x : M) :
@@ -215,6 +228,7 @@ private lemma covGradGradSection_smul
     covGradGradSection_apply]
   exact tensorCovDerivAt_smul (I := I) (M := M) g r s c w x v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w₁ w₂ : SmoothCcTensor g r s) :
@@ -240,6 +254,7 @@ theorem covGrad_add
       covGradGradSection (I := I) (M := M) g r s w₂ x from rfl,
     covGradGradSection_add (I := I) (M := M) g r s w₁ w₂ x, map_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
@@ -259,6 +274,7 @@ theorem covGrad_smul
       covGradGradSection (I := I) (M := M) g r s w x from rfl,
     covGradGradSection_smul (I := I) (M := M) g r s c w x, map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem covGrad_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     covGrad (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) = 0 := by

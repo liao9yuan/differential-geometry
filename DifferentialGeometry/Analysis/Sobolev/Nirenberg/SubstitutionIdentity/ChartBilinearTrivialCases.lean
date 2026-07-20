@@ -13,7 +13,7 @@ namespace Analysis
 namespace Sobolev
 namespace SubstitutionDischargeFinal
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -308,6 +308,7 @@ theorem chartBilinear_substitution_identity_K_0_empty_unconditional
     chartBilinear_RHS (I := I) (M := M) D K_0 η k h :=
   chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
     D hK_0_empty η hη_supp_in_K_0 k h
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_substitution_identity_with_hypothesis
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -104,6 +104,7 @@ private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
   rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
   rw [chartBasisFamily_apply (I := I) α hb k]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centredFrame_gram_expand
     (g : SmoothRiemannianMetric I M) (α c : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -147,6 +148,7 @@ private noncomputable def centredCoordMatrix
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of (fun i k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b)
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centredCoordMatrix_orthonormal_form
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -192,6 +194,7 @@ private lemma centredCoordMatrix_orthonormal_form
   simp only [centredCoordMatrix, Matrix.of_apply]
   ring
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_orthonormality
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -236,6 +239,7 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -257,6 +261,7 @@ private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       (smoothOrthoFrame (I := I) g c i b)) h
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -326,6 +331,7 @@ private lemma centredOrthoFrameCoordMatrix_contMDiffOn
   intro b hb
   exact centredOrthoFrameCoordMatrix_eq_clmAt_proj (I := I) (M := M) g α c i k hb
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -361,6 +367,7 @@ private lemma centred_chartBasisVecFiber_mdiffAt
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -404,6 +411,8 @@ private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma centred_covApply_frameVec_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -499,6 +508,7 @@ private lemma centred_finsum_smul_section_mdiffAt
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -584,6 +594,7 @@ private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma centred_cov_RS_covApply_frameVec_eq_coord_expansion
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -782,6 +793,7 @@ private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
   rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -812,6 +824,8 @@ private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (smoothOrthoFrame (I := I) g b) (fun z : M => T₀.toSection z) b]
   rw [map_sum]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -871,6 +885,7 @@ set_option maxHeartbeats 800000
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma centredFrame_proj_summand_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1027,6 +1042,7 @@ private lemma centredFrame_proj_summand_expand
   rw [Finset.sum_congr rfl (fun l _ => hsummand l)]
   rw [Finset.sum_add_distrib]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma centredFrame_proj_principal_eq_invGramPrincipalSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1081,6 +1097,7 @@ private lemma centredFrame_proj_principal_eq_invGramPrincipalSum
   simp only [hP_def]
   rw [chartProjCLM_apply]
 
+omit [CompactSpace M] in
 private lemma rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1120,6 +1137,7 @@ private lemma rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
     (I := I) (M := M) g r s α T₀ Idx Jdx hb]
   exact hEq T₀ hb
 
+omit [CompactSpace M] in
 private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1256,6 +1274,7 @@ private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
   rw [hReduce]
   exact hDiff T₀ hb
 
+omit [CompactSpace M] in
 theorem rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -108,7 +107,7 @@ end GenericGlue
 section ExpBall
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -121,6 +120,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem exists_expBall_diffeo
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ}
     (hr : ENNReal.ofReal r < injRadius (I := I) g p)

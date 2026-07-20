@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -51,6 +50,7 @@ def IsLeviCivita
     (g : SmoothRiemannianMetric I M) : Prop :=
   IsMetricCompatible_gen (I := I) cov g /\ IsTorsionFree (I := I) cov
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatible_of_isLeviCivita
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -58,6 +58,7 @@ theorem metricCompatible_of_isLeviCivita
     IsMetricCompatible_gen (I := I) cov g :=
   h.1
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsionFree_of_isLeviCivita
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -65,6 +66,7 @@ theorem torsionFree_of_isLeviCivita
     IsTorsionFree (I := I) cov :=
   h.2
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem isLeviCivita_of_parts
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -100,6 +102,7 @@ structure LeviCivitaCalculusOn
   metricCompatible : IsMetricCompatibleFamilyOn (I := I) G
   torsionFree : IsTorsionFreeFamilyOn (I := I) G
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem isLeviCivitaFamilyOn_of_calculus
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}

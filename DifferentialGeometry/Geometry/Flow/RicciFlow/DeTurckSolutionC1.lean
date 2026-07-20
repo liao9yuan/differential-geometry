@@ -21,6 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxreg_solution_in_c1_via_sobolev_embedding
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -38,6 +39,7 @@ theorem maxreg_solution_in_c1_via_sobolev_embedding
   exact hcont_within_Ici.mono Set.Ico_subset_Ici_self
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem c1_norm_time_continuous_from_h1_time_derivative
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -52,6 +54,8 @@ theorem c1_norm_time_continuous_from_h1_time_derivative
       ContinuousWithinAt (fun s : ℝ => (g_DT s).inner x v w) (Set.Ici (0 : ℝ)) t :=
     (hderiv t ht x v w).continuousWithinAt
   exact hcont_within_Ici.mono Set.Ico_subset_Ici_self
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deturck_vf_continuous_in_c1_input
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

@@ -87,6 +87,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma resolvent_pow_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :

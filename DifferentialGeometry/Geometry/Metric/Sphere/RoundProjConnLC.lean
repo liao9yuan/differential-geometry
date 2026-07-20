@@ -96,6 +96,7 @@ theorem mfderiv_inner {F G : sphere (0 : E) 1 → E} {x : sphere (0 : E) 1}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem dIncl_mlieBracket
     (X Y : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
     (x : sphere (0 : E) 1) :
@@ -147,6 +148,7 @@ theorem dIncl_mlieBracket
   exact hbrx
 
 
+omit [FiniteDimensional ℝ E] in
 theorem projConn_torsion :
     (projConnCD (E := E) (n := n)).torsion = 0 := by
   haveI : IsManifold (𝓡 n) ∞ (sphere (0 : E) 1) :=
@@ -216,6 +218,7 @@ theorem projConn_metricCompat :
   · exact horth_right _ _ hmemY
 
 
+omit [FiniteDimensional ℝ E] in
 theorem projConn_eq_metricCov
     {Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x} {x : sphere (0 : E) 1}
     (hY : MDifferentiableAt (𝓡 n) (𝓡 n).tangent

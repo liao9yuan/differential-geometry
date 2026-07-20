@@ -40,6 +40,7 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N
 
 
 
+omit [I.Boundaryless] in
 theorem metricUniformEquivalentOn_pullback
     (K : Set N) (gRef h : SmoothRiemannianMetric I N) (C : ℝ)
     (hequiv : MetricUniformEquivalentOn (I := I) K gRef h C)
@@ -54,6 +55,7 @@ theorem metricUniformEquivalentOn_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem metricUniformEquivalentOnWindow_pullback
     (K : Set N) (β ψ : ℝ) (gRef : SmoothRiemannianMetric I N)
     (gSeq : ℕ → ℝ → SmoothRiemannianMetric I N) (B : ℝ → ℝ)
@@ -69,6 +71,7 @@ theorem metricUniformEquivalentOnWindow_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem solLowData_pullback
     (β ψ : ℝ) (gSeq : ℕ → ℝ → SmoothRiemannianMetric I N)
     (gRef : SmoothRiemannianMetric I N)
@@ -88,6 +91,7 @@ theorem solLowData_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem metricCovDerivNorm_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]
@@ -110,6 +114,7 @@ theorem metricCovDerivNorm_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem metricCovDerivOrderBoundOn_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]
@@ -128,6 +133,7 @@ theorem metricCovDerivOrderBoundOn_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem metricCovDerivOrderBoundOnWindow_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]
@@ -256,6 +262,7 @@ noncomputable def solLipData_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem solnMetricField_pullback
     [SigmaCompactSpace N] [T2Space N]
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := N) D) (Φ : M ≃ₘ⟮I, I⟯ N)
@@ -269,6 +276,7 @@ theorem solnMetricField_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem solnRicField_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]
@@ -284,6 +292,7 @@ theorem solnRicField_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem solnEvolField_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]
@@ -309,6 +318,7 @@ theorem solnEvolField_pullback
 
 
 
+omit [I.Boundaryless] in
 theorem solSwapData_pullback
     [NeZero (Module.finrank ℝ E)]
     [BoundarylessManifold I M] [BoundarylessManifold I N]

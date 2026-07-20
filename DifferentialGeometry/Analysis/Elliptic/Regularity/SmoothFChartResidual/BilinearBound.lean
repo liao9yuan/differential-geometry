@@ -22,7 +22,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -135,6 +135,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
   exact hK_bound hH_W12
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Λgrad_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -152,6 +153,7 @@ private lemma Λgrad_apply_of_mem
     else 0) = _
   rw [if_pos h_tgt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma Λgrad_iteratedFDeriv_bound
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -162,6 +164,7 @@ private lemma Λgrad_iteratedFDeriv_bound
     (gradInnerCoefI_M_smooth (I := I) (M := M) g α i)
     (tsupport_gradInnerCoefI_M_subset (I := I) (M := M) g α i) 1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_gradInnerPiece_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -362,6 +365,7 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
 
 section HeadlineAssembly
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (smoothRep (I := I) (M := M) g α v) := by
@@ -369,6 +373,7 @@ lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
   exact ((gradInnerPiece_smooth (I := I) (M := M) g α v).neg).sub
     (lapPiece_smooth (I := I) (M := M) g α v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tsupport_smoothRep_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (smoothRep (I := I) (M := M) g α v) ⊆ (chartAt H α).source := by
@@ -404,6 +409,7 @@ lemma tsupport_smoothRep_subset_source
   · exact tsupport_gradInnerPiece_subset_source (I := I) (M := M) g α v.toFun
   · exact tsupport_lapPiece_subset_source (I := I) (M := M) g α v.toFun
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -480,6 +486,7 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     exact (ENNReal.ofReal_pos.mpr h_pos).ne'
   exact h_vol_abs_weighted.ae_le h_fChart_smooth_ae
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -494,6 +501,7 @@ private lemma memWkp_chartPushedRaw_smoothRep
       (tsupport_smoothRep_subset_source (I := I) (M := M) g α v) 2
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_smoothRep_eq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (y : EuclN) :
     chartPushedRaw (I := I) (M := M) α
@@ -513,6 +521,7 @@ lemma chartPushedRaw_smoothRep_eq
         chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -543,6 +552,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (by exact hCP_smooth) hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (i : Fin (Module.finrank ℝ E)) :

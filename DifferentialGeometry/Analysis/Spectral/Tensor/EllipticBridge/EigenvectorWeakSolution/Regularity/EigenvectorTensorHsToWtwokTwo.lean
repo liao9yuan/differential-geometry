@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 open scoped Classical in
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
 private lemma sum_basisVec_coeff_apply
     (σ : ℝ) (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
     (T : tensorHs (I := I) (M := M) g r s σ)
@@ -59,6 +60,7 @@ private lemma sum_basisVec_coeff_apply
 
 end TensorHsSmoothReprAux
 
+omit [CompleteSpace E] in
 theorem tensorHs_eq_finset_sum_of_finite_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)

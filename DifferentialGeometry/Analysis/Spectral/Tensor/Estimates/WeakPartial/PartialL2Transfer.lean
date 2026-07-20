@@ -46,6 +46,7 @@ private lemma le_sum_of_mem_finset_nonneg
     Finset.sum_nonneg (fun j _ => hf_nn j)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -96,6 +97,7 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     mul_le_mul_of_nonneg_right h_ofReal_le (by exact zero_le _)
   exact (hCIJ_le (Idx, Jdx)).trans h_envelope_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M) :
@@ -160,6 +162,7 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => hCk_nn k)]
   exact mul_le_mul_of_nonneg_right h_ofReal_sum (by exact zero_le _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_S
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -179,6 +182,7 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_S
   exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (I := I) (M := M) g r s S α β k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_S
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M) :
     ∀ S : SmoothCcTensorH1 g r s,
@@ -198,6 +202,7 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
   exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (I := I) (M := M) g r s S α β
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_single_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -217,6 +222,7 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_s
   exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (I := I) (M := M) g r s S α α k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_single_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M) :

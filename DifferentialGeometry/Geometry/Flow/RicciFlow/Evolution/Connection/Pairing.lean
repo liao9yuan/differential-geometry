@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Compone
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -24,7 +23,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -78,6 +77,8 @@ def ConnectionVariationPairingEquationInFrameOnLocal
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionPairDt_eq_metricVariationRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -147,6 +148,8 @@ theorem connectionPairDt_eq_metricVariationRHS
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionVariationPairing_of_metricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -184,6 +187,8 @@ theorem connectionVariationPairing_of_metricVariation
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem connectionVariationPairing_of_ricciFlow
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -223,6 +228,8 @@ theorem connectionVariationPairing_of_ricciFlow
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connectionVariationPairing_of_koszul
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

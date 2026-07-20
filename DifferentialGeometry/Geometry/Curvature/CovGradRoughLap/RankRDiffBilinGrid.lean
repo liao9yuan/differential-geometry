@@ -30,12 +30,14 @@ section RankCastRS
 
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covGrad_heq_congr_dbRS (g : SmoothRiemannianMetric I M) (c : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b} (hYZ : HEq Y Z) :
     HEq (covGrad g c a Y) (covGrad g c b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetric I M) (c s m : ℕ)
     (X : SmoothCcTensor g c s) :
     HEq (iteratedCovGrad g c (s + 1) m (covGrad g c s X))
@@ -56,6 +58,8 @@ private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
       riemannianFiberNormSq (I := I) (M := M) g c b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rfns_iteratedCovGrad_covGrad_comm_dbRS (g : SmoothRiemannianMetric I M)
     (c s m : ℕ) (W : SmoothCcTensor g c s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g c ((s + 1) + m) x
@@ -95,6 +99,8 @@ namespace RankRaisingDiffBilinOp
 
 variable {g : SmoothRiemannianMetric I M} {c : ℕ}
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g c r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g c ((r + p) + j) x
@@ -222,6 +228,8 @@ theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
         (mul_le_mul_of_nonneg_left hB (by norm_num))
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : RankRaisingDiffBilinOp g c) :
     ∃ C : ℕ → ℕ → ℝ, (∀ r j, 0 ≤ C r j) ∧
       ∀ (r : ℕ) (W : SmoothCcTensor g c r) (j : ℕ) (x : M),
