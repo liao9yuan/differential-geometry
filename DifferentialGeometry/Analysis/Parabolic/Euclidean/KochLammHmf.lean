@@ -25,17 +25,18 @@ variable {V : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
   [MeasurableSpace V] [BorelSpace V]
 
-variable {U G F : Type*}
+variable {U G F H : Type*}
   [NormedAddCommGroup U]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
+  [NormedAddCommGroup H] [NormedSpace ℝ H]
 
 /-- The principal flux and quadratic-gradient term of a harmonic-map heat
 iterate form one Koch--Lamm split source.  The principal radii retain the
 small coefficient `ε`; the quadratic radii are genuinely quadratic in the
 two gradient controls. -/
 theorem klHmf_split {T : ℝ} {A₀ A₂ Aₚ ε K : ℝ≥0}
-    (A : ℝ × V → G →L[ℝ] F)
+    (A : ℝ × V → G →L[ℝ] H)
     (Q : ℝ × V → G →L[ℝ] G →L[ℝ] F)
     (u : ℝ × V → U) (d : ℝ × V → G)
     (hA : ∀ z, ‖A z‖ ≤ (ε : ℝ))

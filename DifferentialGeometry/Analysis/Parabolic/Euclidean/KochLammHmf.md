@@ -17,6 +17,10 @@ harmonic-map heat iterate into the exact `KLSplit` carrier:
 Thus the critical principal arm keeps the genuine small coefficient `ε`,
 while the lower-order arm is small on a small Koch--Lamm gradient ball. No
 pointwise weighted-gradient surrogate and no false horizon gain is used.
+The principal coefficient now has an independent output type, so this theorem
+applies to the genuine operator-valued divergence flux rather than only to a
+single directional component.  The updated theorem passes a warning-free
+focused check against the exported two-codomain `KLSplit` interface.
 
 ## Remaining producer
 
