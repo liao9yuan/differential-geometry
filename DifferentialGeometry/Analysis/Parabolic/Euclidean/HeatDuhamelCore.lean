@@ -15,7 +15,7 @@ physical-space input for the zero-initial-data energy proof of the causal
 noncomputable section
 
 open MeasureTheory Set
-open scoped RealInnerProductSpace
+open scoped RealInnerProductSpace ContDiff
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -73,7 +73,7 @@ omit [Nontrivial V] in
 /-- Move one spatial derivative of the heat kernel onto a smooth compactly
 supported scalar source. -/
 theorem heatD1_ibp {t : ℝ} (ht : 0 < t) (v x : V) (g : V → ℝ)
-    (hg : ContDiff ℝ ⊤ g) (hgc : HasCompactSupport g) :
+    (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD1 t v (x - y) * g y =
       ∫ y : V, heatKernel t (x - y) * fderiv ℝ g y v := by
   have hK : Continuous (fun y : V ↦ heatKernel t (x - y)) := by
@@ -111,7 +111,7 @@ omit [Nontrivial V] in
 /-- Move the second spatial derivative of the heat kernel onto one derivative
 of a smooth compactly supported scalar source. -/
 theorem heatD2_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
-    (hg : ContDiff ℝ ⊤ g) (hgc : HasCompactSupport g) :
+    (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
       ∫ y : V, heatD1 t v (x - y) * fderiv ℝ g y w := by
   have hD1 : Continuous (fun y : V ↦ heatD1 t v (x - y)) := by
@@ -146,16 +146,16 @@ theorem heatD2_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
   simpa only [mul_comm] using hparts
 
 omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-private theorem dir_smooth (g : V → ℝ) (hg : ContDiff ℝ ⊤ g) (v : V) :
-    ContDiff ℝ ⊤ (fun y : V ↦ fderiv ℝ g y v) := by
-  exact (hg.contDiff_fderiv_apply (m := ⊤) (by simp)).comp
+private theorem dir_smooth (g : V → ℝ) (hg : ContDiff ℝ ∞ g) (v : V) :
+    ContDiff ℝ ∞ (fun y : V ↦ fderiv ℝ g y v) := by
+  exact (hg.contDiff_fderiv_apply (m := ∞) (by simp)).comp
     (contDiff_id.prodMk contDiff_const)
 
 omit [Nontrivial V] in
 /-- Move both spatial derivatives of the heat kernel onto a smooth compactly
 supported scalar source. -/
 theorem heatD2_ibp2 {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
-    (hg : ContDiff ℝ ⊤ g) (hgc : HasCompactSupport g) :
+    (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦ fderiv ℝ g z w) y v := by
@@ -166,7 +166,7 @@ theorem heatD2_ibp2 {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
 omit [Nontrivial V] in
 /-- Slice form of the one-derivative transfer identity. -/
 theorem heatD1_slice_ibp {t : ℝ} (ht : 0 < t) (v x : V) (s : ℝ)
-    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ⊤ f) (hfc : HasCompactSupport f) :
+    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD1 t v (x - y) * f (s, y) =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦ f (s, z)) y v :=
@@ -176,7 +176,7 @@ theorem heatD1_slice_ibp {t : ℝ} (ht : 0 < t) (v x : V) (s : ℝ)
 omit [Nontrivial V] in
 /-- Slice form of the one-step second-derivative transfer identity. -/
 theorem heatD2_slice_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (s : ℝ)
-    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ⊤ f) (hfc : HasCompactSupport f) :
+    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
       ∫ y : V, heatD1 t v (x - y) *
         fderiv ℝ (fun z : V ↦ f (s, z)) y w :=
@@ -186,7 +186,7 @@ theorem heatD2_slice_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (s : ℝ)
 omit [Nontrivial V] in
 /-- Slice form of the two-derivative transfer identity. -/
 theorem heatD2_slice2 {t : ℝ} (ht : 0 < t) (v w x : V) (s : ℝ)
-    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ⊤ f) (hfc : HasCompactSupport f) :
+    (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦
@@ -202,7 +202,7 @@ omit [Nontrivial V] in
 /-- A divergence heat potential of a smooth compactly supported source is the
 ordinary heat potential of its spatial derivative. -/
 theorem heatPot1_eq_pot0 {t : ℝ} (ht : 0 < t) (w : V) (f : ℝ × V → ℝ)
-    (hf : ContDiff ℝ ⊤ f) (hfc : HasCompactSupport f) (x : V) :
+    (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) (x : V) :
     heatPot1 t w f x = heatPot0 t (spaceDeriv w f) x := by
   unfold heatPot1 heatPot0
   refine intervalIntegral.integral_congr_ae ?_
