@@ -742,6 +742,95 @@ theorem heatEarly1Near_norm {T t : ℝ} {C : ℝ≥0∞}
       unfold earlyFluxC
       ac_rfl
 
+omit [MeasurableSpace V] [BorelSpace V] [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V] [Nontrivial V] in
+/-- Every point lies in an integer observation-scale shell. -/
+theorem mem_fluxShell_union {t : ℝ} (ht : 0 < t) (x y : V) :
+    y ∈ ⋃ k : ℕ, fluxShell t x k := by
+  let rho := heatScale t
+  have hrho : 0 < rho := heatScale_pos ht
+  let a : ℝ := ‖x - y‖ / rho
+  have ha0 : 0 ≤ a := div_nonneg (norm_nonneg _) hrho.le
+  let k : ℕ := ⌊a⌋₊
+  have hklo : (k : ℝ) ≤ a := Nat.floor_le ha0
+  have hkhi : a < (k : ℝ) + 1 := Nat.lt_floor_add_one a
+  refine Set.mem_iUnion.2 ⟨k, ?_⟩
+  constructor
+  · exact (le_div_iff₀ hrho).1 hklo
+  · have h := (div_lt_iff₀ hrho).1 hkhi
+    simpa only [Nat.cast_add, Nat.cast_one] using h
+
+omit [MeasurableSpace V] [BorelSpace V] [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V] [Nontrivial V] in
+/-- The full early slab is covered by the divergence-source shell cylinders. -/
+theorem earlyFluxSlab_sub {t : ℝ} (ht : 0 < t) (x : V) :
+    (Set.Ioc 0 (t / 2) ×ˢ (Set.univ : Set V)) ⊆
+      ⋃ k : ℕ, fluxShellCyl t x k := by
+  rintro z ⟨hzs, -⟩
+  obtain ⟨k, hyk⟩ := Set.mem_iUnion.mp (mem_fluxShell_union ht x z.2)
+  exact Set.mem_iUnion.2 ⟨k, hzs, hyk⟩
+
+/-- The full early divergence-source heat potential. -/
+def heatEarly1 (t : ℝ) (w : V) (f : ℝ × V → F) (x : V) : F :=
+  ∫ z in (Set.Ioc 0 (t / 2) ×ˢ (Set.univ : Set V)),
+    heatD1 (t - z.1) w (x - z.2) • f z
+      ∂(stVolume : Measure (ℝ × V))
+
+omit [CompleteSpace F] in
+/-- A quantitative heat-scale cover on every shell and any majorant for the
+resulting weight series give the global early divergence-source bound.  The
+canonical Euclidean covering and summability APIs can be inserted later by a
+short bridge. -/
+theorem heatEarly1_norm {T t : ℝ} {C S : ℝ≥0∞}
+    (ht : 0 < t) (htT : t ≤ T) (w : V) (f : ℝ × V → F) (x : V)
+    (hcovers : ∀ k : ℕ, ∃ s : Finset V,
+      s.card ≤ (5 * (k + 1)) ^ Module.finrank ℝ V ∧
+        fluxShell t x k ⊆ ⋃ c ∈ s, Metric.ball c (heatScale t))
+    (hsum : (∑' k : ℕ, ENNReal.ofReal
+      ((5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V *
+        ((k + 1 : ℕ) : ℝ) *
+          Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ)))) ≤ S)
+    (hsrc : GradCarl T C f) :
+    ‖heatEarly1 t w f x‖ₑ ≤
+      ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) * S := by
+  let q : ℝ × V → ℝ≥0∞ := fun z =>
+    ‖heatD1 (t - z.1) w (x - z.2) • f z‖ₑ
+  unfold heatEarly1
+  calc
+    ‖∫ z in (Set.Ioc 0 (t / 2) ×ˢ (Set.univ : Set V)),
+        heatD1 (t - z.1) w (x - z.2) • f z
+          ∂(stVolume : Measure (ℝ × V))‖ₑ ≤
+        ∫⁻ z in (Set.Ioc 0 (t / 2) ×ˢ (Set.univ : Set V)), q z
+          ∂(stVolume : Measure (ℝ × V)) :=
+      enorm_integral_le_lintegral_enorm _
+    _ ≤ ∫⁻ z in (⋃ k : ℕ, fluxShellCyl t x k), q z
+        ∂(stVolume : Measure (ℝ × V)) :=
+      lintegral_mono_set (earlyFluxSlab_sub ht x)
+    _ ≤ ∑' k : ℕ, ∫⁻ z in fluxShellCyl t x k, q z
+        ∂(stVolume : Measure (ℝ × V)) :=
+      lintegral_iUnion_le _ _
+    _ = ∑' k : ℕ, fluxShellMass t w f x k := by rfl
+    _ ≤ ∑' k : ℕ,
+        (ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2)) *
+          ENNReal.ofReal
+            ((5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V *
+              ((k + 1 : ℕ) : ℝ) *
+                Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ))) := by
+      apply ENNReal.tsum_le_tsum
+      intro k
+      obtain ⟨s, hcard, hcover⟩ := hcovers k
+      exact fluxShellMass_le ht htT w f x k s hcard hcover hsrc
+    _ = (ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2)) *
+        (∑' k : ℕ, ENNReal.ofReal
+          ((5 * ((k + 1 : ℕ) : ℝ)) ^ Module.finrank ℝ V *
+            ((k + 1 : ℕ) : ℝ) *
+              Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ)))) := by
+      rw [ENNReal.tsum_mul_left]
+    _ ≤ (ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2)) * S := by
+      exact mul_le_mul_right hsum _
+    _ = ENNReal.ofReal ‖w‖ * earlyFluxC V * C ^ ((1 : ℝ) / 2) * S := by
+      rfl
+
 end Cylinders
 
 end Euclidean

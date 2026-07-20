@@ -32,17 +32,19 @@
 - `fluxShellMass_le` inserts the quantitative cardinality bound and cancels
   every power of `sqrt t`; the remaining factor is exactly polynomial cover
   growth times `(k+1) exp(-k/4)`.
+- `heatEarly1_norm` sums the shell masses over the full early slab.  It is
+  parameterized by the quantitative covers and a weight-series majorant, so
+  the canonical cover and summability files need only supply a short bridge.
 
 The focused Lean check passes with no warnings. The source contains no
 `sorry`, `admit`, axiom, opaque replacement, new class, instance, or notation.
 
 ## Honest frontier
 
-This file now contains the near-cylinder atom and the finite-cover source-mass
-step, but not yet the full early divergence potential. The next producer must
-instantiate the existing quantitative finite-ball cover on every spatial
-shell and sum the resulting polynomial-times-exponential series. After that,
-`KLSource1.local_l2` converts
+This file now contains the full analytic early divergence-potential estimate,
+parameterized by quantitative covers and the shell-series majorant. The next
+producer must instantiate the existing canonical finite-ball cover and the
+checked `fluxShellWeight_sum`. After that, `KLSource1.local_l2` converts
 the squared radius to its stated `A₂` bound.
 
 The exact theorem `ricci_flow_forward_unique` remains 0% until the complete
