@@ -102,17 +102,15 @@ theorem klFluxMajor_memLp {t : ℝ} (ht : 0 < t) (x : V) :
   simpa [ENNReal.toReal_ofReal hp.le, p,
     Real.norm_of_nonneg (klFluxMajor_nonneg (V := V) t x _)] using hpow
 
-/-- Every directional terminal first-derivative kernel belongs to the same
-Hölder-dual space-time class. -/
-theorem klFluxKernel_memLp {t : ℝ} (ht : 0 < t) (w x : V) :
-    MemLp (klFluxKernel t w x) (ENNReal.ofReal (klPDual V))
-      (klTermMeasure (V := V) t) := by
+omit [Nontrivial V] in
+/-- On the terminal slab, every directional first-derivative heat kernel is
+almost everywhere bounded by the radial majorant times the direction norm. -/
+theorem klFluxKernel_ae {t : ℝ} (_ht : 0 < t) (w x : V) :
+    ∀ᵐ z ∂(klTermMeasure (V := V) t),
+      ‖klFluxKernel t w x z‖ ≤ ‖w‖ * klFluxMajor t x z := by
   have hkmeas0 : Measurable (klFluxKernel t w x) := by
     unfold klFluxKernel heatD1 heatScale baseD1 baseHeat baseHeatMass
     fun_prop
-  have hkmeas : AEStronglyMeasurable (klFluxKernel t w x)
-      (klTermMeasure (V := V) t) :=
-    hkmeas0.aestronglyMeasurable
   have hmmeas0 : Measurable (klFluxMajor t x) := by
     unfold klFluxMajor heatD1Maj heatScale baseD1Maj baseHeat baseHeatMass
     fun_prop
@@ -120,19 +118,32 @@ theorem klFluxKernel_memLp {t : ℝ} (ht : 0 < t) (w x : V) :
     have hne : ∀ᵐ s ∂(volume : Measure ℝ), s ≠ t := by
       simp [ae_iff, measure_singleton]
     exact ae_restrict_of_ae hne
+  unfold klTermMeasure
+  apply (Measure.ae_prod_iff_ae_ae (by
+    exact measurableSet_le hkmeas0.norm
+      (measurable_const.mul hmmeas0))).2
+  filter_upwards [ae_restrict_mem measurableSet_Ioc, htime] with s hs hst
+  have hts : 0 < t - s := sub_pos.mpr (lt_of_le_of_ne hs.2 hst)
+  filter_upwards with y
+  simpa only [klFluxKernel, klFluxMajor] using
+    (heatD1_bound (V := V) hts w (x - y))
+
+/-- Every directional terminal first-derivative kernel belongs to the same
+Hölder-dual space-time class. -/
+theorem klFluxKernel_memLp {t : ℝ} (ht : 0 < t) (w x : V) :
+    MemLp (klFluxKernel t w x) (ENNReal.ofReal (klPDual V))
+      (klTermMeasure (V := V) t) := by
+  have hkmeas : AEStronglyMeasurable (klFluxKernel t w x)
+      (klTermMeasure (V := V) t) := by
+    apply Measurable.aestronglyMeasurable
+    unfold klFluxKernel heatD1 heatScale baseD1 baseHeat baseHeatMass
+    fun_prop
   have hbound : ∀ᵐ z ∂(klTermMeasure (V := V) t),
-      ‖klFluxKernel t w x z‖ ≤ ‖‖w‖ * klFluxMajor t x z‖ := by
-    unfold klTermMeasure
-    apply (Measure.ae_prod_iff_ae_ae (by
-      exact measurableSet_le hkmeas0.norm
-        (measurable_const.mul hmmeas0).norm)).2
-    filter_upwards [ae_restrict_mem measurableSet_Ioc, htime] with s hs hst
-    have hts : 0 < t - s := sub_pos.mpr (lt_of_le_of_ne hs.2 hst)
-    filter_upwards with y
-    have hb := heatD1_bound (V := V) hts w (x - y)
-    simpa only [klFluxKernel, klFluxMajor,
-      Real.norm_of_nonneg (norm_nonneg w),
-      Real.norm_of_nonneg (heatD1Maj_nonneg hts _), norm_mul] using hb
+      ‖klFluxKernel t w x z‖ ≤ ‖‖w‖ * klFluxMajor t x z‖ :=
+    (klFluxKernel_ae (V := V) ht w x).mono fun z hz ↦ by
+      simpa only [Real.norm_of_nonneg (norm_nonneg w),
+        Real.norm_of_nonneg (klFluxMajor_nonneg (V := V) t x z), norm_mul]
+        using hz
   exact MemLp.mono
     ((klFluxMajor_memLp (V := V) ht x).const_mul ‖w‖)
     hkmeas hbound

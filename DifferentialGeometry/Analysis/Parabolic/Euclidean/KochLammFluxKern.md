@@ -5,6 +5,8 @@
 - `klFluxMajor_memLp`: the radial first-derivative heat-kernel majorant lies
   in the exact terminal space-time dual class
   `L^((n+4)/(n+3))`.
+- `klFluxKernel_ae`: on that slab, each directional kernel is almost
+  everywhere bounded by `‖w‖` times the radial majorant.
 - `klFluxKernel_memLp`: every directional first-derivative heat kernel lies
   in that same class, by the canonical pointwise radial majorant.
 - `klFluxPowMass_eq`: the full terminal-slab power mass is evaluated exactly
