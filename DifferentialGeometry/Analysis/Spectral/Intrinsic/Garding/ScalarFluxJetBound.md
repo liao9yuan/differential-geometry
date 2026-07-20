@@ -127,3 +127,14 @@ All four producers pass focused and targeted verification. They are **100%**
 and close the former fixed-fibre reflected-coefficient frontier. The all-scale
 dynamic Laplacian path and `galLimExt_smooth` are now proved downstream;
 Perelman noncollapsing remains theorem-level **0%**.
+
+## 2026-07-19 compact-span API exposure
+
+The existing proved producer `metricDiff_joint` is now public.  Its statement,
+proof, and assumptions are unchanged; this is the canonical joint-smoothness
+input needed by both the original one-slab path and the compact-span replay.
+No bundle realization proof was copied into the consumer.
+
+Focused verification passes without warnings or `sorry`.  A targeted module
+refresh is in progress so downstream files can read the newly exported name.
+The producer itself and its dedicated machinery are theorem-level 100%.

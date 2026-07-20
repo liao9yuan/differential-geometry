@@ -112,6 +112,19 @@ as-is when the producer lands.
 
 **Target:** `r ↦ vol(B(x,r)) / V_K(r)` non-increasing (K = Ricci lower bound),
 Gromov's form, valid past the injectivity radius.
+
+**External reference (2026-07-19):** frenzymath/Poincare-Conjecture
+(`MorganTian/PoincareLib/Ch01/`, Apache-2.0, sorry-free) has this whole chain
+on the SAME foundation (`Bundle.ContMDiffRiemannianMetric`; their Mathlib
+v4.30.0, ours v4.29.0): V2b ≈ `JacobiRiccati`/`TraceRiccati`/`SharpTrace`/
+`RicciComparison`; V2c ≈ `CutLocus{,Null}`/`CutTimeMeasurable`/
+`Segment{Injective,Surjective}`; V2a ≈ `PolarIntegral`/`RiemannianMeasure`/
+`BallVolume`; V2d ≈ `BishopGromov{,Ball,Manifold}`
+(`antitoneOn_ratio_transportedJacobian` + `bishop_gromov_ball_ratio`).  See the
+2026-07-19 external-reference status entry for how it bears on the Route B
+packing-radius ruling.  Reference only (RFreference policy: port the smallest
+statement/route, never import); their mid-layer geodesic infra (OpenGALib)
+differs from ours.
 - V2a polar transfer: `∫_{ball} f dλ = ∫_{sphere} ∫_r` via Mathlib
   `HaarToSphere`, composed with V1a.
 - V2b Riccati/trace comparison: `(log √det Gram)' ≤ (n-1)·(log s_K)'` before
@@ -1968,3 +1981,264 @@ implement the selected global route after consultation.
 - Full V1--V3 volume-comparison/CGT producer program: approximately **36--40%**.
 - These numbers are infrastructure coverage only and do not change the 0%
   theorem accounting for unconditional compactness endpoints.
+
+## 2026-07-19 Route B ruling and determinant bridge
+
+For the immediate HCG consumer, the selected architecture is the local
+relative-volume/packing route.  Comparison radii will be kept below each
+center's injectivity radius using the existing `InjRadiusDecayInput` and the
+actual adaptive Step-A scale inequalities.  Do not introduce a cut-time data
+package.  Keep the old `VolumeComparisonInput` path as a conditional
+compatibility interface, but do not claim that its arbitrary-center `ballMult`
+field follows from local normal-chart comparison: it has no injectivity-radius
+premise.
+
+The first Route B theorem is now complete.  `RadialGram.normalDensity_curve`
+proves
+
+`r ^ card ι * normalChartDensity (r • u) = c * curveDensity r`
+
+for one positive constant `c` independent of `r`, under a radial-plus-
+transverse `Option ι` basis and the live normal-source/radius hypotheses.  The
+proof is checked, contains no `sorry`, and uses the existing full normal Gram
+identity, radial scaling, Gauss orthogonality, and basis-change determinant.
+It introduces no high-level geometric assumption.
+
+The binding Route B sequence is now:
+
+1. `normalDensity_curve`: complete.
+2. `normalRatio_anti` in `Volume/BishopRadial.lean`: complete; focused check
+   passed without warnings.
+3. Center-metric polar audit/adapter: complete in
+   `Volume/BishopPolarFramed.lean`.  `exists_framed_den` identifies the framed
+   density with the raw normal density up to one positive center constant,
+   `framedRatio_anti` removes that constant before integration, and
+   `framedBall_polar` integrates the framed exponential over the fixed model
+   ball.  By `framed_norm_lt_iff`, this is the `g.inner p` tangent ball.  The
+   module is focused-check green without warnings and introduces no `sorry`.
+4. `normalBall_ratio`: unstated; this is the substantial pointwise-to-integral
+   local comparison theorem.
+5. `localBall_ratio`: unstated; requires normal-ball/metric-ball equality below
+   injectivity radius.
+6. `localPack_card`: unstated; finite relative-volume packing with explicit
+   injectivity premises.
+7. Step-A scale discharge from `InjRadiusDecayInput`: unstated.
+
+Honest accounting: `normalDensity_curve`, `normalRatio_anti`, and the three
+framed-coordinate adapter theorems are 100%; every later named endpoint above
+is 0% until stated and proved.  Dedicated Route B machinery is about 58--62%,
+while the full V1--V3 volume-comparison/CGT producer program is about 41--45%.
+Global Bishop--Gromov, `SeqBoundedGeometry -> VolumeComparisonInput`, and the
+unconditional HCG compactness endpoints remain 0% as theorems.
+
+## 2026-07-19 Route B local-ball completion and packing blocker
+
+`Volume/BishopBall.lean` now proves `normalBall_cross` and
+`normalBall_ratio`, including the pointwise-to-integrated polar comparison.
+`Volume/BishopLocal.lean` now proves `framedBall_eq_small`, defines the actual
+Hopf--Rinow `Metric.ball` volume, and proves `localBall_cross` and
+`localBall_ratio`.  These files passed focused verification without
+current-file warnings and contain no `sorry` declarations.
+
+The local theorem returns one positive center-dependent comparison radius
+strictly below `injRadius`.  It does **not** prove comparison at every radius
+strictly below `injRadius`: the radius also lies below the small-vector output
+of `exists_radial_cmp` and the source radius of the selected
+`framedExpDiffeo`.
+
+This blocks the intended `localPack_card`.  Its large comparison radius is
+`(2 * m + 1 / 2) * r`; `InjRadiusDecayInput` controls that scale against
+`injRadius`, but supplies no bound against the extra local analytic radius.
+Consequently, a packing theorem with only the requested injectivity premise
+cannot yet call `localBall_cross`, and adding an extra comparison-radius
+assumption would leave Step A unable to discharge it.
+
+The next frontier requires an architecture ruling between:
+
+1. extending radial Jacobi regularity and polar change-of-variables from the
+   selected local partial diffeomorphism to every strictly injective framed
+   exponential ball; or
+2. deriving a uniform lower bound for the existing local comparison radius
+   from the actual HCG bounded-geometry and injectivity-decay inputs.
+
+Do not implement `localPack_card` as an assumption-driven wrapper before this
+is resolved.  `localBall_ratio` is 100%; `localPack_card` and the Step-A direct
+discharge remain 0% as theorems.  Dedicated Route B machinery is approximately
+74--78%; full V1--V3 volume-comparison/CGT machinery is approximately 45--49%.
+Global Bishop--Gromov, the old arbitrary-center `VolumeComparisonInput`
+producer, and unconditional HCG compactness endpoints remain 0% as theorems.
+
+## 2026-07-19 External reference bearing on the packing-radius ruling
+
+Survey result (no code change): frenzymath/Poincare-Conjecture (PKU AI4Math,
+Apache-2.0, https://github.com/frenzymath/Poincare-Conjecture) carries a
+sorry-free Bishop--Gromov chain in `MorganTian/PoincareLib/Ch01/` over the same
+Mathlib foundation as ours (`Bundle.ContMDiffRiemannianMetric`).  It speaks
+directly to the pending architecture ruling above, in favor of option 1:
+
+- Their `ComparisonMinimizing.lean` header documents the same trap we hit: a
+  comparison capped by an analytic radius (their earlier Sturm-window form, our
+  `exists_radial_cmp` "one common normal-coordinate radius") asks the caller
+  for scope Morgan--Tian never assume.  Their fix: prove *minimizing radial
+  geodesic => no interior conjugate point* (`MinimalGeodesicNoConjugate.lean`,
+  `NoConjugateOfMinimizing.lean`; index-form/second-variation argument — our
+  local asset is `Variation/SecondVariationMinimiser.lean`), restate the
+  pointwise comparison in `_of_not_conjugate` form, and get the comparison on
+  every minimizing radial segment — hence every strictly injective framed
+  exponential ball, with no extra analytic radius.  Jacobian regularity on the
+  whole segment domain is `hasRiemannianJacobianOn_expMapGlobal`
+  (`ExpRiemannianJacobian.lean`).
+- For the global form (our V2c/V2d, still 0%): they extend the density by zero
+  past `cutTime` (`transportedJacobian` indicator), show antitonicity survives
+  the truncation (`antitoneOn_Ioo_of_eventually_zero`), and integrate via
+  `CutLocusNull` + `riemannianMeasure_ball_eq_expBallVolume`, so the final
+  ratio statement needs only completeness + a Ricci lower bound on
+  `closedBall p R` — uniform in radius, valid past the injectivity radius.
+
+Use as route/statement reference only; do not import (RFreference policy).
+Local clone for this survey session only; the durable pointer is the GitHub
+URL above and the memory note `frenzymath-poincare-reference`.
+
+## 2026-07-19 RULING MADE: option 1, following the reference route
+
+The user ruled for option 1 (extend Jacobi regularity and change-of-variables
+to every strictly injective framed exponential ball), implemented along the
+frenzymath reference decomposition.  Brick list (our-stack names):
+
+- **R1a** (DONE 2026-07-19): abstract second-order ODE regularity bootstrap
+  `contDiffOn_ode2` / `contDiffOn_ode2_inf`, new file
+  `Analysis/ODE/SecondOrderBootstrap.lean`.  Focused check green, no `sorry`.
+- **R1b** (DONE 2026-07-19): `chartCurve_contDiffOn`, new file
+  `Geometry/Geodesic/ChartRegularity.lean` — fixed-chart reading and its
+  derivative `C^∞` on any open window with continuity + foot-in-source +
+  pointwise geodesic equation.  The chart-recentering bridges already existed
+  (`hasGeodesicEquationAt_fixedChart_{eventually_hasDerivAt,hasDerivAt_velocity}`,
+  `CrossVFReduction.lean`); no new transition work was needed.  Green.
+- **R2-engine** (DONE 2026-07-19): `isGeodesicOn_contMDiffAt_infty` /
+  `isGeodesicOn_contMDiffOn_infty` (same file) — any geodesic continuous on an
+  open time set is `C^∞` there, chart-free (upgrade of the `_one` versions in
+  `Comparison/HopfRinow.lean`).  Green; module olean built.
+- **R2-corollary** (DONE 2026-07-19): `intrinsicGeodesic_contMDiffOn_infty`,
+  new file `Geometry/Exponential/IntrinsicSmooth.lean` — the intrinsic geodesic
+  is `C^∞` in time on all of `ℝ`.  Green.  The TIME-regularity half of the
+  `expMapC2Radius`-type caps is dissolved.
+- **R2-wiring** (next): re-target the Volume-lane radial inputs from the
+  chart-based `radialCurve` (junk beyond the launch chart) to the intrinsic
+  radial curve `t ↦ intrinsicGeodesic … p x` / `expMapIntrinsic`, using
+  `exp_radial_eq_intr` (small-`s` germ) + `geo_eqOn_of_init` to identify the
+  two on the small window, and `intrinsicGeodesic_contMDiffOn_infty` for the
+  `C^k` inputs at every scale (replaces `radialCurve_contMDiffAt_Icc`'s
+  `‖x‖ < expMapC2Radius` cap).
+- **J**: Jacobi-field existence/regularity along the whole radial intrinsic
+  geodesic (linear ODE in a parallel frame).  Frame input DONE 2026-07-19:
+  `exists_intrFrame` (`Volume/IntrRadialFrame.lean`, green) = un-capped
+  analogue of `exists_radialFrame`, via `intrinsicGeodesic_contMDiff`
+  (`Exponential/IntrinsicSmooth.lean`) + generic `exists_parallel_frame`.
+  Remaining sub-bricks (interface: the abstract Jacobi/Wronskian hypotheses of
+  `curveRatio_anti` / `curveMean_le_hyp` in `Volume/BishopJacobi.lean`):
+  - J-a (DONE 2026-07-19): `gON_expand`, new file
+    `Geometry/Metric/FiberExpansion.lean`, green.  Expansion in ANY supplied
+    full g-ON family via the `toRiemannianMetric.toCore` +
+    `ofCoreOfTopology` letI chain + `OrthonormalBasis.mk`/`sum_repr'`
+    (`tangent_frame_expansion` in the Elliptic lane proves it only for a
+    frame it chooses itself).
+  - J-b (DONE 2026-07-19): `forward_ode2_of_bound`, new file
+    `Analysis/ODE/SecondOrderLinearExistence.lean`, green.  Global forward
+    `y'' = A(t) y` on `[0,T]`, pointwise-time-continuous + uniformly bounded
+    `A`, arbitrary initial position/velocity, `HasDerivWithinAt` on `Ici 0`.
+    (First-order engine's `[InnerProductSpace ℝ E]` is genuine —
+    `ballRetraction` is Hilbert-only — hence the `WithLp 2 (F × F)` phase
+    space inside the proof; interface is plain `F`.)
+  - **J-producer: ALREADY DONE by the intrinsic lane** (found 2026-07-19; do
+    not rebuild): `intrinsic_jacobi` (`Exponential/JacobiVariation.lean`)
+    proves `IsJacobiAlong` ON ALL OF ℝ for the variation field
+    `∂ₛ|₀ intrinsicGeodesic p (x + s•w) t`, no smallness; and
+    `intrinsic_jacobi_one` identifies it at `t = 1` with the vector-slot
+    `mfderiv` of `expMapIntrinsic`.  Foundations: `intrinsicExp_smooth` /
+    `intrinsicVar_smooth` (`Exponential/IntrinsicVelocity.lean`, all green).
+  - J-remaining = uniqueness/representation (consumed by N and C): a field
+    with `IsJacobiAlong` on a window, chartRep-`C¹`, and given
+    `(Y 0, D_t Y 0)` equals the frame-ODE solution.  ALL ingredient lemmas
+    pinned public and green (2026-07-19), assembly is mechanical:
+    coordinates `yᵢ t = g.inner (γ t) (F i t) (Y t)`; first derivative via
+    `inner_deriv_at` (`Variation/JacobiField.lean` — the metric-compatibility
+    product rule `d/dt g(V,W) = g(D_tV,W) + g(V,D_tW)`, chartRep-diff
+    hypotheses) + frame parallelism; second derivative via `jacobi_d2_eq`
+    (reads `D_t²Y = -R(Y,γ̇)γ̇` from `IsJacobiAt`) + `gON_expand`
+    (`Metric/FiberExpansion.lean`) to expand the curvature term in the frame;
+    difference-vs-`forward_ode2_of_bound`-solution killed by
+    `norm_le_gronwall_secondOrder` (`Analysis/ODE/SecondOrderGronwall.lean`)
+    at `δ = eps = 0` (same `HasDerivWithinAt (Ici t)` currency).  Take the
+    curvature bound `|⟨R(F j, γ̇)γ̇, F i⟩| ≤ C` on the window as an explicit
+    HYPOTHESIS (comparison consumers carry Rm/Ricci bounds anyway) — no
+    curve-continuity brick needed.  **J-remaining COMPLETE 2026-07-19**, all
+    green: `parInner_deriv` + `parInner_d2` + `parInner_curv_expand` +
+    `jacobi_unique` (`Variation/JacobiCoord.lean`) and `ode2_pi_zero`
+    (`Analysis/ODE/SecondOrderLinearExistence.lean`).  `jacobi_unique` =
+    uniqueness of Jacobi fields with given initial data along any curve with
+    a parallel g-ON frame, under an explicit curvature-entry bound.
+    Elaboration lessons in `JacobiCoord.md`.
+  - Brick N interface RULED by the user 2026-07-19 ("differential def +
+    bridge") and IMPLEMENTED (N-a + N-b), all green + build-verified:
+    `IsConjVec` / `isConjVec_iff` / `isConjVec_iff_jacobi` /
+    `jacobiVar_zero`, new file `Geometry/Exponential/ConjugatePoint.lean`
+    (elaboration lessons in `ConjugatePoint.md`).  The definition is
+    differential-singularity of `expMapIntrinsic`'s vector slot; the Jacobi
+    phrasing is the bridge via `intrinsic_jacobi_one`; no smallness
+    hypothesis anywhere.
+  - **NEXT = N-c/N-d**: N-c the endpoint identity `D_t J_w(0) = w` (check
+    the intrinsic lane's endpoint identities first); N-d the index-form
+    argument (minimizing ⟹ no INTERIOR conjugate vector) — the hard brick.
+    Route extracted 2026-07-19 from the reference (an 18-file cluster in
+    `MorganTian/PoincareLib/Ch01/`), two halves:
+    * **Half 1 (abstract):** foundational file DONE 2026-07-19 —
+      `Analysis/ODE/IndexForm.lean`, BUILD-verified, green: `IsJacobiSolOn`,
+      `indexForm` with symmetry/additivity/quadratic expansion, the FTC
+      integration-by-parts pivot (`indexForm_eq_sub`), the null direction
+      (`indexForm_self_zero`), and the negativity engine
+      (`exists_indexForm_neg`).  Remaining half-1 chain (see `IndexForm.md`):
+      interior-point `IsJacobiSolOn` uniqueness → truncated-field cross-term
+      brick (ref `IndexFormConjugate.lean`) → corner smoothing to a SMOOTH
+      perpendicular witness (ref `IndexFormNegativeSmooth.lean` — the one
+      hard brick) → bridge to the in-tree half 2.
+      ELABORATION WARNING recorded in `IndexForm.md`: `lake env lean` does
+      not apply lakefile `leanOptions` (esp. `autoImplicit false`) — set it
+      per-file; focused checks do not verify binder hygiene.
+    * Survey notes delivered 2026-07-19 by dispatched agents:
+      `Geometry/Exponential/AGREEMENT_GATE_REFERENCE.md` (the full
+      no-conjugate → local-diffeo → segment-injectivity chain mapped onto
+      our objects, with an 8-step smallest-first port order) and
+      `Geometry/Metric/Sphere/SPACEFORM_QUOTIENT_REFERENCE.md` (Petersen
+      `quotientMetric` vs our completed `QuotientDescent.lean`; proposes the
+      missing local-isometry + uniqueness clauses).
+    * **Half 2 (geometric): ALREADY IN-TREE** (confirmed 2026-07-19):
+      `indexForm_nonneg_of_minimising_geodesic`
+      (`Variation/SecondVariationMinimiser.lean:535`).  The reference's
+      six-file broken-variation cluster does NOT need porting.  What half 2
+      demands of half 1: the negative-index witness must be SMOOTH and
+      perpendicular (hence the corner-smoothing brick), plus a bridge
+      between that file's geometric index form and the new abstract one.
+    * Collision/synergy note: their `NoConjugateOfMinimizing.lean` chain
+      (no-conjugate ⟹ `expDifferential_isEquiv` ⟹ exp local diffeo out to
+      the minimizing radius, NO curvature bound) is ALSO the reference for
+      the intrinsic lane's agreement/branch gate — share the pointer.
+  - COLLISION BOUNDARY: the ordinary/intrinsic exponential agreement on the
+    sub-injectivity ball + canonical branch (`NormalRadiusProfile.le_exp_radius`)
+    is the intrinsic lane's DECLARED next target
+    (`IntrinsicVelocity.md` "Next target"); do not build it in this lane.
+    Bricks D and the packing discharge wait on that gate.
+- **N**: minimizing ⟹ no interior conjugate point (index-form; asset
+  `Variation/SecondVariationMinimiser.lean`; reference
+  `MinimalGeodesicNoConjugate.lean`).
+- **C**: density/Riccati comparison continued over the whole minimizing
+  segment (reference `SturmContinuation.lean`, `_of_not_conjugate` forms).
+- **D**: exp is a change-of-variables on arbitrary strictly injective balls
+  (reference `ExpMinimizingLocalDiffeo.lean`,
+  `hasRiemannianJacobianOn_expMapGlobal`); generalizes `framedBall_polar`
+  beyond the selected `framedExpDiffeo`.
+- **P**: `localPack_card` from the extended comparison, then the Step-A
+  discharge.
+
+R1a is infrastructure: `localPack_card` and all endpoint theorems remain 0%
+until stated and proved; Route B machinery estimate unchanged (~74--78%) since
+the new brick is upstream of the blocked consumer.

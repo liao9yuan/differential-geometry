@@ -31,7 +31,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- Every finite level of the realized coordinate-frame curvature tower is
 jointly smooth at regular spacetime points in the chart good set. -/
-theorem coordTowerSmooth [CompactSpace M]
+theorem coordTowerSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}

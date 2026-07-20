@@ -24,3 +24,30 @@ active upstream `.olean` refresh chain prevented verification.  The genuinely
 geometric frontier begins with the shape operator and trace Riccati inequality
 from the Ricci lower bound.  Polar integration and cut-locus transfer remain
 later frontiers.
+
+## 2026-07-19 polar density bridge
+
+Added the public theorem `normalDensity_curve`.  Given a basis indexed by
+`Option ι` whose `none` vector is the radial direction and whose `some` vectors
+are perpendicular to it at the center, the theorem identifies
+`r ^ card ι * normalChartDensity (r • u)` with a positive, radius-independent
+constant times the transverse `curveDensity`.  It uses the existing exact
+radial scaling identity, the Gauss lemma, a basis-change determinant, and
+positivity of the normal and curve Gram matrices.  It adds no unit-speed,
+orthonormal-frame, cut-time, or no-conjugate-points assumption.
+
+Focused verification passed without warnings, and the explicitly named module
+refresh completed successfully.  This closes the determinant
+bridge selected by the local Route B ruling.  The next theorem is the routine
+consumer `normalRatio_anti` in `BishopRadial.lean`.  Before radial integration,
+the live polar theorem still needs a center-metric-ball version: its current
+tangent ball uses the fixed ambient model norm, not the norm from `g.inner p`.
+
+`normalDensity_curve` itself is complete (100%).  `normalRatio_anti` remains
+unstated (0%; its dedicated inputs are about 90%).  The local relative-volume
+and packing endpoints remain unstated (0%); their dedicated Route B machinery
+is about 50%.  Global Bishop--Gromov and the producer from
+`SeqBoundedGeometry` to the old arbitrary-center `VolumeComparisonInput`
+remain 0%.  The full V1--V3 volume-comparison/CGT producer program is about
+38--42% in machinery coverage; unconditional HCG compactness endpoints remain
+0% as theorems.

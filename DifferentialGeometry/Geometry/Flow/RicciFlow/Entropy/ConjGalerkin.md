@@ -101,3 +101,27 @@ warnings or `sorry`.
 This is a completed low-layer producer.  The downstream strong-limit theorem is
 tracked separately in `ConjGalerkinStrong.md`; its theorem percentage must not
 be inferred from this helper alone.
+
+## 2026-07-19 prescribed-interval refactor
+
+The finite-dimensional ODE engine now has the exact-interval producer
+`gal_exists_on`.  Its only analytic input is continuity of the fully assembled
+`scalarGalPert` on the requested compact interval; `galPert_bdd_on` obtains the
+uniform operator bound by compactness.  This removes the old hard-coded split
+bound `1 + C1 * ‖Inc‖` from the reusable engine without adding a consumer
+assumption.  `scalar_gal_exists` remains the compatibility theorem selecting a
+short interval from the existing A2/A1 producers.
+
+`galPert_fin_of` is the scalar, pointwise finite-core normal form needed by a
+target-length energy proof.  The former eventual theorem `scalarGalPert_fin`
+is retained as a wrapper around `lapDiffA20_core`; target-length consumers can
+instead pass the core equality supplied on their already chosen interval.
+`gal_time_mono` records the elementary restriction of an existing common ODE
+interval.
+
+Source refactoring is complete and contains no local `sorry`.  Focused
+verification is currently blocked before elaboration by missing upstream
+spectral `.olean` files while the already-running narrow export is rebuilding
+that dependency chain.  Until the file itself elaborates, the four new
+theorems remain theorem-level **0%** despite their dedicated source machinery
+being approximately **98%**.

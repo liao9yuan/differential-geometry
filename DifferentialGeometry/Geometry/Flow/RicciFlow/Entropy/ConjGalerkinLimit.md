@@ -82,3 +82,19 @@ The downstream `ConjGalerkinStrong.scalar_gal_limit` closure now passes focused
 verification and module export without `sorry`; the theorem and its dedicated
 machinery are **100%**.  The next exact frontier is the separate joint-spacetime
 realization bridge to a classical `IsHeatPotOn` solution.
+
+## 2026-07-19 exact compactness interval
+
+`gal_subseq_on` separates compactness from lifetime selection.  It consumes
+exact-interval energy data and continuity of the full `scalarGalPert`, then
+returns `IsConjGalSubseq` on precisely that interval.  Compactness of the time
+interval supplies a single perturbation norm bound through `galPert_bdd_on`, so
+the old private A2/A1 split estimate is removed.  `scalar_gal_subseq` keeps its
+public statement and is now a compatibility wrapper which performs the legacy
+shortening once before calling the exact engine.
+
+No downstream assumption or new convergence predicate was added.  The source
+contains no local `sorry`; focused verification is pending the active upstream
+spectral object refresh.  Therefore `gal_subseq_on` remains theorem-level
+**0%**, with approximately **98%** dedicated source machinery, until its own
+file check passes.

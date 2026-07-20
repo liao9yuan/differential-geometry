@@ -793,6 +793,50 @@ theorem exists_radial_cmp
         (q * a) b (Module.finrank ℝ E - 1) (mul_nonneg hq ha.le)
         hγ hVdiff hLI hWronsk hmean
 
+/-- Antitonicity of a transverse radial-Jacobi density ratio transfers to the
+corresponding normal-coordinate density ratio. -/
+theorem normalRatio_anti
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (g : SmoothRiemannianMetric I M) (p : M) (u : E)
+    (B : Module.Basis (Option ι) ℝ E)
+    (hBu : B none = u)
+    (hperp : ∀ i : ι, g.inner p u (B (some i)) = 0)
+    (q : ℝ) {b : ℝ}
+    (hsrc : MapsTo (fun r : ℝ => r • u) (Ioo (0 : ℝ) b)
+      (expMapDiffeo (I := I) g p).source)
+    (hrad : ∀ r ∈ Ioo (0 : ℝ) b,
+      ‖r • u‖ < expMapC2Radius (I := I) g p)
+    (hcurve : AntitoneOn
+      (fun r =>
+        curveDensity (I := I) g (radialCurve (I := I) g p u)
+            (fun i : ι => radialJacobiField (I := I) g p u (B (some i))) r /
+          hypDensity q (Fintype.card ι) r)
+      (Ioo (0 : ℝ) b)) :
+    AntitoneOn
+      (fun r =>
+        r ^ Fintype.card ι * normalChartDensity (I := I) g p (r • u) /
+          hypDensity q (Fintype.card ι) r)
+      (Ioo (0 : ℝ) b) := by
+  obtain ⟨c, hc, hdensity⟩ :=
+    normalDensity_curve (I := I) g p u B hBu hperp hsrc hrad
+  intro r hr s hs hrs
+  calc
+    s ^ Fintype.card ι * normalChartDensity (I := I) g p (s • u) /
+          hypDensity q (Fintype.card ι) s =
+        c * (curveDensity (I := I) g (radialCurve (I := I) g p u)
+            (fun i : ι => radialJacobiField (I := I) g p u (B (some i))) s /
+          hypDensity q (Fintype.card ι) s) := by
+      rw [hdensity s hs]
+      ring
+    _ ≤ c * (curveDensity (I := I) g (radialCurve (I := I) g p u)
+            (fun i : ι => radialJacobiField (I := I) g p u (B (some i))) r /
+          hypDensity q (Fintype.card ι) r) :=
+      mul_le_mul_of_nonneg_left (hcurve hr hs hrs) hc.le
+    _ = r ^ Fintype.card ι * normalChartDensity (I := I) g p (r • u) /
+          hypDensity q (Fintype.card ι) r := by
+      rw [hdensity r hr]
+      ring
+
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Mean-curvature projection of `exists_radial_cmp`. -/

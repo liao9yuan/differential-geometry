@@ -171,3 +171,16 @@ theorem-level **100%**. The Galerkin endpoint-continuity machinery is about
 until its moving-integral proof verifies. Perelman `NoLocalCollapsing` and
 `ham3_noncollapse` remain theorem-level **0%**; broader entropy/noncollapsing
 machinery remains about **97%**, and whole HCG machinery about **60%**.
+
+## 2026-07-19 exact closed-interval adapters
+
+`galLim_slice_cc` is now public so exact-interval reconstruction can reuse the
+canonical smooth slice instead of duplicating its spectral proof.
+`heatpot_mass_on` is the exact-interval mass conservation theorem: given an
+already constructed `IsHeatPotOn` object and reflected regularity on the
+caller-supplied closed interval, it proves that every slice has the same mass
+as the zero slice.  It does not choose a smaller lifespan.
+
+Both changes are source-complete and contain no local `sorry`; they remain
+theorem-level **0%** until the pending upstream refresh permits a focused file
+check.  Their dedicated source is approximately **95%**.

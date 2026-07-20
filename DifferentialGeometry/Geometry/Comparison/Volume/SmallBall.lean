@@ -33,6 +33,37 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every positive-radius explicit-metric ball has positive finite real volume
+on a compact manifold. -/
+theorem edist_vol_pos
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (a : M) {r : ℝ} (hr : 0 < r) :
+    0 < (riemannianVolumeMeasure (I := I) (M := M) g
+      {x : M | riemannianEDistOf (I := I) g a x < ENNReal.ofReal r}).toReal := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let U : Set M :=
+    {x : M | riemannianEDistOf (I := I) g a x < ENNReal.ofReal r}
+  have hUopen : IsOpen U := by
+    dsimp only [U]
+    exact isOpen_lt
+      (by
+        unfold riemannianEDistOf
+        exact DifferentialGeometry.Geometry.Riemannian.continuous_riemannianEDist g a)
+      continuous_const
+  have hUne : U.Nonempty := by
+    refine ⟨a, ?_⟩
+    simp only [U, mem_setOf_eq, riemannianEDistOf,
+      Manifold.riemannianEDist_self]
+    exact ENNReal.ofReal_pos.mpr hr
+  letI : μ.IsOpenPosMeasure :=
+    riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  exact ENNReal.toReal_pos (hUopen.measure_pos μ hUne).ne' (measure_ne_top μ U)
+
 variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 

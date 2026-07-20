@@ -78,3 +78,23 @@ still has `sorry`; their dedicated proof machinery is about 95%.
 `cc_a2_span`, the target-length critical tame estimate, `gal_span`, and all
 downstream noncollapsing propagation theorems are not yet stated and remain
 theorem-level 0%.
+
+## 2026-07-19 prescribed A2 source
+
+The stale-claim blocker above is superseded.  After confirming that both old
+claim processes were dead, the claims were released and the smallest canonical
+API was exposed: `metricDiff_joint`, `fluxDiv_jet_bdd`, and
+`finite_lap_unif`.  No copies or consumer assumptions were introduced.
+
+The explicit `sorry` in `metricDiff_span` is discharged by the public
+`metricDiff_joint`.  The module now contains `metricDiff_span`,
+`scalarFlux_span`, `cc_comm_span`, `cc_conn_span`, `cc_lap_span`, and
+`cc_a2_span`, all without local `sorry`.  The common radius is chosen before
+the terminal time and before the terminal-metric spectral type.  The final A2
+constant is independent of spectral support and Galerkin cutoff.
+
+Both edited producer modules pass focused verification.  Final focused
+verification of this module is pending their sequential exported-object
+refresh.  Until that check passes, these new span theorems remain theorem-level
+0% with approximately 99% dedicated source and machinery.  The next theorem is
+`scalar_crit_span`, followed by the target-length Galerkin assembly.

@@ -1229,3 +1229,171 @@ about 95%.  `cc_a2_span`, target-length critical tame/Galerkin, `gallim_on`,
 target-length positivity/mass, finite Good induction, `NoLocalCollapsing`, and
 `ham3_noncollapse` remain theorem-level 0%.  Broader noncollapsing machinery
 remains about 97%, and whole HCG machinery about 60%.
+
+## 2026-07-19 prescribed A2 and critical source
+
+The compact-span Garding replay has now been written through `cc_a2_span`.
+Only three existing producer declarations needed public visibility:
+`metricDiff_joint`, `fluxDiv_jet_bdd`, and `finite_lap_unif`; the other internal
+jet helpers remain private.  The source contains no local `sorry`, chooses the
+common radius before the terminal metric and spectral type, and keeps all
+constants independent of spectral support and Galerkin cutoff.
+
+The next assembly `scalar_crit_span` is also source-complete.  It combines the
+prescribed A2 inequality with `cc_a1_unif` on the caller's exact closed interval
+and preserves the coercive top coefficient `23/12 < 2`; it does not select a
+second lifespan.  The updated route is therefore reflected exactly:
+propagation starts on a compact positive interior slab, not at the nonregular
+initial endpoint.
+
+Both edited producer modules pass focused verification.  The A2 span and
+critical-span files are not yet theorem-level complete because a sequential
+exported-object refresh is still running before their focused checks.  Their
+dedicated source and machinery are approximately 99%.  `gal_span`,
+`gallim_on`, target-length positivity/mass, finite Good induction,
+`NoLocalCollapsing`, and `ham3_noncollapse` remain theorem-level 0%.  Broader
+noncollapsing machinery remains approximately 97%, and whole HCG machinery
+approximately 60%.
+
+## 2026-07-19 operator-span source
+
+Two further target-length producers are now source-complete.  `lapA20_span`
+uses the compact varying-background metric modulus at the
+dimension-adjusted extension threshold and returns continuity, a compact
+operator-norm bound, and the genuine finite-core identity on the caller's
+exact `Icc 0 h`.  `conjA1_on` similarly packages the existing lower-order
+operator continuity and a finite norm bound without choosing a new lifespan.
+
+These are the exact replacements for the two independently selected short
+intervals in `scalar_gal_exists` and `scalar_gal_subseq`.  They add no consumer
+assumptions and do not compare spectral spaces belonging to different terminal
+metrics.
+
+Verification is currently stopped at missing imported objects rather than a
+proof goal.  `CovDerivPointwise` was rebuilt successfully and the edited
+`ScalarFluxJetBound` source check then passed; its exported-object refresh is
+still active.  A first check of `conjA1_on` next found the missing imported
+object `ComponentSobolevBoundDerivBridge.olean`, so no second overlapping build
+was launched.  `lapA20_span`, `conjA1_on`, and `scalar_crit_span` remain
+theorem-level 0% until their own focused checks pass, with dedicated source and
+machinery approximately 98--99%.  `gal_span`, `gallim_on`, Good induction,
+`NoLocalCollapsing`, and `ham3_noncollapse` remain theorem-level 0%.
+
+## 2026-07-19 exact Galerkin and positive-slab W source
+
+The prescribed-interval source route now reaches the positive-slab W lower
+bound.  `gallim_on` reconstructs the scalar Galerkin limit as an exact
+`IsHeatPotOn` object; `gallim_pos_on` and `heatpot_mass_on` preserve positivity
+and unit mass on the same caller-supplied interval.  `gallim_w_lt` then uses
+the already verified local W continuity only for the right limit at reverse
+time zero, while exact `w_rev_antitone` supplies the comparison at every
+strictly interior reverse time.  Thus the unknown local continuity radius no
+longer controls propagation length.
+
+`w_span` performs the finite Good-set propagation on a compact positive
+regular slab.  One horizon `r` is selected before the terminal metric; every
+actual step is at most `r / 2`, so it lies strictly inside a heat interval of
+length `r`.  The induction accepts arbitrary smooth positive unit densities,
+including the selected cutoff density and every evolved slice.  Its invariant
+is `theta + (t - a) < tauMax`.
+
+All these new declarations are source-complete and contain no local `sorry`,
+but none is counted as proved until the active upstream spectral export refresh
+finishes and their focused checks pass.  Accordingly `gallim_on`,
+`gallim_w_lt`, and `w_span` remain theorem-level **0%** with approximately
+**80--95%** dedicated source.  The positive-time W lower route is source-
+assembled, while the all-carrier `NoLocalCollapsing` endpoint remains **0%**:
+times near the nonregular initial endpoint still need a uniform geometric
+small-ball volume producer.  The current fixed-metric, fixed-centre
+`exists_edist_vol` theorem does not by itself provide that family-uniform
+statement.  `ham3_noncollapse` remains theorem-level **0%**.
+
+## 2026-07-19 positive-slab noncollapse source
+
+The positive-time argument now has its honest geometric target in
+`NoncollapseSpan.lean`.  `noncollapse_span` combines the compact-slab W lower
+bound with `exists_sel_w_bound`, chooses
+`kappa = exp (L - collapseWConst n - 1)`, and proves the actual
+`FlowMetricBall.IsKappaNoncollapsed` inequality in `ENNReal`.  It quantifies
+only over times in one fixed positive regular slab; it does not pretend to
+prove the stronger all-carrier `NoLocalCollapsing` predicate.
+
+The ball-volume positivity needed to exponentiate the logarithmic estimate is
+not a consumer assumption.  The former private proof in `FlowBallW.lean` was
+moved to the public metric-volume theorem `VolumeComparison.edist_vol_pos` in
+`Geometry/Comparison/Volume/SmallBall.lean`, and all existing flow-ball uses
+now reuse that lower-layer API.  `w_span_uniform` also exposes the fact that
+the W lower constant is chosen from the fixed metric at the positive base time
+before the finite upper slab endpoint is quantified; the Galerkin step radius
+may still depend on each finite slab without entering this constant.
+
+The remaining initial-time obstruction was checked along three distinct
+routes.  Pointwise `exists_edist_vol` cannot be finite-subcovered because the
+centre neighborhood would have to shrink with the ball radius.  Joint metric
+continuity gives short-time bilinear equivalence and existing distance
+comparison, but there is no theorem converting that domination into a uniform
+setwise Riemannian-volume lower bound.  The local Bishop comparison still has a
+centre-dependent analytic/injectivity radius; the available compact uniform
+injectivity theorem assumes lower semicontinuity of the injectivity radius,
+which is itself not yet produced from joint exponential-map regularity.  Thus
+the smallest honest missing producer remains `early_ball_low`: a normalized
+small-ball lower bound uniform in short time, centre, and every radius with
+`r^2 <= t`.  This is missing geometry, not a wrapper or a new convergence
+assumption.
+
+Source accounting only: `noncollapse_span`, `w_span_uniform`, and the public
+volume-positivity refactor contain no local `sorry`, but remain theorem-level
+**0%** until their focused checks pass after the active spectral artifact
+refresh.  Even after they verify, `NoLocalCollapsing` and `ham3_noncollapse`
+remain theorem-level **0%** until `early_ball_low` and the final all-time
+assembly are proved.  The Galerkin classical-slice chain also still imports the
+explicit Weyl counting frontier in `ShortTime/WeylEigenvalueCountingBound.lean`;
+green downstream checks will therefore not make the entropy route axiom-clean.
+Broader entropy/noncollapse machinery is approximately **98%**, while whole
+HCG machinery remains approximately **60%** and its endpoint theorems remain
+**0%**.
+
+### Prepared consult prompt (not sent automatically)
+
+```text
+Please diagnose the smallest assumption-free Lean route to the remaining
+initial-time producer for Perelman noncollapsing.  Use the GitHub page
+https://github.com/liao9yuan/differential-geometry/tree/short-time-existence as
+the source of truth for published declarations, and cite exact GitHub-visible
+repo-relative files/lines or theorem names from that branch.  Do not invent
+signatures.  The local post-merge checkout also has uncommitted proposed
+theorems `Entropy.w_span_uniform` and `Perelman.noncollapse_span`; those are not
+visible on GitHub and should be treated only as the following summary: the W
+argument closes noncollapse uniformly on every fixed positive regular slab,
+with a lower constant chosen before the finite upper endpoint.
+
+The missing theorem should add no consumer hypothesis and may be named
+`early_ball_low` (name <= 20 chars).  For a smooth Ricci-flow solution on
+`closedOpen 0 omega`, it must provide tau,kappa>0 such that for every flow time
+t<=tau, every centre p, and every r>0 with r^2<=t,
+
+  ofReal kappa * ofReal r ^ finrank <=
+    Vol_{g(t)} {x | edist_{g(t)} p x < ofReal r}.
+
+Constraints: do not use `HasLocallyConstantChartAt`; do not replace the result
+by a new hypothesis, convergence predicate, or wrapper black box; work in
+`DifferentialGeometry/`; RFreference is reference-only.  Existing relevant
+published APIs include `MetricFamilySmoothOn.metricTensor_cont`,
+`metricTimeBundleQuad_cont_of_metricFamilySmoothOn`, `metricUnitOn_compact`,
+`edistOf_mono`, `edistOf_scale`, `edistBall_scale`, `volume_scale_apply`,
+`VolumeComparison.exists_edist_vol`, the local Bishop comparison in
+`Geometry/Comparison/Volume/BishopLocal.lean`, and the conditional compact
+uniform injectivity-radius theorem in
+`Geometry/Comparison/InjectivityRadius.lean`.
+
+Three routes have not yet closed: (1) metric equivalence lacks a theorem giving
+setwise Riemannian-volume domination; (2) pointwise fixed-centre small-ball
+bounds cannot be finite-subcovered uniformly at arbitrarily small radii; (3)
+local Bishop comparison retains a centre-dependent analytic/injectivity radius,
+while the compact uniform injectivity theorem requires lower semicontinuity not
+yet produced from joint exponential-map regularity.  Please decide which route
+actually closes with the published APIs, identify the first genuinely missing
+producer if none closes, and give an exact minimal statement/proof normal form
+for that producer.  Prefer scalar/chart or already-realized metric objects;
+avoid whole varying-fibre tensor equalities.
+```

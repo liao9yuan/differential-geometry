@@ -58,3 +58,16 @@ The `H^(m+2) ->L H^m` A2 operator and its time-continuous path remain unstated
 (**0%** each), with approximately **88%** and **60%** dedicated machinery,
 respectively.  Perelman no-local-collapsing and `ham3_noncollapse` remain
 endpoint-level **0%**.
+
+## 2026-07-19 minimal shared API
+
+Only two existing generic producers were made public for the compact-span
+replay: `fluxDiv_jet_bdd` and `finite_lap_unif`.  Their proofs, hypotheses, and
+normal forms are unchanged.  The lower helpers `appRS_jet_bdd`,
+`fixed_jet_bdd`, and `traceCast_jet_bdd` remain private; the new span proof uses
+the already-public joint coefficient API and therefore does not need to widen
+that surface.
+
+Focused verification passes without warnings or `sorry`.  The public
+producers and their dedicated machinery are theorem-level 100%; downstream
+compact-span verification awaits the sequential exported-object refresh.

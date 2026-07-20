@@ -1,5 +1,18 @@
 # StepCDerivBounds.lean — MSM135 C2 (`lbl430`), the QUANTITATIVE derivative-bounds half
 
+## 2026-07-19: (c4) and the (c5) induction-step engine LANDED
+
+`C4/StepCDerivAll.lean` (new leaf file, focused-green, no `sorry`) now
+provides sub-brick (c4) — `norm_iteratedFDeriv_clmComp_le`, the bilinear
+collection at `compL` in `ContDiffAt` currency — and the (c5) induction-step
+engine `implicitDeriv_succ_le`:
+`‖∇^{m+1} f‖ ≤ 2^m·(m!·(m!·(max Λ 1)^{m+1})·(max DA 1)^m)·CB` from the
+neighbourhood formula + block bounds.  The remaining all-order work is now
+assembly: the recursive majorant definition, the strong induction, and the
+cm-wiring generalizing `cmChartDerivLe2` — scoped in `StepCDerivAll.md`.
+This discharges the "explicit recursive numerical majorant" precondition
+below for finally stating the arbitrary-order theorem.
+
 ## Current state — 2026-07-09: false all-order statement removed
 
 The former `cmChartDerivLe` was unprovable: it assumed only `C²` regularity and constrained

@@ -334,6 +334,73 @@ theorem heatpot_mass_eq
   change mass s = mass 0
   exact (hclosed hs).trans (hclosed ⟨le_rfl, htau'.le⟩).symm
 
+omit [BoundarylessManifold I M] in
+/-- On a prescribed reflected regular interval, a genuine heat potential has
+constant moving mass on the entire closed interval. -/
+theorem heatpot_mass_on
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
+    {tau : Real} (htau : 0 < tau) {u : Real → M → Real}
+    (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn
+      (RealTimeInterval.closed 0 tau htau.le)
+      (reverseFamily (I := I) (M := M) (flowG (I := I) S) (T : Real))
+      (fun r x =>
+        (conjCoeff (I := I) (M := M) S ((T : Real) - r) : M → Real) x)
+      u)
+    (hreg : ∀ r ∈ Set.Icc (0 : Real) tau,
+      (T : Real) - r ∈ D.regular) :
+    ∀ s ∈ Set.Icc (0 : Real) tau,
+      (∫ x, u s x ∂(volumeMeasureFamily (I := I) (M := M)
+        (reverseFamily (I := I) (M := M) (flowG (I := I) S) (T : Real)) s)) =
+      ∫ x, u 0 x ∂(volumeMeasureFamily (I := I) (M := M)
+        (reverseFamily (I := I) (M := M) (flowG (I := I) S) (T : Real)) 0) := by
+  classical
+  let G := reverseFamily (I := I) (M := M) (flowG (I := I) S) (T : Real)
+  let mass : Real → Real := fun s =>
+    ∫ x, u s x ∂(volumeMeasureFamily (I := I) (M := M) G s)
+  have hmap : Set.MapsTo (fun r : Real => (T : Real) - r)
+      (Set.Icc (0 : Real) tau) D.regular := by
+    intro r hr
+    exact hreg r hr
+  have hmass_cont : ContinuousOn mass (Set.Icc (0 : Real) tau) := by
+    have hgram (x₀ : M) (i j : Fin (Module.finrank Real E)) :
+        ContinuousOn
+          (fun p : Real × M => chartGramMatrix (I := I) (G.metric p.1) x₀ p.2 i j)
+          (Set.Icc (0 : Real) tau ×ˢ
+            (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+      exact (rev_gram_smooth (I := I) (M := M) hS (T : Real) hmap x₀ i j).continuousOn
+    simpa only [mass, volumeMeasureFamily, metricFamilyForMeasure] using
+      (integral_family_cont (I := I) (M := M) isCompact_Icc hgram hu.jointCont)
+  have hderiv (r : Real) (hr : r ∈ Set.Ioo (0 : Real) tau) :
+      HasDerivAt mass 0 r := by
+    have hTr : (T : Real) - r ∈ D.regular :=
+      hreg r ⟨hr.1.le, hr.2.le⟩
+    simpa only [mass, G] using
+      heatpot_mass_deriv (I := I) (M := M) S hS T htau.le hu hr hTr
+  have hdiff : DifferentiableOn Real mass (Set.Ioo (0 : Real) tau) := by
+    intro r hr
+    exact (hderiv r hr).differentiableAt.differentiableWithinAt
+  have hzero : Set.EqOn (deriv mass) 0 (Set.Ioo (0 : Real) tau) := by
+    intro r hr
+    exact (hderiv r hr).deriv
+  let mid : Real := tau / 2
+  have hmid : mid ∈ Set.Ioo (0 : Real) tau := by
+    exact ⟨half_pos htau, half_lt_self htau⟩
+  have hinner : Set.EqOn mass (fun _ : Real => mass mid)
+      (Set.Ioo (0 : Real) tau) := by
+    intro r hr
+    exact isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo
+      hdiff hzero hr hmid
+  have hclosed : Set.EqOn mass (fun _ : Real => mass mid)
+      (Set.Icc (0 : Real) tau) := by
+    apply hinner.of_subset_closure hmass_cont continuousOn_const
+      Set.Ioo_subset_Icc_self
+    rw [closure_Ioo htau.ne]
+  intro s hs
+  change mass s = mass 0
+  exact (hclosed hs).trans (hclosed ⟨le_rfl, htau.le⟩).symm
+
 /-- Every Sobolev realization of the Galerkin limit has the original limiting
 coefficient on the compact Galerkin interval. -/
 @[simp] theorem galLimExt_coeff
@@ -615,7 +682,7 @@ theorem galLim_mass0
 
 /-- Every Galerkin limit slice has one smooth representative realizing all
 natural Sobolev orders and its scalar spectral series. -/
-private theorem galLim_slice_cc
+theorem galLim_slice_cc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}

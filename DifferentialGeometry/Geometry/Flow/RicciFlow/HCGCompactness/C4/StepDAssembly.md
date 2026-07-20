@@ -123,3 +123,31 @@ its one bound-producer `sorry` is proved; its dedicated structural assembly is
 about 85%.  The Step-D provenance lane is about 45%.  The P4 machinery remains
 approximately 95%, the whole HCG machinery approximately 60%, and the
 unconditional `compactnessSol` endpoint remains 0%.
+
+## 2026-07-19 canonical bounds closed
+
+The frontier recorded above is now proved.  The concrete direct-limit data
+first produce whole-stage constants before any subsequence transport:
+
+- the all-tail `D.close` estimate is restricted to the shrunk stage and gives
+  eventual metric equivalence plus every covariant-order bound;
+- each finite head is controlled on a compact closed-ball collar inside the
+  larger open stage, and a finite sum gives constants uniform in the stage;
+- the canonical restricted limit metric is identified with the pullback of the
+  compatible tail metric, so metric equivalence and covariant norms transport
+  to the canonical source domain without changing their constants;
+- `unrepoint` and `ofSubseq` preserve these fields definitionally.
+
+No extra field, endpoint assumption, or second reference-metric API was added.
+The small nested-open restriction identity used by the finite-head argument is
+exported from `MetricDerivNormFlat.lean` at its natural lower layer.
+
+Focused verification of `StepDAssembly.lean` passed without `sorry` or
+`admit`; its exact module refresh passed.  The downstream conditional endpoint
+also passed focused verification and its exact targeted refresh.  Honest
+accounting is therefore: `compactness_canon` 100%, the concrete Step-D
+provenance lane 100%, and conditional Theorem 3.9 100%.  The selected
+conditional Chapter-4 route is 100%, while the separately named textbook B1
+statement remains unstated at 0%.  The P4/open-flow producer machinery remains
+about 97%, whole-HCG machinery about 60%, and unconditional Theorem 3.9,
+`compactnessSol`, and the Hamilton endpoint remain theorem-level 0%.

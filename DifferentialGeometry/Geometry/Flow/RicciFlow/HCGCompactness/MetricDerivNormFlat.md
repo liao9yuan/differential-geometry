@@ -27,3 +27,24 @@ checked `tailAmbientConv`, so ambient convergence and `tailLimitComplete` use
 the same shrunk direct-limit metric.  The final D6 theorem remains unstated and
 unproved (0%); dedicated D6 wiring is about 30%, and whole Step-D machinery is
 about 97%.
+
+## 2026-07-19
+
+`restrictSubset_pull` now exports the metric-level identity already used
+internally by `metricDerivNorm_flat`: flat restriction from an ambient open
+`U` to `V ≤ U` is the pullback of ordinary restriction to the corresponding
+nested open subtype.  This is the lowest reusable bridge needed to transport
+finite-head covariant metric bounds in the concrete Step-D provenance proof;
+the higher proof can combine it with the existing pullback and open-restriction
+norm theorems without duplicating the flat-carrier construction.
+
+Focused source verification and the explicitly named exact module refresh both
+passed without local warnings.
+
+Project accounting after the downstream closure: this helper is complete
+(100%), `HasCanonBounds` is proved (100%), and the concrete Step-D provenance
+lane plus conditional metric-compactness endpoint are 100% checked.  The
+selected conditional Chapter-4 route is complete; the separately named
+textbook B1 theorem and unconditional Theorem 3.9 remain 0%.  Whole-HCG
+machinery remains approximately 60%, and the unconditional solution/Hamilton
+endpoints remain theorem-level 0%.

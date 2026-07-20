@@ -2,19 +2,17 @@
 
 ## Current verification state
 
-The previously checked public interface remains unchanged.  The analytic body
-of `movingShi_of_bound` is now assembled in source with no local `sorry`, but
-its focused check is pending: the shared H6 migration temporarily owns the
-upstream refresh chain, and `GaussLemma.olean` is currently absent.  No Lean
-source error from `MovingShiOpen.lean` has yet been observed in this pass.
-Static signature review did identify and repair one definite, still-unverified
-binder error: the call to
-`ricci_diag_eq_sum_rm04_diag_of_orthonormal` had passed an extra `hON`
-immediately after the basis, although the next argument is the Ricci section.
-The remaining inspected calls to `towerHeatSol_any`,
-`BernsteinTower.estimate_complete`, `MetricComplete.complete`,
-`ricTower_normSq_le`, and `MovingShiBoundOn` match their current source
-signatures.
+The public interface remains unchanged.  `movingShi_of_bound`,
+`movingShi_complete`, and `CurvBoundInput.movingShi_open` are now
+focused-green and targeted-build green, with no local `sorry` or warning.
+The local assembly repairs installed the stored carrier instances explicitly,
+used the complete left-anchor metric for the tangent norm, and removed an
+accidental compactness requirement from the chart-local tower-norm regularity
+chain.
+
+This is an assembly result, not a trusted end-to-end Shi theorem:
+`exists_rmTowerSol` and `BernsteinTower.estimate_complete` still contain the
+two lower analytic `sorry`s consumed by this module.
 
 - `shiOpenConst` is an explicit constants-first envelope depending only on the
   model dimension, the common squared-curvature bound, the buffered time slab,
@@ -72,12 +70,12 @@ uniform constant.
 
 ## Honest accounting
 
-- `movingShi_of_bound`: proof source assembled, but theorem completion remains
-  0% until its focused check passes.
-- `movingShi_complete` and `CurvBoundInput.movingShi_open`: wrapper proofs 100%;
-  their checked consumption of the new core is pending the same focused check.
-- dedicated HCG-facing complete-Shi assembly machinery: about 95%, with only
-  verification and local elaboration repairs remaining.
+- `movingShi_of_bound`: source proof and verification 100%; trusted theorem
+  completion remains 0% because it consumes two explicit lower `sorry`s.
+- `movingShi_complete` and `CurvBoundInput.movingShi_open`: wrapper proofs and
+  verification 100%; trusted complete-Shi route remains 0% for the same lower
+  reasons.
+- dedicated HCG-facing complete-Shi assembly machinery: 100%.
 - arbitrary-dimensional curvature-tower machinery: about 70%; its genuine
   commutator producer remains an honest lower `sorry`.
 - complete-noncompact Bernstein machinery: about 25%; the HCG adapter is

@@ -19,3 +19,15 @@ This pointwise constant is sufficient: geometric decay under persistently bad
 dyadic ratios would force normalized volume to zero at that same centre.
 
 Focused verification passed without warnings.
+
+## 2026-07-19
+
+Promoted the explicit-ball positivity argument to the public theorem
+`edist_vol_pos`.  It states positivity of the real volume of every
+positive-radius `riemannianEDistOf` ball on a compact manifold.  The theorem
+lives here because it is a metric-volume fact, not Perelman-specific
+machinery; `FlowBallW` now reuses it instead of carrying a private copy.
+
+Focused verification is pending.  The source check did not emit a Lean
+diagnostic during the bounded check window while another long upstream build
+was active.

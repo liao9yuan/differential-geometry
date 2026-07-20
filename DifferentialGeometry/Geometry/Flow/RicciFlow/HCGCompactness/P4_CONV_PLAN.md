@@ -2,9 +2,10 @@
 
 The approved post-assembly producer architecture is
 [`P4_PRODUCER_RULING.md`](P4_PRODUCER_RULING.md).  It is authoritative for the
-two remaining independent lanes (complete-noncompact arbitrary-dimensional
-Shi analysis and concrete Step-D provenance), the grow-only `hcovTail`
-migration, and their final meeting point at `open_upgrade_of_raw`.
+two independent lanes (complete-noncompact arbitrary-dimensional Shi analysis
+and concrete Step-D provenance), the grow-only `hcovTail` migration, and their
+final meeting point at `open_upgrade_of_raw`.  The provenance lane is now
+closed; the analytic lane remains active.
 
 Self-contained execution plan for Opus sessions. Planner (Fable) verifies each brick on
 return (build + `#print axioms` + statement read). Approved architecture:
@@ -39,7 +40,7 @@ the flows with metrics `Φ_k^* g_k(t)` near any compact of `M_∞ = mc.limit.M`;
 subsequence converging C^∞-window-uniformly to a limit family `g_∞(t)`; `g_∞` is the metric
 of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 
-## Current status (2026-07-18)
+## Current status (2026-07-19)
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -89,21 +90,23 @@ raw window packages plus the time-zero CP witness, and proves completeness of
 every time slice of that same limit flow.  The assembly consumes the canonical
 `flowUpgrade_open_L` projection rather than unfolding the dependent record.
 
-The remaining P4 work is producer-side.  First, the theorem-level curvature
-and completeness inputs must yield uniform open-window lower, covariant, and
-time-Lipschitz estimates in the complete noncompact arbitrary-dimensional
-setting.  Second, the concrete Step-D time-zero convergence provenance must be
-retained: an arbitrary abstract `MetricCompactnessConclusion.convergence`
-does not pin its `MetricSourceData.referenceMetric`, so it cannot by itself
-produce the canonical `hcp` seminorm consumed by `open_upgrade_of_raw`.
+The remaining P4 work is producer-side and analytic: the theorem-level
+curvature and completeness inputs must yield uniform open-window lower,
+covariant, and time-Lipschitz estimates in the complete noncompact
+arbitrary-dimensional setting.  The formerly independent provenance task is
+closed.  The concrete Step-D sidecar retains the canonical time-zero
+`MetricSourceData` and its constants-first bounds, while the abstract
+`MetricCompactnessConclusion` remains intentionally unchanged.
 
 The analytic boundary is now explicit in `MovingShiOpen.lean`.
 `movingShi_complete` and `CurvBoundInput.movingShi_open` choose the common
 curvature bound and the explicit `shiOpenConst` before the member index; they
-do not uniformize memberwise existentials.  A full source proof of the
-constants-first `movingShi_of_bound` has now been assembled, but that revision
-still awaits focused verification after the shared framed-coordinate refresh.
-Its trusted lower work remains split visibly between the explicit
+do not uniformize memberwise existentials.
+`movingShi_of_bound`, `movingShi_complete`, and
+`CurvBoundInput.movingShi_open` are now focused- and exact-green.  The
+chart-local curvature/tower/norm regularity chain was weakened honestly to the
+complete-noncompact setting, and the anchor-norm statement mismatch was
+repaired.  Their trusted lower work remains split visibly between the explicit
 `exists_rmTowerSol` commuted-curvature frontier and the explicit
 `BernsteinTower.estimate_complete` complete-noncompact maximum-principle
 frontier.
@@ -114,12 +117,12 @@ The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `hcovTail` migration is now complete across the ten-module open-convergence
 chain: `hchi` and the artificial whole-source bump-collar estimate are gone,
 and the focused checks plus exact refreshes are green.  The concrete
-`StepDCanonData` provenance sidecar, its subsequence transport, and the
-`compactness_canon` producer are now stated.  The source was focused-green
-around one honest `HasCanonBounds` frontier; exact refresh and the flow-side
-projection adapters are paused until H6 hands back the shared
-framed-normal-coordinate import chain.  The approved architecture therefore
-needs no further consult at this point.
+`StepDCanonData` provenance sidecar, its subsequence transport, and
+`compactness_canon` are now complete.  `HasCanonBounds` is proved by an
+all-tail/compact-finite-head argument, and `StepDCanonP4.canon_cp`,
+`canon_rel`, and `canon_init` are focused- and exact-green against the live
+framed import chain.  The approved architecture therefore needs no further
+provenance consult.
 
 The downstream audit rules out globally replacing `carrier` by `regular` in
 the canonical convergence API.  `SourceSpacetimeConvergenceData.toSpatial`

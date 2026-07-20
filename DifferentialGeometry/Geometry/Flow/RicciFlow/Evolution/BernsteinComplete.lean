@@ -35,6 +35,8 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 
 namespace BernsteinTower
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Bernstein's tower estimate on a complete, possibly noncompact manifold.
 
 The active `IsRiemannianManifold` structure is the fixed complete anchor.  The

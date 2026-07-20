@@ -556,6 +556,8 @@ theorem shiOpenConst_nonneg
     0 <= shiOpenConst d C alpha beta psi N := by
   exact Real.sqrt_nonneg _
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Constants-first complete Shi estimate on a buffered slab.
 
 This is the unique analytic proof frontier owned by this module.  Its future
@@ -564,8 +566,6 @@ noncompact Bernstein maximum principle, the Ricci trace estimate, and metric
 equivalence to the complete left-anchor metric.  The displayed constant is
 independent of the particular flow, which is what permits the sequence
 wrapper below. -/
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
 theorem movingShi_of_bound
     {D : RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D)
@@ -595,6 +595,18 @@ theorem movingShi_of_bound
       (fun _ t => F.S.family.metric t) N
       (shiOpenConst (Module.finrank Real E) C alpha beta psi N) := by
   classical
+  letI : TopologicalSpace F.M := F.topology
+  letI : ChartedSpace H F.M := F.charted
+  letI : IsManifold I ∞ F.M := F.smooth
+  letI : IsManifold I 1 F.M :=
+    IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+  letI : IsManifold I 2 F.M :=
+    IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) F.M := by
+    change IsManifold I ∞ F.M
+    infer_instance
+  letI : SigmaCompactSpace F.M := F.sigmaCompact
+  letI : T2Space F.M := F.t2
   have halphaPsi : alpha < psi := halphaBeta.trans_le hbetaPsi
   let t0 : Real := (alpha + beta) / 2
   have halphaT0 : alpha < t0 := by
@@ -662,9 +674,10 @@ theorem movingShi_of_bound
   have hKOne : 1 ≤ K := le_max_left 1 C
   have hKPos : 0 < K := zero_lt_one.trans_le hKOne
   have hCK : C ≤ K := le_max_right 1 C
+  have hKNonneg : 0 ≤ K := hC.trans hCK
   let aScale : Real := K * (psi - alpha)
   have hScale : 0 ≤ aScale :=
-    mul_nonneg hKPos.le (sub_nonneg.mpr halphaPsi.le)
+    mul_nonneg hKNonneg (sub_nonneg.mpr halphaPsi.le)
   let levels : Finset Nat := Finset.range (N + 1)
   let c : Real := max 0 (∑ k ∈ levels, levelC k)
   have hc : 0 ≤ c := le_max_left _ _
@@ -692,17 +705,18 @@ theorem movingShi_of_bound
     halphaPsi hslab hreg
   have hmetric := metric_equiv_start (I := I)
     (fun s ↦ F.S.base.metric s) hpde hquad
-  let Yalpha := F.atTime (I := I) alpha
   letI : TopologicalSpace.MetrizableSpace F.M := Manifold.metrizableSpace I F.M
   letI : T3Space F.M := inferInstance
   letI : RiemannianBundle (fun x : F.M ↦ TangentSpace I x) :=
-    ⟨Yalpha.metric.toRiemannianMetric⟩
+    ⟨(F.S.base.metric alpha).toRiemannianMetric⟩
   letI : IsContinuousRiemannianBundle E
       (fun x : F.M ↦ TangentSpace I x) :=
-    ⟨⟨Yalpha.metric.inner, Yalpha.metric.contMDiff.continuous,
+    ⟨⟨(F.S.base.metric alpha).inner,
+      (F.S.base.metric alpha).contMDiff.continuous,
       by intro x v w; rfl⟩⟩
   letI : EMetricSpace F.M := EMetricSpace.ofRiemannianMetric I F.M
-  letI : CompleteSpace F.M := MetricComplete.complete (I := I) Yalpha hcomplete
+  letI : CompleteSpace F.M :=
+    MetricComplete.complete (I := I) (F.atTime (I := I) alpha) hcomplete
   let T : Real := psi - t0
   have hT : 0 < T := by
     dsimp only [T]
@@ -791,21 +805,27 @@ theorem movingShi_of_bound
       dsimp only [T] at hs
       exact ⟨by linarith [halphaT0, hs.1], by linarith [hs.2]⟩
     have hm := hmetric (s + t0) hu x v
-    have hga : 0 ≤ (F.S.base.metric alpha).inner x v v :=
-      metric_inner_self_nonneg (I := I) (M := F.M) (F.S.base.metric alpha) x v
+    have hga : 0 ≤ (F.S.base.metric alpha).inner x v v := by
+      by_cases hv : v = 0
+      · subst v
+        simp
+      · exact ((F.S.base.metric alpha).pos x v hv).le
+    have htime : s + t0 - alpha ≤ psi - alpha :=
+      sub_le_sub_right hu.2 alpha
+    have hscaled :
+        2 * A * (s + t0 - alpha) ≤ 2 * A * (psi - alpha) :=
+      mul_le_mul_of_nonneg_left htime (mul_nonneg (by norm_num) hA)
     have hexpUpper : Real.exp (2 * A * (s + t0 - alpha)) ≤ Ceq := by
       dsimp only [Ceq]
       apply Real.exp_le_exp.mpr
-      dsimp only [T] at hs
-      nlinarith [hA]
+      exact hscaled
     have hCeqInv : Ceq⁻¹ = Real.exp (-(2 * A * (psi - alpha))) := by
       dsimp only [Ceq]
       exact (Real.exp_neg _).symm
     have hexpLower : Ceq⁻¹ ≤ Real.exp (-(2 * A * (s + t0 - alpha))) := by
       rw [hCeqInv]
       apply Real.exp_le_exp.mpr
-      dsimp only [T] at hs
-      nlinarith [hA]
+      exact neg_le_neg hscaled
     have hinner :
         Ceq⁻¹ * (F.S.base.metric alpha).inner x v v ≤
             (F.S.base.metric (s + t0)).inner x v v ∧

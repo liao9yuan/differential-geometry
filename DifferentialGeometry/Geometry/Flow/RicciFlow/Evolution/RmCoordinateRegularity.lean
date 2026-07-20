@@ -183,7 +183,7 @@ private lemma chartRmEqJet
 omit [CompleteSpace E] in
 /-- Joint smoothness of a chart Riemann component from joint smoothness of the
 metric's chart-Gram components. -/
-theorem chartRmSmoothAt [CompactSpace M]
+theorem chartRmSmoothAt
     (g : Real -> SmoothRiemannianMetric I M)
     (a b : Real) (x0 : M)
     (hsmooth : ∀ x : M, ∀ i j : Fin (Module.finrank Real E),
@@ -279,7 +279,7 @@ theorem chartRmSmoothAt [CompactSpace M]
 
 /-- The chart-basis components of the canonical lowered Riemann tensor are
 jointly smooth at every regular spacetime point. -/
-theorem coordRmSmoothInf [CompactSpace M]
+theorem coordRmSmoothInf
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
@@ -362,7 +362,7 @@ theorem coordRmSmoothInf [CompactSpace M]
 
 /-- The coordinate-frame level-zero Riemann array is jointly smooth at every
 regular spacetime point in the chart good set. -/
-theorem coordRmFinSmooth [CompactSpace M]
+theorem coordRmFinSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}

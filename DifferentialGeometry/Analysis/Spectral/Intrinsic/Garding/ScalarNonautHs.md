@@ -92,3 +92,24 @@ identifies its `H⁰` coefficients.  `galLimVel_lift` itself remains 0%; its
 dedicated machinery is about 80%, with scalar-potential/inclusion compatibility
 still being closed.  The Perelman noncollapsing endpoint remains 0%; whole HCG
 machinery is about 57%, with endpoint theorems at 0%.
+
+## 2026-07-19 interval-independent structural API
+
+The source now factors the old internally chosen-slab wrappers through three
+metric-generic declarations:
+
+- `lapHs_core`, smooth-core agreement for arbitrary smooth `q` and `h`;
+- `lapHs_eq`, the global second-order/first-order structural CLM identity;
+- `lapHs_inc`, global commutation with natural Sobolev inclusions.
+
+This removes the hidden lifespan choice from downstream exact-interval proofs.
+The old `lapDiffHs_core` and `lapDiffHs_inc` remain compatibility wrappers, but
+their mathematical content is now supplied by the global declarations.
+
+Focused verification of this edit is pending the active upstream spectral
+object refresh. No local `sorry` is present and no local Lean error has yet
+been observed. Until the focused check is green, the three new declarations
+remain theorem-level **0% verified** with approximately **95%** dedicated
+source. The noncollapsing endpoint remains theorem-level **0%**; its broader
+dedicated machinery is approximately **97%**, while whole HCG machinery is
+approximately **60%**.

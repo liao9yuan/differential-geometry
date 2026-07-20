@@ -1717,3 +1717,23 @@ else is assembly against existing engines.
   until the B/C lane constructs `StepB1RawInput`.  There is no remaining
   Step-D/F brick: follow the live B/C status in `B1_JOIN_HANDOFF.md` and
   `B1_MIN_BRANCH_RULING.md` rather than this historical coda.
+
+- 2026-07-19 (canonical provenance closure): the concrete sidecar branch is
+  complete.  `D6ChainData.stage_bounds` combines the `D.close` all-tail
+  estimate with compact finite-head collars to produce one stage-independent
+  metric-equivalence constant and one constant at every covariant order.
+  `chain_canon_eq` identifies the canonical restricted limit metric with the
+  pullback of the compatible stage metric; pullback invariance and the existing
+  `unrepoint`/`ofSubseq` chain then prove `HasCanonBounds` inside
+  `compactness_canon`.  The abstract `MetricCompactnessConclusion` remains
+  unchanged, and no new endpoint input was added.
+
+  `StepDAssembly.lean` is focused- and exact-green without `sorry` or `admit`.
+  `MetricCompactnessEndpoint.lean` is also focused-green, and its exact targeted
+  refresh completed successfully through the live framed import closure.
+  `compactness_canon`, `metricCanon`, conditional Theorem 3.9, and the selected
+  concrete Step-D route are therefore **100% checked**.  The separately named
+  textbook B1 statement and unconditional Theorem 3.9 remain theorem-level
+  **0%**.  This closes the provenance half of the P4 ruling; its next work lies
+  in the independent analytic lane (`exists_rmTowerSol`, complete-noncompact
+  Bernstein/Shi, then `srcCovLip_of_soln`), not in another Step-D wrapper.

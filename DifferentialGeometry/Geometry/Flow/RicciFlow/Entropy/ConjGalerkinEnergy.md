@@ -59,3 +59,19 @@ temporary duplicate and uses this canonical producer directly.
 The theorem is infrastructure only.  Downstream `scalar_gal_limit` completion is
 recorded in `ConjGalerkinStrong.md` as theorem-level **100%** with **100%**
 dedicated machinery, and is not counted from this export by itself.
+
+## 2026-07-19 exact energy interval
+
+`gal_bound_on` factors the energy hierarchy from lifetime selection.  It takes
+an exact `IsConjGalTime` interval, the support-independent critical estimate,
+and the moving-Laplacian finite-core equality on that same interval.  Its proof
+reuses the existing `gal_crit_nf` and all-order energy theorem.  The public
+`scalar_gal_bound` statement is unchanged and now selects its old short
+interval before calling the exact engine.
+
+This removes the target route's former `delta / 2` shrink: the new engine calls
+`galPert_fin_of` pointwise from the supplied core equality.  No new regularity,
+chart, convergence, or spectral-support assumption was introduced.  The source
+contains no local `sorry`; focused verification is pending the active upstream
+spectral object refresh, so `gal_bound_on` is theorem-level **0%** with about
+**98%** dedicated source machinery until it elaborates.

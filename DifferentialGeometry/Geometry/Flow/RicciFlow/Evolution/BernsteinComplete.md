@@ -10,6 +10,12 @@ That structural repair is focused-check green.
 consumer with one fixed complete anchor metric, slabwise metric equivalence,
 and a uniform Ricci lower bound.  It has one honest `sorry`.
 
+Its tangent-space norm is now elaborated under the active anchor
+`RiemannianBundle`, matching the geometric meaning of the displayed metric
+equivalence and the HCG caller.  The prior exported statement had accidentally
+used the model-fibre norm.  This statement repair is focused- and
+targeted-green; it does not fill the analytic `sorry`.
+
 ## Exact frontier
 
 The missing proof is a complete-noncompact scalar affine maximum principle for

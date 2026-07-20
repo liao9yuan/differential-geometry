@@ -248,14 +248,14 @@ The analytic and provenance lanes run in parallel:
   maximum-principle/cutoff `sorry`; dedicated machinery is about 10%.
 - `movingShi_complete` and `CurvBoundInput.movingShi_open`: the wrappers and a
   full source proof of `movingShi_of_bound` are assembled with one explicit
-  constant chosen before the sequence member.  The latest source revision is
-  awaiting focused verification after the framed-coordinate refresh; its
-  trusted analytic foundation still depends on the explicit lower-level
+  constant chosen before the sequence member.  The HCG-facing assembly is now
+  focused- and exact-green, including the noncompact tower-norm regularity and
+  anchor-norm repairs.  Its trusted analytic foundation still depends on the explicit lower-level
   frontiers in `exists_rmTowerSol` and `BernsteinTower.estimate_complete`.
-- `StepDCanonData` / `compactness_canon`: the sidecar, subsequence transport,
-  and public projection are stated; the source was focused-green around one
-  honest `HasCanonBounds` frontier.  Its exact refresh is paused while H6
-  migrates the shared framed normal-coordinate import chain.
+- `StepDCanonData` / `compactness_canon`: 100% checked.  The sidecar,
+  subsequence transport, public projection, whole-source canonical bounds, and
+  flow-side `canon_cp` / `canon_rel` / `canon_init` adapters are focused- and
+  exact-green on the live framed import chain.  The provenance lane is closed.
 - `SrcCovLipData`: source-native interface stated and focused-green.
   `srcCovLip_of_soln` remains theorem-level 0% at its single constants-first
   varying-source analytic `sorry`.

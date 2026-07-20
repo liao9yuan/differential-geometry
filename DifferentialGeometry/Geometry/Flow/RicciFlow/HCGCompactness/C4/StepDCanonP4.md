@@ -40,14 +40,14 @@ convergence hierarchy was introduced.
 
 ## Verification and frontier
 
-The adapter source is assembled without `sorry`, `admit`, or `axiom`.
-Focused verification is pending the exact refresh of the newly strengthened
-`StepDAssembly` interface; that refresh is currently waiting on its upstream
-exponential-geometry chain.
+The adapter source contains no `sorry`, `admit`, or `axiom`.  After the
+canonical-bounds producer closed, focused verification passed and the exact
+targeted refresh completed successfully.  `canon_cp`, `canon_rel`, and
+`canon_init` are therefore 100% checked, as are `compactness_canon` and the
+conditional metric-compactness endpoint.  The Step-D provenance lane has no
+remaining frontier.
 
-The adapter theorem statements themselves remain 0% until that focused check
-is green; their dedicated implementation is otherwise complete.  The concrete
-Step-D sidecar producer still has the independent `HasCanonBounds`/`hbounds`
-proof frontier.  The unconditional `compactnessSol` endpoint is still 0%; P4
-support machinery is roughly 97%, and the whole HCG machinery remains roughly
-60%.
+The independent analytic lane remains: arbitrary-dimensional complete
+noncompact Shi estimates and the constants-first varying-source producer.
+Accordingly unconditional `compactnessSol` stays theorem-level 0%; P4 support
+machinery is roughly 97%, and whole-HCG machinery remains roughly 60%.

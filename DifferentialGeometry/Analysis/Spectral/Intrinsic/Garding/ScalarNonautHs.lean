@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IterCovGradHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
@@ -169,6 +170,150 @@ noncomputable def lapDiffHs
       (lapDiffCcLin (I := I) (M := M) q h)).extendOfNorm
     (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2))
 
+/-- For arbitrary smooth metrics, the completed scalar Laplacian difference
+agrees with its invariant action on every smooth spectral embedding. -/
+theorem lapHs_core
+    (q h : SmoothRiemannianMetric I M) (m : ℕ)
+    (U : SmoothCcTensor q 0 0) :
+    lapDiffHs (I := I) (M := M) q h m
+        (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U) =
+      ccTensorToHs (I := I) (M := M) q 0 (m : ℝ)
+        (scalarLapDiffCc (I := I) q h U) := by
+  classical
+  let J := tensorHsInclusion (I := I) (M := M)
+    (g := q) (r := 0) (s := 0)
+    (by norm_num : (m : ℝ) + ((1 : ℕ) : ℝ) ≤ (m : ℝ) + 2)
+  let D₂ := iterCovGradHs (I := I) (M := M) q 0 2 m
+  let D₁ := (iterCovGradHs (I := I) (M := M) q 0 1 m).comp J
+  let R :=
+    (appHs q 2 0 m (scalarTraceCoeff (I := I) q h)).comp D₂ -
+      (appHs q 1 0 m (connTraceCoeff (I := I) q h)).comp D₁
+  have hstruct (W : SmoothCcTensor q 0 0) :
+      R (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W) =
+        ccTensorToHs (I := I) (M := M) q 0 (m : ℝ)
+          (scalarLapDiffCc (I := I) q h W) := by
+    have hD₂ :
+        iterCovGradHs (I := I) (M := M) q 0 2 m
+            (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W) =
+          ccTensorToHs (I := I) (M := M) q 2 (m : ℝ)
+            (iteratedCovGrad (I := I) q 0 0 2 W) := by
+      exact iterCovGradHs_core (I := I) (M := M) q 0 2 m W
+    have hJ :
+        J (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W) =
+          ccTensorToHs (I := I) (M := M) q 0
+            ((m : ℝ) + ((1 : ℕ) : ℝ)) W := by
+      apply tensorHs.ext
+      funext i
+      simp only [J, tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
+    have hD₁ :
+        iterCovGradHs (I := I) (M := M) q 0 1 m
+            (ccTensorToHs (I := I) (M := M) q 0
+              ((m : ℝ) + ((1 : ℕ) : ℝ)) W) =
+          ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
+            (iteratedCovGrad (I := I) q 0 0 1 W) := by
+      exact iterCovGradHs_core (I := I) (M := M) q 0 1 m W
+    let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+      (iteratedCovGrad (I := I) q 0 0 2 W)
+    let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+      (iteratedCovGrad (I := I) q 0 0 1 W)
+    have hsub :
+        ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
+          ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) X -
+            ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) Y := by
+      simpa only [ccToHsLin_apply] using
+        map_sub (ccToHsLin (I := I) (M := M) q 0 (m : ℝ)) X Y
+    simp only [R, D₂, D₁, J, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.comp_apply, hD₂, hJ, hD₁, appHs_core]
+    rw [← hsub]
+    rfl
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  change
+    (((ccToHsLin (I := I) (M := M) q 0 (m : ℝ)).comp
+        (lapDiffCcLin (I := I) (M := M) q h)).extendOfNorm
+      (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)))
+        ((ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)) U) = _
+  apply LinearMap.extendOfNorm_eq hdense
+  refine ⟨‖R‖, ?_⟩
+  intro W
+  change
+    ‖ccTensorToHs (I := I) (M := M) q 0 (m : ℝ)
+        (scalarLapDiffCc (I := I) q h W)‖ ≤
+      ‖R‖ * ‖ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W‖
+  rw [← hstruct W]
+  exact R.le_opNorm _
+
+/-- The completed scalar Laplacian difference is the structural sum of its
+second-order metric coefficient arm and first-order connection arm. -/
+theorem lapHs_eq
+    (q h : SmoothRiemannianMetric I M) (m : ℕ) :
+    lapDiffHs (I := I) (M := M) q h m =
+      (appHs q 2 0 m (scalarTraceCoeff (I := I) q h)).comp
+          (iterCovGradHs (I := I) (M := M) q 0 2 m) -
+        (appHs q 1 0 m (connTraceCoeff (I := I) q h)).comp
+          ((iterCovGradHs (I := I) (M := M) q 0 1 m).comp
+            (tensorHsInclusion (I := I) (M := M)
+              (g := q) (r := 0) (s := 0)
+              (by norm_num : (m : ℝ) + ((1 : ℕ) : ℝ) ≤ (m : ℝ) + 2))) := by
+  classical
+  let J := tensorHsInclusion (I := I) (M := M)
+    (g := q) (r := 0) (s := 0)
+    (by norm_num : (m : ℝ) + ((1 : ℕ) : ℝ) ≤ (m : ℝ) + 2)
+  let D₂ := iterCovGradHs (I := I) (M := M) q 0 2 m
+  let D₁ := (iterCovGradHs (I := I) (M := M) q 0 1 m).comp J
+  let L := lapDiffHs (I := I) (M := M) q h m
+  let R :=
+    (appHs q 2 0 m (scalarTraceCoeff (I := I) q h)).comp D₂ -
+      (appHs q 1 0 m (connTraceCoeff (I := I) q h)).comp D₁
+  change L = R
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  apply ContinuousLinearMap.ext
+  intro v
+  refine congr_fun (hdense.equalizer L.continuous R.continuous ?_) v
+  funext U
+  change
+    lapDiffHs (I := I) (M := M) q h m
+        (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U) =
+      R (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U)
+  rw [lapHs_core (I := I) (M := M)]
+  have hD₂ :
+      iterCovGradHs (I := I) (M := M) q 0 2 m
+          (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U) =
+        ccTensorToHs (I := I) (M := M) q 2 (m : ℝ)
+          (iteratedCovGrad (I := I) q 0 0 2 U) := by
+    exact iterCovGradHs_core (I := I) (M := M) q 0 2 m U
+  have hJ :
+      J (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U) =
+        ccTensorToHs (I := I) (M := M) q 0
+          ((m : ℝ) + ((1 : ℕ) : ℝ)) U := by
+    apply tensorHs.ext
+    funext i
+    simp only [J, tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
+  have hD₁ :
+      iterCovGradHs (I := I) (M := M) q 0 1 m
+          (ccTensorToHs (I := I) (M := M) q 0
+            ((m : ℝ) + ((1 : ℕ) : ℝ)) U) =
+        ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
+          (iteratedCovGrad (I := I) q 0 0 1 U) := by
+    exact iterCovGradHs_core (I := I) (M := M) q 0 1 m U
+  let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+    (iteratedCovGrad (I := I) q 0 0 2 U)
+  let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+    (iteratedCovGrad (I := I) q 0 0 1 U)
+  have hsub :
+      ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
+        ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) X -
+          ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) Y := by
+    simpa only [ccToHsLin_apply] using
+      map_sub (ccToHsLin (I := I) (M := M) q 0 (m : ℝ)) X Y
+  simp only [R, ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply,
+    D₂, D₁, hD₂, hJ, hD₁, appHs_core]
+  rw [← hsub]
+  rfl
+
 /-- On one common backward-time slab, `lapDiffHs` agrees on every smooth
 spectral embedding with the invariant scalar Laplacian-difference action. -/
 theorem lapDiffHs_core
@@ -187,33 +332,12 @@ theorem lapDiffHs_core
             ccTensorToHs (I := I) (M := M) (G.metric (T : ℝ)) 0 (m : ℝ)
               (scalarLapDiffCc (I := I) (G.metric (T : ℝ))
                 (G.metric ((T : ℝ) - s)) U) := by
-  classical
-  obtain ⟨tau, htau, htau_one, hreg, hbound⟩ :=
+  obtain ⟨tau, htau, htau_one, hreg, _hbound⟩ :=
     lapDiff_hs_unif (I := I) (M := M) G hG T
   refine ⟨tau, htau, htau_one, hreg, ?_⟩
-  intro m s hs U
-  obtain ⟨C, hC_nn, hC⟩ := hbound m
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
-  let h : SmoothRiemannianMetric I M := G.metric ((T : ℝ) - s)
-  have hdense : DenseRange
-      (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)) :=
-    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
-  change
-    (((ccToHsLin (I := I) (M := M) q 0 (m : ℝ)).comp
-        (lapDiffCcLin (I := I) (M := M) q h)).extendOfNorm
-      (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)))
-        ((ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2)) U) =
-      ((ccToHsLin (I := I) (M := M) q 0 (m : ℝ)).comp
-        (lapDiffCcLin (I := I) (M := M) q h)) U
-  apply LinearMap.extendOfNorm_eq hdense
-  refine ⟨C, ?_⟩
-  intro W
-  change
-    ‖ccTensorToHs (I := I) (M := M) q 0 (m : ℝ)
-        (scalarLapDiffCc (I := I) q h W)‖ ≤
-      C * ‖ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W‖
-  rw [show ((m : ℝ) + 2) = ((m + 2 : ℕ) : ℝ) by norm_num]
-  simpa only [q, h] using hC s hs W
+  intro m s _hs U
+  exact lapHs_core (I := I) (M := M)
+    (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s)) m U
 
 /-- On the same kind of common slab, the completed all-scale scalar Laplacian
 difference has an operator-norm bound independent of backward time. -/
@@ -430,35 +554,20 @@ theorem lapDiffHs_tendsto
   intro ε hε
   exact lapDiffHs_small (I := I) (M := M) G hG T m hε
 
-/-- On one common backward-time slab, the completed Laplacian-difference
-operators commute with the canonical inclusions between natural Sobolev
-orders. -/
-theorem lapDiffHs_inc
-    {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
-    (T : D.RegularTime) :
-    ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
-      (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
-      ∀ {n m : ℕ} (hnm : n ≤ m) s, s ∈ Set.Icc (0 : ℝ) tau →
-        (tensorHsInclusion (I := I) (M := M)
-            (g := G.metric (T : ℝ)) (r := 0) (s := 0)
-            (by exact_mod_cast hnm : (n : ℝ) ≤ (m : ℝ))).comp
-          (lapDiffHs (I := I) (M := M) (G.metric (T : ℝ))
-            (G.metric ((T : ℝ) - s)) m) =
-        (lapDiffHs (I := I) (M := M) (G.metric (T : ℝ))
-            (G.metric ((T : ℝ) - s)) n).comp
-          (tensorHsInclusion (I := I) (M := M)
-            (g := G.metric (T : ℝ)) (r := 0) (s := 0)
-            (by exact_mod_cast Nat.add_le_add_right hnm 2 :
-              (n : ℝ) + 2 ≤ (m : ℝ) + 2)) := by
+/-- For arbitrary smooth metrics, the completed Laplacian-difference operators
+commute with the canonical inclusions between natural Sobolev orders. -/
+theorem lapHs_inc
+    (q h : SmoothRiemannianMetric I M) {n m : ℕ} (hnm : n ≤ m) :
+    (tensorHsInclusion (I := I) (M := M)
+        (g := q) (r := 0) (s := 0)
+        (by exact_mod_cast hnm : (n : ℝ) ≤ (m : ℝ))).comp
+      (lapDiffHs (I := I) (M := M) q h m) =
+    (lapDiffHs (I := I) (M := M) q h n).comp
+      (tensorHsInclusion (I := I) (M := M)
+        (g := q) (r := 0) (s := 0)
+        (by exact_mod_cast Nat.add_le_add_right hnm 2 :
+          (n : ℝ) + 2 ≤ (m : ℝ) + 2)) := by
   classical
-  obtain ⟨tau, htau, htau_one, hreg, hcore⟩ :=
-    lapDiffHs_core (I := I) (M := M) G hG T
-  refine ⟨tau, htau, htau_one, hreg, ?_⟩
-  intro n m hnm s hs
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
-  let h : SmoothRiemannianMetric I M := G.metric ((T : ℝ) - s)
   have hnmR : (n : ℝ) ≤ (m : ℝ) := by exact_mod_cast hnm
   have hnmR2 : (n : ℝ) + 2 ≤ (m : ℝ) + 2 := by
     exact_mod_cast Nat.add_le_add_right hnm 2
@@ -489,11 +598,7 @@ theorem lapDiffHs_inc
           (tensorHsInclusion (I := I) (M := M)
             (g := q) (r := 0) (s := 0) hnmR2
             (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U))
-    rw [show lapDiffHs (I := I) (M := M) q h m
-          (ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) U) =
-        ccTensorToHs (I := I) (M := M) q 0 (m : ℝ)
-          (scalarLapDiffCc (I := I) q h U) by
-      simpa only [q, h] using hcore m s hs U]
+    rw [lapHs_core (I := I) (M := M)]
     have hin :
         tensorHsInclusion (I := I) (M := M)
             (g := q) (r := 0) (s := 0) hnmR2
@@ -502,17 +607,41 @@ theorem lapDiffHs_inc
       apply tensorHs.ext
       funext i
       simp only [tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
-    rw [hin]
-    rw [show lapDiffHs (I := I) (M := M) q h n
-          (ccTensorToHs (I := I) (M := M) q 0 ((n : ℝ) + 2) U) =
-        ccTensorToHs (I := I) (M := M) q 0 (n : ℝ)
-          (scalarLapDiffCc (I := I) q h U) by
-      simpa only [q, h] using hcore n s hs U]
+    rw [hin, lapHs_core (I := I) (M := M)]
     apply tensorHs.ext
     funext i
     simp only [tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
   have hfun := hdense.equalizer L.continuous R.continuous heq
   exact congr_fun hfun v
+
+/-- On one common backward-time slab, the completed Laplacian-difference
+operators commute with the canonical inclusions between natural Sobolev
+orders. -/
+theorem lapDiffHs_inc
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) :
+    ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
+      (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
+      ∀ {n m : ℕ} (hnm : n ≤ m) s, s ∈ Set.Icc (0 : ℝ) tau →
+        (tensorHsInclusion (I := I) (M := M)
+            (g := G.metric (T : ℝ)) (r := 0) (s := 0)
+            (by exact_mod_cast hnm : (n : ℝ) ≤ (m : ℝ))).comp
+          (lapDiffHs (I := I) (M := M) (G.metric (T : ℝ))
+            (G.metric ((T : ℝ) - s)) m) =
+        (lapDiffHs (I := I) (M := M) (G.metric (T : ℝ))
+            (G.metric ((T : ℝ) - s)) n).comp
+          (tensorHsInclusion (I := I) (M := M)
+            (g := G.metric (T : ℝ)) (r := 0) (s := 0)
+            (by exact_mod_cast Nat.add_le_add_right hnm 2 :
+              (n : ℝ) + 2 ≤ (m : ℝ) + 2)) := by
+  obtain ⟨tau, htau, htau_one, hreg, _hcore⟩ :=
+    lapDiffHs_core (I := I) (M := M) G hG T
+  refine ⟨tau, htau, htau_one, hreg, ?_⟩
+  intro n m hnm s _hs
+  exact lapHs_inc (I := I) (M := M)
+    (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s)) hnm
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

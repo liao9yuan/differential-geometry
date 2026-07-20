@@ -13,3 +13,11 @@
 - Focused verification passed without warnings. The theorem is complete; the
   downstream mixed derivative swap and arbitrary-frame transfer remain
   separate, unfinished theorems.
+
+## 2026-07-19
+
+- `coordTowerSmooth` no longer assumes `[CompactSpace M]`.  The recursive
+  proof is pointwise and now consumes the correspondingly weakened
+  coordinate-Riemann base API.
+- Focused and targeted verification passed.  This closes only the noncompact
+  regularity transport; it does not prove `exists_rmTowerSol`.

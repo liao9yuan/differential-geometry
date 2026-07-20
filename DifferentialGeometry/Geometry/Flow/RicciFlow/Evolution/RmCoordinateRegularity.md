@@ -32,3 +32,12 @@
 - This constant change of basis is enough for the coordinate tower. A later
   transfer from coordinate components to an arbitrary smooth orthonormal frame
   is still required by the local-frame Shi consumer.
+
+## 2026-07-19
+
+- Removed the accidental `[CompactSpace M]` assumptions from
+  `chartRmSmoothAt`, `coordRmSmoothInf`, and `coordRmFinSmooth`.  Their proofs
+  are chart-local and did not use compactness.
+- Focused and targeted verification passed.  This supplies the canonical
+  noncompact regularity base needed by the complete-Shi norm tower; it does
+  not address the separate commuted-curvature heat identity.

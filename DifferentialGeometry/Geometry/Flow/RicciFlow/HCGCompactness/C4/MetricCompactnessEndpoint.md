@@ -20,9 +20,8 @@ The proof uses exactly this chain:
    returns a conclusion for the original pointed sequence.
 
 Focused verification and the exact targeted module refresh pass against the
-canonical framed B/C chain.  There is no local `sorry` or `admit` in this file,
-but the concrete sidecar constructor it calls still contains the single
-`HasCanonBounds` `sorry` recorded below.
+canonical framed B/C chain.  There is no `sorry` or `admit` in this file or in
+the concrete `compactness_canon` sidecar constructor it calls.
 
 ## Honest accounting
 
@@ -30,9 +29,8 @@ but the concrete sidecar constructor it calls still contains the single
 - concrete `StepB1RawInput`: 5/5 fields checked.
 - selected B/C-to-B1 producer route: 100%.
 - nested-subsequence lift and endpoint wiring: 100%.
-- `compactness_canon`, `metricCanon`, and the current projected
-  `MetricCompactnessInputs.metricCompactness`: theorem-level 0% until the
-  upstream `HasCanonBounds` producer is proved.
+- `compactness_canon`, `metricCanon`, and the projected
+  `MetricCompactnessInputs.metricCompactness`: 100% checked.
 - separately named textbook B1 theorem: unstated/unproved, 0%.
 - historical full textbook Step-C arbitrary recurrence: separate and incomplete.
 - unconditional Theorem 3.9: 0%; native CGT, Bishop--Gromov/uniform-packing,
@@ -58,10 +56,22 @@ The canonical framed dependency chain is now exact-current through
 remaining obstruction is mathematical/API content in `HasCanonBounds`, not a
 stale artifact or framed-coordinate mismatch.
 
-Honest accounting: `metricCanon` is stated but theorem-level 0% while the
-single `HasCanonBounds` producer in `compactness_canon` remains `sorry`;
-canonical endpoint wiring is about 90% and exact-current.  The old public
-conclusion is source-compatible by projection, but the edited proof chain
-currently depends on that explicit frontier.  The unconditional
-Theorem 3.9 and `compactnessSol` endpoints remain 0%; whole-HCG machinery is
+This section recorded the state before the concrete canonical-bounds producer
+was proved; it is superseded by the update below.
+
+## 2026-07-19 canonical endpoint closed
+
+`compactness_canon` now proves `HasCanonBounds` from the concrete Step-D chain:
+an all-tail estimate is combined with compact finite-head collars, then metric
+equivalence and covariant bounds are transported through the canonical
+source-target diffeomorphism and the nested subsequence.  The endpoint consumes
+that checked sidecar without changing the abstract
+`MetricCompactnessConclusion` API.
+
+Focused verification and the exact targeted refresh pass through
+`MetricCompactnessEndpoint`.  Honest accounting: `compactness_canon`,
+`metricCanon`, and conditional Theorem 3.9 are each 100% checked; the selected
+conditional Chapter-4 route is 100%.  The separately named textbook B1 theorem
+and unconditional Theorem 3.9 remain 0%; `compactnessSol` and the Hamilton
+endpoint also remain theorem-level 0%.  Whole-HCG machinery remains
 approximately 60%.

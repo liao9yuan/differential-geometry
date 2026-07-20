@@ -21,6 +21,7 @@ open Bundle Tensor0SBundle MeasureTheory Set Function
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 universe u uE uH
 
@@ -66,38 +67,6 @@ private theorem cutoff_grad_le
   rw [hnum, hden, heq]
   exact mul_le_mul_of_nonneg_left
     ((div_le_iff₀ hHr).2 hVH.le) (by norm_num)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Explicit-metric balls have positive finite real volume on a compact
-manifold. -/
-private theorem edist_vol_pos
-    (g : SmoothRiemannianMetric I M) (a : M) {r : ℝ} (hr : 0 < r) :
-    0 < (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
-      I M g {x : M | DifferentialGeometry.riemannianEDistOf
-        (I := I) g a x < ENNReal.ofReal r}).toReal := by
-  let μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g
-  let U : Set M := {x : M | DifferentialGeometry.riemannianEDistOf
-    (I := I) g a x < ENNReal.ofReal r}
-  have hUopen : IsOpen U := by
-    dsimp only [U]
-    exact isOpen_lt
-      (by
-        unfold DifferentialGeometry.riemannianEDistOf
-        exact DifferentialGeometry.Geometry.Riemannian.continuous_riemannianEDist g a)
-      continuous_const
-  have hUne : U.Nonempty := by
-    refine ⟨a, ?_⟩
-    simp only [U, mem_setOf_eq, DifferentialGeometry.riemannianEDistOf,
-      Manifold.riemannianEDist_self]
-    exact ENNReal.ofReal_pos.mpr hr
-  letI : μ.IsOpenPosMeasure :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isOpenPosMeasure
-      (I := I) (M := M) g
-  letI : IsFiniteMeasure μ :=
-    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
-      (I := I) (M := M) g
-  exact ENNReal.toReal_pos (hUopen.measure_pos μ hUne).ne' (measure_ne_top μ U)
 
 private theorem scale_curv_eq (n : ℕ) {r : ℝ} (hr : 0 < r) :
     r ^ 2 * ((n : ℝ) ^ 2 * Real.sqrt (1 / r ^ 4)) = (n : ℝ) ^ 2 := by

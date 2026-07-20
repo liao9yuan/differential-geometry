@@ -22,3 +22,13 @@ Focused verification passed without warnings.  The curvature-controlled
 flow-ball square-form producer, positive-amplitude W upper producer, and
 selected-scale W bound are each theorem-level 100%.  The remaining separate
 frontier is a flow-uniform W lower bound reaching the initial slice.
+
+## 2026-07-19
+
+Removed the file-private explicit-ball volume-positivity proof.  All three
+uses now call the public `VolumeComparison.edist_vol_pos` theorem from
+`Geometry/Comparison/Volume/SmallBall`, keeping the general metric-volume fact
+below the Perelman layer.
+
+Focused verification is pending the upstream `SmallBall` source check and
+artifact refresh; no local Lean diagnostic has been observed yet.
