@@ -357,6 +357,103 @@ def earlyFluxC (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
 
 variable [NormedSpace ℝ F] [CompleteSpace F]
 
+/-- The scalar mass of one early divergence-source shell integrand. -/
+def fluxShellMass (t : ℝ) (w : V) (f : ℝ × V → F)
+    (x : V) (k : ℕ) : ℝ≥0∞ :=
+  ∫⁻ z in fluxShellCyl t x k,
+    ‖heatD1 (t - z.1) w (x - z.2) • f z‖ₑ
+      ∂(stVolume : Measure (ℝ × V))
+
+omit [CompleteSpace F] in
+/-- Before the final scale cancellation, one shell is bounded by its finite
+cover count, its local gradient-Carleson `L¹` mass, and the exact first heat
+derivative Gaussian factor. -/
+theorem fluxShellMass_raw {T t : ℝ} {C : ℝ≥0∞}
+    (ht : 0 < t) (htT : t ≤ T) (w : V) (f : ℝ × V → F)
+    (x : V) (k : ℕ) (s : Finset V)
+    (hcover : fluxShell t x k ⊆
+      ⋃ c ∈ s, Metric.ball c (heatScale t))
+    (hsrc : GradCarl T C f) :
+    fluxShellMass t w f x k ≤
+      ENNReal.ofReal
+        (‖w‖ *
+          (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+            (heatScale (t / 2))⁻¹ *
+              (((2 : ℝ)⁻¹ *
+                  (Real.sqrt 2 * ((k + 1 : ℕ) : ℝ))) *
+                ((baseHeatMass V)⁻¹ *
+                  Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ) ^ 2))))) *
+        ((s.card : ℝ≥0∞) *
+          ((ENNReal.ofReal (heatScale t)) ^
+              (Module.finrank ℝ V + 1) *
+            (heatBallVol V) ^ ((1 : ℝ) / 2) *
+              C ^ ((1 : ℝ) / 2))) := by
+  let K : ℝ :=
+    ‖w‖ *
+      (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+        (heatScale (t / 2))⁻¹ *
+          (((2 : ℝ)⁻¹ *
+              (Real.sqrt 2 * ((k + 1 : ℕ) : ℝ))) *
+            ((baseHeatMass V)⁻¹ *
+              Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ) ^ 2))))
+  have hK0 : 0 ≤ K := by
+    dsimp [K]
+    exact mul_nonneg (norm_nonneg w)
+      (mul_nonneg
+        (mul_nonneg
+          (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg _) _))
+          (inv_nonneg.mpr (Real.sqrt_nonneg _)))
+        (mul_nonneg
+          (mul_nonneg (by positivity)
+            (mul_nonneg (Real.sqrt_nonneg _) (Nat.cast_nonneg _)))
+          (mul_nonneg
+            (inv_nonneg.mpr (baseHeatMass_pos (V := V)).le)
+            (Real.exp_pos _).le)))
+  have hsource :
+      (∫⁻ z in fluxShellCyl t x k, ENNReal.ofReal ‖f z‖
+          ∂(stVolume : Measure (ℝ × V))) ≤
+        (s.card : ℝ≥0∞) *
+          ((ENNReal.ofReal (heatScale t)) ^
+              (Module.finrank ℝ V + 1) *
+            (heatBallVol V) ^ ((1 : ℝ) / 2) *
+              C ^ ((1 : ℝ) / 2)) := by
+    simpa only [fluxShellCyl] using
+      earlyFlux_cover_l1 ht htT f (fluxShell t x k) s hcover hsrc
+  have hpoint : ∀ z ∈ fluxShellCyl t x k,
+      ‖heatD1 (t - z.1) w (x - z.2) • f z‖ₑ ≤
+        ENNReal.ofReal K * ENNReal.ofReal ‖f z‖ := by
+    intro z hz
+    have hk := heatD1_early_shell ht hz.1.1.le hz.1.2 w k hz.2
+    rw [← ofReal_norm_eq_enorm, norm_smul,
+      ENNReal.ofReal_mul (norm_nonneg _)]
+    exact mul_le_mul_left (ENNReal.ofReal_le_ofReal hk) _
+  have hm : AEMeasurable (fun z : ℝ × V => ENNReal.ofReal ‖f z‖)
+      ((stVolume : Measure (ℝ × V)).restrict (fluxShellCyl t x k)) :=
+    (hsrc.ae.norm.aemeasurable.ennreal_ofReal).mono_measure
+      Measure.restrict_le_self
+  unfold fluxShellMass
+  calc
+    (∫⁻ z in fluxShellCyl t x k,
+        ‖heatD1 (t - z.1) w (x - z.2) • f z‖ₑ
+          ∂(stVolume : Measure (ℝ × V))) ≤
+        ∫⁻ z in fluxShellCyl t x k,
+          ENNReal.ofReal K * ENNReal.ofReal ‖f z‖
+            ∂(stVolume : Measure (ℝ × V)) := by
+      apply lintegral_mono_ae
+      filter_upwards [ae_restrict_mem (fluxShellCyl_meas t x k)] with z hz
+      exact hpoint z hz
+    _ = ENNReal.ofReal K *
+        (∫⁻ z in fluxShellCyl t x k, ENNReal.ofReal ‖f z‖
+          ∂(stVolume : Measure (ℝ × V))) := by
+      rw [lintegral_const_mul'' _ hm]
+    _ ≤ ENNReal.ofReal K *
+        ((s.card : ℝ≥0∞) *
+          ((ENNReal.ofReal (heatScale t)) ^
+              (Module.finrank ℝ V + 1) *
+            (heatBallVol V) ^ ((1 : ℝ) / 2) *
+              C ^ ((1 : ℝ) / 2))) :=
+      mul_le_mul_right hsource _
+
 /-- The actual Bochner potential of one divergence-source component on an
 early heat-scale cylinder. -/
 def heatEarly1Near (t : ℝ) (w : V) (f : ℝ × V → F) (x : V) : F :=
