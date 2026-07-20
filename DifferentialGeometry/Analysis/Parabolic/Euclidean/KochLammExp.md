@@ -10,6 +10,8 @@ This file specializes the late ordinary-source exponents before the genuine
 space-time Hölder estimate:
 
 - `klQReal = (n+4)/2` is the source exponent;
+- `klQReal_ofReal` identifies it with the existing `ENNReal` exponent
+  `klQ V`;
 - `klQDual = (n+4)/(n+2)` is its Hölder conjugate;
 - `klHeatExp = n(1-klQDual)/2 = -n/(n+2)` is the time power in the exact
   spatial heat-kernel mass;

@@ -38,6 +38,16 @@ def klHeatExp (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ :=
   (Module.finrank ℝ V : ℝ) * (1 - klQDual V) / 2
 
+/-- `klQReal` is exactly the real representative of the existing `ENNReal`
+late-source exponent. -/
+theorem klQReal_ofReal : ENNReal.ofReal (klQReal V) = klQ V := by
+  unfold klQReal klQ klP
+  rw [ENNReal.ofReal_div_of_pos (by norm_num : (0 : ℝ) < 2)]
+  rw [show (Module.finrank ℝ V : ℝ) + 4 =
+      ((Module.finrank ℝ V + 4 : ℕ) : ℝ) by norm_num]
+  rw [ENNReal.ofReal_natCast]
+  norm_num
+
 /-- The late source exponent and heat-kernel exponent are Hölder conjugate. -/
 theorem klQ_holder : (klQDual V).HolderConjugate (klQReal V) := by
   let n : ℝ := Module.finrank ℝ V
