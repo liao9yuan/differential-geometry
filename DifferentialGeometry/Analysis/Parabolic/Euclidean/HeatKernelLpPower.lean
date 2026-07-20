@@ -116,6 +116,16 @@ theorem heatPow_int_eq {t p : ℝ} (ht : 0 < t) (hp : 0 < p) :
       t ^ ((Module.finrank ℝ V : ℝ) * (1 - p) / 2) * basePowMass V p := by
   rw [heatKernelPow_int (V := V) ht hp, heatPow_scale (V := V) ht]
 
+omit [Nontrivial V] in
+/-- The same exact mass for the translated-reflected kernel used in a
+convolution at observation point `x`. -/
+theorem heatPow_shift {t p : ℝ} (ht : 0 < t) (hp : 0 < p) (x : V) :
+    ∫ y : V, (heatKernel t (x - y)) ^ p =
+      t ^ ((Module.finrank ℝ V : ℝ) * (1 - p) / 2) * basePowMass V p := by
+  rw [integral_sub_left_eq_self
+    (fun y : V => (heatKernel t y) ^ p) (volume : Measure V) x]
+  exact heatPow_int_eq (V := V) ht hp
+
 end Euclidean
 end Parabolic
 end Analysis
