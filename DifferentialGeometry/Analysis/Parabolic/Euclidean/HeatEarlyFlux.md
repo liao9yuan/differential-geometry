@@ -19,16 +19,20 @@
 - `heatEarly1Near_norm` bounds the actual Bochner potential by
   `ofReal ||w|| * earlyFluxC(V) * C^(1/2)`, uniformly in the observation
   time.
+- `earlyFlux_cover_l1` bounds the early-slab `L¹` source mass on any set
+  covered by finitely many heat-scale balls by the cover cardinality times
+  the scale-cancelled local gradient-Carleson mass.  It is independent of the
+  particular quantitative covering theorem.
 
 The focused Lean check passes with no warnings. The source contains no
 `sorry`, `admit`, axiom, opaque replacement, new class, instance, or notation.
 
 ## Honest frontier
 
-This file is the near-cylinder atom, not yet the full early divergence
-potential. The next producer must use the existing quantitative finite-ball
-cover to bound every spatial shell by finitely many translated copies of this
-atom, retain the first-derivative Gaussian factor, and sum the resulting
+This file now contains the near-cylinder atom and the finite-cover source-mass
+step, but not yet the full early divergence potential. The next producer must
+instantiate the existing quantitative finite-ball cover on every spatial
+shell, retain the first-derivative Gaussian factor, and sum the resulting
 polynomial-times-exponential series. After that, `KLSource1.local_l2` converts
 the squared radius to its stated `A₂` bound.
 

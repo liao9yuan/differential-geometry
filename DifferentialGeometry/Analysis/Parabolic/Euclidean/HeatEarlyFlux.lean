@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelGaussian
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.RoughCarleson
+import DifferentialGeometry.External.DeGiorgi.FiniteCover
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
 
@@ -209,6 +210,46 @@ theorem earlyFlux_l1_scale {T t : ℝ} {C : ℝ≥0∞}
       (ENNReal.ofReal (heatScale t)) ^ Module.finrank ℝ V :=
     ENNReal.ofReal_pow hs0 (Module.finrank ℝ V)
   rw [hpow, parabolicSqrt_mul]
+
+/-- A finite heat-scale ball cover converts the local gradient-Carleson
+estimate into an `L¹` estimate on the covered early slab.  The theorem is
+stated independently of how the cover is produced, so quantitative Euclidean
+covering lemmas can be inserted without duplicating the analytic argument. -/
+theorem earlyFlux_cover_l1 {T t : ℝ} {C : ℝ≥0∞}
+    (ht : 0 < t) (htT : t ≤ T) (f : ℝ × V → F) (A : Set V)
+    (s : Finset V)
+    (hcover : A ⊆ ⋃ c ∈ s, Metric.ball c (heatScale t))
+    (hsrc : GradCarl T C f) :
+    (∫⁻ z in Set.Ioc 0 (t / 2) ×ˢ A, ENNReal.ofReal ‖f z‖
+        ∂(stVolume : Measure (ℝ × V))) ≤
+      (s.card : ℝ≥0∞) *
+        ((ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) *
+          (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2)) := by
+  let U : V → Set (ℝ × V) := fun c => earlyFluxCyl t c
+  have hcyl : (Set.Ioc 0 (t / 2) ×ˢ A) ⊆ ⋃ c ∈ s, U c := by
+    rintro z ⟨hzs, hzy⟩
+    have hcov := hcover hzy
+    rw [Set.mem_iUnion] at hcov
+    obtain ⟨c, hcov⟩ := hcov
+    rw [Set.mem_iUnion] at hcov
+    obtain ⟨hc, hyc⟩ := hcov
+    exact Set.mem_iUnion.2 ⟨c, Set.mem_iUnion.2 ⟨hc, hzs, hyc⟩⟩
+  calc
+    (∫⁻ z in Set.Ioc 0 (t / 2) ×ˢ A, ENNReal.ofReal ‖f z‖
+        ∂(stVolume : Measure (ℝ × V))) ≤
+        ∑ c ∈ s, ∫⁻ z in U c, ENNReal.ofReal ‖f z‖
+          ∂(stVolume : Measure (ℝ × V)) :=
+      DeGiorgi.lintegralOn_le_sum_lintegralOn_of_finite_cover hcyl
+    _ ≤ ∑ _c ∈ s,
+        (ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) *
+          (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2) := by
+      apply Finset.sum_le_sum
+      intro c hc
+      exact earlyFlux_l1_scale ht htT f c hsrc
+    _ = (s.card : ℝ≥0∞) *
+        ((ENNReal.ofReal (heatScale t)) ^ (Module.finrank ℝ V + 1) *
+          (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2)) := by
+      rw [Finset.sum_const, nsmul_eq_mul]
 
 omit [MeasurableSpace V] [BorelSpace V] [FiniteDimensional ℝ V]
   [Nontrivial V] in
