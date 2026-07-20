@@ -251,6 +251,61 @@ theorem earlyFlux_cover_l1 {T t : ℝ} {C : ℝ≥0∞}
           (heatBallVol V) ^ ((1 : ℝ) / 2) * C ^ ((1 : ℝ) / 2)) := by
       rw [Finset.sum_const, nsmul_eq_mul]
 
+/-- The `k`-th spatial shell in observation-time heat units. -/
+def fluxShell (t : ℝ) (x : V) (k : ℕ) : Set V :=
+  {y | (k : ℝ) * heatScale t ≤ ‖x - y‖ ∧
+    ‖x - y‖ < ((k + 1 : ℕ) : ℝ) * heatScale t}
+
+/-- The early time slab over one divergence-source heat shell. -/
+def fluxShellCyl (t : ℝ) (x : V) (k : ℕ) : Set (ℝ × V) :=
+  Set.Ioc 0 (t / 2) ×ˢ fluxShell t x k
+
+omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [Nontrivial V] in
+theorem fluxShellCyl_meas (t : ℝ) (x : V) (k : ℕ) :
+    MeasurableSet (fluxShellCyl t x k) := by
+  have hnorm : Continuous (fun y : V => ‖x - y‖) :=
+    (continuous_const.sub continuous_id).norm
+  exact measurableSet_Ioc.prod
+    ((isClosed_le continuous_const hnorm).measurableSet.inter
+      (isOpen_lt hnorm continuous_const).measurableSet)
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+/-- On the `k`-th early shell, the first heat derivative carries the exact
+radial factor `k+1` and Gaussian decay `exp (-k^2/4)`. -/
+theorem heatD1_early_shell {t s : ℝ} (ht : 0 < t) (hs : 0 ≤ s)
+    (hst : s ≤ t / 2) (w : V) {x y : V} (k : ℕ)
+    (hy : y ∈ fluxShell t x k) :
+    ‖heatD1 (t - s) w (x - y)‖ ≤
+      ‖w‖ *
+        (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+          (heatScale (t / 2))⁻¹ *
+            (((2 : ℝ)⁻¹ *
+                (Real.sqrt 2 * ((k + 1 : ℕ) : ℝ))) *
+              ((baseHeatMass V)⁻¹ *
+                Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ) ^ 2)))) := by
+  have hlo : (k : ℝ) ≤
+      ‖(heatScale (t - s))⁻¹ • (x - y)‖ :=
+    earlyScaled_lo ht hs hst (Nat.cast_nonneg k) hy.1
+  have hhi : ‖(heatScale (t - s))⁻¹ • (x - y)‖ ≤
+      Real.sqrt 2 * ((k + 1 : ℕ) : ℝ) :=
+    earlyScaled_hi ht hs hst (by positivity) hy.2.le
+  have hmaj := heatD1Maj_early (V := V) (t := t) (s := s)
+    (R := (k : ℝ)) (Q := Real.sqrt 2 * ((k + 1 : ℕ) : ℝ))
+    ht hs hst (Nat.cast_nonneg k) hlo hhi
+  have hdiff : 0 < t - s := by linarith
+  calc
+    ‖heatD1 (t - s) w (x - y)‖ ≤
+        ‖w‖ * heatD1Maj (t - s) (x - y) :=
+      heatD1_bound hdiff w (x - y)
+    _ ≤ ‖w‖ *
+        (((heatScale (t / 2)) ^ Module.finrank ℝ V)⁻¹ *
+          (heatScale (t / 2))⁻¹ *
+            (((2 : ℝ)⁻¹ *
+                (Real.sqrt 2 * ((k + 1 : ℕ) : ℝ))) *
+              ((baseHeatMass V)⁻¹ *
+                Real.exp (-(4 : ℝ)⁻¹ * (k : ℝ) ^ 2)))) := by
+      exact mul_le_mul_of_nonneg_left hmaj (norm_nonneg w)
+
 omit [MeasurableSpace V] [BorelSpace V] [FiniteDimensional ℝ V]
   [Nontrivial V] in
 /-- The extra inverse heat scale in the first derivative kernel cancels the

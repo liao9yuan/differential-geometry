@@ -23,6 +23,9 @@
   covered by finitely many heat-scale balls by the cover cardinality times
   the scale-cancelled local gradient-Carleson mass.  It is independent of the
   particular quantitative covering theorem.
+- `heatD1_early_shell` retains the exact `(k+1) exp(-k²/4)` radial-Gaussian
+  factor of the first heat derivative on shell `k`; `fluxShellCyl_meas`
+  supplies the measurable shell cylinder needed by the integral comparison.
 
 The focused Lean check passes with no warnings. The source contains no
 `sorry`, `admit`, axiom, opaque replacement, new class, instance, or notation.
@@ -32,7 +35,7 @@ The focused Lean check passes with no warnings. The source contains no
 This file now contains the near-cylinder atom and the finite-cover source-mass
 step, but not yet the full early divergence potential. The next producer must
 instantiate the existing quantitative finite-ball cover on every spatial
-shell, retain the first-derivative Gaussian factor, and sum the resulting
+shell, combine the two checked bounds, and sum the resulting
 polynomial-times-exponential series. After that, `KLSource1.local_l2` converts
 the squared radius to its stated `A₂` bound.
 
