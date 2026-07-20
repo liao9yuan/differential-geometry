@@ -13,6 +13,9 @@ This file supplies the exact real Hölder exponents for the late
   range consumed by the first-derivative power-mass theorem.
 - `klD1Exp` simplifies to `-(n+2)/(n+3)`, hence is strictly greater than
   `-1`.
+- `klD1Exp_add`, `klD1Scale_exp`, `klD1Time_int`, and `klD1Time_set`
+  evaluate the terminal time integral and expose the exact
+  `t^(1/(n+4))` scale after the dual root.
 - `klD1Time_intble` proves the corresponding reflected terminal-time power is
   integrable on `(t/2,t]`.
 

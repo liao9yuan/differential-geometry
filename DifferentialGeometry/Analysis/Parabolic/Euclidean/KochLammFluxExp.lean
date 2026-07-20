@@ -12,7 +12,7 @@ the Koch--Lamm radius factor `R^(2/(n+4))` after taking the dual root.
 
 noncomputable section
 
-open MeasureTheory
+open MeasureTheory Set
 open scoped RealInnerProductSpace
 
 namespace DifferentialGeometry
@@ -99,6 +99,49 @@ theorem klD1Exp_gt : -1 < klD1Exp V := by
           (Module.finrank ℝ V + 3 : ℝ)) by ring]
   rw [neg_lt_neg_iff]
   exact (div_lt_one hn3).2 (by linarith)
+
+/-- Adding one to the first-derivative kernel singularity leaves exponent
+`1/(n+3)`. -/
+theorem klD1Exp_add :
+    klD1Exp V + 1 =
+      1 / (Module.finrank ℝ V + 3 : ℝ) := by
+  rw [klD1Exp_eq]
+  have hn3 : (Module.finrank ℝ V : ℝ) + 3 ≠ 0 := by positivity
+  field_simp [hn3]
+  ring
+
+/-- After taking the Hölder-dual root, the terminal heat-time scale is
+`t^(1/(n+4))`. -/
+theorem klD1Scale_exp :
+    (klD1Exp V + 1) / klPDual V =
+      1 / (Module.finrank ℝ V + 4 : ℝ) := by
+  rw [klD1Exp_add]
+  unfold klPDual
+  have hn3 : (Module.finrank ℝ V : ℝ) + 3 ≠ 0 := by positivity
+  have hn4 : (Module.finrank ℝ V : ℝ) + 4 ≠ 0 := by positivity
+  field_simp [hn3, hn4]
+
+/-- Exact integral of the reflected first-derivative kernel-power
+singularity on the terminal half interval. -/
+theorem klD1Time_int (t : ℝ) :
+    ∫ s : ℝ in t / 2..t, (t - s) ^ klD1Exp V =
+      (t / 2) ^ (klD1Exp V + 1) / (klD1Exp V + 1) := by
+  rw [intervalIntegral.integral_comp_sub_left
+    (fun u : ℝ ↦ u ^ klD1Exp V) t]
+  simp only [sub_self]
+  rw [show t - t / 2 = t / 2 by ring]
+  rw [integral_rpow (Or.inl (klD1Exp_gt (V := V)))]
+  have hexp : 0 < klD1Exp V + 1 := by
+    linarith [klD1Exp_gt (V := V)]
+  rw [Real.zero_rpow hexp.ne']
+  ring
+
+/-- Set-integral form used by the restricted terminal product measure. -/
+theorem klD1Time_set {t : ℝ} (ht : 0 < t) :
+    ∫ s : ℝ in Set.Ioc (t / 2) t, (t - s) ^ klD1Exp V =
+      (t / 2) ^ (klD1Exp V + 1) / (klD1Exp V + 1) := by
+  rw [← intervalIntegral.integral_of_le (by linarith : t / 2 ≤ t)]
+  exact klD1Time_int (V := V) t
 
 /-- The reflected first-derivative kernel-power singularity is integrable on
 the terminal half of every positive Duhamel interval. -/
