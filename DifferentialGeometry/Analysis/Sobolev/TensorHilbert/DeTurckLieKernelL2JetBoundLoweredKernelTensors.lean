@@ -306,6 +306,7 @@ private lemma dLaLoweredCc_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I 
   rfl
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma dLaLoweredCc_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -335,6 +336,7 @@ def dLaQuadCc (g₀ g_arm g_out : SmoothRiemannianMetric I M) :
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma dLaQuadCc_toModel (g₀ g_arm g_out : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : Fin 3 → TangentSpace I x) :
     Tensor0SSpace.toModel

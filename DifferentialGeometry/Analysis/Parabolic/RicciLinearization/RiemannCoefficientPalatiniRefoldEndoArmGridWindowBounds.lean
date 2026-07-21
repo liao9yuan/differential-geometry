@@ -226,6 +226,7 @@ private theorem bdCometricCastG0_gridWindow (g₀ : SmoothRiemannianMetric I M)
   nlinarith [hA', hB, hW_nn, hcfix_nn 0]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdConnDiffSection_eq_cometricRaise (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -287,6 +288,7 @@ private lemma bdConnDiffSection_eq_cometricRaise (g₀ g₁ : SmoothRiemannianMe
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma bdRfns_iCG_connDiffLoweredCc_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x

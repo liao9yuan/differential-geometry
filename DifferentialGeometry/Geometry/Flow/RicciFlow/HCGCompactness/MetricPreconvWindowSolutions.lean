@@ -218,6 +218,7 @@ theorem covZeroBdd
 
 
 omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem covBddAllSol
     [Module.Finite ℝ E]
     {β ψ t0 : Real}

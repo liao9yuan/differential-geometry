@@ -245,6 +245,7 @@ theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorEigenIdx_val_pos
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -258,6 +259,7 @@ theorem tensorEigenIdx_val_pos
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem one_add_lambda_eq_inv_val
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

@@ -398,6 +398,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
 
+omit [CompleteSpace E] in
 theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -738,6 +739,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                     EuclN → ℝ) y) Ω)) := by
       rw [mul_add]
 
+omit [CompleteSpace E] in
 theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))

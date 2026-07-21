@@ -23,6 +23,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 
 
 
+omit [CompleteSpace E] in
 theorem normalGeodesicSpray_conv
     {U : Set E} (hU : IsOpen U)
     {g : ℕ → E → E →L[Real] E →L[Real] Real}
@@ -38,6 +39,7 @@ theorem normalGeodesicSpray_conv
   MetricKoszul.metricSpray_conv hU hg_cd hgInf_cd hg_co hgInf_co hg_conv
 
 set_option maxHeartbeats 700000 in
+omit [CompleteSpace E] in
 private theorem normalSpray_time_conv
     {U : Set E} (hU : IsOpen U)
     {g : ℕ → E → E →L[Real] E →L[Real] Real}
@@ -69,6 +71,7 @@ set_option maxHeartbeats 700000 in
 
 
 
+omit [CompleteSpace E] in
 theorem normalPhase_end_conv
     {U : Set E} (hU : IsOpen U)
     {Q : Set (E × E)} (hQ : IsOpen Q)

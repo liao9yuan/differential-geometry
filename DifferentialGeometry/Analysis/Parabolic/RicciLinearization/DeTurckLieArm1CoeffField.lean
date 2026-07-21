@@ -185,6 +185,7 @@ private theorem deTurckLiePairTraceFib_apply_section_contMDiff
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem deTurckLieKoszulTraceFib_apply_section_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 3))
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 3 ℝ E) ∞
@@ -210,6 +211,7 @@ private theorem deTurckLieKoszulTraceFib_apply_section_contMDiff
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem deTurckLieArm1CoreFib_apply_section_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 3 ℝ E) ∞
@@ -256,6 +258,7 @@ private theorem deTurckLieArm1CoreFib_apply_section_contMDiff
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckLieArm1Fib_contMDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
@@ -294,6 +297,7 @@ noncomputable def deTurckLieArm1Coeff (g₀ g₁ g_bg : SmoothRiemannianMetric I
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem deTurckLieArm1Coeff_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from

@@ -194,6 +194,7 @@ def eigenvectorIteratedTensorChartBilinearData_toData
     eigenvectorIteratedChartBilinearH1ComplData
       (I := I) (M := M) g r s i α P₀ D_m h_parent
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

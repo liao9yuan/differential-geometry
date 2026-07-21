@@ -255,6 +255,7 @@ private theorem lc0b_rfns_icg_symmS_le (g : SmoothRiemannianMetric I M)
     ((iteratedCovGrad (I := I) g 0 2 j T).toSection x)
   nlinarith [hnn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lc0b_normSq_icg_symmS_le (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (j : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 j (ccTensor02Symm (I := I) (M := M) g T)‖ ^ 2 ≤
@@ -267,6 +268,7 @@ lemma lc0b_normSq_icg_symmS_le (g : SmoothRiemannianMetric I M)
   · exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (2 + j)
       (iteratedCovGrad (I := I) g 0 2 j T)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lc0b_normSq_icg_raise_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g 1 (s + 1) i
@@ -362,6 +364,7 @@ private lemma lc0b_rfns_symmS_zero_le (g : SmoothRiemannianMetric I M)
           ring
         rw [hc0, hc2, one_mul, hnE]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lc0b_WB_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     {δ₀ : ℝ} (P : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
@@ -548,6 +551,7 @@ def lc0Kappa (g₀ g₁ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma lc0Kappa_unitModel_apply (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lc0Kappa (I := I) (M := M) g₀ g₁ gB) x m =
@@ -577,6 +581,7 @@ def lc0LowFix (g₀ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 w
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0LowFix_unitModel_apply (g₀ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lc0LowFix (I := I) (M := M) g₀ gB) x m =
@@ -627,6 +632,7 @@ private lemma lc0PbLow_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_connDiffLowered_unitModel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
@@ -690,6 +696,7 @@ def lc0FixCd (g₀ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 wh
   hasCompactSupport := (connDiffSection (I := I) g₀ gB).hasCompactSupport
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_connDiffSection_eq_raise_lowered (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -751,6 +758,7 @@ private lemma lc0b_connDiffSection_eq_raise_lowered (g₀ g₁ : SmoothRiemannia
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lc0b_rfns_icg_lowered_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -777,6 +785,7 @@ private lemma lc0b_rfns_icg_lowered_eq_connDiff (g₀ g₁ : SmoothRiemannianMet
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [lc0b_connDiffSection_eq_raise_lowered (I := I) (M := M) g₀ g₁]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lc0b_normSq_icg_lowered_eq (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 =
       ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ ^ 2 := by
@@ -909,6 +918,7 @@ private lemma lc0b_pbLow_raise_eq (g₀ : SmoothRiemannianMetric I M)
   rw [hLHS, hLHSval]
   exact hRHS.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lc0b_rfns_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)
     (Ψc : SmoothCcTensor g₀ 1 2)
@@ -945,6 +955,7 @@ private lemma lc0b_rfns_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
                 (ccTensor02Symm (I := I) (M := M) g₀ P)))).toSection x) := by
         rw [lc0b_pbLow_raise_eq (I := I) (M := M) g₀ P gA gB Ψc hΨc]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lc0b_normSq_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)
     (Ψc : SmoothCcTensor g₀ 1 2)
@@ -2250,6 +2261,7 @@ private lemma lc0b_KLift_fiber_33 (g₀ : SmoothRiemannianMetric I M)
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_kappa_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (lc0Kappa (I := I) (M := M) g₀ g₁ gB).toSection x)
@@ -2308,6 +2320,7 @@ noncomputable def lc0VFlat (g₀ g₁ gB : SmoothRiemannianMetric I M) :
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 (lc0PureDT (I := I) (M := M) g₀ g₁ 1)
     (lc0Kappa (I := I) (M := M) g₀ g₁ gB)
 
+omit [SigmaCompactSpace M] in
 private lemma lc0b_vflat_value (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (u : E) :
     Tensor0SSpace.toModel
@@ -2351,6 +2364,7 @@ private lemma lc0b_vflat_value (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : 
   rw [PDE.DeTurck.deTurckVF_eq_orthoFrame_trace (I := I) g₁ gB x]
   rw [map_sum, ContinuousLinearMap.sum_apply]
 
+omit [SigmaCompactSpace M] in
 private lemma lc0b_iV_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (B : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 1 I x from
@@ -2491,6 +2505,7 @@ noncomputable def lc0CdVField (g₀ g₁ gB : SmoothRiemannianMetric I M) :
   ccOperatorFieldComp (I := I) (M := M) g₀ 1 2 1 (lc0IVField (I := I) (M := M) g₀ g₁ gB)
     (connDiffSection (I := I) g₁ g₀)
 
+omit [SigmaCompactSpace M] in
 private lemma lc0b_cdV_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
@@ -2679,6 +2694,7 @@ noncomputable def lc0RiemField (g₀ g₁ : SmoothRiemannianMetric I M) :
   (-1 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
     (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2) (lc0RiemRestField (I := I) (M := M) g₀)
 
+omit [SigmaCompactSpace M] in
 private lemma lc0b_vb_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -2723,6 +2739,7 @@ private lemma lc0b_vb_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     rfl]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_amixhalf_fiber (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (σlast : Equiv.Perm (Fin 4)) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -2781,6 +2798,7 @@ private lemma lc0b_amixhalf_fiber (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (lc0b_traceStep_fiber (I := I) (M := M) g₀ g₁ 2 σlast x)) _
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_amix_fiber (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -2807,6 +2825,7 @@ private lemma lc0b_amix_fiber (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x :
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0b_riem_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from

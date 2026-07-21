@@ -185,6 +185,7 @@ private def backgroundRiemannCommWeightKernel (g₀ : SmoothRiemannianMetric I M
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -455,6 +456,7 @@ def palatiniRicciFoldWeightB (g₀ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -559,6 +561,7 @@ private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeights_unitModel_eq_kernel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
@@ -810,6 +813,7 @@ lemma bdRicciFold_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
     palatiniRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
@@ -866,6 +870,7 @@ private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
     rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6

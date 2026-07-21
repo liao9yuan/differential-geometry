@@ -48,6 +48,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckLieArm1Coeff_eq_lieArm1Piece_sum (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg =
       deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaC lieArm1RhoSlot0

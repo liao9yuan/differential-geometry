@@ -157,6 +157,7 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorParseval_l2Coeff_ofCompact_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -172,6 +173,7 @@ theorem tensorParseval_l2Coeff_ofCompact_sq
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Coeff_ofCompact_summable_sq'
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -183,6 +185,7 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem summable_tensorSobolevWeight_of_even
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)

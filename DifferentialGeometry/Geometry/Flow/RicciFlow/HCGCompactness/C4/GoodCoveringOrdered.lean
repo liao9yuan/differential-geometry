@@ -722,7 +722,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] in
 private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
-    (ip : InnerProductSpace Real E)
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -754,7 +753,6 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
   letI rb := Y.riemBundle (I := I)
   letI hInner := Y.riemInner (I := I)
   haveI hCont := Y.riemBundle_cont (I := I)
-  letI : InnerProductSpace Real E := ip
   have hcomplete :
       (letI : EMetricSpace Y.M := EMetricSpace.ofRiemannianMetric I Y.M
        CompleteSpace Y.M) := by
@@ -791,7 +789,6 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
 
 omit [CompleteSpace E] in
 theorem exists_proper_realization {I : ModelWithCorners Real E H}
-    [InnerProductSpace Real E]
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -807,7 +804,7 @@ theorem exists_proper_realization {I : ModelWithCorners Real E H}
       (letI : MetricSpace Y.M := ms
        ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
          ∃ q : Y.M, dist q Y.basepoint = t) := by
-  exact exists_proper_realization_aux (I := I) (ip := inferInstance) Y hc hconn
+  exact exists_proper_realization_aux (I := I) Y hc hconn
 
 
 
@@ -868,7 +865,6 @@ theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
 
 
 noncomputable def properMetricOn {I : ModelWithCorners Real E H}
-    [InnerProductSpace Real E]
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
@@ -884,7 +880,7 @@ section SeqInstantiation
 universe u' uE' uH'
 
 variable {E : Type uE'} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH'} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}

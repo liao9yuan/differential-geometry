@@ -112,6 +112,7 @@ lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem exists_eigenvectorIteratedCarrier
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

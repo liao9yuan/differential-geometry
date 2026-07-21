@@ -61,6 +61,7 @@ noncomputable def finiteReprLin
     (finiteCoeffLin (I := I) (M := M) g r s σ)
 
 
+omit [CompleteSpace E] in
 @[simp] theorem finiteReprLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
     (v : tensorHs.finiteSupportSubmodule

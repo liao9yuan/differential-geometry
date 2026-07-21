@@ -100,6 +100,7 @@ theorem norm_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I
   have hnnB : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := norm_nonneg _
   exact (sq_eq_sq₀ hnnA hnnB).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_tensorSymmetrization_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)‖ ≤

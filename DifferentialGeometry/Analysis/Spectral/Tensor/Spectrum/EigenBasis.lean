@@ -123,6 +123,7 @@ theorem nonzero_tensor_resolvent_eigenvalues_set_countable
     (I := I) (M := M) g r s h_compact h_pos).countable
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem TensorNonzeroResolventEigenvalue.countable_ofCompact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -220,6 +221,7 @@ theorem tensorResolventEigenbasisVec_mem
     (I := I) (M := M) h_compact i.1 i.2).property
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorResolventEigenbasisVec_orthonormal
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -422,6 +424,7 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
                     (I := I) (M := M) g r s μ.val) hν_in_subtype
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorResolventEigenbasisVec_span_orthogonal_eq_bot
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -452,6 +455,7 @@ noncomputable def tensorResolventHilbertEigenbasisSigma
       (I := I) (M := M) h_compact)
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorResolventHilbertEigenbasisSigma_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -475,6 +479,7 @@ omit [CompactSpace M] in
     i
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorResolventHilbertEigenbasisSigma_ofCompact_isEigenvector
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2

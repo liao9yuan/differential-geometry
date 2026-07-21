@@ -37,6 +37,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffContrInsertionInnerFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 3 ℝ E)
@@ -70,6 +71,7 @@ def connDiffContrInsertionInnerField (g₀ g₁ : SmoothRiemannianMetric I M) :
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem connDiffContrInsertionInnerField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffContrInsertionInnerField (I := I) g₀ g₁).toSection x =
@@ -82,6 +84,7 @@ def innerContractionSwapPerm : Equiv.Perm (Fin 2) :=
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionInnerField (I := I) g₀ g₁ =

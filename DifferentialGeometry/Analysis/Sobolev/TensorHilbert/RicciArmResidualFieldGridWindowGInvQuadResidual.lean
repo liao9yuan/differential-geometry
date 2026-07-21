@@ -178,6 +178,7 @@ variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connDiffLowered_unitModel_value (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
       g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (m 0) (m 1)) (m 2) := by
@@ -211,6 +212,7 @@ private lemma interiorProduct_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma connDiffSection_eq_raise_lowered :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -272,6 +274,7 @@ private lemma connDiffSection_eq_raise_lowered :
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_icg_connDiffLowered_eq_connDiffSection (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) =
@@ -320,6 +323,7 @@ private lemma cometricDoubleTraceFib_toModel_center (p : ℕ) (x : M)
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma slotExtend_connDiffLowered_toModel (x : M)
     (om : Tensor0SSpace 1 I x) (v0 : E) (vs : Fin 3 → E) :
     Tensor0SSpace.toModel
@@ -355,6 +359,7 @@ private lemma slotExtend_connDiffLowered_toModel (x : M)
   exact hu
 
 set_option backward.isDefEq.respectTransparency false in
+omit [SigmaCompactSpace M] in
 private lemma gInvQuadRefoldArm_toModel (x : M) (om : Tensor0SSpace 1 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -384,6 +389,7 @@ private lemma gInvQuadRefoldArm_toModel (x : M) (om : Tensor0SSpace 1 I x) (m : 
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [SigmaCompactSpace M] in
 private lemma gInvQuadRefoldWeight_toModel (x : M) (D : Tensor0SSpace 2 I x) (m : Fin 1 → E) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 1 I x from

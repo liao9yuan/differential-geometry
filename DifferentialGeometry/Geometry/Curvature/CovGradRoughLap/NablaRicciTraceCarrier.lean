@@ -81,6 +81,7 @@ theorem nablaRicci_contMDiff
 
 omit [CompactSpace M] in
 omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicciBilin_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -182,6 +183,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] in
 omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma nablaRicSlotOpFib_apply (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) :
@@ -196,6 +198,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] in
 omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :

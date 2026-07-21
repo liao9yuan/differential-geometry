@@ -827,6 +827,7 @@ private theorem connDiffSection_lowOrder_jetL2_succ_generic
     exact Finset.sum_le_sum hterm
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma connDiffSection_eq_cometricRaiseSlot0Field' (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -888,6 +889,7 @@ private lemma connDiffSection_eq_cometricRaiseSlot0Field' (g₀ g₁ : SmoothRie
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rfns_iCG_connDiffLoweredCc_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -914,6 +916,7 @@ private lemma rfns_iCG_connDiffLoweredCc_eq_connDiffSection
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [connDiffSection_eq_cometricRaiseSlot0Field']
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_iCG_connDiffLoweredCc_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ =
@@ -1325,6 +1328,7 @@ private theorem connDiffVariationTrace_lowOrder_jetL2_succ_generic
       linarith [e1, e2]
     exact Finset.sum_le_sum hterm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannianFiberNormSq_iteratedCovGrad_connDiffRaisedSlot0_eq_connDiffSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
@@ -1349,6 +1353,7 @@ private lemma riemannianFiberNormSq_iteratedCovGrad_connDiffRaisedSlot0_eq_connD
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) :=
         rfns_iCG_connDiffLoweredCc_eq_connDiffSection (I := I) (M := M) g₀ g₁ n x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_iCG_wCA_eq_connDiffSection (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffRaisedSwapSlot0 (I := I) (M := M) g₀ g₁)‖ =
       ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ := by
@@ -1385,6 +1390,7 @@ private lemma riemannianFiberNormSq_iteratedCovGrad_connDiffVariationTraceGrad_e
         rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 1 i
           (deTurckVFFlat (I := I) (M := M) g₀ g₁ g_bg) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_iCG_wAlphaA_eq_succ_wOmega (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 i (deTurckLieWEndoBilinCovGradTerm (I := I) (M := M) g₀ g₁ g_bg)‖ =

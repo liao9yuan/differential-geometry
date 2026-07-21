@@ -107,6 +107,8 @@ private lemma resolvent_pow_eq_weight
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma garding_l1_sum_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     {p : ℝ}

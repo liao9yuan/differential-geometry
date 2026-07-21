@@ -69,6 +69,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dLaLoweredCc_raise_repr (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
         (dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg) =
@@ -483,6 +484,7 @@ private lemma unitModel_add_dla (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma dLaLoweredPerturbCc_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
@@ -965,6 +967,7 @@ private theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid_dla
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma connDiffSection_eq_armSlotEndoCc_zero_dla (g₀ gc : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) gc g₀ =
       armSlotEndoCc (I := I) (M := M) g₀ 0 (dLaConnArmPt (I := I) (M := M) g₀ gc) := by
@@ -2027,6 +2030,7 @@ private def dLaSymCc (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g�
     dLaLoweredG1Cc (I := I) (M := M) g₀ T g₁ g_bg
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma dLaLoweredG1Cc_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (g₁ g_bg : SmoothRiemannianMetric I M)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -2041,6 +2045,7 @@ private lemma dLaLoweredG1Cc_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
   rw [htie x (connDiffCovDerivOp (I := I) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma dLaSymCc_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (g₁ g_bg : SmoothRiemannianMetric I M)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

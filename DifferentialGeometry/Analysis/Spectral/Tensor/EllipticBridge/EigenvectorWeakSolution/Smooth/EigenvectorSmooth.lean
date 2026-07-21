@@ -72,6 +72,7 @@ def chosenComp (α : M) (P : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s i α P)
 
+omit [CompleteSpace E] in
 private lemma chosenComp_contDiffOn
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s i α P)
@@ -80,6 +81,7 @@ private lemma chosenComp_contDiffOn
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s i α P)).1
 
+omit [CompleteSpace E] in
 private lemma chosenComp_hasCompactSupport
     (α : M) (P : TensorCompIdx (E := E) r s) :
     HasCompactSupport (chosenComp (I := I) (M := M) g r s i α P) :=
@@ -87,6 +89,7 @@ private lemma chosenComp_hasCompactSupport
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s i α P)).2.1
 
+omit [CompleteSpace E] in
 private lemma chosenComp_tsupport (α : M) (P : TensorCompIdx (E := E) r s) :
     tsupport (chosenComp (I := I) (M := M) g r s i α P) ⊆
       chartTargetEuclid (I := I) (M := M) α :=
@@ -94,6 +97,7 @@ private lemma chosenComp_tsupport (α : M) (P : TensorCompIdx (E := E) r s) :
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s i α P)).2.2.1
 
+omit [CompleteSpace E] in
 lemma chosenComp_ae_eq (α : M) (P : TensorCompIdx (E := E) r s) :
     chosenComp (I := I) (M := M) g r s i α P
       =ᵐ[(volume : Measure EuclN).restrict
@@ -103,12 +107,14 @@ lemma chosenComp_ae_eq (α : M) (P : TensorCompIdx (E := E) r s) :
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s i α P)).2.2.2
 
+omit [CompleteSpace E] in
 private lemma chosenComp_hu (α : M) :
     ∀ P : TensorCompIdx (E := E) r s,
       ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s i α P)
         (chartTargetEuclid (I := I) (M := M) α) :=
   fun P => chosenComp_contDiffOn (I := I) (M := M) g r s i α P
 
+omit [CompleteSpace E] in
 private lemma chosenComp_hsupp (α : M) :
     ∀ P : TensorCompIdx (E := E) r s,
       HasCompactSupport (chosenComp (I := I) (M := M) g r s i α P) ∧
@@ -123,6 +129,7 @@ def eigenvectorSmoothChart (α : M) : SmoothCcTensor g r s :=
     (chosenComp_hu (I := I) (M := M) g r s i α)
     (chosenComp_hsupp (I := I) (M := M) g r s i α)
 
+omit [CompleteSpace E] in
 lemma tensorChartComponentRaw_eigenvectorSmoothChart_self
     (α : M) (P : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -140,11 +147,13 @@ noncomputable def eigenvectorSmooth : SmoothCcTensor g r s :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     eigenvectorSmoothChart (I := I) (M := M) g r s i α
 
+omit [CompleteSpace E] in
 lemma eigenvectorSmooth_eq :
     eigenvectorSmooth (I := I) (M := M) g r s i =
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         eigenvectorSmoothChart (I := I) (M := M) g r s i α := rfl
 
+omit [CompleteSpace E] in
 private lemma eigenvectorSmoothChart_toSection_eq_zero_off_source
     (α : M) {x : M} (hx : x ∉ (chartAt H α).source) :
     (eigenvectorSmoothChart (I := I) (M := M) g r s i α).toSection x =
@@ -155,6 +164,7 @@ private lemma eigenvectorSmoothChart_toSection_eq_zero_off_source
     (chosenComp_hu (I := I) (M := M) g r s i α)
     (chosenComp_hsupp (I := I) (M := M) g r s i α) hx
 
+omit [CompleteSpace E] in
 lemma tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
     (α β : M) (P : TensorCompIdx (E := E) r s) {x : M}
     (hx : x ∉ (chartAt H α).source) :

@@ -253,6 +253,7 @@ private def bdVFSec (g₁ gA gB : SmoothRiemannianMetric I M) :
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdVFSec_apply (g₁ gA gB : SmoothRiemannianMetric I M) (b : M) :
     bdVFSec (I := I) (M := M) g₁ gA gB b =
       (PDE.DeTurck.deTurckVF (I := I) g₁ gA :
@@ -301,6 +302,7 @@ lemma bdUnitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdConnDiffLoweredCc_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x =
       Tensor0SSpace.toModel (connDiffLoweredCovec (I := I) g₀ g₁ x) := by
@@ -316,6 +318,7 @@ private lemma bdConnDiffLoweredCc_unitModel (g₀ g₁ : SmoothRiemannianMetric 
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma bdConnDiffLoweredCc_unitModel_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
@@ -325,6 +328,7 @@ lemma bdConnDiffLoweredCc_unitModel_apply (g₀ g₁ : SmoothRiemannianMetric I 
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdXiGen_unitModel_apply (g₀ g₁ gc : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3
@@ -340,6 +344,7 @@ private lemma bdXiGen_unitModel_apply (g₀ g₁ gc : SmoothRiemannianMetric I M
   rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ gc x (m 0) (m 1)]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdOmegaGen_toSection_unit (g₀ g₁ gc : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
         (bdOmegaGen (I := I) (M := M) g₀ g₁ gc).toSection x)
@@ -351,6 +356,7 @@ private lemma bdOmegaGen_toSection_unit (g₀ g₁ gc : SmoothRiemannianMetric I
   rw [bdOmegaGen, appCcRS_toSection]
   rfl
 
+omit [SigmaCompactSpace M] in
 private lemma bdOmegaGen_unitModel_apply (g₀ g₁ gc : SmoothRiemannianMetric I M) (x : M)
     (z : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 1 (bdOmegaGen (I := I) (M := M) g₀ g₁ gc) x
@@ -690,6 +696,7 @@ private lemma bdLeviCivita_toFun_sub (g₀ : SmoothRiemannianMetric I M)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdWEndo_eq_covDeriv_add_connDiff (g₀ g₁ gc : SmoothRiemannianMetric I M)
     (x : M) (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ gc x w =
@@ -713,6 +720,7 @@ private lemma bdWEndo_eq_covDeriv_add_connDiff (g₀ g₁ gc : SmoothRiemannianM
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdWEndo_sub_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x w - deTurckLieWEndo (I := I) g₁ g₀ x w =

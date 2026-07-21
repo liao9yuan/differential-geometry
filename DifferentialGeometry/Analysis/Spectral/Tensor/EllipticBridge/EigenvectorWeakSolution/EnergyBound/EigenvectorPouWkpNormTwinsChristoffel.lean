@@ -195,6 +195,7 @@ private lemma wkpNorm_coef_mul_factor_le
 omit [CompleteSpace E] in
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :

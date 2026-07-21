@@ -95,6 +95,7 @@ theorem frame_cyclic_second_bianchi_orthoFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [SigmaCompactSpace M] in
 theorem frameSummed_contracted_second_bianchi_eq_half_nablaScalar
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b} {x : M}

@@ -1192,6 +1192,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 omit [Module.Finite ℝ E] [T2Space M'] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mfderivNormalCenter
     [Module.Finite ℝ E]
     {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N'] [IsManifold I ∞ N']
@@ -1305,6 +1306,7 @@ theorem mfderivNormalCenter
 
 omit [Module.Finite ℝ E] in
 omit [T2Space M'] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackErrComp
     [Module.Finite ℝ E]
     {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N'] [IsManifold I ∞ N']
@@ -1375,6 +1377,7 @@ theorem pullbackErrComp
 
 
 omit [Module.Finite ℝ E] [T2Space M'] [SigmaCompactSpace M'] [ConnectedSpace M'] [T3Space M'] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRoundTrip_ev
     [Module.Finite ℝ E]
     {N' : Type u} [TopologicalSpace N'] [ChartedSpace H N'] [IsManifold I ∞ N']
@@ -1701,6 +1704,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ F)] in
 theorem edistLeOfEquivOn (Y : PointedRiemannianManifold.{u, uE, uH} (I := J')) (x : Y.M)
     {U : Set F} {v : F}
     (heq : NormalCoordMetricEquivOn (I := J') Y x U)
@@ -1763,6 +1767,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ F)] in
 theorem normLowerOfSep (Y : PointedRiemannianManifold.{u, uE, uH} (I := J')) (x : Y.M)
     {U : Set F} {v : F}
     (heq : NormalCoordMetricEquivOn (I := J') Y x U)

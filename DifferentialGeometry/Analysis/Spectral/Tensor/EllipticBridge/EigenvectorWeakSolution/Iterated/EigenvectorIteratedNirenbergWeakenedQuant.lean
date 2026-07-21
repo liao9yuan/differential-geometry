@@ -179,6 +179,7 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -839,6 +840,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ} :

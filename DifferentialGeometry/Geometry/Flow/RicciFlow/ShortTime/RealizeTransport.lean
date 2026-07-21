@@ -166,6 +166,7 @@ theorem realize_eval_carrier_factorization
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pointwise_deriv_through_realize
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)

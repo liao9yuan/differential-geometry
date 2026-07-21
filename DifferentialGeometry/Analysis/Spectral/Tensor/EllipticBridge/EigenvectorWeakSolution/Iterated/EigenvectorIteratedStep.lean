@@ -192,6 +192,7 @@ private theorem ibp_density_fChartEffPrev
     h_fChartEffPrev_memW1p (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
+omit [CompleteSpace E] in
 private theorem ibp_principal_pair_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -282,6 +283,7 @@ private theorem ibp_principal_pair_unconditional
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+omit [CompleteSpace E] in
 private theorem ibp_mass_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -319,6 +321,7 @@ private theorem ibp_mass_unconditional
     h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
+omit [CompleteSpace E] in
 private theorem ibp_inner_j_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

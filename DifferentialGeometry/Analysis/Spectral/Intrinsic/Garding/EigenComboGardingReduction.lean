@@ -140,6 +140,8 @@ theorem eigenSpan_pouHs_le_spectral_of_elliptic
     _ = (C * (k + 1)) * Nspec := by ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem finiteEigenComboHs_norm_eq_sqrt_spectral
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (k : ℕ) :

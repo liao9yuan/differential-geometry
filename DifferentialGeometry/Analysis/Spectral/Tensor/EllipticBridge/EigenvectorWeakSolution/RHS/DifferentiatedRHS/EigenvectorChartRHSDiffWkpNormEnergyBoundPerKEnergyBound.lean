@@ -844,6 +844,7 @@ lemma rhsZeroAggregate_le_energy_perK
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 
+omit [CompleteSpace E] in
 theorem diffRHSAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

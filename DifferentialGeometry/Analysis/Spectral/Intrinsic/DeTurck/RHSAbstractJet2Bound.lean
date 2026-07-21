@@ -388,6 +388,7 @@ theorem chartCarrierRHSComp_diff_abs_le_jet2
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_eq_chartCarrier
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -409,6 +410,7 @@ theorem abstractRHSFrameComponent_eq_chartCarrier
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -456,6 +458,7 @@ private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
 
 
 omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_abs_le_jet2
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

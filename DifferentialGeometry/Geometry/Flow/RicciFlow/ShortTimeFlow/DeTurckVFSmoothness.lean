@@ -1285,6 +1285,7 @@ end DeTurckVFSmoothnessKeystone
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_vf_joint_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
@@ -1467,6 +1468,7 @@ theorem deturck_vf_continuous_up_to_zero
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_solution_joint_smooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (h_smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),

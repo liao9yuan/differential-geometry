@@ -178,6 +178,7 @@ theorem chartPtsConv
 
 omit [Module.Finite ℝ E] in
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPtsSrcK
     [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1054,6 +1055,7 @@ theorem hatPtsOfCompact
 
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hatChartPts
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -1189,6 +1191,7 @@ theorem hatChartPts
 
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hatChartPtsSrcK
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -1299,6 +1302,7 @@ theorem hatChartPtsSrcK
 
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hatSrcPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -1433,6 +1437,7 @@ theorem hatSrcPtsOfComp
 
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hatSuppPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -1789,6 +1794,7 @@ theorem hatPtsCasesComp
 
 
 omit [Module.Finite ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hatChartPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

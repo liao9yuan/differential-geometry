@@ -75,6 +75,7 @@ private def lieArm1PbLow (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma lieArm1_kappa_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -92,6 +93,7 @@ lemma lieArm1_kappa_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_connDiffLowered_unitModel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
@@ -108,6 +110,7 @@ private lemma lieArm1_connDiffLowered_unitModel_apply (g₀ g₁ : SmoothRiemann
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_LowFix_unitModel_apply (g₀ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lieArm1LowFix (I := I) (M := M) g₀ g_bg) x m =
@@ -275,6 +278,7 @@ private lemma lieArm1_interior_product_toModel_eval (s : ℕ) (x : M) (v : Tange
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_connDiffSection_eq_raise_lowered (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -336,6 +340,7 @@ private lemma lieArm1_connDiffSection_eq_raise_lowered (g₀ g₁ : SmoothRieman
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_rfns_icg_lowered_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -466,6 +471,7 @@ private theorem lieArm1_pbLow_raise_eq (g₀ : SmoothRiemannianMetric I M)
   exact (ccTensorBilinSymm_symm (I := I) g₀ P x u
     (PDE.DeTurck.connDiff (I := I) gA gB x (YZ 0) (YZ 1))).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_rfns_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)
     (Ψc : SmoothCcTensor g₀ 1 2)
@@ -559,6 +565,7 @@ private theorem lieArm1_twoArm_1121_fn (g₀ : SmoothRiemannianMetric I M) (a : 
   obtain ⟨C2, hC2_nn, hC2⟩ := exists_fn_of_forall_exists_bounded a _ h2A
   exact ⟨C2, hC2_nn, hC2⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_WB_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     {δ₀ : ℝ} (P : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
@@ -587,6 +594,7 @@ private theorem lieArm1_WB_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R
     have h1 := hPball l (by omega)
     exact pow_le_pow_left₀ (norm_nonneg _) h1 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_normSq_icg_lowered_eq (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 =
       ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ ^ 2 := by
@@ -594,6 +602,7 @@ private lemma lieArm1_normSq_icg_lowered_eq (g₀ g₁ : SmoothRiemannianMetric 
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact lieArm1_rfns_icg_lowered_eq_connDiff (I := I) (M := M) g₀ g₁ n x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_normSq_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)
     (Ψc : SmoothCcTensor g₀ 1 2)
@@ -607,6 +616,7 @@ private lemma lieArm1_normSq_icg_pbLow_eq (g₀ : SmoothRiemannianMetric I M)
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact lieArm1_rfns_icg_pbLow_eq (I := I) (M := M) g₀ P gA gB Ψc hΨc n x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
@@ -620,6 +630,7 @@ private lemma lieArm1_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M
   exact riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀
     σ κ' n x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_normSq_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 n

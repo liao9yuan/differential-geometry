@@ -148,6 +148,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem duhamel_endpoint_value_weighted_summable
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (c : ℝ) {t : ℝ} (ht : 0 ≤ t)
     (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
@@ -198,6 +199,7 @@ def duhamelValueHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (c : ℝ)
     duhamel_endpoint_value_weighted_summable (I := I) (M := M) c ht φ hφ hmass
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem duhamelValueHs_coeff {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (c : ℝ) {t : ℝ} (ht : 0 ≤ t)
     (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
@@ -210,6 +212,7 @@ omit [CompactSpace M] in
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t := rfl
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem duhamel_endpoint_value_summable_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {c : ℝ} (hc : 0 ≤ c) {t : ℝ}
     (ht : 0 ≤ t)
@@ -225,6 +228,8 @@ theorem duhamel_endpoint_value_summable_sq
 
 set_option maxHeartbeats 800000 in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {t : ℝ} (ht : 0 ≤ t)
     (h_compact : IsCompactOperator (tensorResolventL2

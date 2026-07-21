@@ -309,6 +309,7 @@ private lemma k1_symmS_toModel_rel (g₀ : SmoothRiemannianMetric I M)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma k1_symmSCovGrad3_swap12 (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
     domDomCongrSection (I := I) g₀ (Equiv.swap (1 : Fin 3) 2)
@@ -409,6 +410,7 @@ private lemma k1_rfns_addsub_expand (g : SmoothRiemannianMetric I M) (r s : ℕ)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_koszulCovecCc_le_iteratedCovGrad_symmetrization_succ (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (u : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + u) x

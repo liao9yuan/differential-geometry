@@ -195,6 +195,8 @@ theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : 
   exact norm_le_zero_iff.mp h
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
@@ -330,6 +332,8 @@ def nemytskiiMixedForcingMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : 
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F)
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem nemytskiiMixedForcingMap_apply (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}

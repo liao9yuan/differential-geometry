@@ -224,6 +224,7 @@ private noncomputable def lieCorr0NScalar (x : M) (i p : Fin (Module.finrank ℝ
             (extChartAt I x x))
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0_connDiffVF_chartBasis (gP : SmoothRiemannianMetric I M) (x : M) (i : Fin (Module.finrank ℝ E)) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x
         ((PDE.DeTurck.deTurckVF (I := I) g₁ gP : Π b : M, TangentSpace I b) x)
@@ -288,6 +289,7 @@ private lemma lieCorr0_connDiffVF_chartBasis (gP : SmoothRiemannianMetric I M) (
   rw [Finset.sum_smul]
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0NEndo_chartBasis (x : M) (i : Fin (Module.finrank ℝ E)) :
     lieCorr0NEndo (I := I) g₀ g₁ g_bg x ((chartModelBasis E) i : TangentSpace I x) =
       ∑ p : Fin (Module.finrank ℝ E),
@@ -375,6 +377,7 @@ private lemma lieCorr0_cmm2_expand_slot1 (f : ContinuousMultilinearMap ℝ (fun 
   rfl
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0InsertFib_basis_value (x : M) (D : Tensor0SSpace 2 I x) (i j : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0InsertFib (I := I) g₀ g₁ g_bg x D)
         ![(chartModelBasis E) i, (chartModelBasis E) j] =
@@ -473,6 +476,7 @@ private lemma lieCorr0_natAdd1 (b v0 v1 a : E) : (fun i : Fin 3 => (![b, v0, v1,
   fin_cases i <;> rfl
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0_D_VF_expand (g₁ gP : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 2 I x) (b : E) :
     Tensor0SSpace.toModel D
         ![((PDE.DeTurck.deTurckVF (I := I) g₁ gP : Π b' : M, TangentSpace I b') x : E), b] =
@@ -495,6 +499,7 @@ private lemma lieCorr0_D_VF_expand (g₁ gP : SmoothRiemannianMetric I M) (x : M
       (extChartAt I x x)) b
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0VBFib_basis_value (x : M) (D : Tensor0SSpace 2 I x) (i j : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0VBFib (I := I) g₀ g₁ x D)
         ![(chartModelBasis E) i, (chartModelBasis E) j] =
@@ -795,6 +800,7 @@ private lemma lieCorr0_upd4_12 (z0 z1 z2 z3 a b : E) :
   fin_cases i <;> simp [Function.update]
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0_lowered_basis_value (gB : SmoothRiemannianMetric I M) (x : M) (a b c : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (metricConnDiffLoweredFib (I := I) g₁ g₁ gB x)
         ![(chartModelBasis E) a, (chartModelBasis E) b, (chartModelBasis E) c] =
@@ -816,6 +822,7 @@ private lemma lieCorr0_lowered_basis_value (gB : SmoothRiemannianMetric I M) (x 
     lieArm_inner_chartBasis_center (I := I) g₁ x d c]
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0AMixHalfFib_basis_value (x : M) (D : Tensor0SSpace 2 I x) (i j : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0AMixHalfFib (I := I) g₀ g₁ g_bg x D)
         ![(chartModelBasis E) i, (chartModelBasis E) j] =
@@ -1020,6 +1027,7 @@ private lemma lieCorr0_upd4_23 (z0 z1 z2 z3 a b : E) :
   fin_cases i <;> simp [Function.update]
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0_riemLowered_basis_value (x : M) (i j ml kl : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0RiemLoweredFib (I := I) g₀ x)
         ![(chartModelBasis E) i, (chartModelBasis E) j, (chartModelBasis E) ml,
@@ -1046,6 +1054,7 @@ private lemma lieCorr0_riemLowered_basis_value (x : M) (i j ml kl : Fin (Module.
     lieArm_inner_chartBasis_center (I := I) g₀ x ρ kl]
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0RiemFib_basis_value (x : M) (D : Tensor0SSpace 2 I x) (i j : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0RiemFib (I := I) g₀ g₁ x D)
         ![(chartModelBasis E) i, (chartModelBasis E) j] =
@@ -1291,6 +1300,7 @@ private noncomputable def lieCorr0CovWSc (g₁ g_bg : SmoothRiemannianMetric I M
           (extChartAt I x x)
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieCorr0_covW_basis (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (a : Fin (Module.finrank ℝ E)) :
     deTurckVFCovDeriv (I := I) g₁ g_bg
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) a : TangentSpace I x)) x =
@@ -2445,6 +2455,7 @@ private lemma lc0_amix_piece (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound (
       (lc0_amixhalf_piece (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' g₁ g_bg x j i))
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lc0_totalfib_split (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 2 I x) (i j : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0TotalFib (I := I) g₀ g₁ g_bg x D)
         ![(chartModelBasis E) i, (chartModelBasis E) j] =

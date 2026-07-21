@@ -848,7 +848,11 @@ theorem centerReadoutB_min
       let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
       (∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
         ENNReal.ofReal (ρ / 2)) →
-      let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+      let B : DiagInvBranch (I := I) (X.obj k).metric
+          (normal_enorm (I := I) (X.obj k)) x :=
+        IsNormalDiag.toBranch (I := I) (Y := X.obj k)
+          (hcomplete := hcomplete) (hconn := hconn) (x := x)
+          (q := q) (δ := δ) (e := e) (hq := hq) (h := he)
       chartCmEqnB (I := I) (X.obj k).metric
         (normal_enorm (I := I) (X.obj k)) x B
         (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)

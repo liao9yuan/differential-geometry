@@ -184,6 +184,7 @@ structure eigenvectorChartRHSDiffSharpWkpBoundsUpToOrder
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -894,6 +895,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N : ℕ)
@@ -960,6 +962,7 @@ private lemma sharpDiffBdd_level_zero_wkpNorm
 set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -1252,6 +1255,7 @@ private lemma sharpDiffBdd_recursion
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

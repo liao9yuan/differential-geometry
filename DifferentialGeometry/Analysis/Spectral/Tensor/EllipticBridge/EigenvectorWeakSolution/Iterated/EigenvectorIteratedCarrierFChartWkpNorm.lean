@@ -225,6 +225,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
 
 section MainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -303,6 +304,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
           congr 2
           ring
 
+omit [CompleteSpace E] in
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
@@ -387,6 +389,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
 
 end MainBoundUnconditional
 
+omit [CompleteSpace E] in
 private lemma diffRHSHead_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -416,6 +419,7 @@ private lemma diffRHSHead_ne_top
   · exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (h_iter (2 + K) m (Fin.init l)))
 
+omit [CompleteSpace E] in
 private lemma rhsZeroAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -467,6 +471,7 @@ private lemma rhsZeroAggregate_ne_top
       (cutoffPartialLpLimit_memWkp (I := I) (M := M)
         g r s i α P l K h_pou)
 
+omit [CompleteSpace E] in
 theorem diffRHSAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

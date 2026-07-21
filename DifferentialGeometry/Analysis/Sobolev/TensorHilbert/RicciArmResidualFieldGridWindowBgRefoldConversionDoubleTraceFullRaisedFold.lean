@@ -390,6 +390,7 @@ def riemannCometricDoubleTraceFold : SmoothCcTensor g₀ 2 4 :=
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel

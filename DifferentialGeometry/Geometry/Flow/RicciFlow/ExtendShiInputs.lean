@@ -79,6 +79,7 @@ private theorem tensor2_eval_contOn {K : Set ℝ}
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ricciFlowPDE_Ici_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -126,6 +127,7 @@ theorem ricciFlowPDE_Ici_of_soln
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem hell_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -277,6 +279,7 @@ private theorem chartJet0_le_of_equiv
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem ric_quad_le_of_rm04
     (g : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (basis : Module.Basis (Fin n) ℝ (TangentSpace I x))

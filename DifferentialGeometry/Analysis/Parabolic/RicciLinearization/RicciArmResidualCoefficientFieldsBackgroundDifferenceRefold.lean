@@ -391,6 +391,7 @@ private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma foldSkew_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -483,6 +484,7 @@ private lemma foldCompleteness_slot2 (g₁ : SmoothRiemannianMetric I M) (x : M)
     exact congrArg (fun t : TangentSpace I x => (![(p : E), (t : E)] : Fin 2 → E)) hexp
   rw [hfinal, hkey]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -639,6 +641,7 @@ private lemma foldToModel_slot2_neg (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 
   ring
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -938,6 +941,7 @@ private lemma unitModel_sub_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
       unitModel (I := I) (M := M) g s A x v - unitModel (I := I) (M := M) g s B x v := by
   rw [unitModel_sub_loc, ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -953,6 +957,7 @@ private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     linearizedKoszulCovec_apply,
     connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z, hsymmS]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldQuadKernel_split (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

@@ -462,6 +462,7 @@ private theorem eigenvectorIteratedPartial_wkpNorm_gapInduction
       rw [pow_succ]
       ring
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -521,6 +522,7 @@ theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le
     rw [h_cast]
     exact h_gap_norm
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ) :

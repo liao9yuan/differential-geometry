@@ -69,6 +69,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
       riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) g₀ σ S n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 m (ccTensor02Symm (I := I) g₀ P)‖ ≤
@@ -80,6 +81,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -101,6 +103,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
       riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) g₀ P n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ P)‖ ≤

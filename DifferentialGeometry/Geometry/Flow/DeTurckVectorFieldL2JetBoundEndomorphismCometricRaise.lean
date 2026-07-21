@@ -81,6 +81,7 @@ def deTurckLieWEndoBilin (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothC
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma connDiffLoweredCc_unitModel' (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x =
       Tensor0SSpace.toModel (connDiffLoweredCovec (I := I) g₀ g₁ x) := by
@@ -96,6 +97,7 @@ private lemma connDiffLoweredCc_unitModel' (g₀ g₁ : SmoothRiemannianMetric I
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma connDiffLoweredCc_unitModel_apply' (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
@@ -114,6 +116,7 @@ private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCcDiff (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -128,6 +131,7 @@ private lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) 
   rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ g_bg x (m 0) (m 1)]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma wOmega_toSection_unit (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
         (deTurckVFFlat (I := I) (M := M) g₀ g₁ g_bg).toSection x)
@@ -139,6 +143,7 @@ private lemma wOmega_toSection_unit (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   rw [deTurckVFFlat, appCc_toSection]
   rfl
 
+omit [SigmaCompactSpace M] in
 private lemma wOmega_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (z : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 1 (deTurckVFFlat (I := I) (M := M) g₀ g₁ g_bg) x
@@ -210,6 +215,7 @@ private lemma wOmega_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I 
     rw [map_sum, ContinuousLinearMap.sum_apply]]
   rw [deTurckVFRaw, ← PDE.DeTurck.deTurckVF_eq_orthoFrame_trace (I := I) g₁ g_bg x]
 
+omit [SigmaCompactSpace M] in
 private lemma wOmega_toSection_unit_eq_flat (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
         (deTurckVFFlat (I := I) (M := M) g₀ g₁ g_bg).toSection x)
@@ -284,6 +290,7 @@ private lemma tensor0SCovariantDerivative01_consEval_leibnizDefect
     rw [hfun]
   rw [hpeel, hbase]
 
+omit [SigmaCompactSpace M] in
 private lemma wOmega_toSection_unitZero (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (b : M) :
     (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 1 I b from
         (deTurckVFFlat (I := I) (M := M) g₀ g₁ g_bg).toSection b)
@@ -291,6 +298,7 @@ private lemma wOmega_toSection_unitZero (g₀ g₁ g_bg : SmoothRiemannianMetric
       g0FlatCLM (I := I) g₀ b (deTurckVFRaw (I := I) (M := M) g₁ g_bg b) :=
   wOmega_toSection_unit_eq_flat (I := I) (M := M) g₀ g₁ g_bg b
 
+omit [SigmaCompactSpace M] in
 private lemma unitEvalSection_wOmega_toModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (b : M) (z : TangentSpace I b) :
     Tensor0SSpace.toModel (unitEvalSection (I := I) (M := M) g₀ 1
@@ -317,6 +325,7 @@ private lemma unitEvalSection_wOmega_toModel (g₀ g₁ g_bg : SmoothRiemannianM
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma wVF_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
@@ -399,6 +408,7 @@ lemma interior_product_toModel_eval' (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
+omit [SigmaCompactSpace M] in
 private lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (deTurckLieWEndoBilinConnDiffTerm (I := I) (M := M) g₀ g₁ g_bg) x ![u, w] =
@@ -439,6 +449,7 @@ private lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma wEndo_eq_covDeriv_add_connDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x w =

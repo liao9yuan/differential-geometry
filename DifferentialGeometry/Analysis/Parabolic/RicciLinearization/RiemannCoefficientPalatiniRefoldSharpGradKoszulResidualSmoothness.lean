@@ -136,6 +136,7 @@ private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
     (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

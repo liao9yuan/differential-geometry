@@ -1089,6 +1089,7 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_background_sub_eq_connDiff_trace
     (g₁ gA gB : SmoothRiemannianMetric I M) (x : M) :
     (PDE.DeTurck.deTurckVF (I := I) g₁ gA :

@@ -28,9 +28,9 @@ namespace DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {G : Type*} [TopologicalSpace G] {J : ModelWithCorners ℝ F G}

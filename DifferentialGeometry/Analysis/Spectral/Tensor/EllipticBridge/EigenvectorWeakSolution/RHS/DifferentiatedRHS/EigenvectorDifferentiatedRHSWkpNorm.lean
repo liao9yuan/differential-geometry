@@ -965,6 +965,7 @@ end LayerBoundsUnconditional
 
 section MainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1593,6 +1594,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self le_self_add
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

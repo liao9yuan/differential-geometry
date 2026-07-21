@@ -37,6 +37,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 private lemma iteratedPartial_wkpNorm_le_of_chart_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -104,6 +105,7 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -304,6 +306,7 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

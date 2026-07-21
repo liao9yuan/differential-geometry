@@ -205,6 +205,7 @@ private theorem chartLie_symm
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private theorem lieSlope_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

@@ -718,6 +718,7 @@ private def connDiffGmLoweredTensor (g₀ gm : SmoothRiemannianMetric I M) : Smo
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffGmLoweredTensor (I := I) (M := M) g₀ gm) x m =
@@ -821,6 +822,7 @@ private lemma lrArmSlotTuple (g₀ gm : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ gm) x m =
@@ -853,6 +855,7 @@ private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lrQA_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ gm) x m =
@@ -924,6 +927,7 @@ private def connDiffQuadraticCurvatureTerm (g₀ gm : SmoothRiemannianMetric I M
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lrQuadF_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ gm) x m =
@@ -1005,6 +1009,7 @@ private def riemannLoweredContractionB (g₀ : SmoothRiemannianMetric I M) : Smo
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma lrRiemW1_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1089,6 +1094,7 @@ private lemma lrRiemW1_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma lrRiemW2_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1178,6 +1184,7 @@ private def riemannCurvatureCoeffField (g₀ : SmoothRiemannianMetric I M) (T : 
     + ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (riemannLoweredContractionB (I := I) (M := M) g₀) T
 
 set_option backward.isDefEq.respectTransparency false in
+omit [SigmaCompactSpace M] in
 private lemma lrCurvF_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (riemannCurvatureCoeffField (I := I) (M := M) g₀ T) x m =

@@ -136,6 +136,7 @@ private lemma sqrt_energy_le_of_atoms_le
 set_option maxHeartbeats 3200000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

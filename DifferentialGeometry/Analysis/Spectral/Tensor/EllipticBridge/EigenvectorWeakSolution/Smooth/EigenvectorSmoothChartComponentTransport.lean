@@ -187,6 +187,7 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
   · exact hy_on hy_mem
   · exact hy_off hy_mem
 
+omit [CompleteSpace E] in
 private lemma chosenComp_comp_chartTransition_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -240,6 +241,7 @@ private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmoothChart_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

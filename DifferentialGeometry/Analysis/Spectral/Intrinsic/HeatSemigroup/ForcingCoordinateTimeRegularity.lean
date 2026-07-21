@@ -130,6 +130,7 @@ private noncomputable def eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
   Finset.univ.map ⟨Sigma.mk i.1, sigma_mk_injective⟩
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mem_eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} :
     j ∈ eigenBlockFinset (I := I) (M := M) g₀ i ↔ j.1 = i.1 := by
@@ -293,6 +294,7 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
     tensorL2Coeff_toL2_swap_eq_blockSum (I := I) (M := M) g₀ X i]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} (h : j.1 = i.1) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) j σ = tensorSobolevWeight (I := I) (M := M) i σ := by

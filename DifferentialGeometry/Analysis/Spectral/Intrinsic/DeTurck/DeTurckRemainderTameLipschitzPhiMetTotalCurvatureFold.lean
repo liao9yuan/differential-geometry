@@ -1196,6 +1196,7 @@ private theorem appCc_smul_left_fw (g₀ : SmoothRiemannianMetric I M) (r s : �
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_deTurckPhiMetTotal_background_curvatureFold_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ K₀ : SmoothCcTensor g₀ 2 2,

@@ -233,6 +233,7 @@ def eigenvectorChartRHSDiffNumerator
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
         fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -402,6 +403,7 @@ theorem eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
         g r s i α P₀ (m + 1) l y = 0 := by
   rw [eigenvectorChartRHSDiff_succ, Set.indicator_of_notMem hy]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

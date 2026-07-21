@@ -94,6 +94,7 @@ def EigenvalueCountingBound (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop 
 
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eigenvalueTailSummable_of_countingBound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h : EigenvalueCountingBound (I := I) (M := M) g r s) :

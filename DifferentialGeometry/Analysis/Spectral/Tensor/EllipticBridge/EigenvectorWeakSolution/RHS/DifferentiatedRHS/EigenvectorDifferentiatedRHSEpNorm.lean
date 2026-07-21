@@ -643,6 +643,7 @@ end MainBoundUnconditional
 
 section SharpAtomBoundsUnconditional
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1101,6 +1102,7 @@ end SharpAtomBoundsUnconditional
 
 section SharpMainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

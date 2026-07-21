@@ -1410,6 +1410,7 @@ private lemma pAO_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (connDiffLoweredField) in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pAO_lieArm1Kappa_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -1478,6 +1479,7 @@ private lemma pAO_rfns_lieArm1Kappa_eq (g₀ g₁ g_bg : SmoothRiemannianMetric 
   exact riemannianFiberNormSq_neg_value (I := I) (M := M) g₀ 0 3 x _
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (cometricRaiseSlot0Field riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq) in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
@@ -1492,6 +1494,7 @@ private lemma pAO_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     σ κ' n x
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (cometricRaiseSlot0Field) in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_normSq_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 n

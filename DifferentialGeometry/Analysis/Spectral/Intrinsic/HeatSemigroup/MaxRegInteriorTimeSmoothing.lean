@@ -98,6 +98,7 @@ private theorem perModeConv_sq_le_T_mul_integral (lam : ℝ) (hlam : 0 ≤ lam)
         apply mul_le_mul hmass_le hintegral_le hintegral_t_nn hT
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perModeConv_allOrder_timeDeriv_spectralMass_le (hT : 0 ≤ T)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
     (hf_smooth : ∀ i, ContDiff ℝ ∞ (f i))

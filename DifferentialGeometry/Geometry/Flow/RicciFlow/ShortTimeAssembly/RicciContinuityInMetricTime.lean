@@ -1472,6 +1472,7 @@ open RicciContInMetricAux
   DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieDeriv_deTurckVF_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (x : M) (v w : TangentSpace I x)

@@ -112,6 +112,7 @@ private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -206,6 +207,7 @@ theorem eigenvectorChartRHSDiff_memWkp
           g r s i α P₀ m (Fin.init l))
         (l (Fin.last m)) h_comp h_prev_memWkp_succ h_prev_ae_zero
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

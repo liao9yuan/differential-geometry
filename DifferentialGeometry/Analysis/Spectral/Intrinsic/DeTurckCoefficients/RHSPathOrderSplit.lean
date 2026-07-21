@@ -146,6 +146,7 @@ def rhsPathSlope
 
 
 
+omit [CompactSpace M] in
 theorem hasDerivAt_rhsPath
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -178,6 +179,7 @@ theorem hasDerivAt_rhsPath
 
 
 
+omit [CompactSpace M] in
 theorem deriv_rhsPath
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -755,6 +757,7 @@ theorem rhsSum_contDiffAt [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem hasDerivAt_rhsSum [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -775,6 +778,7 @@ theorem hasDerivAt_rhsSum [BoundarylessManifold I M]
     g_bg x i k hy hs).const_mul _
 
 
+omit [CompactSpace M] in
 theorem deriv_rhsSum [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -805,6 +809,7 @@ theorem rhsSum_continuous [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem rhsSlope_integrable [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -848,6 +853,7 @@ theorem rhsSlope_integrable [BoundarylessManifold I M]
 
 
 
+omit [CompactSpace M] in
 theorem rhsSum_sub_eq_int [BoundarylessManifold I M]
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

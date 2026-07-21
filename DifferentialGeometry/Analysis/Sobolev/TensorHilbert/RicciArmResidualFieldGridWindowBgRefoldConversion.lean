@@ -89,6 +89,7 @@ def ricciFoldWeightB (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
     (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -193,6 +194,7 @@ private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
@@ -740,6 +742,7 @@ lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
 
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sharpRaisedKoszulVec_symmS_eq_connDiff (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -769,6 +772,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma koszulCovecCc_unitModel_eq_connDiff_g1_inner (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)

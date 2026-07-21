@@ -222,6 +222,7 @@ private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
 
+omit [CompleteSpace E] in
 private lemma resolventChartComponent_memWkp_arbitrary_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K' : ℕ)
@@ -294,6 +295,7 @@ private lemma sharpDiff_eigen_inv_pow_le_inv_pow_succ
     sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i
   exact pow_le_pow_right₀ h1 (by omega)
 
+omit [CompleteSpace E] in
 private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) (C_IH : ℝ) (hC_IH_nn : 0 ≤ C_IH)
@@ -976,6 +978,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       ((DirCard : ℝ) * C_IH + C_cmp * Sum_p5)) * (i.fst.val)⁻¹ ^ (m + 2)) =
       C * (i.fst.val)⁻¹ ^ (m + 2) by rw [hC_def]; ring]
 
+omit [CompleteSpace E] in
 private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) :
@@ -1064,6 +1067,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
           (I := I) (M := M) g r s i hα P₀ ((m + 1) + 2)]
         exact zero_le _
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_arbitrary
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s) :

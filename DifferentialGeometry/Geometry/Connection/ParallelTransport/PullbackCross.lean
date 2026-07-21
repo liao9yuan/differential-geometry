@@ -25,10 +25,10 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -58,7 +58,6 @@ private theorem deriv_repr_comp_at
             (extChartAt I (gamma t)).symm)
           (extChartAt I (gamma t) (gamma t))
         (deriv (chartCurve (I := I) (gamma t) gamma) t) := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
   classical
   set a : M := gamma t with ha_def
   set f : E → E :=
@@ -110,7 +109,6 @@ private theorem covAlong_restrict_at
     covDerivAlong (I := I) g gamma (fun r => Y (gamma r)) t =
       (LeviCivita (I := I) g) (fun x : M => Y x) (gamma t)
         ((mfderiv 𝓘(ℝ, ℝ) I gamma t : ℝ →L[ℝ] _) (1 : ℝ)) := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
   classical
   set a : M := gamma t with ha_def
   set v : TangentSpace I a :=
@@ -481,8 +479,6 @@ theorem covAlong_mapCrossAt
           gamma (fun s => Y (gamma s)) t) =
       covDerivAlong (I := J) g (fun s => Phi (gamma s))
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t := by
-  letI : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
-  letI : NormedSpace ℝ F := InnerProductSpace.toNormedSpace
   let delta : ℝ → N := fun s => Phi (gamma s)
   let Ypush := DifferentialGeometry.Integral.Connection.pushFwdSectionCross
     (I := I) (J := J) Phi Y

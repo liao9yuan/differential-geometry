@@ -130,6 +130,7 @@ lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [mem_eigenFinset]
   linarith
 
+omit [CompleteSpace E] in
 lemma eigenFinset_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Tendsto (eigenFinset (I := I) (M := M) g r s) atTop atTop :=
   tendsto_atTop_finset_of_monotone
@@ -141,6 +142,8 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -152,6 +155,8 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
   positivity
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ)
     (hd : Tendsto (fun n => ‖d n‖) atTop (𝓝 0))
@@ -456,6 +461,8 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
   exact tendsto_of_coeff (I := I) (M := M) hσ'σ'' d hC hCbd hcoeff0
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_le_sqrt_of_weightedMass_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ'' : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ'') {B : ℝ}
@@ -467,6 +474,7 @@ private lemma norm_le_sqrt_of_weightedMass_le
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg T)] at h
 
+omit [CompleteSpace E] in
 theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
     (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')

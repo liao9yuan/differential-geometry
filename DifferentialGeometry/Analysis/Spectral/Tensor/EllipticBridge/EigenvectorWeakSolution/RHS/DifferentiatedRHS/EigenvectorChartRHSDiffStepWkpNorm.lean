@@ -703,6 +703,7 @@ lemma eigenvectorChartRHSDiffNumerator_memWkp_of_iter
 
 section DivDensityBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -771,6 +772,7 @@ theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le
     _ = ENNReal.ofReal (C₂ * C₁) * A := by
           rw [ENNReal.ofReal_mul hC₂_nn, mul_assoc]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -851,6 +853,7 @@ end DivDensityBoundUnconditional
 
 section IteratedStepBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -954,6 +957,7 @@ theorem eigenvectorChartIteratedStep_wkpNorm_le
   rw [h_norm_eq, hQ_def]
   exact hC
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

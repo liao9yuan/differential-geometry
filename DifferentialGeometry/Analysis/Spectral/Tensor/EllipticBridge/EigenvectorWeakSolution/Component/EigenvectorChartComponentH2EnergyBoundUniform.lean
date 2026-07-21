@@ -136,6 +136,7 @@ private noncomputable def perAlphaPCConstant
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -146,6 +147,7 @@ private lemma perAlphaPCConstant_nonneg
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -172,6 +174,7 @@ private noncomputable def totalActivePCConstant
     ∑ P₀ : TensorCompIdx (E := E) r s,
       perAlphaPCConstant (I := I) (M := M) g r s α P₀
 
+omit [CompleteSpace E] in
 private lemma totalActivePCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActivePCConstant (I := I) (M := M) g r s := by
@@ -181,6 +184,7 @@ private lemma totalActivePCConstant_nonneg
   exact Finset.sum_nonneg fun P₀ _ =>
     perAlphaPCConstant_nonneg (I := I) (M := M) g r s α P₀
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_le_totalActivePCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∈ chartAtlasPOU_activeFinset I M)
@@ -216,6 +220,7 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
 set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

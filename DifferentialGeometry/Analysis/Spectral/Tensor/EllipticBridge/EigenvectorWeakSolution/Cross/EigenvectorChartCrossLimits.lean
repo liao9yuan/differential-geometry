@@ -129,6 +129,7 @@ theorem tensorCovDerivCrossLeft_integral_eq_inner
     (I := I) (M := M) g r s ζ w.toCcTensor S x]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossLeft_integral_eq_chartPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (w : SmoothCcTensorH1 g r s) (S : SmoothCcTensor g r s) :

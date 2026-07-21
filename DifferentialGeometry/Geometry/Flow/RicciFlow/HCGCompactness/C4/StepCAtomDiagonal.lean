@@ -94,6 +94,7 @@ theorem HasAtomWeightLim.of_atoms
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem HasAtomWeightLim.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
@@ -121,6 +122,7 @@ theorem HasAtomWeightLim.subseq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem HasAtomWeightLim.weight_ne_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}

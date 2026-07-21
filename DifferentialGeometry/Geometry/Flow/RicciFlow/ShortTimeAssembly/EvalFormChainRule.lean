@@ -213,6 +213,7 @@ theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem evalFormTwoVar_diag_hasDerivWithinAt_deTurckRicciRHS_chainRule
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

@@ -771,6 +771,7 @@ private theorem armField_jointSmooth_rfns_jointContinuous
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_covGrad_pathIntegral_comm
     (g₀ : SmoothRiemannianMetric I M) (r sIdx : ℕ)
     (Ψ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ) (hS : IsOpen S)
@@ -841,6 +842,7 @@ private theorem armField_iteratedCovGrad_jointSmooth
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_rfns_jointContinuous
     (g₀ : SmoothRiemannianMetric I M) (r sIdx i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ)
@@ -861,6 +863,7 @@ private theorem armField_iteratedCovGrad_rfns_jointContinuous
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_normSq_intervalIntegrable
     (g₀ : SmoothRiemannianMetric I M) (r sIdx i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ)
@@ -908,6 +911,7 @@ private theorem armField_iteratedCovGrad_normSq_intervalIntegrable
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_pathIntegral_comm
     (g₀ : SmoothRiemannianMetric I M) (r sIdx i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ) (hS : IsOpen S)
@@ -959,6 +963,7 @@ private theorem armField_iteratedCovGrad_pathIntegral_comm
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pathIntegralCoeffField_jetL2_tower_le
     (g₀ : SmoothRiemannianMetric I M) (r a : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}

@@ -267,6 +267,7 @@ private theorem joint0S_sub {d : ℕ} {S : Set ℝ}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_small
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -343,6 +344,7 @@ theorem scalarTrace_joint
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTrace_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -403,6 +405,7 @@ theorem scalarTrace_rev
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTrace_rev
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -444,6 +447,7 @@ theorem scalarTrace_rev_on
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connTrace_rev_on
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -461,6 +465,7 @@ theorem connTrace_rev_on
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTrace_small
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -502,6 +507,7 @@ private theorem connFib_self (q : SmoothRiemannianMetric I M) (x : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connTrace_small
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -586,6 +592,7 @@ theorem scalarFlux_jet_grid
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_slab
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

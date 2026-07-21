@@ -197,6 +197,7 @@ theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       exact stepCAtom_Icc (X.obj (L.φ k)) c _ _ q
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtom_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)

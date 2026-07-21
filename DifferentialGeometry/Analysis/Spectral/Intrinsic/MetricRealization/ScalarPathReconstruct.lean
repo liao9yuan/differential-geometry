@@ -229,6 +229,7 @@ lemma scalarMode_smooth
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_two_sq
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) :
@@ -242,6 +243,7 @@ private lemma weight_two_sq
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_le_sqrt_wt
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) {v C : ℝ}
@@ -267,6 +269,7 @@ private lemma abs_le_sqrt_wt
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_mul_tail
     (g : SmoothRiemannianMetric I M) (p : ℝ)
     (C : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ)
@@ -405,6 +408,7 @@ omit [BoundarylessManifold I M] in
 
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem prodMode_majorant
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     (g : SmoothRiemannianMetric I M)

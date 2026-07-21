@@ -93,6 +93,7 @@ theorem singleton_chartCenter_subset_interior_target (α : M) :
 
 
 omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_abs_le_jet2_chartCenter
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ i j : Fin (Module.finrank ℝ E),
@@ -140,6 +141,7 @@ theorem exists_finite_chartSource_cover :
 
 
 omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem exists_uniform_const_RHSFrameComponent_diff_jet2_on_finset
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M)
     {ι : Type*} (t : Finset ι) (α : ι → M) (K : ι → Set E)

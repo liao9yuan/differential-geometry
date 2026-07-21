@@ -257,6 +257,7 @@ def lieArm1ConnDiffBgCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCc
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem lieArm1ConnDiffBgCc_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       connDiffFib (I := I) g₁ g_bg x := rfl
@@ -330,6 +331,7 @@ private theorem lieArm1_normSq_icg_domDom_eq (g : SmoothRiemannianMetric I M) {s
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g σ S i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieArm1_normSq_icg_raise_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g 1 (s + 1) i
@@ -836,6 +838,7 @@ def lieArm1FixCd (g₀ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieArm1_connDiffBg_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg =
       connDiffSection (I := I) g₁ g₀ + lieArm1FixCd (I := I) (M := M) g₀ g_bg := by
@@ -1168,6 +1171,7 @@ private lemma lieArm1_rfns_icg_symmS_le (g₀ : SmoothRiemannianMetric I M)
   nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x
     ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lieArm1_normSq_icg_symmS_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (j : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 j (ccTensor02Symm (I := I) (M := M) g₀ T)‖ ^ 2 ≤

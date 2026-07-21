@@ -78,6 +78,7 @@ private theorem appRS_jet_bdd
       riemannianFiberNormSq_nonneg (I := I) (M := M) q p (a + l) x _)
     (hBPhi i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fixed_jet_bdd
     (q : SmoothRiemannianMetric I M) {r s : ℕ} (Phi : SmoothCcTensor q r s) :
     ∃ B : ℕ → ℝ, (∀ i, 0 ≤ B i) ∧ ∀ i x,

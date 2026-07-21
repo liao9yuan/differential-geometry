@@ -52,6 +52,7 @@ theorem tensor_lambda_nonneg
   exact tensorLaplacianEigenvalueOf_nonneg_of_resolventEigenvalue h_mem_unit
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor_heat_coeff_mem_unit_interval
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : 0 ≤ t) :
@@ -64,6 +65,7 @@ theorem tensor_heat_coeff_mem_unit_interval
   nlinarith
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor_heat_coeff_sq_le_one
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : 0 ≤ t) :
@@ -76,6 +78,7 @@ lemma tensor_heat_coeff_sq_le_one
     (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1)]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSummable_basis_coeff_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -115,6 +118,7 @@ lemma tensorSummable_basis_coeff_sq
   exact h_iff.mp h_summable_smul
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorParseval_norm_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2

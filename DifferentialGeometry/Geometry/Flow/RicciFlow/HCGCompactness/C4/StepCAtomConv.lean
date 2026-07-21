@@ -383,6 +383,7 @@ theorem quadNormal_readout
   rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (lam : Real) (hlam : 0 < lam) {z : E}
@@ -678,6 +679,7 @@ theorem atom_disjoint_conv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtoms_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -707,6 +709,7 @@ theorem seqAtoms_conv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (center : ι -> forall k : Nat, (X.obj k).M)
@@ -835,6 +838,7 @@ theorem existsMetric0Univ {ι : Type*} [Fintype ι]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem existsLiveMetric0
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)

@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {g : SmoothRiemannianMetric I M} {r s₀ : ℕ}
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lambda_mul_tensorSobolevWeight
     (i : TensorEigenIdx (I := I) (M := M) g r s₀) (σ : ℝ) :
     TensorEigenIdx.lambda (I := I) (M := M) i *
@@ -42,6 +43,7 @@ noncomputable def galerkinEnergy
   ∑ i ∈ s, tensorSobolevWeight (I := I) (M := M) i σ * (u t i) ^ 2
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma galerkinEnergy_nonneg
     (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
     (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ) (σ : ℝ) (t : ℝ) :
@@ -84,6 +86,7 @@ lemma galerkinEnergy_hasDerivWithinAt
   simpa [pow_one] using this
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem galerkinEnergy_deriv_identity
     (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
     (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ)
@@ -113,6 +116,7 @@ theorem galerkinEnergy_deriv_identity
     Finset.sum_add_distrib]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem galerkinEnergy_hasDerivWithinAt_ode
     (s : Finset (TensorEigenIdx (I := I) (M := M) g r s₀))
     (u : ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ)
@@ -226,6 +230,7 @@ theorem energy_hierarchy_explicit_bound_perScale
     _ ≤ gronwallBound (B0 k) (C k + 1) ((seed k) ^ 2 / 4) T := hmono
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem galerkin_energy_uniform_bound_perScale
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
@@ -304,6 +309,7 @@ theorem galerkin_energy_uniform_bound_perScale
   exact hkey N k t ht
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem galerkin_energy_uniform_bound
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}

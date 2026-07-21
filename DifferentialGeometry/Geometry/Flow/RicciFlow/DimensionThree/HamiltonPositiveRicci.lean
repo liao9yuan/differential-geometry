@@ -1444,6 +1444,7 @@ theorem ham3_scalar74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_finite_time
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1654,6 +1655,7 @@ theorem ham3_scalar_blowup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_point_select
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2139,6 +2141,7 @@ theorem ham3_scalar_pos
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp_can
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2179,6 +2182,7 @@ theorem ham3_pinch_imp_can
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -3051,6 +3055,7 @@ theorem const_pos_of_tf0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_const_pos
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)

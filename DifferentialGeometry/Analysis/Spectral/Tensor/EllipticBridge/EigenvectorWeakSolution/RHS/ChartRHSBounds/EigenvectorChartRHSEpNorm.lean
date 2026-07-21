@@ -144,6 +144,7 @@ section MainBound
 omit [CompleteSpace E] in
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -837,6 +838,7 @@ private lemma rhsTerm3_eLpNorm_le_uniform_unconditional :
   rw [← h_eq, hμw_def]
   exact hC_bd i
 
+omit [CompleteSpace E] in
 private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -854,6 +856,7 @@ private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
   gcongr
   exact aggrPartial_le_rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -911,6 +914,7 @@ private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn,
           mul_comm C 2]
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1002,6 +1006,7 @@ private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
   rw [hμw_def] at hC_bd
   exact hC_bd i
 
+omit [CompleteSpace E] in
 private lemma rhsTerm6_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1130,6 +1135,7 @@ section BracketBoundUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
+omit [CompleteSpace E] in
 private lemma rhsBracket_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1238,6 +1244,7 @@ section MainBoundUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_uniform_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

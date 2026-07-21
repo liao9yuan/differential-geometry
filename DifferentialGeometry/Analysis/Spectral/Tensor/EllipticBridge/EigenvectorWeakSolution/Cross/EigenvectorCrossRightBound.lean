@@ -231,6 +231,7 @@ private lemma crossRightLimitComponent_coe_ae_eq
 
 set_option maxHeartbeats 3200000 in
 
+omit [CompleteSpace E] in
 theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)

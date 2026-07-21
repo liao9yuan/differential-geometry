@@ -37,6 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
     (g_bg g₁ : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ (chartAt H α).source)
@@ -83,6 +84,7 @@ private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
   rw [hdirect, hmodel]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
     (g_bg g₁ : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

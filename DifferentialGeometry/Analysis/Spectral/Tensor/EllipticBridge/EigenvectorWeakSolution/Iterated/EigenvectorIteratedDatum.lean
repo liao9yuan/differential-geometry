@@ -190,6 +190,7 @@ theorem eigenvectorChartIteratedPartial_memW1p_of_memWkp
     at h_memWkp_1
   exact h_memWkp_1
 
+omit [CompleteSpace E] in
 theorem eigenvector_per_pair_ibp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -366,6 +367,7 @@ theorem eigenvectorChartIteratedStep_support_subset_chartPouKernel
   unfold eigenvectorChartIteratedStep
   exact Set.support_indicator_subset
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_memLp_two_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

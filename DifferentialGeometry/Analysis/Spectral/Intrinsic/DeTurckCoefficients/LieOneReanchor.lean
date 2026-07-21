@@ -364,6 +364,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_arm1_group_traced
     (g₀X g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -621,6 +622,7 @@ private lemma lieArm_arm1_T14_traced
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_arm1_value_traced
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (D : SmoothCcTensor g₀ 0 3)
     (x : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -830,6 +832,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_inner_connDiff_chartBasis_value
     (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (a c d : Fin (Module.finrank ℝ E)) :
@@ -857,6 +860,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_U3_deTurckVF_slot0_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M) (u v : E) :
@@ -882,6 +886,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_U3_deTurckVF_slot2_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M) (u v : E) :
@@ -907,6 +912,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_U3_connDiff_slot0_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M)
@@ -939,6 +945,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm_U3_connDiff_slot1_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M)

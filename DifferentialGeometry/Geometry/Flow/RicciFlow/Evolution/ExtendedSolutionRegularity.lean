@@ -1251,6 +1251,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem isSolutionOn_of_extendData
     {α omega b : ℝ} (hαb : α < b) (hαω : α < omega)
     (g_ext : ℝ → SmoothRiemannianMetric I M)

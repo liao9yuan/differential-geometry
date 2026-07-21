@@ -162,6 +162,7 @@ private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

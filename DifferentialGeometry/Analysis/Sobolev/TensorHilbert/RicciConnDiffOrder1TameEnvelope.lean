@@ -57,6 +57,7 @@ theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1KernelFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 4 ℝ E)) ∞
@@ -108,6 +109,7 @@ omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem linearizedRicciConnDiffOrder1KernelField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁).toSection x =
@@ -117,6 +119,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁ =
@@ -701,6 +704,7 @@ private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem connDiffContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 4 ℝ E)
@@ -734,6 +738,7 @@ def connDiffContrInsertionField (g₀ g₁ : SmoothRiemannianMetric I M) :
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem connDiffContrInsertionField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffContrInsertionField (I := I) g₀ g₁).toSection x =
@@ -742,6 +747,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
@@ -892,6 +898,7 @@ def connDiffContrInsertionReindexPerm : Equiv.Perm (Fin 3) :=
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionField (I := I) g₀ g₁ =

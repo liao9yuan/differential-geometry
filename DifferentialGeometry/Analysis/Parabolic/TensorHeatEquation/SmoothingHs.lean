@@ -216,6 +216,7 @@ theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
           tensorSmoothingScalarBound hμ ht'_pos ht'_le_one hlam
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ} (i : TensorEigenIdx (I := I) (M := M) g r s)
     (a b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ) :
@@ -286,6 +287,7 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHs_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -309,6 +311,8 @@ def heatHsFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     T.coeff i
   weighted_summable := heatHs_weighted_summable (I := I) (M := M) b ht T
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma heatHsFun_coeff {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -316,6 +320,8 @@ def heatHsFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHsFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (S T : tensorHs (I := I) (M := M) g r s a) :
     heatHsFun (I := I) (M := M) b ht (S + T) =
@@ -325,6 +331,8 @@ lemma heatHsFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
   simp only [heatHsFun_coeff, add_coeff]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHsFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
     (T : tensorHs (I := I) (M := M) g r s a) :
     heatHsFun (I := I) (M := M) b ht (c • T) =
@@ -333,6 +341,8 @@ lemma heatHsFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
   simp only [heatHsFun_coeff, smul_coeff]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     (ht : 0 < t) (ht1 : t ≤ 1)
     (T : tensorHs (I := I) (M := M) g r s a) :
@@ -481,6 +491,8 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     positivity
   nlinarith [h_final_sq, h_lhs_nn, h_rhs_nn]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_heatHsFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     ‖heatHsFun (I := I) (M := M) a ht T‖ ≤ ‖T‖ := by
@@ -639,6 +651,8 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
           h_norm_le_sqrt
         _ ≤ K * ‖T‖ := mul_le_mul_of_nonneg_right h_sqrtK_le_K h2)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensorHeatSemigroupHs_apply {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {t : ℝ}
     (ht : 0 < t) {a b : ℝ}
@@ -646,6 +660,8 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht (a := a) (b := b) T =
       tensorHs.heatHsFun (I := I) (M := M) b ht T := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatSemigroupHs_coeff {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {t : ℝ}
     (ht : 0 < t) {a b : ℝ}
@@ -656,6 +672,8 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {a b : ℝ} (hab : a ≤ b) {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
@@ -673,6 +691,8 @@ theorem tensorHeatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
   rw [tensorHeatSemigroupHs_apply]
   exact tensorHs.norm_heatHsFun_le_smoothing (I := I) (M := M) hab ht ht1 T
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {r s : ℕ} {a : ℝ}
     {t : ℝ} (ht : 0 < t) :
@@ -682,6 +702,8 @@ theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   rw [tensorHeatSemigroupHs_apply, one_mul]
   exact tensorHs.norm_heatHsFun_le_self (I := I) (M := M) ht T
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHs_add {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {t u : ℝ} (ht : 0 < t) (hu : 0 < u) {a b c : ℝ}
@@ -705,6 +727,8 @@ theorem tensorHeatSemigroupHs_add {g : SmoothRiemannianMetric I M}
   rw [h_exp_add]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHs_add_comp {g : SmoothRiemannianMetric I M}
     {r s : ℕ}
     {t u : ℝ} (ht : 0 < t) (hu : 0 < u) {a : ℝ} :

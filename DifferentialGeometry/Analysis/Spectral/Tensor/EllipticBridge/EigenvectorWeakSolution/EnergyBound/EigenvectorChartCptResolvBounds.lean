@@ -207,6 +207,7 @@ private lemma resolvent_chartComponent_coe_ae_eq
   filter_upwards [h_eq] with y hy
   rw [hy, smul_eq_mul]
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_memWkp_of_resolv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -251,6 +252,7 @@ private lemma eigenvectorChartComponentFun_memWkp_of_resolv
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mp h_scaled
 
+omit [CompleteSpace E] in
 theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -415,6 +417,7 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
                 g r s) i‖ :=
       h_step2
 
+omit [CompleteSpace E] in
 theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)

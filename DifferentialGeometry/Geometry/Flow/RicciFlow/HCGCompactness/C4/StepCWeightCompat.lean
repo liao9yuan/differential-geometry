@@ -98,6 +98,7 @@ theorem normalRaw_eq_bump {ι : Type*} [DecidableEq ι]
 
 
 omit [T2Space M0] in
+omit [NeZero (Module.finrank ℝ E0)] in
 theorem normalWeight_eq {ι : Type} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I0 M0) (p : ι → M0)
     (cut : ContDiffBump (0 : E0)) (f : ι → ContDiffBump (0 : E0))

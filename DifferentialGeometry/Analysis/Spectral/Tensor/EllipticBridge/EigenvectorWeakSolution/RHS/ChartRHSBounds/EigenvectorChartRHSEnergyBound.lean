@@ -534,6 +534,7 @@ set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_energy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

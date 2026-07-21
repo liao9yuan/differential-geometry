@@ -53,6 +53,7 @@ omit [SigmaCompactSpace M] in
       (deTurckRHSSection (I := I) g_bg g).toSection := rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRHSSectionBg_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -63,6 +64,7 @@ theorem deTurckRHSSectionBg_toModel_apply
   deTurckRHSSection_toModel_apply (I := I) g_bg g x v
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g_bg (deTurckRHSSectionBg (I := I) g_bg g) x v w =

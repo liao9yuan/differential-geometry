@@ -213,6 +213,7 @@ noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     iteratedCovGrad (I := I) g₀ 0 2 2 S
@@ -239,6 +240,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem phiMet_curv_fold
     (g₀ g_bg g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     operatorFieldApply (I := I) (M := M) g₀ 4 2

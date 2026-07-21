@@ -715,6 +715,7 @@ private lemma rhsZeroAggregate_le_at_target
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N target : ℕ)
@@ -786,6 +787,7 @@ private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffExplicit_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -807,6 +809,7 @@ set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K target : ℕ)
@@ -1205,6 +1208,7 @@ private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffExplicit_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -1220,6 +1224,7 @@ private lemma sharpDiffExplicit_diff_memWkp
 set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_recursion_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N eAtomMax : ℕ)
@@ -1528,6 +1533,7 @@ private lemma sharpDiffBdd_recursion_at_target
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd_explicit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

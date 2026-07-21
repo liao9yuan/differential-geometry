@@ -315,6 +315,7 @@ lemma sharp_ofReal_const_pow_eigen_inv_le
   exact pow_le_pow_right₀
     (sharp_eigen_inv_one_le (I := I) (M := M) g r s i) hke
 
+omit [CompleteSpace E] in
 private lemma sharp_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -332,6 +333,7 @@ private lemma sharp_iter_memWkp
   exact (eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (I := I) (M := M) g r s i α P₀ j K h_chart_cpt idx).1
 
+omit [CompleteSpace E] in
 lemma sharp_invGramDerivCoeff_mul_iteratedPartial_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -562,6 +564,7 @@ lemma sharp_invGramDerivCoeff_mul_iteratedPartial_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
+omit [CompleteSpace E] in
 lemma sharp_invGramCoeff_mul_iteratedPartialWeakDeriv_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -822,6 +825,7 @@ lemma sharp_invGramCoeff_mul_iteratedPartialWeakDeriv_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
+omit [CompleteSpace E] in
 lemma sharp_densityDeriv_mul_iteratedPartial_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -984,6 +988,7 @@ lemma sharp_density_mul_prevChartFunWeakDeriv_wkpNorm_le
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

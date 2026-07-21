@@ -48,6 +48,7 @@ private lemma memWkp_succ_of_chosenWeakPartial_memWkp
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_succ]
   exact ⟨h_w1p, h_partials⟩
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_memWkp_two_k
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

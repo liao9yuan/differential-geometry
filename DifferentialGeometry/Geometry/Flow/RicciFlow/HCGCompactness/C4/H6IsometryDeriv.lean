@@ -639,7 +639,8 @@ private theorem raisedKoszul_eq [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) :
     raisedKoszul B D u v = MetricKoszul.koszulVec hB D u v := by
-  rw [raisedKoszul, gram_inv_eq hB, koszulRieszCLM_apply]
+  rw [raisedKoszul, gramCLM_apply, koszulRieszCLM_apply,
+    ← hB.sharp_eq_inverse]
   rfl
 
 

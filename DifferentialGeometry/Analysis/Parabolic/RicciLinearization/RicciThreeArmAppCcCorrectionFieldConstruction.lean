@@ -168,6 +168,7 @@ theorem exists_Csob_sub_pointwise_jet3_le
     _ = (Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2) * R := by ring
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciArmOrder1KoszulCoeff_appCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
     (x : M) (v : Fin 2 → TangentSpace I x) :

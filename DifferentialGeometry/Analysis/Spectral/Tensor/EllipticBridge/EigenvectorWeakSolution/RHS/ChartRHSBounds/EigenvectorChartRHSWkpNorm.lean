@@ -52,6 +52,7 @@ section MainBound
 
 omit [CompleteSpace E] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -87,6 +88,7 @@ private lemma rhsTerm1_wkpNorm_le :
   exact le_trans (le_of_eq rfl)
     (aggrUchart_le (I := I) (M := M) g r s i α P₀ K)
 
+omit [CompleteSpace E] in
 private lemma rhsTerm2_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -330,6 +332,7 @@ private lemma rhsTerm3_wkpNorm_le
   rw [h_eq, hΩ_def]
   exact hC_bd
 
+omit [CompleteSpace E] in
 private lemma rhsTerm4_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -347,6 +350,7 @@ private lemma rhsTerm4_wkpNorm_le
   gcongr
   exact aggrPartial_le (I := I) (M := M) g r s i α P₀ K
 
+omit [CompleteSpace E] in
 private lemma rhsTerm5_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -383,6 +387,7 @@ private lemma rhsTerm5_wkpNorm_le
             g r s i α P₀ K := by
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_comm C 2]
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -445,6 +450,7 @@ private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le
     (wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K)
     (fun l => (h_data l).1) (fun l => (h_data l).2)
 
+omit [CompleteSpace E] in
 private lemma rhsTerm6_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -512,6 +518,7 @@ private lemma rhsTerm6_wkpNorm_le
             g r s i α P₀ K := by
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
+omit [CompleteSpace E] in
 private lemma rhsTerm7_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -591,6 +598,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
+omit [CompleteSpace E] in
 private lemma rhsBracket_wkpNorm_le
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -752,6 +760,7 @@ end BracketBoundUnconditional
 
 section MainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -916,6 +925,7 @@ end MainBoundUnconditional
 
 section UniformMainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)

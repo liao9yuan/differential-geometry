@@ -1745,6 +1745,7 @@ private lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         rw [Tensor0SSpace.toModel_sub]
         simp only [ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (s + 1) x
@@ -5819,6 +5820,7 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic_allOrders
 
 section TopSeparatedKoszulExport
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

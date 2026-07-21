@@ -92,6 +92,7 @@ private lemma resolventChartComponent_memWkp_of_componentFun
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp i.fst.val)
 
+omit [CompleteSpace E] in
 private lemma eigenvector_chartComponent_memWkp_global
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -166,6 +167,7 @@ private lemma eigenvector_chartComponent_memWkp_global
     h_chart_open hΩ''_open hK_compact hK_in_Ω'' h_closureΩ''_in_chart
     h_global_Lp h_ae_zero h_interior
 
+omit [CompleteSpace E] in
 private theorem eigenvector_chartComponent_memWkp_pm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -247,6 +249,7 @@ private theorem eigenvector_chartComponent_memWkp_pm
           h_intermediate_w1p h_top_memWkp_two
       exact h_raised
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_memWkp_arbitrary
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -84,6 +84,7 @@ private lemma eigenvalue_pos
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)

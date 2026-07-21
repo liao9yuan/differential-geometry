@@ -270,6 +270,7 @@ section CrossRotationWkpNormBoundsUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
 
+omit [CompleteSpace E] in
 theorem wkpNorm_crossLeftLimitComponent_le
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
@@ -392,6 +393,7 @@ section CrossRotationWkpNormBoundsUniformUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
 
+omit [CompleteSpace E] in
 theorem wkpNorm_crossLeftLimitComponent_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),

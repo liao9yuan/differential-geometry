@@ -48,6 +48,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_two_rpow_eq_sq (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (pp : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (2 * pp)
@@ -59,6 +60,7 @@ private lemma weight_two_rpow_eq_sq (g : SmoothRiemannianMetric I M)
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma abs_le_sqrt_of_weight_sq_le (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (pp : ℝ) {v C : ℝ}
     (h : tensorSobolevWeight (I := I) (M := M) i (2 * pp) * v ^ 2 ≤ C) :

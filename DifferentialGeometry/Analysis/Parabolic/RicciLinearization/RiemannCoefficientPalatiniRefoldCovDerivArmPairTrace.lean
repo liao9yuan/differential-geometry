@@ -1032,6 +1032,7 @@ lemma riemannianFiberNormSq_symmS_le_of_gFibreOpBound (g₀ : SmoothRiemannianMe
           ring
         rw [hc0, hc2, one_mul, hnE]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem bdOmRecover_gridWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (_hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
@@ -1168,6 +1169,7 @@ private lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       armSlotEndoCc (I := I) (M := M) g₀ 0 (connDiffEndo (I := I) (M := M) g₀ g₁) := by
@@ -1752,6 +1754,7 @@ private lemma bdFixLoweredCc_unitModel (g₀ gA gB : SmoothRiemannianMetric I M)
   rfl
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdFixLoweredCc_unitModel_apply (g₀ gA gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (bdFixLoweredCc (I := I) (M := M) g₀ gA gB) x m =
@@ -1768,6 +1771,7 @@ private def connDiffQuadraticLoweredCc (g₀ gArm gOut : SmoothRiemannianMetric 
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdQuadLowCc_unitModel_apply (g₀ gArm gOut : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (connDiffQuadraticLoweredCc (I := I) (M := M) g₀ gArm gOut) x m =
@@ -1945,6 +1949,7 @@ lemma bdUnitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdLow0_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (dLaCovKernelDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -2030,6 +2035,7 @@ lemma bdG0_inner_lambda (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [g₁.symm x v u]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdXdHalf_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (deTurckArmCoeffDiffHalfCc (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -2083,6 +2089,7 @@ private lemma bdXdHalf_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric 
       connDiffCovDerivOp (I := I) g₁ g₀ x (m 1) (m 2) (m 3)) (m 0)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdXd_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (deTurckArmCoeffDiffCc (I := I) (M := M) g₀ g₁ g_bg) x m =

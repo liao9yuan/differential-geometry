@@ -576,6 +576,7 @@ private lemma principalTerm_tendsto
         g r s i n).toCcTensor β Q'.1 (Matrix.vecTail Q'.2)
       (Q'.2 0))
 
+omit [CompleteSpace E] in
 private lemma christoffelTerm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -636,6 +637,7 @@ private lemma covGrad_chartComponent_tendsto
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

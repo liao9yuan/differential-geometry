@@ -614,6 +614,8 @@ theorem smoothCcToTensorHs_smul (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (
     tensorL2Coeff_smul]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHs_norm_smul (g₀ : SmoothRiemannianMetric I M) {σ : ℝ} (c : ℝ)
     (x : tensorHs (I := I) (M := M) g₀ 0 2 σ) :
     ‖c • x‖ = |c| * ‖x‖ := by
