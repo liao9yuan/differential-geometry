@@ -22,7 +22,9 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,6 +44,18 @@ theorem chartDeTurckRicciRHS_def (g g_bg : SmoothRiemannianMetric I M) (α : M)
       -2 * chartRicciTensor (I := I) g α i k y +
         chartLieDeTurckComp (I := I) g g_bg α i k y := rfl
 
+end NormedSpaceModel
+
+section InnerProductSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {x : M}
@@ -62,6 +76,7 @@ theorem deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
 omit [BoundarylessManifold I M] in
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckRicciRHS_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -120,6 +135,7 @@ theorem chartDeTurckRicciRHS_sub_eq
 omit [BoundarylessManifold I M] in
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -161,6 +177,8 @@ theorem chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder
   rw [chartRicciTensor_sub_eq_principalSymbol_add_lowerOrder (I := I) g₁ g₂ α i k y,
     chartLieDeTurckComp_sub_eq (I := I) g₁ g₂ g_bg α i k y]
   ring
+
+end InnerProductSpaceModel
 
 end DeTurckCoefficients
 end IntrinsicSpectral

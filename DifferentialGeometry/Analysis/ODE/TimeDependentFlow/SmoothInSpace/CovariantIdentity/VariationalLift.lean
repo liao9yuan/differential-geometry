@@ -13,12 +13,12 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasDerivAt_clm_pre_post
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (Q : E →L[ℝ] E) (d : E) :
@@ -29,6 +29,7 @@ theorem hasDerivAt_clm_pre_post
   have := Q.hasFDerivAt.comp_hasDerivAt t hEval
   simpa using this
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hasDerivAt_mfderiv_flow_of_chart
     (Fam : ℝ → (M → M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (Q : E →L[ℝ] E) (d : E)
@@ -41,6 +42,9 @@ theorem hasDerivAt_mfderiv_flow_of_chart
     hasDerivAt_clm_pre_post hDchart Q d
   exact hchart.congr_of_eventuallyEq hagree
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartLeviCivita_flat_add_christoffel
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π x : M, TangentSpace I x) {x : M}
@@ -55,6 +59,9 @@ theorem chartLeviCivita_flat_add_christoffel
   rw [LeviCivita_chart_apply (I := I) g α hx hX v]
   rw [chartLeviCivita_apply (I := I) g α X hx v]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartLeviCivita_flat_eq_sub_christoffel
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π x : M, TangentSpace I x) {x : M}

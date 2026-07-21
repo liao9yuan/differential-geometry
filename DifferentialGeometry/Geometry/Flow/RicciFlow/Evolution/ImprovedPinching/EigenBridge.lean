@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -20,16 +19,16 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [Module.Finite ℝ E] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     {g : SmoothRiemannianMetric I M}
     {x : M}
@@ -94,7 +93,10 @@ theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
 
 
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem pinchEigen3Unordered_of_pinchTensor_nonneg
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     {delta t : Real} {x : M}
@@ -125,7 +127,9 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
 
 
 
+omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9_point
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     {delta epsilon t : Real} {x : M}

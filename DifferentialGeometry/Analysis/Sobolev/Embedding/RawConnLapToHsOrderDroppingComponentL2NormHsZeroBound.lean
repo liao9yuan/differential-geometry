@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -70,6 +70,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -164,6 +165,7 @@ private lemma tsupport_sqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq' (I := I) (M := M) α]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma continuous_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -209,6 +211,7 @@ private lemma continuous_sqrtPou
       by_contra hne; exact hy_notsupp hne
     exact hzero.symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma measurable_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -218,6 +221,7 @@ private lemma measurable_sqrtPou
       (tensorChartComponentSqrtPou (I := I) (M := M) g r s T α Idx Jdx) :=
   (continuous_sqrtPou (I := I) (M := M) g r s T α Idx Jdx).measurable
 
+omit [BoundarylessManifold I M] in
 private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -330,6 +334,7 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     _ = (ENNReal.ofReal Cbr) ^ 2 * chE ^ 2 := by rw [mul_pow]
     _ = ENNReal.ofReal (Cbr ^ 2) * chE ^ 2 := by rw [← ENNReal.ofReal_pow hCbr_pos.le]
 
+omit [BoundarylessManifold I M] in
 theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

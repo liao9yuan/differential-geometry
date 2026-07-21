@@ -20,7 +20,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,7 +31,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 section AchartEquality
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma achart_modelProd_eq_of_proj_eq {q₁ q₂ : TangentBundle I M}
     (h : q₁.proj = q₂.proj) :
     achart (ModelProd H E) q₁ = achart (ModelProd H E) q₂ := by
@@ -43,7 +43,7 @@ end AchartEquality
 
 section TangentCoordChange
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mem_chartAt_modelProd_zero_source_iff
     (α : M) (q : TangentBundle I M) :
     q ∈ (chartAt (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)).source ↔
@@ -51,7 +51,7 @@ lemma mem_chartAt_modelProd_zero_source_iff
   exact TangentBundle.mem_chart_source_iff (I := I) (M := M) q
     (⟨α, (0 : E)⟩ : TangentBundle I M)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma trivializationAt_tangent_continuousLinearMapAt_eq_core
     (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -66,7 +66,7 @@ lemma trivializationAt_tangent_continuousLinearMapAt_eq_core
   exact TangentBundle.continuousLinearMapAt_trivializationAt_eq_core
     (𝕜 := ℝ) (b₀ := (⟨α, (0 : E)⟩ : TangentBundle I M)) (b := q) hq_src
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tangentCoordChange_tangent_eq_triv
     (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) (V : E × E) :
@@ -76,7 +76,7 @@ lemma tangentCoordChange_tangent_eq_triv
   rw [trivializationAt_tangent_continuousLinearMapAt_eq_core (I := I) α q hq]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tangentCoordChange_tangent_symm_apply
     (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) (v_fiber : E × E) :
@@ -96,7 +96,7 @@ lemma tangentCoordChange_tangent_symm_apply
   rw [hsymm]
   exact e.continuousLinearMapAt_symmL hq_base v_fiber
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tangentCoordChange_tangent_geodesicVF
     (g : SmoothRiemannianMetric I M) (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -113,7 +113,7 @@ section ChartPushVFEq
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma achart_modelProd_f0_eq
     {f : ℝ → TangentBundle I M} {α : M}
     (hf0_proj : (f 0).proj = α) :
@@ -122,7 +122,7 @@ lemma achart_modelProd_f0_eq
   apply achart_modelProd_eq_of_proj_eq (I := I)
   exact hf0_proj
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tangentCoordChange_tangent_f0_eq
     {f : ℝ → TangentBundle I M} {α : M}
     (hf0_proj : (f 0).proj = α) (q : TangentBundle I M) :
@@ -135,7 +135,7 @@ lemma tangentCoordChange_tangent_f0_eq
       (achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)) q
   rw [achart_modelProd_f0_eq (I := I) (f := f) (α := α) hf0_proj]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushVF_eq_geodesicVectorFieldChartFiber
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} (hf0_proj : (f 0).proj = α)
@@ -146,6 +146,7 @@ theorem chartPushVF_eq_geodesicVectorFieldChartFiber
   rw [tangentCoordChange_tangent_f0_eq (I := I) hf0_proj (f t)]
   exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f t) ht
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} (hf0_proj : (f 0).proj = α)
@@ -162,6 +163,7 @@ theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF
   rw [hpair]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushVF_eq_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} (hf0_proj : (f 0).proj = α)
@@ -173,7 +175,7 @@ theorem chartPushVF_eq_chartPhaseVF
   exact geodesicVectorFieldChartFiber_eq_chartPhaseVF (I := I) g α
     hf0_proj t ht
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma achart_modelProd_ft₀_eq
     {f : ℝ → TangentBundle I M} {α : M} {t₀ : ℝ}
     (hft₀_proj : (f t₀).proj = α) :
@@ -182,7 +184,7 @@ lemma achart_modelProd_ft₀_eq
   apply achart_modelProd_eq_of_proj_eq (I := I)
   exact hft₀_proj
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tangentCoordChange_tangent_ft₀_eq
     {f : ℝ → TangentBundle I M} {α : M} {t₀ : ℝ}
     (hft₀_proj : (f t₀).proj = α) (q : TangentBundle I M) :
@@ -195,7 +197,7 @@ lemma tangentCoordChange_tangent_ft₀_eq
       (achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)) q
   rw [achart_modelProd_ft₀_eq (I := I) (f := f) (α := α) (t₀ := t₀) hft₀_proj]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushVF_eq_geodesicVectorFieldChartFiber_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
@@ -206,6 +208,7 @@ theorem chartPushVF_eq_geodesicVectorFieldChartFiber_at
   rw [tangentCoordChange_tangent_ft₀_eq (I := I) (t₀ := t₀) hft₀_proj (f s)]
   exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f s) hs
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
@@ -222,6 +225,7 @@ theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF_at
   rw [hpair]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushVF_eq_chartPhaseVF_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
@@ -239,6 +243,7 @@ section EventualChartPhase
 
 variable [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {α : M}
     {f : ℝ → TangentBundle I M}
@@ -270,6 +275,7 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF
   rw [hreplace] at htD
   exact htD
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     {g : SmoothRiemannianMetric I M} {α : M}
     {f : ℝ → TangentBundle I M}
@@ -319,6 +325,7 @@ section UnconditionalBridge
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedFlow_eq_witness_curve_eventually_unconditional
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {γ : ℝ → M}
@@ -339,6 +346,7 @@ theorem chartPushedFlow_eq_witness_curve_eventually_unconditional
     (I := I) (g := g) (p := p) (v_chart := v_chart)
     (γ := γ) (f := f) hproj hf0 hf_int_at0 hd
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedFlow_eq_maximalGeodesicChosenCurve_eventually_unconditional
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {t₁ : ℝ} (ht₁ : t₁ ∈ maximalGeodesicInterval (I := I) g p v)

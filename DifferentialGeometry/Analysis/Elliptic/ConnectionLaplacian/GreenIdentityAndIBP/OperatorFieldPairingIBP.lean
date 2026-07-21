@@ -26,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Inner_covGrad_appCc_eq_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (T : SmoothCcTensor g 0 (s + 1)) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)

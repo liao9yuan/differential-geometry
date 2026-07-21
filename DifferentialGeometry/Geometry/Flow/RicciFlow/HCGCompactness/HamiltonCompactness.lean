@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCo
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 

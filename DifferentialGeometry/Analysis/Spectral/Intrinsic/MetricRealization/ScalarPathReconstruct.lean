@@ -33,7 +33,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -201,6 +201,7 @@ lemma scalarSpec_chart
 
 
 
+omit [BoundarylessManifold I M] in
 lemma scalarMode_smooth
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -227,6 +228,8 @@ lemma scalarMode_smooth
   exact ht.mul hx
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_two_sq
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) :
@@ -239,6 +242,8 @@ private lemma weight_two_sq
     Real.rpow_two]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_le_sqrt_wt
     (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 0) (p : ℝ) {v C : ℝ}
@@ -263,6 +268,8 @@ private lemma abs_le_sqrt_wt
   rwa [← hW_def]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_mul_tail
     (g : SmoothRiemannianMetric I M) (p : ℝ)
     (C : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ)
@@ -400,6 +407,8 @@ omit [BoundarylessManifold I M] in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem prodMode_majorant
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     (g : SmoothRiemannianMetric I M)

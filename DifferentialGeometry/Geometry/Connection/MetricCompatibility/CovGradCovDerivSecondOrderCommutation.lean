@@ -22,7 +22,7 @@ open Tensor0SNabla
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,6 +69,8 @@ def secondOrderChristoffelResidual
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma secondOrderChristoffelResidual_def
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -90,6 +92,8 @@ lemma secondOrderChristoffelResidual_def
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma nablaTensorCurvSec_def
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -115,6 +119,8 @@ variable {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ 
 omit [CompactSpace M] [I.Boundaryless] in
 
 omit [FiniteDimensional ℝ F] [ContMDiffVectorBundle ∞ F 𝒱 I] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma thirdOrder_commutation_abstract
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I F 𝒱)
@@ -193,6 +199,7 @@ end AbstractThirdOrder
 section Reductions
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -284,6 +291,7 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
   rw [cov_toFun_sub nab h1 h2]
   simp only [ContinuousLinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curry_covApply_unitGradFieldGen_eq_abstractHess
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -318,6 +326,7 @@ lemma curry_covApply_unitGradFieldGen_eq_abstractHess
     ((LeviCivita (I := I) g).toFun w y (B y))]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -483,6 +492,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
   simp only [two_smul]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_covDeriv_leadingSlot_secondOrder_commutation
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}

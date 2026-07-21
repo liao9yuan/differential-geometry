@@ -10,7 +10,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -46,18 +45,21 @@ open DifferentialGeometry.Integral.Connection Tensor0SBundle
 open DifferentialGeometry.PDE.RicciFlow (iterCov_realizes)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [I.Boundaryless]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
 
 
-theorem covStep_domDomCongr {s s' : ℕ} (gRef : SmoothRiemannianMetric I M)
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem covStep_domDomCongr [FiniteDimensional Real E] {s s' : ℕ}
+    (gRef : SmoothRiemannianMetric I M)
     (e : Fin s ≃ Fin s')
     (Z : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -79,7 +81,9 @@ theorem covStep_domDomCongr {s s' : ℕ} (gRef : SmoothRiemannianMetric I M)
 
 
 
+omit [Module.Finite ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem totalNabla0SRealizes_unique {s : ℕ}
+    [FiniteDimensional Real E]
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s}
@@ -113,7 +117,11 @@ def shiftEquiv (r : ℕ) : (m : ℕ) → Fin ((r + 1) + m) ≃ Fin (r + (m + 1))
 
 
 
-theorem iterCov_shift (gRef : SmoothRiemannianMetric I M) {r : ℕ}
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_shift [FiniteDimensional Real E]
+    (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r) (m : ℕ) :
     iterCov (I := I) gRef r T (m + 1) =
@@ -135,7 +143,11 @@ def frontExtendIter {s s' : ℕ} (e : Fin s ≃ Fin s') : (m : ℕ) → Fin (s +
 
 
 
-theorem iterCov_domDomCongr {s s' : ℕ} (gRef : SmoothRiemannianMetric I M)
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_domDomCongr [FiniteDimensional Real E] {s s' : ℕ}
+    (gRef : SmoothRiemannianMetric I M)
     (e : Fin s ≃ Fin s')
     (Y : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (m : ℕ) :
@@ -152,7 +164,11 @@ theorem iterCov_domDomCongr {s s' : ℕ} (gRef : SmoothRiemannianMetric I M)
       rw [iterCov_succ, ih, covStep_domDomCongr, ← iterCov_succ]
 
 
-theorem normSq0S_iterCov_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem normSq0S_iterCov_domDomCongr [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) {s s' : ℕ} (e : Fin s ≃ Fin s')
     (Y : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (m : ℕ) (x : M)
@@ -172,7 +188,11 @@ theorem normSq0S_iterCov_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Id
 
 
 
-theorem normSq0S_iterCov_shift {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem normSq0S_iterCov_shift [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r) (m : ℕ) (x : M)
@@ -193,14 +213,21 @@ theorem normSq0S_iterCov_shift {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-theorem iterCov_one (gRef : SmoothRiemannianMetric I M) {r : ℕ}
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_one [FiniteDimensional Real E]
+    (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r) :
     iterCov (I := I) gRef r T 1 = covStep (I := I) gRef r T := rfl
 
 
 
-theorem iterCov_product_one {s q : ℕ} (gRef : SmoothRiemannianMetric I M)
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_product_one [FiniteDimensional Real E] {s q : ℕ}
+    (gRef : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
     (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -230,7 +257,9 @@ theorem iterCov_product_one {s q : ℕ} (gRef : SmoothRiemannianMetric I M)
 
 
 
-theorem sqrt_normSq0S_add_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [IsManifold I 2 M] in
+theorem sqrt_normSq0S_add_le [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) {s : ℕ} {x : M}
     (u v : Tensor0SSpace s I x)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -252,7 +281,11 @@ theorem sqrt_normSq0S_add_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-theorem iterCov_product_sqrtNormSq_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv : MetricInverseInBasis_gen (I := I) gRef x basis (identityInvMetric (Idx := Idx)))
@@ -374,7 +407,9 @@ theorem iterCov_product_sqrtNormSq_le {Idx : Type*} [Fintype Idx] [DecidableEq I
 
 
 
-theorem smulByFun_eq_product {q : ℕ} (φ : M → Real) (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
+omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [IsManifold I 2 M] in
+theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
+    (φ : M → Real) (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
     (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) q) :
     tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -411,7 +446,11 @@ theorem smulByFun_eq_product {q : ℕ} (φ : M → Real) (hφ : ContMDiff I 𝓘
 
 
 
-theorem iterCov_smulF_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem iterCov_smulF_le [FiniteDimensional Real E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv : MetricInverseInBasis_gen (I := I) gRef x basis (identityInvMetric (Idx := Idx)))

@@ -37,7 +37,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -58,6 +58,8 @@ theorem differentiableOn_and_deriv_eq_of_hasDerivWithinAt_Ici
   exact (h_within t ht).derivWithin (hopen.uniqueDiffWithinAt ht)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricci_flow_pde_at_zero
     (g_fam : ℝ → SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (x : M)
     (v w : TangentSpace I x)

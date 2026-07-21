@@ -14,7 +14,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) 
   ⟨Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff,
     Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] lemma laplacianOfChartPOU_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
@@ -51,6 +52,7 @@ noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α 
         (laplacianOfChartPOU (I := I) (M := M) g α)
         (H1ComplToLp (I := I) (M := M) g u_h)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h =
@@ -63,6 +65,7 @@ lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
             (laplacianOfChartPOU (I := I) (M := M) g α)
             (H1ComplToLp (I := I) (M := M) g u_h) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     leibnizCompensatedSource (I := I) (M := M) g α

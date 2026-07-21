@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRe
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -664,6 +663,7 @@ theorem coordCommAt
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciEvolCore
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -742,6 +742,7 @@ theorem ricciEvolCore
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -795,6 +796,7 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
 
 
 
+omit [SigmaCompactSpace M] in
 theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

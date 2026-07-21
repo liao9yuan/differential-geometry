@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerVariationalIntegralForm
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -78,6 +78,7 @@ theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     exact resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g ⟨w_lift, hw_lift⟩
   rw [h_LHS, h_RHS]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -198,6 +199,7 @@ theorem integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
   rw [← h_LHS_integral, ← h_RHS_integral]
   exact h_abs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -219,6 +221,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
   exact integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
     (I := I) (M := M) g hw_lift w
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (w : SmoothScalar g) :
@@ -363,6 +366,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_density
   exact integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
     (I := I) (M := M) g φ hu_h hvar_id w
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_gradInner_oneSubLap_contMDiff_eq_integral_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -383,6 +387,7 @@ theorem integral_gradInner_oneSubLap_contMDiff_eq_integral_preimage
   exact integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (I := I) (M := M) g φ hw_lift h_witness ⟨w, hw⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_grad_inner_oneSubLap_smooth_pointwise
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (w : SmoothScalar g) :
@@ -456,6 +461,7 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
   rw [← h_LHS_eq, ← h_RHS_eq]
   exact h_main
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_gradInner_oneSubLap_contMDiffMap_eq_integral_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

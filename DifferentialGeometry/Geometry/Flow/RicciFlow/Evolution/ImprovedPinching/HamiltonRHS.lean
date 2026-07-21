@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Q
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -18,12 +17,11 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -61,7 +59,9 @@ abbrev PinchEvolOn
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_setup
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -150,7 +150,9 @@ def ricciGradCoupleSq
 
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_inner
+    [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq : Real -> M -> Real)
@@ -210,7 +212,9 @@ theorem ricciGradCoupleSq_exp_inner
 
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciMixed_eq_gradNorm
+    [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -325,7 +329,9 @@ theorem ricciMixed_eq_gradNorm
 
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciMixed_eq_tfGrad
+    [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -464,7 +470,9 @@ theorem ricciMixed_eq_tfGrad
 
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_mixed
+    [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq : Real -> M -> Real)
@@ -567,7 +575,9 @@ def pinchBookRHS
       pinchReactTerm scalar ricciNormSq Q epsilon t x
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchDrift_exp
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
@@ -661,7 +671,10 @@ theorem pinchDrift_exp
 
 
 
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 1 M] in
 theorem pinchRHS_eq_book_of_parts
+    [FiniteDimensional Real E]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
       coupleSq Q : Real -> M -> Real)
@@ -747,7 +760,9 @@ theorem pinchRHS_eq_book_of_parts
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchRHS_eq_book
+    [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
@@ -789,7 +804,9 @@ theorem pinchRHS_eq_book
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_book_of_couple
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -851,7 +868,9 @@ theorem pinchEvol_book_of_couple
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_book_of_mixed
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -940,7 +959,9 @@ theorem pinchEvol_book_of_mixed
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_sec
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]

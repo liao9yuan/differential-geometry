@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ c : ℝ, 0 ≤ c ∧
@@ -80,6 +81,7 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict
@@ -150,6 +152,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M) {f : ι → EuclN → ℝ}
     (hf : ∀ i, f i =ᵐ[(volume : Measure EuclN).restrict
@@ -222,6 +225,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
 
 section MainBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -300,6 +304,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
           congr 2
           ring
 
+omit [CompleteSpace E] in
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
@@ -384,6 +389,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
 
 end MainBoundUnconditional
 
+omit [CompleteSpace E] in
 private lemma diffRHSHead_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -413,6 +419,7 @@ private lemma diffRHSHead_ne_top
   · exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (h_iter (2 + K) m (Fin.init l)))
 
+omit [CompleteSpace E] in
 private lemma rhsZeroAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -464,6 +471,7 @@ private lemma rhsZeroAggregate_ne_top
       (cutoffPartialLpLimit_memWkp (I := I) (M := M)
         g r s i α P l K h_pou)
 
+omit [CompleteSpace E] in
 theorem diffRHSAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

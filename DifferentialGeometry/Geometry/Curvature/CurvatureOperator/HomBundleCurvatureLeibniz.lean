@@ -46,6 +46,8 @@ omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [∀ (x : M), IsTopo
 local notation "covHom" =>
   homBundleCovariantDerivativeGen I M E_U U F V
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [CompleteSpace E_U] [FiniteDimensional ℝ F] [CompleteSpace F] [ContMDiffVectorBundle ∞ F V I] in
 lemma covApply_cov_V_pairedSection_eq
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -77,6 +79,8 @@ lemma covApply_cov_V_pairedSection_eq
   rw [hkey]
   abel
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [CompleteSpace E_U] [FiniteDimensional ℝ F] [CompleteSpace F] [ContMDiffVectorBundle ∞ F V I] in
 lemma cov_V_toFun_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -106,6 +110,8 @@ lemma cov_V_toFun_pairedSection_apply
       cov_V.toFun (fun y => σ y (Y y)) x v from rfl, hkey]
   abel
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [CompleteSpace E_U] [CompleteSpace F] in
 lemma cov_V_toFun_covApply_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]
@@ -164,6 +170,8 @@ lemma cov_V_toFun_covApply_pairedSection_apply
       cov_V_toFun_pairedSection_apply I M E_U U F V cov_U cov_V hτ_at hcovZY v]
   abel
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [CompleteSpace E_U] [CompleteSpace F] in
 lemma riemannSec_cov_V_pairedSection_eq
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]
@@ -197,6 +205,8 @@ lemma riemannSec_cov_V_pairedSection_eq
   simp only [covApply_apply, ContinuousLinearMap.sub_apply, map_sub]
   abel
 
+omit [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [CompleteSpace E_U] [CompleteSpace F] in
 theorem riemannSec_homBundleGen_apply_eq
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]

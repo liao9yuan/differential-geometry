@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -33,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem correction_eq_contr
     (g : SmoothRiemannianMetric I M) (a x : M) (Y : E)
     (v : TangentSpace I x) :
@@ -88,6 +89,7 @@ theorem correction_eq_contr
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem const_cov_eq_contr
     (g : SmoothRiemannianMetric 𝓘(Real, E) E) (a z v w : E) :
     (leviCivitaConnectionOfMetric (I := 𝓘(Real, E)) g

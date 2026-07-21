@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInput
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -42,6 +41,8 @@ noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
   (normalChartAt (I := I) g p).source.indicator
     (fun q => f (normalChartAt (I := I) g p q))
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalBump_of_mem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source) :
@@ -49,6 +50,8 @@ noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
   unfold normalBump
   exact indicator_of_mem hq _
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalBump_of_notMem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∉ (normalChartAt (I := I) g p).source) :
@@ -57,6 +60,8 @@ noncomputable def normalBump (g : SmoothRiemannianMetric I M) (p : M)
   exact indicator_of_notMem hq _
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalBump_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) (q : M) : normalBump g p f q ∈ Set.Icc (0 : Real) 1 := by
   by_cases hq : q ∈ (normalChartAt (I := I) g p).source
@@ -67,6 +72,8 @@ theorem normalBump_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
 
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalBump_one (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : E)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source)
@@ -170,6 +177,8 @@ noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
     f (g.inner p (normalChartAt (I := I) g p q)
       (normalChartAt (I := I) g p q))
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem quadNormal_of_mem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source) :
@@ -179,6 +188,8 @@ noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
   unfold quadNormal
   exact indicator_of_mem hq _
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem quadNormal_of_notMem (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∉ (normalChartAt (I := I) g p).source) :
@@ -187,6 +198,8 @@ noncomputable def quadNormal (g : SmoothRiemannianMetric I M) (p : M)
   exact indicator_of_notMem hq _
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem quadNormal_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) (q : M) :
     quadNormal g p f q ∈ Set.Icc (0 : Real) 1 := by
@@ -198,6 +211,8 @@ theorem quadNormal_mem_Icc (g : SmoothRiemannianMetric I M) (p : M)
 
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem quadNormal_one (g : SmoothRiemannianMetric I M) (p : M)
     (f : ContDiffBump (0 : Real)) {q : M}
     (hq : q ∈ (normalChartAt (I := I) g p).source)
@@ -318,6 +333,8 @@ noncomputable def normalRaw (g : SmoothRiemannianMetric I M) (p : ι → M)
   else (1 - normalBump g (p i0) cut q) * normalBump g (p i) (f i) q
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalRaw_same (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E)) (i0 : ι) :
     normalRaw g p cut f i0 i0 = normalBump g (p i0) (f i0) := by
@@ -326,6 +343,8 @@ noncomputable def normalRaw (g : SmoothRiemannianMetric I M) (p : ι → M)
 
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_of_ne (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E)) (i0 i : ι)
     (hi : i ≠ i0) :
@@ -350,6 +369,8 @@ theorem normalRaw_contMDiff (g : SmoothRiemannianMetric I M) (p : ι → M)
       (normalBump_contMDiff g (p i) (f i) (hf i))
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_nonneg (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 i : ι) (q : M) : 0 ≤ normalRaw g p cut f i0 i q := by
@@ -362,6 +383,8 @@ theorem normalRaw_nonneg (g : SmoothRiemannianMetric I M) (p : ι → M)
 
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_tsupport (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 i : ι) :
@@ -378,6 +401,8 @@ theorem normalRaw_tsupport (g : SmoothRiemannianMetric I M) (p : ι → M)
 
 
 
+omit [T2Space M] in
+omit [NeZero (Module.finrank Real E)] in
 theorem normalRaw_readout (g : SmoothRiemannianMetric I M) (p : ι → M)
     (cut : ContDiffBump (0 : E)) (f : ι → ContDiffBump (0 : E))
     (i0 β i : ι) {z : E}

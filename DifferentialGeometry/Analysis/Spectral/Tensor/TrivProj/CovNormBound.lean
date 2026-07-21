@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -71,6 +73,7 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
   rw [h_bridge, h_round] at h_T
   exact h_T
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -129,6 +132,8 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
     _ = (K * C') *
           tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b := h_assoc
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -142,6 +147,7 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

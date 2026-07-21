@@ -18,7 +18,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,7 +32,7 @@ section UniformConfinement
 variable [I.Boundaryless] [CompleteSpace E]
 
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [CompleteSpace E] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [CompleteSpace E] in
 lemma exists_uniform_orbit_in_inner_ball
     (p : M)
     {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
@@ -138,6 +138,7 @@ section UniformChartCoordExistence
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlow_uniform_orbit
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -181,6 +182,7 @@ section UniformChartPhaseODE
 variable [I.Boundaryless] [CompleteSpace E]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 lemma orbit_hasDerivAt_chartPhaseVF_uniform
     (g : SmoothRiemannianMetric I M) (p : M)
     {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
@@ -247,6 +249,7 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
   rw [h_eq] at hd_cutoff
   exact hd_cutoff
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -341,6 +344,8 @@ section ManifoldIdentification
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma per_v_orbit_proj_eq_lift_proj_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
@@ -452,6 +457,8 @@ section HeadlineUniformExistence
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_uniform_existence_interval
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

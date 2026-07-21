@@ -135,6 +135,8 @@ private theorem hjoint_add
     (E := fun z : M => TensorRSSpace r 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem symmS_eq_self_local
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (hS : ∀ (x : M) (v w : TangentSpace I x),
@@ -166,6 +168,7 @@ private theorem symmS_eq_self_local
 
 omit [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chartLie_symm
     (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -202,6 +205,7 @@ private theorem chartLie_symm
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private theorem lieSlope_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

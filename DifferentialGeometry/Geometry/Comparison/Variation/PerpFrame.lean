@@ -291,6 +291,8 @@ section PerpFrame
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -459,6 +461,8 @@ theorem perp_to_velocity_preserved_of_parallel
   rw [hft]
   exact hPerp0
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -555,6 +559,8 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
         from rfl]
     exact hperp
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_frame
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ) {L : ℝ} (hL : 0 < L)
@@ -586,6 +592,8 @@ theorem exists_parallel_frame
   rw [hconst, hV0 i, hV0 j]
   exact hON0 i j
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] in
 theorem parallel_on_frame_perp_to_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
@@ -616,6 +624,7 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
     (hX : IsParallelChart (I := I) g (γ t) γ
@@ -771,6 +780,7 @@ theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
 
 set_option linter.unusedVariables false in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_on
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (_hL : 0 < L)
@@ -938,6 +948,7 @@ theorem perp_to_velocity_preserved_on
   rw [hft]
   exact hPerp0
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem velocity_chartRepAt_differentiableAt
     (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     DifferentiableAt ℝ
@@ -981,6 +992,7 @@ theorem velocity_chartRepAt_differentiableAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)

@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,6 +77,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb_baseRS _).symm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -92,6 +93,7 @@ private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (I := I) r s g α T X b]
   abel
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (X : Π b' : M, TangentSpace I b')
@@ -117,6 +119,9 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
   rw [tensorRSIntrinsicChartCLM_apply_eq_cov
     (I := I) r s g α (fun b' => S.toSection b') X b]
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -148,6 +153,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
       (I := I) (M := M) g r s α S.toSection X hb
   rw [hcov_eq]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -171,6 +177,7 @@ theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (I := I) (M := M) g r s α S hb (trivToE (I := I) α b v)]
   rw [trivFromE_trivToE (I := I) α hb_base v]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem mfderiv_tensorTrivProj_apply_eq_chart_pushforward_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

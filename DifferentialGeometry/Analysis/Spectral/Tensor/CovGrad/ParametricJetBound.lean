@@ -38,6 +38,8 @@ omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem joint_rfns_cont
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}
@@ -108,6 +110,8 @@ theorem joint_rfns_cont
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_iter_joint
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -131,6 +135,8 @@ theorem covGrad_iter_joint
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem joint_jet_rfns
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}
@@ -199,6 +205,8 @@ private theorem joint_small
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem joint_jet_small
     (g₀ : SmoothRiemannianMetric I M) (r s p : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S : Set ℝ} {t₀ : ℝ}
@@ -255,6 +263,8 @@ theorem joint_jet_small
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem joint_jet_bdd
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) {S K : Set ℝ}

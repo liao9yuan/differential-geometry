@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -61,6 +60,8 @@ private theorem sum_swap_four_local
                   rw [Finset.sum_comm]
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connSmoothInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -70,6 +71,8 @@ private theorem connSmoothInf
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem isMetricCompatibleSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -102,6 +105,7 @@ private def nabla2RicField
 
 
 
+omit [I.Boundaryless] in
 theorem coordNab2Ric_eq_nabla2RicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -484,6 +488,7 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
 
 
 
+omit [I.Boundaryless] in
 private theorem coordScalarRmTrace_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -573,6 +578,7 @@ private theorem coordScalarRmTrace_center
 
 
 
+omit [I.Boundaryless] in
 private theorem coordScalarTraceDerivRHS_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

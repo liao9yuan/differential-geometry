@@ -32,7 +32,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -48,7 +47,7 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -75,6 +74,7 @@ def vec {g : SmoothRiemannianMetric I M}
     TangentSpace I (base (I := I) (M := M) p) :=
   (p.1).2
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem unit {g : SmoothRiemannianMetric I M}
     (p : MetricUnitTangent (I := I) (M := M) g) :
@@ -82,6 +82,7 @@ theorem unit {g : SmoothRiemannianMetric I M}
       (vec (I := I) (M := M) p) (vec (I := I) (M := M) p) = 1 :=
   p.2
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem base_mk {g : SmoothRiemannianMetric I M} {x : M}
     {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
@@ -90,6 +91,7 @@ theorem base_mk {g : SmoothRiemannianMetric I M} {x : M}
         MetricUnitTangent (I := I) (M := M) g) = x :=
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
     {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
@@ -139,6 +141,7 @@ def time {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : Real :=
   q.1.1.1
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem time_mem {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
@@ -162,6 +165,7 @@ def vec {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     TangentSpace I (base (I := I) (M := M) q) :=
   (bundlePoint (I := I) (M := M) q).2
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem unit {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
@@ -170,6 +174,7 @@ theorem unit {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
       (vec (I := I) (M := M) q) (vec (I := I) (M := M) q) = 1 :=
   q.2
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem time_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     {t : Real} {ht : t ∈ K} {x : M} {v : TangentSpace I x}
@@ -179,6 +184,7 @@ theorem time_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
         MetricUnitTangentTimeSlab (I := I) (M := M) G K) = t :=
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem bundlePoint_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     {t : Real} {ht : t ∈ K} {x : M} {v : TangentSpace I x}
@@ -189,6 +195,7 @@ theorem bundlePoint_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
       (⟨x, v⟩ : TangentBundle I M) :=
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem base_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     {t : Real} {ht : t ∈ K} {x : M} {v : TangentSpace I x}
@@ -198,6 +205,7 @@ theorem base_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
         MetricUnitTangentTimeSlab (I := I) (M := M) G K) = x :=
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp]
 theorem vec_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     {t : Real} {ht : t ∈ K} {x : M} {v : TangentSpace I x}
@@ -223,6 +231,7 @@ def eval02
     (v w : TangentSpace I x) : Real :=
   A (fun i : Fin 2 => if i = 0 then v else w)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 @[simp] theorem eval02_self
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -235,6 +244,7 @@ def eval02
   · simp [hi]
   · simp [hi]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem eval02_slots_eq
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -245,6 +255,7 @@ private theorem eval02_slots_eq
   funext i
   fin_cases i <;> simp [h0, h1]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem quad02_add_smul_eq
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -399,6 +410,7 @@ private theorem quad02_add_smul_eq
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem psd_null_left
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -439,6 +451,7 @@ theorem psd_null_left
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem psd_null_right
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -461,6 +474,7 @@ theorem psd_null_right
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricQuad_cont
     (g : SmoothRiemannianMetric I M) :
     Continuous (fun p : TangentBundle I M => g.inner p.proj p.2 p.2) := by
@@ -490,6 +504,7 @@ theorem metricQuad_cont
     (continuous_snd.comp hprod)
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricUnit_closed
     (g : SmoothRiemannianMetric I M) :
     IsClosed {p : TangentBundle I M | g.inner p.proj p.2 p.2 = 1} := by
@@ -852,6 +867,7 @@ theorem metricUnit_quadCont
   simpa [quad02, b, v] using hEval
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem tensor02_smul2
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -869,6 +885,7 @@ theorem tensor02_smul2
     mul_assoc, mul_comm, mul_left_comm] using hmap
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem metric_smul2
     (g : SmoothRiemannianMetric I M) {x : M}
     (a : Real) (v : TangentSpace I x) :

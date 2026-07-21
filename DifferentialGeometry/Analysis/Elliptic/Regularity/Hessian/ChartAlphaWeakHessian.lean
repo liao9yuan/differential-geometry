@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianChartAlphaWeakRaw
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -234,6 +234,7 @@ omit [NeZero (Module.finrank ℝ E)] in
           chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y := rfl
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E)) :
@@ -255,6 +256,7 @@ private lemma chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
   exact h_chris_cont.comp h_toE_cont.continuousOn h_maps
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_toE_symm_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E))

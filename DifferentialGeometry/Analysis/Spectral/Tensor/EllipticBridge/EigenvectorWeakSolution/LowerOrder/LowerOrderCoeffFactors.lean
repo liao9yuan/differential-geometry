@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -59,6 +60,8 @@ def principalRotationFactor
         chartInvGramEuclid (I := I) g α k l y *
       euclidPartial (E := E) l (gramInvEntry (I := I) (M := M) g r s α Q P₀) y
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma principalRotationFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -71,6 +74,7 @@ lemma principalRotationFactor_contDiffOn
     (euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma covDerivLowerOrderTerm_pouSmul_eqOn_coeffFactors
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -107,6 +111,7 @@ def weightedGradFactor
         covDerivLowerOrderCoeff (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2 y *
       covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -123,6 +128,7 @@ lemma weightedGradFactor_contDiffOn
       g r s α k P.1 p.1 P.2 p.2)).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma weightedGradCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -152,6 +158,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn_section
   rw [weightedGradFactor]
   ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -233,6 +240,7 @@ lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     (differentiableAt_tensorChartComponent (I := I) (M := M) g r s wₙ α
       p.1 p.2 y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma euclidPartial_weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -257,6 +265,8 @@ def valuePartialFactor
         chartInvGramEuclid (I := I) g α k l y *
       lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ l Q y
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma valuePartialFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -281,6 +291,8 @@ def valueComponentFactor
             lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ l Q y) *
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2 y
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma valueComponentFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
@@ -296,6 +308,7 @@ lemma valueComponentFactor_contDiffOn
           g r s α P₀ l Q))).mul
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α k P.1 p.1 P.2 p.2)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (S : SmoothCcTensor g r s)

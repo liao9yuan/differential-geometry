@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -46,7 +45,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
@@ -63,6 +61,7 @@ def akAct {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real) (B : (Fin q → Idx) �
 
 
 
+omit [DecidableEq Idx] in
 theorem covStep_chr_convert {q : ℕ}
     (ext : (Fin q → Idx) → Idx → Real)
     (chrR chrK : Idx → Idx → Idx → Real)
@@ -147,6 +146,7 @@ theorem akSlotEquiv_natAdd {q : ℕ} (s : Fin (q + 1)) (i : Fin q) :
 
 
 
+omit [DecidableEq Idx] in
 theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
     (B : (Fin (q + 1) → Idx) → Real) (s : Fin (q + 1)) (n : Fin (q + 1 + 1) → Idx) :
     (∑ p : Idx, A ![n 0, Fin.tail n s, p] * B (Function.update (Fin.tail n) s p)) =
@@ -198,6 +198,7 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (F : ι → M → Real)
     (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
@@ -216,6 +217,7 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -255,6 +257,7 @@ theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
       Finset.sum_insert hbs]
 
 
+omit [DecidableEq Idx] in
 theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → (Fin r → Idx) → Real) :
     compL2 (fun n => ∑ i ∈ t, F i n) ≤ ∑ i ∈ t, compL2 (F i) := by
@@ -276,6 +279,7 @@ theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -355,6 +359,8 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCov_chr_convert {q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrR chrK : M → Idx → Idx → Idx → Real)
@@ -376,6 +382,7 @@ theorem iterCov_chr_convert {q : ℕ}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem claim2core {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrR chrK : M → Idx → Idx → Idx → Real)
@@ -516,6 +523,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem claim2_geom
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]

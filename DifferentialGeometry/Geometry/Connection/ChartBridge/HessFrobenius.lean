@@ -13,7 +13,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,8 @@ noncomputable def leviHessSec
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem hessSec_abs
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -88,6 +90,8 @@ private theorem hessSec_abs
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem hessSec_chart_comp
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -116,6 +120,7 @@ private theorem hessSec_chart_comp
 
 omit [NeZero (Module.finrank Real E)] in
 
+omit [SigmaCompactSpace M] in
 private theorem hessSec_norm_coord
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
@@ -166,6 +171,7 @@ private theorem hessSec_norm_coord
     hinv (leviHessSec (I := I) g f hf x)
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -240,6 +246,8 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
@@ -262,6 +270,8 @@ theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hessSec_normSq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :

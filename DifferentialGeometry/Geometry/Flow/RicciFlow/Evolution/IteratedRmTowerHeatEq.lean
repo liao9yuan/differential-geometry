@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.style.setOption false
@@ -86,12 +85,11 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -178,6 +176,8 @@ end Fields
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKNorm_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
@@ -226,7 +226,11 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKNormHeatAt
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -388,7 +392,11 @@ theorem nablaKNormHeatAt
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormHeatEquationOn_intrinsic
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -582,6 +590,7 @@ def iteratedRmCompDt
       covDerivStepDt (chrDt t x)
         (iteratedRmComp (I := I) frame chr base k t x)
 
+omit [DecidableEq Idx] in
 @[simp] theorem iteratedRmCompDt_zero
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -591,6 +600,7 @@ def iteratedRmCompDt
     (base baseDt : Real → M → (Fin 4 → Idx) → Real) :
     iteratedRmCompDt (I := I) frame chr chrDt base baseDt 0 = baseDt := rfl
 
+omit [DecidableEq Idx] in
 theorem iteratedRmCompDt_succ
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -633,6 +643,7 @@ theorem iteratedRmCompDt_succ
 
 
 
+omit [DecidableEq Idx] in
 theorem iteratedRmComp_hasDerivWithinAt
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -698,6 +709,8 @@ section Nonneg
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormSqIntrinsic_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M) :

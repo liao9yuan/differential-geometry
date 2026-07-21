@@ -18,7 +18,7 @@ namespace IntrinsicSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,6 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable (g : SmoothRiemannianMetric I M)
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_finiteEigenComboHs_self_le (σ : ℝ)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
@@ -72,16 +74,19 @@ def spatialEigenProj (σ : ℝ) (N : ℕ) :
     exact norm_finiteEigenComboHs_self_le (I := I) (M := M) g σ
       (eigenIdxFinset (I := I) (M := M) g N) W)
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma spatialEigenProj_apply (σ : ℝ) (N : ℕ) (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     spatialEigenProj (I := I) (M := M) g σ N W =
       finiteEigenComboHs (I := I) (M := M) g (eigenIdxFinset (I := I) (M := M) g N) W.coeff σ :=
   rfl
 
+omit [BoundarylessManifold I M] in
 lemma norm_spatialEigenProj_le_one (σ : ℝ) (N : ℕ) :
     ‖spatialEigenProj (I := I) (M := M) g σ N‖ ≤ 1 := by
   unfold spatialEigenProj
   exact LinearMap.mkContinuous_norm_le _ (by norm_num) _
 
+omit [BoundarylessManifold I M] in
 lemma norm_spatialEigenProj_apply_le (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     ‖spatialEigenProj (I := I) (M := M) g σ N W‖ ≤ ‖W‖ := by
@@ -89,6 +94,7 @@ lemma norm_spatialEigenProj_apply_le (σ : ℝ) (N : ℕ)
   exact norm_finiteEigenComboHs_self_le (I := I) (M := M) g σ
     (eigenIdxFinset (I := I) (M := M) g N) W
 
+omit [BoundarylessManifold I M] in
 private lemma normSq_spatialEigenProj_sub_add (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     (∑ i ∈ eigenIdxFinset (I := I) (M := M) g N,
@@ -155,6 +161,7 @@ private lemma normSq_spatialEigenProj_sub_add (σ : ℝ) (N : ℕ)
         by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g N <;> simp [hi]
     _ = ‖W‖ ^ 2 := (tensorHs.norm_sq_eq_tsum (I := I) (M := M) W).symm
 
+omit [BoundarylessManifold I M] in
 lemma spatialEigenProj_tendsto (σ : ℝ) (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     Tendsto (fun N => spatialEigenProj (I := I) (M := M) g σ N W) atTop (𝓝 W) := by
   classical
@@ -193,11 +200,13 @@ def timeL2EigenProj (σ T : ℝ) (N : ℕ) :
       timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T :=
   (spatialEigenProj (I := I) (M := M) g σ N).compLpL 2 (timeMeasure T)
 
+omit [BoundarylessManifold I M] in
 lemma norm_timeL2EigenProj_le_one (σ T : ℝ) (N : ℕ) :
     ‖timeL2EigenProj (I := I) (M := M) g σ T N‖ ≤ 1 := by
   refine le_trans ?_ (norm_spatialEigenProj_le_one (I := I) (M := M) g σ N)
   exact ContinuousLinearMap.norm_compLpL_le (spatialEigenProj (I := I) (M := M) g σ N)
 
+omit [BoundarylessManifold I M] in
 lemma timeL2EigenProj_tendsto (σ T : ℝ) (x : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T) :
     Tendsto (fun N => timeL2EigenProj (I := I) (M := M) g σ T N x) atTop (𝓝 x) := by
   classical
@@ -266,6 +275,7 @@ lemma timeL2EigenProj_tendsto (σ T : ℝ) (x : timeL2 (tensorHs (I := I) (M := 
     exact Real.sqrt_sq (norm_nonneg _)
   exact tendsto_sub_nhds_zero_iff.mp (tendsto_zero_iff_norm_tendsto_zero.mpr hnorm0)
 
+omit [BoundarylessManifold I M] in
 theorem exists_timeL2EigenProjection (σ T : ℝ) :
     ∃ P : ℕ → (timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T →L[ℝ]
         timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T),

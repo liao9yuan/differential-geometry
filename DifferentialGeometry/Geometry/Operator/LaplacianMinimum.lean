@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.DerivativeTest
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -42,6 +41,7 @@ private noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) 
     TangentSpace I p :=
   TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p
 
+omit [FiniteDimensional ℝ E] in
 @[simp] private theorem tangentConstAt_self (x : M) (v : TangentSpace I x) :
     tangentConstAt (I := I) x v x = v := by
   unfold tangentConstAt
@@ -57,6 +57,7 @@ private noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) 
   rw [hL]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 private theorem mdifferentiableAt_tangentConstAt_self
     (x : M) (v : TangentSpace I x) :
     MDiffAt (T% (tangentConstAt (I := I) x v : (p : M) -> TangentSpace I p)) x := by
@@ -65,6 +66,7 @@ private theorem mdifferentiableAt_tangentConstAt_self
     (𝕜 := Real) (I := I) (x₀ := x) (p := x) v
     (mem_baseSet_trivializationAt E (TangentSpace I) x)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_real_eq_mfderiv
     (u : M -> Real) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) u x v =
@@ -100,6 +102,7 @@ private theorem deriv_deriv_nonneg_of_isLocalMin
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
     {F : E -> Real} {y : E}
     (hmin : IsLocalMin F y)
@@ -161,6 +164,7 @@ private theorem fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
   · rw [fderiv_zero_of_not_differentiableAt hD]
     exact le_rfl
 
+omit [FiniteDimensional ℝ E] in
 private theorem writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
     [I.Boundaryless]
     {f : M -> Real} {x p : M} {z : E}
@@ -188,6 +192,7 @@ private theorem writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
   rw [hpoint] at hdiff_within
   exact hdiff_within.differentiableAt hrange
 
+omit [FiniteDimensional ℝ E] in
 private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
     [I.Boundaryless]
     {f : M -> Real} {x p : M}
@@ -259,6 +264,7 @@ private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem mfderiv_eq_zero_at_spatial_min
     [I.Boundaryless]
     {f : M -> Real} {x : M}

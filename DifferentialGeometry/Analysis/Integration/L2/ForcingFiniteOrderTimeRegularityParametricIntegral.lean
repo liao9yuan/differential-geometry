@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -118,6 +118,7 @@ private theorem partialSnd_contMDiffOn_Icc_finiteOrder
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem hasDerivWithinAt_integral_param_Icc_finiteOrder
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞)
@@ -211,6 +212,7 @@ private theorem hasDerivWithinAt_integral_param_Icc_finiteOrder
       hmeas hbnd (integrable_const C) hlim
     simpa [hG'] using this
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem contDiffOn_integral_of_jointContMDiffOn_Icc_finiteOrder
     (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
     ∀ (N : ℕ) (f : M → ℝ → ℝ),
@@ -295,6 +297,7 @@ theorem clm_comm_iteratedDerivWithin_finiteOrder {V W : Type*} [NormedAddCommGro
     iteratedDerivWithin_eq_iteratedFDerivWithin]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem iteratedDerivWithin_integral_param_Icc_finiteOrder
     (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
     ∀ (j : ℕ) (f : M → ℝ → ℝ),

@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Scaling
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -26,7 +25,7 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -196,6 +195,7 @@ def paraSolution
     SolutionOn (I := I) (M := M) (paraInterval D τ R hR hτ) where
   base := paraFamily (I := I) S.base τ R hR
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem paraSolution_metric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -204,6 +204,7 @@ def paraSolution
       fun s => scaleMetric (I := I) R hR (S.base.metric (paraTime τ R s)) := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem paraSolution_connection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -214,6 +215,7 @@ def paraSolution
   simp [paraSolution, paraFamily, SolutionFamily.connection,
     DifferentialGeometry.Integral.Connection.lcConn_scaleMetric]
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem paraSolution_ricci
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -224,6 +226,7 @@ def paraSolution
   simp [paraSolution, paraFamily, SolutionFamily.ricci, metricRicci,
     DifferentialGeometry.Integral.Connection.metricRicci, DifferentialGeometry.Integral.Connection.metricCov, DifferentialGeometry.Integral.Connection.lcConn_scaleMetric]
 
+omit [SigmaCompactSpace M] in
 private theorem metricRm04_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M) :
     DifferentialGeometry.Integral.Connection.metricRm04 (I := I) (M := M) (scaleMetric (I := I) c hc g) x =
@@ -237,6 +240,7 @@ private theorem metricRm04_scaleMetric
   simp [DifferentialGeometry.Integral.Connection.metricRm04, DifferentialGeometry.Integral.Connection.metricCov, scaleMetric_inner,
     DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, smul_eq_mul]
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem paraSolution_rm04
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -249,6 +253,7 @@ private theorem metricRm04_scaleMetric
 
 
 
+omit [SigmaCompactSpace M] in
 theorem paraRmNormSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -266,6 +271,7 @@ theorem paraRmNormSq
     Tensor0SBundle.normSq0S_scale, Tensor0SBundle.normSq0S_smul]
   field_simp [ne_of_gt hR]
 
+omit [SigmaCompactSpace M] in
 @[simp] private theorem paraNablaRic_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -284,6 +290,7 @@ theorem paraRmNormSq
   · have h := congrFun (paraSolution_ricci (I := I) S τ R hR hτ) s
     simp [SolutionOn.ricci] at h ⊢
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metricTensorField_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M) :
     metricTensorField (I := I) (scaleMetric (I := I) c hc g) x =
@@ -291,6 +298,7 @@ private theorem metricTensorField_scaleMetric
   ext v
   simp [metricTensorField_apply, scaleMetric_inner, smul_eq_mul]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metricTracePair0SAt_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {x : M} (B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -321,6 +329,7 @@ private theorem metricTracePair0SAt_scaleMetric
   intro j _hj
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem paraSolution_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -333,6 +342,7 @@ private theorem metricTracePair0SAt_scaleMetric
     DifferentialGeometry.Integral.Connection.metricCov, DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
     metricTracePair0SAt_scaleMetric]
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem paraSolution_ricciNorm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -352,6 +362,7 @@ private theorem metricTracePair0SAt_scaleMetric
     (normSq0S_two_scale (I := I) R hR (S.family.metric (paraTime τ R s))
       (x := x) (A := S.ricci (paraTime τ R s) x))
 
+omit [SigmaCompactSpace M] in
 private theorem paraRicciNormGrad_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -401,6 +412,7 @@ private theorem paraRicciNormGrad_eq
             (ricciNorm (I := I) S (paraTime τ R s)) x := by
           simp [smul_smul, mul_comm]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem lcConnectionSmooth
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivative
@@ -412,6 +424,7 @@ private theorem lcConnectionSmooth
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricFamilySmooth_para
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -513,6 +526,7 @@ theorem metricFamilySmooth_para
       smul_eq_mul] using hscale
 
 
+omit [SigmaCompactSpace M] in
 theorem connectionFamilySmooth_para
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -527,6 +541,7 @@ theorem connectionFamilySmooth_para
       ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
 
+omit [SigmaCompactSpace M] in
 theorem leviCivita_para
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -544,6 +559,7 @@ theorem leviCivita_para
         (I := I) ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
 
+omit [SigmaCompactSpace M] in
 theorem metricVariation_para
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -580,6 +596,7 @@ theorem metricVariation_para
         field_simp [ne_of_gt hR]))
 
 
+omit [SigmaCompactSpace M] in
 theorem paraSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -737,6 +754,7 @@ theorem paraSol
     rw [htotal]
     exact hscaled
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 theorem paraBack_para_metric
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (t : Real) :
@@ -748,6 +766,7 @@ theorem paraBack_para_metric
   rw [paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
   rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hR), one_mul]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem paraBack_para_connection
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (t : Real) :
@@ -757,6 +776,7 @@ theorem paraBack_para_connection
     DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, paraTime_back (τ := τ) (R := R) (t := t)
       (ne_of_gt hR)]
 
+omit [SigmaCompactSpace M] in
 theorem paraBack_para_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (t : Real) :
@@ -766,6 +786,7 @@ theorem paraBack_para_ricci
     DifferentialGeometry.Integral.Connection.metricRicci, DifferentialGeometry.Integral.Connection.metricCov, DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
     paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 theorem para_paraBack_metric
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (s : Real) :
@@ -777,6 +798,7 @@ theorem para_paraBack_metric
   rw [paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
   rw [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hR), one_mul]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem para_paraBack_connection
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (s : Real) :
@@ -786,6 +808,7 @@ theorem para_paraBack_connection
     DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, paraBack_time (τ := τ) (R := R) (s := s)
       (ne_of_gt hR)]
 
+omit [SigmaCompactSpace M] in
 theorem para_paraBack_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (s : Real) :
@@ -807,6 +830,7 @@ def ParaTracefreeNormSqDisplay
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem para_tracefree_ratio_invariant
     {scalar scalarR q qR : Real -> M -> Real}
     {τ R : Real} (hR : 0 < R)

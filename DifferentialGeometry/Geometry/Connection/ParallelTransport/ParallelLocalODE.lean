@@ -18,8 +18,8 @@ namespace Geometry
 namespace Riemannian
 namespace Variation
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -29,6 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ}
@@ -99,6 +100,7 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
   · exact continuousOn_const
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -125,6 +127,7 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   exact htmax_max ht
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem parallel_picard_lindelof_data
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -134,6 +137,7 @@ theorem parallel_picard_lindelof_data
     True := trivial
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem parallel_local_existence_step [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {aa bb : ℝ}
@@ -254,6 +258,7 @@ private theorem parallel_local_existence_step [I.Boundaryless]
     show Y t_in = w₀; exact this
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_local_existence_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -758,6 +763,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
     rw [if_pos (le_refl _)]; exact hY_L_init
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)

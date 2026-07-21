@@ -46,6 +46,8 @@ def metricTransportResidual
             (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
           (mfderiv I I (Φ_fam t : M → M) x w))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem variational_flow_flat_pairing_hasDerivAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -123,6 +125,8 @@ theorem variational_flow_flat_pairing_hasDerivAt
     ring
   rwa [hval] at h_total
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem variational_flow_flat_pairing_hasDerivWithinAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

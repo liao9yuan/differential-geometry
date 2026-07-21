@@ -38,7 +38,7 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -46,6 +46,8 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator
@@ -64,6 +66,7 @@ private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
   rw [hS, hT, h i]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by

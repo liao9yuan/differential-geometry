@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -27,10 +26,12 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 def compL2Sq {r : ℕ} (T : (Fin r → Idx) → Real) : Real :=
   ∑ idx : Fin r → Idx, (T idx) ^ 2
 
+omit [DecidableEq Idx] in
 theorem compL2Sq_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2Sq T :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
 
+omit [DecidableEq Idx] in
 private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
     (∑ f : Fin (p + 1) → Idx, F f) =
       ∑ g : Fin p → Idx, ∑ c : Idx, F (Fin.snoc g c) := by
@@ -47,6 +48,7 @@ private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
     (fun f => by simp only [e, Equiv.coe_fn_mk, Fin.snoc_init_self])
 
 
+omit [DecidableEq Idx] in
 private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real) :
     (∑ idx : Fin (p + q) → Idx, F idx) =
       ∑ a : Fin p → Idx, ∑ b : Fin q → Idx, F (Fin.append a b) := by
@@ -75,6 +77,7 @@ private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real
 
 
 
+omit [DecidableEq Idx] in
 theorem compL2Sq_contrTail_le {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     compL2Sq (contrTail A B) ≤ compL2Sq A * compL2Sq B := by
@@ -108,14 +111,17 @@ theorem compL2Sq_contrTail_le {p q : ℕ}
 
 def compL2 {r : ℕ} (T : (Fin r → Idx) → Real) : Real := Real.sqrt (compL2Sq T)
 
+omit [DecidableEq Idx] in
 theorem compL2_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2 T :=
   Real.sqrt_nonneg _
 
+omit [DecidableEq Idx] in
 theorem compL2_sq {r : ℕ} (T : (Fin r → Idx) → Real) : compL2 T ^ 2 = compL2Sq T := by
   rw [compL2, Real.sq_sqrt (compL2Sq_nonneg T)]
 
 
 
+omit [DecidableEq Idx] in
 theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2Sq (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2Sq T := by
   classical
@@ -130,11 +136,13 @@ theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin
   rw [hfun]
 
 
+omit [DecidableEq Idx] in
 theorem compL2_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2 (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2 T := by
   rw [compL2, compL2, compL2Sq_comp_equiv]
 
 
+omit [DecidableEq Idx] in
 theorem compL2_contrTail_le {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     compL2 (contrTail A B) ≤ compL2 A * compL2 B := by
@@ -142,6 +150,7 @@ theorem compL2_contrTail_le {p q : ℕ}
   exact Real.sqrt_le_sqrt (compL2Sq_contrTail_le A B)
 
 
+omit [DecidableEq Idx] in
 theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     compL2 (fun idx => T idx + U idx) ≤ compL2 T + compL2 U := by
   have hCS : (∑ idx : Fin r → Idx, T idx * U idx) ≤ compL2 T * compL2 U := by
@@ -171,6 +180,7 @@ theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
           Real.sqrt_sq (add_nonneg (compL2_nonneg T) (compL2_nonneg U))
 
 
+omit [DecidableEq Idx] in
 theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => -T idx) = compL2 T := by
   simp only [compL2, compL2Sq]
@@ -179,6 +189,7 @@ theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
 
 
 
+omit [DecidableEq Idx] in
 theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     compL2 (fun idx => T idx - U idx) ≤ compL2 T + compL2 U := by
   have h := compL2_add_le T (fun idx => -U idx)
@@ -186,6 +197,7 @@ theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
   simpa only [sub_eq_add_neg] using h
 
 
+omit [DecidableEq Idx] in
 theorem compL2_smul {r : ℕ} (c : Real) (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => c * T idx) = |c| * compL2 T := by
   rw [compL2, compL2,

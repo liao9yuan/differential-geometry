@@ -39,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_pou_mul_smooth_compactSupport
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (β : M) :
@@ -95,6 +96,7 @@ private lemma chartPushed_pou_mul_smooth_compactSupport
       (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β f hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_memWkpChart
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

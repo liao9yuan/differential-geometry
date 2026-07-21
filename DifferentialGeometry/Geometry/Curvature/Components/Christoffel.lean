@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -31,9 +30,6 @@ section CoordinateChristoffelCurvature
 
 open DifferentialGeometry.Tensor.Coordinates
 
-variable [Module.Finite Real E] [CompleteSpace Real]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -134,6 +130,7 @@ def ConnectionCurvatureCoordAt
             coordinateFrameAt (I := I) x₀ m x₀
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -506,6 +503,7 @@ theorem connection_curvature_coord_of_christoffel
           simp
           ring
 
+omit [FiniteDimensional ℝ E] in
 private theorem smoothSections_cov_apply_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

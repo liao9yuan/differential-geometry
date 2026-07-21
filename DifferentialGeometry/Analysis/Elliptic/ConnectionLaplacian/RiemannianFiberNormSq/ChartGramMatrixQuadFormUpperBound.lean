@@ -18,7 +18,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
@@ -50,6 +50,7 @@ private lemma abs_mul_le_sum_sq
     linarith
   exact le_trans h_half_le h_half_total
 
+omit [T2Space M] in
 private lemma chartGramMatrix_eq_inner
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :

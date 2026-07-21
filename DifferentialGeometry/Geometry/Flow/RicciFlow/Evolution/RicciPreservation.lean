@@ -13,7 +13,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -37,18 +36,19 @@ open scoped BigOperators Manifold ContDiff
 
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
+omit [FiniteDimensional ℝ E] in
 private theorem real_smul0S_apply {s : ℕ} {x : M} (c : Real)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (v : Fin s → TangentSpace I x) :
     (c • A) v = c * A v := by
   rw [Tensor0SSpace.smul_apply, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor02_zero_apply {x : M}
     (A : Tensor02At (I := I) (M := M) x) :
     A (0 : Fin 2 → TangentSpace I x) = 0 := by
@@ -71,6 +71,7 @@ def ShiftBlockReactRealizes
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem shiftNullSymm_of_block
     {G : Real -> SmoothRiemannianMetric I M}
     {N : TwoTensorReaction (I := I) (M := M)}
@@ -107,6 +108,7 @@ def ShiftBlockReactRealizesScaled
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem shiftNullSymm_of_block_scaled
     {G : Real -> SmoothRiemannianMetric I M}
     {N : TwoTensorReaction (I := I) (M := M)}
@@ -166,6 +168,7 @@ def PinchInitLt
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_lt
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -250,6 +253,7 @@ def vec {g : SmoothRiemannianMetric I M}
     TangentSpace I (base (I := I) (M := M) p) :=
   p.1.2
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem unit {g : SmoothRiemannianMetric I M}
     (p : UnitTangent (I := I) (M := M) g) :
@@ -257,6 +261,7 @@ theorem unit {g : SmoothRiemannianMetric I M}
       (vec (I := I) (M := M) p) (vec (I := I) (M := M) p) = 1 :=
   p.2
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem base_mk {g : SmoothRiemannianMetric I M} {x : M}
     {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
@@ -265,6 +270,7 @@ theorem base_mk {g : SmoothRiemannianMetric I M} {x : M}
         UnitTangent (I := I) (M := M) g) = x :=
   rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
     {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
@@ -526,6 +532,7 @@ def BoundsOfPosRic
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem ricPos_ricMin
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -556,6 +563,7 @@ theorem scalarUpper_cont
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem bounds_ricMin
     [CompactSpace M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -590,6 +598,7 @@ theorem bounds_ricMin
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem boundsPos_ricMin
     [CompactSpace M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -606,6 +615,7 @@ theorem boundsPos_ricMin
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_bounds
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -656,6 +666,7 @@ theorem pinchInitLt_bounds
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_bounds
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -668,6 +679,7 @@ theorem pinchInit_of_bounds
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_of_pos
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -680,6 +692,7 @@ theorem pinchInitLt_of_pos
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_pos
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
@@ -693,6 +706,7 @@ theorem pinchInit_of_pos
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_ricMin
     [CompactSpace M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -710,6 +724,7 @@ theorem pinchInitLt_ricMin
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem pinchInit_ricMin
     [CompactSpace M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}

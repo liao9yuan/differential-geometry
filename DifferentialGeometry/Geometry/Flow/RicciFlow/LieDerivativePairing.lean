@@ -16,7 +16,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,6 +27,8 @@ lemma chartFrameVec_eq_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) (b : M) :
     chartFrameVec (I := I) α i b = chartBasisVecFiber (I := I) α i b := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartFrame
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -39,6 +41,8 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartFrame
   DifferentialGeometry.PDE.DeTurck.chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     (I := I) g W α i j
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieDerivMetric_pairing_contMDiff
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

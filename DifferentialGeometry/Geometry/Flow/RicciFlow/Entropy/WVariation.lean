@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

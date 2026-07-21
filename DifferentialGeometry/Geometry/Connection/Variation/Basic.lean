@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Tensor.RSTensor.Components
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 set_option linter.style.longLine false
 
 
@@ -57,11 +56,13 @@ namespace MetricPotentialVariationPath
 
 variable {g : SmoothRiemannianMetric I M} {potential : M -> Real}
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem metric_base
     (path : MetricPotentialVariationPath (I := I) g potential) :
     path.G.metric path.base = g :=
   path.metricBase
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem potential_base
     (path : MetricPotentialVariationPath (I := I) g potential) :
     path.potentialPath path.base = potential :=

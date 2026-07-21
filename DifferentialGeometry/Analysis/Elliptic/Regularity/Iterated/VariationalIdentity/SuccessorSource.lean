@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedVariationalIdentityStepScaffold
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -59,6 +59,7 @@ private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem per_pair_ibp_chosenMthMixed
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -383,6 +384,7 @@ private lemma memLp_two_of_bounded_mul
     exact hy.trans (le_max_left _ _)
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma memLp_two_continuousOn_mul_on_Kα
     {α : M} {h f : EuclN → ℝ}
     (hh_contOn : ContinuousOn h
@@ -412,6 +414,7 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -448,6 +451,7 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -462,6 +466,7 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :
@@ -491,6 +496,7 @@ private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
   have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
   exact h.continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma memLp_restrict_Kα_of_memLp_chartTarget
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -511,6 +517,7 @@ private lemma memLp_restrict_Kα_of_memLp_chartTarget
   rw [← h_eq]
   exact hf.restrict _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termA_pair_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -545,6 +552,7 @@ private lemma termA_pair_memLp_vol_K
     (weightedInvGramDerivOnEuclid_partial_continuousOn
       (I := I) (M := M) g α i j l) h_factor
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termB_pair_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -579,6 +587,7 @@ private lemma termB_pair_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (weightedInvGramDerivOnEuclid_continuousOn (I := I) g α i j l) h_factor
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termC_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -618,6 +627,7 @@ private lemma termC_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (densityDerivOnEuclid_continuousOn (I := I) g α l) h_factor
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma termD_memLp_vol_K
     {g : SmoothRiemannianMetric I M} {α : M}
     (fChartEffPrev : EuclN → ℝ)
@@ -642,6 +652,7 @@ private lemma termD_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (densityDerivOnEuclid_continuousOn (I := I) g α l) h_prev_vol_K
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma termE_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (fChartEffPrev : EuclN → ℝ)
@@ -694,6 +705,7 @@ private lemma termE_memLp_vol_K
     rw [this]
     exact MemLp.zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -764,6 +776,7 @@ private lemma fChartEffStepNumerator_memLp_vol_K
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -778,6 +791,7 @@ private lemma one_div_densityOnEuclid_continuousOn
   rw [h_eq]
   exact h_inv
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartEffStepNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -826,6 +840,7 @@ private lemma fChartEffStepNumerator_div_density_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (one_div_densityOnEuclid_continuousOn (I := I) (M := M) g α) h_num
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_memLp_two_weighted
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}

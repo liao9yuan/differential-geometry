@@ -33,7 +33,9 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +52,7 @@ def gInvDiffRaisedEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   contMDiff_toFun := gInvDiffRaisedEndo_contMDiff (I := I) g₀ g₁
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem inverseMetricSharpFib_g0FlatY_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -66,6 +69,7 @@ theorem inverseMetricSharpFib_g0FlatY_contMDiff
   refine hsharpY.congr (fun x => ?_)
   rw [inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₀ g₁ x (Y x)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cotangent_g0FlatY_mdiffAtCotangent
     (g₀ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -83,6 +87,9 @@ private theorem cotangent_g0FlatY_mdiffAtCotangent
   exact metricFlat_mdiff (I := I) g₀ (Y.contMDiff.mdifferentiableAt (by norm_num))
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem endoCov_gInvDiffRaisedField_apply
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
@@ -168,7 +175,7 @@ theorem endoCov_gInvDiffRaisedField_apply
           ((cotangentCov (LeviCivita (I := I) g₀)).toFun
             (fun b : M => cotangentToCLM (I := I) (β b)) x v) := by
       rw [hgradY, hB,
-        Analysis.Parabolic.TensorSpectral.g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x _]
+        Analysis.Sobolev.TensorHilbert.g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x _]
     rw [hflat]
   rw [hT1, hΛx]
   rw [show (inverseMetricSharpFib (I := I) g₁ x) (β x) =
@@ -177,6 +184,7 @@ theorem endoCov_gInvDiffRaisedField_apply
   abel
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private lemma sqrt_g0_inner_add_le'
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤
@@ -216,9 +224,23 @@ private lemma sqrt_g0_inner_add_le'
       ≤ Real.sqrt ((na + nb) ^ 2) := Real.sqrt_le_sqrt hle_sq
     _ = na + nb := by rw [Real.sqrt_sq hsum_pos_nn]
 
+end NormedSpaceModel
+
+section InnerProductSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -376,6 +398,8 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
       (2 * C₀ * G * Nv * Nw) + (2 * C₀ * G * Nv * Nw) := add_le_add hT2_bound hT3_bound
   refine hsum.trans ?_
   nlinarith [mul_nonneg (mul_nonneg (mul_nonneg hC₀0 hG_nn) hNv_nn) hNw_nn]
+
+end InnerProductSpaceModel
 
 end Connection
 end Integral

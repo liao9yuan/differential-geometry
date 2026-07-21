@@ -21,13 +21,15 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E)
     (D : Tensor0SBundle.Tensor0SSpace (r + 1) I x) (v0 : E) :
@@ -118,6 +120,8 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
   abel
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E) :
     Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
@@ -143,6 +147,8 @@ theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s 
   exact core_curry_reading (I := I) (M := M) g₀ r s Φ x v D (m 0)
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s)
     (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ r s Φ = 0) :

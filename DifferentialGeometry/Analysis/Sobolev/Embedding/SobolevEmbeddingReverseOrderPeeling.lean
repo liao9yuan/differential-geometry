@@ -20,7 +20,7 @@ open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -182,6 +182,7 @@ lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -193,6 +194,7 @@ lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]; rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -242,6 +244,7 @@ lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
   simpa [tensorComponentAbsSum, hf] using h
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -454,6 +457,7 @@ lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
         exact le_refl _
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma lowerOrderTerm_iteratedFDeriv_norm_leR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
@@ -1142,6 +1146,7 @@ private lemma reverse_pointwise_integrand_le
     rw [hρ0]; simp
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma rawPullRIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1197,6 +1202,7 @@ private lemma rawPullRIntegrand_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma sumIntegrals_eq_integral_sumR
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1392,6 +1398,8 @@ private lemma sumIntegrals_eq_integral_sumR
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rhsInner_eq_integral_hsZeroContent
     (g : SmoothRiemannianMetric I M) (r s i : ℕ) (T : SmoothCcTensor g r s)
     (α : M) :
@@ -1433,6 +1441,8 @@ private lemma rhsInner_eq_integral_hsZeroContent
       (fun ii => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx ii))| ^ 2)]
   rw [iteratedFDeriv_zero_apply]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma reverse_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (C : ℝ) (hC_nn : 0 ≤ C)
@@ -1621,6 +1631,7 @@ private lemma reverse_per_alpha_inner_bound
                     (Fin (Module.finrank ℝ E)) ℝ (basisIdx ii))| ^ 2)
           ∂(volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
 
+omit [BoundarylessManifold I M] in
 private lemma exists_tensorPouSobolevHsNormSq_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1683,6 +1694,7 @@ private lemma enn_sum_sq_le_sq_sum {ι : Type*} (s : Finset ι) (f : ι → ℝ�
     _ = (∑ i ∈ s, f i) * (∑ j ∈ s, f j) := by rw [← Finset.sum_mul]
     _ = (∑ i ∈ s, f i) ^ 2 := by rw [sq]
 
+omit [BoundarylessManifold I M] in
 theorem exists_tensorPouSobolevHsNorm_le_iteratedCovGrad_zero_sum
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

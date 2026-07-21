@@ -21,7 +21,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,8 @@ section MainBound
 
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -62,6 +64,8 @@ private lemma eigenIdx_val_pos
 
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -176,6 +180,7 @@ def diffRHSAggregate
       diffRHSHead (I := I) (M := M) g r s i α P₀ m K l +
         diffRHSAggregate g r s i α P₀ m (K + 1) (Fin.init l)
 
+omit [CompleteSpace E] in
 private theorem diffRHSAggregate_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -184,6 +189,7 @@ private theorem diffRHSAggregate_zero
     diffRHSAggregate (I := I) (M := M) g r s i α P₀ 0 K l =
       rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K := rfl
 
+omit [CompleteSpace E] in
 private theorem diffRHSAggregate_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -194,6 +200,7 @@ private theorem diffRHSAggregate_succ
         diffRHSAggregate (I := I) (M := M) g r s i α P₀ m (K + 1)
           (Fin.init l) := rfl
 
+omit [CompleteSpace E] in
 lemma rhsDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -218,6 +225,7 @@ lemma rhsDiff_ae_zero_off_chartPouKernel
       exact eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
         (I := I) (M := M) g r s i α P₀ m l hy.2
 
+omit [CompleteSpace E] in
 private lemma iteratedPartial_memWkp_two_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -236,6 +244,7 @@ private lemma iteratedPartial_memWkp_two_add
   exact eigenvectorChartIteratedPartial_memWkp_of_memWkp (I := I)
     (M := M) g r s i α P₀ j (2 + K) h_comp idx
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -436,6 +445,7 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
       exact add_le_add h_head_le h_tail_le
 
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -642,6 +652,7 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         exact add_le_add h_tail_one h_tail_one
       exact add_le_add h_head_le h_tail_le
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -666,6 +677,7 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le
   refine ⟨C, hC_nn, ?_⟩
   rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

@@ -26,7 +26,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainChartData
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -64,6 +64,7 @@ private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -73,6 +74,7 @@ private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_measurable (α : M) :
     Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
   classical
@@ -83,6 +85,7 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F) := by
@@ -126,6 +129,7 @@ private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
   rw [h_piecewise]
   exact Measurable.piecewise hCT_meas h_comp measurable_const
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -170,6 +174,7 @@ private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
   · rw [hFtilde_def, Set.indicator_of_mem hx]
   · rw [hFtilde_def, Set.indicator_of_notMem hx]; exact zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma lintegral_density_chartPushedRaw_pow_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F) {p : ℝ} (_hp_pos : 0 < p) :
@@ -240,6 +245,7 @@ private lemma lintegral_density_chartPushedRaw_pow_le
   exact lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
     (I := I) (M := M) g α h_G_meas
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedRaw_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F)
@@ -333,6 +339,7 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   rw [h_contra, ENNReal.mul_top h_c_E_ne_zero] at h_bound
   exact absurd h_bound (not_le.mpr h_RHS_lt_top)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPushedRaw_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F) :
@@ -448,6 +455,7 @@ noncomputable def chartPushedRawLpFromLp
   (chartPushedRaw_memLp_chartPulledWeighted (I := I) (M := M) g α
     (Lp.stronglyMeasurable F).measurable (Lp.memLp F)).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawLpFromLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -463,6 +471,7 @@ lemma chartPushedRawLpFromLp_coeFn
   unfold chartPushedRawLpFromLp
   exact MemLp.coeFn_toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawLpFromLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : ℕ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -603,6 +612,7 @@ lemma chartPushedRawLpFromLp_tendsto
     simpa using h_comp
   exact h_toReal_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -644,6 +654,7 @@ private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (I := I) (M := M) α v.toFun hy]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma psi_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -658,6 +669,7 @@ private lemma psi_memLp_chartPulledWeighted
   continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (I := I) (M := M) g α hψ.continuous hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma setIntegral_density_eq_integral_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (f ψ : EuclN → ℝ) :
@@ -687,6 +699,7 @@ private lemma setIntegral_density_eq_integral_weighted
   rw [← setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (I := I) (M := M) g α (fun y => f y * ψ y)]
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma setIntegral_density_G_psi_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -723,6 +736,7 @@ private lemma setIntegral_density_G_psi_eq_inner
   rw [show @inner ℝ _ _ (ψ y) ((G : EuclN → ℝ) y) =
       ((G : EuclN → ℝ) y) * ψ y from RCLike.inner_apply _ _]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_aeEq_of_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     {f₁ f₂ : M → ℝ} (hf₁ : Measurable f₁) (hf₂ : Measurable f₂)
@@ -857,6 +871,7 @@ lemma chartPushedRaw_aeEq_of_aeEq
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) (M := M) α f₂ h_in_chart]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_density_ψ_eq_setIntegral
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1008,6 +1023,7 @@ theorem chartPulledIntegralCLM_density_ψ_eq_setIntegral
   rw [h_LHS_eq_inner_seq] at h_LHS_tendsto
   exact tendsto_nhds_unique h_LHS_tendsto h_inner_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

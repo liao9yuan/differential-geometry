@@ -22,7 +22,7 @@ namespace Analysis
 namespace Laplacian
 namespace H1ComplToLpChartBridge
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,14 +40,17 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartAtlasPOU_continuous (α : M) :
     Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU_continuous (I := I) (M := M) α).measurable
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
     ‖(chartAtlasPOU I M α : M → ℝ) x * u x‖ₑ ≤ ‖u x‖ₑ := by
   have h_nn : (0 : ℝ) ≤ (chartAtlasPOU I M α : M → ℝ) x :=
@@ -65,6 +68,7 @@ private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
   rw [Real.enorm_eq_ofReal_abs, Real.enorm_eq_ofReal_abs]
   exact ENNReal.ofReal_le_ofReal habsmul
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma tsupport_pou_mul_subset_chartSource (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (chartAtlasPOU I M α : M → ℝ) x * u x) ⊆
       (chartAt H α).source := by
@@ -84,6 +88,7 @@ private lemma tsupport_pou_mul_subset_chartSource (α : M) (u : M → ℝ) :
   exact h_tsupp_sub.trans
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma tsupport_pou_mul_subset_tsupport_pou (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (chartAtlasPOU I M α : M → ℝ) x * u x) ⊆
       tsupport fun x : M => (chartAtlasPOU I M α : M → ℝ) x := by
@@ -237,6 +242,7 @@ private lemma exists_density_sup_on_kα
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (M_sup : ℝ) (hM_sup_pos : 0 < M_sup)
@@ -307,6 +313,7 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hM_sup_pos]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
@@ -471,6 +478,7 @@ private noncomputable def extChartAtSymmExt (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -480,6 +488,7 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -490,6 +499,7 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
@@ -557,6 +567,7 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
     apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
     exact hu_memLp.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_tendsto_chartPulledWeightedMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → M → ℝ} {u_lim : M → ℝ}

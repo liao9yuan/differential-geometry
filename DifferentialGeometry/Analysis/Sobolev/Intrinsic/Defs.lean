@@ -28,7 +28,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
 namespace Intrinsic
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,21 +42,21 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_inner_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (G X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (X b)) :=
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g G X
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_norm_sq_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (G b)) :=
   continuous_g_inner_smooth_sections g G G
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_norm_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -83,7 +83,6 @@ private lemma exists_bound_continuous_compactSpace
     intro x
     exact (hM ⟨x⟩).elim
 
-omit [InnerProductSpace ℝ E] in
 private lemma continuous_memLp_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -98,7 +97,6 @@ private lemma continuous_memLp_of_compactSpace
   obtain ⟨C, hC⟩ := exists_bound_continuous_compactSpace hf
   exact MemLp.of_bound hmeas C (Filter.Eventually.of_forall (fun x => hC x))
 
-omit [InnerProductSpace ℝ E] in
 private lemma continuous_integrable_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -121,7 +119,6 @@ def HasWeakRiemannianGrad
         -∫ x, u x * divergence_g (I := I) g X x
           ∂(riemannianVolumeMeasure I M g)
 
-omit [InnerProductSpace ℝ E] in
 lemma HasWeakRiemannianGrad.pairing_eq
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -142,7 +139,6 @@ def MemW1pIntrinsic
       MemLp (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-omit [InnerProductSpace ℝ E] in
 lemma MemW1pIntrinsic.memLp_self
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -284,7 +280,6 @@ theorem MemW1pIntrinsic.add
   · have hcont := continuous_g_norm_smooth_section g (G + G')
     exact continuous_memLp_of_compactSpace g p hcont
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -303,7 +298,6 @@ theorem HasWeakRiemannianGrad.zero
       (fun _ : M => (0 : ℝ)) from by funext x; simp]
   simp [integral_zero]
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -377,7 +371,6 @@ theorem MemW1pIntrinsic.const_smul
   · have hcont := continuous_g_norm_smooth_section g (c • G)
     exact continuous_memLp_of_compactSpace g p hcont
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.pairing_inner_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -390,7 +383,6 @@ theorem HasWeakRiemannianGrad.pairing_inner_eq
       ∫ x, g.inner x (G' x) (X x) ∂(riemannianVolumeMeasure I M g) := by
   rw [h₁.pairing_eq X hX, h₂.pairing_eq X hX]
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.pairing_inner_diff_eq_zero
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -432,7 +424,6 @@ private def gradInfimum
       eLpNorm (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-omit [InnerProductSpace ℝ E] in
 private lemma w1pNormIntrinsic_def
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) :
@@ -440,7 +431,6 @@ private lemma w1pNormIntrinsic_def
       eLpNorm u p (riemannianVolumeMeasure I M g) +
         gradInfimum (I := I) (M := M) g p u := rfl
 
-omit [InnerProductSpace ℝ E] in
 private lemma gradInfimum_le_of_weakGrad
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} {u : M → ℝ}
@@ -452,7 +442,6 @@ private lemma gradInfimum_le_of_weakGrad
   unfold gradInfimum
   exact iInf_le_of_le G (iInf_le _ hG)
 
-omit [InnerProductSpace ℝ E] in
 theorem w1pNormIntrinsic_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -487,7 +476,6 @@ theorem w1pNormIntrinsic_zero
     exact le_of_eq h_zero_norm
   · exact zero_le _
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.eLpNorm_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -495,7 +483,6 @@ theorem MemW1pIntrinsic.eLpNorm_lt_top
     eLpNorm u p (riemannianVolumeMeasure I M g) < ⊤ :=
   h.memLp_self.2
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.gradInfimum_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -506,7 +493,6 @@ theorem MemW1pIntrinsic.gradInfimum_lt_top
     (gradInfimum_le_of_weakGrad g hG_weak) ?_
   exact hG_p.2
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.w1pNormIntrinsic_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}

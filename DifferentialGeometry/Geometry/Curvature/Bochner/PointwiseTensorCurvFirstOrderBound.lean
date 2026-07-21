@@ -34,7 +34,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_succ_eq_sum_slot0Curry_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x) :
@@ -76,6 +78,8 @@ private lemma tensor0S_eq_of_toModel_eq' {t : ℕ} {x : M} {T T' : Tensor0SSpace
     (h : ∀ v : Fin t → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensor00Scalar_unitZeroSec' (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
   rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
@@ -84,6 +88,8 @@ lemma tensor00Scalar_unitZeroSec' (x : M) :
   rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensor0S_zero_span' (x : M) (τ : Tensor0SSpace 0 I x) :
     τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
   apply tensor0S_eq_of_toModel_eq' (I := I) (M := M)
@@ -99,6 +105,8 @@ lemma tensor0S_zero_span' (x : M) (τ : Tensor0SSpace 0 I x) :
     (tensor00Scalar_apply (I := I) (M := M) x τ (fun k : Fin 0 => k.elim0)).symm]
   rw [smul_eq_mul, mul_one]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensor0SAsRS_unit_recover (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SToTensorRS (I := I) (M := M) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
@@ -116,6 +124,7 @@ lemma tensor0SAsRS_unit_recover (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
   conv_rhs => rw [tensor0S_zero_span' (I := I) (M := M) x τ]
   rw [ContinuousLinearMap.map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensor0SAsRS_sub' (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C - D) =
       tensor0SToTensorRS (I := I) (M := M) x C - tensor0SToTensorRS (I := I) (M := M) x D := by
@@ -179,6 +188,7 @@ private lemma tensor0SAsRS_sum' {ι : Type*} (s_dummy : Finset ι) (t : ℕ) (x 
         rw [smul_add]
       exact h
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma frameSum_secondCovDeriv_pair_eq_riemannSec
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {X : Π b : M, TangentSpace I b}
@@ -331,6 +341,7 @@ private lemma frameSum_secondCovDeriv_pair_eq_riemannSec
     (Finset.smul_sum).symm]
   rw [hsumT6, hkey]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradBundleEquiv_secondCovDeriv_eq_covGrad_secondCovDerivCc
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {V : Π b : M, TangentSpace I b}
@@ -381,6 +392,7 @@ private noncomputable def secondCovDerivCommutatorSum
         (fun y : M => S.toSection y) x)
       (unitZeroSec (I := I) (M := M) x)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma slot0Curry_secondCovDeriv_sub_eq_commutatorSum
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {V X : Π b : M, TangentSpace I b}
@@ -407,6 +419,7 @@ private lemma slot0Curry_secondCovDeriv_sub_eq_commutatorSum
   rw [secondCovDerivCommutatorSum]
   exact secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq (I := I) g s S hVs hXs x m
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma wrap_carrierSevenInner_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (V X : Π b : M, TangentSpace I b) (x : M) :
@@ -502,6 +515,7 @@ private lemma slot0_read_curv_eq_sum_carrier
   exact slot0Curry_secondCovDeriv_sub_eq_commutatorSum (I := I) (M := M) g s S
     (smoothOrthoFrame_smooth (I := I) g x i) hXs x
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma frameSum_secondCovDeriv_pair_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {X : Π b : M, TangentSpace I b}
@@ -683,6 +697,8 @@ lemma slot0_read_curv_eq_frameFree
   rw [Finset.smul_sum]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_eq_toModel_unitEval
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (T : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n) :
@@ -713,6 +729,8 @@ private lemma fiberNormSqComponent_eq_toModel_unitEval
   rw [hscal]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_embedRS_unitEval
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (T : TensorRSSpace 0 s I x) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x T =
@@ -736,6 +754,7 @@ private lemma riemannianFiberNormSq_eq_embedRS_unitEval
       (unitZeroSec (I := I) (M := M) x)) e K₀ J]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannSec_tensorRSCov_unitEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -765,6 +784,7 @@ private lemma riemannSec_tensorRSCov_unitEval
   exact hkey
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannSecRS_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {τ : Π b : M, TensorRSSpace 0 s I b}
@@ -801,6 +821,8 @@ private lemma riemannSecRS_contMDiff
   intro b
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma nablaTensorCurvSec_tensorRSCov_unitEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1016,6 +1038,7 @@ private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannianFiberNormSq_tensorCovDerivAt_frame_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -1207,6 +1230,7 @@ private theorem exists_frameSummed_curvDirCovDeriv_fiberNormSq_le
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma frameSummed_riemannSec_eq_genuineCurvTraceFixedFramePureR
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) :

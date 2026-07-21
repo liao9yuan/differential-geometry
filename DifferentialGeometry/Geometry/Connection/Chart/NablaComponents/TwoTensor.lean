@@ -11,14 +11,11 @@ open Bundle Set Tensor0SBundle TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
-variable [CompleteSpace Real]
+variable [IsManifold I ∞ M]
 
 theorem tensor0S_two_eval_coordFrame_sum
     {x₀ : M}

@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -309,6 +309,7 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
     (Q : Integral.L2.SmoothCcTensor g r p) (x : M) (v : TangentSpace I x) :
@@ -454,6 +455,7 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
 
 set_option maxHeartbeats 1600000 in
 
+omit [BoundarylessManifold I M] in
 theorem prependCovGradSlot_fiberNormSq_frame_sum_rs
     (g : SmoothRiemannianMetric I M) (r t : ℕ) (ζ : C^∞⟮I, M; ℝ⟯)
     (S : Integral.L2.SmoothCcTensor g r t) (x : M) :

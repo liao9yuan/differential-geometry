@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -35,7 +34,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -599,6 +598,7 @@ theorem nabla_metricTraceFirstTwo0S {s : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
     (tail : Fin s -> TangentSpace I x) (i : Fin (s + 2)) :
     metricTraceInput (I := I) X Y tail i =
@@ -928,6 +928,7 @@ private theorem consPredVal {V : Type*} {n : ℕ} (c : V) (f : Fin n → V) (q :
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
     (a b Z : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
     metricTraceInput (I := I) a b (Fin.cons Z tail) ∘ traceNablaShuffle s =

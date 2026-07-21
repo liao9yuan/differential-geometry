@@ -18,7 +18,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem appCcRS_zero_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
     ccOperatorFieldComp (I := I) (M := M) g a b c Φ (0 : SmoothCcTensor g a b) = 0 := by
@@ -38,6 +39,8 @@ theorem appCcRS_zero_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     rw [add_zero]; exact h
   exact (add_left_cancel h0).symm
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I M) (a b : ℕ)
     (W : SmoothCcTensor g a b)
     (hW : covGrad (I := I) (M := M) g a b W = 0) :
@@ -50,6 +53,8 @@ theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I
   | succ k ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma appCcLeibnizPsi_order_zero (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0 =
@@ -62,6 +67,7 @@ private lemma appCcLeibnizPsi_order_zero (g : SmoothRiemannianMetric I M) (b c :
           iteratedCovGrad (I := I) g b c (i + 1) Φ
       rw [ih, iteratedCovGrad_succ]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_operatorFieldCompose_of_covGrad_right_eq_zero
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b)

@@ -80,6 +80,7 @@ private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_continuous_of_X_interior_support
     [T2Space M]
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ) ∞ u)
@@ -123,6 +124,7 @@ private lemma tangentSectionAction_continuous_of_X_interior_support
       exact (mfderiv I 𝓘(ℝ, ℝ) u y).map_zero
     exact (continuous_const.continuousAt.congr hev_zero.symm)
 
+omit [InnerProductSpace ℝ E] in
 private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -222,6 +224,7 @@ private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
 
+omit [InnerProductSpace ℝ E] in
 private lemma memLp_g_norm_gradFun_interior_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -249,6 +252,7 @@ private lemma memLp_g_norm_gradFun_interior_smooth
     Real.continuous_sqrt.comp hgrad_inner_cont
   exact continuous_memLp_of_compactSpace g p hG_cont
 
+omit [InnerProductSpace ℝ E] in
 private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -323,6 +327,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
   MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     (I := I) (M := M) g p hu_smooth hu_int
 
+omit [InnerProductSpace ℝ E] in
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (j : Fin (Module.finrank ℝ E)) :
@@ -342,6 +347,7 @@ private lemma partialDerivWithin_scalarOnE_continuousOn_target
     partialDerivWithin_contDiffOn_top_of_uniqueDiffOn (i := j) hbase hUD
   exact hpartial_target.continuousOn
 
+omit [InnerProductSpace ℝ E] in
 private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (j : Fin (Module.finrank ℝ E)) :
@@ -369,6 +375,7 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     exact (extChartAt I α).map_source hxsrc
   exact hpartial.comp hchart hmaps
 
+omit [InnerProductSpace ℝ E] in
 private lemma gradChartCoeffWithin_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -413,6 +420,7 @@ private lemma chartGramMatrix_entry_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
+omit [InnerProductSpace ℝ E] in
 private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -487,6 +495,7 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hu j
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
 
+omit [InnerProductSpace ℝ E] in
 private lemma g_inner_gradFun_gradFun_continuous
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -501,6 +510,7 @@ private lemma g_inner_gradFun_gradFun_continuous
     g_inner_gradFun_gradFun_continuousOn_chart_source (I := I) g x hu
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
+omit [InnerProductSpace ℝ E] in
 private lemma memLp_g_norm_gradFun_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -511,6 +521,7 @@ private lemma memLp_g_norm_gradFun_smooth
   have hcont := g_inner_gradFun_gradFun_continuous (I := I) (M := M) g hu
   exact continuous_memLp_of_compactSpace g p (Real.continuous_sqrt.comp hcont)
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_chartLocal_within
     (α : M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -541,6 +552,7 @@ private lemma tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within_of_smooth (I := I) α hu hx i]
   rfl
 
+omit [InnerProductSpace ℝ E] in
 private lemma chartCoeff_continuousOn_source
     (α : M) (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :
@@ -553,6 +565,7 @@ private lemma chartCoeff_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_continuousOn_chart_source
     (α : M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -573,6 +586,7 @@ private lemma tangentSectionAction_continuousOn_chart_source
   · exact partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
       (I := I) α hu i
 
+omit [InnerProductSpace ℝ E] in
 private lemma tangentSectionAction_continuous
     [T2Space M]
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -585,6 +599,7 @@ private lemma tangentSectionAction_continuous
   have hcontOn := tangentSectionAction_continuousOn_chart_source (I := I) x Y hu
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
+omit [InnerProductSpace ℝ E] in
 private lemma continuous_g_inner_gradFun_section
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -600,6 +615,7 @@ private lemma continuous_g_inner_gradFun_section
   exact (tangentSectionAction_continuous (I := I) (M := M) Y hu).congr
     (fun x => (h_eq x).symm)
 
+omit [InnerProductSpace ℝ E] in
 private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

@@ -21,12 +21,14 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_tensorCov_baseSlot_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -44,6 +46,7 @@ theorem riemannSec_tensorCov_baseSlot_eval
   riemannSec_tensor0SCov_apply_eval (I := I) (M := M) g s X W A hA x u
 
 omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem smoothOrthoFrame_riemannOp_trace_eq_ricci
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     ∑ i : Fin (Module.finrank ℝ E),

@@ -22,7 +22,7 @@ namespace DeTurckCoefficients
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -92,12 +92,10 @@ lemma abs_entry_le_matrixEntryL1 {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ)
 def chartGramDiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) : ℝ :=
   matrixEntryL1 (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x)
 
-omit [InnerProductSpace ℝ E] in
 lemma chartGramDiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) :
     0 ≤ chartGramDiffSup (I := I) (M := M) g₁ g₂ α x :=
   matrixEntryL1_nonneg _
 
-omit [InnerProductSpace ℝ E] in
 lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M)
     (p q : Fin (Module.finrank ℝ E)) :
@@ -107,7 +105,6 @@ lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x) p q
   rwa [Matrix.sub_apply] at h
 
-omit [InnerProductSpace ℝ E] in
 theorem chartInvGramMatrix_entry_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -148,7 +145,6 @@ theorem chartInvGramMatrix_entry_sub_abs_le
   unfold chartInvGramMatrix
   exact h
 
-omit [InnerProductSpace ℝ E] in
 theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -164,7 +160,6 @@ theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (fun p q => chartGramMatrix_sub_entry_abs_le_gramDiffSup (I := I) (M := M)
       g₁ g₂ α x p q) k l
 
-omit [InnerProductSpace ℝ E] in
 lemma exists_chartInvGramMatrix_entry_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
@@ -193,7 +188,6 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
     exact abs_entry_le_matrixEntryL1 (chartInvGramMatrix (I := I) g α x) p q
   exact h_entry_le.trans (h_l1_le.trans (le_max_left _ _))
 
-omit [InnerProductSpace ℝ E] in
 theorem exists_chartInvGramMatrix_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K)

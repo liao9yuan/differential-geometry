@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,13 +18,11 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 private theorem coordinateFrame_coeff_contMDiffAt
@@ -65,6 +62,7 @@ private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
     coordinateFrameAt] using hcoeff
 
 set_option backward.isDefEq.respectTransparency false in
+omit [IsManifold I 2 M] in
 theorem oneForm_eval_coordinateFrame_contMDiffAt
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1)
@@ -110,6 +108,8 @@ theorem nabla0SFun_one_eval_smooth_slots
       (oneForm_eval_coordinateFrame_contMDiffAt (I := I) α x₀ j).mdifferentiableAt
         (by simp))]
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

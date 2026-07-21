@@ -115,7 +115,7 @@ theorem pinchingP_formula
 
 abbrev PAlphaOverQBetaFormulaOn
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-    [Module.Finite Real E] [FiniteDimensional Real E]
+    [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H]
     {I : ModelWithCorners Real E H}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -194,7 +194,7 @@ theorem hamilton_tracefree_pinching_of_eigenvalue_pinching
 
 theorem palpha_over_qbeta_formula
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-    [Module.Finite Real E] [FiniteDimensional Real E]
+    [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H]
     {I : ModelWithCorners Real E H}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

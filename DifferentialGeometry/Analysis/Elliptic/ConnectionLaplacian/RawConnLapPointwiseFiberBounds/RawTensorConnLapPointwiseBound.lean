@@ -45,6 +45,7 @@ noncomputable def chartFrameData
           (smoothOrthoFrame (I := I) g y i) T₀ y‖)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartFrameData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -95,6 +96,8 @@ noncomputable def secondAppChartData
       + ‖T₀ y‖)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma secondAppChartData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)

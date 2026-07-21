@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -875,6 +875,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
 
 set_option maxHeartbeats 1200000 in
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     (g : SmoothRiemannianMetric I M) (k m i r : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
     (w : Integral.L2.SmoothCcTensor g r m) :

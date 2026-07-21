@@ -34,7 +34,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,8 +50,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-variable [Module.Finite Real E]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -61,6 +58,8 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_congr_nhds
     {X : (p : M) -> TangentSpace I p} {f h : M -> Real} {x : M}
     (hfh : f =ᶠ[𝓝 x] h) :
@@ -70,6 +69,8 @@ private theorem directionalDeriv_congr_nhds
   rw [hfh.mfderiv_eq]
   rw [hx]
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_add_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -83,6 +84,8 @@ private theorem directionalDeriv_add_fun
   rw [extDerivFun_add hf hh]
   rw [ContinuousLinearMap.add_apply]
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_sub_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -103,6 +106,8 @@ private theorem directionalDeriv_sub_fun
   rw [hsub]
   rw [ContinuousLinearMap.sub_apply]
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem oneForm_eval_const_add {x : M}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -114,6 +119,8 @@ private theorem oneForm_eval_const_add {x : M}
   rw [← cotangentToDual_apply_gen (I := I) alpha B]
   exact map_add (cotangentToDual_gen (I := I) alpha) A B
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem oneForm_eval_const_sub {x : M}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -125,6 +132,8 @@ private theorem oneForm_eval_const_sub {x : M}
   rw [← cotangentToDual_apply_gen (I := I) alpha B]
   exact map_sub (cotangentToDual_gen (I := I) alpha) A B
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem oneForm_eval_const_neg {x : M}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -134,6 +143,8 @@ private theorem oneForm_eval_const_neg {x : M}
   rw [← cotangentToDual_apply_gen (I := I) alpha A]
   exact map_neg (cotangentToDual_gen (I := I) alpha) A
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem oneForm_eval_const_smul {x : M}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -143,6 +154,8 @@ private theorem oneForm_eval_const_smul {x : M}
   rw [← cotangentToDual_apply_gen (I := I) alpha A]
   simp [smul_eq_mul]
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem oneForm_eval_const_sub_add_sub {x : M}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -154,6 +167,8 @@ private theorem oneForm_eval_const_sub_add_sub {x : M}
   rw [oneForm_eval_const_add (I := I) alpha (A - B) C]
   rw [oneForm_eval_const_sub (I := I) alpha A B]
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem mdifferentiableAt_metric_inner
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) -> TangentSpace I p} {x : M}
@@ -178,6 +193,8 @@ private theorem mdifferentiableAt_metric_inner
   rw [mdifferentiableAt_totalSpace] at htotal
   exact htotal.2
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem contMDiffAt_metric_inner
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) -> TangentSpace I p} {x : M} {n : WithTop ℕ∞}
@@ -206,6 +223,7 @@ private theorem contMDiffAt_metric_inner
   exact htotal.2
 
 
+omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem nabla0SFun_two_eval_smooth_slots
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -302,7 +320,10 @@ private theorem nabla0SFun_two_eval_smooth_slots
       rw [hscalar, hsum]
       ring
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 private theorem cov_smoothSections_apply_contMDiffAt_one
+    [IsManifold I 2 M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
@@ -343,6 +364,7 @@ private theorem cov_smoothSections_apply_contMDiffAt_one
         exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
   exact (hcovY.clm_bundle_apply hX).contMDiffAt (by simp)
 
+omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem coordinateFrame_coeff_mdiffAt_of_contMDiffAt_one
     (Z : (x : M) -> TangentSpace I x) {x₀ : M}
     (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
@@ -368,6 +390,7 @@ private theorem coordinateFrame_coeff_mdiffAt_of_contMDiffAt_one
       coordinateFrameAt] using hraw
   exact hcoeff.mdifferentiableAt (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
 
+omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem oneForm_eval_moving_C1_slot_mdiffAt
     (alpha : OneFormSection (I := I) (M := M))
     (Z : (x : M) -> TangentSpace I x) {x₀ : M}
@@ -408,6 +431,7 @@ private theorem oneForm_eval_moving_C1_slot_mdiffAt
     (DifferentialGeometry.Tensor.Coordinates.oneForm_pair_coordFrame_eventually
       (I := I) Z alpha x₀)
 
+omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem nablaOneFormSectionRealizes_eval_moving_C1_slot
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -441,6 +465,8 @@ private theorem nablaOneFormSectionRealizes_eval_moving_C1_slot
     _ = extDerivFun (I := I) (fun y : M => alpha y (fun _ : Fin 1 => Z y)) x (X x) -
         alpha x (fun _ : Fin 1 => (cov Z x) (X x)) := hraw
 
+omit [CompleteSpace E] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem mdifferentiableAt_tangentConstAt_of_mem
     (x₀ : M) (v : TangentSpace I x₀) {p : M}
     (hp : p ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -451,6 +477,8 @@ private theorem mdifferentiableAt_tangentConstAt_of_mem
   exact TensorLieDeriv.mdifferentiableAt_tangentConstInChart_of_mem
     (𝕜 := Real) (I := I) (x₀ := x₀) (p := p) v hp
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 private theorem contMDiffAt_tangentConstAt_self_minTwo
     (x₀ : M) (v : TangentSpace I x₀) :
     ContMDiffAt I (I.prod 𝓘(Real, E)) (minSmoothness Real 2)
@@ -477,6 +505,7 @@ private theorem contMDiffAt_tangentConstAt_self_minTwo
     ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
       (mem_baseSet_trivializationAt E (TangentSpace I) x₀))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem cov_tangentConstAt_apply_contMDiffOn_baseSet
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -523,6 +552,7 @@ private theorem cov_tangentConstAt_apply_contMDiffOn_baseSet
         (n := (1 : WithTop ℕ∞)) x₀ v)
   simpa [e] using hcovw.clm_bundle_apply hv
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem cov_tangentConstAt_apply_mdiffAt_of_mem
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -540,6 +570,8 @@ private theorem cov_tangentConstAt_apply_mdiffAt_of_mem
     (e.open_baseSet.mem_nhds hp)).mdifferentiableAt
       (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem cov_smooth_apply_mdiffAt_one
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -551,6 +583,8 @@ private theorem cov_smooth_apply_mdiffAt_one
     (𝕜 := Real) (I := I) cov hcov X Y x).mdifferentiableAt
       (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
 
+omit [IsManifold I 2 M] [IsManifold I 3 M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem exists_contMDiffSection_eventuallyEq_tangentConstAt
     (x : M) (v : TangentSpace I x) :
     ∃ V : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
@@ -595,6 +629,7 @@ private theorem exists_contMDiffSection_eventuallyEq_tangentConstAt
   refine ⟨V, hV, ?_⟩
   exact hV.self_of_nhds.trans (tangentConstAt_self (I := I) x v)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -695,6 +730,7 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangen
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem rm04_tconst_eval
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -745,6 +781,7 @@ private theorem rm04_tconst_eval
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem directionalDeriv_directionalDeriv_sub_commutator
     (X Y : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M)
     (hX : ContMDiffAt I (I.prod 𝓘(Real, E)) (minSmoothness Real 2) (T% X) x)
@@ -766,6 +803,7 @@ theorem directionalDeriv_directionalDeriv_sub_commutator
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatible
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1019,6 +1057,8 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
 
 
 
+omit [IsManifold I 2 M] [IsManifold I 3 M] in
+omit [SigmaCompactSpace M] in
 theorem rm04InputSkewAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -1068,6 +1108,7 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
 
 
 
+omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] in
 theorem rm04InputSkew_ofRealizes
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1114,6 +1155,7 @@ theorem rm04InputSkew_ofRealizes
 
 
 
+omit [SigmaCompactSpace M] in
 theorem firstBianchi_ofTF
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1136,6 +1178,8 @@ theorem firstBianchi_ofTF
   simpa [map_add, map_zero] using hinner
 
 
+omit [IsManifold I 1 M] in
+omit [SigmaCompactSpace M] in
 theorem firstBianchiAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -1165,6 +1209,8 @@ theorem firstBianchiAt_of_leviCivita_realizes
   rw [hXYZ, hYZX, hZXY]
   simpa [map_add, map_zero] using hinner
 
+omit [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] in
 private theorem rm04_pair_symm_of_input_output_first
     {x : M}
     {Rm04 : Tensor04At (I := I) (M := M) x}
@@ -1194,6 +1240,8 @@ private theorem rm04_pair_symm_of_input_output_first
 
 
 
+omit [IsManifold I 1 M] in
+omit [SigmaCompactSpace M] in
 theorem rm04OutputSkewAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -1219,6 +1267,7 @@ theorem rm04OutputSkewAt_of_leviCivita_realizes
 
 
 
+omit [SigmaCompactSpace M] in
 theorem rm04OutputSkew_ofMC
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1239,6 +1288,7 @@ theorem rm04OutputSkew_ofMC
 
 
 
+omit [SigmaCompactSpace M] in
 theorem rm04PairSymm_ofLC
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1258,6 +1308,7 @@ theorem rm04PairSymm_ofLC
       (torsionFree_of_isLeviCivita (I := I) hLC) Rm04 hRm04)
 
 
+omit [SigmaCompactSpace M] in
 theorem rm04PairSymmAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -1273,6 +1324,7 @@ theorem rm04PairSymmAt_of_leviCivita_realizes
 
 
 
+omit [IsManifold I 1 M] in
 theorem rm13MetricSkewAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -1287,6 +1339,7 @@ theorem rm13MetricSkewAt_of_leviCivita_realizes
     (leviCivitaConnectionOfMetric (I := I) g) Rm13 Rm04 hRm13 hRm04
     (rm04OutputSkewAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
 
+omit [SigmaCompactSpace M] in
 private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -1584,6 +1637,7 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
 
 
 
+omit [SigmaCompactSpace M] in
 theorem oneFormThirdCovDerivCommAt_of_leviCivita
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -1609,6 +1663,8 @@ theorem oneFormThirdCovDerivCommAt_of_leviCivita
 
 
 
+omit [IsManifold I 3 M] in
+omit [SigmaCompactSpace M] in
 theorem tensor0S_ricciIdentity_of_leviCivita
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))

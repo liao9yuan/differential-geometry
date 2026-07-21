@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -53,13 +52,12 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
@@ -73,7 +71,11 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_le_compSq_uniform
+    [FiniteDimensional Real E]
     (gRef : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     ∃ (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
       (u' : Set M) (Cu : Real),
@@ -158,7 +160,11 @@ theorem metricDerivNorm_le_compSq_uniform
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_le_compSq
+    [FiniteDimensional Real E]
     (gRef gk gInf : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     ∃ (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
       (u' : Set M) (Cu : Real),
@@ -184,7 +190,11 @@ theorem metricDerivNorm_le_compSq
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCInfConvOnCompacts_of_normConv
+    [FiniteDimensional Real E]
     (gSeq : ℕ → SmoothRiemannianMetric I M) (gInf gRef : SmoothRiemannianMetric I M)
     (hnorm : ∀ (p : ℕ) (K : Set M), IsCompact K → ∀ ε : Real, 0 < ε →
       ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p → ∀ x ∈ K,
@@ -207,7 +217,10 @@ theorem metricCInfConvOnCompacts_of_normConv
 
 
 
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem exists_subseq_hconv
+    [FiniteDimensional Real E]
     (K : Set M) (p : ℕ)
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
@@ -244,7 +257,11 @@ theorem exists_subseq_hconv
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem windowPreconv_of_perTime
+    [FiniteDimensional Real E]
     (K : Set M) (β ψ : Real) (p : ℕ)
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)

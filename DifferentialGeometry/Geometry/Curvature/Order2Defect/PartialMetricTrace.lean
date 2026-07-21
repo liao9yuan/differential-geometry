@@ -20,8 +20,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SNabla
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +57,7 @@ lemma metricTrace2_def
         H (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricTrace2_secondCovDeriv_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -64,6 +65,8 @@ theorem metricTrace2_secondCovDeriv_eq_metricTraceHessian
       metricTraceHessian (I := I) g r s T x := by
   rw [metricTrace2_def, metricTraceHessian_def]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_eq_metricTrace2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -72,6 +75,7 @@ theorem rawTensorConnLap_eq_metricTrace2
   rw [metricTrace2_secondCovDeriv_eq_metricTraceHessian]
   exact rawTensorConnLap_eq_metricTraceHessian (I := I) g r s T x
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem metricTrace2_eq_gWeighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -99,6 +103,7 @@ theorem frame_pairing_locally_const
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [SigmaCompactSpace M] in
 theorem cometric_skew_core
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) (w : TangentSpace I x) :
@@ -131,6 +136,7 @@ theorem cometric_skew_core
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [SigmaCompactSpace M] in
 theorem cometric_diagonal_skew
     (g : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) (w : TangentSpace I x) :

@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.Implicit
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -84,7 +83,7 @@ open scoped Topology Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -156,6 +155,7 @@ def CmHessianInput (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem implicitSol_hasStrictFDerivAt
     {ι : Type} [Fintype ι]
     (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
@@ -257,6 +257,7 @@ theorem implicitSol_hasStrictFDerivAt
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem existsPinnedDeriv
     {ι : Type} [Fintype ι]
     (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E)
@@ -348,6 +349,7 @@ theorem existsPinnedDeriv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem existsPinnedLocal
     {ι : Type} [Fintype ι]
     (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E)
@@ -373,6 +375,7 @@ theorem existsPinnedLocal
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem implicitSol_contDiffAt
     {ι : Type} [Fintype ι]
     (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
@@ -432,6 +435,7 @@ theorem implicitSol_contDiffAt
     rw [hzp]
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [T3Space M] in
 theorem chartCm_hasStrictFDerivAt
     (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (p : M) (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
@@ -458,7 +462,7 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -479,6 +483,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem normalChart_eq_diagExpInv_snd
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -499,6 +505,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem diagExpInv_eq_normal
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -523,6 +531,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem diagInv_eq_normal_lt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -554,6 +564,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem diagExpReadout_contMDiffAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -574,6 +586,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem diagExpReadout_contMDiffAt_order
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -596,6 +610,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem diagReadout_of_md
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -619,6 +635,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem exists_readoutDom
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -656,6 +674,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem exists_readoutDom_inf
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -707,6 +727,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [ConnectedSpace M] in
 theorem exists_readoutEBall
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -758,6 +779,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem centerPairs_lt_of
     (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -816,6 +838,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem centerPairs_lt_le
     (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -845,6 +868,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem centerPairs_lt
     (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -903,6 +927,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem chartCmEqnB_std
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -918,6 +944,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem chartCmEqnB_cdAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -980,6 +1008,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutB_sum_eq
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1012,6 +1042,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutB_zero_iff
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1032,6 +1064,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutSolB_strict
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1074,6 +1108,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutSolB_cdAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1116,6 +1152,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readout_sum_eq_clm
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1150,6 +1188,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readout_sum_eq_zero_iff
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1173,6 +1213,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem chartCmEqn'_contDiffAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1217,6 +1259,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem chartCmEqn'_contDiffAt_order
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1266,6 +1310,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutSol_hasStrictFDerivAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1306,6 +1352,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem readoutSol_contDiffAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1339,6 +1387,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem centerB_hasStrict
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1382,6 +1432,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem centerB_contDiff
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1431,6 +1483,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem center_hasStrictFDerivAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1477,6 +1531,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem center_contDiffAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -1638,6 +1694,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem centerOfMassChart_cont
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)

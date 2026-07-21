@@ -43,6 +43,7 @@ private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
   rw [h1, h2]
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma u_contDiffOn_goodSet
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -57,17 +58,19 @@ private lemma u_contDiffOn_goodSet
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have h_eq :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma u_and_fderiv_u_bound
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -133,6 +136,7 @@ private lemma u_and_fderiv_u_bound
   · have h1 := hCu_mem ⟨b, hb, rfl⟩
     exact le_trans (le_trans h1 (le_max_left _ _)) (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem intrinsic_piece_fderiv_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

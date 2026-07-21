@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_toSection_apply_congr_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {G₁ G₂ : SmoothCcTensor g r s} {x : M}
@@ -43,6 +44,7 @@ theorem covGrad_toSection_apply_congr_of_eventuallyEq
     (G₁.toSection.contMDiff.mdifferentiableAt (by simp))
     (G₂.toSection.contMDiff.mdifferentiableAt (by simp))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_toSection_eventuallyEq_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {G₁ G₂ : SmoothCcTensor g r s} {x : M}
@@ -54,6 +56,7 @@ theorem covGrad_toSection_eventuallyEq_of_eventuallyEq
   exact covGrad_toSection_apply_congr_of_eventuallyEq (I := I) g r s
     (G₁ := G₁) (G₂ := G₂) (x := y) hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_toSection_apply_congr_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {G₁ G₂ : SmoothCcTensor g r s} {x : M}
@@ -76,6 +79,7 @@ theorem iteratedCovGrad_toSection_apply_congr_of_eventuallyEq
   intro k
   exact (hev k).self_of_nhds
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_toSection_congr_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {G₁ G₂ : SmoothCcTensor g r s} {x : M}

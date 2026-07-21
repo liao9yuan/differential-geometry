@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Tensor
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {x : M}
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor02_vec2_smul
     (Q : Tensor02At (I := I) (M := M) x) (c : Real) (v : TangentSpace I x) :
     Q (vec2 (I := I) (c • v) (c • v)) = c ^ 2 * Q (vec2 (I := I) v v) := by
@@ -44,6 +44,7 @@ private theorem tensor02_vec2_smul
   simpa [Fin.prod_univ_two, pow_two, smul_eq_mul] using hmap
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem metric_inner_smul_self
     (g : SmoothRiemannianMetric I M) (c : Real) (v : TangentSpace I x) :
     g.inner x (c • v) (c • v) = c ^ 2 * g.inner x v v := by
@@ -57,6 +58,7 @@ private theorem metric_inner_smul_self
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor02_quadForm_le_of_unit_bound
     (g : SmoothRiemannianMetric I M) (Q : Tensor02At (I := I) (M := M) x) {Λ : Real}
     (hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 → Q (vec2 (I := I) u u) ≤ Λ)
@@ -91,6 +93,7 @@ theorem tensor02_quadForm_le_of_unit_bound
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor02_quadForm_abs_le_of_unit_bound
     (g : SmoothRiemannianMetric I M) (Q : Tensor02At (I := I) (M := M) x) {Λ : Real}
     (hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 → |Q (vec2 (I := I) u u)| ≤ Λ)

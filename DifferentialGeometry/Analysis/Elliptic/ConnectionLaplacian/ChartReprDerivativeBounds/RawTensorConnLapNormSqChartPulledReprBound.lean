@@ -48,6 +48,7 @@ private lemma sq_add_three_le_three_mul_sum_sq (a b c : ℝ) :
     (a + b + c) ^ 2 ≤ 3 * (a ^ 2 + b ^ 2 + c ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -136,6 +137,8 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_reprT_differentiableAt_chart_point
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) {b : M}
@@ -218,7 +221,7 @@ private lemma chartFrameNormGlobalSmooth_fderiv_repr_bound
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub_good : K_set ⊆ chartLeviCivitaGoodSet (I := I) α := by
-    have h_eq := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α
+    have h_eq := DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α
     intro y hy
     rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
     exact hK_sub hy

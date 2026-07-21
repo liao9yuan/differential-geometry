@@ -17,7 +17,7 @@ noncomputable section
 
 namespace MetricKoszul
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 
 
 
@@ -206,14 +206,14 @@ end CovCLM
 
 
 noncomputable def koszulVec
-    [CompleteSpace E]
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) : E :=
   hco.sharp (koszulCov D v w)
 
 
 @[simp] theorem apply_koszulVec
-    [CompleteSpace E]
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     B (koszulVec hco D v w) = koszulCov D v w := by
@@ -222,7 +222,7 @@ noncomputable def koszulVec
 
 
 theorem koszulVec_norm_le
-    [CompleteSpace E]
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
     {c : Real} (hc : 0 < c)
     (hB : ∀ u : E, c * ‖u‖ * ‖u‖ ≤ B u u)
@@ -240,7 +240,7 @@ theorem koszulVec_norm_le
 
 
 theorem koszulVec_diag_le
-    [CompleteSpace E]
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
     {c : Real} (hc : 0 < c)
     (hB : ∀ u : E, c * ‖u‖ * ‖u‖ ≤ B u u)
@@ -277,7 +277,7 @@ theorem koszulVec_diag_le
 
 
 theorem koszulVec_sub_le
-    [CompleteSpace E]
+    [CompleteSpace E] [CoerciveBilinInverse E]
     {B C : E →L[Real] E →L[Real] Real}
     (hBco : IsCoercive B) (hCco : IsCoercive C)
     {cB cC : Real} (hcB : 0 < cB) (hcC : 0 < cC)

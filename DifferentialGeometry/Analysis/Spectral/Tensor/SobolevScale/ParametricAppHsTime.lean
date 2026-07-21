@@ -42,6 +42,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem appCc_time_deriv
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -237,6 +238,7 @@ private theorem affine_eventually {P : ℝ → Prop} {a : ℝ}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem coeff_secant
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -374,6 +376,7 @@ private theorem coeff_secant
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem coeffRem_jet
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)

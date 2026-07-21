@@ -28,10 +28,11 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem ricciFrameDiffAt
     {Idx : Type} [Fintype Idx]
     (g : SmoothRiemannianMetric I M)
@@ -60,6 +61,8 @@ private theorem ricciFrameDiffAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChristoffel
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
@@ -141,6 +144,8 @@ theorem tailChristoffel
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChristoffelReg
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
@@ -178,6 +183,8 @@ theorem tailChristoffelReg
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tailChrOrtho
     {Idx : Type} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}

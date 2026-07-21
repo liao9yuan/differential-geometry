@@ -274,6 +274,7 @@ private lemma riemannSec_add_third_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
 omit [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private lemma riemannSec_smul_third_smooth
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -347,6 +348,7 @@ private lemma riemannSec_smul_third_smooth
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
 omit [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private lemma riemannSec_eq_zero_of_Z_eq_zero
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -468,6 +470,7 @@ private lemma riemannSec_eq_zero_of_Z_eq_zero
     rw [Finset.sum_insert hjs]
 
 omit [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 lemma riemannSec_eq_of_Z_eq_at
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}

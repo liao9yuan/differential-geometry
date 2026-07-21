@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.RicciCoord
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -48,6 +47,7 @@ def scalarHessCoordAt
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem gammaTraceCovVar
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -164,6 +164,7 @@ def scalarSecondVarCoordAt
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarFirst_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -180,6 +181,7 @@ theorem scalarFirst_of_fixedBase
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarFirst_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -197,6 +199,7 @@ theorem scalarFirst_of_fixedBaseRegular
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarSecond_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -214,6 +217,7 @@ theorem scalarSecond_of_fixedBase
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarSecond_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -233,6 +237,7 @@ theorem scalarSecond_of_fixedBaseRegular
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -314,6 +319,7 @@ def ricciHessVarCoordRHS
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -359,6 +365,7 @@ def shiftedScalarHessCoordAt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -397,6 +404,7 @@ theorem lcRicciHessVarShifted
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -451,6 +459,7 @@ theorem lcTraceVar
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessShifted_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -504,6 +513,7 @@ theorem lcRicciHessShifted_of_trace
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_of_trace
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -576,6 +586,7 @@ theorem lcTraceVar_of_trace
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_inv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -662,6 +673,7 @@ theorem lcTraceVar_inv
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcTraceShifted
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,

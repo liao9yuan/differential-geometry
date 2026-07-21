@@ -15,7 +15,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,6 +27,7 @@ section UniformSmallRescaling
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem maximalGeodesic_rescaled_eq_orbit_proj
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -55,6 +56,7 @@ private theorem maximalGeodesic_rescaled_eq_orbit_proj
     chartFlowOrbitLiftRescaled_proj (I := I) p v t' (Φ := Φ) s hΦ_target_ts
   rw [← h_proj_eq, h_proj]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem foot_in_source_throughout
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -111,6 +113,7 @@ theorem foot_in_source_throughout
   rw [chartFlowOrbitLiftRescaled_proj (I := I) p vb t' t hΦ_target_tt] at hsrc
   exact hsrc
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_rescale_at_one_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -189,6 +192,7 @@ theorem maximalGeodesic_rescale_at_one_of_small
     rw [h_lhs, h_rhs]
     congr 2
     rw [ht''_def, mul_one, mul_comm]
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_continuousOn_Icc_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧

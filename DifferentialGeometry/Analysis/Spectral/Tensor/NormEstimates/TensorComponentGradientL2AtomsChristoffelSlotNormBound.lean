@@ -436,6 +436,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompleteSpace E] in
 theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -532,6 +533,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompleteSpace E] in
 theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

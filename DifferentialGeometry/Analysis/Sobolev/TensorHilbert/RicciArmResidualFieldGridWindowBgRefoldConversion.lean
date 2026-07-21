@@ -29,7 +29,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,6 +45,9 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma metricDifferenceCcTensor_eq_symmS (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
@@ -86,6 +89,7 @@ def ricciFoldWeightB (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
     (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -190,6 +194,7 @@ private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
+omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
@@ -737,6 +742,7 @@ lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
 
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sharpRaisedKoszulVec_symmS_eq_connDiff (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -752,7 +758,21 @@ private lemma sharpRaisedKoszulVec_symmS_eq_connDiff (P : SmoothCcTensor g₀ 0 
   rw [linearizedKoszulCovec_apply (I := I) g₀ (ccTensor02Symm (I := I) g₀ P) x u ζ z]
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z]
 
+section NormedKoszulCovectorConnectionDifferenceIdentity
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+variable (g₀ g₁ : SmoothRiemannianMetric I M)
+
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma koszulCovecCc_unitModel_eq_connDiff_g1_inner (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -763,6 +783,21 @@ lemma koszulCovecCc_unitModel_eq_connDiff_g1_inner (P : SmoothCcTensor g₀ 0 2)
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x a b c]
   rfl
 
+end NormedKoszulCovectorConnectionDifferenceIdentity
+
+section NormedKoszulConnectionDifferenceFoldWeight
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+variable (g₀ g₁ : SmoothRiemannianMetric I M)
+
 def koszulConnDiffFoldWeight (σ : Equiv.Perm (Fin 6)) (P : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 4 :=
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
@@ -770,6 +805,21 @@ def koszulConnDiffFoldWeight (σ : Equiv.Perm (Fin 6)) (P : SmoothCcTensor g₀ 
       (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
         (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovecCc (I := I) g₀ P))
         (connDiffLoweredCc (I := I) g₀ g₁)))
+
+end NormedKoszulConnectionDifferenceFoldWeight
+
+section NormedKoszulConnectionDifferenceFoldIdentity
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
@@ -880,6 +930,8 @@ lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [hYval]
   rfl
+
+end NormedKoszulConnectionDifferenceFoldIdentity
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
@@ -1327,6 +1379,19 @@ lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
 
+section NormedKoszulConnectionDifferenceFoldGrid
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+variable (g₀ : SmoothRiemannianMetric I M)
+
 lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGeneral_boundedFactorGridWindow_le (σ : Equiv.Perm (Fin 6))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
@@ -1590,6 +1655,8 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGener
           ring
         rw [Finset.sum_congr rfl fun w₁ _ => hstep w₁, ← Finset.sum_mul]
         ring
+
+end NormedKoszulConnectionDifferenceFoldGrid
 
 end bgrConversion
 

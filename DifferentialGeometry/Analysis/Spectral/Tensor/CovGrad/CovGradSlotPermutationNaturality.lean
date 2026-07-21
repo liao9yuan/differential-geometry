@@ -25,7 +25,9 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +46,19 @@ def unitModel (g : SmoothRiemannianMetric I M) (s : ℕ)
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
       (unitTensor (I := I) (M := M) x))
 
+end NormedSpaceModel
+
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 private def covDerivUnitModel (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) (v : TangentSpace I x) : Tensor0SModel s ℝ E :=
   Tensor0SSpace.toModel
@@ -57,6 +72,8 @@ private def unitEvalSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from W.toSection y)
       (unitTensor (I := I) (M := M) y)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) (v : TangentSpace I x) :
@@ -70,6 +87,7 @@ private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
   exact tensorRSCovariantDerivative_zeroS_unit_eval
     (I := I) (M := M) g s W.toSection x v
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartE_section_repr_apply_tuple
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace s I b) (b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -85,6 +103,7 @@ private lemma tensor0SChartE_section_repr_apply_tuple
   rw [e.continuousLinearMapAt_apply ℝ, e.coe_linearMapAt_of_mem hbE]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartE_section_repr_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
@@ -143,6 +162,7 @@ private lemma tensor0SChartFiberFromModel_domDomCongr
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb M0 (fun i => v (σ i))]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SIntrinsicChartCLM_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M)
@@ -188,6 +208,7 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
 
   rw [tensor0SChartFiberFromModel_domDomCongr (I := I) s σ α b hb]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma localSlotCLM_comp_perm
     (s : ℕ) (σ : Equiv.Perm (Fin s)) {b : M} (k : Fin s)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (i : Fin s) :
@@ -202,6 +223,7 @@ private lemma localSlotCLM_comp_perm
         (by intro h; exact hi (by rw [← Equiv.symm_apply_apply σ i, h])),
       DifferentialGeometry.Integral.Connection.localSlotCLM_other s (σ.symm k) Φ hi]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensor0SSlotCorrection_sum_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (X : Π b : M, TangentSpace I b) (b : M) :
@@ -239,6 +261,7 @@ private lemma domDomCongr_sub
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1))) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) (X : Π b : M, TangentSpace I b) {b : M}
@@ -264,6 +287,7 @@ private lemma chartTensor0SCovariantDerivative_succ_domDomCongr
   rw [chartTensor0SSlotCorrection_sum_domDomCongr (I := I) (s + 1) g σ α T X b]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitEvalSection_tensorSectionMDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M) :
     DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s
@@ -295,6 +319,8 @@ private lemma domDomCongr_finsum_smul
   rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1)))
     (ŝ ŝ' : Π y : M, Tensor0SSpace (s + 1) I y) (x : M) (v : TangentSpace I x)
@@ -352,6 +378,8 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe i]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -398,6 +426,7 @@ theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
       hrel
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma unitModel_covGrad_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) (v : Fin (s + 1) → TangentSpace I x) :
@@ -407,6 +436,7 @@ private lemma unitModel_covGrad_apply
   exact covGrad_toSection_apply_eval (I := I) (M := M) g 0 s W x
     (unitTensor (I := I) (M := M) x) v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -415,10 +445,12 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
     (i : ℕ) :
     ∃ σ' : Equiv.Perm (Fin (s + i)),
       ∀ x : M, unitModel (I := I) (M := M) g (s + i)
-          (iteratedCovGrad (I := I) (M := M) g 0 s i S') x =
+          (show SmoothCcTensor g 0 (s + i) from
+            iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') x =
         ContinuousMultilinearMap.domDomCongr σ'
           (unitModel (I := I) (M := M) g (s + i)
-            (iteratedCovGrad (I := I) (M := M) g 0 s i S) x) := by
+            (show SmoothCcTensor g 0 (s + i) from
+              iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S) x) := by
   induction i with
   | zero => exact ⟨σ, hSS'⟩
   | succ i ih =>
@@ -429,22 +461,22 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
 
     change unitModel (I := I) (M := M) g (s + i + 1)
         (covGrad (I := I) (M := M) g 0 (s + i)
-          (iteratedCovGrad (I := I) (M := M) g 0 s i S')) x v =
+          (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S')) x v =
       ContinuousMultilinearMap.domDomCongr (Equiv.Perm.decomposeFin.symm (0, σ'))
         (unitModel (I := I) (M := M) g (s + i + 1)
           (covGrad (I := I) (M := M) g 0 (s + i)
-            (iteratedCovGrad (I := I) (M := M) g 0 s i S)) x) v
+            (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S)) x) v
 
     rw [unitModel_covGrad_apply (I := I) (M := M) g (s + i)
-      (iteratedCovGrad (I := I) (M := M) g 0 s i S') x v]
+      (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') x v]
     rw [ContinuousMultilinearMap.domDomCongr_apply,
       unitModel_covGrad_apply (I := I) (M := M) g (s + i)
-        (iteratedCovGrad (I := I) (M := M) g 0 s i S) x
+        (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S) x
         (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ')) k))]
 
     rw [tensorCovDerivAt_unit_toModel_domDomCongr_of_section (I := I) (M := M) g (s + i) σ'
-      (iteratedCovGrad (I := I) (M := M) g 0 s i S)
-      (iteratedCovGrad (I := I) (M := M) g 0 s i S') hσ' x (v 0)]
+      (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S)
+      (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') hσ' x (v 0)]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
 
     have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ')) (0 : Fin (s + i + 1))) = v 0 := by
@@ -476,6 +508,8 @@ private lemma applySection_tensorSectionMDiffAt
     (w.contMDiff.contMDiffAt).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHom hv
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_rs_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
@@ -567,6 +601,7 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
         hu_at hu'_at hurel
   rw [htarget, hsource]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_rs_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
@@ -650,6 +685,7 @@ private lemma lowerAllUpperIndices_zero_domDomCongr_of_unitModel
   apply Fin.ext
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -657,38 +693,42 @@ theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
       ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g s S y))
     (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
-        ((iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x) =
+        ((show SmoothCcTensor g 0 (s + i) from
+          iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S').toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
-        ((iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x) := by
+        ((show SmoothCcTensor g 0 (s + i) from
+          iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S).toSection x) := by
   obtain ⟨σ', hσ'⟩ :=
     exists_iteratedCovGrad_unit_toModel_domDomCongr (I := I) (M := M) g s σ S S' hSS' i
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + i) x
-      ((iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x),
+      ((iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S').toSection x),
     riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + i) x
-      ((iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x)]
+      ((iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S).toSection x)]
 
   change covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
-              (iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x)))
+              (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S').toSection x)))
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
-              (iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x))) =
+              (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S').toSection x))) =
       covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
-              (iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x)))
+              (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S).toSection x)))
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
-              (iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x)))
+              (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S).toSection x)))
   rw [lowerAllUpperIndices_zero_domDomCongr_of_unitModel (I := I) (M := M) g (s + i) σ'
-    (iteratedCovGrad (I := I) (M := M) g 0 s i S)
-    (iteratedCovGrad (I := I) (M := M) g 0 s i S') hσ' x]
+    (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S)
+    (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') hσ' x]
   rw [tensorInnerPointwise_0s_domDomCongr]
+
+end NormedSpaceModel
 
 end TensorSpectral
 end Parabolic

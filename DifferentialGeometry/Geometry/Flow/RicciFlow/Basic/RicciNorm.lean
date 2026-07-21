@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -61,6 +60,7 @@ variable {Idx : Type*} [Fintype Idx]
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -84,6 +84,7 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -120,6 +121,7 @@ def RicciNormLaplacianComponentsOn
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_bochner
     (ricciNormLap roughLapInner nablaRicNormSq : Real -> M -> Real)
     (h_lap : DifferentialGeometry.Integral.Connection.RicciNormLaplacianComponentsInFrame
@@ -129,6 +131,7 @@ theorem ricciNormLaplacianComponentsOn_of_bochner
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx]
@@ -167,6 +170,7 @@ noncomputable def coordInv
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -260,6 +264,7 @@ def RicciNormHeatEquationOn
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (ricciNormSq ricciNormLap roughLapInner nablaRicNormSq reaction : Real -> M -> Real)
@@ -386,6 +391,7 @@ variable {Idx : Type*} [Fintype Idx]
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -423,6 +429,7 @@ theorem ricciNormHeatEquationOn_of_solution
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -456,6 +463,7 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricci_heat_mc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [DecidableEq Idx]

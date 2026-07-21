@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerLaplacianVariational
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,6 +46,7 @@ noncomputable def gradInnerLapU
   gradInnerCLM (I := I) (M := M) g φ
     (u_h - preimageLift (I := I) (M := M) g hu_h)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerLapU_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -54,6 +55,7 @@ noncomputable def gradInnerLapU
       gradInnerCLM (I := I) (M := M) g φ
         (u_h - preimageLift (I := I) (M := M) g hu_h) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerLapU_eq_sub
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -110,6 +112,7 @@ theorem gradInnerLaplacianCandidateUnconditional_explicit
   rw [gradInnerLapU_eq_sub]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_laplacianDomain_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -119,6 +122,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_smooth
   gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_laplacianDomain_from_witness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -181,6 +185,7 @@ theorem gradInnerLaplacianCandidateUnconditional_norm_le
     rw [norm_smul]; simp
   linarith [hstep1, hstep2, hstep3, hstep4, h_smul_ricci, h_smul_hess]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerCLM_smoothToH1Compl_eq_smoothToLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -190,6 +195,7 @@ lemma gradInnerCLM_smoothToH1Compl_eq_smoothToLp
   rw [gradInnerCLM_smoothToH1Compl]
   exact gradInnerSmooth_eq_smoothToLp_bundle (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricciPairingCLM_smoothToH1Compl_eq_smoothToLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ricciPairingCLM (I := I) (M := M) g φ
@@ -205,6 +211,7 @@ noncomputable def smoothGradInnerWitness
   smoothToH1Compl (I := I) (M := M) g
     (gradInnerSmoothBundle (I := I) (M := M) g φ v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothGradInnerWitness_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothGradInnerWitness (I := I) (M := M) g φ v ∈
@@ -214,6 +221,7 @@ theorem smoothGradInnerWitness_mem_laplacianDomain
     (I := I) (M := M)
     (gradInnerSmoothBundle (I := I) (M := M) g φ v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_smoothGradInnerWitness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     H1ComplToLp (I := I) (M := M) g
@@ -224,6 +232,7 @@ theorem H1ComplToLp_smoothGradInnerWitness
   rw [H1ComplToLp_smoothToH1Compl]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_eq_H1ComplToLp_smoothWitness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -232,6 +241,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_smoothWitness
         (smoothGradInnerWitness (I := I) (M := M) g φ v) := by
   rw [H1ComplToLp_smoothGradInnerWitness]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -243,6 +253,7 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
   exact gradInnerCLM_mem_image_laplacianDomain_smooth
     (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_laplacianDomain_of_witness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -257,6 +268,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_of_witness
   obtain ⟨w_lift, hw_lift_dom, hw_lift_eq⟩ := mkWitness
   exact ⟨w_lift, hw_lift_dom, hw_lift_eq⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_witness_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ∃ w_lift : H1Compl (I := I) (M := M) g,
@@ -288,6 +300,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational
   exact (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
     ⟨gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h, rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothGradInnerWitness_eq_resolvent
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothGradInnerWitness (I := I) (M := M) g φ v =
@@ -298,6 +311,7 @@ theorem smoothGradInnerWitness_eq_resolvent
   exact smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M)
     (gradInnerSmoothBundle (I := I) (M := M) g φ v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -309,6 +323,7 @@ theorem gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate
   rw [gradInnerCLM_eq_H1ComplToLp_smoothWitness]
   rw [smoothGradInnerWitness_eq_resolvent]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_smoothToH1Compl_eq_resolventL2_smoothCandidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -359,6 +374,8 @@ theorem g_inner_polar
   ring
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_polar
     (g : SmoothRiemannianMetric I M) (b : M) (u w : TangentSpace I b) :
     ricciTensor (I := I) g b (u + w) (u + w) -

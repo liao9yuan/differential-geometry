@@ -17,7 +17,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open TensorMultilinear
 open TensorRSNabla
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,8 @@ instance endoCovariantDerivative_contMDiff (g : SmoothRiemannianMetric I M) :
     (LeviCivita (I := I) g) (LeviCivita (I := I) g)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [CompleteSpace E] in
 theorem endoCovariantDerivative_apply (g : SmoothRiemannianMetric I M)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (Y : ContMDiffSection I E ∞ (TangentSpace I)) (x : M) (v : E) :
@@ -72,6 +74,7 @@ def endoSlotZeroCcTensor (g : SmoothRiemannianMetric I M) (s : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma slotInsertEndoCc_toSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) :
@@ -80,6 +83,7 @@ omit [CompleteSpace E] in
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) := rfl
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace (s + 1) I x) :
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
@@ -94,6 +98,8 @@ lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
   congr 1
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) (D : Tensor0SSpace (s + 1) I x) (v0 : E) :
@@ -173,6 +179,8 @@ private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x (w x) from rfl]
   abel
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) :
@@ -196,6 +204,8 @@ theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s
   congr 1
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_slotInsertEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (D : Tensor0SSpace (s + 1) I x) (v : Fin (s + 1 + 1) → TangentSpace I x) :
@@ -222,11 +232,13 @@ def identityHomTensorRSField (r a : ℕ) :
       (φ := fun x : M => ContinuousLinearMap.id ℝ (TensorRSSpace r a I x))
       (fun Y => Y.contMDiff)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma idHomTensorRSField_apply (r a : ℕ) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r a I x from
         identityHomTensorRSField (E := E) (M := M) (I := I) r a x) =
       ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
     (W : SmoothCcTensor g r a) :
     homTensorRSFieldApply (I := I) (M := M) g r a a (identityHomTensorRSField (E := E) (M := M) (I := I) r a) W = W := by
@@ -235,6 +247,8 @@ lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
   intro x
   rw [appFullSec_toSection, idHomTensorRSField_apply, ContinuousLinearMap.id_apply]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (k : ℕ) :
@@ -254,6 +268,7 @@ theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I
 omit [CompleteSpace E] in
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cotangent_slot_apply (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (om : Tensor0SSpace 1 I x)
     (w : TangentSpace I x) :

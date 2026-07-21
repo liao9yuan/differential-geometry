@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,7 +38,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -134,6 +134,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -194,6 +195,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per
           mul_le_mul_of_nonneg_left h_one_le (by exact zero_le _)
   exact h1.trans h2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α β : M)
@@ -214,6 +216,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
   eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (I := I) (M := M) g r s S α β Idx Jdx k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -324,6 +327,7 @@ theorem wkpNorm_one_two_decomposition
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -388,6 +392,7 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
     rw [ENNReal.ofReal_add (by linarith : (0 : ℝ) ≤ a₀ + 1) hC₁_nn]
   exact mul_le_mul_of_nonneg_right h_ofReal_sum (by exact zero_le _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNorm_chartPushed_tensorChartComponentScalar_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α β : M)

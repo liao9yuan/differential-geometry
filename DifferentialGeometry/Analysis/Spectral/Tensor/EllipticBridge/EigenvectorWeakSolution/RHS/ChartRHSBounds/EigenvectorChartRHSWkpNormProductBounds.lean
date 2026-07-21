@@ -19,7 +19,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -197,6 +197,7 @@ lemma memWkpFinsetSum
 end SmoothCoefBound
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -207,6 +208,7 @@ lemma one_div_densityOnEuclid_contDiffOn
 section Aggregation
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma wkpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → EuclN → ℝ) (A : ℝ≥0∞)
@@ -462,6 +464,7 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {δ : Type*} {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → δ → EuclN → ℝ) (A : δ → ℝ≥0∞)

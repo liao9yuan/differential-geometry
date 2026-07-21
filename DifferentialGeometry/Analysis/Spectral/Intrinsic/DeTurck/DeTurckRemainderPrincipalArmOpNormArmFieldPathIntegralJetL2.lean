@@ -39,7 +39,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,7 @@ open DifferentialGeometry.Integral.Measure
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r sIdx i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ)
@@ -76,6 +77,7 @@ omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [S
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem riemannianFiberNormSq_jointContinuousOn
     (g₀ : SmoothRiemannianMetric I M) (r sIdx : ℕ)
     (Ψ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ)
@@ -138,6 +140,7 @@ private theorem riemannianFiberNormSq_jointContinuousOn
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dscr_pathIntegralCoeffField_congr
     (g₀ : SmoothRiemannianMetric I M) (r sIdx : ℕ)
     (Ψ₁ Ψ₂ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ) (hS : IsOpen S)
@@ -162,6 +165,7 @@ private theorem dscr_pathIntegralCoeffField_congr
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_pathIntegralCoeffField_comm
     (g₀ : SmoothRiemannianMetric I M) (r sIdx i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ) (hS : IsOpen S)
@@ -213,6 +217,7 @@ private theorem iteratedCovGrad_pathIntegralCoeffField_comm
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem armField_pathIntegral_jetL2_perOrder_le
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}

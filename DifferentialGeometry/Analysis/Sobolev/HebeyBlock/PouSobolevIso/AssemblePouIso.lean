@@ -21,6 +21,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem assemble_pou_h1_iso_intrinsic_h1
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

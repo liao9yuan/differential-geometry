@@ -21,7 +21,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -75,7 +75,7 @@ private lemma extChartAt_target_measurableSet (α : M) :
   DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
     (I := I) (M := M) α
 
-private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 private lemma toEuclidean_measurableEmbedding :
@@ -138,7 +138,7 @@ private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
     (DifferentialGeometry.Integral.Measure.modelHaar (E := E))
 
 noncomputable def euclideanHaarFactor (E : Type*)
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] :
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] :
     ℝ≥0 :=
   letI : MeasurableSpace E := borel E
   haveI : BorelSpace E := ⟨rfl⟩
@@ -1080,7 +1080,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

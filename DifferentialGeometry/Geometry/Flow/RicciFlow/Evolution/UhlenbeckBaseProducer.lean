@@ -17,7 +17,6 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -55,6 +54,8 @@ variable {Idx : Type*}
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem metricCompInFrame_timeDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -76,6 +77,8 @@ theorem metricCompInFrame_timeDeriv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem realizedRmBase_eq_curvCoeff_lower
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -123,6 +126,7 @@ theorem realizedRmBase_eq_curvCoeff_lower
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem realizedRmBase_timeDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -218,6 +222,7 @@ theorem realizedRmBase_timeDeriv
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_firstTrace_gform_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
@@ -248,6 +253,7 @@ theorem solution_rm04_kn_firstTrace_gform_at
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
@@ -276,6 +282,7 @@ theorem solution_rm04_kn_field
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_timeDeriv_kn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -358,6 +365,8 @@ theorem solution_rm04_timeDeriv_kn
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_eq_trace_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
@@ -387,6 +396,8 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem scalarDot_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -428,6 +439,7 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04CompknOrtho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -464,6 +476,8 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricDot_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -507,6 +521,7 @@ set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Dim3Reaction in
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricDot_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -602,6 +617,7 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04BaseEvolution_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -660,6 +676,7 @@ theorem rm04BaseEvolution_at
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ricciSymFrame_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -671,6 +688,7 @@ theorem ricciSymFrame_can
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_all
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
@@ -702,6 +720,8 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem rmBaseDeriv_basis
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M)
@@ -748,6 +768,8 @@ theorem rmBaseDeriv_basis
   exact (hD (slots 0) (slots 1) (slots 2) (slots 3)).mul_const _
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connSmoothSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -757,6 +779,8 @@ theorem connSmoothSol
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -771,6 +795,8 @@ theorem metricCompatSol
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ricNablaRealizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -791,6 +817,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem knTermRealizes
     [IsManifold I 2 M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -834,6 +862,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem knScalRealizes
     [IsManifold I 2 M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -948,6 +978,8 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem knFieldRealizes
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -964,6 +996,8 @@ private theorem knFieldRealizes
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ric2NablaRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -984,6 +1018,8 @@ theorem ric2NablaRealizes
     (2 + 1) (S.family.connection t) _ _
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem duNablaRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1065,6 +1101,8 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem knTerm2Realizes
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1138,6 +1176,8 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem knScal2Realizes
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1240,6 +1280,7 @@ set_option maxHeartbeats 2000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem knField_eq_rm04
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1351,6 +1392,7 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem nablaRm04Kn
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1388,6 +1430,8 @@ private noncomputable def rm04DerivsKn
 
 
 
+omit [IsManifold I 1 M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rm04Nab2Kn_eq
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1418,6 +1462,7 @@ open DifferentialGeometry.Integral.Connection in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceRicWit
     [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
@@ -1483,6 +1528,7 @@ open DifferentialGeometry.Integral.Connection in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceScalWit
     [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
@@ -1625,6 +1671,8 @@ private noncomputable def lapRm04Kn
 open DifferentialGeometry.Integral.Connection in
 
 
+omit [IsManifold I 1 M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lapRm04Kn_apply
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
@@ -1757,6 +1805,8 @@ open DifferentialGeometry.Integral.Connection in
 
 
 
+omit [IsManifold I 1 M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem traceRm04Kn
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1773,6 +1823,8 @@ open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction 
 
 
 
+omit [IsManifold I 1 M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem roughRm04_comp
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1838,6 +1890,7 @@ set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04Base_of_sol
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -1933,6 +1986,7 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04HrmProducer
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCente
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -27,7 +26,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -37,6 +36,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [T3Space M] in
 theorem metricEnorm (g : SmoothRiemannianMetric I M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -87,6 +87,8 @@ noncomputable def activeFill (μ : X → ι → ℝ) (pts : X → ι → M)
 
 
 
+omit [T3Space M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem energy_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
     (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
     (x : X) (q : M) :
@@ -126,6 +128,7 @@ theorem uniqueMin_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar : X → M}
     {x : X} {ε : ℝ} (hε : 0 < ε)
     (hactive :
@@ -292,6 +295,7 @@ theorem on_eq {s : Set X} {qstar : X → M}
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem inputOfFill {qstar : X → M} (x : X)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -341,6 +345,7 @@ theorem inputOfFill {qstar : X → M} (x : X)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem inputOfFillSelf {qstar : X -> M} (x : X)
     (hcomplete :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

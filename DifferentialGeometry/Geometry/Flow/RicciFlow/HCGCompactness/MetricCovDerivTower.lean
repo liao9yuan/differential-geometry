@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -46,7 +45,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
@@ -72,12 +70,14 @@ def iterCovComp {r : ℕ}
         (chr x)
         (iterCovComp frame chr base a x)
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovComp_zero {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (base : M → (Fin r → Idx) → Real) :
     iterCovComp (I := I) frame chr base 0 = base := rfl
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_succ {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -95,6 +95,8 @@ theorem iterCovComp_succ {r : ℕ}
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iterCov_realizes
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -131,6 +133,8 @@ theorem iterCov_realizes
 
 
 
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem iterCovComp_eq_iterCov
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

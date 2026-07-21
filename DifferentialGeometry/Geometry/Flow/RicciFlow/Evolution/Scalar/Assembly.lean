@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.RmTrace
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,6 +28,7 @@ section TraceRoute
 variable {Idx : Type*} [Fintype Idx]
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -83,6 +83,7 @@ theorem scalarTraceInFrame_hasDerivWithinAt
                   exact hInv.mul hRic))))
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution
     [DecidableEq Idx]
@@ -139,6 +140,7 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     [DecidableEq Idx]

@@ -35,6 +35,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -45,6 +46,8 @@ private lemma pouTsupport_subset_chartAt_source (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_sq_triv_christoffel_correction_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

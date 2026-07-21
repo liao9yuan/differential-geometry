@@ -19,7 +19,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,6 +42,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGrad_toFun_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport w.toFun) :
@@ -56,6 +57,7 @@ private lemma covGrad_toFun_eq_zero_off_tsupport
   rw [SmoothCcTensor.toFun_apply, covGrad_toSection_apply, hcov_zero, map_zero,
     TensorRSSpace.toModel_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarSmul_toFun_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) {x : M}
@@ -65,6 +67,7 @@ private lemma scalarSmul_toFun_eq_zero_off_tsupport
     image_eq_zero_of_notMem_tsupport hx
   rw [scalarSmul_toFun_apply, hζx, zero_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarSmul_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) :
@@ -77,6 +80,7 @@ private lemma scalarSmul_tsupport_subset
   exact hx (scalarSmul_toFun_eq_zero_off_tsupport (I := I) (M := M) g r s ζ w
     hx_notin)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma prependCovGradSlot_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) :
@@ -107,6 +111,7 @@ private lemma prependCovGradSlot_tsupport_subset
       (covGrad (I := I) (M := M) g r s S) hx_notin
   rw [hfst, hsnd, sub_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossLeft_integral_eq_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensorH1 g r s)
@@ -124,6 +129,7 @@ theorem tensorCovDerivCrossLeft_integral_eq_inner
     (I := I) (M := M) g r s ζ w.toCcTensor S x]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossLeft_integral_eq_chartPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (w : SmoothCcTensorH1 g r s) (S : SmoothCcTensor g r s) :
@@ -159,6 +165,8 @@ private lemma gramMatrixAt_inv_symm
   have h := hHerm.apply l k
   rwa [star_trivial] at h
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossRight_eq_crossLeft
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -175,6 +183,7 @@ theorem tensorCovDerivCrossRight_eq_crossLeft
       (TensorRSSpace.toModel
         (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j)))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivCrossRight_integral_eq_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensorH1 g r s)

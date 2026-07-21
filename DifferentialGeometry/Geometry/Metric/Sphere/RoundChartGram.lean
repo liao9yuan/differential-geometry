@@ -44,6 +44,7 @@ theorem extChartAt_symm_zero_sphere (x₀ : sphere (0 : E) 1) :
 
 
 
+omit [NeZero n] in
 theorem chartGramOnE_roundMetric (x₀ : sphere (0 : E) 1)
     (i j : Fin (finrank ℝ (EuclideanSpace ℝ (Fin n)))) (y : EuclideanSpace ℝ (Fin n)) :
     chartGramOnE (roundMetric (E := E) (n := n)) x₀ i j y =

@@ -68,6 +68,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance instMeasurableSpaceE : MeasurableSpace E := borel E
 private local instance instBorelSpaceE : @BorelSpace E _ (borel E) := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] in
 private lemma integrable_divergence_g_with_boundary
     [hI : HasSmoothBoundary E H I]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

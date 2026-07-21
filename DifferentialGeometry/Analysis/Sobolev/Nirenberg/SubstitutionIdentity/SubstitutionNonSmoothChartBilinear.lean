@@ -14,7 +14,7 @@ namespace Analysis
 namespace Sobolev
 namespace SubstitutionNonSmoothChartBilinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ lemma standardNirenbergTest_tsupport_in_thickening
     refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 hy_K_0 ?_
     exact h_dist
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma standardNirenbergTest_tsupport_in_chartTarget
     [I.Boundaryless]
     {α : M}
@@ -656,6 +657,7 @@ def chartBilinear_RHS
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) : ℝ :=
   c_term_chartBilinear (I := I) (M := M) D K_0 η k h
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma standardNirenbergTest_smooth_admissible
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -744,6 +746,7 @@ lemma standardNirenbergTest_smooth_admissible
   · exact standardNirenbergTest_tsupport_in_chartTarget (E := E) (I := I) (M := M)
       (α := α) k h hη_supp hη_supp_in_K_0 h_thick D.u_chart
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma variational_identity_at_standardNirenbergTest_smooth_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -780,6 +783,7 @@ lemma variational_identity_at_standardNirenbergTest_smooth_uChart
   exact D.variational_identity (standardNirenbergTest
     (d := Module.finrank ℝ E) k h η D.u_chart) h_v_smooth h_v_supp h_v_tsupp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smooth_uChart_variational_lhs_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -859,6 +863,7 @@ set_option linter.unusedVariables false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nirenberg_substitution_identity_chartBilinear
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -1000,6 +1005,7 @@ set_option linter.unusedVariables false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nirenberg_substitution_identity_chartBilinear_symbolic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -1030,6 +1036,7 @@ theorem nirenberg_substitution_identity_chartBilinear_symbolic
 set_option linter.unusedVariables false in
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nirenberg_substitution_identity_chartBilinear_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -1051,6 +1058,7 @@ theorem nirenberg_substitution_identity_chartBilinear_compact
 
 set_option linter.unusedVariables false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nirenberg_substitution_identity_chartBilinear_final
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

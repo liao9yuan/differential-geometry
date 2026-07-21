@@ -352,6 +352,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quadNormal_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (f : ContDiffBump (0 : Real)) {z : E}
@@ -382,6 +383,7 @@ theorem quadNormal_readout
   rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (lam : Real) (hlam : 0 < lam) {z : E}
@@ -430,6 +432,7 @@ noncomputable def seqCenterD
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem seqCenterD_dist_eq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -446,6 +449,7 @@ theorem seqCenterD_dist_eq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem seqCenterD_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -476,6 +480,7 @@ noncomputable instance liveSlotFintype
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem seqCenterD_some
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -489,6 +494,7 @@ theorem seqCenterD_some
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem seqCenterD_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -500,6 +506,7 @@ theorem seqCenterD_live
     seqCenterD_some hd P L k gamma (hk.trans hgamma)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem seqCenter_dead
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -530,6 +537,7 @@ noncomputable def seqAtomChart
     (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem seqAtomChart_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -582,6 +590,7 @@ theorem seqAtomChart_smooth
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtom_live_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -611,6 +620,7 @@ theorem seqAtom_live_conv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtom_dead_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -669,6 +679,7 @@ theorem atom_disjoint_conv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem seqAtoms_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -698,6 +709,7 @@ theorem seqAtoms_conv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (center : ι -> forall k : Nat, (X.obj k).M)
@@ -741,6 +753,7 @@ theorem stepCAtom_conv {ι : Type*} [Fintype ι]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem existsOriginMetric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -784,6 +797,7 @@ theorem existsOriginMetric
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem existsMetric0Univ {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -824,6 +838,7 @@ theorem existsMetric0Univ {ι : Type*} [Fintype ι]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem existsLiveMetric0
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -849,6 +864,7 @@ theorem existsLiveMetric0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem liveMetric0_equiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)

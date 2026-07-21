@@ -42,7 +42,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -65,6 +65,8 @@ def ricEndoBackgroundDifferenceField (g₀ g₁ : SmoothRiemannianMetric I M) :
   ricciEndomorphismField (I := I) (M := M) g₁ - ricciEndomorphismField (I := I) (M := M) g₀
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁ x =
       ricEndoRaisedFib (I := I) g₁ x - ricEndoRaisedFib (I := I) g₀ x := by
@@ -77,6 +79,7 @@ lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma curvCoeffSlot_zero_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 -
@@ -112,6 +115,7 @@ private lemma curvCoeffSlot_zero_backgroundDifference_eq
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.map_update_sub]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma curvCoeffSlot_one_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 1 -
@@ -171,6 +175,7 @@ private lemma curvCoeffSlot_one_backgroundDifference_eq
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.map_update_sub]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ -
@@ -187,6 +192,8 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
     ricciArmOrder0CurvCoeff, ricciArmOrder0CurvCoeff]
   abel
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem curvDiffGrid_productTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -895,7 +902,19 @@ lemma tWindow_mul_antidiagonalTupleGrid_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ 
     _ = tWindowMulConst j l * tWindow b (j + l) := by
         rw [tWindowMulConst, ← Finset.sum_mul]
 
+section NormedGridIdentities
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (i : ℕ) :
     tWindow (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -908,6 +927,7 @@ lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
                 ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (l : ℕ) :
     Combinatorics.antidiagonalTupleGrid
@@ -920,6 +940,7 @@ lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_iteratedCovGrad_fiberNormSq_bound (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
@@ -932,6 +953,8 @@ theorem exists_iteratedCovGrad_fiberNormSq_bound (g₀ : SmoothRiemannianMetric 
       (iteratedCovGrad (I := I) g₀ r s i S)
   choose c hc0 hcb using h
   exact ⟨c, hc0, hcb⟩
+
+end NormedGridIdentities
 
 end Connection
 end Integral

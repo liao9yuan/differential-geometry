@@ -40,7 +40,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (g0FlatCLM metricCompar
   gInvRaisedEndo_apply gInvRaisedEndo_eq_diff_add_id metricComparisonDiffEndo
   cotangentToDual_g0FlatCLM inverseMetricSharpFib_g0FlatCLM)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -64,6 +64,7 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
 
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SBundle.Tensor0SSpace 1 I x) (w : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -73,6 +74,7 @@ private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) 
         (fun _ : Fin 1 => (show E from PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 0) (w 1))) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
     (w : Fin 2 → TangentSpace I x) :
@@ -100,6 +102,8 @@ private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannian
   simp only [modelDoubleTrace_apply]
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
     (w : Fin 2 → TangentSpace I x) :
@@ -121,6 +125,9 @@ private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannia
   fin_cases i <;> rfl
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (a b : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -304,6 +311,9 @@ private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemann
   rw [hS2, hB, hT2, hT3, hT4, hT5]
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (w : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -372,6 +382,9 @@ private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRieman
   exact deTurckLieArm1CoreFib_toModel_eval (I := I) g₀ g₁ g_bg x D (w 0) (w 1)
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -386,6 +399,9 @@ private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMet
     (by funext i; fin_cases i <;> rfl)
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -400,6 +416,8 @@ private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianM
     (by funext i; fin_cases i <;> rfl)
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -427,6 +445,8 @@ private lemma lieArm1_omega_eval (g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [inverseMetricSharpFib_inner (I := I) g₁ x om w, cotangentToDualLinear_apply,
     cotangentToDual_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_psiB_raw (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -486,6 +506,8 @@ private def lieArm1PsiBKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
       (show E →L[ℝ] ℝ from
         (g₁.inner x v).comp (PDE.DeTurck.connDiff (I := I) g_bg g₁ x w)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1PsiBKernel_inner (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     g₁.inner x (lieArm1PsiBKernel (I := I) (M := M) g₁ g_bg x v w) u =
@@ -493,6 +515,8 @@ private lemma lieArm1PsiBKernel_inner (g₁ g_bg : SmoothRiemannianMetric I M) (
   rw [lieArm1PsiBKernel, cometricLmodel_covectorOfCLM_inner]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_psiB_hPsi (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -506,6 +530,9 @@ private lemma lieArm1_psiB_hPsi (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x
     (PDE.DeTurck.connDiff (I := I) g_bg g₁ x (YZ 1)
       (inverseMetricSharpFib (I := I) g₁ x om)) (YZ 0)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1PsiBKernel_inner_neg (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     g₁.inner x (lieArm1PsiBKernel (I := I) (M := M) g₁ g_bg x v w) u =
@@ -518,6 +545,7 @@ private lemma lieArm1PsiBKernel_inner_neg (g₁ g_bg : SmoothRiemannianMetric I 
   rw [map_neg (g₁.inner x) (PDE.DeTurck.connDiff (I := I) g₁ g_bg x w u)]
   rw [ContinuousLinearMap.neg_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_cometric_collapse_full (g₁ : SmoothRiemannianMetric I M) (x : M)
     (w : TangentSpace I x) :
     ∑ k : Fin (Module.finrank ℝ E),
@@ -528,6 +556,7 @@ private lemma lieArm1_cometric_collapse_full (g₁ : SmoothRiemannianMetric I M)
                 ((Module.finBasis ℝ E).cDualBasis k))) = w :=
   lieArm1_cometric_collapse (I := I) g₁ x w
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_slot2_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₀ c₁ : E) (X : TangentSpace I x) :
     Tensor0SSpace.toModel D ![c₀, c₁, (show E from X)] =
@@ -584,6 +613,7 @@ private lemma lieArm1_slot2_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis j)))).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_slot0_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₁ c₂ : E) (X : TangentSpace I x) :
     Tensor0SSpace.toModel D ![(show E from X), c₁, c₂] =
@@ -640,6 +670,8 @@ private lemma lieArm1_slot0_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis j)))).symm
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_cometricTrace_eq_chartInvGram (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] ℝ) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -680,6 +712,9 @@ private lemma lieArm1_cometricTrace_eq_chartInvGram (g₁ : SmoothRiemannianMetr
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [map_smul, ContinuousLinearMap.smul_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_deTurckVF_cometric_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M) :
     (∑ k : Fin (Module.finrank ℝ E),
         (PDE.DeTurck.connDiff (I := I) g₁ gB x
@@ -749,6 +784,9 @@ private lemma lieArm1_deTurckVF_cometric_trace (g₁ gB : SmoothRiemannianMetric
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   rw [h2 k l]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_slot2_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₀ c₁ : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -826,6 +864,9 @@ private lemma lieArm1_slot2_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x :
               ((PDE.DeTurck.deTurckVF (I := I) g₁ gB : Π y : M, TangentSpace I y) x))] :=
         (congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t) (hupd _)).symm
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_slot0_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₁ c₂ : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -910,6 +951,8 @@ private lemma lieArm1_neg_double_sum (f : Fin (Module.finrank ℝ E) → Fin (Mo
   rw [← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun k _ => by rw [← Finset.sum_neg_distrib]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p1 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -942,6 +985,8 @@ private lemma lieArm1_match_p1 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   exact lieArm1_slot0_vf_trace (I := I) (M := M) g₁ g_bg x D
     ((m 0 : TangentSpace I x) : E) ((m 1 : TangentSpace I x) : E)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p2 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1002,6 +1047,8 @@ private lemma lieArm1_match_p2 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p3 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1080,6 +1127,8 @@ private lemma lieArm1_match_p3 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   rw [Finset.sum_comm]
   exact lieArm1_neg_double_sum (E := E) _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p4 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1112,6 +1161,8 @@ private lemma lieArm1_match_p4 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact lieArm1_slot2_vf_trace (I := I) (M := M) g₁ g₀ x D
     ((m 0 : TangentSpace I x) : E) ((m 1 : TangentSpace I x) : E)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p5 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1171,6 +1222,8 @@ private lemma lieArm1_match_p5 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p6 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1195,6 +1248,8 @@ private lemma lieArm1_match_p6 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p7 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1255,6 +1310,8 @@ private lemma lieArm1_match_p7 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p8 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1315,6 +1372,8 @@ private lemma lieArm1_match_p8 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p9 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1393,6 +1452,8 @@ private lemma lieArm1_match_p9 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   rw [Finset.sum_comm]
   exact lieArm1_neg_double_sum (E := E) _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p10 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1425,6 +1486,8 @@ private lemma lieArm1_match_p10 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact lieArm1_slot2_vf_trace (I := I) (M := M) g₁ g₀ x D
     ((m 1 : TangentSpace I x) : E) ((m 0 : TangentSpace I x) : E)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p11 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1484,6 +1547,8 @@ private lemma lieArm1_match_p11 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p12 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1508,6 +1573,8 @@ private lemma lieArm1_match_p12 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p13 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1568,6 +1635,8 @@ private lemma lieArm1_match_p13 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma lieArm1_match_p14 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1592,6 +1661,8 @@ private lemma lieArm1_match_p14 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lieArm1_coeff_pieces_pointwise (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel

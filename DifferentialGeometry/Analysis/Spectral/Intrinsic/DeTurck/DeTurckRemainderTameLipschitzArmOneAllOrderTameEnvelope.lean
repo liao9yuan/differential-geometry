@@ -64,7 +64,7 @@ open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -640,6 +640,8 @@ lemma smoothCcToTensorHs_zero_norm_le_fw (g₀ : SmoothRiemannianMetric I M) (σ
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_zero_symm_fw (g₀ : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
@@ -1381,6 +1383,8 @@ theorem pAO_connDiffSection_jetL2_tame (g₀ : SmoothRiemannianMetric I M) (a : 
   linarith
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma pAO_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gA x u v = 0 := by
@@ -1392,6 +1396,9 @@ private lemma pAO_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     exact h.symm
   exact add_left_cancel h2
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma pAO_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =
@@ -1401,6 +1408,9 @@ private lemma pAO_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
   exact eq_neg_of_add_eq_zero_left h.symm
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (connDiffLoweredField) in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pAO_lieArm1Kappa_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -1420,6 +1430,8 @@ private lemma pAO_lieArm1Kappa_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannia
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_lieArm1Kappa_eq_neg_lc0Kappa (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg =
       -(lc0Kappa (I := I) (M := M) g₀ g₁ g_bg) := by
@@ -1442,6 +1454,7 @@ private lemma pAO_lieArm1Kappa_eq_neg_lc0Kappa (g₀ g₁ g_bg : SmoothRiemannia
   rw [map_neg (g₁.inner x), ContinuousLinearMap.neg_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_normSq_icg_lieArm1Kappa_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 q
@@ -1450,6 +1463,8 @@ private lemma pAO_normSq_icg_lieArm1Kappa_eq (g₀ g₁ g_bg : SmoothRiemannianM
   rw [pAO_lieArm1Kappa_eq_neg_lc0Kappa (I := I) (M := M) g₀ g₁ g_bg,
     iteratedCovGrad_neg, norm_neg]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_rfns_lieArm1Kappa_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
         ((lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg).toSection x) =
@@ -1464,6 +1479,7 @@ private lemma pAO_rfns_lieArm1Kappa_eq (g₀ g₁ g_bg : SmoothRiemannianMetric 
   exact riemannianFiberNormSq_neg_value (I := I) (M := M) g₀ 0 3 x _
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (cometricRaiseSlot0Field riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq) in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
@@ -1478,6 +1494,7 @@ private lemma pAO_rfns_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     σ κ' n x
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (cometricRaiseSlot0Field) in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pAO_normSq_icg_raiseDomDom_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (κ' : SmoothCcTensor g₀ 0 3) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 n
@@ -2998,6 +3015,8 @@ theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_tl_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
   have h := iteratedCovGrad_add (I := I) g r s j 0 0
@@ -3162,6 +3181,7 @@ lemma b1_rfns_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma b1_rfns_icg_symmS_le (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (k : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
@@ -3224,6 +3244,7 @@ private lemma b1_unitModel_sub (g : SmoothRiemannianMetric I M) (s : ℕ)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem b1_appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
@@ -3245,6 +3266,8 @@ private theorem b1_appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem b1_symmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
@@ -3280,6 +3303,8 @@ private theorem b1_symmS_eq_self (g₀ : SmoothRiemannianMetric I M)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma b1_metricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
@@ -3311,6 +3336,9 @@ private lemma b1_metricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem b1_perturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -3358,6 +3386,7 @@ private theorem b1_perturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannia
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem b1_ccTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
     (C D : SmoothCcTensor g₀ 2 2)
     (h : ∀ W : SmoothCcTensor g₀ 0 2,
@@ -3530,6 +3559,8 @@ lemma b1_toSection_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem b1_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =
@@ -3544,6 +3575,7 @@ omit [BoundarylessManifold I M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem b1_fixedField_jet_bound (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
@@ -3722,6 +3754,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_bgRDiffRefoldRemainderField_bounde
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma b1_sqrt_rfns_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r s x (a + b)) ≤

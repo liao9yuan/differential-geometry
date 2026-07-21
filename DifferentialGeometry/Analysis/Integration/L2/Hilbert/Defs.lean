@@ -35,13 +35,13 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 abbrev TensorL2
-    [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+    [T2Space M] [SigmaCompactSpace M]
     (r s : ℕ) (g : SmoothRiemannianMetric I M) : Type _ :=
   UniformSpace.Completion (SmoothCcTensor g r s)
 
 section ElaborationTests
 
-variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) : Type _ := TensorL2 r s g
 

@@ -264,6 +264,7 @@ omit [NeZero d] in
       -∫ x, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1) := rfl
 
 
+omit [NeZero d] in
 private lemma diffQuot_eq_zero_of_notMem_cthickening
     {φ : E → ℝ} (_hφ_supp : HasCompactSupport φ)
     (k : Fin d) {h₀ : ℝ} (_hh₀ : 0 ≤ h₀) {h : ℝ} (hh_bd : |h| ≤ h₀) :
@@ -420,6 +421,7 @@ private lemma volume_cthickening_lt_top
   exact hK_thick.measure_lt_top
 
 
+omit [NeZero d] in
 private lemma tendsto_integral_w_diffQuot_phi
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -533,6 +535,7 @@ private lemma tendsto_integral_w_diffQuot_phi
     h_pointwise_bound h_bound_int h_pointwise_conv
 
 
+omit [NeZero d] in
 private lemma abs_smoothTestFunctional_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -635,6 +638,7 @@ private lemma abs_smoothTestFunctional_le
   exact h_lim_le
 
 
+omit [NeZero d] in
 private lemma abs_smoothTestFunctional_le_lpNorm
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -659,6 +663,7 @@ def smoothTestFunctional_ext
   (smoothTestFunctional (d := d) hw_l2 k).extendOfNorm
     (smoothCSToLp (d := d))
 
+omit [NeZero d] in
 private lemma opNorm_smoothTestFunctional_ext_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -671,6 +676,7 @@ private lemma opNorm_smoothTestFunctional_ext_le
   intro φ
   exact abs_smoothTestFunctional_le_lpNorm (d := d) hw_l2 k hM_nn hh₀ h_bdd φ
 
+omit [NeZero d] in
 private lemma smoothTestFunctional_ext_apply
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -713,6 +719,7 @@ private lemma smoothTestFunctional_ext_eq_inner
   unfold smoothTestFunctional_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
+omit [NeZero d] in
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ
     {w : E → ℝ}
     (hw_l2 : MemLp w 2 (volume : Measure E))

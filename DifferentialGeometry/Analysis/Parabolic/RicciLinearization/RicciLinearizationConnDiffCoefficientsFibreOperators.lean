@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -177,6 +177,7 @@ noncomputable def tensorProdPairCLM (m k : ℕ) (x : M) :
           ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (m + k) x).symm) c _ }
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem tensorProdPairCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) :
     tensorProdPairCLM (I := I) m k x P = tensorProdWithCLM (I := I) m k x P := rfl

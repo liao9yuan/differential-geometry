@@ -38,7 +38,7 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -46,7 +46,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem chartCoord_mfderiv_eq_fderiv_at
@@ -76,7 +76,7 @@ theorem chartCoord_mfderiv_eq_fderiv_at
     rw [← hmf_eq_f, hchain]; rfl
   rw [hRHS]; rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem raw_mfderiv_eq_symmL_fderiv_at
@@ -106,6 +106,7 @@ theorem raw_mfderiv_eq_symmL_fderiv_at
 
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesic_speed_constant
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_C1 : ContMDiff 𝓘(ℝ, ℝ) I 1 γ) :
@@ -210,6 +211,7 @@ theorem geodesic_speed_constant
 
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_speedSq_hasDerivAt_zero
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -308,6 +310,7 @@ theorem isGeodesicOn_speedSq_hasDerivAt_zero
 
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_speedSq_const
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t₀ t₁ : ℝ}
     (hs : IsOpen s)
@@ -348,7 +351,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [PseudoEMetricSpace M]
   [IsRiemannianManifold I M] in
 theorem maximalGeodesic_edist_le_speed_mul_time
@@ -407,7 +410,7 @@ variable [CompleteSpace M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompleteSpace M] in
 theorem maximalGeodesic_cauchySeq_of_tendsto_sup
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
@@ -496,7 +499,7 @@ theorem maximalGeodesic_cauchySeq_of_tendsto_sup
           exact h_cdelta_lt_real
     _ < ε := hδ₀_ofReal_lt
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem maximalGeodesic_limit_exists_tangent_speed_eq
@@ -538,7 +541,7 @@ theorem maximalGeodesic_limit_exists_tangent_speed_eq
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem curve_edist_le_speed_mul_time
     {γ : ℝ → M} {s t c : ℝ}
     (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
@@ -577,7 +580,7 @@ theorem curve_edist_le_speed_mul_time
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
   [ConnectedSpace M] in
 theorem curve_exists_limit_of_bounded_speed
@@ -666,7 +669,7 @@ theorem curve_exists_limit_of_bounded_speed
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M]
   [CompleteSpace M] in
 theorem eventually_mem_nhds_of_tendsto_riemannianEDist
@@ -686,7 +689,7 @@ theorem eventually_mem_nhds_of_tendsto_riemannianEDist
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompleteSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompleteSpace M] in
 theorem tendsto_riemannianEDist_of_tendsto_metric_nhds
     {α : Type*} {l : Filter α} {f : α → M} {p : M}
     (h : Tendsto f l (@nhds M PseudoEMetricSpace.toUniformSpace.toTopologicalSpace p)) :
@@ -701,7 +704,7 @@ theorem tendsto_riemannianEDist_of_tendsto_metric_nhds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [ConnectedSpace M] [CompleteSpace M] in
 theorem eventually_mem_nhds_of_tendsto_metric_nhds
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -714,7 +717,7 @@ theorem eventually_mem_nhds_of_tendsto_metric_nhds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [ConnectedSpace M] [CompleteSpace M] in
 theorem tendsto_nhds_of_tendsto_metric_nhds
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

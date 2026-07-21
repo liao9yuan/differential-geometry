@@ -20,7 +20,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 
+omit [CompleteSpace E] in
 private lemma resolventEigenvectorComponent_wkpNorm_le_uniform :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -68,6 +69,7 @@ private lemma resolventEigenvectorComponent_wkpNorm_le_uniform :
     (aggrUchart_le (I := I) (M := M) g r s i α P₀ K)
 
 
+omit [CompleteSpace E] in
 private lemma crossLeftBracketTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -207,6 +209,7 @@ private lemma crossLeftBracketTerm_wkpNorm_le_uniform
   exact hC_bd i
 
 
+omit [CompleteSpace E] in
 private lemma crossRightBracketTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -343,6 +346,7 @@ private lemma crossRightBracketTerm_wkpNorm_le_uniform
   exact hC_bd i
 
 
+omit [CompleteSpace E] in
 private lemma principalRotationCoeffTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -369,6 +373,7 @@ private lemma principalRotationCoeffTerm_wkpNorm_le_uniform
   exact aggrPartial_le (I := I) (M := M) g r s i α P₀ K
 
 
+omit [CompleteSpace E] in
 private lemma lowerOrderRotationCoeffTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -414,6 +419,7 @@ private lemma lowerOrderRotationCoeffTerm_wkpNorm_le_uniform
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_comm C 2]
 
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -491,6 +497,7 @@ private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
   exact ⟨C, hC_nn, fun i => hC_bd i⟩
 
 
+omit [CompleteSpace E] in
 private lemma weightedGradDivTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -572,6 +579,7 @@ private lemma weightedGradDivTerm_wkpNorm_le_uniform
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
 
+omit [CompleteSpace E] in
 private lemma crossRightGradDivTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -662,6 +670,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 
+omit [CompleteSpace E] in
 lemma rhsBracket_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),

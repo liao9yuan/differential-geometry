@@ -16,7 +16,7 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -24,6 +24,7 @@ variable
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -121,6 +122,7 @@ theorem chartRHS_pou_lip
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

@@ -12,7 +12,7 @@ namespace DeTurck
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -22,6 +22,8 @@ def connDiff (g g' : SmoothRiemannianMetric I M) :
     Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
   CovariantDerivative.difference (LeviCivita (I := I) g) (LeviCivita (I := I) g')
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem connDiff_apply (g g' : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x} {x : M} (hσ : MDiffAt (T% σ) x)
@@ -36,6 +38,8 @@ theorem connDiff_apply (g g' : SmoothRiemannianMetric I M)
   rw [h]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem connDiff_self (g : SmoothRiemannianMetric I M) :
     connDiff (I := I) g g = 0 := by
@@ -55,6 +59,8 @@ theorem connDiff_self (g : SmoothRiemannianMetric I M) :
   rw [sub_self] at hval
   simpa [hσx] using hval
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem leviCivita_section_contMDiff (g : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)) :
@@ -70,6 +76,8 @@ private theorem leviCivita_section_contMDiff (g : SmoothRiemannianMetric I M)
   rw [← contMDiffOn_univ]
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_contMDiff (g g' : SmoothRiemannianMetric I M)
     {σ τ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% σ))
@@ -99,6 +107,8 @@ theorem connDiff_contMDiff (g g' : SmoothRiemannianMetric I M)
         (fun y => (LeviCivita (I := I) g').toFun σ y (τ y))) x⟩
   rw [Pi.sub_apply, hval]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_contMDiffOn (g g' : SmoothRiemannianMetric I M)
     {U : Set M} {σ τ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% σ))

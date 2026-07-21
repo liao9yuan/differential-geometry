@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -92,6 +93,7 @@ theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem tensorEigenvector_memWtwokTwo
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (k : ℕ) :

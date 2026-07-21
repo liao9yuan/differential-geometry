@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace DiffChartBilinearH1ComplResidual
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -110,6 +110,7 @@ noncomputable def smoothFChartResidual
   DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
     (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothFChartResidual_memW1p
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -118,6 +119,7 @@ lemma smoothFChartResidual_memW1p
   unfold smoothFChartResidual
   exact memW1p_fChartResidual_smoothToH1Compl (I := I) (M := M) g α v
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -299,6 +301,7 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
   funext n
   exact eLpNorm_congr_ae (h_subFun_aeEq n).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

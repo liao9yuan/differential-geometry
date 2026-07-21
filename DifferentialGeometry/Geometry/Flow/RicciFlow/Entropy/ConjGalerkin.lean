@@ -62,6 +62,8 @@ def scalarGalVec
 open Classical in
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalVec_coeff
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -74,6 +76,8 @@ omit [BoundarylessManifold I M] in
 open Classical in
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_supp
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -92,6 +96,8 @@ theorem scalarGalVec_supp
 open Classical in
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_finite
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -103,6 +109,8 @@ theorem scalarGalVec_finite
 open Classical in
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_inc
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -168,6 +176,8 @@ noncomputable def scalarGalEmbed
 open Classical in
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalEmbed_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -181,6 +191,8 @@ open Classical in
 omit [BoundarylessManifold I M] in
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_cont
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -226,6 +238,8 @@ noncomputable def scalarGalRestrict
 
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalRest_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -261,6 +275,8 @@ noncomputable def scalarGalDiag
 
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalDiag_apply
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))

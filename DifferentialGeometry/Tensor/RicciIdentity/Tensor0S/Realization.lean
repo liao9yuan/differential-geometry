@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RicciIdentity.OneForm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -212,6 +211,7 @@ theorem Nabla20SRealizesAt.eval_smooth_slots
             (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             cov X V nablaAlpha x
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem mdiffAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι → M → Real)
     {x : M}
@@ -232,6 +232,7 @@ theorem mdiffAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_finset_sum_at
     {ι : Type*} (t : Finset ι) (f : ι → M → Real)
     {x : M} (v : TangentSpace I x)
@@ -263,6 +264,7 @@ theorem extDerivFun_finset_sum_at
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_neg_at
     {f : M → Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
@@ -278,6 +280,7 @@ theorem extDerivFun_neg_at
     hf v
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul] using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_sub_at
     {f g : M → Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -290,6 +293,7 @@ theorem extDerivFun_sub_at
     (x := x) hf hg.neg) v)
   simpa [Pi.add_apply, sub_eq_add_neg, hneg] using hadd
 
+omit [FiniteDimensional ℝ E] in
 lemma tensor0S_update_curvature_diag
     {s : ℕ} {x : M}
     (alpha :
@@ -313,12 +317,14 @@ lemma tensor0S_update_curvature_diag
   rw [map_sub, map_sub]
   abel
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma metricTraceInput_eq_finCons {s : ℕ} {x : M}
     (X Y : TangentSpace I x) (tail : Fin s → TangentSpace I x) :
     metricTraceInput (I := I) X Y tail =
       Fin.cons X (Fin.cons Y tail) := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma first_slot_torsionCorrection_eq
     {s : ℕ} {x : M}
     (nablaAlpha :

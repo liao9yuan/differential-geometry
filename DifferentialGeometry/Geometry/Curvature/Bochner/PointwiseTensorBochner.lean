@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -216,6 +216,7 @@ noncomputable def tensor3rdCurvBracket
           (smoothOrthoFrame (I := I) g x i x))
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem Tensor3rdCurv_eq_genuine_add_bracket
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -253,6 +254,7 @@ theorem frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket
   abel
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M)

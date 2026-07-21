@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,7 +30,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
@@ -102,6 +102,7 @@ theorem differentiableAt_chartPushedRaw_chartAtlasPOU
       (hopen.mem_nhds hy)
   exact hcontDiffAt.differentiableAt (by decide)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem differentiableAt_chartPushedRaw_tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M)
@@ -120,6 +121,7 @@ theorem differentiableAt_chartPushedRaw_tensorChartComponentRaw
       g r s S α Idx Jdx y hy).contDiffAt (hopen.mem_nhds hy)
   exact hcontDiffAt.differentiableAt (by decide)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartPushedRaw_pou_mul_euclidPartial_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

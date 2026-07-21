@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -36,12 +35,12 @@ open scoped Manifold ContDiff Topology BigOperators
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
@@ -51,6 +50,8 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_cor_II_of_intrinsic
     (g gRef : SmoothRiemannianMetric I M) {q₂ : ℕ}
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)

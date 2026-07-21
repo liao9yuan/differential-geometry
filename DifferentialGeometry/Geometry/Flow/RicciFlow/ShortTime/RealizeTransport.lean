@@ -30,7 +30,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -164,6 +164,9 @@ theorem realize_eval_carrier_factorization
   exact (ccTensorBilinSymm_hasSum_eigenRealizeEval
     (I := I) (M := M) g_bg a ha T_z x v w).tsum_eq
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pointwise_deriv_through_realize
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)

@@ -3,7 +3,6 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -48,6 +47,7 @@ def raisedRm04CompInFrame
     gInv t x a p * gInv t x b q * gInv t x c r * gInv t x d s *
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem raisedRm04CompInFrame_apply
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -71,6 +71,7 @@ def rm04NormSqInFrame
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem rm04NormSqInFrame_apply
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -201,6 +202,7 @@ def Rm04NormTimeDerivativeComponentsOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -241,6 +243,7 @@ def Rm04NormHeatEquationOn
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_components
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (rmNormSq rmNormLap roughLapInner nablaRmNormSq reaction : Real -> M -> Real)
@@ -262,6 +265,7 @@ theorem rm04NormHeatEquationOn_of_components
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_rawDerivative
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -68,6 +68,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem uc_coverChartAt_extend_conjugacy
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a).extend I : _ → E)
@@ -129,6 +130,8 @@ theorem uc_coverChartAt_extend_conjugacy
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem uc_tangentBundleCore_coordChange_agree
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {z : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
@@ -265,6 +268,8 @@ theorem uc_tangentBundleCore_coordChange_agree
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem uc_hom_bundle_inCoordinates_pullback
     (g : SmoothRiemannianMetric I M)
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -402,6 +407,8 @@ theorem uc_hom_bundle_inCoordinates_pullback
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [ConnectedSpace M] in
 theorem uc_liftedMetric_contMDiff
     (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞

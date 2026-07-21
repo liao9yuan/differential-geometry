@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -184,6 +184,7 @@ structure eigenvectorChartRHSDiffSharpWkpBoundsUpToOrder
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -200,6 +201,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma rhsZeroAggregate_le_energy_perK_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N : ℕ)
@@ -893,6 +895,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N : ℕ)
@@ -959,6 +962,7 @@ private lemma sharpDiffBdd_level_zero_wkpNorm
 set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiffBdd_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -1251,6 +1255,7 @@ private lemma sharpDiffBdd_recursion
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

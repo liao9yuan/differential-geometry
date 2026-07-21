@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -34,17 +33,18 @@ set_option backward.isDefEq.respectTransparency false
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
-variable [T2Space M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [T2Space M] [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M]
 
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem difference_symm_at
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     {x : M}
@@ -93,6 +93,7 @@ theorem difference_symm_at
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem nabla_metric_two_term
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -120,6 +121,7 @@ theorem nabla_metric_two_term
 
 
 
+omit [SigmaCompactSpace M] in
 theorem koszul_difference
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)

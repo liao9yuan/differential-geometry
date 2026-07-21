@@ -20,7 +20,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,7 @@ def TensorSectionMDiffAt (n : ℕ)
     (fun b' : M => TotalSpace.mk' (Tensor0SModel n ℝ E)
       (E := fun x : M => Tensor0SSpace n I x) b' (T b')) b
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
     (n : ℕ) (α : M) (T : Π b : M, Tensor0SSpace n I b)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -112,6 +113,7 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem mdifferentiableAt_curriedSection_of_section
     (s : ℕ) (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M}
     (hT_at : TensorSectionMDiffAt (I := I) (s + 1) T b) :
@@ -121,6 +123,7 @@ theorem mdifferentiableAt_curriedSection_of_section
         b' (curriedSection I M T b')) b :=
   (mdifferentiableAt_curriedSection_iff_section (I := I) (M := M) T).mp hT_at
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem TensorSectionMDiffAt_partialEval
     (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)

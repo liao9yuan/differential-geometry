@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -47,6 +47,8 @@ noncomputable def smoothToTensorH1Compl
     SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s :=
   UniformSpace.Completion.toComplL
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smoothToTensorH1Compl_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -65,6 +67,8 @@ lemma SmoothCcTensor.norm_sq_eq_inner_self
   exact h.symm
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma SmoothCcTensorH1.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -75,6 +79,8 @@ lemma SmoothCcTensorH1.norm_sq_eq_inner_self
   exact h.symm
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -93,6 +99,8 @@ lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
   linarith
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma SmoothCcTensorH1.l2Norm_le_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -102,6 +110,8 @@ lemma SmoothCcTensorH1.l2Norm_le_h1Norm
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma SmoothCcTensorH1.l2Norm_le_one_mul_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -131,6 +141,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
       (S.toCcTensor : TensorL2 r s g) := rfl
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothCcTensorH1ToTensorL2Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -150,12 +162,16 @@ noncomputable def smoothCcTensorH1ToTensorL2
   (smoothCcTensorH1ToTensorL2Lin (I := I) (M := M) g r s).mkContinuous 1
     (fun S => smoothCcTensorH1ToTensorL2Lin_norm_le (I := I) (M := M) g r s S)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smoothCcTensorH1ToTensorL2_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
     smoothCcTensorH1ToTensorL2 (I := I) (M := M) g r s S =
       (S.toCcTensor : TensorL2 r s g) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange
@@ -168,6 +184,8 @@ private lemma denseRange_toComplL_smoothCcTensorH1
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsUniformInducing
@@ -187,6 +205,8 @@ noncomputable def TensorH1ComplToTensorL2
     (UniformSpace.Completion.toComplL :
       SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma TensorH1ComplToTensorL2_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -200,6 +220,8 @@ noncomputable def TensorH1ComplToTensorL2
     (denseRange_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s)
     (isUniformInducing_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s) S
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :

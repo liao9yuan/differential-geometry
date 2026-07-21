@@ -20,12 +20,14 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inverseMetricSharp_covDeriv_eq (g : SmoothRiemannianMetric I M)
     {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -52,6 +54,8 @@ theorem metricFlat_inverseMetricSharpField_eq (g : SmoothRiemannianMetric I M)
   rw [inverseMetricSharpFib_inner (I := I) g b (β b) w]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem inverseMetricSharpField_covGrad_eq_zero (g : SmoothRiemannianMetric I M)
     (β : Π b : M, Tensor0SSpace 1 I b) {x : M}
     (hβ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -88,6 +92,8 @@ private theorem dualToCotangent_add' {x : M}
   rw [cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem cotangentCov_leviCivita_connDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
@@ -117,6 +123,8 @@ theorem cotangentCov_leviCivita_connDiff
   rw [hsub, hconn, map_sub]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem covGrad_inverseMetricSharpFib_cross
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (β : Π b : M, Tensor0SSpace 1 I b) {x : M}

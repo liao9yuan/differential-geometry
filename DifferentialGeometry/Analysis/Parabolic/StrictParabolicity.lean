@@ -16,7 +16,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,11 +26,13 @@ def deTurckSymbol (g g' : SmoothRiemannianMetric I M) : TensorSymbol (E := E) I 
   fun x ξ => (-2 : ℝ) • ricciSymbol (I := I) g x ξ +
     deTurckCorrectionSymbol (I := I) g g' x ξ
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma deTurckSymbol_def (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     deTurckSymbol (I := I) g g' x ξ =
       (-2 : ℝ) • ricciSymbol (I := I) g x ξ +
         deTurckCorrectionSymbol (I := I) g g' x ξ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma deTurckSymbol_apply (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     deTurckSymbol (I := I) g g' x ξ t =
@@ -38,6 +40,7 @@ lemma deTurckSymbol_def (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
         deTurckCorrectionSymbol (I := I) g g' x ξ t := by
   rw [deTurckSymbol_def, LinearMap.add_apply, LinearMap.smul_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma deTurckSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :
@@ -47,7 +50,7 @@ lemma deTurckSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) (x : M) (ξ 
   rw [deTurckSymbol_apply, LinearMap.add_apply, LinearMap.smul_apply,
     LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContraction_eq_snd_of_symm (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (k : Fin (Module.finrank ℝ E)) :
@@ -55,6 +58,7 @@ lemma raisedFormContraction_eq_snd_of_symm (g : SmoothRiemannianMetric I M) (x :
       raisedFormContractionSnd (I := I) g x ξ t k :=
   (raisedFormContractionSnd_eq_of_symm (I := I) g x ξ t ht k).symm
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckSymbol_apply_apply_eq_isotropic_of_symm (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (i k : Fin (Module.finrank ℝ E)) :
@@ -67,6 +71,7 @@ theorem deTurckSymbol_apply_apply_eq_isotropic_of_symm (g g' : SmoothRiemannianM
   rw [raisedFormContraction_eq_snd_of_symm (I := I) g x ξ t ht k]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckSymbol_apply_eq_smul_of_symm (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) :
@@ -81,6 +86,7 @@ theorem deTurckSymbol_apply_eq_smul_of_symm (g g' : SmoothRiemannianMetric I M)
           ((chartModelBasis E) i) ((chartModelBasis E) k) := by
         rw [LinearMap.smul_apply, LinearMap.smul_apply, smul_eq_mul, formComp_def]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckSymbol_isStrictlyParabolic_of_symm (g g' : SmoothRiemannianMetric I M) (x : M)
     {ξ : E} (hξ : ξ ≠ 0) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) :
@@ -90,6 +96,7 @@ theorem deTurckSymbol_isStrictlyParabolic_of_symm (g g' : SmoothRiemannianMetric
   ⟨deTurckSymbol_apply_eq_smul_of_symm (I := I) g g' x ξ t ht,
     metricCovectorNormSq_pos (I := I) g x hξ⟩
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckSymbol_eq_neg_laplacianSymbolCoeff_smul_of_symm
     (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

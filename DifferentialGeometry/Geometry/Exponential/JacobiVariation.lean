@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -48,7 +47,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -59,6 +58,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem chartRep_congr_curve
     {γ γ' : ℝ → M}
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (V' : ∀ s : ℝ, TangentSpace I (γ' s))
@@ -85,6 +85,7 @@ theorem chartRep_congr_curve
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem covDerivAlong_congr_curve
     (g : SmoothRiemannianMetric I M) {γ γ' : ℝ → M}
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (V' : ∀ s : ℝ, TangentSpace I (γ' s)) {t : ℝ}
@@ -108,6 +109,9 @@ theorem covDerivAlong_congr_curve
 
 
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma riemannOp_congr_point (g : SmoothRiemannianMetric I M)
     {x y : M} (h : x = y) (A B C : E) :
     ((DifferentialGeometry.Integral.Connection.riemannOp
@@ -122,6 +126,7 @@ private lemma riemannOp_congr_point (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem covDerivAlong_const (g : SmoothRiemannianMetric I M) (p : M)
     (V : ℝ → TangentSpace I p) (t : ℝ)
     (hV : DifferentiableAt ℝ (fun s => (V s : E)) t) :
@@ -149,6 +154,7 @@ theorem covDerivAlong_const (g : SmoothRiemannianMetric I M) (p : M)
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma clamped_slice_covDeriv_velocity_zero
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p)
@@ -209,6 +215,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 private lemma clamped_slice_covDeriv_velocity_zero_at_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -284,6 +291,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential in
 
 
 
+omit [SigmaCompactSpace M] in
 theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ t₀ ∈ Set.Ioo (0 : ℝ) 1,
       IsJacobiAt (I := I) g
@@ -500,6 +508,8 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential in
 
 
 
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
       (∀ t ∈ Set.Icc (0 : ℝ) b,
@@ -658,6 +668,9 @@ theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radial_jacobi_zero (g : SmoothRiemannianMetric I M) (p : M) (x w : E) :
     mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ =>
       (expMap (I := I) g p (show TangentSpace I p from ((0 : ℝ) • (x + s • w))) : M))
@@ -675,6 +688,7 @@ theorem radial_jacobi_zero (g : SmoothRiemannianMetric I M) (p : M) (x w : E) :
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_jacobi_one (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
     mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ =>
@@ -739,6 +753,8 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential in
 
 
 
+omit [T2Space M] in
+omit [SigmaCompactSpace M] in
 theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
       (covDerivAlong (I := I) g

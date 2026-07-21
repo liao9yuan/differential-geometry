@@ -29,6 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma c_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -49,6 +51,7 @@ private lemma c_contDiffOn_goodSet
   exact hF_cd.fderiv_of_isOpen hU_open h_le
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma u_contDiffOn_goodSet'
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -63,18 +66,20 @@ private lemma u_contDiffOn_goodSet'
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pouTsupport_subset_goodSet' (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have h_eq :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedFDeriv_u_continuousOn
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (k : ℕ) :
@@ -115,6 +120,7 @@ private lemma iteratedFDeriv_u_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedFDeriv_u_bound_012
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -182,6 +188,7 @@ private lemma iteratedFDeriv_u_bound_012
       _ ≤ max (max C0 C1) C2 := le_max_right _ _
       _ ≤ max (max (max C0 C1) C2) 0 := le_max_left _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem intrinsic_piece_iteratedFDeriv_two_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

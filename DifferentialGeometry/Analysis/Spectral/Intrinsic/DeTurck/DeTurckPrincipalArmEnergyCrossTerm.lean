@@ -32,7 +32,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,6 +77,8 @@ theorem smoothCcToTensorHs_inner_order_congr (g₀ : SmoothRiemannianMetric I M)
   subst h; rfl
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -511,6 +513,7 @@ private lemma iteratedCovGrad_le_connLap_add (g₀ : SmoothRiemannianMetric I M)
           (Real.sqrt 2 + Real.sqrt Cgap) *
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((k + 1 : ℕ) : ℝ) S‖ := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma arm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -558,6 +561,7 @@ private lemma arm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [hexp, sq_deTurckArmFibreConst]
   exact hsq1
 
+omit [BoundarylessManifold I M] in
 private lemma arm_covGrad_slotExtend_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
     {κ : ℝ} (hκ_nn : 0 ≤ κ)
     (hC : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
@@ -646,6 +650,8 @@ private lemma hs_extreme_interp {f : ℕ → ℝ} (hf_nn : ∀ k, 0 ≤ f k)
   · exact hkey α β hab hαγ hβγ hsum
   · rw [mul_comm]; exact hkey β α hab hβγ hαγ (by omega)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedCovGrad_norm_comp (g₀ : SmoothRiemannianMetric I M) (r s l m : ℕ)
     (Ψ : SmoothCcTensor g₀ r s) :
     ‖iteratedCovGrad (I := I) g₀ r (s + l) m (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ =
@@ -685,6 +691,7 @@ private lemma hs_logConvex (g₀ : SmoothRiemannianMetric I M) (T₀ : SmoothCcT
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 private lemma jet_fibreNormSq_sup_le (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ Cemb : ℕ → ℝ, (∀ l, 0 ≤ Cemb l) ∧ ∀ (Ψ : SmoothCcTensor g₀ r s) (l : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ r (s + l) x
@@ -1547,6 +1554,7 @@ private theorem arm_covGrad_coeffLower_l2_tame [Nonempty M]
         mul_le_mul_of_nonneg_left h2jet hB_nn
     _ = B * (1 + Cj0) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s Φ (W₁ - W₂) =
@@ -1558,6 +1566,8 @@ private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     abel
   exact eq_sub_of_add_eq h
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma deTurckPrincipalCometricArm_sub (g₀ g₁ : SmoothRiemannianMetric I M)
     (u v : SmoothCcTensor g₀ 0 2) :
     deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ (u - v) =
@@ -1574,6 +1584,7 @@ private lemma smoothCcToTensorHs_subCross (g₀ : SmoothRiemannianMetric I M) (�
   simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, smoothCcToTensorHs_coeff,
     map_add, map_neg, tensorL2Coeff_eq_inner, inner_add_right, inner_neg_right]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma rawConnLap_oneMinusConnLap_comm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     rawTensorConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) =

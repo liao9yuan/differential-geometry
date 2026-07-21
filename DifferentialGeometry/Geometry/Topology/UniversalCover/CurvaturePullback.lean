@@ -60,6 +60,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [PseudoEMetricSpace M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 theorem leviCivita_lifted_eq_pullback (g : SmoothRiemannianMetric I M) :
     LeviCivita (I := I) (liftedMetric (I := I) g) =
       LeviCivita (I := I) (liftedMetric (I := I) g) := rfl
@@ -88,6 +91,10 @@ theorem leviCivita_lifted_eq_pullback (g : SmoothRiemannianMetric I M) :
 
 
 
+omit [PseudoEMetricSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (v' w' u' : E)
@@ -137,6 +144,10 @@ theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
 
 
 
+omit [PseudoEMetricSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (v' w' : E)
@@ -175,6 +186,10 @@ theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
 
 
 
+omit [PseudoEMetricSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 theorem ricciBoundedBelow_liftedMetric_of_base
     {g : SmoothRiemannianMetric I M} {κ : ℝ}
     (hRic : RicciBoundedBelow (I := I) g κ)

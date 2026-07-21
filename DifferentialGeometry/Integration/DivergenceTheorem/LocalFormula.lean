@@ -93,8 +93,8 @@ open scoped Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -111,6 +111,7 @@ open DifferentialGeometry.Integral.Measure
 
 
 
+omit [FiniteDimensional ℝ E] in
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -142,6 +143,7 @@ private def localDivergenceDomain (α : M) : Set M :=
   (extChartAt I α).source ∩
     (extChartAt I α) ⁻¹' interior (extChartAt I α).target
 
+omit [FiniteDimensional ℝ E] in
 private lemma localDivergenceDomain_subset_baseSet (α : M) :
     localDivergenceDomain (I := I) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by

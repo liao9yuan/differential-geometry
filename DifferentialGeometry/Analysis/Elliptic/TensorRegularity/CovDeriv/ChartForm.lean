@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -81,6 +81,7 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
   rwa [extChartAt_source] at hsrc
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covChartMetricGram_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -131,6 +132,7 @@ theorem covChartMetricGram_contDiffOn
       exact hy
   exact hcomp_eucl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (X Y : TensorRSModel r s ℝ E) :
@@ -225,6 +227,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorInnerPointwise_toModel_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -253,6 +256,7 @@ private lemma tensorInnerPointwise_toModel_eq_chart
     (TensorRSSpace.toModel Y)]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_toModel_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -280,6 +284,7 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensorRSCovariantDerivative_locality
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -310,6 +315,9 @@ private lemma chartTensorRSCovariantDerivative_locality
     rw [hparallel]
   rw [hinput, houtput]
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -387,6 +395,7 @@ lemma covPrincipalIntegrand_def
                         g r s T α Q.1 Q.2)) y := rfl
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covPrincipalIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -417,6 +426,9 @@ theorem covPrincipalIntegrand_symm
     rw [star_trivial] at hsymm
     exact hsymm
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

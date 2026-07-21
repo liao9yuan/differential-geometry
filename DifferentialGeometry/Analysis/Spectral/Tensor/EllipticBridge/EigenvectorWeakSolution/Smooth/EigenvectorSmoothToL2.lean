@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmooth_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -53,6 +54,7 @@ theorem eigenvectorSmooth_toL2
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem tensorEigenvector_exists_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -63,6 +65,7 @@ theorem tensorEigenvector_exists_smooth
   ⟨eigenvectorSmooth (I := I) (M := M) g r s i,
     eigenvectorSmooth_toL2 (I := I) (M := M) g r s i⟩
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmooth_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -72,6 +75,7 @@ theorem eigenvectorSmooth_contMDiff
           ((eigenvectorSmooth (I := I) (M := M) g r s i).toSection x)) :=
   (eigenvectorSmooth (I := I) (M := M) g r s i).toSection.contMDiff
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmooth_weak_eigen
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

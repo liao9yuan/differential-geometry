@@ -27,7 +27,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -149,6 +149,7 @@ lemma toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
     (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -162,6 +163,7 @@ lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
   fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma reindexCoeffGen_one_eq (r s : ℕ) (R : SmoothCcTensor g₀ r s) :
     reindexCoeffGen (I := I) (M := M) g₀ r s R 1 = R := by
   apply SmoothCcTensor.ext
@@ -224,6 +226,7 @@ def tauM4 : Equiv.Perm (Fin 6) :=
    fun i => (![2, 3, 4, 5, 1, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma mvOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -278,6 +281,7 @@ lemma mvOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
   rw [hrepr v i, hbB_coe i]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotExtend_toModel_cons (r s : ℕ) (Φ : SmoothCcTensor g₀ r s) (x : M)
     (D : Tensor0SSpace (r + 1) I x) (v0 : TangentSpace I x) (vs : Fin s → E) :
     Tensor0SSpace.toModel
@@ -296,6 +300,7 @@ lemma slotExtend_toModel_cons (r s : ℕ) (Φ : SmoothCcTensor g₀ r s) (x : M)
     (show E from v0) vs
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotExtendIter_two_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
     (D : Tensor0SSpace 2 I x) (u : Fin 6 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -355,6 +360,7 @@ lemma slotExtendIter_two_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
     (D : Tensor0SSpace 3 I x) (u : Fin 6 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -438,6 +444,8 @@ lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma metricCcTensor_unitModel_apply (g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :
     unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x m =
@@ -456,6 +464,7 @@ lemma metricCcTensor_unitModel_apply (g : SmoothRiemannianMetric I M) (x : M)
   rw [hbase]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorBilinearPairing_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =
@@ -467,6 +476,7 @@ lemma tensorBilinearPairing_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorBilinearPairing_expand_right (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =

@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -42,7 +41,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -51,6 +50,7 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_cont (a : Nat) (h gRef : SmoothRiemannianMetric I M) :
     Continuous (fun z : M => metricCovDerivNorm (I := I) a h gRef z) := by
   have hc := Tensor0SBundle.normSq0S_cont (I := I) (M := M) gRef
@@ -63,6 +63,7 @@ theorem metricCovDerivNorm_cont (a : Nat) (h gRef : SmoothRiemannianMetric I M) 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_cont (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) :
     Continuous (fun z : M => metricDerivNorm (I := I) a gk gInf gRef z) := by
   have hc := Tensor0SBundle.normSq0S_cont (I := I) (M := M) gRef
@@ -84,6 +85,7 @@ theorem metricDerivNorm_cont (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I 
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrtNormSq0S_bddOn {K : Set M} (hK : IsCompact K) (s : Nat)
     (gRef : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -102,6 +104,7 @@ theorem sqrtNormSq0S_bddOn {K : Set M} (hK : IsCompact K) (s : Nat)
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
     (a : Nat) (h gRef : SmoothRiemannianMetric I M) :
     exists C : Real, forall z, z ∈ K ->
@@ -114,6 +117,7 @@ theorem metricCovDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
 
 
 
+omit [SigmaCompactSpace M] in
 theorem cov_bdd_of_eventual {K : Set M} (hK : IsCompact K)
     (a : ℕ) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (gRef : SmoothRiemannianMetric I M)
@@ -145,6 +149,7 @@ theorem cov_bdd_of_eventual {K : Set M} (hK : IsCompact K)
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
     (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) :
     exists C : Real, 0 <= C /\ forall a : Nat, a <= p -> forall z, z ∈ K ->
@@ -166,6 +171,7 @@ theorem metricDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
 
 
 
+omit [SigmaCompactSpace M] in
 theorem derivNorm_le_sup {K : Set M} (hK : IsCompact K)
     {a p : ℕ} (hap : a ≤ p) (gk gInf gRef : SmoothRiemannianMetric I M)
     {x : M} (hx : x ∈ K) :

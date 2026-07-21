@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -99,6 +98,7 @@ def factorSeq (S : SmoothSeqSystem I A) (O₀ : A 0)
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem rangeExhausts (S : SmoothSeqSystem I A) :
     ExhaustsByOpen (fun k => Set.range (S.toSeqSystem.incl k)) where
   isOpen k := (S.toSeqSystem.incl_isOpenEmb k).isOpen_range
@@ -320,8 +320,8 @@ def limitCGConverges
           dsimp only [targetSeq, targetLim]
           dsimp only [stageSet, stageVal]
           exact @metricDerivNormSupOn_restrictOpen E inferInstance inferInstance
-            inferInstance inferInstance inferInstance H inferInstance I
-            (A k) inferInstance inferInstance inferInstance inferInstance inferInstance
+            inferInstance inferInstance H inferInstance I
+            (A k) inferInstance inferInstance inferInstance inferInstance
             (gSeq k) (gLim k) (gLim k) (metricTargetOpen (I := I) Φ k)
             targetSigma targetT2 (F '' metricSourceCompactSet (I := I) Φ k K) p
     _ < ε := hkConv k hkC stageSet hKstage
@@ -398,6 +398,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem enorm_mfd_incl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) (a : A k) (v : TangentSpace I a) :
@@ -425,6 +426,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem pathELength_incl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {γ : ℝ → A k} {t₀ t₁ : ℝ}
@@ -459,6 +461,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem edist_incl_le (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) (a b : A k) :
@@ -491,6 +494,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem pathELength_invIncl (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {δ : ℝ → S.toSeqSystem.Lim} {t₀ t₁ : ℝ}
@@ -526,6 +530,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem edist_invIncl_le (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (k : ℕ) {x y : S.toSeqSystem.Lim} {r : ENNReal}
@@ -582,6 +587,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
 theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
@@ -654,6 +660,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [CompleteSpace E] in
 theorem compactCover_of_step (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
@@ -676,6 +683,7 @@ theorem compactCover_of_step (S : SmoothSeqSystem I A)
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [CompleteSpace E] in
 theorem compact_cball_cover (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hcover : HasCompactBallCover S g hg)

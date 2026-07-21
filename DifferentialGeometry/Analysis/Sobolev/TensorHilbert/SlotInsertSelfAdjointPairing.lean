@@ -30,6 +30,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem multilinear_slot0_pairing_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -135,6 +136,7 @@ theorem multilinear_slot0_pairing_self_adjoint
   rw [hLHS, hRHS]
   rw [hadj wB wA, g₀.symm x wB (Λ wA)]
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_slotΛ_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -304,6 +306,7 @@ theorem tensorInnerPointwise_slotΛ_self_adjoint
     rw [hkeyL, hkey, hkeyR]
   rw [hkey']
 
+omit [BoundarylessManifold I M] [I.Boundaryless] in
 theorem tensorL2Inner_appCc_slotInsertEndoCc_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞

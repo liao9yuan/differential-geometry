@@ -39,6 +39,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_covApply_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} (x : M)
@@ -86,6 +87,7 @@ theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
   simpa using hbound
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem orthoFrame_pair_covApply_commutator
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (i a : Fin (Module.finrank ℝ E)) :

@@ -80,6 +80,7 @@ theorem isInvertible_of_norm_id_sub_lt {T : E →L[ℝ] E}
 
 
 
+omit [CompleteSpace F] in
 theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U : Set M} (hU : IsOpen U)
     (hxU : x ∈ U) (hf : ContMDiffOn I J n f U)
     (hinv : (fderiv ℝ (writtenInExtChartAt I J x f) (extChartAt I x x)).IsInvertible) :
@@ -220,6 +221,7 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
 
 
 
+omit [CompleteSpace E] in
 theorem norm_sub_le_of_fderiv_near_id {s : Set E} (hs : Convex ℝ s) {G : E → E} {ε : ℝ}
     (hG : ∀ z ∈ s, DifferentiableAt ℝ G z)
     (hbd : ∀ z ∈ s, ‖ContinuousLinearMap.id ℝ E - fderiv ℝ G z‖ ≤ ε)
@@ -246,6 +248,7 @@ theorem norm_sub_le_of_fderiv_near_id {s : Set E} (hs : Convex ℝ s) {G : E →
 
 
 
+omit [CompleteSpace E] in
 theorem injOn_of_fderiv_near_id {s : Set E} (hs : Convex ℝ s) {G : E → E} {ε : ℝ} (hε : ε < 1)
     (hG : ∀ z ∈ s, DifferentiableAt ℝ G z)
     (hbd : ∀ z ∈ s, ‖ContinuousLinearMap.id ℝ E - fderiv ℝ G z‖ ≤ ε) :
@@ -262,6 +265,7 @@ theorem injOn_of_fderiv_near_id {s : Set E} (hs : Convex ℝ s) {G : E → E} {�
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [CompleteSpace F] [J.Boundaryless] in
 theorem injOn_of_writtenInExtChart {f : M → N} {U : Set M} (x₀ : M)
     (hUsub : U ⊆ (extChartAt I x₀).source)
     (hinj : Set.InjOn (writtenInExtChartAt I J x₀ f) ((extChartAt I x₀) '' U)) :
@@ -285,6 +289,7 @@ theorem injOn_of_writtenInExtChart {f : M → N} {U : Set M} (x₀ : M)
 
 
 
+omit [CompleteSpace F] in
 theorem isLocalDiffeomorphAt_of_contMDiffOn (hn : 1 ≤ n) (hn' : n ≠ ∞) {U : Set M} (hU : IsOpen U)
     (hxU : x ∈ U) (hf : ContMDiffOn I J n f U)
     (hinv : (fderiv ℝ (writtenInExtChartAt I J x f) (extChartAt I x x)).IsInvertible) :
@@ -295,6 +300,7 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn (hn : 1 ≤ n) (hn' : n ≠ ∞) {U 
 
 
 
+omit [CompleteSpace F] in
 theorem contMDiffOn_isLocalDiffeomorphOn (hn : 1 ≤ n) (hn' : n ≠ ∞) {U : Set M} (hU : IsOpen U)
     (hf : ContMDiffOn I J n f U)
     (hinv : ∀ y ∈ U,
@@ -306,6 +312,7 @@ theorem contMDiffOn_isLocalDiffeomorphOn (hn : 1 ≤ n) (hn' : n ≠ ∞) {U : S
 
 
 
+omit [CompleteSpace F] in
 theorem contMDiffAt_isLocalDiffeomorphAt (hn : 1 ≤ n) (hn' : n ≠ ∞)
     (hf : ContMDiffAt I J n f x)
     (hinv : (fderiv ℝ (writtenInExtChartAt I J x f) (extChartAt I x x)).IsInvertible) :
@@ -317,6 +324,7 @@ theorem contMDiffAt_isLocalDiffeomorphAt (hn : 1 ≤ n) (hn' : n ≠ ∞)
 
 
 
+omit [CompleteSpace F] in
 theorem hlocAt_infty'
     [IsManifold I ∞ M] [IsManifold J ∞ N] {f : M → N} {U : Set M} (hU : IsOpen U)
     (hxU : x ∈ U) (hf : ContMDiffOn I J ∞ f U)
@@ -392,6 +400,7 @@ theorem hlocAt_infty'
 
 
 
+omit [CompleteSpace F] in
 theorem contMDiffOn_isLocalDiffeomorphOn_infty
     [IsManifold I ∞ M] [IsManifold J ∞ N] {f : M → N} {U : Set M} (hU : IsOpen U)
     (hf : ContMDiffOn I J ∞ f U)
@@ -407,6 +416,7 @@ omit [I.Boundaryless] [J.Boundaryless] in
 
 
 
+omit [CompleteSpace F] in
 theorem hlocAt_of_coord
     [IsManifold I ∞ M] [IsManifold J ∞ N]
     (c : PartialDiffeomorph I 𝓘(ℝ, E) M E ∞)

@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -69,6 +69,7 @@ lemma tensorChartComp_apply_of_notMem
   rw [tensorChartComp_def, tensorChartComponent_def]
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -80,6 +81,7 @@ theorem tensorChartComp_add
   simp only [tensorChartComp_def]
   exact tensorChartComponent_add (I := I) (M := M) g r s S₁ S₂ α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -90,6 +92,7 @@ theorem tensorChartComp_smul
   simp only [tensorChartComp_def]
   exact tensorChartComponent_smul (I := I) (M := M) g r s c S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem tensorChartComp_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -103,6 +106,7 @@ theorem tensorChartComp_smul
   have hy := congrFun h y
   simpa using hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_neg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -114,6 +118,7 @@ theorem tensorChartComp_neg
   rw [neg_one_smul] at h
   rw [h, neg_one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -134,6 +139,7 @@ noncomputable def tensorChartCompₗ
   map_add' S₁ S₂ := tensorChartComp_add (I := I) (M := M) g r s S₁ S₂ α Idx Jdx
   map_smul' c S := tensorChartComp_smul (I := I) (M := M) g r s c S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartCompₗ_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -208,6 +214,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
     tensorChartPushed (I := I) (M := M) g r s S α y =
       tensorChartPushedRawModel (I := I) (M := M) g r s S α y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartPushed_eq_sum_tensorChartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -221,6 +228,7 @@ theorem tensorChartPushed_eq_sum_tensorChartComp
   exact chartPushedRaw_eq_sum_tensorChartComponent
     (I := I) (M := M) g r s S α y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartPushed_eq_zero_of_tensorChartComp_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -237,6 +245,7 @@ theorem tensorChartPushed_eq_zero_of_tensorChartComp_eq_zero
   rw [h Idx Jdx]
   rw [zero_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComp_eq_zero_of_section_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {S : SmoothCcTensor g r s} (hS : S = 0) (α : M)

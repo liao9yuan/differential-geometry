@@ -18,7 +18,9 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,16 +36,29 @@ noncomputable def iteratedCovGrad
         (iteratedCovGrad g r s j T)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma iteratedCovGrad_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGrad g r s 0 T = T := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma iteratedCovGrad_succ
     (g : SmoothRiemannianMetric I M) (r s j : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGrad g r s (j + 1) T =
       covGrad (I := I) (M := M) g r (s + j)
         (iteratedCovGrad g r s j T) := rfl
+
+end NormedSpaceModel
+
+section InnerProductSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
 
 noncomputable def iteratedCovGradSobolevNorm
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (T : SmoothCcTensor g r s) : ℝ :=
@@ -53,6 +68,7 @@ noncomputable def iteratedCovGradSobolevNorm
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
@@ -119,6 +135,7 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :
@@ -133,6 +150,8 @@ theorem iteratedCovGrad_toSobolev_embedding_C2
   have h_super' : 2 * k > Module.finrank ℝ E + 2 * 2 := by omega
   simpa using
     iteratedCovGrad_toSobolev_embedding_Cm (I := I) (M := M) g 0 2 k 2 h_super'
+
+end InnerProductSpaceModel
 
 end DifferentialGeometry.PDE.RicciFlow
 

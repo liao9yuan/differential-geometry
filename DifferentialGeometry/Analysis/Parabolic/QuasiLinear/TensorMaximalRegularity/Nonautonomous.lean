@@ -72,6 +72,8 @@ def nonautMap (a : Real) {T : Real} (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force)
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonautMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
     (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
     (A2 : Real → tensorHs (I := I) (M := M) g r s (a + 2) →L[Real]
@@ -93,6 +95,8 @@ theorem nonautMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonautMap_dist_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -210,6 +214,8 @@ theorem nonautMap_dist_le
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonautMap_contract
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -244,6 +250,8 @@ theorem nonautMap_contract
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonaut_strong_exists
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

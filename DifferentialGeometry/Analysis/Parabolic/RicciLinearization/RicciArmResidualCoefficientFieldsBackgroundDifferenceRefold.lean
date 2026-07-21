@@ -40,7 +40,18 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+section NormedBackgroundDifferenceRemainderField
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -67,6 +78,8 @@ theorem bgRDiffRefoldRemainderField_self (g₀ : SmoothRiemannianMetric I M) :
     appCcRS_zero_left, ricciArmSharpGradKoszulResidualField_zero_weight,
     ricciArmRicciFoldRemainderField_zero_weight, smul_zero, add_zero, sub_zero]
 
+end NormedBackgroundDifferenceRemainderField
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma inner_ext_vec (g : SmoothRiemannianMetric I M) (x : M) {a b : TangentSpace I x}
     (h : ∀ z : TangentSpace I x, g.inner x a z = g.inner x b z) : a = b := by
@@ -76,6 +89,7 @@ private lemma inner_ext_vec (g : SmoothRiemannianMetric I M) (x : M) {a b : Tang
   rw [metricFlatMap_apply, metricFlatMap_apply]
   exact h z
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_slotSwapFib_pair (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x)
     (u w : E) :
     Tensor0SBundle.Tensor0SSpace.toModel (inputSlotSwapFib (I := I) (M := M) x D) ![u, w] =
@@ -113,6 +127,7 @@ private lemma unitModel_smul_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c :
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem foldOrthoFrame_basis_at_center (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g x i x := by
@@ -144,6 +159,7 @@ private theorem foldOrthoFrame_basis_at_center (g : SmoothRiemannianMetric I M) 
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem foldOrthoFrame_expansion_at_center (g : SmoothRiemannianMetric I M)
     (x : M) (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -175,6 +191,8 @@ private theorem foldOrthoFrame_expansion_at_center (g : SmoothRiemannianMetric I
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma foldInvSharpKoszul_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     inverseMetricSharpFib (I := I) g₁ x
@@ -195,6 +213,7 @@ private lemma vec2_upd_one {F : Type*} (a b z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldTensor0sClmExtUnit {s : ℕ} {x : M}
     {φ ψ : Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :
@@ -203,6 +222,7 @@ private lemma foldTensor0sClmExtUnit {s : ℕ} {x : M}
   ext D
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D, map_smul, map_smul, h]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldCoeff_eq_unitScalarRSLift (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) :
     (P.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x) =
@@ -220,6 +240,7 @@ private lemma foldCoeff_eq_unitScalarRSLift (g₀ : SmoothRiemannianMetric I M)
     rw [unitScalarRSLift_apply_unit]
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     {X Y : Π b : M, TangentSpace I b}
@@ -358,6 +379,7 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
       smoothCcTensorBilinForm (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
     hAPtoModel ![c, riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d]]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -367,6 +389,9 @@ private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensorBilinSymm_apply, ← hPsymm x v w]
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma foldSkew_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -393,6 +418,7 @@ private lemma foldSkew_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [h2']
   ring
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldCompleteness_slot2 (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (p omv : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel D ![(p : E), (omv : E)] =
@@ -458,6 +484,7 @@ private lemma foldCompleteness_slot2 (g₁ : SmoothRiemannianMetric I M) (x : M)
     exact congrArg (fun t : TangentSpace I x => (![(p : E), (t : E)] : Fin 2 → E)) hexp
   rw [hfinal, hkey]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -613,6 +640,8 @@ private lemma foldToModel_slot2_neg (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 
   rw [vec2_upd_one, smul_eq_mul]
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -690,6 +719,7 @@ private lemma foldQuadruplePatterns (x : M) (p q c d : TangentSpace I x) :
     · funext i
       fin_cases i <;> rfl
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (Wsec : Π b : M, Tensor0SBundle.Tensor0SSpace 2 I b)
     (hWsec : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
@@ -815,6 +845,7 @@ private lemma foldDonorWeight_eq (g₀ : SmoothRiemannianMetric I M)
     funext (fun j => by fin_cases j <;> rfl)]
   rfl
 
+omit [I.Boundaryless] in
 private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -896,18 +927,21 @@ private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     refine Finset.sum_congr rfl (fun c _ => ?_)
     exact toModel_slotSwapFib_pair (I := I) (M := M) x Wuv _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_smul_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g 0 s) (x : M) (v : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g s (c • A) x v =
       c * unitModel (I := I) (M := M) g s A x v := by
   rw [unitModel_smul_loc, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_sub_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) (x : M) (v : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g s (A - B) x v =
       unitModel (I := I) (M := M) g s A x v - unitModel (I := I) (M := M) g s B x v := by
   rw [unitModel_sub_loc, ContinuousMultilinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -923,6 +957,7 @@ private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     linearizedKoszulCovec_apply,
     connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z, hsymmS]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldQuadKernel_split (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -956,6 +991,7 @@ private lemma foldQuadKernel_split (g₀ g₁ : SmoothRiemannianMetric I M)
     PDE.DeTurck.connDiff_symm (I := I) g₁ g₀ x v1 p]
   ring
 
+omit [I.Boundaryless] in
 private lemma foldQtrue_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -1011,6 +1047,7 @@ private lemma foldSGK_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     rfl]
   rw [sharpGradKoszulBiContrFib, sharpGradKoszulBiContrFibFixedFrame_toModel]
 
+omit [I.Boundaryless] in
 private lemma foldRF_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -1039,6 +1076,7 @@ private lemma foldRF_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     rfl]
   rw [ricciFoldBiContrFib, ricciFoldBiContrFibFixedFrame_toModel]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldHtie_zero (g₀ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (v w : TangentSpace I y),
       g₀.inner y v w = g₀.inner y v w +
@@ -1047,6 +1085,7 @@ private lemma foldHtie_zero (g₀ : SmoothRiemannianMetric I M) :
   rw [ccTensorBilinSymm_apply, ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldPsymm_zero (g₀ : SmoothRiemannianMetric I M) :
     ∀ (x : M) (v w : TangentSpace I x),
       smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
@@ -1054,6 +1093,7 @@ private lemma foldPsymm_zero (g₀ : SmoothRiemannianMetric I M) :
   intro x v w
   rw [ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem foldAppCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
@@ -1071,6 +1111,8 @@ theorem foldAppCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem foldSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),

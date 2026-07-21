@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -51,6 +51,7 @@ theorem continuous_riemannianFiberNormSq_section
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem memLp_riemannianFiberNormSq_rpow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) (a : ℝ) (ha : 0 ≤ a) (p : ℝ≥0∞) :

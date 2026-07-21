@@ -22,7 +22,7 @@ open TensorRSNabla
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,7 @@ def ccTensorOneForm (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1)
     (unitEvalSection (I := I) (M := M) g 1 σ b)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_unitEval
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1)
     (x : M) (v : TangentSpace I x) :
@@ -58,6 +59,7 @@ lemma tensorCovDerivAt_unitEval
     (LeviCivita (I := I) g) x v
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_one_cotangentToCLM
     (g : SmoothRiemannianMetric I M)
     (α : Π b : M, Tensor0SSpace 1 I b) {x : M}
@@ -104,6 +106,8 @@ lemma tensor0SCovariantDerivative_one_cotangentToCLM
     congr 1
     exact hconsEq ((LeviCivita (I := I) g).toFun (fun y => Y y) x v)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) {x : M}
     (hθ : MDiffAtCotangent (ccTensorOneForm g σ) x)

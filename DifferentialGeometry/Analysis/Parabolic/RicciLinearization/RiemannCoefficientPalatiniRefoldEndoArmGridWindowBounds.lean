@@ -41,7 +41,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -225,6 +225,8 @@ private theorem bdCometricCastG0_gridWindow (g₀ : SmoothRiemannianMetric I M)
       (Finset.sum_nonneg fun l _ => mul_nonneg (by positivity) (hCD_nn l)))
   nlinarith [hA', hB, hW_nn, hcfix_nn 0]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma bdConnDiffSection_eq_cometricRaise (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -286,6 +288,7 @@ private lemma bdConnDiffSection_eq_cometricRaise (g₀ g₁ : SmoothRiemannianMe
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma bdRfns_iCG_connDiffLoweredCc_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -625,6 +628,8 @@ private theorem bdWEndoInsertDiff_gridWindow (g₀ g_bg : SmoothRiemannianMetric
       ((iteratedCovGrad (I := I) g₀ 0 2 i
         (bdAlphaB (I := I) (M := M) g₀ g₁ g_bg)).toSection x)]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem bdDLb_eq_slotInsert_sum
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg =
@@ -757,6 +762,7 @@ private theorem bdDLb_eq_slotInsert_sum
     simp only [hcond]
   rw [harg]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bdSlotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -772,6 +778,7 @@ private lemma bdSlotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : �
   rw [show ((A - B) x) = A x - B x from by rw [ContMDiffSection.coe_sub]; rfl]
   rw [slotInsertEndoFib_sub_left]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bdReindexSwap_sub (g₀ : SmoothRiemannianMetric I M)
     (X Y : SmoothCcTensor g₀ 2 2) :
     reindexCoeffGen (I := I) (M := M) g₀ 2 2
@@ -891,6 +898,8 @@ private def bdWEndoSecDiff (g₁ g_bg g₀' : SmoothRiemannianMetric I M) :
   deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg -
     deTurckLieWEndoSection (I := I) (M := M) g₁ g₀'
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem bdDLbDiff_eq_slotInsert_sum
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg -
@@ -945,6 +954,8 @@ private theorem bdDLbDiff_eq_slotInsert_sum
     (deTurckLieWEndoSection (I := I) (M := M) g₁ g₀)]
   rfl
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bdSlotInsertZero_bdWEndoSecDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
         (bdWEndoSecDiff (I := I) (M := M) g₁ g_bg g₀) =

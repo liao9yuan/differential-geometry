@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -47,6 +46,7 @@ structure CurvatureSectionProducerData
 
 namespace CurvatureSectionProducerData
 
+omit [T2Space M] in
 theorem rm13_from_connection
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -54,6 +54,7 @@ theorem rm13_from_connection
     Rm13RealizesConnection (I := I) cov K.rm13 :=
   K.h_rm13
 
+omit [T2Space M] in
 theorem rm04_from_rm13
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
@@ -61,6 +62,7 @@ theorem rm04_from_rm13
     Rm04RealizesConnection (I := I) g cov K.rm04 :=
   K.h_rm04
 
+omit [T2Space M] in
 theorem ricci_from_rm13
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}

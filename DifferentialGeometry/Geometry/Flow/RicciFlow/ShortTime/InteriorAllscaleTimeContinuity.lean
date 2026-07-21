@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open MeasureTheory Set
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -55,6 +55,9 @@ variable
 
 
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatTraceWeighted_summable_of_tailSummable
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (htail : EigenvalueTailSummable (I := I) (M := M) g r s)
@@ -87,6 +90,8 @@ theorem heatTraceWeighted_summable_of_tailSummable
           exact Real.rpow_nonneg hbase_pos.le _
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hom_integral_eq
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -179,6 +184,8 @@ private theorem coeffFun_u_eq
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem duhamel_integral_abs_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -198,6 +205,8 @@ private theorem duhamel_integral_abs_le
   exact hbound
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem u0_coeff_sq_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :
@@ -211,6 +220,8 @@ private theorem u0_coeff_sq_summable
         mul_le_mul_of_nonneg_right hw (sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem hom_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} (ha2 : 0 ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -248,6 +259,8 @@ private theorem hom_majorant_summable
     nlinarith [hkey, hA2, hB2]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_derivModeCoeff_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -258,6 +271,8 @@ private theorem norm_derivModeCoeff_le
   exact perModeConvDerivL2_sq_le _ (tensor_lambda_nonneg (I := I) (M := M) i) hT _
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem duhamel_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -313,6 +328,8 @@ private theorem duhamel_majorant_summable
             + (1 + lam) ^ (-p)) := by rw [hA2, hB2]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tsum_singleModeCLM_coeff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -337,6 +354,8 @@ private theorem tsum_singleModeCLM_coeff
   rw [tsum_congr hterm, tsum_ite_eq i c]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem continuousOn_coeffFun_u
     {g_bg : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u : MaxRegSolutionSpace (I := I) (M := M) a T)
@@ -350,6 +369,8 @@ private theorem continuousOn_coeffFun_u
   simpa only [coeffCLM_apply] using hcomp
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_singleModeCLM_eq
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (c : ℝ) :
@@ -370,6 +391,7 @@ private theorem norm_singleModeCLM_eq
 
 
 
+omit [BoundarylessManifold I M] in
 theorem interior_allscale_time_continuity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

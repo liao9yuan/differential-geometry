@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -137,6 +137,7 @@ private lemma chosenWeakPartial'_memLp_volume_uncond
   · rw [chosenWeakPartial'_of_not_mem hw k]
     exact MemLp.zero
 
+omit [CompleteSpace E] in
 private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -161,6 +162,7 @@ private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -190,6 +192,7 @@ private theorem ibp_density_fChartEffPrev
     h_fChartEffPrev_memW1p (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
+omit [CompleteSpace E] in
 private theorem ibp_principal_pair_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -280,6 +283,7 @@ private theorem ibp_principal_pair_unconditional
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+omit [CompleteSpace E] in
 private theorem ibp_mass_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -317,6 +321,7 @@ private theorem ibp_mass_unconditional
     h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
+omit [CompleteSpace E] in
 private theorem ibp_inner_j_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -366,6 +371,7 @@ private theorem ibp_inner_j_unconditional
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)

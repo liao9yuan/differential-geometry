@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianPairingLapDom
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -99,6 +99,7 @@ omit [NeZero (Module.finrank ℝ E)] in
                 laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l y := rfl
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartHessianPhiOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) :

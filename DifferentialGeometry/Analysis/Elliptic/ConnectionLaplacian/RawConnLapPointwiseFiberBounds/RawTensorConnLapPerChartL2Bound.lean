@@ -88,12 +88,15 @@ noncomputable def rawChartFrameDataSq
   ‖rawTensorConnLap (I := I) g r s T₀ b‖ ^ 2
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rawChartFrameDataSq_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Π b : M, TensorRSSpace r s I b) (b : M) :
     0 ≤ rawChartFrameDataSq (I := I) g r s T₀ b := by
   unfold rawChartFrameDataSq
   exact sq_nonneg _
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

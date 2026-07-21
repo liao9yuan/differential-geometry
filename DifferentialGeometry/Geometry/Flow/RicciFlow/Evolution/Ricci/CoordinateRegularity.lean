@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -25,7 +24,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -64,6 +63,7 @@ theorem coordInvMdiffOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -82,6 +82,7 @@ theorem coordMetricMdiff
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -150,6 +151,7 @@ theorem coordInvCovZeroOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordRicciMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -205,6 +207,7 @@ theorem coordRicciMdiff
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordNablaReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -271,6 +274,7 @@ theorem coordNablaReg
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordNablaRegOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -337,6 +341,7 @@ theorem coordNablaRegOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordNablaReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -468,6 +473,7 @@ theorem coordNablaReal
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordNablaRealOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -894,6 +900,7 @@ theorem coordNab2Can
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordMetricDeriv
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -930,6 +937,7 @@ theorem coordMetricDeriv
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordMetricMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -997,6 +1005,7 @@ theorem coordGammaEvol
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaForm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1015,6 +1024,7 @@ theorem coordGammaForm
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1144,6 +1154,7 @@ theorem coordGammaRhsMd
 
 
 
+omit [SigmaCompactSpace M] in
 private theorem coordDgSmAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

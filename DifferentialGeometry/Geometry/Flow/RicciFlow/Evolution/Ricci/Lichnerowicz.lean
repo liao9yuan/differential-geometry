@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateId
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -33,6 +32,8 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem evol_ricci_inFrame_of_variation_commutators
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -97,6 +98,8 @@ def RicciTraceDerivativeSimplifiesInFrame
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem ricciEvolutionEquationInFrame_of_riemann_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -272,6 +275,8 @@ def RicciSymmetricInFrameOn
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLeftActionCompInFrame_eq_quadratic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -285,6 +290,8 @@ theorem ricciLeftActionCompInFrame_eq_quadratic
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -338,6 +345,8 @@ theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciRightActionCompInFrame_eq_quadratic_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -391,6 +400,8 @@ theorem ricciRightActionCompInFrame_eq_quadratic_at
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem rightActAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -447,6 +458,8 @@ private theorem rightActAt
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_actions
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -472,6 +485,8 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -495,6 +510,8 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -572,6 +589,8 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -591,6 +610,8 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -652,6 +673,7 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
 
 
 
+omit [SigmaCompactSpace M] in
 theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -764,6 +786,8 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

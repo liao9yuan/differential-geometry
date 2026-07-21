@@ -32,7 +32,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -158,6 +158,7 @@ private theorem deTurckRemainder_pathCoeff_timeContDiff
     refine ContDiffOn.congr ?_ (fun t ht => hraw t ht)
     exact contDiffOn_const.mul (hφ_smooth i).contDiffOn
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem iteratedPartialSnd_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -467,6 +468,7 @@ private theorem reconSec_jointContMDiffOn
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mpr
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem vec_iteratedPartialSnd_contMDiffOn_Icc
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     (Vf : M → ℝ → V) {T : ℝ} (hT : 0 < T)
@@ -549,6 +551,7 @@ private theorem fiber_contDiffOn_Icc_recon
   rw [contMDiffOn_iff_contDiffOn] at hcomp
   exact hcomp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem hasDerivWithinAt_integral_param_Icc_recon
     [MeasurableSpace M] [OpensMeasurableSpace M]
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
@@ -640,6 +643,7 @@ private theorem hasDerivWithinAt_integral_param_Icc_recon
       hmeas hbnd (integrable_const C) hlim
     simpa [hG'] using this
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem iteratedDerivWithin_integral_param_Icc
     [MeasurableSpace M] [OpensMeasurableSpace M]
     (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
@@ -735,6 +739,7 @@ private theorem partialSnd_set_contMDiffOn_Icc
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem iteratedPartialSnd_set_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ} (U : Set M)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -758,6 +763,7 @@ private theorem iteratedPartialSnd_set_contMDiffOn_Icc
       intro p _
       rw [iteratedDerivWithin_succ']
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem vec_iteratedPartialSnd_set_contMDiffOn_Icc
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     {T : ℝ} (U : Set M)

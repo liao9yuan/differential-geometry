@@ -4,7 +4,6 @@ noncomputable section
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped BigOperators Manifold ContDiff Topology
@@ -19,6 +18,7 @@ variable {M : Type _} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace CovariantDerivative
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_add_first
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -63,6 +63,7 @@ private theorem riemannCurvatureAux_tangentConst_add_first
   simp [Pi.add_apply, map_add]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_smul_first
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -97,6 +98,7 @@ private theorem riemannCurvatureAux_tangentConst_smul_first
   simp [Pi.smul_apply, map_smul]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_add_second
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -141,6 +143,7 @@ private theorem riemannCurvatureAux_tangentConst_add_second
   simp [Pi.add_apply, map_add]
   module
 
+omit [FiniteDimensional ℝ E] in
 private theorem riemannCurvatureAux_tangentConst_smul_second
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -175,6 +178,7 @@ private theorem riemannCurvatureAux_tangentConst_smul_second
   simp [Pi.smul_apply, map_smul]
   module
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem riemannCurvatureAux_tangentConst_add_third
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -252,6 +256,7 @@ private theorem riemannCurvatureAux_tangentConst_add_third
   simp
   module
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem riemannCurvatureAux_tangentConst_smul_third
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -355,6 +360,7 @@ private noncomputable def riemannCurvatureZCLM
         rw [riemannCurvatureAux_tangentConst_smul_third cov hcov x a X Y Z]
         exact map_smul (cotangentToDual_gen α) a _ }
 
+omit [CompleteSpace E] in
 @[simp] private theorem riemannCurvatureZCLM_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M)
@@ -568,6 +574,7 @@ private noncomputable def tangentFlatCotangentModelCLM
         exact congrArg (fun L : Module.Dual Real (TangentSpace I x) => L V)
           ((tangentFlatLinear_gen (I := I) g x).map_smul c W) }
 
+omit [CompleteSpace E] in
 @[simp] private theorem tangentFlatCotangentModelCLM_apply
     (g : SmoothRiemannianMetric I M) (x : M) (W : TangentSpace I x) :
     tangentFlatCotangentModelCLM (I := I) g x W =

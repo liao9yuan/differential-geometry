@@ -39,7 +39,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
 
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma deTurckLieCovDerivRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -76,6 +77,8 @@ def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
   rw [deTurckLieCovDerivRefoldC2Family, zero_smul]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
     (p q' : TangentSpace I x) :
@@ -94,6 +97,7 @@ lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
   fin_cases i <;> rfl
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -145,6 +149,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S') y =
@@ -158,6 +163,7 @@ lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S) y =
@@ -169,6 +175,7 @@ lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ
   rfl
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvatureRefoldMonomialCoeffField_unitValue_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -214,6 +221,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_add
   rw [add_mul]
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvatureRefoldMonomialCoeffField_unitValue_smul
     (g₀ g₁ : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -250,6 +258,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_smul
   ring
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -280,6 +289,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     curvatureRefoldMonomialCoeffField_unitValue_trans_swap]
 
 
+omit [BoundarylessManifold I M] in
 theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

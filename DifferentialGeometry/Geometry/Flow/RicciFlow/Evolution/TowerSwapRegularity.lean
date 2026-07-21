@@ -25,12 +25,12 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem frameTowerSwap [CompactSpace M]
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -152,6 +152,7 @@ theorem frameTowerSwap [CompactSpace M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tailTowerData [CompactSpace M]
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

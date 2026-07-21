@@ -33,6 +33,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covariant_derivative_of_pullback_vf_naturality
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)

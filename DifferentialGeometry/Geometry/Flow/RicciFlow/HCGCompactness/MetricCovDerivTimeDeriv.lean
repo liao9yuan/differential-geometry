@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -55,13 +54,12 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
@@ -73,6 +71,8 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
+omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_hasDerivWithinAt
     (gRef : SmoothRiemannianMetric I M)
     (A B : Real → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -136,6 +136,8 @@ theorem covDerivOfField_eval_hasDerivWithinAt
 
 
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_swapReg
     (gRef : SmoothRiemannianMetric I M)
     (A B : Real → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -192,6 +194,8 @@ theorem covDerivOfField_swapReg
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_contMDiffAt
     (gRef : SmoothRiemannianMetric I M)
     (A : Real → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -307,6 +311,8 @@ theorem covDerivOfField_eval_contMDiffAt
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_smoothAt
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -417,6 +423,8 @@ theorem covDerivOfField_eval_smoothAt
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_mdiffAt
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -468,6 +476,8 @@ noncomputable def solnEvolField
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem solnRicField_eq_ricciAt
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -480,6 +490,8 @@ theorem solnRicField_eq_ricciAt
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem solnMetricDeriv
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -514,6 +526,8 @@ theorem solnMetricDeriv
 
 
 
+omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem solnTower_hasDerivAt
     {D : RealTimeInterval}
     (gRef : SmoothRiemannianMetric I M)
@@ -548,6 +562,8 @@ theorem solnTower_hasDerivAt
 
 
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem solnTowerSwap_of_smooth
     {D : RealTimeInterval}
     (gRef : SmoothRiemannianMetric I M)
@@ -598,6 +614,8 @@ theorem solnTowerSwap_of_smooth
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem solnMetricJointAt
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -676,6 +694,8 @@ theorem solnMetricJointAt
 
 
 
+omit [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem solnTowerSwap_of_joint
     {D : RealTimeInterval}
     (gRef : SmoothRiemannianMetric I M)
@@ -712,6 +732,7 @@ theorem solnTowerSwap_of_joint
 
 
 
+omit [SigmaCompactSpace M] in
 theorem solnTowerSwap_reg
     {D : RealTimeInterval}
     (gRef : SmoothRiemannianMetric I M)

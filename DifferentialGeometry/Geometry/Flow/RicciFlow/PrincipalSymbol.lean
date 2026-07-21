@@ -19,7 +19,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -116,22 +116,26 @@ private def testLinear (x α : M) (ξ : E) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr ξ a * (chartModelBasis E).repr (y - extChartAt I α x) a
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma symbolTestPerturbation_apply (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (c d : Fin (Module.finrank ℝ E)) (y : E) :
     symbolTestPerturbation (I := I) x α ξ t ht c d y =
       (1 / 2 : ℝ) * (testLinear (I := I) x α ξ y) ^ 2 * formComp (I := I) x t c d := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma testLinear_self (x α : M) (ξ : E) :
     testLinear (I := I) x α ξ (extChartAt I α x) = 0 := by
   simp [testLinear]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma symbolTestPerturbation_apply_self (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (c d : Fin (Module.finrank ℝ E)) :
     symbolTestPerturbation (I := I) x α ξ t ht c d (extChartAt I α x) = 0 := by
   rw [symbolTestPerturbation_apply, testLinear_self]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma testLinear_differentiableAt (x α : M) (ξ : E) (y : E) :
     DifferentiableAt ℝ (testLinear (I := I) x α ξ) y := by
   refine DifferentiableAt.fun_sum (fun a _ => ?_)
@@ -143,6 +147,7 @@ private lemma testLinear_differentiableAt (x α : M) (ξ : E) (y : E) :
   exact (((chartModelBasis E).coord a).toContinuousLinearMap.differentiableAt).comp y
     ((differentiableAt_id).sub (differentiableAt_const _))
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma partialDeriv_symbolTestPerturbation_self (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (p c d : Fin (Module.finrank ℝ E)) :
@@ -193,6 +198,7 @@ def HasPrincipalSymbol
     IsChartLinearizationSecondOrderPart (I := I) F g₀ P ∧
       IsPrincipalSymbolOfSecondOrderPart (I := I) g₀ P σ
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem HasPrincipalSymbol.isotropic_of
     {F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)}
@@ -208,6 +214,7 @@ theorem HasPrincipalSymbol.isotropic_of
   obtain ⟨_, _, hσ⟩ := h
   exact (hσ x ξ hξ t ht).2
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem HasPrincipalSymbol.symbol_apply_eq_neg_normSq_smul
     {F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)}
@@ -221,12 +228,14 @@ theorem HasPrincipalSymbol.symbol_apply_eq_neg_normSq_smul
       (- DifferentialGeometry.PDE.DeTurck.metricCovectorNormSq (I := I) g₀ x ξ) • t :=
   (h.isotropic_of x ξ hξ t ht).1
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartFComponentOnE_zero_operator
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartFComponentOnE (I := I)
       (fun (_ : SmoothRiemannianMetric I M) (_ : M) => (0 :
         TangentSpace I _ →L[ℝ] TangentSpace I _ →L[ℝ] ℝ)) g α i j y = 0 := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem not_hasPrincipalSymbol_zero_operator [I.Boundaryless]
     (g₀ : SmoothRiemannianMetric I M) (x : M) {ξ : E} (hξ : ξ ≠ 0)
     {t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ}

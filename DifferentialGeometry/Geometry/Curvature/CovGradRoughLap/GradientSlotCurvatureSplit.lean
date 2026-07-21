@@ -37,6 +37,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem baseSlotCurv_eq_riemannOp
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -53,6 +55,7 @@ def gradSlotCurv (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor 
   riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
     (fun b => X b) (fun b => W b) (unitGradFieldGen (I := I) (M := M) g s S) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlotCurv_toModel_eq_baseSlot_sum
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -66,6 +69,7 @@ theorem gradSlotCurv_toModel_eq_baseSlot_sum
     (unitGradFieldGen (I := I) (M := M) g s S)
     (contMDiff_unitGradFieldGen (I := I) (M := M) g s S) x u
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlotCurv_toModel_eq_leading_add_tail
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -84,6 +88,7 @@ def orthoFrameSec (g : SmoothRiemannianMetric I M) (x : M)
   ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i)
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] lemma orthoFrameSec_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) :
     orthoFrameSec (I := I) (M := M) g x i b = smoothOrthoFrame (I := I) g x i b := rfl
@@ -108,6 +113,8 @@ theorem gradSlotCurv_frameSum_toModel_eq
   simp only [gradSlotCurv_toModel_eq_leading_add_tail,
     baseSlotCurv_eq_riemannOp, orthoFrameSec_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem ricEndoRaisedFib_inner_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (ricEndoRaisedFib (I := I) g x v) w =
@@ -118,6 +125,7 @@ theorem ricEndoRaisedFib_inner_eq_frame_trace
   rw [inner_ricEndoRaisedFib (I := I) (M := M) g x v w,
     smoothOrthoFrame_riemannOp_trace_eq_ricci (I := I) (M := M) g x v w]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricTraceSection_apply_leadingSlot
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (x : M) (v0 : E) (vs : Fin s → TangentSpace I x) :
@@ -188,6 +196,7 @@ private lemma slot_skew_cancel {n s : ℕ} (k : Fin (s + 1)) (Rmat : Fin n → F
 
 omit [CompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma curv_inner_left_reduce
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -14,7 +14,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,7 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+omit [NeZero (Module.finrank ℝ E)] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_continuous
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
@@ -47,7 +47,7 @@ lemma gradInnerSmooth_continuous
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)
   rw [grad_g_apply, grad_g_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_memLp_two
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -65,14 +65,14 @@ noncomputable def gradInnerSmooth
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmooth_def
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerSmooth (I := I) (M := M) g ρα v =
       (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _ := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_coeFn
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -101,6 +101,7 @@ lemma gradInnerSmooth_pt_add
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (x : M) :
@@ -166,7 +167,7 @@ omit [NeZero (Module.finrank ℝ E)] in
     gradInnerSmoothLin (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+omit [NeZero (Module.finrank ℝ E)] [T2Space M]
   [SigmaCompactSpace M] in
 private lemma exists_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
@@ -191,7 +192,7 @@ noncomputable def gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Classical.choose (exists_gradSupBound (I := I) (M := M) g ρα)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+omit [NeZero (Module.finrank ℝ E)] [T2Space M]
   [SigmaCompactSpace M] in
 lemma gradSupBound_nonneg
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
@@ -199,7 +200,7 @@ lemma gradSupBound_nonneg
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).1
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+omit [NeZero (Module.finrank ℝ E)] [T2Space M]
   [SigmaCompactSpace M] in
 lemma sqrt_inner_grad_self_le_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
@@ -234,7 +235,7 @@ lemma abs_gradInner_le_gradSupBound_mul_sqrt
       (gradFun (I := I) g v.toFun x)) := Real.sqrt_nonneg _
   exact h1.trans (mul_le_mul_of_nonneg_right h2 h_sqrt_v_nn)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_gradInnerSmooth_sq
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

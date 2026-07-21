@@ -30,7 +30,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -56,6 +56,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 theorem covPrincipalRotationCoeff_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -140,6 +141,7 @@ theorem covPrincipalRotationCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
+omit [CompleteSpace E] in
 theorem covLowerOrderRotationValueCoeff_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -224,6 +226,7 @@ theorem covLowerOrderRotationValueCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
+omit [CompleteSpace E] in
 theorem weightedGradCoeffDivSum_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

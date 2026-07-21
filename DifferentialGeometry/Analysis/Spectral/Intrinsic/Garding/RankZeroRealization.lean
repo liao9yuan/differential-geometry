@@ -59,6 +59,8 @@ noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
 
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarScaleLap_coeff
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -94,6 +96,7 @@ theorem scalarLapHs_core
 
 
 
+omit [CompactSpace M] in
 theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -134,6 +137,8 @@ theorem rawLap_cc_scalar
 
 omit [BoundarylessManifold I M] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_scalarLap_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2) :

@@ -20,7 +20,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,7 +31,7 @@ def tangentSectionAction
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) : M → ℝ :=
   fun x => mfderiv I 𝓘(ℝ) f x (X x)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 @[simp] lemma tangentSectionAction_def
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
     tangentSectionAction (I := I) X f x = mfderiv I 𝓘(ℝ) f x (X x) := rfl
@@ -39,18 +39,18 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 def scalarOnE (α : M) (f : M → ℝ) : E → ℝ :=
   fun y => f ((extChartAt I α).symm y)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 @[simp] lemma scalarOnE_def (α : M) (f : M → ℝ) (y : E) :
     scalarOnE (I := I) α f y = f ((extChartAt I α).symm y) := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma scalarOnE_extChartAt (α : M) (f : M → ℝ) {x : M}
     (hx : x ∈ (extChartAt I α).source) :
     scalarOnE (I := I) α f (extChartAt I α x) = f x := by
   change f ((extChartAt I α).symm (extChartAt I α x)) = f x
   rw [(extChartAt I α).left_inv hx]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 lemma scalarOnE_contDiffOn (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) :
     ContDiffOn ℝ ∞ (scalarOnE (I := I) α f) (extChartAt I α).target := by
@@ -62,6 +62,7 @@ lemma scalarOnE_contDiffOn (α : M) {f : M → ℝ}
     hf_on.comp hsymm (fun _ _ => mem_univ _)
   exact hcomp.contDiffOn
 
+omit [Module.Finite ℝ E] in
 lemma scalarOnE_contDiffWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -167,7 +168,7 @@ theorem tangentSectionAction_chartLocal
   rw [mfderiv_chartBasisVecFiber (I := I) α hf hx hx_int i]
   exact smul_eq_mul ..
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_target_subset_interior_of_boundaryless [I.Boundaryless] (α : M) :
     (extChartAt I α).target ⊆ interior (extChartAt I α).target := by
   intro y hy

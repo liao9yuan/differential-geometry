@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
 
 
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 
@@ -15,14 +14,13 @@ open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -97,6 +95,7 @@ private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [IsManifold I 2 M] in
 theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -107,6 +106,7 @@ theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
   exact (tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt
     (I := I) V x₀ hV).differentiableWithinAt (by simp)
 
+omit [IsManifold I 2 M] in
 theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -151,6 +151,8 @@ theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
     rw [hcoe]
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by simp)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
+omit [IsManifold I ∞ M] in
 private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -225,6 +227,8 @@ private theorem tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_
     rw [hcoe]
   exact hmdiff.contDiffWithinAt
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
+omit [IsManifold I ∞ M] in
 theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -235,6 +239,7 @@ theorem tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt_on
   exact (tangentFieldModelInChart_contDiffWithinAt_center_of_contMDiffAt_one
     (I := I) V x₀ hV).differentiableWithinAt (by norm_num)
 
+omit [IsManifold I ∞ M] in
 theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt_one
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
@@ -283,6 +288,7 @@ theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt_one
     rw [hcoe]
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by norm_num)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tangentConst_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -711,6 +717,7 @@ theorem nabla0SFun_eval_smooth_slots {s : ℕ}
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -737,6 +744,7 @@ theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -760,6 +768,7 @@ theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_C1_slots_mdiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)

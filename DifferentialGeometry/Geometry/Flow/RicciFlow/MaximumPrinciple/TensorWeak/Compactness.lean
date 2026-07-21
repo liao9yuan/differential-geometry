@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,13 +14,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -46,6 +43,7 @@ namespace TensorFirstNullCompactnessOn
 
 
 
+omit [IsManifold I 2 M] in
 theorem of_section
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -178,6 +176,7 @@ namespace TensorFirstNullCompactnessOn
 
 
 
+omit [IsManifold I 2 M] in
 theorem of_section_timeSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -327,6 +326,7 @@ def TensorBarrierStrictSupersolutionOn
     nabla2Barrier nablaBarrier
     (Set.Ioc t0 (t0 + delta))
 
+omit [IsManifold I 2 M] in
 theorem strictBarrier_of_est
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -434,6 +434,7 @@ def TensorStrictCertSlab
 
 
 
+omit [IsManifold I 2 M] in
 theorem scalarSigns_of_eval
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -523,6 +524,7 @@ theorem scalarSigns_of_eval
 
 
 
+omit [IsManifold I 2 M] in
 theorem scalarSigns_of_parts
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -576,6 +578,7 @@ theorem scalarSigns_of_parts
 
 
 
+omit [IsManifold I 2 M] in
 theorem scalarSigns_of_lap
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -625,6 +628,7 @@ theorem scalarSigns_of_lap
 
 
 
+omit [IsManifold I 2 M] in
 theorem scalarSigns_of_lap_firstNull
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -19,13 +18,14 @@ namespace Exponential
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 section SliceAtBallPoint
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -57,6 +57,7 @@ private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball
   have hfst : ContDiff ℝ 1 (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp v₁ hslice
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_two
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -88,6 +89,7 @@ private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_two
   have hfst : ContDiff ℝ 2 (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp v₁ hslice
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffAt_chartFlow_slice_fst_of_mem_ball_nat
     {Φ : (E × E) × ℝ → E × E} {x₀ : E} {ρ T t' : ℝ} {v₁ : E} (n : ℕ)
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -126,6 +128,8 @@ section CandidateAtBallPoint
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [I.Boundaryless] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -162,6 +166,8 @@ private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
+omit [I.Boundaryless] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -198,6 +204,8 @@ private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
+omit [I.Boundaryless] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartFlowCandidate_contMDiffAt_nat_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E} (n : ℕ)
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -242,6 +250,7 @@ section SmallVector
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMap_contMDiffAt_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -352,6 +361,8 @@ theorem expMap_contMDiffAt_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_unified_chartFlow_data_two
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -539,6 +550,7 @@ private theorem exists_unified_chartFlow_data_two
   · intro v hv
     exact hF_int v hv
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMap_contMDiffAt2_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -652,6 +664,8 @@ theorem expMap_contMDiffAt2_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_unified_chartFlow_data_inf
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -839,6 +853,8 @@ private theorem exists_unified_chartFlow_data_inf
   · intro v hv
     exact hF_int v hv
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_unified_chartFlow_data_nat
     (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (_hn : 1 ≤ n) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -870,6 +886,7 @@ private theorem exists_unified_chartFlow_data_nat
     hcd.of_le (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)),
     hinit0, hinitv, htgt, hphase, hconst, hint⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma expMap_contMDiffAtN_of_chartData
     (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ)
     {Φ : (E × E) × ℝ → E × E} {ρ T T_match : ℝ}
@@ -992,6 +1009,7 @@ private lemma expMap_contMDiffAtN_of_chartData
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMap_contMDiffAtN_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -1005,6 +1023,7 @@ theorem expMap_contMDiffAtN_of_norm_lt
     expMap_contMDiffAtN_of_chartData g p n hT_match_pos hT_match_le_T hΦ_cd
       hΦ_init_v hΦ_target hΦ_phase hw⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMap_contMDiffAt_infty_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -1025,6 +1044,7 @@ section JointBasepointVector
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} {z₁ : E × E} (n : ℕ)
     (hz₁ : z₁ ∈ Metric.ball z₀ ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -1048,6 +1068,8 @@ private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
   have hfst : ContDiff ℝ (n : ℕ∞) (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp z₁ hslice
 
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} (n : ℕ)
     (ht' : t' ∈ Set.Ioo (-T) T)
@@ -1060,6 +1082,7 @@ private lemma contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
     (Φ := Φ) (z₀ := z₀) (ρ := ρ) (T := T) (t' := t') (z₁ := z₁) n
     hz₁ ht' hcd).contDiffWithinAt
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     {b : ContDiffBump ((x₀, (0 : E)) : E × E)}
     {ρ_V T_V : ℝ} (hρ_V_pos : 0 < ρ_V) (hT_V_pos : 0 < T_V)
@@ -1125,7 +1148,11 @@ private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     have hmem : ((z, s) : (E × E) × ℝ) ∈ U ×ˢ V := ⟨hz_U, hs_V⟩
     exact h_subset hmem
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartExp_jointContDiffOn_infty
+    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
       0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
@@ -1288,7 +1315,11 @@ theorem exists_chartExp_jointContDiffOn_infty
   exact ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_in_Ioo, ht'_pos,
     hjoint, hΦ_init_z, hΦ_phase_z, hΦ_target_z, hΦ_cd⟩
 
+omit [CompleteSpace E] in
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartExp_jointContDiffOn_nat
+    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (_hn : 1 ≤ n) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
       0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧

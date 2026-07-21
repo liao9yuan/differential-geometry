@@ -3,7 +3,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -41,7 +40,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [T2Space M]
 
 
@@ -56,6 +54,7 @@ variable [T2Space M]
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem nabla0SFun_hasDerivWithinAt_pt {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -104,6 +103,7 @@ theorem nabla0SFun_hasDerivWithinAt_pt {s : ℕ}
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem nabla0SFun_hasDerivWithinAt {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -141,6 +141,7 @@ theorem nabla0SFun_hasDerivWithinAt {s : ℕ}
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem totalNabla0SFun_hasDerivWithinAt_pt {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -177,6 +178,7 @@ theorem totalNabla0SFun_hasDerivWithinAt_pt {s : ℕ}
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem totalNabla0SFun_hasDerivWithinAt {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))

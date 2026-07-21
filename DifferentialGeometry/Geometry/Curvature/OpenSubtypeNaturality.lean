@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -32,6 +31,7 @@ private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem SmoothRiemannianMetric.eq_of_inner_eq_gen
     (g : SmoothRiemannianMetric I M) {x : M} {v w : TangentSpace I x}
     (h : ∀ ζ : TangentSpace I x, g.inner x v ζ = g.inner x w ζ) : v = w := by
@@ -48,6 +48,7 @@ theorem SmoothRiemannianMetric.eq_of_inner_eq_gen
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 theorem extDerivFun_restrictOpen
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (f : M -> Real) (x : U) (v : TangentSpace I x)
@@ -71,6 +72,7 @@ noncomputable def restrictOpenTangentField
     (Y : (p : M) -> TangentSpace I p) : (y : U) -> TangentSpace I y :=
   VectorField.mpullback I I (Subtype.val : U -> M) Y
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 @[simp]
 theorem restrictOpenTangentField_apply
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -88,6 +90,7 @@ theorem restrictOpenTangentField_apply
 
 
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem mdiffAt_restrictOpen_section
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -113,6 +116,7 @@ theorem mdiffAt_restrictOpen_section
 
 
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_restrictOpen_section
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)) :
@@ -138,6 +142,7 @@ noncomputable def restrictOpenTangentSection
   toFun := restrictOpenTangentField (I := I) U (fun y : M => Y y)
   contMDiff_toFun := contMDiff_restrictOpen_section (I := I) U Y
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 @[simp]
 theorem restrictOpenTangentSection_apply
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -148,6 +153,7 @@ theorem restrictOpenTangentSection_apply
 
 
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem mlieBracket_restrictOpen
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -187,6 +193,7 @@ theorem mlieBracket_restrictOpen
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem directionalDeriv_restrictOpen_inner
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -213,6 +220,7 @@ theorem directionalDeriv_restrictOpen_inner
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem koszulScalar_restrictOpen
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -236,6 +244,7 @@ theorem koszulScalar_restrictOpen
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCov_restrictOpen_apply_section
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
@@ -290,6 +299,7 @@ theorem metricCov_restrictOpen_apply_section
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCov_restrictOpen_globalSection
     (g : SmoothRiemannianMetric I M)
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]

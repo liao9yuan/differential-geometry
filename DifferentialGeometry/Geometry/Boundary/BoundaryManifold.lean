@@ -69,6 +69,7 @@ def boundaryChartTarget (x : BoundaryManifold I M) :
     Set hI.boundaryH :=
   hI.inclH ⁻¹' (chartAt H (x : M)).target
 
+omit hI [IsManifold I ∞ M] in
 theorem isOpen_boundaryChartSource (x : BoundaryManifold I M) :
     IsOpen (boundaryChartSource (I := I) x) := by
   unfold boundaryChartSource
@@ -314,6 +315,7 @@ theorem boundaryChart_symm_apply [Nonempty hI.boundaryH] (x : BoundaryManifold I
     (z : hI.boundaryH) :
     (boundaryChart (I := I) x).symm z = boundaryChartInvFun (I := I) x z := rfl
 
+omit hI [IsManifold I ∞ M] in
 theorem mem_boundaryChartSource_self (x : BoundaryManifold I M) :
     x ∈ boundaryChartSource (I := I) x := by
   unfold boundaryChartSource
@@ -385,6 +387,7 @@ theorem chartedSpace_atlas :
     @atlas hI.boundaryH _ (BoundaryManifold I M) _ chartedSpace =
       Set.range (fun x : BoundaryManifold I M => defaultBoundaryChart (I := I) x) := rfl
 
+omit hI [IsManifold I ∞ M] in
 theorem range_coe_eq_boundary :
     Set.range ((↑) : BoundaryManifold I M → M) = I.boundary M := by
   ext y

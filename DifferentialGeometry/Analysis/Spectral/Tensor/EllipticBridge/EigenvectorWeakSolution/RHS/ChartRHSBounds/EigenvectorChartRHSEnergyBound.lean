@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvalue_mem_Ioc
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -60,6 +61,7 @@ private lemma eigenvalue_mem_Ioc
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -153,6 +155,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -184,6 +187,8 @@ private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 800000 in
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_tensorL2ChartComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -246,6 +251,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_eLpNorm_le_energy
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -265,6 +271,7 @@ private lemma eigenvectorChartComponentFun_eLpNorm_le_energy
     (tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)⟩
 
+omit [CompleteSpace E] in
 private lemma crossLeftLimitComponent_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -290,6 +297,7 @@ private lemma crossLeftLimitComponent_eLpNorm_le_energy
         (I := I) (M := M) g r s i))) ?_
   rw [ENNReal.ofReal_mul (Real.sqrt_nonneg _), ← mul_assoc]
 
+omit [CompleteSpace E] in
 private lemma crossRightLimitComponent_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -334,6 +342,7 @@ private lemma crossRightLimitComponent_eLpNorm_le_energy
   refine (hC_bd i).trans ?_
   rw [h_norm, ENNReal.ofReal_mul hC_nn, ENNReal.ofReal_mul hμ_nn, mul_assoc]
 
+omit [CompleteSpace E] in
 private lemma partialLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -394,6 +403,7 @@ private lemma partialLpLimit_eLpNorm_le_energy
     show Ccmp * (Cvol * Real.sqrt i.fst.val) =
       Ccmp * Cvol * Real.sqrt i.fst.val from (mul_assoc _ _ _).symm]
 
+omit [CompleteSpace E] in
 private lemma componentLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -448,6 +458,7 @@ private lemma componentLpLimit_eLpNorm_le_energy
         g r s) i))) (le_of_eq ?_)
   rw [← mul_assoc, ← ENNReal.ofReal_mul hμ_nn, mul_comm i.fst.val C]
 
+omit [CompleteSpace E] in
 private lemma cutoffPartialLpLimit_eLpNorm_le_energy
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -523,6 +534,7 @@ set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_energy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

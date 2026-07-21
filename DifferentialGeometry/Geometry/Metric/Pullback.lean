@@ -22,7 +22,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -57,6 +56,7 @@ noncomputable def Diffeomorph.pullbackInner
     ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)
   precompOp.comp step1
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInner_symm
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N)
     (x : M) (v w : TangentSpace I x) :
@@ -66,6 +66,7 @@ theorem Diffeomorph.pullbackInner_symm
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
   exact g.symm (Φ x) _ _
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInner_pos
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
@@ -88,12 +89,14 @@ theorem Diffeomorph.pullbackInner_pos
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem inner_comp_smooth_along_diffeo
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       ((fun b ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) b (g.inner b)) ∘ (Φ : M → N)) :=
   g.contMDiff.comp Φ.contMDiff
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem pullbackInner_eval
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N)
     (x : M) (v w : TangentSpace I x) :
@@ -102,6 +105,7 @@ private theorem pullbackInner_eval
   unfold Diffeomorph.pullbackInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 private theorem mfderiv_eq_mfderivCLE_apply
     (Φ : M ≃ₘ⟮I, I⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Φ infty_ne_zero x v
@@ -111,6 +115,7 @@ private theorem mfderiv_eq_mfderivCLE_apply
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInner_isVonNBounded
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) :
     ∀ x : M, Bornology.IsVonNBounded ℝ
@@ -149,6 +154,7 @@ theorem Diffeomorph.pullbackInner_isVonNBounded
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem mfderiv_apply_section_smooth_along_diffeo
     (Φ : M ≃ₘ⟮I, I⟯ N)
     (Y : ∀ x : M, TangentSpace I x)
@@ -316,6 +322,7 @@ theorem Diffeomorph.pullbackInner_contMDiff
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I ∞ N] in
 theorem Diffeomorph.mfderiv_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ N) :
     ContMDiff I I ∞ (Φ : M → N) :=

@@ -45,6 +45,7 @@ private lemma section_norm_eq_toFun_norm
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [CompactSpace M] in
 private lemma tsupport_chartAtlasPOU_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -524,6 +525,7 @@ private lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -537,6 +539,7 @@ private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤

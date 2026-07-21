@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace RicciDualNorm
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,8 @@ noncomputable def ricciCovectorChartCoord
   ricciTensor (I := I) g b (gradFun (I := I) g φ b)
     (chartBasisVecFiber (I := I) α j b)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciCovectorChartCoord_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (j : Fin (Module.finrank ℝ E)) (b : M) :
@@ -42,6 +44,7 @@ noncomputable def ricciCovectorChartCoord
       ricciTensor (I := I) g b (gradFun (I := I) g φ b)
         (chartBasisVecFiber (I := I) α j b) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciCovectorChartCoord_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (j : Fin (Module.finrank ℝ E)) :
@@ -86,6 +89,8 @@ noncomputable def chartRicciDualNormSq
       ricciCovectorChartCoord (I := I) g α φ j b *
       chartInvGramMatrix (I := I) g α b i j
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma chartRicciDualNormSq_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     chartRicciDualNormSq (I := I) g α φ b =
@@ -94,6 +99,7 @@ noncomputable def chartRicciDualNormSq
           ricciCovectorChartCoord (I := I) g α φ j b *
           chartInvGramMatrix (I := I) g α b i j := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciDualNormSq_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -108,12 +114,14 @@ theorem chartRicciDualNormSq_contMDiffOn
   have h3 := chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
   exact (h1.mul h2).mul h3
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciDualNormSq_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) :
     ContinuousOn (chartRicciDualNormSq (I := I) g α φ)
       (trivializationAt E (TangentSpace I) α).baseSet :=
   (chartRicciDualNormSq_contMDiffOn (I := I) g α φ).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciDualNormSq_bdd_on_compact
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {K : Set M} (hK_compact : IsCompact K)
@@ -138,12 +146,16 @@ noncomputable def ricciSharp (g : SmoothRiemannianMetric I M)
   DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciSharp_def (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     ricciSharp (I := I) g φ b =
       DifferentialGeometry.Integral.Connection.metricSharp (I := I) g b
         (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricciSharp (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) (w : TangentSpace I b) :
     g.inner b (ricciSharp (I := I) g φ b) w =
@@ -152,6 +164,8 @@ lemma inner_ricciSharp (g : SmoothRiemannianMetric I M)
   exact DifferentialGeometry.Integral.Connection.inner_metricSharp (I := I) g b
     (ricciTensor (I := I) g b (gradFun (I := I) g φ b)).toLinearMap w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricciSharp_right (g : SmoothRiemannianMetric I M)
     (φ : C^∞⟮I, M; ℝ⟯) (b : M) (w : TangentSpace I b) :
     g.inner b w (ricciSharp (I := I) g φ b) =
@@ -166,6 +180,8 @@ noncomputable def ricciSharpChartCoeff
     chartInvGramMatrix (I := I) g α b k j *
       ricciCovectorChartCoord (I := I) g α φ j b
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricciSharpChartCoeff_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (k : Fin (Module.finrank ℝ E)) (b : M) :
@@ -181,6 +197,8 @@ noncomputable def ricciSharpChartLocal
     ricciSharpChartCoeff (I := I) g α φ k b •
       chartBasisVecFiber (I := I) α k b
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricciSharpChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -281,6 +299,8 @@ lemma inner_ricciSharpChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciSharpChartLocal_eq_ricciSharp
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -327,6 +347,8 @@ lemma ricciSharpChartLocal_eq_ricciSharp
   rw [inner_ricciSharpChartLocal_chartBasis (I := I) g α φ hb k]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma inner_ricciSharpChartLocal_self_eq
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (b : M) :
     g.inner b (ricciSharpChartLocal (I := I) g α φ b)
@@ -386,6 +408,8 @@ private lemma inner_ricciSharpChartLocal_self_eq
   intro j _
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma sum_sharp_coeff_gram_eq_invGram
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -529,6 +553,8 @@ private lemma sum_sharp_coeff_gram_eq_invGram
   intro j _
   rw [hα'_def, hGinv_def]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartRicciDualNormSq_eq_inner_ricciSharp
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -539,6 +565,8 @@ theorem chartRicciDualNormSq_eq_inner_ricciSharp
   rw [inner_ricciSharpChartLocal_self_eq (I := I) g α φ b]
   exact (sum_sharp_coeff_gram_eq_invGram (I := I) g α φ hb).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartRicciDualNormSq_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -546,6 +574,8 @@ theorem chartRicciDualNormSq_nonneg
   rw [chartRicciDualNormSq_eq_inner_ricciSharp (I := I) g α φ hb]
   exact metric_inner_self_nonneg (I := I) (M := M) g b _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciPairing_cs_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (b : M) (w : TangentSpace I b) :
@@ -557,6 +587,8 @@ lemma ricciPairing_cs_sq
       (inner_ricciSharp (I := I) g φ b w).symm]
   exact metric_inner_cauchy_schwarz_sq (I := I) (M := M) g b _ w
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricciPairing_cs_sq_chartLocal
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -586,6 +618,7 @@ private lemma tsupport_chartAtlasPOU_subset_baseSet (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hsrc
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRicciDualNormSq_bdd_on_chart_tsupport
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ tsupport (fun x : M =>
@@ -595,6 +628,7 @@ private lemma chartRicciDualNormSq_bdd_on_chart_tsupport
     (tsupport_chartAtlasPOU_compact (I := I) (M := M) α)
     (tsupport_chartAtlasPOU_subset_baseSet (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_global_ricci_dual_normSq_bound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ b : M,

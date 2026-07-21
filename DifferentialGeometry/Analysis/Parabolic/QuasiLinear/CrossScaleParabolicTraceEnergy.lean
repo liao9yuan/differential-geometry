@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,8 @@ namespace CrossScaleField
 
 variable (u : CrossScaleField (I := I) (M := M) g r s a T)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perMode_energyIdentity
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -64,6 +66,8 @@ def energyIntegrand
   2 * (tensorSobolevWeight (I := I) (M := M) i (a + 1) *
     ((u.coeffFun i τ) * (u.lo.deriv τ).coeff i))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tsum_energyIntegrand_eq (τ : ℝ) :
     ∑' i, u.energyIntegrand i τ =
       2 * ∑' i, tensorSobolevWeight (I := I) (M := M) i (a + 1) *
@@ -71,6 +75,8 @@ lemma tsum_energyIntegrand_eq (τ : ℝ) :
   unfold energyIntegrand
   rw [← tsum_mul_left]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma ae_finset_abs_energyIntegrand_le :
     ∀ᵐ τ ∂(volume.restrict (Set.Icc (0 : ℝ) T)),
       ∀ S : Finset (TensorEigenIdx (I := I) (M := M) g r s),
@@ -123,6 +129,8 @@ lemma ae_finset_abs_energyIntegrand_le :
     rwa [abs_of_nonneg hsumfd_nonneg] at this
   linarith [hfd_le]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma integrableOn_energyIntegrand
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -148,6 +156,8 @@ lemma integrableOn_energyIntegrand
   rw [heq]
   exact hprod.const_mul _
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma integrableOn_energyBound :
     IntegrableOn (fun s => 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖)) (Set.Icc (0 : ℝ) T) volume :=
   u.integrableOn_normMul.const_mul 2
@@ -189,6 +199,8 @@ theorem tsum_intervalIntegral_energyIntegrand_eq
   refine tsum_congr (fun i => ?_)
   rw [intervalIntegral.integral_of_le ht.1]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma summable_integral_norm_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     Summable (fun i => ∫ s, ‖u.energyIntegrand i s‖ ∂(volume.restrict (Set.Ioc (0 : ℝ) t))) := by
   set μ : Measure ℝ := volume.restrict (Set.Ioc (0 : ℝ) t) with hμ
@@ -211,6 +223,8 @@ lemma summable_integral_norm_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ)
         refine Finset.sum_congr rfl (fun i _ => ?_); rw [Real.norm_eq_abs]
     _ ≤ 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := hs S
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma summable_intervalIntegral_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     Summable (fun i => ∫ s in (0 : ℝ)..t, u.energyIntegrand i s) := by
   refine (u.summable_integral_norm_energyIntegrand ht).of_norm_bounded ?_
@@ -219,6 +233,8 @@ lemma summable_intervalIntegral_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : �
   refine (MeasureTheory.abs_integral_le_integral_abs).trans (le_of_eq ?_)
   refine integral_congr_ae (ae_of_all _ (fun s => (Real.norm_eq_abs _).symm))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem energyIdentity (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.repr t‖ ^ 2 = ‖u.repr 0‖ ^ 2 +
       ∑' i, ∫ s in (0 : ℝ)..t, u.energyIntegrand i s := by
@@ -239,6 +255,8 @@ theorem energyIdentity (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     rfl
   rw [hpermode, hsum_init.tsum_add hsum_int, ← hnorm_0]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem normSq_repr_le_init_add_integral (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.repr t‖ ^ 2 ≤ ‖u.repr 0‖ ^ 2 +
       ∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
@@ -273,6 +291,8 @@ theorem normSq_repr_le_init_add_integral (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc 
   have htsum_le := (u.summable_intervalIntegral_energyIntegrand ht).tsum_le_of_sum_le hpartial
   linarith [htsum_le]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_intervalIntegral_energyIntegrand
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ContinuousOn (fun t => ∫ s in (0 : ℝ)..t, u.energyIntegrand i s) (Icc (0 : ℝ) T) := by
@@ -286,6 +306,8 @@ lemma continuousOn_intervalIntegral_energyIntegrand
     rwa [uIcc_of_le hT'] at hcont
   · rw [Icc_eq_empty (by linarith)]; exact continuousOn_empty _
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_intervalIntegral_energyIntegrand_le (hT : 0 < T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖∫ s in (0 : ℝ)..t, u.energyIntegrand i s‖ ≤
@@ -301,6 +323,8 @@ lemma norm_intervalIntegral_energyIntegrand_le (hT : 0 < T)
           ((u.integrableOn_energyIntegrand i ⟨hT.le, le_rfl⟩).norm)
           (ae_of_all _ (fun s => norm_nonneg _)) (HasSubset.Subset.eventuallyLE hsub)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem continuousOn_normSq_repr (hT : 0 < T) :
     ContinuousOn (fun t => ‖u.repr t‖ ^ 2) (Icc (0 : ℝ) T) := by
   have hT' : (0 : ℝ) ≤ T := hT.le

@@ -53,6 +53,7 @@ noncomputable def chartSobolevRawNorm
       ∂(volume : Measure EuclN)
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartSobolevRawNorm_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevRawNorm (I := I) (M := M) g r s T =
@@ -67,6 +68,7 @@ omit [I.Boundaryless] in
           ∂(volume : Measure EuclN) := rfl
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -97,6 +99,7 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
   exact hbound
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

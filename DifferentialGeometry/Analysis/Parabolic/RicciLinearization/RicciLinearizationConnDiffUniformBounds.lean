@@ -38,7 +38,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -110,8 +110,16 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
     tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
   have hnE : n' = Module.finrank ℝ E := by rw [hn]; rfl
   subst hnE
-  set G : ℝ := ‖(iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x‖ with hG_def
-  have hG_nn : 0 ≤ G := norm_nonneg _
+  set G : ℝ :=
+    (letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 3 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+    ‖(show Tensor0SBundle.TensorRSSpace 0 3 I x from
+      (iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x)‖) with hG_def
+  have hG_nn : 0 ≤ G := by
+    rw [hG_def]
+    exact norm_nonneg
+      (show Tensor0SBundle.TensorRSSpace 0 3 I x from
+        (iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x)
   have hG_le : G ≤ B := by
     have hterms : ∀ k ∈ Finset.range 3, 0 ≤
         (letI : Bundle.RiemannianBundle
@@ -129,9 +137,8 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w')) ≤
         C₀ * G * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w' w') := by
     intro v w'
-    have h := hpw g₁ P htie (le_refl δm) hδm_nn hboundm x v w'
-    rw [← hG_def] at h
-    exact h
+    refine le_trans (hpw g₁ P htie (le_refl δm) hδm_nn hboundm x v w') ?_
+    rw [hG_def]
   have hpwA' : ∀ (a : Fin (Module.finrank ℝ E)) (v : Fin 2 → TangentSpace I x),
       |(Tensor0SBundle.TensorRSSpace.toModel (connDiffFib (I := I) g₁ g₀ x)
           (Tensor0SBundle.Tensor0SSpace.toModel (g0FlatCLM (I := I) g₀ x (e a))))

@@ -13,7 +13,7 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,8 @@ private noncomputable def intrinsicEigenbasis
   tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma intrinsic_lambda_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=

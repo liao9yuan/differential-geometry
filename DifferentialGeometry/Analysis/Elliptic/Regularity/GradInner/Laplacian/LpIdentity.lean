@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerLpIdentity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,7 @@ private lemma add_sub_rearrange {α : Type*} [AddCommGroup α] {a b c d : α}
     rw [← h]; abel
   rw [this]; abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_eq_two_inv_preimageDiff
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -114,6 +115,7 @@ lemma H1ComplToLp_preimageLift
   (Classical.choose_spec (laplacianDomainPow_two_preimage_eq
     (I := I) (M := M) g hu_h)).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulLp_preimage_in_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -134,6 +136,7 @@ theorem smoothMulLp_preimage_in_image_laplacianDomain
   · rw [H1ComplToLp_smoothMulH1Compl]
     rw [H1ComplToLp_preimageLift]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulLp_DeltaPhi_in_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -151,6 +154,7 @@ theorem smoothMulLp_DeltaPhi_in_image_laplacianDomain
   · exact h_sM_mem
   · rw [H1ComplToLp_smoothMulH1Compl]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -213,6 +217,7 @@ theorem smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image
   rw [hf]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -254,6 +259,7 @@ theorem gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     rw [smul_smul]
     norm_num
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -286,12 +292,14 @@ noncomputable def gradInnerSmoothBundle
     rw [grad_g_apply, grad_g_apply]
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmoothBundle_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
     (gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun x =
       g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g v.toFun x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_eq_smoothToLp_bundle
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerSmooth (I := I) (M := M) g φ v =
@@ -303,6 +311,7 @@ theorem gradInnerSmooth_eq_smoothToLp_bundle
   refine Filter.Eventually.of_forall ?_
   intro x; rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -340,6 +349,7 @@ theorem smoothToH1Compl_mem_laplacianDomainPow_two
     v.oneSubLapClassical]
   rw [H1ComplToLp_smoothToH1Compl]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ

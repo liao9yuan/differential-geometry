@@ -40,7 +40,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -151,6 +151,7 @@ private def eigenSpatialFactor
       (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+omit [BoundarylessManifold I M] in
 private lemma eigenSpatialFactor_eqOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -170,6 +171,7 @@ private lemma eigenSpatialFactor_eqOn
   rfl
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+omit [BoundarylessManifold I M] in
 private lemma eigenSpatialFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :

@@ -36,7 +36,7 @@ namespace Riemannian
 namespace Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -68,6 +68,8 @@ def indexForm (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) : ℝ :=
   ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma indexForm_eq_intervalIntegral
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (a b : ℝ) (V W : ∀ t, TangentSpace I (γ t)) :
@@ -78,7 +80,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}
@@ -889,6 +891,7 @@ theorem second_variation_of_arcLength_eq_indexForm
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem indexFormIntegrand_intervalIntegrable
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (_hL : 0 < L)
     (_hγ_C1 : ContMDiffOn (𝓘(ℝ, ℝ)) I 1 γ (Set.Icc 0 L))

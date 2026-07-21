@@ -19,7 +19,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
 variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -97,6 +97,7 @@ private lemma extChartAt_target_eq_interior (α : M) :
   (isOpen_extChartAt_target (I := I) α).interior_eq.symm
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -118,6 +119,7 @@ theorem chartInvGramEuclid_contDiffOn
   exact hcomp
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E)) :
@@ -144,6 +146,7 @@ theorem chartChristoffelEuclid_contDiffOn
   exact hcomp
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weightedInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -181,6 +184,7 @@ private lemma euclidPartial_contDiff
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single i 1)).contDiff.comp hfd
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_euclidPartial_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -193,6 +197,7 @@ theorem tensorChartComp_euclidPartial_contDiff
     (tensorChartComp_contDiff (I := I) (M := M) g r s T α Idx Jdx) i
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_euclidPartial_partial_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -205,6 +210,7 @@ theorem tensorChartComp_euclidPartial_partial_contDiff
   euclidPartial_contDiff (E := E)
     (tensorChartComp_euclidPartial_contDiff (I := I) (M := M) g r s T α Idx Jdx l) k
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComp_euclidPartial_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

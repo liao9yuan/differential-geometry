@@ -207,10 +207,11 @@ end Compactness
 
 section LowerBound
 
-variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+variable [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -281,6 +282,7 @@ theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     have hp_mem : (b, T) ∈ K := ⟨hb, hT_mem⟩
     exact absurd ⟨(b, T), hp_mem⟩ hK_ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ ε : ℝ, 0 < ε ∧

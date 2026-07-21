@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metric_coordinateFrame_component_contMDiffAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
@@ -75,6 +75,7 @@ theorem metric_coordinateFrame_component_contMDiffAt_of_mem
   exact htotal.2
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metric_coordinateFrame_component_contMDiffAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -87,6 +88,7 @@ theorem metric_coordinateFrame_component_contMDiffAt
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metric_coordinateFrame_component_directional_contMDiffAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (a i j : CoordinateIdx (𝕜 := Real) E) :

@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +57,8 @@ private theorem perModeConv_sq_le_time_mul_integral (lam : ℝ) (hlam : 0 ≤ la
     _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 := by
         exact mul_le_mul_of_nonneg_left hk_sq_int ht
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHs_smallTime_norm_le_of_perModeConv
     (a : ℝ) {T : ℝ} (hT : 0 < T)
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)

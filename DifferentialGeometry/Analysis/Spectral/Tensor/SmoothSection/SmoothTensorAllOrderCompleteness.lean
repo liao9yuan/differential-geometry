@@ -33,7 +33,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
 omit [BoundarylessManifold I M] in
+omit [I.Boundaryless] in
 theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -137,6 +138,7 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : TensorCompIdx (E := E) r s) (j : ℕ) :
@@ -352,6 +354,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem tensorChartComponent_allOrder_uniformCauchy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -451,6 +454,7 @@ theorem tensorChartComponent_allOrder_uniformCauchy
         have hCC_nn : 0 ≤ Cder * Cemb := by positivity
         nlinarith [mul_nonneg hCC_nn hε.le]
 
+omit [BoundarylessManifold I M] in
 theorem exists_chartComponent_limit_smooth_compactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -563,6 +567,7 @@ private def chartLimitComp
   (exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -574,6 +579,7 @@ private lemma chartLimitComp_tsupport
   ((exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P).2
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -586,6 +592,7 @@ private lemma chartLimitComp_tendsto
   (exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.2 P y
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -623,6 +630,7 @@ private lemma chartLimitComp_uniform
       (Filter.eventually_atTop.mpr ⟨N, fun n' hn' => hcauchy0 n' hn'⟩)
   linarith
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -642,6 +650,7 @@ private lemma chartLimitComp_continuous
     chartLimitComp_tsupport (I := I) (M := M) g r s F hF_cauchy α P hx
   exact ((hcdOn.contDiffAt (hO.mem_nhds hxO)).continuousAt)
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -652,6 +661,7 @@ private lemma chartLimitComp_hasCompactSupport
   ((exists_chartComponent_limit_smooth_compactSupport
     (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P).1
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitComp_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -666,6 +676,7 @@ private lemma chartLimitComp_memLp
     (chartLimitComp_continuous (I := I) (M := M) g r s F hF_cauchy α P)
     (chartLimitComp_hasCompactSupport (I := I) (M := M) g r s F hF_cauchy α P)
 
+omit [BoundarylessManifold I M] in
 private lemma chartComponent_toLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -761,6 +772,7 @@ private lemma chartComponent_toLp_tendsto
   simp only [hedist_eq]
   exact htendsto_eLp
 
+omit [BoundarylessManifold I M] in
 private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -803,6 +815,7 @@ private lemma tensorL2ChartComponent_eq_chartLimitComp_aeEq
   rw [h_eq]
   exact MemLp.coeFn_toLp _
 
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComponentRaw_chartLimitSection_self
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -823,6 +836,7 @@ private lemma tensorChartComponentRaw_chartLimitSection_self
     (exists_chartComponent_limit_smooth_compactSupport
       (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 P hy
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_toSection_eq_zero_off_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -839,6 +853,7 @@ private lemma chartLimitSection_toSection_eq_zero_off_source
     (exists_chartComponent_limit_smooth_compactSupport
       (I := I) (M := M) g r s F hF_cauchy α).choose_spec.2.1 hx
 
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComponentRaw_chartLimitSection_eq_zero_off_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -860,6 +875,7 @@ private lemma tensorChartComponentRaw_chartLimitSection_eq_zero_off_source
 
 open Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma raw_chartLimitSection_eq_ite
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -890,6 +906,7 @@ private lemma raw_chartLimitSection_eq_ite
 
 open Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℕ → SmoothCcTensor g r s)
@@ -959,6 +976,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -967,6 +985,7 @@ private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
   rw [chartAtlasPOU_finset_mem]
   exact hγ.mono Set.inter_subset_left
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartPushedPouWeight_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α
@@ -981,6 +1000,8 @@ private def chartKernelCutoffPushed' (α : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) α
     (fun x => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
     (α : M) {y : EuclN} (hy : y ∈ chartPouKernel (I := I) (M := M) α) :
     chartKernelCutoffPushed' (I := I) (M := M) α y = 1 := by
@@ -1001,6 +1022,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) α hw_supp
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartKernelCutoffPushed' (I := I) (M := M) α
@@ -1011,6 +1033,8 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) α hz]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1030,6 +1054,7 @@ private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
   · rw [hy hk, mul_zero]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1047,6 +1072,7 @@ private lemma tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
 
 open Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1276,6 +1302,7 @@ private lemma chartLimitSection_transport_term_aeEq
 
 open Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma chartLimitSection_tensorL2ChartComponent_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1367,6 +1394,7 @@ private lemma chartLimitSection_tensorL2ChartComponent_eq_transport_sum
   funext y
   rw [Finset.mul_sum]
 
+omit [BoundarylessManifold I M] in
 private lemma transportSum_u_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -1524,6 +1552,7 @@ private lemma transportSum_u_ae_zero_of_notMem
   funext y
   rw [Finset.sum_const_zero]
 
+omit [BoundarylessManifold I M] in
 theorem globalLimitSection_toL2_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)
@@ -1663,6 +1692,7 @@ theorem globalLimitSection_toL2_eq
         transportChartCenters (I := I) (M := M) β, G α y) = 0 from hy,
     add_zero]
 
+omit [BoundarylessManifold I M] in
 theorem smoothCcTensor_limit_of_allOrders_toHs_cauchy
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (F : ℕ → SmoothCcTensor g r s)

@@ -25,7 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffContrInsertionInnerFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 3 ℝ E)
@@ -66,6 +69,9 @@ def connDiffContrInsertionInnerField (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := connDiffContrInsertionInnerFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem connDiffContrInsertionInnerField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffContrInsertionInnerField (I := I) g₀ g₁).toSection x =
@@ -76,6 +82,9 @@ def innerContractionSwapPerm : Equiv.Perm (Fin 2) :=
   ⟨![1, 0], ![1, 0], by decide, by decide⟩
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionInnerField (I := I) g₀ g₁ =
@@ -150,6 +159,7 @@ private lemma cDualBasis_eq_coord' (B : Module.Basis (Fin (Module.finrank ℝ E)
   exact congrArg (fun L : E →ₗ[ℝ] ℝ => LinearMap.toContinuousLinearMap L)
     (congrFun (Module.Basis.coe_dualBasis B) k)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3 I x)
     (β : Tensor0SBundle.Tensor0SSpace 1 I x) (v : Fin 3 → E) :
     Tensor0SSpace.toModel
@@ -229,6 +239,7 @@ private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3
     rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul])
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffGradContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 4 ℝ E)
@@ -265,6 +276,7 @@ def connDiffGradContrInsertionField (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := connDiffGradContrInsertionFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem connDiffGradContrInsertionField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffGradContrInsertionField (I := I) g₀ g₁).toSection x =
@@ -274,6 +286,7 @@ def connDiffGradContrInsertionField (g₀ g₁ : SmoothRiemannianMetric I M) :
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffGradContrInsertionField (I := I) g₀ g₁ =
@@ -353,6 +366,7 @@ theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
   exact hL.trans hR.symm
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0KernelFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 4 ℝ E)) ∞
@@ -390,6 +404,7 @@ def linearizedRicciConnDiffOrder0KernelField (g₀ g₁ : SmoothRiemannianMetric
       contMDiff_toFun := linearizedRicciConnDiffOrder0KernelFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem linearizedRicciConnDiffOrder0KernelField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁).toSection x =
@@ -400,6 +415,7 @@ def linearizedRicciConnDiffOrder0KernelField (g₀ g₁ : SmoothRiemannianMetric
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0CoeffField_eq_ricciCometricFourTrace_comp_kernelField
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁ =
@@ -441,6 +457,7 @@ private def kMid0Perm102 : Equiv.Perm (Fin 3) :=
 private def kMid0Perm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotPermCc0Fib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
@@ -467,6 +484,7 @@ private def slotPermCc0 (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equi
       contMDiff_toFun := slotPermCc0Fib_contMDiff (I := I) (M := M) g₀ ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem order0KernelField_eq_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁ =
       (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 4 (slotPermCc0 (I := I) (M := M) g₀ kOut0Perm3201)
@@ -543,6 +561,8 @@ private theorem armOuter23_rfns_eq (g₀ : SmoothRiemannianMetric I M)
         ((show Tensor0SSpace 2 I y →L[ℝ] Tensor0SSpace 3 I y from W.toSection y) d) := rfl
   rw [hy, slotPermCLM_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma o0IteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -654,6 +674,7 @@ private theorem quadArm_rfns_windowGrid_le (g₀ : SmoothRiemannianMetric I M)
   exact le_of_eq (by ring)
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rfns_eightArm_cascade (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v1 v2 v3 v4 v5 v6 v7 v8 : TensorRSSpace r s I x) {Q L w : ℝ}
     (h1 : riemannianFiberNormSq (I := I) (M := M) g r s x v1 ≤ Q * w)

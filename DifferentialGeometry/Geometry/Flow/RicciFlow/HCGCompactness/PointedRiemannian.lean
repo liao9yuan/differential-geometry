@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Metric.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -82,6 +81,7 @@ def repoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem connected_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : ∀ k,
@@ -127,6 +127,7 @@ namespace MetricComplete
 
 
 
+omit [CompleteSpace E] in
 theorem complete {I : ModelWithCorners Real E H}
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hX : MetricComplete (I := I) X) :
@@ -161,6 +162,7 @@ namespace SeqMetricComplete
 variable {I : ModelWithCorners Real E H}
 
 
+omit [CompleteSpace E] in
 theorem subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : SeqMetricComplete (I := I) X) (f : Nat -> Nat) :

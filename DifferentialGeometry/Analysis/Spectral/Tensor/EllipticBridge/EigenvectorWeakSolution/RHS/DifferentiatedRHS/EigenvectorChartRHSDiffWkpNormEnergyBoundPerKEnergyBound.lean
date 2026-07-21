@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 private lemma vec_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -49,6 +50,7 @@ private lemma vec_norm_eq_one
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
+omit [CompleteSpace E] in
 private lemma eigenvalue_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -63,6 +65,7 @@ private lemma eigenvalue_pos
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
+omit [CompleteSpace E] in
 private lemma eigenvalue_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -80,6 +83,7 @@ private lemma eigenvalue_le_one
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 
+omit [CompleteSpace E] in
 lemma rhsZeroAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
@@ -840,6 +844,7 @@ lemma rhsZeroAggregate_le_energy_perK
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 
+omit [CompleteSpace E] in
 theorem diffRHSAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianChartInvariance
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
       smoothTensorPairingChart (I := I) (M := M) g α φ v
         ((toEuclidean (E := E)) (extChartAt I α x)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem smoothTensorPairingChart_eq_hessPairingByChartα_pullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -144,6 +145,7 @@ private lemma scalarOnE_neg_pointwise (α : M) (f : M → ℝ) :
   rfl
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartHessianTensor_add_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -289,6 +291,7 @@ lemma chartHessianTensor_add_of_smooth
   ring
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartHessianTensor_neg_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -356,6 +359,7 @@ lemma chartHessianTensor_neg_of_smooth
   ring
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartHessianTensor_sub_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -373,6 +377,7 @@ lemma chartHessianTensor_sub_of_smooth
   ring
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_polarization_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hf' : ContMDiff I 𝓘(ℝ) ∞ f')
@@ -539,6 +544,8 @@ def chartAlphaMatrixIdentity
       chartHessianTensor (I := I) g α f i j x
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartAlphaMatrixIdentity_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartAlphaMatrixIdentity (I := I) (M := M) g α f x ↔
@@ -558,6 +565,8 @@ private lemma chartBasisVecFiber_baseSet
   trivializationAt_chartBasisVec_snd (I := I) α i hx
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessFrobeniusSqOnChartAlpha_eq_abstractHessian
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hM : chartAlphaMatrixIdentity (I := I) (M := M) g α f x) :
@@ -587,6 +596,8 @@ theorem chartHessFrobeniusSqOnChartAlpha_eq_abstractHessian
   rw [hM i j, hM k l]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_abstractHessian
     (g : SmoothRiemannianMetric I M) (α : M) (f f' : M → ℝ) (x : M)
     (hMf : chartAlphaMatrixIdentity (I := I) (M := M) g α f x)
@@ -629,6 +640,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
         chartHessFrobeniusSq (I := I) g f x := Iff.rfl
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -716,6 +728,8 @@ theorem chartHessFrobeniusPairOnChartAlpha_eq_hessPairingChart_of_invariance
   have h4ne : (4 : ℝ) ≠ 0 := by norm_num
   exact mul_left_cancel₀ h4ne h_4eq
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothTensorPairingChart_eq_hessPairingChart_of_invariance
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -816,6 +830,8 @@ def chartFrobeniusSqGradVectorBridge
       (fun b : M => gradFun (I := I) g f b) x
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartFrobeniusSqHSBridge_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α f x ↔
@@ -824,6 +840,7 @@ omit [CompactSpace M] in
           (fun b : M => gradFun (I := I) g f b) x := Iff.rfl
 
 omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem chartFrobeniusInvariance_of_gradVectorBridge
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -835,6 +852,8 @@ theorem chartFrobeniusInvariance_of_gradVectorBridge
   rw [h_HS]
   exact frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem smoothTensorPairingChart_eq_hessPairingChart_of_HSBridge
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)

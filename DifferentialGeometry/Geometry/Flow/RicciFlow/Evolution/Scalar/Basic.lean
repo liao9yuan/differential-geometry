@@ -8,7 +8,6 @@ import Mathlib.Algebra.Order.Chebyshev
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -28,7 +27,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 def ScalarPreBianchiEvolutionEquationOn
@@ -64,6 +62,7 @@ def ScalarSecondDerivativeContractedBianchiOn
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real)
@@ -79,6 +78,7 @@ theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarEvolutionEquationOn_of_contractedBianchi
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
@@ -93,6 +93,7 @@ theorem scalarEvolutionEquationOn_of_contractedBianchi
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem msm110_ch6_1_scalar_curvature_evolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
@@ -141,6 +142,7 @@ def ScalarLaplacianRealizesHeatOperatorOn
 
 namespace ScalarLaplacianRealizesHeatOperatorOn
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem zero_drift
     {G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real}
     {T : Real} {scalar scalarLap : Real -> M -> Real}
@@ -156,6 +158,7 @@ theorem zero_drift
           (fun y : M => (0 : TangentSpace I y)) (scalar t) x := by
         rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem of_laplacianAt
     {G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real}
     {T : Real} {scalar scalarLap : Real -> M -> Real}

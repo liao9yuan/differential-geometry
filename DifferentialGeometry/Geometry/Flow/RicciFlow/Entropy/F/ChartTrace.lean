@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvari
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -46,6 +45,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem coordinateFrameAt_coeff_one_eq
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (v : TangentSpace I x) (p : CoordinateIdx (𝕜 := Real) E) :
@@ -87,6 +87,7 @@ def compFun
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceCoeff_one_eventually
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)

@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 
 section ScalarUniform
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -109,12 +109,14 @@ private noncomputable def perAlphaConstant
   Classical.choose (tensorChartComponentScalar_eLpNorm_le_uniform
     (I := I) (M := M) g r s α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma perAlphaConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     0 ≤ perAlphaConstant (I := I) (M := M) g r s α :=
   (Classical.choose_spec (tensorChartComponentScalar_eLpNorm_le_uniform
     (I := I) (M := M) g r s α)).1
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma perAlphaConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -134,6 +136,7 @@ private noncomputable def totalActiveConstant
   ∑ α ∈ chartAtlasPOU_activeFinset I M,
     perAlphaConstant (I := I) (M := M) g r s α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma totalActiveConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActiveConstant (I := I) (M := M) g r s := by
@@ -142,6 +145,7 @@ private lemma totalActiveConstant_nonneg
   exact Finset.sum_nonneg (fun α _ =>
     perAlphaConstant_nonneg (I := I) (M := M) g r s α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma perAlphaConstant_le_totalActiveConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {α : M}
     (hα : α ∈ chartAtlasPOU_activeFinset I M) :
@@ -164,6 +168,7 @@ private lemma perAlphaConstant_le_totalActiveConstant
       perAlphaConstant_nonneg (I := I) (M := M) g r s β)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -208,6 +213,7 @@ private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
       (I := I) (M := M) g r s hα S Idx Jdx]
     exact zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorL2Norm_eq_norm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -241,6 +247,8 @@ private lemma coe_nnnorm_eq_ofReal_norm_scalar {X : Type*} [SeminormedAddCommGro
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ofReal_tensorL2Norm_le_norm_ennreal
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -254,6 +262,7 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
   rw [coe_nnnorm_eq_ofReal_norm_scalar S]
   exact ENNReal.ofReal_le_ofReal h_l2_le_h1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -289,6 +298,7 @@ theorem tensorChartComponentScalar_eLpNorm_le
       (by exact zero_le _)
   exact h_smoothCc'.trans h_rhs_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_eLpNorm_le_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -306,7 +316,7 @@ end ScalarUniform
 
 section GradUniform
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -338,6 +348,7 @@ private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (0 : M → ℝ) b
   simp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -378,7 +389,7 @@ end GradUniform
 
 section ChartSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

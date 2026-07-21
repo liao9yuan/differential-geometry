@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -63,6 +63,7 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -88,6 +89,7 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
       (I := I) (M := M) (u := u) α hy_target hy_off')
   · exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target)
 
+omit [CompleteSpace E] in
 private lemma chartTransitionTransportCLM_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (k : ℕ)
@@ -233,6 +235,7 @@ private lemma chartTransitionTransportCLM_memWkp
     rw [h_pointwise]
   exact (MemWkp_congr_ae (d := d) (by norm_num) hTα_open h_ae).mpr hw_memWkp_Tα
 
+omit [CompleteSpace E] in
 theorem tensorL2ChartComponentCutoff_memWkp_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)

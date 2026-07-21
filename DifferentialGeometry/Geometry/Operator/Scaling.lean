@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -89,7 +88,7 @@ theorem laplacian_scaleMetric
           simp [laplacian, hgrad_eq]
     _ = c⁻¹ * laplacian (I := I) cov g f x := by
           simpa [laplacian] using
-            divergence_const_smul (I := I) cov c⁻¹ hgrad
+            divergence_const_smul (I := I) cov inferInstance c⁻¹ hgrad
 
 
 

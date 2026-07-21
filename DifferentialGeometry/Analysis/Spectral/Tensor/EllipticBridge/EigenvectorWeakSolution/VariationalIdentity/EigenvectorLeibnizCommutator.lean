@@ -16,7 +16,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,6 +123,7 @@ private lemma memLp_restrict_of_memLp_restrict
   rw [← h_eq]
   exact hf.restrict K
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ
@@ -160,6 +161,7 @@ private lemma exists_smooth_global_extension
     change η y * φ y = φ y
     rw [hη_one y hy, one_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem generic_per_pair_ibp
     (α : M)
     {v : EuclN → ℝ}
@@ -357,6 +359,7 @@ private lemma integrable_triple
 
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_diff_variational_identity
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -802,6 +805,7 @@ def tensorDiffVariationalSource
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   diffVariationalSource (I := I) (M := M) g α D.toChartData l
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponent_diff_variational_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

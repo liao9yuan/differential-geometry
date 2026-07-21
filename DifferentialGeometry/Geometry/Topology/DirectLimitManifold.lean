@@ -11,7 +11,6 @@ import DifferentialGeometry.Bundle.ClmSectionSmooth
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -93,6 +92,7 @@ theorem mem_limChart_source (k : ℕ) (a : A k) :
     exact mem_chart_source H a
 
 
+omit [∀ (k : ℕ), Nonempty (A k)] in
 theorem exists_sigma_incl (z : S.Lim) : ∃ p : Σ k, A k, S.incl p.1 p.2 = z := by
   obtain ⟨k, x, hx⟩ := S.exists_incl_eq z
   exact ⟨⟨k, x⟩, hx⟩
@@ -100,6 +100,7 @@ theorem exists_sigma_incl (z : S.Lim) : ∃ p : Σ k, A k, S.incl p.1 p.2 = z :=
 
 def rep (z : S.Lim) : Σ k, A k := (S.exists_sigma_incl z).choose
 
+omit [∀ (k : ℕ), Nonempty (A k)] in
 theorem incl_rep (z : S.Lim) : S.incl (S.rep z).1 (S.rep z).2 = z :=
   (S.exists_sigma_incl z).choose_spec
 
@@ -258,6 +259,7 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
 variable (S : SmoothSeqSystem I A)
 
 
+omit [∀ (k : ℕ), IsManifold I ∞ (A k)] [∀ (k : ℕ), Nonempty (A k)] in
 theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
     (hf : ∀ k, ContMDiff I I ∞ (f k)) {k ℓ : ℕ} (h : k ≤ ℓ) :
     ContMDiff I I ∞ (SeqSystem.succMap f h) := by
@@ -279,6 +281,7 @@ theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
 
 
 
+omit [∀ (k : ℕ), IsManifold I ∞ (A k)] in
 theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
     (hfInv : ∀ k, ContMDiffOn I I ∞ (Function.invFun (f k)) (Set.range (f k)))
@@ -479,6 +482,7 @@ open Bundle
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem mfd_comp_id
     {M₁ : Type*} [TopologicalSpace M₁] [ChartedSpace H M₁]
     {M₂ : Type*} [TopologicalSpace M₂] [ChartedSpace H M₂]
@@ -490,6 +494,7 @@ private theorem mfd_comp_id
   rw [← mfderiv_comp x hg hf, hfg.mfderiv_eq]
   exact mfderiv_id
 
+omit [FiniteDimensional ℝ E] in
 private theorem mfd_comp_id_app
     {M₁ : Type*} [TopologicalSpace M₁] [ChartedSpace H M₁]
     {M₂ : Type*} [TopologicalSpace M₂] [ChartedSpace H M₂]
@@ -503,6 +508,7 @@ private theorem mfd_comp_id_app
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem inner_base_eq
     {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H M₀] [IsManifold I ∞ M₀]
     (g₀ : SmoothRiemannianMetric I M₀) {x y : M₀} (hxy : x = y) (v w : E) :
@@ -510,6 +516,7 @@ private theorem inner_base_eq
   subst hxy; rfl
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem mfd_base_eq
     {M₁ : Type*} [TopologicalSpace M₁] [ChartedSpace H M₁]
     {M₂ : Type*} [TopologicalSpace M₂] [ChartedSpace H M₂]
@@ -520,6 +527,7 @@ private theorem mfd_base_eq
 
 
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
     ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k)) z := by
@@ -579,14 +587,17 @@ noncomputable def inclPartialDiffeo (k : ℕ) :
   contMDiffOn_toFun := fun _ hz => (S.contMDiffAt_invIncl k hz).contMDiffWithinAt
   contMDiffOn_invFun := fun a _ => ((S.contMDiff_incl k) a).contMDiffWithinAt
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 @[simp] theorem inclPartialDiffeo_source (k : ℕ) :
     (S.inclPartialDiffeo k).source = Set.range (S.toSeqSystem.incl k) := rfl
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 @[simp] theorem inclPartialDiffeo_apply (k : ℕ) (z : S.toSeqSystem.Lim) :
     S.inclPartialDiffeo k z = Function.invFun (S.toSeqSystem.incl k) z := rfl
 
 
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem invIncl_incl_le {j k : ℕ} (hjk : j ≤ k) (a : A j) :
     Function.invFun (S.toSeqSystem.incl k) (S.toSeqSystem.incl j a)
       = S.toSeqSystem.F hjk a := by
@@ -613,6 +624,7 @@ def MetricCocycle (g : ∀ k, SmoothRiemannianMetric I (A k)) : Prop :=
       = (g k).inner a v w
 
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem MetricCocycle.ofSucc (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hstep : ∀ k (a : A k) (v w : TangentSpace I a),
       (g (k + 1)).inner (S.toSeqSystem.F (Nat.le_succ k) a)
@@ -673,6 +685,7 @@ noncomputable def stageInner (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : �
     ((g k).inner (Function.invFun (S.toSeqSystem.incl k) z)).comp D
   (ContinuousLinearMap.precomp ℝ D).comp step1
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem stageInner_apply (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     (z : S.toSeqSystem.Lim) (v w : TangentSpace I z) :
     S.stageInner g k z v w
@@ -682,12 +695,15 @@ theorem stageInner_apply (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
   unfold stageInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem stageInner_symm (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     (z : S.toSeqSystem.Lim) (v w : TangentSpace I z) :
     S.stageInner g k z v w = S.stageInner g k z w v := by
   rw [stageInner_apply, stageInner_apply]
   exact (g k).symm _ _ _
 
+omit [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
+omit [FiniteDimensional ℝ E] in
 theorem stageInner_pos (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     {z : S.toSeqSystem.Lim} (hz : z ∈ Set.range (S.toSeqSystem.incl k))
     (v : TangentSpace I z) (hv : v ≠ 0) : 0 < S.stageInner g k z v v := by
@@ -703,6 +719,8 @@ theorem stageInner_pos (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
   rw [← happ, h0]
   exact (mfderiv I I (S.toSeqSystem.incl k) _).map_zero
 
+omit [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
+omit [FiniteDimensional ℝ E] in
 theorem stageInner_bounded (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     {z : S.toSeqSystem.Lim} (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
     Bornology.IsVonNBounded ℝ {v : TangentSpace I z | S.stageInner g k z v v < 1} := by
@@ -754,6 +772,7 @@ theorem stageInner_bounded (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
 
 
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     {k m : ℕ} (hkm : k ≤ m) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
@@ -825,6 +844,7 @@ theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Metr
           (mfderiv I I (Function.invFun (S.toSeqSystem.incl m)) (S.toSeqSystem.incl k a) w) :=
         inner_base_eq (g m) hFb _ _
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem stageInner_congr (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     {k ℓ : ℕ} {z : S.toSeqSystem.Lim}
     (hzk : z ∈ Set.range (S.toSeqSystem.incl k)) (hzℓ : z ∈ Set.range (S.toSeqSystem.incl ℓ)) :
@@ -832,6 +852,7 @@ theorem stageInner_congr (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Met
   (S.stageInner_mono g hg (le_max_left k ℓ) hzk).trans
     (S.stageInner_mono g hg (le_max_right k ℓ) hzℓ).symm
 
+omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem mem_range_rep (z : S.toSeqSystem.Lim) :
     z ∈ Set.range (S.toSeqSystem.incl (S.toSeqSystem.rep z).1) :=
   ⟨(S.toSeqSystem.rep z).2, S.toSeqSystem.incl_rep z⟩

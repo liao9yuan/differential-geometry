@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ noncomputable def metricFlatContinuousEquiv
     (LinearMap.toContinuousLinearMap :
       (E →ₗ[Real] Real) ≃ₗ[Real] (E →L[Real] Real))).toContinuousLinearEquiv
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatContinuousEquiv_apply
     (g : SmoothRiemannianMetric I M) (x₀ : M) (v w : E) :
     ((metricFlatContinuousEquiv (I := I) g x₀) v) w = g.inner x₀ v w := by
@@ -57,6 +57,7 @@ noncomputable def metricFlatModelInChart
       (fun p : M => TangentSpace I p →L[Real] TangentSpace I p →L[Real] Real) x₀
       ⟨(extChartAt I x₀).symm y, g.inner ((extChartAt I x₀).symm y)⟩).2
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_center_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x₀) =
@@ -101,6 +102,7 @@ theorem metricFlatModelInChart_center_eq
   rw [hsymm v, hsymm w]
   rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_center_isInvertible
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     (metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x₀)).IsInvertible := by
@@ -108,6 +110,7 @@ theorem metricFlatModelInChart_center_isInvertible
   exact ContinuousLinearMap.isInvertible_equiv
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContDiffWithinAt Real ∞
@@ -155,6 +158,7 @@ theorem metricFlatModelInChart_contDiffWithinAt
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_apply_of_target
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) (v w : E) :
@@ -189,6 +193,7 @@ theorem metricFlatModelInChart_apply_of_target
   simp [hom_trivializationAt, Trivialization.continuousLinearMap_apply]
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricFlatModelInChart_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContDiffWithinAt Real ∞
@@ -204,6 +209,7 @@ theorem inverseMetricFlatModelInChart_contDiffWithinAt
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
     (hy : y ∈ (extChartAt I x₀).target) :
@@ -257,6 +263,7 @@ theorem metricFlatModelInChart_contDiffWithinAt_of_mem
     (heq.self_of_nhdsWithin (extChartAt_target_subset_range x₀ hy))
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (k l : CoordinateIdx (𝕜 := Real) E) :
@@ -282,6 +289,7 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
     simpa [εl] using hinv.clm_apply contDiffWithinAt_const
   simpa [εk, εl] using (contDiffWithinAt_const (c := εk)).clm_apply happ
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem inverseMetricFlatModelInChart_component_center_eq_symm
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -318,6 +326,7 @@ private theorem inverseMetricFlatModelInChart_component_center_eq_symm
           rw [A.apply_symm_apply]
     _ = (Module.finBasis Real E).coord j (A.symm (ε i)) := rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricFlatModelInChart_metricInverseInBasis_center
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     MetricInverseInBasis_gen (I := I) g x₀ (coordinateFrameAt_toBasis (I := I) x₀)

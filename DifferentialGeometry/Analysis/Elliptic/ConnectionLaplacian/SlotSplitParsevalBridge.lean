@@ -17,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,7 +35,7 @@ noncomputable def slot0Curry
           (fun k => g.inner x (e (K₀ k)))))
       (e a))
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma slot0Curry_apply
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -57,7 +57,7 @@ lemma slot0Curry_apply
       (e a))) τ = _
   rw [ContinuousLinearMap.smulRight_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fiberNormSqComponent_slot0Curry
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -101,7 +101,7 @@ lemma fiberNormSqComponent_slot0Curry
         (fun k : Fin s => e (J' k)) from rfl]
   rw [hcurry]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem riemannianFiberNormSq_succ_eq_sum_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x) :

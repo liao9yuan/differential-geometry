@@ -11,7 +11,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -22,7 +22,6 @@ def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartInvGramOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -36,7 +35,6 @@ def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
       chartInvGramOnE (I := I) g α i j y *
         partialDeriv (E := E) j (scalarOnE (I := I) α f) y
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma gradChartCoeffOnE_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -50,7 +48,6 @@ def chartVossWeylIntegrand (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
   fun y =>
     gradChartCoeffOnE (I := I) g α f i y * chartDensityOnE (I := I) g α y
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartVossWeylIntegrand_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -66,7 +63,6 @@ def chartVossWeylLaplacian (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
         (extChartAt I α x))
     / chartDensity (I := I) g α x
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartVossWeylLaplacian_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartVossWeylLaplacian (I := I) g α f x =
@@ -76,7 +72,6 @@ omit [InnerProductSpace ℝ E] in
             (extChartAt I α x))
         / chartDensity (I := I) g α x := rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -141,7 +136,6 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
   rw [hLgrad]
   exact hrepr_basis_combo
 
-omit [InnerProductSpace ℝ E] in
 private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -175,7 +169,6 @@ private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
   rw [hext_z]
   rw [chartInvGramOnE_def]
 
-omit [InnerProductSpace ℝ E] in
 lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)

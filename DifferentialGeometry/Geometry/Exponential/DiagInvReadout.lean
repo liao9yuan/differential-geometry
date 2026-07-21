@@ -57,6 +57,8 @@ def readDom
 
 
 
+omit [ConnectedSpace M] in
+omit [InnerProductSpace ℝ E] in
 theorem readoutDomInf
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}

@@ -35,7 +35,9 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +53,19 @@ def linearizedRicciThreeArmHjoint (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
       (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 ((Φ p.2).toSection p.1))
     ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ'))
 
+end NormedSpaceModel
+
+section NormedArmFields
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 def linearizedRicciArm0BaseCoeff (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -65,6 +80,9 @@ noncomputable def linearizedRicciArm1Fib (g₀ g₁ : SmoothRiemannianMetric I M
     (cometricDoubleTraceFib (I := I) g₁ 1 x)
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem linearizedRicciArm1Fib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 3 I x) :
     linearizedRicciArm1Fib (I := I) g₀ g₁ x D =
@@ -73,6 +91,8 @@ noncomputable def linearizedRicciArm1Fib (g₀ g₁ : SmoothRiemannianMetric I M
         (cometricDoubleTraceFib (I := I) g₁ 1 x D) := by
   rw [linearizedRicciArm1Fib, ContinuousLinearMap.comp_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem linearizedRicciArm1Fib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
@@ -112,6 +132,8 @@ noncomputable def ricciArmOrder1KoszulCoeff (g₀ g₁ : SmoothRiemannianMetric 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricciArmOrder1KoszulCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from linearizedRicciArm1Fib (I := I) g₀ g₁ x) := rfl
@@ -149,6 +171,7 @@ noncomputable def traceHessianFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
   (cometricDoubleTraceFib (I := I) g₁ 2 x).comp (domDomCongrFib (I := I) x)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem traceHessianFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (traceHessianFib (I := I) g₁ x D) =
@@ -194,6 +217,8 @@ private theorem domDomCongr_section_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceHessianFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -223,6 +248,8 @@ noncomputable def traceHessianCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] theorem traceHessianCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (traceHessianCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x) := rfl
@@ -235,6 +262,8 @@ def linearizedRicciArm2FieldLichnerowicz (g₀ : SmoothRiemannianMetric I M)
   ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
     - (1 / 2 : ℝ) • traceHessianCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -263,6 +292,8 @@ theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (
       (fun _ : Fin 1 => (u : E)) = φ (u : E)
   rw [Tensor0SBundle.model_covectorOfCLM_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceHessianCoeff_apply_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -373,6 +404,8 @@ theorem cDualBasis_trace_basis_indep
             F (LinearMap.toContinuousLinearMap (b.coord j)) (b j) := by
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [h_cov j]
+
+end NormedArmFields
 
 end TensorSpectral
 end Parabolic

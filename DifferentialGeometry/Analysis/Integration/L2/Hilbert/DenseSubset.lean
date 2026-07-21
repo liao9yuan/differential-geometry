@@ -39,7 +39,7 @@ namespace SmoothCcTensor
 
 section DenseEmbedding
 
-variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 

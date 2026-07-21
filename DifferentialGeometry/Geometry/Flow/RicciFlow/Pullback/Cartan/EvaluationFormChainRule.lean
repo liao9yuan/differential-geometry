@@ -22,7 +22,7 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -171,6 +171,8 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
     rw [hQ]; exact evalFormTwoVar_diag (I := I) g_DT Φ_fam x v w
   rwa [hdiag_eq] at hdiag
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurck_pullback_h_total_eval
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)

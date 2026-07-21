@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -86,6 +86,8 @@ private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
   rfl
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -117,6 +119,9 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
         (chartBasisVecFiber (I := I) α i b)) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
 
+omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffCovNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -140,6 +145,8 @@ private lemma cutoffCovNormSqSum_continuousOn_chart_source
       g r s S α i).continuousOn
   exact (hcov.norm).pow 2
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffCovNormSumFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -175,12 +182,15 @@ private lemma cutoffCovNormSumFun_continuous
     hw_contOn.continuousAt ((chartAt H α).open_source.mem_nhds hx_src)
   exact hχ_contAt.smul hw_contAt
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoffCovNormSumFun_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
     Measurable (cutoffCovNormSumFun (I := I) (M := M) g r s S α) :=
   (cutoffCovNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasePoint_mem_goodSet'
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -193,6 +203,8 @@ private lemma chartBasePoint_mem_goodSet'
     extChartAt_source]
   exact hsrc
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoffCovDerivComponent_le_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

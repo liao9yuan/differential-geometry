@@ -92,7 +92,7 @@ open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -235,6 +235,8 @@ def EigenvalueTailSummable (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenvalueTail_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (p : ℝ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :

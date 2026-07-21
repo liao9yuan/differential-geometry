@@ -5,7 +5,6 @@ import Mathlib.Tactic.Ring
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -16,13 +15,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -120,6 +117,7 @@ def rawSym2 (A : RawTwoTensorField (I := I) (M := M)) :
     RawTwoTensorField (I := I) (M := M) :=
   fun x v w => (A x v w + A x w v) / 2
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 @[simp]
 theorem rawSym2_self
     (A : RawTwoTensorField (I := I) (M := M))
@@ -128,6 +126,7 @@ theorem rawSym2_self
   unfold rawSym2
   ring
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_symm
     (A : RawTwoTensorField (I := I) (M := M)) (x : M) :
     TwoTensorSymmetricAt (I := I) (M := M)
@@ -136,6 +135,7 @@ theorem rawSym2_symm
   unfold rawSym2
   ring
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_nonneg
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     (hA : TwoTensorNonnegativeAt (I := I) (M := M) A x) :
@@ -145,6 +145,7 @@ theorem rawSym2_nonneg
   simpa using hA v
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem rawSym2_bilin
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
@@ -197,6 +198,7 @@ def TensorReactionSymmInputOn
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem null_of_symm
     {G : Real -> SmoothRiemannianMetric I M}
     {N : TwoTensorReaction (I := I) (M := M)}
@@ -212,6 +214,7 @@ theorem null_of_symm
     (rawSym2_nonneg (I := I) (M := M) hA) v (by simpa using hv)
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem raw_quad_add_smul_eq
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v w : TangentSpace I x} {a : Real}
@@ -235,6 +238,7 @@ theorem raw_quad_add_smul_eq
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem psd_null_left_raw
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v : TangentSpace I x}
@@ -274,6 +278,7 @@ theorem psd_null_left_raw
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem psd_null_right_raw
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v : TangentSpace I x}
@@ -474,6 +479,7 @@ def BarrierLocalCore
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem hasDerivWithinAt_barrier_quad
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -512,6 +518,7 @@ theorem hasDerivWithinAt_barrier_quad
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierCore_deriv
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -564,6 +571,7 @@ theorem barrierCore_deriv
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierCore_of_pt
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -605,6 +613,7 @@ theorem barrierCore_of_pt
 
 
 
+omit [IsManifold I 2 M] in
 theorem localEst_of_core
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -634,6 +643,7 @@ theorem localEst_of_core
 
 
 
+omit [IsManifold I 2 M] in
 theorem localEst_deriv
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -682,6 +692,7 @@ theorem localEst_deriv
     (barrierCore_deriv (I := I) (M := M)
       hS hG hGain hReaction hMargin)
 
+omit [IsManifold I 2 M] in
 theorem strictBarrier_of_derivEst
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -765,6 +776,7 @@ theorem strictBarrier_of_derivEst
   have hmargin_t := hmargin hv
   linarith
 
+omit [IsManifold I 2 M] in
 theorem strictParabolic_of_est
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}

@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSourc
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -45,7 +44,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+  [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -553,6 +552,7 @@ theorem NormalRadiusProfile.sigmaCenterTail
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem binfMemClosed {U V' : Set E} {B : Nat -> E -> E} {Binf : E -> E}
     (hB : MapCInfConvOnCompacts U B Binf) {v : E} (hv : v ∈ U)
     (hV'closed : IsClosed V') (hmem : ∀ᶠ a in Filter.atTop, B a v ∈ V') :
@@ -957,6 +957,7 @@ noncomputable def totalPts
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem activeFill_totalPts_zero
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -974,6 +975,7 @@ noncomputable def totalPts
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem activeFill_totalPts_of_ne
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}

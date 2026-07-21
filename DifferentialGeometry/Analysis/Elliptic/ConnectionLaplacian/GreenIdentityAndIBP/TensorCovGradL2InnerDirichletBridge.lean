@@ -19,8 +19,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
-  [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E]   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -30,6 +29,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : SmoothCcTensor g r s) :

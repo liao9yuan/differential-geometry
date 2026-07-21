@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -22,7 +21,6 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -106,6 +104,7 @@ def tensorDrift0SAt
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x :=
   tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x nablaA (X x)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem tensorDrift0SAt_apply
     (X : (x : M) -> TangentSpace I x)

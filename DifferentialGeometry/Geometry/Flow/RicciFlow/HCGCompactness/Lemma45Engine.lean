@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedFintypeInType false
 
@@ -46,7 +45,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -81,6 +79,7 @@ theorem claim1MulConst_nonneg {C0 KR L : Real} (hL : 0 ≤ L) (m : ℕ) :
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_mul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -222,6 +221,7 @@ theorem claim1_eps_mul_bound {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_mul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -254,6 +254,7 @@ theorem claim1_eps_mul {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -375,6 +376,8 @@ def corrSlotEquiv {r' : ℕ} (s : Fin (r' + 1)) : Fin (2 + r') ≃ Fin (r' + 1 +
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem chrCorrField_eq_contrTail {r' : ℕ}
     (D : M → Idx → Idx → Idx → Real) (X : M → (Fin (r' + 1) → Idx) → Real)
     (s : Fin (r' + 1)) :
@@ -420,6 +423,7 @@ theorem chrCorrField_eq_contrTail {r' : ℕ}
 
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_chr_sub {r : ℕ}
     (ext : (Fin r → Idx) → Idx → Real) (chrG chrH : Idx → Idx → Idx → Real)
     (A : (Fin r → Idx) → Real) (n : Fin (r + 1) → Idx) :
@@ -435,6 +439,8 @@ theorem covDerivStepComp_chr_sub {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCov_one_chr_change {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -449,6 +455,7 @@ theorem iterCov_one_chr_change {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (f : ι → M → Real) (hf : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => f i y) u) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ i ∈ t, f i y) u := by
@@ -462,6 +469,8 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
       (ih fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
     (D : M → Idx → Idx → Idx → Real)
     (hD : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u)
@@ -472,6 +481,7 @@ theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
   contMDiffOn_finsetSum' Finset.univ _ (fun p _ => (hD _ _ p).mul (hX _))
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -490,6 +500,7 @@ theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     zero_mul]
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -521,6 +532,7 @@ theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
       Finset.sum_insert hb]
 
 
+omit [DecidableEq Idx] in
 private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
     (f : ι → (Fin r → Idx) → Real) :
     compL2 (fun n : Fin r → Idx => ∑ i ∈ t, f i n) ≤ ∑ i ∈ t, compL2 (f i) := by
@@ -540,6 +552,7 @@ private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -575,6 +588,7 @@ theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
   rw [compL2_iterCovComp_compReindex (slotRotEquiv s) frame chrH X (k - c) x]
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -605,6 +619,7 @@ theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -775,6 +790,7 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -820,6 +836,7 @@ theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem lemma45_component₀ {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -850,6 +867,8 @@ theorem lemma45_component₀ {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1055,6 +1074,7 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1148,6 +1168,7 @@ theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1182,6 +1203,7 @@ theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1216,6 +1238,7 @@ theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -1268,6 +1291,8 @@ theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1348,6 +1373,8 @@ theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
   simpa only [B] using h
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1404,6 +1431,8 @@ theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)

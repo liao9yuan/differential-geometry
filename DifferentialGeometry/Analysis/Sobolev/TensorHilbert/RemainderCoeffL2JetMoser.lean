@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -321,6 +323,7 @@ theorem ricciArmPrincipalCoeff_realizedFam_jetL2_perOrder_ballUniform
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem traceHessianCoeff_sub_eq_reindex_deTurckPrincipalCometricCoeff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     traceHessianCoeff (I := I) (M := M) g₀ g₁ - traceHessianCoeff (I := I) (M := M) g₀ g₀ =
@@ -739,6 +742,7 @@ private lemma tsmRfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsmRfns_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -747,6 +751,7 @@ private lemma tsmRfns_order_congr (g : SmoothRiemannianMetric I M)
         ((iteratedCovGrad (I := I) g r s n' S).toSection x) := by
   subst h; rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsmAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ a c j (ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ W) =
@@ -772,6 +777,7 @@ private lemma tsmAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (
   rw [hf0]
   exact add_comm _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tsmNormSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C : SmoothCcTensor g r s) :
     ‖C‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (C.toSection x)
@@ -779,6 +785,8 @@ private lemma tsmNormSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.norm_def (I := I) (M := M) C,
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r s C]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsmNormSq_covGrad_shift (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (Φ : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g r (s + 1) n (covGrad (I := I) (M := M) g r s Φ)‖ ^ 2 =
@@ -1312,6 +1320,8 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic
               (mul_nonneg (sq_nonneg ΛS) (hFB_nn i)))))
       nlinarith [hKcC_nn, hsum_nn]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tsmConvex_jet_eq (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s) =
@@ -1320,6 +1330,8 @@ lemma tsmConvex_jet_eq (g₀ : SmoothRiemannianMetric I M)
   rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
     iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsmConvex_rfns_le (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -1354,6 +1366,8 @@ private lemma tsmConvex_rfns_le (g₀ : SmoothRiemannianMetric I M)
     ((iteratedCovGrad (I := I) g₀ 0 2 j T').toSection x)
   nlinarith
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsmConvex_normSq_le (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) (j : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤

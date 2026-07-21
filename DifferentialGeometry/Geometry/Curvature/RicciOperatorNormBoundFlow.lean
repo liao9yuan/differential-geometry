@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -33,6 +32,7 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 
 
+omit [I.Boundaryless] in
 theorem ricciAt_unitQuad_le_of_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -70,6 +70,7 @@ theorem ricciAt_unitQuad_le_of_sol
 
 
 
+omit [I.Boundaryless] in
 theorem twoTensorQuadBound_of_solutions
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)

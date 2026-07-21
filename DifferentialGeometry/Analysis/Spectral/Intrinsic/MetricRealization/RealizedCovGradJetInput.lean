@@ -61,7 +61,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -82,6 +82,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
@@ -134,6 +136,7 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
 
 
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
     chartFrameBasisModel (I := I) (M := M) α x 0
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) =
@@ -148,6 +151,7 @@ lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
 
 
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (l b : Fin (Module.finrank ℝ E)) :
@@ -179,6 +183,7 @@ theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
 
 
 
+omit [BoundarylessManifold I M] in
 theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -205,6 +210,7 @@ theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
     partialDeriv (E := E) a f y =
@@ -221,6 +227,7 @@ theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) :
     (partialDeriv (E := E) a f) ∘ (toEuclidean (E := E)).symm =
@@ -235,6 +242,7 @@ theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
     (c a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
     partialDeriv (E := E) c (partialDeriv (E := E) a f) y =
@@ -248,6 +256,7 @@ theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
 
 
 
+omit [BoundarylessManifold I M] in
 theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -283,6 +292,7 @@ theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
 
 
 
+omit [BoundarylessManifold I M] in
 theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M)
     (a l b : Fin (Module.finrank ℝ E)) {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -309,6 +319,8 @@ theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
 
 
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g_bg 0 s) (α : M)
@@ -326,6 +338,7 @@ theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
   exact (hcd.contDiffAt (hopen.mem_nhds hy')).differentiableAt (by simp)
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α :=
@@ -337,6 +350,7 @@ theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
 
 
 
+omit [BoundarylessManifold I M] in
 theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -412,6 +426,7 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPreimage_image_isCompact_subset_chartSource
     (α : M) {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -450,6 +465,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -529,6 +546,7 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem extChartAt_symm_image_isCompact_subset_chartSource
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
@@ -548,6 +566,7 @@ theorem extChartAt_symm_image_isCompact_subset_chartSource
     rwa [extChartAt_source] at hsrc
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem euclidPartial_congr_of_eqOn_isOpen
     (a : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -562,6 +581,7 @@ theorem euclidPartial_congr_of_eqOn_isOpen
 
 
 
+omit [BoundarylessManifold I M] in
 theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g_bg 0 s) (α : M)
@@ -593,6 +613,7 @@ theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
 
 
 
+omit [BoundarylessManifold I M] in
 theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g_bg 0 s) (α : M)
@@ -627,6 +648,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem euclidPartial_covDerivComponentEuclid_abs_le
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -702,6 +724,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem euclidPartial2_chartPushedRaw_abs_le_aux
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -892,6 +915,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_norm_le_jetSum
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (x : M)
     (j : ℕ) (hj : j < 3) :
@@ -913,6 +938,8 @@ theorem iteratedCovGrad_norm_le_jetSum
 set_option maxHeartbeats 3200000 in
 
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem secondCovDerivLO_valueCoeff_uniform_bound
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -947,6 +974,8 @@ theorem secondCovDerivLO_valueCoeff_uniform_bound
 set_option maxHeartbeats 3200000 in
 
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem secondCovDerivLO_gradCoeff_uniform_bound
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -987,6 +1016,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem euclidPartial2_chartPushedRaw_abs_le_jetSum
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -1076,6 +1106,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -1136,6 +1167,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem partialDeriv_reprDiffChartCompOnE_abs_le
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -1245,6 +1277,7 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem partialDeriv2_reprDiffChartCompOnE_abs_le
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -1375,6 +1408,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem hcovgrad_jet_bound_holds
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -1444,6 +1478,7 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}

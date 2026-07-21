@@ -34,6 +34,8 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
         chartGramOnE (I := I) g α l m y *
           chartRiemannTensor (I := I) g α i j k m y := rfl
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannLower_antisymm_jk
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -403,6 +405,8 @@ private lemma chartFourFold_reverse_sum
   refine Finset.sum_congr rfl ?_; intro i _
   ring
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sectionalCurvatureNumerator_symm_of_chartRiemannLower_second_pair_antisymm
     (g : SmoothRiemannianMetric I M) (p : M)
     (h_pair : ∀ i j k l : Fin (Module.finrank ℝ E),
@@ -440,6 +444,8 @@ theorem sectionalCurvatureDenominator_symm
   rw [g.symm p v w]
   ring
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sectionalCurvature_symm_of_chartRiemannLower_second_pair_antisymm
     (g : SmoothRiemannianMetric I M) (p : M)
     (h_pair : ∀ i j k l : Fin (Module.finrank ℝ E),

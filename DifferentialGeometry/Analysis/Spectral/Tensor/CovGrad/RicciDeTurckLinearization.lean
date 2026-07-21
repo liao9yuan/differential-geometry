@@ -31,7 +31,9 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,6 +43,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroTensor_eq_smul_unitTensor (x : M)
     (D : Tensor0SSpace 0 I x) :
     D = (Tensor0SNabla.tensor0Iso I M x D) • unitTensor (I := I) (M := M) x := by
@@ -54,6 +57,7 @@ private theorem zeroTensor_eq_smul_unitTensor (x : M)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor0s_clm_ext_unit {s : ℕ} {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x}
     (h : φ (unitTensor (I := I) (M := M) x) = ψ (unitTensor (I := I) (M := M) x)) :
@@ -64,6 +68,7 @@ private theorem tensor0s_clm_ext_unit {s : ℕ} {x : M}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem smoothCcTensor_ext_of_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
     {S S' : SmoothCcTensor g 0 s}
     (h : ∀ x : M, unitModel (I := I) (M := M) g s S x = unitModel (I := I) (M := M) g s S' x) :
@@ -93,16 +98,42 @@ private theorem unitModel_add (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
+end NormedSpaceModel
+
+section NormedSpacePermutation
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
 
 private theorem unitModel_castRankCc (g : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
     (W : SmoothCcTensor g 0 a) (x : M) :
-    unitModel (I := I) (M := M) g b (castRankCc g 0 h W) x =
+    unitModel (I := I) (M := M) g b (h ▸ W) x =
       h ▸ unitModel (I := I) (M := M) g a W x := by
   subst h
   rfl
 
+end NormedSpacePermutation
+
+section NormedSpaceModel
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem domDomCongrField_contMDiff (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
@@ -159,6 +190,8 @@ noncomputable def domDomCongrSection (g : SmoothRiemannianMetric I M) {s : ℕ}
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem domDomCongrSection_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (domDomCongrSection (I := I) g σ S) x =
@@ -176,6 +209,19 @@ theorem domDomCongrSection_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
         (ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g s S x))) = _
   rw [Tensor0SSpace.toModel_ofModel]
 
+end NormedSpaceModel
+
+section NormedSpacePermutationNorm
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_iteratedCovGrad_unitModel_domDomCongrSection (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) (i : ℕ) :
     ∃ σ' : Equiv.Perm (Fin (s + i)),
@@ -188,6 +234,7 @@ theorem exists_iteratedCovGrad_unitModel_domDomCongrSection (g : SmoothRiemannia
     (domDomCongrSection (I := I) g σ S)
     (fun y => domDomCongrSection_unitModel (I := I) g σ S y) i
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (g : SmoothRiemannianMetric I M) {s : ℕ} (σ : Equiv.Perm (Fin s))
     (S : SmoothCcTensor g 0 s) (i : ℕ) (x : M) :
@@ -198,6 +245,8 @@ theorem riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
   riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr (I := I) (M := M) g s σ S
     (domDomCongrSection (I := I) g σ S)
     (fun y => domDomCongrSection_unitModel (I := I) g σ S y) i x
+
+end NormedSpacePermutationNorm
 
 end TensorSpectral
 end Parabolic

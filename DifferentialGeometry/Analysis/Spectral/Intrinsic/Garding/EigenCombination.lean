@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -70,6 +70,7 @@ theorem finiteEigenCombo_contMDiff
 abbrev hCompact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2) :=
   tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2
 
+omit [BoundarylessManifold I M] in
 theorem finiteEigenCombo_toL2
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
@@ -104,6 +105,7 @@ theorem tensorL2Coeff_ofCompact_eigenSmooth
 
 open scoped Classical in
 
+omit [BoundarylessManifold I M] in
 theorem finiteEigenCombo_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -279,6 +281,8 @@ def finiteEigenComboHs
 open scoped Classical in
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma finiteEigenComboHs_coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ)
@@ -286,6 +290,7 @@ omit [BoundarylessManifold I M] in
     (finiteEigenComboHs (I := I) (M := M) g F c σ).coeff i =
       (if i ∈ F then c i else 0) := rfl
 
+omit [BoundarylessManifold I M] in
 lemma finiteEigenComboHs_coeff_eq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ)
@@ -296,6 +301,9 @@ lemma finiteEigenComboHs_coeff_eq
   rw [finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F c i]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem finiteEigenCombo_spectral_normSq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) :

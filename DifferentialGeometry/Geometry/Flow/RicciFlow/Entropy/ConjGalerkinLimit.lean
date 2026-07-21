@@ -139,6 +139,8 @@ private theorem galPert_norm_le
       ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem gal_lim_mass
     (q : SmoothRiemannianMetric I M) {tau : Real}
     (Fs : Nat → Finset (TensorEigenIdx (I := I) (M := M) q 0 0))

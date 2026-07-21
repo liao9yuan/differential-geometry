@@ -18,6 +18,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem pou_weighted_norm_equals_chart_component_norm_up_to_constant
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

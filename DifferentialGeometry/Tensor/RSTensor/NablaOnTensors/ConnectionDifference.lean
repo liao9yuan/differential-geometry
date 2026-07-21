@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable {x : M}
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_one_apply_add
     (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (X Y : TangentSpace I x) :
@@ -61,6 +61,7 @@ private theorem tensor0S_one_apply_add
   rw [← hleft, ← hX, ← hY]
   exact h
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_one_apply_smul
     (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (c : Real) (X : TangentSpace I x) :

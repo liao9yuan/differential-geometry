@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -24,12 +23,11 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 def pinchWeight (scalar : Real -> M -> Real) (epsilon : Real) :
@@ -65,7 +63,9 @@ def pinchDriftVector
       DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x
 
 
+omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchDriftTerm_eq_inner_drift
+    [Module.Finite ℝ E]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M) :
@@ -79,6 +79,7 @@ theorem pinchDriftTerm_eq_inner_drift
 
 
 
+omit [TopologicalSpace M] in
 theorem pinchEstimateOn_of_pinchQuotient_bound
     {tracefreeRicciNormSq scalar : Real -> M -> Real}
     {epsilon C : Real} {U : Set Real}
@@ -114,6 +115,7 @@ theorem pinchEstimateOn_of_pinchQuotient_bound
   simpa [PinchEstimateOn, pinchWeight, hquot] using hmul
 
 
+omit [TopologicalSpace M] in
 theorem pinchSquareTerm_nonpos
     (scalar coupleSq : Real -> M -> Real) (epsilon t : Real) (x : M)
     (hR : 0 < scalar t x) (hcouple : 0 <= coupleSq t x) :
@@ -127,6 +129,7 @@ theorem pinchSquareTerm_nonpos
 
 
 
+omit [TopologicalSpace M] in
 theorem pinchGradTerm_nonpos
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -160,6 +163,7 @@ theorem pinchGradTerm_nonpos
 
 
 
+omit [TopologicalSpace M] in
 theorem pinchReactTerm_nonpos
     (scalar ricciNormSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -177,7 +181,9 @@ theorem pinchReactTerm_nonpos
 
 
 
+omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -205,7 +211,9 @@ theorem cubicQ_sub_nonneg_of_section9
     (hric t ht x) (hpinch t ht x)
 
 
+omit [Module.Finite ℝ E] in
 theorem scalGradSq_nonneg
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -219,7 +227,9 @@ theorem scalGradSq_nonneg
   · exact le_of_lt ((S.family.metric t).pos x v hv)
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchCoupleSol_nonneg
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -234,7 +244,9 @@ theorem pinchCoupleSol_nonneg
 
 
 
+omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchBookRHS_le_drift
+    [Module.Finite ℝ E]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -261,7 +273,9 @@ theorem pinchBookRHS_le_drift
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchBookRHS_le_drift_sol
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -302,7 +316,9 @@ theorem pinchBookRHS_le_drift_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_parabolic_nonpos
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -382,7 +398,9 @@ theorem pinchQuotient_parabolic_nonpos
   linarith
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_continuous
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -426,7 +444,9 @@ theorem compact_nonneg_upper_bound
     exact False.elim (hne ⟨x⟩)
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_bound
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -450,7 +470,9 @@ private theorem continuousOn_of_restrict
   intro x hx
   exact (continuousWithinAt_iff_continuousAt_restrict f hx).mpr h.continuousAt
 
+omit [Module.Finite ℝ E] in
 private theorem ricciComp_coordCont
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -509,7 +531,9 @@ private theorem ricciComp_coordCont
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p.1 p.2 i j)
       hcomp
 
+omit [Module.Finite ℝ E] in
 private theorem ricciNorm_coordCont
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -565,7 +589,9 @@ private theorem ricciNorm_coordCont
       hbasis
   simpa [ricciNorm, U] using hnorm.symm
 
+omit [Module.Finite ℝ E] in
 private theorem ricciNorm_slabCont
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -596,7 +622,9 @@ private theorem ricciNorm_slabCont
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_slab_continuous_of_ricciNorm
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -648,7 +676,9 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
   exact continuousOn_const.sub hquot_cont
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_space_pos
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -682,7 +712,9 @@ theorem pinchQuotient_space_pos
   simp [pinchQuotient, quotField, p]
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuotient_grad_pos
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -762,7 +794,9 @@ theorem pinchQuotient_grad_pos
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchQuot_slab_bound
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -965,6 +999,7 @@ def carrierWeightExt
 
 
 
+omit [TopologicalSpace M] in
 theorem pinchEstimate_ext
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {tracefreeRicciNormSq scalar : Real -> M -> Real}
@@ -988,7 +1023,9 @@ theorem pinchEstimate_ext
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEstimate_sol
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -1077,7 +1114,9 @@ theorem pinchEstimate_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEstimate_display_sol
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]

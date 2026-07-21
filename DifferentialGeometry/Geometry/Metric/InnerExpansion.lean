@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.TangentRiemannianRealized
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -42,6 +41,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem inner_sum_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
     {ι : Type*} [Fintype ι] [DecidableEq ι] (v : ι → TangentSpace I x)
     (hON : ∀ i j, g.inner x (v i) (v j) = if i = j then (1 : ℝ) else 0)

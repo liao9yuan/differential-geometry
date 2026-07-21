@@ -24,6 +24,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] in
+omit [SigmaCompactSpace M] in
 theorem endoCovariantDerivative_g0_self_adjoint
     (g₀ : SmoothRiemannianMetric I M)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞

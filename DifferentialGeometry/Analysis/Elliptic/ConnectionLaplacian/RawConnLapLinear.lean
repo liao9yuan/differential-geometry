@@ -35,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 
 noncomputable def rawConnLapLin
@@ -115,8 +114,8 @@ noncomputable def rawConnLapLin
     rw [hLHS, hsmul_section, hRHS]
     exact hsmul
 
-set_option linter.unusedSectionVars false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem rawConnLapLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawConnLapLin (I := I) g r s T =

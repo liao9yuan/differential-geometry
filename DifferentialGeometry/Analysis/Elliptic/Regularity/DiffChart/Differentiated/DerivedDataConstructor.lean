@@ -19,7 +19,7 @@ namespace Analysis
 namespace Laplacian
 namespace DerivedChartBilinearH1ComplDataCanonical
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -214,6 +214,7 @@ private lemma base_u_chart_ae_zero_off_K_α
     hy_diff.1 hy_diff.2
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_memLp_two_global
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -256,6 +257,7 @@ private lemma locallyIntegrableOn_of_memLp_two_global
   exact Metric.ball_subset_closedBall
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_locally_memLp_two
     (α : M) {f : EuclN → ℝ}
     (hf : ∀ K' : Set EuclN, IsCompact K' →

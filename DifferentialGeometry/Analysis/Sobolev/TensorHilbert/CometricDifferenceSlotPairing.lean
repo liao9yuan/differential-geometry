@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -52,6 +52,7 @@ theorem g0_polarized_parseval
     _ = g₀.inner x v w := by rw [hexp]
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem multilinear_firstSlot_pairing_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -126,6 +127,7 @@ theorem multilinear_firstSlot_pairing_le
   exact hbound w
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
     (A : Tensor0SSpace (s + 1) I x) (v : Fin (s + 1) → TangentSpace I x) :
@@ -139,6 +141,7 @@ theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
   rfl
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -169,6 +172,7 @@ theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_slotΛ_le
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -285,6 +289,7 @@ def gInvDiffSlotApplied (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : 
   TensorRSSpace.ofCLM ((slotInsertEndoFib (s+1) 0 x (metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s+1) I x from W))
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_gInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -323,6 +328,7 @@ theorem tensorL2Inner_slotΛ_le
   refine integral_mono hWS_int (hWW_int.const_mul κ) ?_
   intro x; exact hptwise x
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem tensorL2Inner_gInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -349,8 +355,8 @@ theorem tensorL2Inner_gInvDiffSlot_le
     (fun x => TensorRSSpace.toModel (gInvDiffSlotApplied (I := I) g₀ g₁ s x (W x)))
     (fun x => ?_) hWS_int hWW_int
   exact tensorInnerPointwise_gInvDiffSlot_le g₀ g₁ h htie hδ_lt hδ_nn hδ s x (W x)
-set_option linter.unusedSectionVars false in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem multi_slotAt_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {r : ℕ} (j : Fin r)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -423,8 +429,8 @@ private theorem multi_slotAt_le
   rw [hkey, hself]
   exact hbound w
 
-set_option linter.unusedSectionVars false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem slotFib_eval_at (r : ℕ) (j : Fin r) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
     (A : Tensor0SSpace r I x) (v : Fin r → TangentSpace I x) :
@@ -437,8 +443,8 @@ private theorem slotFib_eval_at (r : ℕ) (j : Fin r) (x : M)
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem inner_slotAt_le
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ) (j : Fin r) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -569,6 +575,7 @@ private noncomputable def negDiffSlotApplied
         (-metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from W))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem negDiffSlot_eq_neg
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : TensorRSSpace 0 (s + 1) I x) :
@@ -582,6 +589,7 @@ private theorem negDiffSlot_eq_neg
     neg_one_smul, ContinuousLinearMap.neg_comp]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem negDiffSlot_model
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : TensorRSSpace 0 (s + 1) I x) :
@@ -591,6 +599,7 @@ private theorem negDiffSlot_model
         (gInvDiffSlotApplied (I := I) g₀ g₁ s x W) := by
   rw [negDiffSlot_eq_neg (I := I) g₀ g₁ s x W, TensorRSSpace.toModel_neg]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem negDiffEndo_adjoint
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
@@ -599,6 +608,7 @@ private theorem negDiffEndo_adjoint
   simp only [ContinuousLinearMap.neg_apply, map_neg]
   rw [gInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x a b]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem negDiffEndo_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -623,9 +633,9 @@ private theorem negDiffEndo_le
         (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v)) := hbnd
     _ = (δ / (1 - δ)) * g₀.inner x v v := by rw [hsq]
 
-set_option linter.unusedSectionVars false in
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem negDiffSlot_point_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -647,9 +657,9 @@ theorem negDiffSlot_point_le
   rw [← negDiffSlot_model (I := I) g₀ g₁ s x W]
   exact hslot
 
-set_option linter.unusedSectionVars false in
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem neg_gInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -685,6 +695,7 @@ private noncomputable def negDiffSlotAt
         (-metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem negSlotAt_model
     (g₀ g₁ : SmoothRiemannianMetric I M) (r : ℕ) (j : Fin r) (x : M)
     (W : TensorRSSpace 0 r I x) :
@@ -698,9 +709,9 @@ private theorem negSlotAt_model
     neg_one_smul, ContinuousLinearMap.neg_comp]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem negDiffSlotAt_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -722,8 +733,8 @@ theorem negDiffSlotAt_le
   rw [← negSlotAt_model (I := I) g₀ g₁ r j x W]
   exact hslot
 
-set_option linter.unusedSectionVars false in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem negSlotAtL2_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)

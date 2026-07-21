@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -146,13 +145,12 @@ theorem hasDerivWithinAt_lim
 
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
@@ -160,7 +158,11 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricInner_tendsto
+    [Module.Finite ℝ E]
     (gk : Nat → SmoothRiemannianMetric I M)
     (gLim gRef : SmoothRiemannianMetric I M) (x : M)
     (hconv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
@@ -210,7 +212,10 @@ theorem metricInner_tendsto
 
 
 
+omit [Module.Finite ℝ E] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricLimit_pde
+    [Module.Finite ℝ E]
     [NeZero (Module.finrank Real E)]
     {D : Nat → RealTimeInterval}
     (S : (k : Nat) → SolutionOn (I := I) (M := M) (D k))
@@ -270,7 +275,11 @@ theorem metricLimit_pde
 
 
 
+omit [Module.Finite ℝ E] in
+omit [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricLimit_pdeOn
+    [Module.Finite ℝ E]
     [NeZero (Module.finrank Real E)]
     {D : Nat → RealTimeInterval}
     (S : (k : Nat) → SolutionOn (I := I) (M := M) (D k))

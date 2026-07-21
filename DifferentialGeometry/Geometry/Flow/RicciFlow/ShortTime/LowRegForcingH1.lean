@@ -32,7 +32,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -41,6 +41,8 @@ variable
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem rhs_raw_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -54,6 +56,7 @@ private theorem rhs_raw_eq
     tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
       (I := I) (M := M) gBase g α hb Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rhs_raw_sub_eq
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -73,6 +76,7 @@ private theorem rhs_raw_sub_eq
     rhs_raw_eq (I := I) (M := M) gBase g₂ α hb]
   simp only [smul_eq_mul, neg_one_mul, sub_eq_add_neg]
 
+omit [SigmaCompactSpace M] in
 private theorem rhs_pull_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -100,6 +104,7 @@ private theorem rhs_pull_eq
   rw [rhs_raw_eq (I := I) (M := M) gBase g α hb_good]
   simp only [Function.comp_apply, hφ]
 
+omit [SigmaCompactSpace M] in
 private theorem rhs_partial_eq
     (gBase g : SmoothRiemannianMetric I M) (α : M)
     (d : Fin (Module.finrank ℝ E))
@@ -134,6 +139,7 @@ private theorem rhs_partial_eq
     _ = _ := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem rawComp_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -147,6 +153,7 @@ private theorem rawComp_sub
   simp only [smul_eq_mul, neg_one_mul, sub_eq_add_neg]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem lowerTerm_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)

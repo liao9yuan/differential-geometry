@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -22,12 +21,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -64,6 +62,8 @@ private theorem metric_gain_of_quad_bound
 
 
 
+omit [IsManifold I 2 M] in
+omit [FiniteDimensional ℝ E] in
 theorem metricGainAt_of_timeSlabQuadBound
     (G : Real -> SmoothRiemannianMetric I M)
     (A : (t : Real) -> (x : M) ->
@@ -160,6 +160,7 @@ theorem metricGainAt_of_timeSlabQuadBound
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricGainAt_of_totalCont
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : Real -> SmoothRiemannianMetric I M)
@@ -216,6 +217,7 @@ theorem metricGainAt_of_totalCont
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricGainAt_of_metricVariationDerivAt
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -278,6 +280,7 @@ theorem metricGainAt_of_metricVariationDerivAt
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariation
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -341,6 +344,7 @@ theorem metricGainControl_of_metricVariation
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariationOn
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {D : RealTimeInterval}
@@ -418,6 +422,7 @@ theorem metricGainControl_of_metricVariationOn
 
 
 
+omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariationOn_closedOpen
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     {omega T : Real} (h0ω : 0 < omega) (hTω : T < omega)

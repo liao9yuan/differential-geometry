@@ -19,7 +19,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,7 +32,7 @@ noncomputable def coframeS
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin s) ℝ).compContinuousLinearMap
     (fun k : Fin s => g.inner x (e (J k)))
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma coframeS_apply
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin s → Fin n)
@@ -50,7 +50,7 @@ noncomputable def dualTensorFrameS
   (tensor00Scalar (I := I) (M := M) x).smulRight
     (coframeS (I := I) (M := M) g x s e J)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma dualTensorFrameS_apply
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin s → Fin n)
@@ -61,7 +61,7 @@ lemma dualTensorFrameS_apply
   unfold dualTensorFrameS
   rw [ContinuousLinearMap.smulRight_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fiberNormSqComponent_dualTensorFrameS
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -93,7 +93,7 @@ lemma fiberNormSqComponent_dualTensorFrameS
   refine Finset.prod_congr rfl (fun k _ => ?_)
   rw [horth (J k) (J' k)]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensorS_coframe_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -163,7 +163,7 @@ lemma tensorS_coframe_expansion
     rw [mul_zero]
   · intro h; exact absurd (Finset.mem_univ v) h
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensorS_dualFrame_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -225,7 +225,7 @@ lemma tensorS_dualFrame_expansion
       dualTensorFrameS_apply (I := I) (M := M) g x s e J τ, ← hc_def]
   rw [hLHS', hRHS']
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma riemannianFiberNormSq_eq_sum_componentS_sq
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -246,7 +246,7 @@ lemma riemannianFiberNormSq_eq_sum_componentS_sq
     exact absurd (Subsingleton.elim K K₀) hK
   · intro h; exact absurd (Finset.mem_univ K₀) h
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tangent_orthonormalBasisS_witness
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x)
@@ -308,6 +308,7 @@ lemma tangent_orthonormalBasisS_witness
   · intro S
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannOp_tensorCovS_frame_expand
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -348,6 +349,7 @@ lemma riemannOp_tensorCovS_frame_expand
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [ContinuousLinearMap.smul_apply, smul_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fiberNormSqSummand_riemannOp_tensorCovS_vw_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -407,6 +409,7 @@ lemma fiberNormSqSummand_riemannOp_tensorCovS_vw_le
     rw [ha_def, fiberNormSqSummand_eq_component_sq]
   rw [hcsq, hasq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sum_riemannianFiberNormSq_riemannOpS_le_Cx
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -561,7 +564,7 @@ noncomputable def tensorEvalAtFrame
         ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ →ₗ[ℝ] ℝ)).comp
     (Tensor0SSpace.toModelL (I := I) r x)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensorEvalAtFrame_apply
     (x : M) (r : ℕ) {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin r → Fin n)
     (τ : Tensor0SSpace r I x) :
@@ -574,7 +577,7 @@ noncomputable def dualTensorFrameRS
   (tensorEvalAtFrame (I := I) (M := M) x r e K).smulRight
     (coframeS (I := I) (M := M) g x s e J)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma dualTensorFrameRS_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin r → Fin n) (J : Fin s → Fin n)
@@ -586,7 +589,7 @@ lemma dualTensorFrameRS_apply
   unfold dualTensorFrameRS
   rw [ContinuousLinearMap.smulRight_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fiberNormSqComponent_dualTensorFrameRS
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -624,7 +627,7 @@ lemma fiberNormSqComponent_dualTensorFrameRS
   refine Finset.prod_congr rfl (fun l _ => ?_)
   rw [horth (J l) (J' l)]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensorRS_dualFrame_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -686,7 +689,7 @@ lemma tensorRS_dualFrame_expansion
   change Tclm τ = _
   rw [hLHS', hRHS']
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma riemannianFiberNormSq_eq_sum_componentRS_sq
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -703,6 +706,7 @@ lemma riemannianFiberNormSq_eq_sum_componentRS_sq
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [fiberNormSqSummand_eq_component_sq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannOp_tensorCovRS_frame_expand
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -743,6 +747,7 @@ lemma riemannOp_tensorCovRS_frame_expand
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [ContinuousLinearMap.smul_apply, smul_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fiberNormSqSummand_riemannOp_tensorCovRS_vw_le
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -802,6 +807,7 @@ lemma fiberNormSqSummand_riemannOp_tensorCovRS_vw_le
     rw [ha_def, fiberNormSqSummand_eq_component_sq]
   rw [hcsq, hasq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sum_riemannianFiberNormSq_riemannOpRS_le_Cx
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -970,7 +976,7 @@ lemma sum_riemannianFiberNormSq_riemannOpRS_le_Cx
           refine Finset.sum_congr rfl (fun i _ => ?_)
           rw [Finset.sum_mul]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tangent_orthonormalBasisRS_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x)
@@ -1032,6 +1038,7 @@ lemma tangent_orthonormalBasisRS_witness
   · intro S
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ Cx : ℝ, 0 ≤ Cx ∧
@@ -1154,6 +1161,7 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs
     _ = Cx * g.inner x v v * g.inner x w w *
             riemannianFiberNormSq (I := I) (M := M) g r s x T := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     ∃ Cx : ℝ, 0 ≤ Cx ∧
@@ -1165,6 +1173,7 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le
   exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs
     (I := I) (M := M) g 0 s x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_riemannOp_tensorCovS_vw_factor_le
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M)
     (v w : TangentSpace I x) (T : TensorRSSpace 0 t I x) :

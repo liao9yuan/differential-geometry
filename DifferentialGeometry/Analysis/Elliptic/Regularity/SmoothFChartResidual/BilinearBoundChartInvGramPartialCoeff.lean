@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,6 +53,7 @@ private noncomputable def coefIJ_M
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
         (extChartAt I α x)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma coefIJ_M_apply (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
     coefIJ_M (I := I) (M := M) g α i j x =
@@ -63,6 +64,7 @@ private lemma coefIJ_M_apply (g : SmoothRiemannianMetric I M) (α : M)
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
           (extChartAt I α x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma coefIJ_M_eq_zero_off_tsupport_chartStrictCutoff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -72,6 +74,7 @@ private lemma coefIJ_M_eq_zero_off_tsupport_chartStrictCutoff
   rw [hx]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma coefIJ_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -171,6 +174,7 @@ private lemma coefIJ_M_smooth
         (fun _ : M => (0 : ℝ)) := h_ev_zero_coef
     exact h_const.congr_of_eventuallyEq h_evEq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tsupport_coefIJ_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -191,6 +195,7 @@ private lemma tsupport_coefIJ_M_subset
       (isClosed_tsupport _)
   exact h_tsupp_subset.trans (chartStrictCutoff_tsupport_subset (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPushedRaw_coefIJ_M_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}

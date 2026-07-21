@@ -38,6 +38,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem const_gram_joint
     (q : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
     ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => q) α S := by
@@ -50,6 +51,8 @@ private theorem const_gram_joint
     exact chartGramMatrix_det_pos (I := I) q α hx
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem christ_const_joint
     (q : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
@@ -103,6 +106,10 @@ private theorem covComp_joint
     hbase.comp contMDiffOn_fst (fun _p hp => hp.1)
   simpa only [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hcomp
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem conn_pair_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -149,6 +156,8 @@ private theorem conn_pair_joint
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [map_smul, smul_eq_mul, hφapply]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem connDiff_app_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -258,6 +267,8 @@ private theorem connDiff_app_joint
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

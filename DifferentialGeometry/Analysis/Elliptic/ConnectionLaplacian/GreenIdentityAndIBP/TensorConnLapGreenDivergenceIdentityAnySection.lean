@@ -36,7 +36,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open Tensor0SNabla TensorRSNabla TensorMetricLowering
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -60,10 +60,13 @@ def LoweringIntertwiner (g : SmoothRiemannianMetric I M) (s : ℕ) : Prop :=
           (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g) S x v))
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweringIntertwiner_two (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 2 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S x v
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun x : M => TensorRSSpace 0 3 I x)⟯)
@@ -123,6 +126,8 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     exact congrArg u (Fin.ext (by simp))
   rw [hsec]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma loweringIntertwiner_three (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 3 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_three (I := I) (M := M) g S x v
@@ -136,6 +141,7 @@ def covDerivAlongVFrawGen
     (fun y : M => B y) (fun y : M => T y)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma covDerivAlongVFrawGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -145,6 +151,7 @@ omit [CompactSpace M] [I.Boundaryless] in
         (fun y : M => T y) y (B y) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongVFrawGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -182,6 +189,7 @@ def covDerivAlongVFSectionGen
     (covDerivAlongVFrawGen_contMDiff (I := I) (M := M) g s T B)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma covDerivAlongVFSectionGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -191,6 +199,7 @@ omit [CompactSpace M] [I.Boundaryless] in
         (fun y : M => T y) y (B y) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongVFSectionGen_lowered_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -203,6 +212,7 @@ lemma covDerivAlongVFSectionGen_lowered_eq
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -216,6 +226,7 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
   exact covDerivAlongVFSectionGen_lowered_eq (I := I) (M := M) g s hint T B y
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongGen_covDerivAlongVFSectionGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -261,6 +272,7 @@ def dirichletFormGen
     rfl
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma dirichletFormGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M)
     (X : TangentSpace I b) :
@@ -275,6 +287,7 @@ def dirichletVFGen
   metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b)
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_dirichletVFGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M)
     (X : TangentSpace I b) :
@@ -284,6 +297,7 @@ lemma inner_dirichletVFGen
   exact inner_metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b) X
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma dirichletFormGen_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -336,6 +350,7 @@ private lemma dirichletFormGen_chartBasis_component_contMDiffOn
   rw [dirichletFormGen_apply]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma dirichletVFGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -353,11 +368,13 @@ def dirichletVFSectionGen
     (dirichletVFGen_contMDiff (I := I) (M := M) g s T v)
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma dirichletVFSectionGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     dirichletVFSectionGen (I := I) (M := M) g s T v b =
       dirichletVFGen (I := I) (M := M) g s T v b := rfl
 
+omit [CompactSpace M] in
 private lemma divergence_dirichletVFGen_summand_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -476,6 +493,7 @@ private lemma divergence_dirichletVFGen_summand_eq
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 s T v b =
@@ -541,6 +559,7 @@ private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
+omit [CompactSpace M] in
 lemma divergence_dirichletVFGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)

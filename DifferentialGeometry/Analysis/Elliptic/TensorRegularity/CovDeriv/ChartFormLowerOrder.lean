@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -90,6 +90,9 @@ lemma covLowerOrderIntegrand_def
                         covDerivLowerOrderTerm (I := I) (M := M)
                           g r s T α l Q.1 Q.2 y) := rfl
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_chart_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -115,6 +118,7 @@ theorem tensorCovDerivPointwiseInner_chart_eq
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -164,6 +168,7 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hz
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem euclidPartial_chartPushedRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -205,6 +210,8 @@ theorem euclidPartial_chartPushedRaw_contDiffOn
   rw [hu_def]
   rfl
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderIntegrand_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -365,6 +372,9 @@ theorem covLowerOrderIntegrand_contDiffOn
     ContDiffOn.sum (fun P _ => ContDiffOn.sum (fun Q _ => hsummand P Q))
   exact hsum
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderIntegrand_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -384,6 +394,7 @@ theorem covLowerOrderIntegrand_eqOn
   ring
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covLowerOrderIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

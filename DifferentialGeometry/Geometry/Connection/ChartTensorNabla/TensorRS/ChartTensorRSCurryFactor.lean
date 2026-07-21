@@ -18,7 +18,7 @@ namespace Connection
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   {H : Type*} [TopologicalSpace H]
   {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,7 +30,7 @@ noncomputable def tensorPartialEval (r s : ℕ)
     Π b : M, Tensor0SSpace s I b :=
   fun b => (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) (w b)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma tensorPartialEval_apply (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (w : Π b : M, Tensor0SSpace r I b) (b : M) :
@@ -41,7 +41,7 @@ noncomputable def tensorRSEvalAtCLM (r s : ℕ) (D_α : Tensor0SModel r ℝ E) :
     TensorRSModel r s ℝ E →L[ℝ] Tensor0SModel s ℝ E :=
   ContinuousLinearMap.apply ℝ (Tensor0SModel s ℝ E) D_α
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+omit [CompleteSpace E] in
 @[simp] lemma tensorRSEvalAtCLM_apply (r s : ℕ) (D_α : Tensor0SModel r ℝ E)
     (D : TensorRSModel r s ℝ E) :
     tensorRSEvalAtCLM (E := E) r s D_α D = D D_α := by
@@ -49,7 +49,7 @@ omit [InnerProductSpace ℝ E] [CompleteSpace E] in
   unfold tensorRSEvalAtCLM
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -94,7 +94,7 @@ theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
           : Tensor0SModel r ℝ E →L[ℝ] Tensor0SSpace r I b))) D = _
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (D : TensorRSModel r s ℝ E) (α_input : Tensor0SSpace r I b) :
@@ -140,7 +140,7 @@ theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
   rw [hHomSymm]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (_hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -174,7 +174,7 @@ theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
   rw [hPE_at_b']
   rw [tensorRSChartE_section_repr_apply_model (I := I) r s α T (b := b') hb' D_α]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorPartialEval_chartPullback_eventually_eq_evalAt_chartPullback
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (α_input : Tensor0SSpace r I b)
@@ -210,7 +210,7 @@ theorem tensorPartialEval_chartPullback_eventually_eq_evalAt_chartPullback
   exact tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     (I := I) r s α T (b := b) hb_base α_input (b' := φ.symm y) hyBase
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (α_input : Tensor0SSpace r I b)
@@ -244,7 +244,7 @@ theorem fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
     (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)

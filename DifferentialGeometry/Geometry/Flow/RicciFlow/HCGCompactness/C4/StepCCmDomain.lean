@@ -30,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -90,7 +90,7 @@ section RootExtension
 
 variable {P₀ : Type*} [TopologicalSpace P₀] [T2Space P₀]
 
-omit [NormedSpace Real E] [InnerProductSpace Real E] [FiniteDimensional Real E]
+omit [NormedSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
 
 
@@ -515,6 +515,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [ConnectedSpace M] in
 theorem existsCmExtensionB
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -560,6 +561,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [ConnectedSpace M] in
 theorem existsCmExtension
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -662,6 +664,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmExtB_contDiffOn
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -718,6 +722,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [T3Space M] in
+omit [ConnectedSpace M] in
 theorem cmExt_contDiffOn
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -784,7 +790,7 @@ open DifferentialGeometry.Integral.Connection
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -842,7 +848,11 @@ theorem centerReadoutB_min
       let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
       (∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
         ENNReal.ofReal (ρ / 2)) →
-      let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+      let B : DiagInvBranch (I := I) (X.obj k).metric
+          (normal_enorm (I := I) (X.obj k)) x :=
+        IsNormalDiag.toBranch (I := I) (Y := X.obj k)
+          (hcomplete := hcomplete) (hconn := hconn) (x := x)
+          (q := q) (δ := δ) (e := e) (hq := hq) (h := he)
       chartCmEqnB (I := I) (X.obj k).metric
         (normal_enorm (I := I) (X.obj k)) x B
         (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)

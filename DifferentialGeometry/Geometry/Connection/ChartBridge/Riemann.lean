@@ -14,7 +14,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -240,7 +240,7 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     exact mul_smul _ _ _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRiemannLin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannLin (I := I) g x v w u =
@@ -280,13 +280,13 @@ def chartRiemannCLM (g : SmoothRiemannianMetric I M) (x : M) :
         rw [map_smul]; rfl }
   LinearMap.toContinuousLinearMap outer
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem chartRiemannCLM_apply_eq_chartRiemannLin
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u = chartRiemannLin (I := I) g x v w u := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u =
@@ -301,13 +301,13 @@ theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
                 ((chartModelBasis E) l : TangentSpace I x) :=
   chartRiemannLin_apply (I := I) g x v w u
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma repr_basis_eq_kron (a b' : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr ((chartModelBasis E) a)) b' =
       (if a = b' then (1 : ℝ) else 0) :=
   Module.Basis.repr_self_apply _ _ _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
@@ -365,7 +365,7 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     simp [hii']
   · intro hi; exact absurd (Finset.mem_univ _) hi
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr
@@ -389,6 +389,7 @@ theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
   · intro hl; exact absurd (Finset.mem_univ _) hl
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u = - chartRiemannCLM (I := I) g x w v u := by
@@ -528,6 +529,7 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
   abel
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
@@ -540,6 +542,7 @@ theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : 
     ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannCLM_diag (g : SmoothRiemannianMetric I M) (x : M)
     (v u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v v u = 0 := by
@@ -555,6 +558,8 @@ theorem chartRiemannCLM_diag (g : SmoothRiemannianMetric I M) (x : M)
   have htwo : (2 : ℝ) ≠ 0 := by norm_num
   exact (smul_eq_zero.mp h_smul_zero).resolve_left htwo
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannOp_chartBasis_via_riemannSec (g : SmoothRiemannianMetric I M) (x : M)
     {X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
     (hX : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i)))
@@ -569,6 +574,8 @@ theorem riemannOp_chartBasis_via_riemannSec (g : SmoothRiemannianMetric I M) (x 
       show ((chartModelBasis E) i : TangentSpace I x) = X i x from (hXx i).symm]
   exact riemannOp_apply_smooth (cov := LeviCivita (I := I) g) (hX j) (hX k) (hX i)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem riemannSec_chartBasis_swap (g : SmoothRiemannianMetric I M) (x : M)
     (X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -576,11 +583,15 @@ theorem riemannSec_chartBasis_swap (g : SmoothRiemannianMetric I M) (x : M)
       - riemannSec (LeviCivita (I := I) g) (X k) (X j) (X i) x :=
   riemannSec_swap (cov := LeviCivita (I := I) g) (X j) (X k) (X i) x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem riemannSec_chartBasis_diag (g : SmoothRiemannianMetric I M) (x : M)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, TangentSpace I b) :
     riemannSec (LeviCivita (I := I) g) X X Z x = 0 :=
   riemannSec_self_eq_zero (cov := LeviCivita (I := I) g) X Z x
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannOp_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     riemannOp (cov := LeviCivita (I := I) g) x

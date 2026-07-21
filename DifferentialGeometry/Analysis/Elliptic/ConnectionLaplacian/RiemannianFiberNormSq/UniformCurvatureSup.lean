@@ -45,6 +45,7 @@ def curvatureContraction
 
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma curvatureContraction_toSection_eq_riemannSec
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)
@@ -56,6 +57,7 @@ omit [I.Boundaryless] in
 
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem curvatureContraction_toSection_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)
@@ -69,6 +71,7 @@ theorem curvatureContraction_toSection_apply
     Z.toSection.contMDiff
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_uniform_riemannianFiberNormSq_riemannOp_bound
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)
@@ -95,6 +98,7 @@ def covGradCurvatureContraction
   covGrad g 0 s (curvatureContraction (I := I) (M := M) g s Z hX hY)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGradCurvatureContraction_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)
@@ -105,6 +109,7 @@ lemma covGradCurvatureContraction_toSection
       (covGrad g 0 s (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)

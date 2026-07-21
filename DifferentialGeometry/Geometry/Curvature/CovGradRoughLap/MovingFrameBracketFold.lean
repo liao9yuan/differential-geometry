@@ -43,6 +43,7 @@ theorem movingFrameRemainderSection_eq_sub_add
   rw [movingFrameRemainderSection]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem frameSummed_bracketIntegral_empty_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (V : Fin 0 → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

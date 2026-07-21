@@ -114,6 +114,7 @@ theorem normalTrans_mapsTo
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem NormalOverlapOn.decode
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
     {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
@@ -140,6 +141,7 @@ theorem NormalOverlapOn.decode
 
 
 
+omit [NeZero (Module.finrank Real E)] in
 theorem NormalOverlapOn.cancel
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
     {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)

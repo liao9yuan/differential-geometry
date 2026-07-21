@@ -19,7 +19,7 @@ namespace Analysis
 namespace Laplacian
 namespace TwiceDerivedChartBilinearH1ComplData
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -196,6 +196,7 @@ private lemma integral_u_mixed_partial_swap_aux
   refine setIntegral_congr_fun hΩ_open.measurableSet (fun y _hy => ?_)
   rw [mixed_smooth_classical_partial_swap_aux (ψ := ψ) hψ_smooth i j y]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integral_chosenSecond_mul_swap_aux
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -276,6 +277,7 @@ private lemma chosenSecond_locallyIntegrableOn_of_memWkp_two
   apply Filter.mem_of_superset (Metric.ball_mem_nhds x (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_swap_ae_of_memWkp_two
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -574,6 +576,7 @@ theorem chosenWeakPartial_chosenSecondPartialChartPushedU_eq_chosenThirdMixedPar
           (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁) Ω :=
         h_congr
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulledWeighted_le_volume_on_compact
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)

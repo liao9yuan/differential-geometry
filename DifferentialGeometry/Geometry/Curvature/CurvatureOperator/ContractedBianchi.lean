@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 section NablaRicci
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -30,6 +30,8 @@ def nablaRicci (g : SmoothRiemannianMetric I M)
     - ricciTensor (I := I) g x ((LeviCivita (I := I) g).toFun V x (X x)) (W x)
     - ricciTensor (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma nablaRicci_def (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) :
     nablaRicci (I := I) g X V W x =
@@ -42,11 +44,12 @@ end NablaRicci
 section FrameExpansion
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem orthonormal_frame_vector_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -67,7 +70,7 @@ end FrameExpansion
 section ScalarCurv
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -77,6 +80,7 @@ def scalarCurv (g : SmoothRiemannianMetric I M) (x : M) : ℝ :=
     ricciTensor (I := I) g x (smoothOrthoFrame (I := I) g x i x)
       (smoothOrthoFrame (I := I) g x i x)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem symm_bilin_orthonormal_trace_invariant
     (g : SmoothRiemannianMetric I M) (x : M)
     (T : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -142,6 +146,7 @@ theorem symm_bilin_orthonormal_trace_invariant
   · intro l _ hlk
     rw [hB k l, if_neg (fun h => hlk h.symm)]; ring
 
+omit [SigmaCompactSpace M] in
 theorem scalarCurv_eq_orthonormal_trace
     (g : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -158,6 +163,7 @@ theorem scalarCurv_eq_orthonormal_trace
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricScalar_eq_scal
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricScalarAt (I := I) g x = scalarCurv (I := I) g x := by
@@ -216,12 +222,12 @@ end ScalarCurv
 section TraceBridge
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
 private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ) {x : M}
@@ -237,7 +243,7 @@ private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M �
       have hsum : MDifferentiableAt I 𝓘(ℝ) (t.sum f) x := ih hft
       simpa [Finset.sum_insert, hit] using hfi.add hsum
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
 private lemma extDerivFun_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ)
@@ -262,6 +268,7 @@ private lemma extDerivFun_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι →
         simpa [Pi.add_apply] using hadd
       rw [hstep, ih hft, Finset.sum_insert hit]
 
+omit [SigmaCompactSpace M] in
 theorem orthonormal_frame_correction_sum_eq_zero
     (g : SmoothRiemannianMetric I M)
     {X V W : Π b : M, TangentSpace I b} {x : M} :
@@ -348,6 +355,7 @@ theorem orthonormal_frame_correction_sum_eq_zero
   rw [hcancel]
   ring
 
+omit [SigmaCompactSpace M] in
 theorem nablaRicci_eq_frame_trace_nablaCurvSec
     (g : SmoothRiemannianMetric I M)
     {X V W : Π b : M, TangentSpace I b} {x : M}
@@ -480,7 +488,7 @@ end TraceBridge
 section NablaScalar
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -489,11 +497,14 @@ def nablaScalar (g : SmoothRiemannianMetric I M)
     (X : Π b : M, TangentSpace I b) (x : M) : ℝ :=
   extDerivFun (I := I) (scalarCurv (I := I) g) x (X x)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma nablaScalar_def (g : SmoothRiemannianMetric I M)
     (X : Π b : M, TangentSpace I b) (x : M) :
     nablaScalar (I := I) g X x =
       extDerivFun (I := I) (scalarCurv (I := I) g) x (X x) := rfl
 
+omit [SigmaCompactSpace M] in
 theorem ricci_orthonormal_frame_correction_eq_zero
     (g : SmoothRiemannianMetric I M)
     {X : Π b : M, TangentSpace I b} {x : M} :
@@ -550,6 +561,7 @@ theorem ricci_orthonormal_frame_correction_eq_zero
     ring
   linarith [hzero]
 
+omit [SigmaCompactSpace M] in
 theorem nablaScalar_eq_frame_trace_nablaRicci
     (g : SmoothRiemannianMetric I M)
     {X : Π b : M, TangentSpace I b} {x : M} :
@@ -618,11 +630,13 @@ end NablaScalar
 section NablaCurvSymmetries
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaCurvSec_swap23
     (g : SmoothRiemannianMetric I M)
     {X Y Z W : Π b : M, TangentSpace I b} {x : M}
@@ -649,6 +663,8 @@ theorem nablaCurvSec_swap23
       riemannSec_swap cov Z Y (covApply cov X W) x]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaCurvSec_metric_skew45
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -755,6 +771,8 @@ theorem nablaCurvSec_metric_skew45
       show ((LeviCivita (I := I) g).toFun W x) (X x) = covApply cov X W x from rfl] at hmf0
   linarith [hmf0, p1, p2, p3, p4]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaCurvSec_inner_pair_symm
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -890,6 +908,8 @@ theorem nablaCurvSec_inner_pair_symm
   rw [q1, q2, q3, q4, r1, r2, r3, r5] at hmf0
   linarith [hmf0]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaCurvSec_bianchi_paired
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -913,11 +933,12 @@ end NablaCurvSymmetries
 section ContractedBianchi
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [SigmaCompactSpace M] in
 theorem contracted_second_bianchi
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b} {x : M}

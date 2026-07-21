@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -117,6 +117,7 @@ private lemma abs_prod_sub_lip
       (mul_le_mul ha₂ hb (abs_nonneg _) hA_nn)
     _ = (Cₐ * B + A * Cb) * J := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma invD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -127,6 +128,7 @@ private lemma invD_diffAt
     ((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset) m
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inv_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -135,6 +137,7 @@ private lemma inv_diffAt
   have h := (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramD1_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -145,6 +148,7 @@ private lemma gramD1_diffAt
     ((chartGramOnE_contDiffOn (I := I) g α a b).mono interior_subset) m
   exact (h.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma gramD2_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -157,6 +161,7 @@ private lemma gramD2_diffAt
   have h2 := partialDeriv_contDiffOn_of_isOpen isOpen_interior h1 d
   exact (h2.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bracket_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -166,6 +171,7 @@ private lemma bracket_diffAt
     (gramD1_diffAt (I := I) g α j l i hy)).sub
       (gramD1_diffAt (I := I) g α l i j hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bracketD_diffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (m i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -176,6 +182,7 @@ private lemma bracketD_diffAt
       (gramD2_diffAt (I := I) g α m l i j hy)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partial_gramBracketD
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m i j l : Fin (Module.finrank ℝ E)) {y : E}
@@ -202,6 +209,7 @@ lemma partial_gramBracketD
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partial2_christ_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (d m i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -276,6 +284,7 @@ theorem partial2_christ_eq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -487,6 +496,7 @@ theorem christD2_sub_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -555,6 +565,7 @@ theorem christD2_abs_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_bnd
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -661,6 +672,7 @@ theorem christD2_pou_bnd
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_lip
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

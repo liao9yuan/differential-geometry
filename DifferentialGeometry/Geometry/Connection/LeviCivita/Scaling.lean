@@ -4,7 +4,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,6 +28,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem mfderiv_const_smul_ne
     {f : M -> Real} {x : M} {c : Real} (hc : c ≠ 0) :
     mfderiv I 𝓘(Real, Real) (c • f) x =
@@ -49,6 +49,7 @@ private theorem mfderiv_const_smul_ne
     rw [smul_zero]
     rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem directionalDeriv_const_mul_ne
     (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M)
     {c : Real} (hc : c ≠ 0) :
@@ -62,6 +63,7 @@ private theorem directionalDeriv_const_mul_ne
   rw [mfderiv_const_smul_ne (I := I) (f := f) (x := x) hc]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M) :
@@ -94,6 +96,7 @@ private theorem koszulScalar_scaleMetric
   rw [hYZ, hZX, hXY]
   ring
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulCovectorField_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M) :
@@ -118,6 +121,7 @@ private theorem koszulCovectorField_scaleMetric
   simp [koszulScalar_scaleMetric (I := I) c hc g, smul_eq_mul]
   ring
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metricSharp_scaleMetric_smul
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M)
     (alpha : Module.Dual Real (TangentSpace I x)) :
@@ -145,6 +149,7 @@ private theorem metricSharp_scaleMetric_smul
     _ = g.inner x (metricSharp (I := I) g x alpha) w :=
         (inner_metricSharp (I := I) g x alpha w).symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M) :
@@ -155,6 +160,7 @@ private theorem koszulNablaField_scaleMetric
   exact metricSharp_scaleMetric_smul (I := I) c hc g x
     (koszulCovectorField (I := I) g X Y x)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem leviCivitaConnectionCandidateAt_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M) :
@@ -181,6 +187,7 @@ private theorem leviCivitaConnectionCandidateAt_scaleMetric
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcConn_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) :
     leviCivitaConnectionOfMetric (I := I) (scaleMetric (I := I) c hc g) =

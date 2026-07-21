@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_memWkp_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -84,6 +85,7 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -110,6 +112,7 @@ private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -204,6 +207,7 @@ theorem eigenvectorChartRHSDiff_memWkp
           g r s i α P₀ m (Fin.init l))
         (l (Fin.last m)) h_comp h_prev_memWkp_succ h_prev_ae_zero
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

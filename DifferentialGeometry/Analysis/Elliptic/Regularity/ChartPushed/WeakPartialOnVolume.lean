@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace ChartPushedWeakPartialOnVolume
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -47,6 +47,7 @@ private noncomputable def extChartAtSymmExt (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -56,6 +57,7 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -66,6 +68,7 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_density_inf_pos_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -86,6 +89,7 @@ private lemma exists_density_inf_pos_on_compact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -132,6 +136,7 @@ private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
           ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y)
             ∂(volume : Measure EuclN) := by gcongr
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -200,6 +205,7 @@ theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
   unfold chartPushedPartialLp
   exact MeasureTheory.MemLp.coeFn_toLp _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma memLp_of_chartPulledWeighted_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -218,6 +224,7 @@ private lemma memLp_of_chartPulledWeighted_on_compact
   refine lt_of_le_of_lt (hC_bd f) ?_
   exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hf_memLp.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedWeakPartialLp_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -266,6 +273,7 @@ private lemma exists_smoothApprox_seq
   rw [h_eq]
   exact hxs_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} {v : ℕ → SmoothScalar g}
@@ -669,6 +677,7 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
   unfold smoothChartExtPartial
   exact h_identity
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

@@ -19,7 +19,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -116,6 +116,7 @@ def rhsBracket : EuclN → ℝ :=
       rhsTerm7 (I := I) (M := M) g r s i α P₀
 
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHS_eq_smul_bracket :
     eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
       = fun y => (i.fst.val)⁻¹ *
@@ -134,6 +135,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
+omit [CompleteSpace E] in
 lemma rhsTerm1_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -143,6 +145,7 @@ lemma rhsTerm1_memWkp
   exact eigenvectorChartRHS_summand1_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm2_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -152,6 +155,7 @@ lemma rhsTerm2_memWkp
   exact eigenvectorChartRHS_summand2_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm3_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -161,6 +165,7 @@ lemma rhsTerm3_memWkp
   exact eigenvectorChartRHS_summand3_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm4_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -170,6 +175,7 @@ lemma rhsTerm4_memWkp
   exact eigenvectorChartRHS_summand4_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm5_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -179,6 +185,7 @@ lemma rhsTerm5_memWkp
   exact eigenvectorChartRHS_summand5_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm6_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -188,6 +195,7 @@ lemma rhsTerm6_memWkp
   exact eigenvectorChartRHS_summand6_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
+omit [CompleteSpace E] in
 lemma rhsTerm7_memWkp
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -288,30 +296,35 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 
+omit [CompleteSpace E] in
 lemma aggrUchart_le :
     aggrUchart (I := I) (M := M) g r s i α P₀ K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).1
 
 
+omit [CompleteSpace E] in
 lemma aggrCrossLeft_le :
     aggrCrossLeft (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.1
 
 
+omit [CompleteSpace E] in
 lemma aggrCrossRight_le :
     aggrCrossRight (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.1
 
 
+omit [CompleteSpace E] in
 lemma aggrPartial_le :
     aggrPartial (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.1
 
 
+omit [CompleteSpace E] in
 lemma aggrComponent_le :
     aggrComponent (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
@@ -319,6 +332,7 @@ lemma aggrComponent_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.1
 
 
+omit [CompleteSpace E] in
 lemma aggrCrossRightLimit_le :
     aggrCrossRightLimit (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
@@ -326,12 +340,14 @@ lemma aggrCrossRightLimit_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.1
 
 
+omit [CompleteSpace E] in
 lemma aggrCutoffPartial_le :
     aggrCutoffPartial (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.2
 
+omit [CompleteSpace E] in
 lemma crossRightGradCoeffDivLimit_memWkp_local
     (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2

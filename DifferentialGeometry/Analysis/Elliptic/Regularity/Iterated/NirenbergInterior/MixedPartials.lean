@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedMixedPartials
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -115,6 +115,7 @@ theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
   rw [h_last_1, h_inner_last]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -187,6 +188,7 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -219,6 +221,7 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
       (I := I) (M := M) g α u_h m 0 h_parent' idx
   exact h_memWkp_0
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -253,6 +256,7 @@ theorem chosenMthMixedPartialChartPushedU_memW1p_two
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_memWkp_1
   exact h_memWkp_1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

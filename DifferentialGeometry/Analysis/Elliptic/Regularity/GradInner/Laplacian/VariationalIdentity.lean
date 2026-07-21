@@ -11,7 +11,7 @@ namespace Analysis
 namespace Laplacian
 namespace GradInnerLaplacianFinal
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -120,6 +120,7 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate
     (gradInnerCLM_smoothCase_eq_resolventL2_candidate
       (I := I) (M := M) g φ v h_identify)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -128,6 +129,7 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   gradInnerCLM_mem_image_laplacianDomain_smooth (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -136,6 +138,7 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditiona
   smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -148,6 +151,7 @@ theorem mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two
   rw [← smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -160,6 +164,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
   gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     (I := I) (M := M) g φ hu_h h_sM
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

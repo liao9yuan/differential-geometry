@@ -84,7 +84,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -92,6 +92,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramOnE_diffAt_interior
     (g : SmoothRiemannianMetric I M) (α : M) (l b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -103,6 +104,7 @@ private lemma chartGramOnE_diffAt_interior
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_contDiffOn_interior
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -119,6 +121,7 @@ private lemma partialDeriv_contDiffOn_interior
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_chartGramOnE_diffAt_interior
     (g : SmoothRiemannianMetric I M) (α : M) (a l b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -150,6 +153,7 @@ def reprDiffChartCompOnE (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartGramOnE_realizeMetricAt_sub_funext
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -164,6 +168,7 @@ theorem chartGramOnE_realizeMetricAt_sub_funext
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiffComp
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -180,6 +185,7 @@ theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiffComp
 
 
 
+omit [BoundarylessManifold I M] in
 theorem partialDeriv_chartGramOnE_realizeMetricAt_sub_eq
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -201,6 +207,7 @@ theorem partialDeriv_chartGramOnE_realizeMetricAt_sub_eq
 
 
 
+omit [BoundarylessManifold I M] in
 theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -271,6 +278,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace in
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedCovGradJetSum_nonneg (g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g_bg 0 2) (x : M) :
     0 ≤ iteratedCovGradJetSum (I := I) g_bg S x := by
@@ -294,6 +303,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 
 
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGradJetSum_le_toHs (g_bg : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :
     ∃ C : ℝ, 0 < C ∧ ∀ (S : SmoothCcTensor g_bg 0 2) (x : M),
@@ -305,7 +315,6 @@ theorem iteratedCovGradJetSum_le_toHs (g_bg : SmoothRiemannianMetric I M) (k : �
   rw [iteratedCovGradJetSum]
   exact hC S x
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -327,6 +336,7 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
@@ -442,7 +452,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
         gcongr
     _ = C₀ * Ncard * R := by rw [hNcard_def]; ring
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -458,6 +467,7 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}

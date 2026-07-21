@@ -196,6 +196,7 @@ private noncomputable def tensorPouSobolevNormSqAgg
                   ((toEuclidean (E := E)).symm y)‖ ^ 2)
           ∂(volume : Measure EuclN)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorPouSobolevNorm_one_sq_eq_agg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -979,6 +980,7 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     _ ≤ K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := h_step3
     _ = K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma pouWeightedSummand_aemeasurable_on_chartTarget
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M)

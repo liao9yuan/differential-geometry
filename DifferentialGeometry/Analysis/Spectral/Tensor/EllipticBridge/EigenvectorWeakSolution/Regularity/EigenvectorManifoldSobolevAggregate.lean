@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,7 @@ private noncomputable def perChartCompConstant
     (eigenvector_chartComponent_wkpNorm_arbitrary (I := I) (M := M)
       g r s (2 * k) α (Idx, Jdx))
 
+omit [CompleteSpace E] in
 private lemma perChartCompConstant_nonneg
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -59,6 +60,7 @@ private lemma perChartCompConstant_nonneg
     (eigenvector_chartComponent_wkpNorm_arbitrary (I := I) (M := M)
       g r s (2 * k) α (Idx, Jdx))).1
 
+omit [CompleteSpace E] in
 private lemma perChartCompConstant_bound
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -87,6 +89,7 @@ private noncomputable def aggregateConstant : ℝ :=
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         perChartCompConstant (I := I) (M := M) g r s k α Idx Jdx
 
+omit [CompleteSpace E] in
 private lemma aggregateConstant_nonneg :
     0 ≤ aggregateConstant (I := I) (M := M) g r s k := by
   classical
@@ -101,6 +104,7 @@ end EigenvectorManifoldAggregateUnconditional
 
 open EigenvectorManifoldAggregateUnconditional
 
+omit [CompleteSpace E] in
 private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M)
@@ -146,6 +150,7 @@ private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
   exact perChartCompConstant_bound
     (I := I) (M := M) g r s k α Idx Jdx i
 
+omit [CompleteSpace E] in
 private lemma chartTerm_eigenvectorSmooth_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M)
@@ -239,6 +244,7 @@ private lemma chartTerm_eigenvectorSmooth_le
     rw [Finset.sum_mul]
   rw [h_eq]
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmooth_wtwokTwoNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) :

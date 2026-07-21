@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -30,8 +29,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -126,6 +125,7 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (γ' := fun s : ℝ => (F s).proj) (t₀ := t)
     (hF_proj t ht_J).symm hEvEq hgeoEqF
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem radial_maximalGeodesic_cont_and_foot_in_source_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -294,6 +294,7 @@ lemma mem_expDomain_of_norm_lt_radius
     exact hx0 (hinj hsrc h0src (by rw [hΦx, hΦ0]))
 
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ c : ℝ, 0 < c ∧
       (∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x) ∧
@@ -362,14 +363,17 @@ private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
 def gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   Classical.choose (gp_coercive (I := I) g p)
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma gpCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < gpCoerciveConst (I := I) g p :=
   (Classical.choose_spec (gp_coercive (I := I) g p)).1
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma gpCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
   (Classical.choose_spec (gp_coercive (I := I) g p)).2.1 x
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma le_gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ}
     (hc : ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x) :
     c ≤ gpCoerciveConst (I := I) g p :=
@@ -387,10 +391,12 @@ lemma expRadiusGp_pos (g : SmoothRiemannianMetric I M) (p : M) :
 abbrev metricCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   gpCoerciveConst (I := I) g p
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma metricCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < metricCoerciveConst (I := I) g p :=
   gpCoerciveConst_pos (I := I) g p
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma metricCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
   gpCoerciveConst_le (I := I) g p x
@@ -429,6 +435,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompleteSpace E] in
 lemma gauss_t2Space_base (I : ModelWithCorners ℝ E H) [ChartedSpace H M]
     [IsManifold I ∞ M] [T2Space (TangentBundle I M)] : T2Space M := by
   have hproj : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
@@ -444,6 +451,7 @@ private def gaussVariation (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     ℝ → ℝ → M :=
   fun s t => expMap (I := I) g p (show TangentSpace I p from (t • (v + s • w)))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     (γ : ℝ → M) (t₀ : ℝ) (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀) :
     DifferentiableAt ℝ
@@ -472,6 +480,7 @@ private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma speedSq_hasDerivAt_zero_of_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t₀ : ℝ)
     (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀)
@@ -651,6 +660,7 @@ lemma radialSpeedSq_eq_inner
     exact tendsto_nhds_unique h1 h2
   rw [← h0val, hval0]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma variationFieldChartRep_differentiableAt_of_contDiffAt2
     (f : ℝ → ℝ → M) (t₀ : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (f 0 t₀) (f q.1 q.2)) (0, t₀))
@@ -695,6 +705,7 @@ private lemma variationFieldChartRep_differentiableAt_of_contDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma longitVelChartRep_differentiableAt_of_contDiffAt2
     (f : ℝ → ℝ → M) (t₀ : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (f 0 t₀) (f q.1 q.2)) (0, t₀))
@@ -734,6 +745,7 @@ private lemma longitVelChartRep_differentiableAt_of_contDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma launchSpeedSq_s_hasDerivAt
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     HasDerivAt (fun s : ℝ => g.inner p (v + s • w) (v + s • w))
@@ -1359,6 +1371,7 @@ section RadialLengthEngine
 
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem expMap_normalChartAt (g : SmoothRiemannianMetric I M) (p : M) {x : M}
     (hx : x ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
     (expMap (I := I) g p
@@ -1519,6 +1532,7 @@ theorem radial_chain_mfderiv
     mfderiv_comp t hexp_diff hψ_diff]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem radialDist_hasDerivAt
     (B : E →L[ℝ] E →L[ℝ] ℝ) (hBsym : ∀ a b : E, B a b = B b a)
     (ψ : ℝ → E) (ψ' : E) {t : ℝ}

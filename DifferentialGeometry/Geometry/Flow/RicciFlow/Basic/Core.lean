@@ -18,7 +18,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -48,7 +47,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
 
 
@@ -73,6 +72,7 @@ def toTensorField (Ric : RicciAtFamily (I := I) (M := M)) :
     DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (DifferentialGeometry.Integral.Connection.vec2 X Y)
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 @[simp] theorem toTensorField_apply
     (Ric : RicciAtFamily (I := I) (M := M))
     (t : Real) (x : M) (X Y : TangentSpace I x) :
@@ -90,6 +90,7 @@ def toTensorField (Ric : RicciSectionFamily (I := I) (M := M)) :
     DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (DifferentialGeometry.Integral.Connection.vec2 X Y)
 
+omit [IsManifold I 1 M] in
 @[simp] theorem toTensorField_apply
     (Ric : RicciSectionFamily (I := I) (M := M))
     (t : Real) (x : M) (X Y : TangentSpace I x) :
@@ -107,6 +108,7 @@ abbrev metricCov (g : SmoothRiemannianMetric I M) :
   DifferentialGeometry.Integral.Connection.metricCov (I := I) (M := M) g
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (I := I) (E := E) (M := M) (metricCov (I := I) (M := M) g) ∞ :=
@@ -146,18 +148,21 @@ abbrev metricRicci (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.Tensor02Section (I := I) (M := M) :=
   DifferentialGeometry.Integral.Connection.metricRicci (I := I) (M := M) g
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRm04_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm04 (I := I) (M := M) g x =
       metricRm04At (I := I) (M := M) g x :=
   DifferentialGeometry.Integral.Connection.metricRm04_apply (I := I) (M := M) g x
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRm13_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm13 (I := I) (M := M) g x =
       metricRm13At (I := I) (M := M) g x :=
   DifferentialGeometry.Integral.Connection.metricRm13_apply (I := I) (M := M) g x
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem metricRicci_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricRicci (I := I) (M := M) g x =
@@ -172,6 +177,7 @@ abbrev metricCurvData
   DifferentialGeometry.Integral.Connection.metricCurvData (I := I) (M := M) g
 
 
+omit [SigmaCompactSpace M] in
 theorem metricScalar_smooth
     (g : SmoothRiemannianMetric I M) :
     ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
@@ -179,6 +185,7 @@ theorem metricScalar_smooth
   DifferentialGeometry.Integral.Connection.metricScalar_smooth (I := I) (M := M) g
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCurvData_exists
     (g : SmoothRiemannianMetric I M) :
     Nonempty (DifferentialGeometry.Integral.Connection.CurvatureSectionProducerData (I := I)
@@ -203,6 +210,7 @@ def timeShift
     SolutionFamily (I := I) (M := M) where
   metric := fun s => G.metric (s + τ)
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_metric
     (G : SolutionFamily (I := I) (M := M)) (τ s : Real) :
     (G.timeShift τ).metric s = G.metric (s + τ) := by
@@ -264,12 +272,14 @@ noncomputable def ricci
     RicciSectionFamily (I := I) (M := M) :=
   fun t => metricRicci (I := I) (M := M) (G.metric t)
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricci_apply
     (G : SolutionFamily (I := I) (M := M))
     (t : Real) (x : M) :
     G.ricci t x = G.ricciAt t x := by
   simp [ricci, ricciAt]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem scalar_apply
     (G : SolutionFamily (I := I) (M := M))
     (t : Real) (x : M) :
@@ -305,11 +315,13 @@ def timeShift {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     SolutionOn (I := I) (M := M) (D.timeShift τ) where
   base := S.base.timeShift τ
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_base {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
     (S.timeShift τ).base = S.base.timeShift τ := by
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_base_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).base.metric s = S.base.metric (s + τ) := by
@@ -317,6 +329,7 @@ def timeShift {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatible {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.base.MetricCompatibleOn D := by
@@ -352,31 +365,37 @@ def scalar {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     Real -> M -> Real :=
   S.base.scalar
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem family_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.family.metric = S.base.metric := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem family_connection {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.family.connection = S.base.connection := by
   rfl
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem ricci_eq {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.ricci = S.base.ricci := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem ricciAt_eq {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.ricciAt = S.base.ricciAt := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem scalar_eq {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.scalar = S.base.scalar := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem scalar_eq_metricTrace {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
@@ -385,21 +404,25 @@ def scalar {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
         (S.ricciAt t x) := by
   simp [scalar, SolutionFamily.scalar_apply]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_family_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).family.metric s = S.family.metric (s + τ) := by
   rfl
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem timeShift_ricci {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).ricci s = S.ricci (s + τ) := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_ricciAt {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).ricciAt s = S.ricciAt (s + τ) := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_scalar {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).scalar s = S.scalar (s + τ) := by
@@ -407,12 +430,14 @@ def scalar {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem timeShift_initial_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
     (S.timeShift τ).family.metric ((D.timeShift τ).initial) =
       S.family.metric D.initial := by
   simp [DifferentialGeometry.Integral.Connection.RealTimeInterval.timeShift, sub_add_cancel]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeShift_self_initial_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     (S.timeShift D.initial).family.metric 0 = S.family.metric D.initial := by
@@ -425,6 +450,7 @@ def toRealizedCandidate {D : DifferentialGeometry.Integral.Connection.RealTimeIn
   family := S.family
   ricci := RicciAtFamily.toTensorField (I := I) S.ricciAt
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem toRealizedCandidate_family {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.toRealizedCandidate.family = S.family := by
@@ -545,6 +571,7 @@ structure IsSolutionOn
 namespace IsSolutionOn
 
 
+omit [SigmaCompactSpace M] in
 theorem leviCivita
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -575,6 +602,7 @@ namespace ScalarSTContOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem continuous_subtype
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -653,6 +681,7 @@ structure CanonicalScalarRegularOn
 namespace CanonicalScalarRegularOn
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem toScalarSTCont
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -690,6 +719,7 @@ structure CanonicalRicciRegularOn
 namespace CanonicalRicciRegularOn
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciTensorFamilyContinuousOnSet
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -700,6 +730,7 @@ theorem ricciTensorFamilyContinuousOnSet
 
 
 
+omit [SigmaCompactSpace M] in
 theorem rm04FamilyContinuousOnSet
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -714,6 +745,7 @@ namespace SolutionOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem scalar_continuousOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -733,6 +765,7 @@ end SolutionOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem isSolutionOn_timeShift
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -894,6 +927,7 @@ theorem isSolutionOn_timeShift
 
 
 
+omit [SigmaCompactSpace M] in
 theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -906,6 +940,7 @@ theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
       equation := hS.equation }
 
 
+omit [SigmaCompactSpace M] in
 theorem metric_derivWithin_eq_neg_two_ricci
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -923,6 +958,7 @@ theorem metric_derivWithin_eq_neg_two_ricci
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

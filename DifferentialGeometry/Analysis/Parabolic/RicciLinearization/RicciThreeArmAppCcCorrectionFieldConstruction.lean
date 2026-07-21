@@ -47,7 +47,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -56,6 +56,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
@@ -96,6 +97,7 @@ lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 theorem exists_Csob_sub_pointwise_jet3_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -165,6 +167,8 @@ theorem exists_Csob_sub_pointwise_jet3_le
         mul_le_mul_of_nonneg_left hMn_le hCc_pos.le
     _ = (Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2) * R := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciArmOrder1KoszulCoeff_appCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
     (x : M) (v : Fin 2 → TangentSpace I x) :

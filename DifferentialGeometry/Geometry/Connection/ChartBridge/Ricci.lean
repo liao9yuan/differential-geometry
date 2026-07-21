@@ -12,7 +12,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,6 +29,8 @@ def chartRiemannBasisIdentity (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
           ((chartModelBasis E) i))) l =
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x ↔
       ∀ i j k : Fin (Module.finrank ℝ E),
@@ -49,6 +51,8 @@ theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
     rw [h i j k]
     rw [chartRiemannCLM_repr_basis (I := I) g x i j k l]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -195,6 +199,8 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [hbasis i j k]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -275,6 +281,8 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
   refine Finset.sum_congr rfl fun t _ => ?_
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFun_eq_ricciTensor_swap_of_basis_identity
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)
@@ -286,6 +294,8 @@ theorem ricciFun_eq_ricciTensor_swap_of_basis_identity
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFun_eq_ricciTensor_of_basis_identity [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (h : chartRiemannBasisIdentity (I := I) g x)

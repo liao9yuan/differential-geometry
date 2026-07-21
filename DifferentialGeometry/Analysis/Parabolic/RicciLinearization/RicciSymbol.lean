@@ -14,7 +14,7 @@ namespace RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -22,7 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Output
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (v₁ + v₂) i =
@@ -30,7 +30,7 @@ private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
   rw [← Module.Basis.coord_apply, ← Module.Basis.coord_apply, ← Module.Basis.coord_apply,
     map_add]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_smul (a : ℝ) (v : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (a • v) i = a * (chartModelBasis E).repr v i := by
@@ -79,6 +79,7 @@ def ricciSymbolOutput (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
       ring) :
     E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma ricciSymbolOutput_apply_apply (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :
@@ -88,6 +89,7 @@ def ricciSymbolOutput (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           (chartModelBasis E).repr v i * (chartModelBasis E).repr w k *
             ricciSymbolComp (I := I) g x ξ t i k := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma ricciSymbolOutput_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     ricciSymbolOutput (I := I) g x ξ (t + t') =
@@ -101,6 +103,7 @@ lemma ricciSymbolOutput_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   rw [ricciSymbolComp_add]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma ricciSymbolOutput_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     ricciSymbolOutput (I := I) g x ξ (a • t) =
@@ -125,10 +128,12 @@ def ricciSymbol (g : SmoothRiemannianMetric I M) : TensorSymbol (E := E) I M :=
       map_smul' := fun a t => by
         simpa using ricciSymbolOutput_smul (I := I) g x ξ a t }
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma ricciSymbol_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     ricciSymbol (I := I) g x ξ t = ricciSymbolOutput (I := I) g x ξ t := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbol_apply_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -153,6 +158,7 @@ theorem ricciSymbol_apply_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbol_apply_eq_closedForm (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -168,6 +174,7 @@ theorem ricciSymbol_apply_eq_closedForm (g : SmoothRiemannianMetric I M) (x : M)
           (chartModelBasis E).repr ξ k * formMetricTrace (I := I) g x t) := by
   rw [ricciSymbol_apply_apply, ricciSymbolComp_eq_closedForm]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbol_apply_symm (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (v w : TangentSpace I x) :

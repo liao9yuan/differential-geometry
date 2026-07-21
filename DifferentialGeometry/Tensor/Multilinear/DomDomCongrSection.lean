@@ -22,7 +22,6 @@ import DifferentialGeometry.Tensor.Multilinear.Tensor
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set
 open scoped Manifold Topology Bundle ContDiff BigOperators

@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -95,6 +95,8 @@ private def deTurckRHSModelFun (g_bg g : SmoothRiemannianMetric I M) (x : M) :
     (bilinFormToModel (TangentSpace I x) (deTurckRicciRHS (I := I) g_bg g x))
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem deTurckRHSModelFun_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSModelFun (I := I) g_bg g x) v =
@@ -136,6 +138,8 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     rfl⟩
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem deTurckRHSField_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSField (I := I) g_bg g x) v =
@@ -152,11 +156,15 @@ def deTurckRHSSection (g_bg g : SmoothRiemannianMetric I M) :
   toSection := deTurckRHSMixedSection (I := I) g_bg g
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem deTurckRHSSection_toSection
     (g_bg g : SmoothRiemannianMetric I M) :
     (deTurckRHSSection (I := I) g_bg g).toSection =
       deTurckRHSMixedSection (I := I) g_bg g := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRHSSection_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel

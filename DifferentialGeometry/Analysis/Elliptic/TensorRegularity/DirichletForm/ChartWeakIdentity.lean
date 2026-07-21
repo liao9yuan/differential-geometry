@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_integral_chart_pull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -149,6 +151,8 @@ noncomputable def gramInvEntry
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   fun y => covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gramInvEntry_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Q P₀ : CompIdx E r s) :
@@ -156,6 +160,8 @@ lemma gramInvEntry_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRaw_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -221,6 +227,8 @@ lemma covPrincipalRotationRemainder_def
                       (gramInvEntry (I := I) (M := M) g r s α Q P₀) y *
                     chartPushedRaw I α χ y) := rfl
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covPrincipalRotationRemainder_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -322,6 +330,8 @@ theorem covPrincipalRotationRemainder_contDiffOn
     ContDiffOn.sum (fun P _ => ContDiffOn.sum (fun Q _ => hsummand P Q))
   exact hsum
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -376,6 +386,8 @@ lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
       (hopen.mem_nhds hy)
   exact euclidPartial_mul (E := E) l hGinv_diff hbump_diff
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covPrincipalIntegrand_rotated_collapse
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

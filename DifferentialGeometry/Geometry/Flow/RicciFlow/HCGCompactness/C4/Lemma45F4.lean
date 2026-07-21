@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodF
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -37,12 +36,12 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
-variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
@@ -55,6 +54,7 @@ noncomputable def lemma45CorConst (q₂ p : ℕ) : Real :=
     p q₂
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem corConst_nonneg (q₂ p : ℕ) : 0 ≤ lemma45CorConst (E := E) q₂ p := by
   apply lemma45Const_nonneg
   intro c
@@ -62,6 +62,8 @@ theorem corConst_nonneg (q₂ p : ℕ) : 0 ≤ lemma45CorConst (E := E) q₂ p :
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_corII_bound
     {q₂ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
@@ -170,6 +172,8 @@ theorem lemma45_corII_bound
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem lemma45_corII
     {q₂ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
@@ -201,6 +205,7 @@ theorem lemma45_corII
 
 
 
+omit [I.Boundaryless] in
 theorem lemma45_corII_unif (q₂ p : ℕ) :
     ∃ Cc : Real, 0 ≤ Cc ∧
       ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']

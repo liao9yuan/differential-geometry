@@ -33,12 +33,14 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem symmetricBilinearForm_of_tensorSymmetrization_eq_self (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x v w =
@@ -47,6 +49,8 @@ theorem symmetricBilinearForm_of_tensorSymmetrization_eq_self (g₀ : SmoothRiem
     ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem fiberwiseOperatorNormBound_of_tensorSymmetrization (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
@@ -56,12 +60,15 @@ theorem fiberwiseOperatorNormBound_of_tensorSymmetrization (g₀ : SmoothRiemann
   rw [symmetricBilinearForm_of_tensorSymmetrization_eq_self (I := I) (M := M) g₀ T x v w]
   exact hδ x v w
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem bilinearForm_of_tensorSymmetrization_symm (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x v w =
       smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x w v := by
   rw [ccTensorBilin_symmS, ccTensorBilin_symmS, ccTensorBilinSymm_symm]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 2)) (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 k (domDomCongrSection (I := I) g₀ σ T)‖ =
@@ -93,6 +100,7 @@ theorem norm_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I
   have hnnB : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := norm_nonneg _
   exact (sq_eq_sq₀ hnnA hnnB).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_tensorSymmetrization_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)‖ ≤

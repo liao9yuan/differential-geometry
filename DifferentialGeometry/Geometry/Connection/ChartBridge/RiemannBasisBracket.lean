@@ -151,6 +151,9 @@ theorem exists_smooth_chartBasisExtension (x : M) :
   refine ⟨fun i b => s' i b, fun i => (s' i).contMDiff, ?_⟩
   filter_upwards [hs'] with b hb i using hb i
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_chartBasisVec_neighborhood_formula
     (g : SmoothRiemannianMetric I M) (x : M)
     {X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -204,6 +207,9 @@ private lemma chartE_section_repr_chartBasisVec_baseSet
       chartBasisVecFiber_symmL_apply (I := I) x i b]
   exact trivToE_trivFromE (I := I) x hb ((chartModelBasis E) i)
 
+omit [InnerProductSpace ℝ E] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_covApply_firstLayer_pointwise
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -300,6 +306,9 @@ private lemma LeviCivita_covApply_firstLayer_pointwise
     rw [hrepr_basis k p, if_neg (fun h => hp h.symm)]; simp
   · exact absurd (Finset.mem_univ k) hk
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma chartE_section_repr_covApply_eventuallyEq
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -364,6 +373,7 @@ private lemma chartE_section_repr_covApply_eventuallyEq
   rw [hb_def, (extChartAt I x).right_inv hy_tgt]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_differentiableAt_self
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -383,6 +393,7 @@ private lemma chartChristoffel_differentiableAt_self
     (isOpen_interior.mem_nhds hxint)
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_christoffelSum_apply
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -406,6 +417,9 @@ private lemma fderiv_christoffelSum_apply
   rw [ContinuousLinearMap.smulRight_apply]
   rfl
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma LeviCivita_covApply_secondLayer
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -543,6 +557,9 @@ private lemma coord_sum_smul_basis
     (fun hl => absurd (Finset.mem_univ l) hl)]
   rw [Module.Basis.repr_self_apply, if_pos rfl, mul_one]
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x := by

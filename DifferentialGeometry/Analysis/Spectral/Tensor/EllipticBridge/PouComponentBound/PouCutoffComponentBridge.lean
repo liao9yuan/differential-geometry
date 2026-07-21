@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -276,6 +276,8 @@ private lemma tensorChartComponent_eq_chartPushedPouWeight_mul_cutoffComponentEu
   exact chartPushedRaw_pou_mul_eq_chartPushedPouWeight_mul (I := I) (M := M) α
     (cutoffComponentScalar (I := I) (M := M) g r s S α P₀.1 P₀.2) y
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponent_smooth_eq_boundedPouMul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -299,6 +301,8 @@ private lemma tensorL2ChartComponent_smooth_eq_boundedPouMul_cutoff
   exact (tensorChartComponent_eq_chartPushedPouWeight_mul_cutoffComponentEuclid
     (I := I) (M := M) g r s S α P₀ y).symm
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma continuous_boundedPouMul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -320,6 +324,8 @@ private lemma continuous_boundedPouMul_cutoff
   exact (boundedPouMulLpCLM (I := I) (M := M) α).continuous.comp
     (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀).continuous
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponent_eq_boundedPouMul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -352,6 +358,8 @@ private lemma tensorL2ChartComponent_eq_boundedPouMul_cutoff
   exact tensorL2ChartComponent_smooth_eq_boundedPouMul_cutoff
     (I := I) (M := M) g r s S α P₀
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -368,6 +376,7 @@ theorem tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
   exact boundedPouMulLpCLM_coeFn (I := I) (M := M) α
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀)
 
+omit [CompleteSpace E] in
 theorem tensorL2ChartComponent_ae_eq_pou_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :

@@ -24,12 +24,11 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -46,12 +45,15 @@ theorem compNormSqMulti_le_card {Idx : Type*} [Fintype Idx] {r : ℕ}
     _ = (Fintype.card (Fin r → Idx) : Real) * B ^ 2 := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 
 
 
 
-theorem normSq0S_le_card {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+theorem normSq0S_le_card
+    [Module.Finite ℝ E]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) {x : M} {s : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
@@ -61,7 +63,6 @@ theorem normSq0S_le_card {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [← compNormSqMulti_orthoBasis_eq_normSq0S (I := I) g basis horth A]
   exact compNormSqMulti_le_card (fun idx : Fin s → Idx => A (fun p => basis (idx p))) B hB
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -167,10 +168,14 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
     _ = (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) * Real.sqrt (w k) * Ssum := by
         ring
 
-set_option linter.unusedSectionVars false in
 
 
-theorem nablaKReactionAt_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem nablaKReactionAt_le
+    [Module.Finite ℝ E]
+    {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M)
@@ -214,7 +219,6 @@ theorem nablaKReactionAt_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
   refine le_of_eq (Finset.sum_congr rfl fun j _ => ?_)
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -222,7 +226,12 @@ set_option linter.unusedSectionVars false in
 
 
 
-theorem nablaKReaction_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
+theorem nablaKReaction_le
+    [Module.Finite ℝ E]
+    {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (basis : (x : M) → Module.Basis Idx Real (TangentSpace I x))
@@ -253,7 +262,6 @@ theorem nablaKReaction_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx
   exact nablaKReactionAt_le (I := I) S t x (basis x) (gInv t x) (ric t x)
     (Tdot t x) w horth hgInv hlevel hRic Cres hCres hresid
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -264,6 +272,7 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem towerHeatBoundOn_of_heatReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {w wLap : ℕ → Real → M → Real}

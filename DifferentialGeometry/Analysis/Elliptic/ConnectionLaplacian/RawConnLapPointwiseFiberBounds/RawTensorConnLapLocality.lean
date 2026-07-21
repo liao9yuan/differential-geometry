@@ -23,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] in
 theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -72,6 +73,7 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
   exact rawTensorConnLap_eq_zero_of_eventually_zero (I := I) g r s
     (T := T) (U := U) hU_open hbU hT_zero_U hT_diff_b hcov_diff_b
 
+omit [InnerProductSpace ℝ E] in
 theorem rawTensorConnLap_tsupport_subset [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

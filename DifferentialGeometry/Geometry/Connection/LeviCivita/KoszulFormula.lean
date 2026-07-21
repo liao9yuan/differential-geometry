@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -60,11 +59,13 @@ def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
   TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tangentConstAt_apply (x : M) (v : TangentSpace I x) (p : M) :
     tangentConstAt (I := I) x v p =
       TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p := by
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tangentConstAt_self (x : M) (v : TangentSpace I x) :
     tangentConstAt (I := I) x v x = v := by
   unfold tangentConstAt
@@ -80,6 +81,7 @@ def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
   rw [hL]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tangentConstAt_add (x : M) (v w : TangentSpace I x) :
     (tangentConstAt (I := I) x (v + w) : (p : M) -> TangentSpace I p) =
       (tangentConstAt (I := I) x v : (p : M) -> TangentSpace I p) +
@@ -87,12 +89,14 @@ def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_add (𝕜 := Real) (I := I) x v w
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tangentConstAt_smul (x : M) (a : Real) (v : TangentSpace I x) :
     (tangentConstAt (I := I) x (a • v) : (p : M) -> TangentSpace I p) =
       a • (tangentConstAt (I := I) x v : (p : M) -> TangentSpace I p) := by
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_smul (𝕜 := Real) (I := I) x a v
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_tangentConstAt_self
     (x : M) (v : TangentSpace I x) :
     MDiffAt (T% (tangentConstAt (I := I) x v : (p : M) -> TangentSpace I p)) x := by
@@ -103,6 +107,7 @@ theorem mdifferentiableAt_tangentConstAt_self
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mdifferentiableAt_metric_inner
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) -> TangentSpace I p} {x : M}
@@ -132,6 +137,7 @@ def directionalDerivAlong
     (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) : Real :=
   extDerivFun (I := I) f x (X x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem directionalDerivAlong_add_left
     (X X' : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) :
   directionalDerivAlong (I := I) (X + X') f x =
@@ -140,6 +146,7 @@ def directionalDerivAlong
   unfold directionalDerivAlong
   rw [Pi.add_apply, map_add]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem directionalDerivAlong_smul_left
     (a : Real) (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) :
   directionalDerivAlong (I := I) (a • X) f x =
@@ -148,6 +155,7 @@ def directionalDerivAlong
   rw [Pi.smul_apply, map_smul]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem directionalDerivAlong_add_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -174,6 +182,7 @@ def koszulScalar
     g.inner x (Y x) (VectorField.mlieBracket I Z X x) +
     g.inner x (Z x) (VectorField.mlieBracket I X Y x)
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_add_first
     (g : SmoothRiemannianMetric I M)
     (X X' Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -202,6 +211,7 @@ private theorem koszulScalar_add_first
   simp [Pi.add_apply, map_add, ContinuousLinearMap.add_apply]
   abel_nf
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_add_second
     (g : SmoothRiemannianMetric I M)
     (X Y Y' Z : (p : M) -> TangentSpace I p) (x : M)
@@ -232,6 +242,7 @@ private theorem koszulScalar_add_second
   simp [Pi.add_apply, map_add, ContinuousLinearMap.add_apply]
   abel_nf
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem extDerivFun_mul_at
     {f h : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -247,6 +258,7 @@ private theorem extDerivFun_mul_at
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem directionalDerivAlong_mul_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -257,6 +269,7 @@ private theorem directionalDerivAlong_mul_fun
   unfold directionalDerivAlong
   exact extDerivFun_mul_at (I := I) (v := X x) hf hh
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem directionalDerivAlong_smul_fun_left
     {f : M -> Real} (X : (p : M) -> TangentSpace I p) (h : M -> Real) (x : M) :
     directionalDerivAlong (I := I) (f • X) h x =
@@ -267,6 +280,7 @@ private theorem directionalDerivAlong_smul_fun_left
   rw [map_smul]
   rfl
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_smul_first
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -309,6 +323,7 @@ private theorem koszulScalar_smul_first
   rw [g.symm x (Y x) (X x), g.symm x (Z x) (X x)]
   ring_nf
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_smul_second
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -352,6 +367,7 @@ private theorem koszulScalar_smul_second
   rw [g.symm x (Z x) (Y x)]
   ring_nf
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_add_third
     (g : SmoothRiemannianMetric I M)
     (X Y Z Z' : (p : M) -> TangentSpace I p) (x : M)
@@ -382,6 +398,7 @@ private theorem koszulScalar_add_third
   simp [Pi.add_apply, map_add, ContinuousLinearMap.add_apply]
   abel_nf
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_smul_third
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -424,6 +441,7 @@ private theorem koszulScalar_smul_third
   rw [g.symm x (Y x) (Z x), g.symm x (X x) (Z x)]
   ring_nf
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_tensorial_first
     (g : SmoothRiemannianMetric I M)
     (Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -438,6 +456,7 @@ private theorem koszulScalar_tensorial_first
     intro X X' hX hX'
     exact koszulScalar_add_first (I := I) g X X' Y Z x hX hX' hY hZ
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulScalar_tensorial_third
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -477,6 +496,7 @@ def koszulNablaField
     TangentSpace I x :=
   metricSharp (I := I) g x (koszulCovectorField (I := I) g X Y x)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem koszulNablaField_inner_eq_covector
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -487,6 +507,7 @@ def koszulNablaField
   exact inner_metricSharp (I := I) g x
     (koszulCovectorField (I := I) g X Y x) Z
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulCovectorField_smul_first
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -512,6 +533,7 @@ private theorem koszulCovectorField_smul_first
       ((Module.finBasis Real (TangentSpace I x)) i)) x hf hX hY hZi]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulCovectorField_add_first
     (g : SmoothRiemannianMetric I M)
     (X X' Y : (p : M) -> TangentSpace I p) (x : M)
@@ -538,6 +560,7 @@ private theorem koszulCovectorField_add_first
       ((Module.finBasis Real (TangentSpace I x)) i)) x hX hX' hY hZi]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_smul_first
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -550,6 +573,7 @@ private theorem koszulNablaField_smul_first
   exact LinearEquiv.map_smul (metricFlatEquiv (I := I) g x).symm
     (f x) (koszulCovectorField (I := I) g X Y x)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_add_first
     (g : SmoothRiemannianMetric I M)
     (X X' Y : (p : M) -> TangentSpace I p) (x : M)
@@ -564,6 +588,7 @@ private theorem koszulNablaField_add_first
     (koszulCovectorField (I := I) g X Y x)
     (koszulCovectorField (I := I) g X' Y x)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulCovectorField_add_second
     (g : SmoothRiemannianMetric I M)
     (X Y Y' : (p : M) -> TangentSpace I p) (x : M)
@@ -590,6 +615,7 @@ private theorem koszulCovectorField_add_second
       ((Module.finBasis Real (TangentSpace I x)) i)) x hX hY hY' hZi]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_add_second
     (g : SmoothRiemannianMetric I M)
     (X Y Y' : (p : M) -> TangentSpace I p) (x : M)
@@ -604,6 +630,7 @@ private theorem koszulNablaField_add_second
     (koszulCovectorField (I := I) g X Y x)
     (koszulCovectorField (I := I) g X Y' x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem metric_inner_sum_basis_coord
     (g : SmoothRiemannianMetric I M) {x : M}
     (B : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
@@ -628,6 +655,7 @@ private theorem metric_inner_sum_basis_coord
     _ = g.inner x Y v := by
           rw [B.sum_repr v]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulCovectorField_smul_second
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -667,6 +695,7 @@ private theorem koszulCovectorField_smul_second
   rw [tangentConstAt_self]
   ring_nf
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_smul_second
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -686,6 +715,7 @@ private theorem koszulNablaField_smul_second
   congr 1
   exact LinearEquiv.symm_apply_apply (metricFlatEquiv (I := I) g x) (Y x)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem koszulNablaField_tensorial_first
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
@@ -723,6 +753,7 @@ def KoszulCovectorCorrectAt
       koszulCovectorField (I := I) g X Y x (Z x) =
         (1 / 2 : Real) * koszulScalar (I := I) g X Y Z x
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulCovectorField_apply_of_mdiff
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -771,6 +802,7 @@ theorem koszulCovectorField_apply_of_mdiff
   rw [hEq]
   exact TensorialAt.mkHom_apply (I := I) (F := E) hΦ hZ
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulCovectorCorrectAt_of_mdiff
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -779,6 +811,7 @@ theorem koszulCovectorCorrectAt_of_mdiff
   intro Z hZ
   exact koszulCovectorField_apply_of_mdiff (I := I) g X Y Z x hX hY hZ
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaField_eval_of_covector_correct
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -789,6 +822,7 @@ theorem koszulNablaField_eval_of_covector_correct
   rw [koszulNablaField_inner_eq_covector]
   exact hcorrect Z hZ
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaField_inner_eq_koszulScalar
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -799,6 +833,7 @@ theorem koszulNablaField_inner_eq_koszulScalar
   koszulNablaField_eval_of_covector_correct (I := I) g X Y Z x
     (koszulCovectorCorrectAt_of_mdiff (I := I) g X Y x hX hY) hZ
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulScalar_pair_sum
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M) :
@@ -823,6 +858,7 @@ theorem koszulScalar_pair_sum
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulScalar_swap_sub
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M) :
@@ -855,6 +891,7 @@ theorem koszulScalar_swap_sub
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaField_eq_of_first_eq_at
     (g : SmoothRiemannianMetric I M)
     (X X' Y : (p : M) -> TangentSpace I p) (x : M)
@@ -892,6 +929,7 @@ theorem koszulNablaField_eq_of_first_eq_at
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaAt_eq_of_extension
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -927,6 +965,7 @@ def leviCivitaConnectionCandidateAt
   exact LinearMap.toContinuousLinearMap
     (B.constr Real W)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem leviCivitaConnectionCandidateAt_apply_basis
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
@@ -944,6 +983,7 @@ def leviCivitaConnectionCandidateAt
   change LinearMap.toContinuousLinearMap (B.constr Real W) (B i) = W i
   simp [B.constr_basis (S := Real) W i]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem leviCivitaConnectionCandidateAt_basis_agreesWithField
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
@@ -960,6 +1000,7 @@ def leviCivitaConnectionCandidateAt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionCandidateAt_agreesWithField
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -999,6 +1040,7 @@ theorem leviCivitaConnectionCandidateAt_agreesWithField
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionCandidateAt_agreesWithDescended
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
@@ -1055,6 +1097,7 @@ def leviCivitaConnectionOfMetric
       unfold directionalDerivAlong
       rw [tangentConstAt_self]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem leviCivitaConnectionOfMetric_apply
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M) :
@@ -1062,6 +1105,7 @@ def leviCivitaConnectionOfMetric
       leviCivitaConnectionCandidateAt (I := I) g Y x := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_apply_descended
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
@@ -1071,6 +1115,7 @@ theorem leviCivitaConnectionOfMetric_apply_descended
   rw [leviCivitaConnectionOfMetric_apply]
   exact leviCivitaConnectionCandidateAt_agreesWithDescended (I := I) g Y x hY v
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar
     (g : SmoothRiemannianMetric I M)
     (X Y Z : (p : M) -> TangentSpace I p) (x : M)
@@ -1088,6 +1133,7 @@ theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar_tangent
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M)
@@ -1106,6 +1152,7 @@ theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar_tangent
   exact h
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_isMetricCompatible
     (g : SmoothRiemannianMetric I M) :
     IsMetricCompatible_gen (I := I) (leviCivitaConnectionOfMetric (I := I) g) g := by

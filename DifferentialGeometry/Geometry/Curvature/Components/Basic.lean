@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.Components
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -54,6 +53,7 @@ def rm04CompAt
     (Rm04 : Tensor04At (I := I) (M := M) x) (i j k l : Idx) : Real :=
   component0S (I := I) basis Rm04 (slots4 i j k l)
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem ricciCompAt_apply
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -65,6 +65,7 @@ theorem ricciCompAt_apply
   funext a
   fin_cases a <;> simp
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem rm04CompAt_apply
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -76,6 +77,7 @@ theorem rm04CompAt_apply
   funext a
   fin_cases a <;> simp
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {s : ℕ}
     (T : ι -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (v : Fin s -> TangentSpace I x) :
@@ -124,6 +126,7 @@ theorem ricciCompAt_eq_contractTrace
 
 
 
+omit [DecidableEq Idx] in
 theorem contract_trace13_component_basis
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm13 : Tensor13At (I := I) (M := M) x) (i j : Idx) :
@@ -187,6 +190,7 @@ theorem contract_trace13_component_basis
 
 
 
+omit [DecidableEq Idx] in
 theorem ricciFromRm13At_apply_basis_trace
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (Rm13 : Tensor13At (I := I) (M := M) x)

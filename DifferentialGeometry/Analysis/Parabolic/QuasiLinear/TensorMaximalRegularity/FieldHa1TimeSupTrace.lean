@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -147,6 +147,8 @@ private theorem one_add_lambda_mul_perModeConv_sq_le_timeL2 (lam : ℝ)
 
 variable {g₀ : SmoothRiemannianMetric I M}
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem weighted_perModeConv_forcing_sq_le
     (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2)

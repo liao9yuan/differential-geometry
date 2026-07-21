@@ -28,7 +28,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -62,6 +64,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_neg_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -70,6 +73,7 @@ private lemma rfns_neg_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [neg_one_smul] at h
   rw [h]; norm_num
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rfns_eq_sum_componentSq_of_horth_pt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -102,6 +106,8 @@ lemma rfns_eq_sum_componentSq_of_horth_pt
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x S e bse hn hbse horth
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fiberNormSqComponent_zero_toModel_pt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -116,6 +122,8 @@ lemma fiberNormSqComponent_zero_toModel_pt
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K]
   rfl
 
+omit [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
     (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) :
@@ -177,6 +185,7 @@ lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 
           ring
         rw [hc0, hc2, one_mul, hnE]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
         ((iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x) ≤
@@ -221,6 +230,7 @@ lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : �
     _ = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x (A.toSection x) := by
         rw [hRB]; ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
     (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
@@ -305,6 +315,7 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
   nlinarith [hsum, hR2_nn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a - b) ≤

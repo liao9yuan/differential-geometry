@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem l2_bdd_of_raw {ι : Type*}
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : ι → SmoothCcTensor g r s) (B : ℝ) (hB : 0 ≤ B)

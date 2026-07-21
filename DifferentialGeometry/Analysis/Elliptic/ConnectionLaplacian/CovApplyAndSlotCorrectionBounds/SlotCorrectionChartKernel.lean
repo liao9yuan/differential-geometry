@@ -26,7 +26,7 @@ open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -420,6 +420,7 @@ private lemma chartLCConj_eq_christoffelCorrectionCLM
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartLCConj_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -453,6 +454,7 @@ private lemma chartLCConj_contMDiffOn_chartSource
   exact chartLCConj_eq_christoffelCorrectionCLM (I := I) (M := M) g α B.toFun hb
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma goodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   chartLeviCivitaGoodSet_image_isOpen (I := I) α
@@ -473,6 +475,7 @@ private lemma extChartAt_mem_goodSet_image (α : M) {b : M}
   ⟨b, hb, rfl⟩
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartLCConj_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -520,6 +523,7 @@ private lemma chartLCConj_chart_pulled_contDiffOn
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartLCConj_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -540,6 +544,7 @@ private lemma chartLCConj_chart_pulled_contDiffAt
     (hOpen.mem_nhds hmem)
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma slotInputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -572,6 +577,7 @@ private lemma slotInputConjCLM_chart_pulled_contDiffAt
     exact contDiffAt_const
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -604,6 +610,7 @@ private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     exact contDiffAt_const
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -649,6 +656,7 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
   exact h_eval y
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -694,6 +702,7 @@ private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
   exact h_eval y
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -718,6 +727,7 @@ theorem inputSlotChartKernel_contDiffAt_chart_pulled
   rfl
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem outputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -896,6 +906,7 @@ private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
   rw [one_mul]
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -927,6 +938,7 @@ theorem inputSlotChartKernel_chart_pulled_contDiffOn
   exact h_at.contDiffWithinAt
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem outputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -958,6 +970,7 @@ theorem outputSlotChartKernel_chart_pulled_contDiffOn
   exact h_at.contDiffWithinAt
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inputSlotChartKernel_fderiv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -979,6 +992,7 @@ private lemma inputSlotChartKernel_fderiv_continuousOn
   exact continuous_norm.comp_continuousOn hfd_cd.continuousOn
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma outputSlotChartKernel_fderiv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -999,6 +1013,7 @@ private lemma outputSlotChartKernel_fderiv_continuousOn
     exact hcd.fderiv_of_isOpen hOpen h_le
   exact continuous_norm.comp_continuousOn hfd_cd.continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -1044,6 +1059,7 @@ theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
   have h := hC_mem ⟨b, hb_K, rfl⟩
   exact le_trans h (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :

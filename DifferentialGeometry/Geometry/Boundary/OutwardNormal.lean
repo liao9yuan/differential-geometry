@@ -678,6 +678,7 @@ private noncomputable def boundaryFlatCharted
     ⟨b, inducedMetricInner g b⟩).2
 
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma boundaryFlatCharted_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ) ∞
@@ -785,6 +786,7 @@ private noncomputable def boundaryFlatChartedInv
     (hI.boundaryE →L[ℝ] ℝ) →L[ℝ] hI.boundaryE :=
   ContinuousLinearMap.inverse (boundaryFlatCharted (M := M) g x₀ b)
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma boundaryFlatChartedInv_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, (hI.boundaryE →L[ℝ] ℝ) →L[ℝ] hI.boundaryE) ∞
@@ -1105,6 +1107,7 @@ private noncomputable def boundaryComponentOfInwardAtCharted
   (boundaryFlatChartedInv (M := M) g α₀ b)
     (boundaryFunOfInwardAtChartedCLM (M := M) g α₀ b)
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma boundaryComponentOfInwardAtCharted_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE) ∞
@@ -1153,6 +1156,7 @@ private lemma boundaryComponentOfInwardAtCharted_eq
   rw [← h_eq]
   exact (ContinuousLinearMap.IsInvertible.inverse_apply_eq h_inv).mpr rfl
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma inwardTangentialPartAtCharted_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, E) ∞
@@ -1183,6 +1187,7 @@ private lemma inwardTangentialPartAtCharted_eq
   rw [h_round_bdy]
   rfl
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma outwardDirAt_section_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞
@@ -1248,6 +1253,7 @@ private lemma outwardDirAt_section_contMDiffAt
         rw [T_amb.coe_linearMapAt_of_mem hb_amb_baseSet]
     rw [h_inwardCoord_chartTriv]
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 private lemma outwardDirAt_norm_squared_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ) ∞
@@ -1291,6 +1297,7 @@ private lemma outwardDirAt_norm_squared_pos_basepoint
   rw [outwardDirAt_self (M := M) g α₀]
   exact g_inner_outwardDir_pos (M := M) g α₀
 omit [InnerProductSpace ℝ E] in
+omit [FiniteDimensional ℝ E] in
 theorem outwardNormalAt_section_contMDiffAt
     (α₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞

@@ -166,6 +166,7 @@ section Reduction
 variable [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartE_section_repr_coordExtensionTangent_eq
     (x : M) (w : TangentSpace I x) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -174,6 +175,7 @@ lemma chartE_section_repr_coordExtensionTangent_eq
   rw [chartE_section_repr_eq_trivToE, coordExtensionTangent_apply]
   exact (trivializationAt E (TangentSpace I) x).continuousLinearMapAt_symmL (R := ℝ) hb _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
     (x : M) (w : TangentSpace I x) :
     chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
@@ -193,6 +195,7 @@ lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
   rw [chartE_section_repr_eq_trivToE, hWb, ← chartE_section_repr_eq_trivToE]
   exact chartE_section_repr_coordExtensionTangent_eq (I := I) x w hb2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fderiv_chartE_section_repr_linearExtensionTangent_eq_zero
     (x : M) (w : TangentSpace I x) :
     fderiv ℝ (chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
@@ -222,6 +225,8 @@ lemma fderiv_chartE_section_repr_linearExtensionTangent_eq_zero
   rw [hconst.fderiv_eq]
   exact fderiv_const_apply (𝕜 := ℝ) (tangentCoord (I := I) x w)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem covApply_linearExtensionTangent_basepoint_eq
     (g : SmoothRiemannianMetric I M) (x : M) (w : TangentSpace I x)
     (v : TangentSpace I x) :

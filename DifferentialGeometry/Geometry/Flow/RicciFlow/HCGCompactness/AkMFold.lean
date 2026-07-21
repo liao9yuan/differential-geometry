@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedFintypeInType false
 
@@ -44,7 +43,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -62,6 +60,7 @@ def shiftEquivC (r : ℕ) : (m : ℕ) → Fin ((r + 1) + m) ≃ Fin (r + (m + 1)
 
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (ext : (Fin s → Idx) → Idx → Real) (chr : Idx → Idx → Idx → Real)
     (A : (Fin s → Idx) → Real) (n : Fin (s' + 1) → Idx) :
@@ -92,6 +91,7 @@ theorem covDerivStepComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -126,6 +126,7 @@ theorem iterCovComp_shift {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem compL2_iterCovComp_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -152,6 +153,7 @@ def rotEquiv (p q : ℕ) : Fin (p + (q + 1)) ≃ Fin (p + q + 1) :=
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem slotId1 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : Fin q → Idx) :
     (Fin.append (Fin.cons d aPart) bPart : Fin (p + 1 + q) → Idx) =
       fun j => (Fin.cons d (Fin.append aPart bPart) : Fin (p + q + 1) → Idx)
@@ -176,6 +178,7 @@ private theorem slotId1 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : Fin q → Idx) :
     (Fin.append aPart (Fin.cons d bPart) : Fin (p + (q + 1)) → Idx) =
       fun i => (Fin.cons d (Fin.append aPart bPart) : Fin (p + q + 1) → Idx)
@@ -247,6 +250,7 @@ theorem extendLast_frontExtend_comm {p p' : ℕ} (e : Fin p ≃ Fin p') :
 
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_comp_equiv' {α β : Type*} [DecidableEq α] [DecidableEq β]
     (g : β → Idx) (e : α ≃ β) (s : α) (sv : β) (hsv : e s = sv) (a : Idx) :
     (fun i => Function.update g sv a (e i)) = Function.update (fun i => g (e i)) s a := by
@@ -260,6 +264,7 @@ private theorem update_comp_equiv' {α β : Type*} [DecidableEq α] [DecidableEq
 
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepCompU_compReindex {p p' : ℕ} (e₀ : Fin p ≃ Fin p')
     (ext : (Fin (p + 1) → Idx) → Idx → Real) (chr : Idx → Idx → Idx → Real)
     (A : (Fin (p + 1) → Idx) → Real) (n : Fin (p' + 1 + 1) → Idx) :
@@ -286,6 +291,7 @@ theorem covDerivStepCompU_compReindex {p p' : ℕ} (e₀ : Fin p ≃ Fin p')
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -332,12 +338,14 @@ def iterCovCompU {r : ℕ}
         (chr x)
         (iterCovCompU frame chr base a x)
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovCompU_zero {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (base : M → (Fin (r + 1) → Idx) → Real) :
     iterCovCompU (I := I) frame chr base 0 = base := rfl
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovCompU_succ {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -353,6 +361,8 @@ def iterCovCompU {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem iterCovCompU_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -386,6 +396,8 @@ theorem iterCovCompU_shift {r : ℕ}
     rfl
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem compL2_iterCovCompU_shift {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -406,6 +418,8 @@ theorem compL2_iterCovCompU_shift {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem frameExtData_contrTail {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (A : M → (Fin (p + 1) → Idx) → Real) (B : M → (Fin (q + 1) → Idx) → Real)
@@ -439,6 +453,7 @@ theorem frameExtData_contrTail {p q : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem frameExtData_add {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (f₁ f₂ : M → (Fin r → Idx) → Real) (x : M)
@@ -457,6 +472,7 @@ theorem frameExtData_add {r : ℕ}
   rfl
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem frameExtData_smul {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (c : Real) (f : M → (Fin r → Idx) → Real) (x : M)
@@ -480,6 +496,7 @@ theorem frameExtData_smul {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum {ι : Type*} {u : Set M} (t : Finset ι)
     (F : ι → M → Real)
     (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
@@ -497,6 +514,7 @@ private theorem contMDiffOn_finsetSum {ι : Type*} {u : Set M} (t : Finset ι)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -536,6 +554,7 @@ theorem iterCovComp_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovCompU_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -583,6 +602,7 @@ theorem iterCovCompU_contMDiffOn {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -598,6 +618,7 @@ theorem iterCovComp_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovCompU_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -612,6 +633,8 @@ theorem iterCovCompU_mdiffAt {r : ℕ} {u : Set M} (hu : IsOpen u)
     (hu.mem_nhds hx)).mdifferentiableAt (by simp)
 
 
+omit [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtData_congr_nhds {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     {F₁ F₂ : M → (Fin r → Idx) → Real} {y : M}
@@ -626,6 +649,7 @@ private theorem frameExtData_congr_nhds {r : ℕ}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_add {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -667,6 +691,7 @@ theorem iterCovComp_add {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_smul {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -704,6 +729,8 @@ theorem iterCovComp_smul {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_frameExtData_contrTail {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -732,6 +759,8 @@ theorem covDerivStepComp_frameExtData_contrTail {p q : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem covStep_contrTail_field {p q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -770,6 +799,7 @@ theorem covStep_contrTail_field {p q : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem compL2_iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -784,6 +814,8 @@ theorem compL2_iterCovComp_compReindex {s s' : ℕ} (e : Fin s ≃ Fin s')
 
 
 
+omit [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem iterCovComp_congr_on {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -802,6 +834,7 @@ theorem iterCovComp_congr_on {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem contMDiffOn_contrTail {p q : ℕ} {u : Set M}
     (A : M → (Fin (p + 1) → Idx) → Real) (B : M → (Fin (q + 1) → Idx) → Real)
     (hA : ∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
@@ -823,6 +856,7 @@ theorem contMDiffOn_contrTail {p q : ℕ} {u : Set M}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -946,6 +980,7 @@ theorem compL2_iterCovComp_contrTail_le {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem iterCovComp_contrTail_succ {p q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1011,11 +1046,13 @@ def isoTop {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
       isoTop g frame chr m (fun z => iterCovCompU (I := I) frame chr A 1 z) x
         (fun j => n (isoReindex p q m j))
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem isoTop_zero {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
     {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real) (x : M) :
     isoTop (I := I) g frame chr 0 A x = contrTail (A x) (g x) := rfl
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem isoTop_succ {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
     {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real) (m : ℕ) (x : M) :
@@ -1029,6 +1066,7 @@ def isoTop {q : ℕ} (g : M → (Fin (q + 1) → Idx) → Real)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem compL2_isoResidual_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1173,6 +1211,7 @@ def blockLeftEquiv {a a' : ℕ} (e₀ : Fin a ≃ Fin a') (b : ℕ) : Fin (a + b
 
 
 
+omit [DecidableEq Idx] in
 theorem contrTail_extendLast {pT pF q : ℕ} (e₀ : Fin pT ≃ Fin pF)
     (T : (Fin (pT + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
     contrTail (fun n : Fin (pF + 1) → Idx => T (fun j => n (extendLastEquiv e₀ j))) B =
@@ -1198,6 +1237,8 @@ theorem contrTail_extendLast {pT pF q : ℕ} (e₀ : Fin pT ≃ Fin pF)
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [DecidableEq Idx] in
 theorem compL2_isoTop_eq {q : ℕ}
     (g : M → (Fin (q + 1) → Idx) → Real)
     (frame : Idx → (x : M) → TangentSpace I x) (chr : M → Idx → Idx → Idx → Real)
@@ -1231,6 +1272,7 @@ theorem compL2_isoTop_eq {q : ℕ}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem compL2_contrTail_topU_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1345,6 +1387,7 @@ theorem compL2_le_contrTail_inv {P : ℕ}
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1_abstract {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -1490,6 +1533,7 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 theorem claim1 {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)

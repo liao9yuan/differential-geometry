@@ -109,6 +109,7 @@ theorem scalarPotCore_apply
           (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2)) := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem scalarSmul_norm_le
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C)
@@ -166,6 +167,7 @@ private theorem finiteRepr_norm
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPotCore_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C)
@@ -202,6 +204,7 @@ noncomputable def scalarPotOp
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPotOp_core
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) :
@@ -219,6 +222,7 @@ theorem scalarPotOp_core
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPotOp_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C) (hζ : ∀ x : M, |(ζ : M → Real) x| ≤ C) :
@@ -260,6 +264,7 @@ omit [BoundarylessManifold I M] in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPotH0_test
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (u : tensorHs (I := I) (M := M) q 0 0 1)
@@ -361,6 +366,7 @@ private theorem scalarPotCore_sub
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPot_pair_core
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)
@@ -376,6 +382,7 @@ theorem scalarPot_pair_core
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPot_pair_norm
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)
@@ -402,6 +409,7 @@ theorem scalarPot_pair_norm
 
 
 
+omit [BoundarylessManifold I M] in
 theorem scalarPotH0_pair
     (q : SmoothRiemannianMetric I M) (ζ η : C^∞⟮I, M; Real⟯)
     {C : Real} (hC : 0 ≤ C)

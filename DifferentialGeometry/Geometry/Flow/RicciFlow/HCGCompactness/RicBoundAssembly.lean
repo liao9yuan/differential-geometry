@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -34,7 +33,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -45,6 +43,9 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem tower_bound_to_intrinsic
     (gRef : SmoothRiemannianMetric I M)
     (T T' : Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -84,6 +85,9 @@ theorem tower_bound_to_intrinsic
 
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem aN_intrinsic_point
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}

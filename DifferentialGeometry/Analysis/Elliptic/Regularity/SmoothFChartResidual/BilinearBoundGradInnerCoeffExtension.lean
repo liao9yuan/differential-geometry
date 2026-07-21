@@ -18,7 +18,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothFChartResidualBilinearBound
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,7 @@ noncomputable def gradInnerCoefI_M
       gradChartCoeff (I := I) g α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma gradInnerCoefI_M_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -58,6 +59,7 @@ private lemma gradInnerCoefI_M_apply
         gradChartCoeff (I := I) g α
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {x : M}
@@ -66,6 +68,7 @@ private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
   unfold gradInnerCoefI_M
   rw [hx]; ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerCoefI_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -157,6 +160,7 @@ lemma gradInnerCoefI_M_smooth
       contMDiffAt_const
     exact h_const.congr_of_eventuallyEq h_ev_zero_coef
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_gradInnerCoefI_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -182,6 +186,7 @@ noncomputable def Λgrad
   smoothExtensionScalar (I := I) (M := M) α
     (gradInnerCoefI_M (I := I) (M := M) g α i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma Λgrad_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

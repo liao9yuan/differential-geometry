@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -47,6 +47,7 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -67,6 +68,7 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -103,6 +105,7 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivative
@@ -113,6 +116,7 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally

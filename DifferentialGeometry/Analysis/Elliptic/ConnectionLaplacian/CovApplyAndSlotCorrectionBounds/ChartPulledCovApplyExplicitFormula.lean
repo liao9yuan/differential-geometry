@@ -20,7 +20,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma good_set_mem_baseSet_rs
     (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -45,6 +46,8 @@ private lemma good_set_mem_baseSet_rs
   · change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_pulled_covApply_explicit_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -142,6 +145,8 @@ theorem chart_pulled_covApply_explicit_formula
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
       (R := ℝ) hb_baseRS]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_pulled_covApply_explicit_formula_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -187,6 +192,8 @@ theorem chart_pulled_covApply_explicit_formula_target
   rw [hround] at h
   exact h
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_pulled_covApply_explicit_formula_target_smoothCc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

@@ -18,7 +18,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,7 +27,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma extDerivFun_comp_extChartAt_apply_basis [I.Boundaryless]
     (x : M) {gE : E → ℝ}
     (hgE : ContDiffAt ℝ ∞ gE (extChartAt I x x))
@@ -67,6 +67,7 @@ lemma extDerivFun_comp_extChartAt_apply_basis [I.Boundaryless]
   rw [hcompose_eq.fderiv_eq]
   rw [partialDeriv]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma exists_globalSmooth_chartBasisVec_ext
     (x : M) (j : Fin (Module.finrank ℝ E)) :
     ∃ (Xext : Π b : M, TangentSpace I b) (U : Set M),
@@ -98,6 +99,7 @@ lemma exists_globalSmooth_chartBasisVec_ext
   rw [hχ_one_y, one_smul]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (b i m : Fin (Module.finrank ℝ E)) :
@@ -115,6 +117,8 @@ private lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     chartChristoffel_contDiffOn_interior (I := I) g x b i m
   exact hon.contDiffAt (isOpen_interior.mem_nhds hxint)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 lemma leviCivita_finset_sum_apply
     {ι : Type*} (g : SmoothRiemannianMetric I M)
     (t : Finset ι) (σ : ι → Π y : M, TangentSpace I y)
@@ -141,6 +145,8 @@ lemma leviCivita_finset_sum_apply
         _ = (insert i t).sum (fun j => (cov.toFun (σ j) x) v) := by
               rw [ih]; simp [Finset.sum_insert, hit]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_chartBasisVec_secondCovDeriv [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (a b i : Fin (Module.finrank ℝ E))
@@ -318,6 +324,7 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless]
     (x : M) (j : Fin (Module.finrank ℝ E))
     {X : Π b : M, TangentSpace I b} {U : Set M}
@@ -359,6 +366,7 @@ private lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless
   rw [hev.fderiv_eq]
   exact fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) x j hx_good
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 lemma mlieBracket_chartBasisVec_ext_self_eq_zero [I.Boundaryless]
     (x : M) (j k : Fin (Module.finrank ℝ E))
     {Xj Xk : Π b : M, TangentSpace I b} {U : Set M}
@@ -384,6 +392,8 @@ lemma mlieBracket_chartBasisVec_ext_self_eq_zero [I.Boundaryless]
   rw [ContinuousLinearMap.zero_apply, ContinuousLinearMap.zero_apply]
   exact sub_self 0
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma riemannOp_chartBasis_eq_chartRiemannCLM_basis [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -479,6 +489,8 @@ lemma riemannOp_chartBasis_eq_chartRiemannCLM_basis [I.Boundaryless]
   rw [← hcoeff l]
   exact (sub_smul _ _ _).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartRiemannBasisIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x := by
@@ -486,6 +498,8 @@ theorem chartRiemannBasisIdentity_holds [I.Boundaryless]
   intro i j k
   exact riemannOp_chartBasis_eq_chartRiemannCLM_basis (I := I) g x i j k
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannOp_eq_chartRiemannCLM_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     riemannOp (cov := LeviCivita (I := I) g) x v w u =

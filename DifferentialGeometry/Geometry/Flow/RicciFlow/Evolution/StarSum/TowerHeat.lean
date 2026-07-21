@@ -20,18 +20,16 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Dim3Reaction in
 
 
@@ -41,7 +39,10 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem resStarBoundLF
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
     {u : Set M}

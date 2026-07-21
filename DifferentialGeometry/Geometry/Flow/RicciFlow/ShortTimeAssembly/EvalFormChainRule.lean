@@ -97,6 +97,9 @@ theorem exists_jointFDerivWithinAt_evalFormTwoVar
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -209,6 +212,8 @@ theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
   exact hdiag
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem evalFormTwoVar_diag_hasDerivWithinAt_deTurckRicciRHS_chainRule
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

@@ -25,7 +25,7 @@ namespace Connection
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 
 set_option synthInstance.maxHeartbeats 800000 in

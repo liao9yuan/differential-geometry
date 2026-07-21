@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
@@ -34,12 +34,14 @@ def chartInvGramMatrix_l1Sum
   ∑ ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
     |chartInvGramMatrix (I := I) g α x ij.1 ij.2|
 
+omit [T2Space M] in
 lemma chartInvGramMatrix_l1Sum_nonneg
     (g : SmoothRiemannianMetric I M) (α x : M) :
     0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
+omit [T2Space M] in
 private lemma chartGramMatrix_entry_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -55,6 +57,7 @@ private lemma chartGramMatrix_entry_continuousOn_chartSource
   rw [h_set_eq] at hsmooth
   exact hsmooth.continuousOn
 
+omit [T2Space M] in
 private lemma chartInvGramMatrix_entry_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -70,6 +73,7 @@ private lemma chartInvGramMatrix_entry_continuousOn_chartSource
   rw [h_set_eq] at hsmooth
   exact hsmooth.continuousOn
 
+omit [T2Space M] in
 private lemma chartInvGramMatrix_l1Sum_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (chartInvGramMatrix_l1Sum (I := I) (M := M) g α)
@@ -100,6 +104,7 @@ private lemma exists_bound_on_compact_of_continuousOn
   have h2 : C ≤ max C 0 := le_max_left _ _
   linarith
 
+omit [T2Space M] in
 theorem chartGramMatrix_entry_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -111,6 +116,7 @@ theorem chartGramMatrix_entry_isBounded_on_compact
     (chartGramMatrix_entry_continuousOn_chartSource (I := I) (M := M) g α i j).abs
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
 
+omit [T2Space M] in
 theorem chartInvGramMatrix_entry_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -124,6 +130,7 @@ theorem chartInvGramMatrix_entry_isBounded_on_compact
       (I := I) (M := M) g α i j).abs
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
 
+omit [T2Space M] in
 theorem chartInvGramMatrix_l1Sum_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) {K : Set M} (hK : IsCompact K)

@@ -36,6 +36,7 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
     achart H b = achart H b₀ :=
   Subtype.ext h_chart
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma trivb₀_symmL_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -48,6 +49,7 @@ private lemma trivb₀_symmL_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma trivb₀_clmAt_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -86,6 +88,7 @@ private lemma continuousOn_coordChangeL_b₀_α (b₀ α : M) :
   rw [h_base_b₀, h_base_α] at h_smooth
   exact h_smooth.continuousOn
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma coordChangeL_eq_chartJ_of_locality
     (α : M) {b b₀ : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -123,6 +126,7 @@ private lemma coordChangeL_eq_chartJ_of_locality
   rw [h_eq]
   rfl
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma coordChangeL_eq_chartJinv_of_locality
     (α : M) {b b₀ : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -165,6 +169,7 @@ private lemma coordChangeL_eq_chartJinv_of_locality
   rw [h_eq]
   rfl
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartJ_continuousOn_loc
     (α b₀ : M)
     {U : Set M}
@@ -188,6 +193,7 @@ private lemma chartJ_continuousOn_loc
       (hU_sub_α hb) (hU_sub_b₀ hb) (hU_const b hb)).symm
   exact h_coord_cont.congr h_eq
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartJinv_continuousOn_loc
     (α b₀ : M)
     {U : Set M}

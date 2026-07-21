@@ -30,7 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -55,6 +55,7 @@ theorem gZeroInner_self_le_of_g1_self_le
   rw [← htie x v v] at hlb
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem gZeroInner_self_le_neumann_of_g1_unit
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -76,6 +77,7 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   rw [inv_le_inv₀ ha hb]; exact hab
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private lemma gNorm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a + b) (a + b)) ≤
@@ -110,6 +112,8 @@ private lemma gNorm_triangle
   rw [hsq]
   linarith [hcs]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private lemma gNorm_sq_sub_eq_self_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x)
     {Ka Cb : ℝ} (hKa : 0 ≤ Ka) (hCb : 0 ≤ Cb) {p : ℝ} (hp : 0 ≤ p)

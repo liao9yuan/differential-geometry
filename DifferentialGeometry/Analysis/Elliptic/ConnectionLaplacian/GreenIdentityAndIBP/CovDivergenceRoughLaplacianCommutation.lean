@@ -30,7 +30,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,8 +46,7 @@ theorem covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMetric I M)
         (covGrad (I := I) (M := M) g₀ 0 (p + 2) W) := by
   rw [covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W]
   rw [cometricDoubleTraceField_covGrad_eq_zero (I := I) g₀ p]
-  rw [appCc_zero_left (I := I) (M := M) g₀ (p + 2) (p + 1) W]
-  rw [zero_add]
+  exact add_eq_right.mpr (appCc_zero_left (I := I) (M := M) g₀ (p + 2) (p + 1) W)
 
 theorem covGrad_covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
     (W : SmoothCcTensor g₀ 0 (p + 2)) :
@@ -66,11 +65,10 @@ theorem covGrad_covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMet
   rw [covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (I := I) (M := M) g₀ (p + 2) p
     (cometricDoubleTraceField (I := I) g₀ p)
     (cometricDoubleTraceField_covGrad_eq_zero (I := I) g₀ p)]
-  rw [appCc_zero_left (I := I) (M := M) g₀ (p + 2 + 1) (p + 1 + 1)
-    (covGrad (I := I) (M := M) g₀ 0 (p + 2) W)]
-  rw [zero_add]
+  exact add_eq_right.mpr (appCc_zero_left (I := I) (M := M) g₀ (p + 2 + 1) (p + 1 + 1)
+    (covGrad (I := I) (M := M) g₀ 0 (p + 2) W))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_eq_toModel_unitEval_gen
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g₀ 0 s) (x : M)
     (v : Fin s → TangentSpace I x) :
@@ -79,6 +77,7 @@ private lemma unitModel_eq_toModel_unitEval_gen
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
           (unitZeroSec (I := I) (M := M) x)) v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma unitModel_appCc_cometricDoubleTrace_eq_dualTrace
     (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (W : SmoothCcTensor g₀ 0 (p + 2))
     (x : M) (v : Fin p → TangentSpace I x) :
@@ -391,6 +390,7 @@ theorem pointwiseTensorCurv_l2Inner_eq_covDivergence_commutator
       X (covDivergence (I := I) (M := M) g s Z)]
   linarith [h1, h2]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma unitModel_appCc_slotExtend_slotExtend_cometric
     (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (U : SmoothCcTensor g₀ 0 (t + 4))
     (x : M) (a b : E) (v : Fin t → TangentSpace I x) :
@@ -498,6 +498,7 @@ theorem rawTensorConnLapSmooth_cometricDoubleTrace_apply_comm
   rw [Finset.sum_congr rfl (fun i _ => hlhs i), Finset.sum_congr rfl (fun k _ => hrhs k)]
   rw [Finset.sum_comm]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem appCc_sub_right_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (A B : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s Φ (A - B) =
@@ -533,6 +534,8 @@ theorem rawConnLap_covDivergence_commutator_eq_appCc_pointwiseTensorCurv
   rw [← appCc_sub_right_cc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem norm_iteratedCovGrad_comp_cc (g : SmoothRiemannianMetric I M) (s j i : ℕ)
     (S : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad (I := I) g 0 (s + j) i (iteratedCovGrad (I := I) g 0 s j S)‖ =
@@ -587,6 +590,15 @@ theorem exists_iteratedCovGrad_covDivergence_l2_le
   have h0nn : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) 0 V‖ := norm_nonneg _
   linarith [hshift]
 
+section CurvatureCommutatorL2
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
 theorem exists_iteratedCovGrad_rawConnLap_covDivergence_commutator_l2_le
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℕ → ℝ, (∀ p, 0 ≤ K p) ∧
@@ -622,6 +634,9 @@ theorem exists_iteratedCovGrad_rawConnLap_covDivergence_commutator_l2_le
     exact Finset.range_subset_range.mpr (by omega)
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hterm) (hcc_nn p)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
+
+end CurvatureCommutatorL2
+
 set_option backward.isDefEq.respectTransparency false in
 
 theorem covDiv_appCc (g₀ : SmoothRiemannianMetric I M)

@@ -23,8 +23,8 @@ namespace Geometry
 namespace Riemannian
 namespace Variation
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -35,6 +35,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_ode_chart_local
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y : ℝ → E) (s : Set ℝ) :
@@ -50,6 +51,7 @@ theorem parallel_ode_chart_local
   simp [zero_sub]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_local_existence_uniqueness [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -200,6 +202,7 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
     exact hgoal
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_global_extension [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -269,6 +272,7 @@ noncomputable def parallelTransport [I.Boundaryless]
       hd.huCurveCont hd.huDeriv hd.hsource v₀).choose⟩
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma parallelTransport_spec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -280,6 +284,7 @@ lemma parallelTransport_spec [I.Boundaryless]
     hd.huCurveCont hd.huDeriv hd.hsource v₀).choose_spec.1
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem parallelTransport_initial [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -287,6 +292,7 @@ lemma parallelTransport_spec [I.Boundaryless]
   (parallelTransport_spec (I := I) g α γ hd v₀).1
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallelTransport_isParallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -296,6 +302,7 @@ theorem parallelTransport_isParallel [I.Boundaryless]
   (parallelTransport_spec (I := I) g α γ hd v₀).2
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {V W : ℝ → E} {s : Set ℝ}
@@ -360,6 +367,7 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
   simpa using hbase
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallelTransport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ w₀ : E)
@@ -396,6 +404,7 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
   exact hconst t ht
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem trivialization_coordinateChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -493,6 +502,7 @@ theorem exists_uniform_chart_partition
   exact ⟨N, fun k => γ (tp k), hN_pos, fun k hk t ht => htp k hk t ht⟩
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem chartCurve_continuousOn_of_mapsTo
     (α : M) (γ : ℝ → M) (hγ : Continuous γ) {a b : ℝ}
     (hsrc : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
@@ -644,6 +654,7 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     rw [hgoal, hYβ_zero]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
@@ -756,6 +767,7 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
   exact hconst t ht
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
@@ -812,6 +824,7 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
   exact this
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :
@@ -820,6 +833,7 @@ theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
   rw [chartRepAt_apply, chartRepAt_apply, hs]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_congr_of_eventuallyEq (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :

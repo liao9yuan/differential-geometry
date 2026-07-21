@@ -28,7 +28,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
 namespace IntrinsicLp
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,50 +43,50 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y w : TangentSpace I x) :
     g.inner x v (y + w) = g.inner x v y + g.inner x v w :=
   ContinuousLinearMap.map_add (g.inner x v) y w
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) (c : ℝ)
     (y : TangentSpace I x) :
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_neg_left
     (g : SmoothRiemannianMetric I M) (x : M) (v y : TangentSpace I x) :
     g.inner x (-v) y = - g.inner x v y := by
   rw [map_neg, ContinuousLinearMap.neg_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_neg_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y : TangentSpace I x) :
     g.inner x v (-y) = - g.inner x v y := by
   rw [ContinuousLinearMap.map_neg]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (v + w) (v + w) =
@@ -96,7 +96,7 @@ private lemma g_inner_add_diag
   have hsymm : g.inner x w v = g.inner x v w := g.symm x w v
   rw [hsymm]; ring
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (t : ℝ) (v w : TangentSpace I x) :
     g.inner x (t • v + w) (t • v + w) =
@@ -109,7 +109,7 @@ private lemma g_inner_smul_add_diag
   have hsymm : g.inner x w v = g.inner x v w := g.symm x w v
   rw [hsymm]; ring
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_cauchy_schwarz
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
@@ -163,7 +163,7 @@ private lemma g_inner_cauchy_schwarz
   rw [hsqrt_mul] at hC
   exact hC
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -200,7 +200,7 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -210,21 +210,21 @@ private lemma g_norm_const_smul
   rw [Real.sqrt_mul (sq_nonneg c)]
   rw [Real.sqrt_sq_eq_abs]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_norm_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (-v) (-v)) = Real.sqrt (g.inner x v v) := by
   rw [g_inner_neg_left g x v (-v), g_inner_neg_right g x v v]
   simp
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_inner_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (G X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (X b)) :=
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g G X
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_norm_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -267,7 +267,6 @@ namespace HasWeakRiemannianGradLp
 
 variable {g : SmoothRiemannianMetric I M} {u : M → ℝ} {G : M → E}
 
-omit [InnerProductSpace ℝ E] in
 lemma pairing_eq
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (h : HasWeakRiemannianGradLp (I := I) (M := M) g u G)
@@ -277,7 +276,6 @@ lemma pairing_eq
       -∫ x, u x * divergence_g (I := I) g X x
         ∂(riemannianVolumeMeasure I M g) := h.2 X hX
 
-omit [InnerProductSpace ℝ E] in
 lemma pairing_aestronglyMeasurable
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (h : HasWeakRiemannianGradLp (I := I) (M := M) g u G)
@@ -295,14 +293,12 @@ def MemW1pIntrinsicLp
       MemLp (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-omit [InnerProductSpace ℝ E] in
 lemma MemW1pIntrinsicLp.memLp_self
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsicLp (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
 
-omit [InnerProductSpace ℝ E] in
 theorem hasWeakRiemannianGradLp_of_smooth
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -315,7 +311,6 @@ theorem hasWeakRiemannianGradLp_of_smooth
   · intro X hX
     exact h X hX
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsicLp_of_MemW1pIntrinsic
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -334,7 +329,6 @@ theorem MemW1pIntrinsicLp_of_contMDiff
   MemW1pIntrinsicLp_of_MemW1pIntrinsic (I := I) (M := M)
     (Intrinsic.MemW1pIntrinsic_of_contMDiff (I := I) (M := M) g p hu)
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -362,7 +356,6 @@ theorem HasWeakRiemannianGradLp.zero
         (fun _ : M => (0 : ℝ)) from by funext x; simp]
     simp [integral_zero]
 
-omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsicLp.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -749,7 +742,6 @@ private def gradInfimumLp
     eLpNorm (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
       (riemannianVolumeMeasure I M g)
 
-omit [InnerProductSpace ℝ E] in
 private lemma w1pNormIntrinsicLp_def
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) :
@@ -757,7 +749,6 @@ private lemma w1pNormIntrinsicLp_def
       eLpNorm u p (riemannianVolumeMeasure I M g) +
         gradInfimumLp (I := I) (M := M) g p u := rfl
 
-omit [InnerProductSpace ℝ E] in
 theorem w1pNormIntrinsicLp_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -791,7 +782,6 @@ theorem w1pNormIntrinsicLp_zero
     exact iInf_le_of_le (fun _ : M => (0 : E)) (iInf_le _ hzero_grad)
   · exact zero_le _
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp.pairing_inner_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -804,7 +794,6 @@ theorem HasWeakRiemannianGradLp.pairing_inner_eq
       ∫ x, g.inner x (G' x) (X x) ∂(riemannianVolumeMeasure I M g) := by
   rw [h₁.pairing_eq X hX, h₂.pairing_eq X hX]
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp.pairing_inner_diff_eq_zero
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -875,7 +864,6 @@ theorem HasWeakRiemannianGradLp.pairing_inner_diff_eq_zero
   rw [integral_sub h_int_G h_int_G']
   rw [HasWeakRiemannianGradLp.pairing_inner_eq h₁ h₂ X hX, sub_self]
 
-omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}

@@ -259,12 +259,14 @@ end TorsionFree
 section LeviCivitaTorsionFree
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem LeviCivita_riemannSec_torsionFree_form
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, TangentSpace I b} {x : M}
@@ -348,6 +350,7 @@ lemma riemannSec_add_third
   abel
 
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
 lemma riemannSec_smul_third
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
@@ -430,7 +433,7 @@ end TensorSection
 section Bianchi
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -438,7 +441,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma covApply_sub_eventuallyEq_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -449,7 +452,7 @@ private lemma covApply_sub_eventuallyEq_mlieBracket
   filter_upwards [hAnhd, hBnhd] with b hAb hBb
   exact (CovariantDerivative.torsion_eq_zero_iff (cov := cov)).mp htor hAb hBb
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cov_covApply_sub_eq_cov_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -488,6 +491,8 @@ private lemma cov_covApply_sub_eq_cov_mlieBracket
   rw [← hcov_swap, hσ_val]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannSec_first_bianchi_levi_civita
     (g : SmoothRiemannianMetric I M)
     {X Y Z : Π b : M, TangentSpace I b} {x : M}

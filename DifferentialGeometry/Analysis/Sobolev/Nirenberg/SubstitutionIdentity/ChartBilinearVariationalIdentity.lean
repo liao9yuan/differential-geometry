@@ -14,7 +14,7 @@ namespace Analysis
 namespace Sobolev
 namespace SubstitutionDischargeAssembly
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -79,6 +79,7 @@ private theorem exists_chart_target_cutoff_strong
     have hx_range : χ x ∈ Set.range χ := Set.mem_range_self x
     exact (hχ_range hx_range).2
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_chi_zero_on_cthickening
     {δ : ℝ} (hδ : 0 < δ) {χ : EuclN → ℝ} {h : ℝ} {K_0 : Set EuclN}
     (hχ_one : ∀ x ∈ Metric.cthickening δ (Metric.cthickening |h| K_0), χ x = 1)

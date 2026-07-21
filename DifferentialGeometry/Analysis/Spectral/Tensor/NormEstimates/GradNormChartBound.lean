@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -462,6 +462,7 @@ private lemma sq_add_le_two_mul_sq_add_sq_local (a b : ℝ) :
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

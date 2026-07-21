@@ -18,7 +18,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,6 +77,7 @@ lemma tsupport_pou_mul_fun_subset
       tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   closure_mono (support_pou_mul_fun_subset (I := I) (M := M) ρ α u)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma tsupport_pou_mul_fun_subset_chartAt_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))

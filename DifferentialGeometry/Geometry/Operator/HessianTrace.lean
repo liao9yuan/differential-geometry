@@ -15,7 +15,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,7 +38,7 @@ def ChartContractedChristoffelOn
             chartDensityOnE (I := I) g α y' *
               chartInvGramOnE (I := I) g α j l y') y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartHessTrace_expand
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     chartHessTrace (I := I) g f x =
@@ -124,6 +124,7 @@ lemma chartHessTrace_expand
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartVossWeylLaplacian_expand_hypBearing
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hgrad_diff : ∀ i : Fin (Module.finrank ℝ E),
@@ -185,6 +186,7 @@ lemma chartVossWeylLaplacian_expand_hypBearing
   rw [div_eq_mul_one_div]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessTrace_eq_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -628,7 +630,7 @@ theorem chartHessTrace_eq_laplacian
   field_simp
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -647,6 +649,7 @@ theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem trace_hessFun_eq_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -661,6 +664,7 @@ theorem trace_hessFun_eq_laplacian
   rw [chartHessTrace_def] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -685,6 +689,7 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
   exact laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
     (I := I) g hf x htr
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartContractedChristoffel_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (y : E) (j : Fin (Module.finrank ℝ E))
@@ -1091,6 +1096,7 @@ theorem chartContractedChristoffel_holds
     ring]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartContractedChristoffel_holds_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target)
@@ -1100,6 +1106,7 @@ theorem chartContractedChristoffel_holds_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hy
   exact chartContractedChristoffel_holds (I := I) g α y j hy_int
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessTrace_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1117,6 +1124,7 @@ theorem chartHessTrace_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact chartHessTrace_eq_laplacian (I := I) g hf x hcc
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartInvGram_trace_hessianTensor_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1137,6 +1145,7 @@ theorem chartInvGram_trace_hessianTensor_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact trace_hessFun_eq_laplacian (I := I) g hf x hcc
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1161,6 +1170,7 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
   exact laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
     (I := I) g hf x hcc h_orth
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessTrace_eq_laplacian_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1604,6 +1614,7 @@ theorem chartHessTrace_eq_laplacian_pointwise
   field_simp
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessTrace_eq_laplacian_pointwise_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

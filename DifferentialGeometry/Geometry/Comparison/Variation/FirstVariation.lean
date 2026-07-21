@@ -33,7 +33,7 @@ namespace Riemannian
 namespace Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -47,6 +47,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
@@ -193,6 +194,7 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_deriv_at
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -217,6 +219,7 @@ lemma inner_deriv_at
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma metric_compat_hasDerivAt_inner
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -232,6 +235,7 @@ lemma metric_compat_hasDerivAt_inner
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma commute_ds_dt_intrinsic
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -319,6 +323,7 @@ omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_commute_transverse_longitudinal_of_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
@@ -398,7 +403,7 @@ theorem covDerivAlong_commute_transverse_longitudinal_of_variation
   rw [hchartL, hchartR]
   rw [hcommute']
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPulled_contDiffAt_infty
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (α : M) (s₀ t₀ : ℝ)
     (hsrc : f s₀ t₀ ∈ (chartAt H α).source) :
@@ -413,7 +418,7 @@ lemma chartPulled_contDiffAt_infty
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma variationField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -476,7 +481,7 @@ lemma variationField_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma velocityField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -528,7 +533,7 @@ lemma velocityField_chartRep_differentiableAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_along_curve_contMDiff
     {n : WithTop ℕ∞} [ENat.LEInfty n] (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)}
@@ -546,6 +551,7 @@ private lemma g_inner_along_curve_contMDiff
   rw [← contMDiff_iff_contDiff]; exact hcm
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem first_variation_of_arcLength_fixed_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -743,6 +749,7 @@ theorem first_variation_of_arcLength_fixed_endpoints
   exact hS2A
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem first_variation_of_arcLength_free_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -931,6 +938,7 @@ theorem first_variation_of_arcLength_free_endpoints
   exact hS2A
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem first_variation_geodesic_fixed_end
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -1002,6 +1010,7 @@ theorem first_variation_geodesic_fixed_end
   simpa using hfv
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem dist_deriv_of_length [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -1021,6 +1030,7 @@ theorem dist_deriv_of_length [PseudoMetricSpace M]
     |>.congr_of_eventuallyEq hdist
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem halfSq_deriv_length [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -1043,6 +1053,7 @@ theorem halfSq_deriv_length [PseudoMetricSpace M]
 
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem first_variation_vanishes_for_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

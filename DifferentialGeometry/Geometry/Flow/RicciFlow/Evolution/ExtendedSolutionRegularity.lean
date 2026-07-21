@@ -8,7 +8,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -50,6 +49,8 @@ variable
 
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCLMSection_jointContMDiffOn_of_chartGram_Ioo
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -112,6 +113,7 @@ theorem metricCLMSection_jointContMDiffOn_of_chartGram_Ioo
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contOn_partial_iteratedFDeriv_of_contDiffOn
     {F : ℝ × E → ℝ} {U : Set (ℝ × E)} (hUopen : IsOpen U)
     (hF : ContDiffOn ℝ ∞ F U) (k : ℕ) :
@@ -192,6 +194,7 @@ private lemma contOn_partial_iteratedFDeriv_of_contDiffOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_jointContDiffOn {G : ℝ × E → ℝ} {U : Set (ℝ × E)}
     (hUopen : IsOpen U) (hG : ContDiffOn ℝ ∞ G U) (m : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -221,6 +224,7 @@ private lemma partialDeriv_jointContDiffOn {G : ℝ × E → ℝ} {U : Set (ℝ 
 
 
 set_option synthInstance.maxHeartbeats 200000 in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma spatialJet_set
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {G : ℝ → E → F} {J : Set ℝ} {V : Set E}
@@ -254,6 +258,7 @@ private lemma spatialJet_set
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_set {G : ℝ × E → ℝ} {J : Set ℝ} {V : Set E}
     (hJ : UniqueDiffOn ℝ J) (hV : IsOpen V)
     (hG : ContDiffOn ℝ ∞ G (J ×ˢ V)) (m : Fin (Module.finrank ℝ E)) :
@@ -297,6 +302,7 @@ private lemma matrixAdjugate_contDiffOn {n : ℕ} {s : Set ℝ}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartInvGramOnE_contDiff_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E) (s : Set ℝ)
     (h_entry : ∀ a b : Fin (Module.finrank ℝ E),
@@ -335,6 +341,7 @@ private lemma chartInvGramOnE_contDiff_in_metric_at
   rw [heq]; exact ne_of_gt hpos
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramBracket_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (i j l : Fin (Module.finrank ℝ E))
     (y : E) (s : Set ℝ)
@@ -352,6 +359,7 @@ private lemma gramBracket_contDiff
   exact ((hp1 i l j).add (hp1 j l i)).sub (hp1 l i j)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramBracketDeriv_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (m i j l : Fin (Module.finrank ℝ E))
     (y : E) (s : Set ℝ)
@@ -374,6 +382,8 @@ private lemma gramBracketDeriv_contDiff
 
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartInvGramOnE_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (m k l : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
@@ -400,6 +410,7 @@ private lemma partialDeriv_chartInvGramOnE_contDiff
     (chartInvGramOnE_contDiff_in_metric_at (I := I) g_DT α y s hp0 hx b l)).mul (hp1 m a b)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartChristoffel_contDiff_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (a b k : Fin (Module.finrank ℝ E))
     (y : E) (s : Set ℝ)
@@ -430,6 +441,8 @@ private lemma chartChristoffel_contDiff_in_metric_at
   · exact ((hp1 a l b).add (hp1 b l a)).sub (hp1 l a b)
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartChristoffel_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (m i j k : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
@@ -464,6 +477,8 @@ private lemma partialDeriv_chartChristoffel_contDiff
   · exact gramBracketDeriv_contDiff (I := I) g_DT α m i j l y s hp2
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRiemannTensor_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (i j k r : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
@@ -499,6 +514,8 @@ private lemma chartRiemannTensor_contDiff
     exact ((hΓ j n r).mul (hΓ i k n)).sub ((hΓ k n r).mul (hΓ i j n))
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRicciTensor_contDiff
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (i k : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
@@ -523,6 +540,7 @@ private lemma chartRicciTensor_contDiff
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTimeSlice_contDiffOn {α : M} {J : Set ℝ} {y : E}
     (hy : y ∈ interior (extChartAt I α).target) {f : ℝ × E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (J ×ˢ interior (extChartAt I α).target)) :
@@ -531,6 +549,7 @@ private lemma chartTimeSlice_contDiffOn {α : M} {J : Set ℝ} {y : E}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartGramOnE_set
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -581,6 +600,7 @@ theorem chartGramOnE_set
   exact hcomp.contDiffOn
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartGramOnE_jointContDiffOn
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -597,6 +617,7 @@ theorem chartGramOnE_jointContDiffOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartGram_jet_set
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -629,6 +650,7 @@ theorem chartGram_jet_set
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -671,6 +693,8 @@ theorem chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
 
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricFrameComp_jointContMDiffOn_of_chartGram
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -720,6 +744,9 @@ theorem metricFrameComp_jointContMDiffOn_of_chartGram
 
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricVariationEquationOn_of_pde
     (g : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (hpde : ∀ t ∈ Set.Ico a b, ∀ (x : M) (v w : TangentSpace I x),
@@ -747,6 +774,9 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem metricFamilySmoothOn_of_chartGram
     (g : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -833,6 +863,10 @@ theorem metricFamilySmoothOn_of_chartGram
 
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciCont_of_joint [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -878,6 +912,10 @@ theorem ricciCont_of_joint [I.Boundaryless]
   exact metricRicciAt_apply_eq_ricciTensor (g q.1.1) q.2 _ _
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciCont_interior_of_chartGram [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -891,6 +929,9 @@ theorem ricciCont_interior_of_chartGram [I.Boundaryless]
 
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem rm04_coord_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (idx : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
@@ -917,6 +958,10 @@ theorem rm04_coord_eq [I.Boundaryless]
 
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem rm04Cont_of_joint [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -965,6 +1010,10 @@ theorem rm04Cont_of_joint [I.Boundaryless]
   exact rm04_coord_eq (I := I) (g q.1.1) x₀ idx hq
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -979,6 +1028,10 @@ theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
 
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem scalarCont_of_joint [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1008,6 +1061,10 @@ theorem scalarCont_of_joint [I.Boundaryless]
   exact ⟨hq.1.1, hq.2.2⟩
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem scalarCont_interior_of_chartGram [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1021,6 +1078,10 @@ theorem scalarCont_interior_of_chartGram [I.Boundaryless]
 
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem scalarTime_of_joint [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1083,6 +1144,10 @@ theorem scalarTime_of_joint [I.Boundaryless]
   exact ((hcd.congr (fun s' _ => hsum_eq s')).differentiableOn (by simp)) t ht
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem scalarTime_interior_of_chartGram [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1096,6 +1161,10 @@ theorem scalarTime_interior_of_chartGram [I.Boundaryless]
 
 
 
+omit [I.Boundaryless] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem solutionOn_of_joint [I.Boundaryless]
     {a b : ℝ} (hab : a < b) (g : ℝ → SmoothRiemannianMetric I M)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1180,6 +1249,9 @@ theorem solutionOn_of_joint [I.Boundaryless]
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem isSolutionOn_of_extendData
     {α omega b : ℝ} (hαb : α < b) (hαω : α < omega)
     (g_ext : ℝ → SmoothRiemannianMetric I M)

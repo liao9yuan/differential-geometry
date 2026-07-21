@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem hsNorm_sq_toReal_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -43,6 +44,7 @@ private theorem hsNorm_sq_toReal_eq
       ((tensorPouSobolevHsNorm (I := I) (M := M) g k T) ^ 2).toReal := by
   rw [tensorPouSobolevHilbert_norm_eq, ← ENNReal.toReal_pow]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem hsBlock_le_hsNorm_sq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) (α₀ : M)
@@ -228,6 +230,7 @@ private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rawPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -273,6 +276,7 @@ private theorem rawPull_contDiffOn
   exact h_raw_pull_contDiffOn.comp h_toEucl_symm_smooth.contDiffOn h_maps
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_global_smooth_eqOn_ball_of_rawPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -323,6 +327,7 @@ theorem exists_global_smooth_eqOn_ball_of_rawPull
     simp only [hη_y, one_mul, hrp_def]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem hsIntegrandReal_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -386,6 +391,7 @@ private theorem hsIntegrandReal_continuousOn
   exact hPOU_pull_cont.mul ((h_eval_contOn.abs).pow 2)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -575,6 +581,7 @@ theorem smooth_eLpNorm_iteratedFDeriv_ball_ne_top
     rw [norm_one, mul_one]
     exact hMb z hz'
 
+omit [BoundarylessManifold I M] in
 private theorem rawPullCenter_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -708,6 +715,7 @@ private theorem rawPullCenter_le_hsNorm
         mul_le_mul_of_nonneg_left h_sum_le hCloc_nn
     _ = Cloc * (((2 * (2 * k) + 1 : ℕ) : ℝ) * A) * hsn := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem uniformRawPull_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -808,6 +816,7 @@ private theorem superlevel_compact_subset_source
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 private theorem chartFiberNorm_le_hsNorm_on_superlevel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k))
@@ -967,6 +976,7 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem tensorPouSobolevHilbert_embedding_Ck_gNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :

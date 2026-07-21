@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -34,7 +33,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,7 +42,10 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_ortho_expand
+    [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -65,6 +67,7 @@ private theorem cotangentSharp_ortho_expand
   · intro h
     exact absurd (Finset.mem_univ i) h
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor05_vec5_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -94,6 +97,7 @@ private theorem tensor05_vec5_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
@@ -123,7 +127,10 @@ private theorem tensor04_vec4_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 private theorem slotdiffBasisEq
+    [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -315,7 +322,10 @@ private theorem slotdiffBasisEq
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 private theorem curvactReduce
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -371,7 +381,10 @@ private theorem curvactReduce
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [Finset.sum_comm]
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 private theorem slotdiffReduce
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -453,7 +466,10 @@ private theorem sumDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hj h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 private theorem curvRoute
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -503,7 +519,10 @@ def commStarCost (n k : ℕ) : Real :=
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem spatialCommStarSum
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :

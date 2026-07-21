@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -233,6 +232,7 @@ def ricciVarCoordRHS
     gammaCovCoordAt (I := I) cov gammaDot x0 p p i j) -
     gammaTraceCovAt (I := I) cov gammaDot x0 i j
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 private theorem christoffelCoordAt_symm_of_lc
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -253,6 +253,7 @@ private theorem christoffelCoordAt_symm_of_lc
   rw [hzero] at hskew
   simpa [DifferentialGeometry.Integral.Connection.christoffelCoordAt] using sub_eq_zero.mp hskew.symm
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 private theorem curvVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -381,6 +382,7 @@ private theorem curvVarCoord
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciVarCoord
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
@@ -437,6 +439,7 @@ def scalarCoordSecondAt
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 private theorem extDerivFun_congr_eventually_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -448,6 +451,7 @@ private theorem extDerivFun_congr_eventually_real
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem traceExtSum
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
@@ -484,6 +488,7 @@ theorem traceExtSum
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem gammaTracePoint
     (gInv :
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
@@ -505,6 +510,7 @@ theorem gammaTracePoint
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem metricTraceCov_eq_deriv
     (gInv :
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
@@ -597,6 +603,7 @@ theorem metricTraceCov_eq_deriv
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem traceDerivAt
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -817,6 +824,7 @@ private theorem traceCancelAlg
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem gInvTraceCancel
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -860,6 +868,7 @@ theorem gInvTraceCancel
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem traceCovEqDeriv
     (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (metricDot : M -> Idx -> Idx -> Real)
@@ -927,6 +936,7 @@ theorem traceCovEqDeriv
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem gammaTraceDeriv
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->

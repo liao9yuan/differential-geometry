@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Potential
 import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -84,6 +83,7 @@ theorem potential_grad_sq
 
 
 
+omit [TopologicalSpace M] in
 theorem potential_square
     (n : Nat) {tau : Real} {v : M -> Real}
     (hpos : ∀ y : M, 0 < v y) (htau : 0 < tau) (x : M) :

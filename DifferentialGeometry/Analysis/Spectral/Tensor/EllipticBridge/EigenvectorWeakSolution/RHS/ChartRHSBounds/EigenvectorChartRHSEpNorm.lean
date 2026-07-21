@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -97,6 +97,7 @@ variable (g : SmoothRiemannianMetric I M) (α : M)
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -142,6 +143,8 @@ section MainBound
 
 omit [CompleteSpace E] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -261,6 +264,7 @@ private def rhsBracket : EuclN → ℝ :=
       rhsTerm6 (I := I) (M := M) g r s i α P₀ -
       rhsTerm7 (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHS_eq_smul_bracket :
     eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
       = (i.fst.val)⁻¹ •
@@ -282,6 +286,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma rhsTerm1_memLp_unconditional :
     MemLp (rhsTerm1 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -292,6 +297,7 @@ private lemma rhsTerm1_memLp_unconditional :
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)
     α P₀
 
+omit [CompleteSpace E] in
 private lemma rhsTerm2_summand_memLp_unconditional
     (P Q : TensorCompIdx (E := E) r (s + 1)) :
     MemLp
@@ -324,6 +330,7 @@ private lemma rhsTerm2_summand_memLp_unconditional
       g r s i α P)
     h_aezero
 
+omit [CompleteSpace E] in
 private lemma rhsTerm2_memLp_unconditional :
     MemLp (rhsTerm2 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -335,6 +342,7 @@ private lemma rhsTerm2_memLp_unconditional :
       (fun Q _ => rhsTerm2_summand_memLp_unconditional (I := I) (M := M)
         g r s i α P₀ P Q))
 
+omit [CompleteSpace E] in
 private lemma rhsTerm3_summand_memLp_unconditional
     (P Q : TensorCompIdx (E := E) r s) :
     MemLp
@@ -367,6 +375,7 @@ private lemma rhsTerm3_summand_memLp_unconditional
       g r s i α P)
     h_aezero
 
+omit [CompleteSpace E] in
 private lemma rhsTerm3_memLp_unconditional :
     MemLp (rhsTerm3 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -378,6 +387,7 @@ private lemma rhsTerm3_memLp_unconditional :
       (fun Q _ => rhsTerm3_summand_memLp_unconditional (I := I) (M := M)
         g r s i α P₀ P Q))
 
+omit [CompleteSpace E] in
 private lemma rhsTerm4_memLp_unconditional :
     MemLp (rhsTerm4 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -386,6 +396,7 @@ private lemma rhsTerm4_memLp_unconditional :
   exact covPrincipalRotationCoeffLimit_memLp_weighted_unconditional
     (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma rhsTerm5_memLp_unconditional :
     MemLp (rhsTerm5 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -394,6 +405,7 @@ private lemma rhsTerm5_memLp_unconditional :
   exact covLowerOrderRotationValueCoeffLimit_memLp_weighted_unconditional
     (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_memLp_unconditional :
     MemLp
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
@@ -406,6 +418,7 @@ private lemma weightedGradCoeffDivLimit_sum_memLp_unconditional :
     (fun l _ => weightedGradCoeffDivLimit_memLp_weighted_unconditional
       (I := I) (M := M) g r s i α P₀ l)
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditional :
     ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -418,6 +431,7 @@ private lemma weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditi
       weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
         (I := I) (M := M) g r s i α P₀ l hy))
 
+omit [CompleteSpace E] in
 private lemma crossRightGradCoeffDivLimit_memLp_weighted :
     MemLp (crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀) 2
@@ -440,6 +454,7 @@ private lemma crossRightGradCoeffDivLimit_memLp_weighted :
         (I := I) (M := M) g r s i α P₀ hy))
     h_plain
 
+omit [CompleteSpace E] in
 private lemma rhsTerm6_memLp_unconditional :
     MemLp (rhsTerm6 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -455,6 +470,7 @@ private lemma rhsTerm6_memLp_unconditional :
     (weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditional
       (I := I) (M := M) g r s i α P₀)
 
+omit [CompleteSpace E] in
 private lemma rhsTerm7_memLp_unconditional :
     MemLp (rhsTerm7 (I := I) (M := M) g r s i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -552,6 +568,7 @@ private def rhsAggregate_unconditional
     aggrComponent (I := I) (M := M) g r s i α P₀ +
     aggrCutoffPartial (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma aggrUchart_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -561,6 +578,7 @@ private lemma aggrUchart_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).1
 
+omit [CompleteSpace E] in
 private lemma aggrCrossLeft_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -570,6 +588,7 @@ private lemma aggrCrossLeft_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.1
 
+omit [CompleteSpace E] in
 private lemma aggrCrossRight_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -579,6 +598,7 @@ private lemma aggrCrossRight_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.1
 
+omit [CompleteSpace E] in
 private lemma aggrPartial_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -588,6 +608,7 @@ private lemma aggrPartial_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.2.1
 
+omit [CompleteSpace E] in
 private lemma aggrComponent_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -597,6 +618,7 @@ private lemma aggrComponent_le_rhsAggregate_unconditional
   rw [rhsAggregate_unconditional]
   exact (le_sixSum _ _ _ _ _ _).2.2.2.2.1
 
+omit [CompleteSpace E] in
 private lemma aggrCutoffPartial_le_rhsAggregate_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -613,6 +635,7 @@ section TermBoundsUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
+omit [CompleteSpace E] in
 private lemma rhsTerm1_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -626,6 +649,7 @@ private lemma rhsTerm1_eLpNorm_le_uniform_unconditional :
   exact le_trans (le_of_eq rfl)
     (aggrUchart_le_rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀)
 
+omit [CompleteSpace E] in
 private lemma rhsTerm2_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -720,6 +744,7 @@ private lemma rhsTerm2_eLpNorm_le_uniform_unconditional :
   rw [← h_eq, hμw_def]
   exact hC_bd i
 
+omit [CompleteSpace E] in
 private lemma rhsTerm3_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -813,6 +838,7 @@ private lemma rhsTerm3_eLpNorm_le_uniform_unconditional :
   rw [← h_eq, hμw_def]
   exact hC_bd i
 
+omit [CompleteSpace E] in
 private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -830,6 +856,7 @@ private lemma rhsTerm4_eLpNorm_le_uniform_unconditional :
   gcongr
   exact aggrPartial_le_rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀
 
+omit [CompleteSpace E] in
 private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -887,6 +914,7 @@ private lemma rhsTerm5_eLpNorm_le_uniform_unconditional :
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn,
           mul_comm C 2]
 
+omit [CompleteSpace E] in
 private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -978,6 +1006,7 @@ private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform_unconditional :
   rw [hμw_def] at hC_bd
   exact hC_bd i
 
+omit [CompleteSpace E] in
 private lemma rhsTerm6_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1027,6 +1056,7 @@ private lemma rhsTerm6_eLpNorm_le_uniform_unconditional :
           rhsAggregate_unconditional (I := I) (M := M) g r s i α P₀ := by
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
+omit [CompleteSpace E] in
 private lemma rhsTerm7_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1105,6 +1135,7 @@ section BracketBoundUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
+omit [CompleteSpace E] in
 private lemma rhsBracket_eLpNorm_le_uniform_unconditional :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1213,6 +1244,7 @@ section MainBoundUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_uniform_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

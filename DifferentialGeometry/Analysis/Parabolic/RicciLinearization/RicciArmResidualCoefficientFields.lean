@@ -41,7 +41,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,6 +53,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option maxHeartbeats 3200000
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :
     unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x m =
@@ -73,6 +75,9 @@ private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetri
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -106,6 +111,7 @@ private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemanni
     ring
   rw [hmd, hsymm]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
     (C D : SmoothCcTensor g₀ 2 2)
     (h : ∀ W : SmoothCcTensor g₀ 0 2,
@@ -230,9 +236,10 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationI
   rw [ccInputSymm_add (I := I) (M := M) g₀, ccInputSymm_add (I := I) (M := M) g₀,
     ccInputSymm_add (I := I) (M := M) g₀]
   abel
-set_option linter.unusedSectionVars false in
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCcTensor_apply (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =

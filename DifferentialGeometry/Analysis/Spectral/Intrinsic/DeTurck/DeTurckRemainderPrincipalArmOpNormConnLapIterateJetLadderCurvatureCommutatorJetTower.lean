@@ -40,7 +40,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,8 @@ section BalLadder
 
 variable (g₀ : SmoothRiemannianMetric I M)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_iteratedCovGrad_iteratedCovGrad_eq (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
     (Ψ : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g r (s + j) i (iteratedCovGrad (I := I) g r s j Ψ)‖ =
@@ -73,6 +75,8 @@ lemma norm_iteratedCovGrad_iteratedCovGrad_eq (g : SmoothRiemannianMetric I M) (
         (iteratedCovGrad (I := I) g r s j Ψ)‖ -
       ‖iteratedCovGrad (I := I) g r s (j + i) Ψ‖)]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma bal_icg_zero_tensor (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
   have h := iteratedCovGrad_sub (I := I) (M := M) g r s j
@@ -80,6 +84,7 @@ private lemma bal_icg_zero_tensor (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   rw [sub_self, sub_self] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma normSq_le_sum_normSq_of_pointwise_fiberNormSq_window (g : SmoothRiemannianMetric I M)
     {rz sz rw : ℕ} (Z : SmoothCcTensor g rz sz) (c : ℝ) (_hc : 0 ≤ c)
     (sw : ℕ → ℕ) (F : (i : ℕ) → SmoothCcTensor g rw (sw i)) (n : ℕ)
@@ -229,6 +234,7 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     _ = (Real.sqrt (cc₀ j) + Real.sqrt (cc₁ j) + Real.sqrt (cc₂ j)) * Sj := by ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covGrad_eq_iteratedCovGrad_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s X = iteratedCovGrad (I := I) g r s 1 X := rfl
@@ -522,6 +528,7 @@ lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemann
       ≤ (1 + 2 * cG b) * Sb + KT b 0 * Sb := add_le_add hpiece1 hpiece2
     _ = (1 + 2 * cG b + KT b 0) * Sb := by ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bal_iter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 1 S =
@@ -530,6 +537,7 @@ private lemma bal_iter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     oneMinusConnLapSmoothIter_zero]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bal_iter_succ_inner (g : SmoothRiemannianMetric I M) (r s : ℕ) (q : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s (q + 1) S =
@@ -537,8 +545,9 @@ private lemma bal_iter_succ_inner (g : SmoothRiemannianMetric I M) (r s : ℕ) (
         oneMinusConnLapSmoothIter (I := I) g r s q
           (rawTensorConnLapSmooth (I := I) g r s S) := by
   rw [oneMinusConnLapSmoothIter_add (I := I) (M := M) g r s q 1 S,
-    bal_iter_one (I := I) (M := M) g r s S,
-    oneMinusConnLapSmoothIter_sub (I := I) (M := M) g r s q]
+    bal_iter_one (I := I) (M := M) g r s S]
+  exact oneMinusConnLapSmoothIter_sub (I := I) (M := M) g r s q S
+    (rawTensorConnLapSmooth (I := I) g r s S)
 
 private lemma bal_sum_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (cL : ℕ → ℝ) (hcL_nn : ∀ b, 0 ≤ cL b)

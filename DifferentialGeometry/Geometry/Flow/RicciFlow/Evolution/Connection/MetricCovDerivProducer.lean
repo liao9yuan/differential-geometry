@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -40,7 +39,7 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type} [Fintype Idx] [DecidableEq Idx]
@@ -51,6 +50,7 @@ variable {u : Set M}
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_mdiffAt
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -82,6 +82,8 @@ theorem metricInner_mdiffAt
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricFrameComp_fixedBaseSwap_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -120,6 +122,8 @@ theorem metricFrameComp_fixedBaseSwap_of_solution
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivDeriv_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -200,6 +204,9 @@ def connectionVariationBlackBox_of_solution
 
 
 
+omit [DecidableEq Idx] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_solution
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

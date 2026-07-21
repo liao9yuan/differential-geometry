@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -53,6 +53,7 @@ private lemma mem_chartImagePOUTsupport_of_pou_pos
   refine ⟨(extChartAt I α) x, ⟨x, hx_supp, rfl⟩, ?_⟩
   rw [hext, hz_eq]
 
+omit [BoundarylessManifold I M] in
 private theorem eLpNorm_abs_rawPullR_ball_le_tensorL2Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y₀ : EuclN} {R c : ℝ} (hc_pos : 0 < c)
@@ -145,6 +146,7 @@ private theorem eLpNorm_abs_rawPullR_ball_le_tensorL2Norm
         calc X.toReal ≤ Real.sqrt c⁻¹ * (CA * L) := hXr_le
           _ = (Real.sqrt c⁻¹ * CA) * L := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem sharpRawPullCenter_le_jetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (IJ : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))
@@ -454,6 +456,7 @@ private theorem sharpRawPullCenter_le_jetSum
         ring
     _ = Cloc * (((m : ℝ) + 1) * (Cmax * Kmax)) * JS := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem sharpUniformRawPull_le_jetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (IJ : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))
@@ -541,6 +544,7 @@ private theorem sharpUniformRawPull_le_jetSum
       ≤ Cfun yi * jsn := h_bound
     _ ≤ Dmax * jsn := mul_le_mul_of_nonneg_right hCyi_le hjsn_nn
 
+omit [BoundarylessManifold I M] in
 private theorem sharpFiberNormSq_le_jetSum_on_superlevel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {c : ℝ} (hc_pos : 0 < c) :
@@ -713,6 +717,7 @@ private theorem sharpFiberNormSq_le_jetSum_on_superlevel
         mul_le_mul_of_nonneg_left h_sum_sq hC₁_nn
     _ = C₁ * npairs * Dmax ^ 2 * jsn ^ 2 := by ring
 
+omit [BoundarylessManifold I M] in
 theorem exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

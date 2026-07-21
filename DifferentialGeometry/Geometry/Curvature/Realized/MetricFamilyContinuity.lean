@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -33,11 +32,11 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
 
 
@@ -221,6 +220,7 @@ namespace MetricCLMSectionAux
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inCoordinates_metric_eq_chartGram_sum
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v w : E) :
@@ -283,6 +283,7 @@ set_option linter.unusedVariables false in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCLMSection_jointContMDiffOn_of_chartGram
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),

@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -23,16 +22,16 @@ open scoped Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
+omit [IsManifold I 2 M] in
+omit [CompleteSpace 𝕜] in
 theorem tangentConstInChart_eq_coordinateFrame_eventually
     (x₀ : M) (i : CoordinateIdx (𝕜 := 𝕜) E) :
     (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ ((Module.finBasis 𝕜 E) i) :

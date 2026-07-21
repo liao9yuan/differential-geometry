@@ -4,7 +4,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -319,6 +318,7 @@ def rmReactionInFrame
           uhlenbeckBTensorInFrame gInv (solutionRm04CompInFrame (I := I) Rm04 frame) t x a d b c)
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem raisedRm04CompInFrame_orthonormal
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -335,6 +335,7 @@ private theorem raisedRm04CompInFrame_orthonormal
   simp [Finset.mem_univ]
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormSqInFrame_eq_compNormSq4
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -355,6 +356,7 @@ theorem rm04NormSqInFrame_eq_compNormSq4
   ring
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem uhlenbeckBTensorInFrame_orthonormal
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -414,6 +416,7 @@ private theorem uhlenbeckBTensorInFrame_orthonormal
           · intro h; exact absurd (Finset.mem_univ f) h
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem rmReactionInFrame_eq_rmReactionDown
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -441,6 +444,7 @@ theorem rmReactionInFrame_eq_rmReactionDown
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_rmReactionInFrame_le
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -465,6 +469,8 @@ theorem abs_rmReactionInFrame_le
 
 
 
+omit [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -22,7 +22,6 @@ noncomputable section
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped BigOperators Manifold ContDiff Topology
@@ -41,6 +40,7 @@ noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
   TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_self (x : M) (v : TangentSpace I x) :
     tangentConstAt (I := I) x v x = v := by
   unfold tangentConstAt
@@ -56,6 +56,7 @@ noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
   rw [hL]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem mdifferentiableAt_tangentConstAt_self
     (x : M) (v : TangentSpace I x) :
     MDiffAt (T% (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p)) x := by
@@ -64,6 +65,7 @@ theorem mdifferentiableAt_tangentConstAt_self
     (𝕜 := Real) (I := I) (x₀ := x) (p := x) v
     (mem_baseSet_trivializationAt E (TangentSpace I) x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_add (x : M) (v w : TangentSpace I x) :
     (tangentConstAt (I := I) x (v + w) : (p : M) → TangentSpace I p) =
       (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p) +
@@ -71,12 +73,14 @@ theorem mdifferentiableAt_tangentConstAt_self
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_add (𝕜 := Real) (I := I) x v w
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp] theorem tangentConstAt_smul (x : M) (a : Real) (v : TangentSpace I x) :
     (tangentConstAt (I := I) x (a • v) : (p : M) → TangentSpace I p) =
       a • (tangentConstAt (I := I) x v : (p : M) → TangentSpace I p) := by
   unfold tangentConstAt
   exact TensorLieDeriv.tangentConstInChart_smul (𝕜 := Real) (I := I) x a v
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_apply_mdiffAt_self
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
@@ -128,6 +132,7 @@ theorem cov_tangentConst_apply_mdiffAt_self
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -168,6 +173,7 @@ theorem cov_smooth_apply_mdiffAt
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -206,6 +212,7 @@ theorem cov_smooth_apply_contMDiffAt
     simpa [e] using hcovY.clm_bundle_apply hX
   exact (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_smooth_apply_raw_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -245,6 +252,7 @@ theorem cov_smooth_apply_raw_mdiffAt
     (hcovY_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact (hcovY_at.mdifferentiableAt (by simp)).clm_bundle_apply hX
 
+omit [FiniteDimensional ℝ E] in
 theorem curvField_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -296,6 +304,7 @@ theorem curvField_contMDiffAt
   simpa [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZ, XZ, B] using
     (h1.sub_section h2).sub_section h3
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem metric_inner_contMDiffAt
     (g : SmoothRiemannianMetric I M)
     {X Y : (p : M) → TangentSpace I p} {x : M} {n : WithTop ℕ∞}
@@ -323,6 +332,7 @@ theorem metric_inner_contMDiffAt
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_add_apply_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (x : M) (v₁ v₂ w : TangentSpace I x) :
@@ -348,6 +358,7 @@ theorem cov_tangentConst_add_apply_eventuallyEq
   rw [cov.isCovariantDerivativeOnUniv.add hv₁ hv₂]
   simp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_smul_apply_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (x : M) (a : Real) (v w : TangentSpace I x) :
@@ -380,6 +391,7 @@ def riemannCurvatureAux
     (cov (fun p => (cov Z p) (X p)) x) (Y x) -
       (cov Z x) (VectorField.mlieBracket I X Y x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 @[simp]
 theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -389,6 +401,7 @@ theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -465,6 +478,7 @@ theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
   simp [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, hcovZY, hcovZX,
     hZ_at, hXx, hYx, hbr]
 
+omit [FiniteDimensional ℝ E] in
 theorem connectionRiemannCurvatureField_tensorial_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -517,6 +531,7 @@ theorem connectionRiemannCurvatureField_tensorial_left
     simp [map_add]
     module
 
+omit [FiniteDimensional ℝ E] in
 theorem connectionRiemannCurvatureField_tensorial_middle
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -711,6 +726,7 @@ private theorem connectionRiemannCurvatureField_smul_right_smooth
   module
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem connectionRiemannCurvatureField_add_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -785,6 +801,7 @@ private theorem connectionRiemannCurvatureField_add_right_smooth
   simp [YZ, YZ', XZ, XZ']
   module
 
+omit [CompleteSpace E] in
 private theorem smooth_linear_tangentSection_pointwise
     [T2Space M]
     {x : M}

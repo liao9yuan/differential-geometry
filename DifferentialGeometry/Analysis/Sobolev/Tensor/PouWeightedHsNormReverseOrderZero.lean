@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -68,6 +68,7 @@ lemma tensorChartComponentSqrtPou_sq
     (chartAtlasPOU I M).nonneg α b
   rw [tensorChartComponentSqrtPou_apply, mul_pow, Real.sq_sqrt hρ_nn]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -213,6 +214,7 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -280,6 +282,7 @@ private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem eLpNorm_tensorChartComponentSqrtPou_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -484,6 +487,7 @@ private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
     rw [sq_abs, sq_abs, hw_sq]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ B : ℝ, 0 ≤ B ∧
@@ -543,12 +547,14 @@ private noncomputable def sqrtPouChartConst
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
   (eLpNorm_chartPushedRaw_sqrtPou_le_uniform (I := I) (M := M) g r s α).choose
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sqrtPouChartConst_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     0 ≤ sqrtPouChartConst (I := I) (M := M) g r s α :=
   (eLpNorm_chartPushedRaw_sqrtPou_le_uniform (I := I) (M := M)
     g r s α).choose_spec.1
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sqrtPouChartConst_spec
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -811,6 +817,7 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
     _ = Real.sqrt Ksum * L := by
         rw [Real.sqrt_mul hKsum_nn, Real.sqrt_sq hL_nn]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorL2Norm_toFun_eq_norm
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (S : SmoothCcTensor g r s) :
     tensorL2Norm (I := I) (M := M) g r s S.toFun = ‖S‖ := by

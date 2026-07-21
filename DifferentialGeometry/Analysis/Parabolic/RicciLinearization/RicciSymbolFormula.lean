@@ -16,7 +16,7 @@ namespace RicciLinearization
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -25,13 +25,14 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 section InvGramBridge
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartInvGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :
     chartInvGramOnE (I := I) g x j l (extChartAt I x x) =
       chartInvGramMatrix (I := I) g x x j l := by
   rw [chartInvGramOnE_def, extChartAt_to_inv]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramMatrix_self_symm (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :
     chartInvGramMatrix (I := I) g x x j l =
@@ -51,19 +52,19 @@ def formComp (x : M)
     (c d : Fin (Module.finrank ℝ E)) : ℝ :=
   t ((chartModelBasis E) c) ((chartModelBasis E) d)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma formComp_def (x : M)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x t c d =
       t ((chartModelBasis E) c) ((chartModelBasis E) d) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma formComp_zero (x : M) (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x
       (0 : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) c d = 0 := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma formComp_add (x : M)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
@@ -71,14 +72,14 @@ lemma formComp_add (x : M)
       formComp (I := I) x t c d + formComp (I := I) x t' c d := by
   simp [formComp]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma formComp_smul (x : M) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x (a • t) c d = a * formComp (I := I) x t c d := by
   simp [formComp]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma formComp_symm (x : M)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (c d : Fin (Module.finrank ℝ E)) :
@@ -91,7 +92,7 @@ def formMetricTrace (g : SmoothRiemannianMetric I M) (x : M)
     ∑ n : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g x x m n * formComp (I := I) x t m n
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma formMetricTrace_def (g : SmoothRiemannianMetric I M) (x : M)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     formMetricTrace (I := I) g x t =
@@ -99,13 +100,13 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
         ∑ n : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x m n * formComp (I := I) x t m n := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma formMetricTrace_zero (g : SmoothRiemannianMetric I M) (x : M) :
     formMetricTrace (I := I) g x
       (0 : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) = 0 := by
   simp [formMetricTrace]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma formMetricTrace_add (g : SmoothRiemannianMetric I M) (x : M)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     formMetricTrace (I := I) g x (t + t') =
@@ -118,7 +119,7 @@ lemma formMetricTrace_add (g : SmoothRiemannianMetric I M) (x : M)
   rw [formComp_add]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma formMetricTrace_smul (g : SmoothRiemannianMetric I M) (x : M) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     formMetricTrace (I := I) g x (a • t) = a * formMetricTrace (I := I) g x t := by
@@ -135,7 +136,7 @@ def raisedFormContraction (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   ∑ l : Fin (Module.finrank ℝ E),
     raisedCovectorComp (I := I) g x ξ l * formComp (I := I) x t l k
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedFormContraction_def (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (k : Fin (Module.finrank ℝ E)) :
@@ -143,14 +144,14 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
       ∑ l : Fin (Module.finrank ℝ E),
         raisedCovectorComp (I := I) g x ξ l * formComp (I := I) x t l k := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedFormContraction_zero (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (k : Fin (Module.finrank ℝ E)) :
     raisedFormContraction (I := I) g x ξ
       (0 : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) k = 0 := by
   simp [raisedFormContraction]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContraction_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (k : Fin (Module.finrank ℝ E)) :
@@ -163,7 +164,7 @@ lemma raisedFormContraction_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E
   rw [formComp_add]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContraction_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (k : Fin (Module.finrank ℝ E)) :
@@ -180,7 +181,7 @@ def raisedFormContractionSnd (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   ∑ j : Fin (Module.finrank ℝ E),
     raisedCovectorComp (I := I) g x ξ j * formComp (I := I) x t i j
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedFormContractionSnd_def (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i : Fin (Module.finrank ℝ E)) :
@@ -188,14 +189,14 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
       ∑ j : Fin (Module.finrank ℝ E),
         raisedCovectorComp (I := I) g x ξ j * formComp (I := I) x t i j := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma raisedFormContractionSnd_zero (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (i : Fin (Module.finrank ℝ E)) :
     raisedFormContractionSnd (I := I) g x ξ
       (0 : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) i = 0 := by
   simp [raisedFormContractionSnd]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContractionSnd_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i : Fin (Module.finrank ℝ E)) :
@@ -208,7 +209,7 @@ lemma raisedFormContractionSnd_add (g : SmoothRiemannianMetric I M) (x : M) (ξ 
   rw [formComp_add]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContractionSnd_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (a : ℝ) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i : Fin (Module.finrank ℝ E)) :
@@ -219,7 +220,7 @@ lemma raisedFormContractionSnd_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ
   rw [formComp_smul]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContractionSnd_eq_of_symm (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (i : Fin (Module.finrank ℝ E)) :
@@ -248,7 +249,7 @@ def ricciSymbolComp (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           (chartModelBasis E).repr ξ k * (chartModelBasis E).repr ξ i *
             formComp (I := I) x t l j)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma ricciSymbolComp_def (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -269,7 +270,7 @@ end SymbolComponent
 
 section ClosedForm
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_term_one (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -303,7 +304,7 @@ private lemma sum_term_one (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           raisedFormContraction (I := I) g x ξ t k := by
         rw [raisedFormContraction_def, Finset.mul_sum]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_term_two (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -331,6 +332,7 @@ private lemma sum_term_two (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           raisedFormContractionSnd (I := I) g x ξ t i := by
         rw [raisedFormContractionSnd_def, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_term_three (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -346,7 +348,7 @@ private lemma sum_term_three (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_term_four (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -379,7 +381,7 @@ private lemma sum_term_four (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
         refine Finset.sum_congr rfl (fun m _ => ?_)
         rw [Finset.mul_sum]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma ricciSymbol_doubleSum_split (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -469,6 +471,7 @@ private lemma ricciSymbol_doubleSum_split (g : SmoothRiemannianMetric I M) (x : 
   rw [Finset.sum_congr rfl (fun j (_ : j ∈ Finset.univ) => hrow j),
     Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbolComp_eq_closedForm (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -520,6 +523,7 @@ end ClosedForm
 
 section Linearity
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbolComp_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -533,6 +537,7 @@ theorem ricciSymbolComp_add (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     formMetricTrace_add]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbolComp_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -544,6 +549,7 @@ theorem ricciSymbolComp_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (
     formMetricTrace_smul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem ricciSymbolComp_zero (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (i k : Fin (Module.finrank ℝ E)) :
     ricciSymbolComp (I := I) g x ξ
@@ -556,6 +562,7 @@ end Linearity
 
 section Symmetry
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricciSymbolComp_symm (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (i k : Fin (Module.finrank ℝ E)) :

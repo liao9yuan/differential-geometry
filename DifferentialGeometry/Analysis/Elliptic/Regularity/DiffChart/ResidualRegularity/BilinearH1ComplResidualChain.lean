@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace DiffChartBilinearH1ComplFinal
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerCLM_mem_image_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -77,6 +78,7 @@ theorem gradInnerCLM_mem_image_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_mem_pow_two_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ

@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,19 +40,24 @@ private abbrev Kα (α : M) : Set EuclN :=
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_compact (α : M) : IsCompact (Kα (I := I) (M := M) α) :=
   chartPouKernel_isCompact (I := I) (M := M) α
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_meas (α : M) : MeasurableSet (Kα (I := I) (M := M) α) :=
   chartPouKernel_measurableSet (I := I) (M := M) α
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_coef_mul_factor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -160,6 +165,7 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α) h_ae_eq).mp
     h_prod_memWkp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -185,6 +191,7 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma layer_D_memWkp
     (g : SmoothRiemannianMetric I M) (α : M) (K : ℕ)
     (lₙ : Fin (Module.finrank ℝ E))
@@ -202,6 +209,7 @@ private lemma layer_D_memWkp
     (densityDerivOnEuclid_contDiffOn (I := I) g α lₙ)
     h_prev_memWkp_K h_prev_ae_zero
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma layer_E_memWkp
     (g : SmoothRiemannianMetric I M) (α : M) (K : ℕ)
     (lₙ : Fin (Module.finrank ℝ E))
@@ -233,6 +241,7 @@ private lemma layer_E_memWkp
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -240,6 +249,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
+omit [CompleteSpace E] in
 private lemma iteratedPartial_ae_zero_off_Kα_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -253,6 +263,7 @@ private lemma iteratedPartial_ae_zero_off_Kα_unconditional
   eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s i α P₀ m l
 
+omit [CompleteSpace E] in
 private lemma layer_A_pair_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -309,6 +320,7 @@ private lemma layer_A_pair_memWkp_unconditional
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [CompleteSpace E] in
 private lemma layer_A_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -358,6 +370,7 @@ private lemma layer_A_memWkp_unconditional
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
     (fun a _ha => h_inner a)
 
+omit [CompleteSpace E] in
 private lemma layer_B_pair_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -408,6 +421,7 @@ private lemma layer_B_pair_memWkp_unconditional
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [CompleteSpace E] in
 private lemma layer_B_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -457,6 +471,7 @@ private lemma layer_B_memWkp_unconditional
           (Ωα (I := I) (M := M) α) y)
     (fun a _ha => h_inner a)
 
+omit [CompleteSpace E] in
 private lemma layer_C_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -493,6 +508,7 @@ private lemma layer_C_memWkp_unconditional
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -576,6 +592,7 @@ lemma eigenvectorChartRHSDiffNumerator_memWkp
   rw [← h_eq]
   exact h_step4
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_unconditional_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -709,6 +726,7 @@ private lemma eigenvectorChartRHSDiffNumerator_unconditional_ae_zero_off_Kα
   unfold eigenvectorChartRHSDiffNumerator
   rw [hA, hB, hC, hD, hE]; ring
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_div_density_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -750,6 +768,7 @@ lemma eigenvectorChartRHSDiffNumerator_div_density_memWkp
     (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_num_memWkp h_num_ae_zero
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

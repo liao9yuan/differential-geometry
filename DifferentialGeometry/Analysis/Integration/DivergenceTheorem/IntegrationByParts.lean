@@ -19,8 +19,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -40,7 +39,7 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 theorem tangentSectionAction_mul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f h : M → ℝ}

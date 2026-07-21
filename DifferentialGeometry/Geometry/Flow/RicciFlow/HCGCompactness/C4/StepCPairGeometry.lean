@@ -31,6 +31,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem NetLimitData.sigmaBall_nesting
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

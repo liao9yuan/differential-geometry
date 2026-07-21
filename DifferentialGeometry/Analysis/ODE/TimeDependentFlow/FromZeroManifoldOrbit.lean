@@ -221,6 +221,7 @@ private theorem fromZero_orbit_confined
     rw [hsδ]; exact hLδ
   · exact le_of_lt (hbound_to_openball s ⟨hs.1, hsδ⟩ (hmain hs))
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 theorem fromZero_manifold_orbit_of_lipschitz
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a r : ℝ≥0} {K L : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)
@@ -321,6 +322,7 @@ theorem fromZero_manifold_orbit_of_lipschitz
     rw [← hvelCLM]
     exact hbridge
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 private theorem fromZero_orbit_of_window
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T : ℝ}
     {a : ℝ≥0} {δ_w : ℝ} {K : ℝ≥0} {Mbd : ℝ}

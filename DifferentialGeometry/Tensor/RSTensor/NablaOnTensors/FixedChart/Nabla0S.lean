@@ -8,7 +8,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -55,6 +54,7 @@ noncomputable def fixedChartNabla0SModel (s : ℕ)
 
 
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 theorem fixedChartNabla0SModel_apply_slots (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -81,6 +81,7 @@ theorem fixedChartNabla0SModel_apply_slots (s : ℕ)
 
 
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 theorem fixedChartNabla0SModel_apply_slots_of_mem (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -116,6 +117,7 @@ theorem fixedChartNabla0SModel_apply_slots_of_mem (s : ℕ)
 
 
 
+omit [IsManifold I n M] in
 theorem fixedChartNabla0SModel_contDiffWithinAt (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)

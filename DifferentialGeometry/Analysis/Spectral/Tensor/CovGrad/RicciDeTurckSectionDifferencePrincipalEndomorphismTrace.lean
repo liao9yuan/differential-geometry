@@ -32,7 +32,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -84,6 +84,7 @@ private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemann
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply, Module.Basis.repr_self]
   rw [Finsupp.single_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) (x : M) (G : E →ₗ[ℝ] E) :
     ∑ k : Fin (Module.finrank ℝ E),
         g₁.inner x
@@ -232,6 +233,8 @@ private def alignedPrincipalCorrectionVec (g₀ g₁ : SmoothRiemannianMetric I 
               c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
             rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma alignedPrincipalEndoC_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x v =
@@ -242,6 +245,9 @@ private def alignedPrincipalCorrectionVec (g₀ g₁ : SmoothRiemannianMetric I 
               (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
             TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x))) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma g1Principal_splitC
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
@@ -287,6 +293,7 @@ private lemma g1Principal_splitC
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)) from rfl]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma alignedPrincipalEndoC_inner_secondKoszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -361,6 +368,7 @@ def secondKoszulFrameRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
                   (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                     ((Module.finBasis ℝ E).cDualBasis k)))])
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma alignedPrincipalEndoC_trace_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -447,6 +455,7 @@ def palatiniTracedPrincipalRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
   secondKoszulFrameRemainder (I := I) (M := M) g₀ g₁ S Z Y x
     + alignedPrincipalCorrectionTrace (I := I) (M := M) g₀ g₁ Z Y x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipal_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -525,6 +534,7 @@ noncomputable def combinedTrace42ModelZSlot
             koszulZSlotPerm3).toContinuousLinearEquiv.toContinuousLinearMap))
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem combinedTrace42ModelZ_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -609,6 +619,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -713,11 +725,15 @@ noncomputable def ricciArmPrincipalCoeffZSlot (g₀ g₁ : SmoothRiemannianMetri
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] theorem ricciArmPrincipalCoeffZ_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -826,6 +842,7 @@ private def secondCovGradZSlotCovec (g₀ : SmoothRiemannianMetric I M) (S : Smo
 
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x e ζ =
@@ -835,6 +852,8 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
           - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e e' : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (e + e') =
@@ -879,6 +898,8 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
   rw [h1, h2, h3]; ring
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (e : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (c • e) =
@@ -945,6 +966,8 @@ def alignedPrincipalEndoZSlot (g₀ g₁ : SmoothRiemannianMetric I M) (S : Smoo
     rw [dualToCotangent_smulC, map_smul]; rfl
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
@@ -962,6 +985,8 @@ private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I
   exact zPrincipalCovec_apply (I := I) (M := M) g₀ S V W x e ζ
 
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -982,6 +1007,7 @@ lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
   norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem alignedPrincipalEndoC_sub_endoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -1040,6 +1066,7 @@ def palatiniTracedPrincipalZRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
           W x (V x)) i)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

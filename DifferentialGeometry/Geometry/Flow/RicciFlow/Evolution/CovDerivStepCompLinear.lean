@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -23,6 +22,7 @@ open scoped BigOperators
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_add {r : ℕ}
     (extA extB : (Fin r → Idx) → Idx → Real)
     (chr : Idx → Idx → Idx → Real)
@@ -48,6 +48,7 @@ theorem covDerivStepComp_add {r : ℕ}
   ring
 
 
+omit [DecidableEq Idx] in
 theorem covDerivStepComp_smul {r : ℕ} (c : Real)
     (ext : (Fin r → Idx) → Idx → Real)
     (chr : Idx → Idx → Idx → Real)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -58,7 +57,7 @@ open scoped Manifold ContDiff BigOperators
 open Bundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -68,6 +67,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_mul_real
     {f h : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -344,7 +344,7 @@ theorem nabla_product_zero_of_zero {s q : ℕ}
 
 
 
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
 
 

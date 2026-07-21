@@ -43,7 +43,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -54,6 +54,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorH1Inner_symm (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s S T =
@@ -66,6 +68,8 @@ theorem tensorH1Inner_symm (g : SmoothRiemannianMetric I M) (r s : ℕ)
     intro x
     exact tensorCovDerivPointwiseInner_symm (I := I) (M := M) g r s S T x
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorH1Inner_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     0 ≤ tensorH1Inner (I := I) (M := M) g r s S S := by
@@ -76,6 +80,8 @@ theorem tensorH1Inner_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     intro x
     exact tensorCovDerivPointwiseInner_nonneg (I := I) (M := M) g r s S x
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorH1Inner_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s (S₁ + S₂) T =
@@ -104,6 +110,8 @@ theorem tensorH1Inner_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (tensorCovDerivPointwiseInner_integrable (I := I) (M := M) g r s S₂ T)]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorH1Inner_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S T : SmoothCcTensor g r s) :
     tensorH1Inner (I := I) (M := M) g r s (c • S) T =
@@ -133,12 +141,12 @@ namespace SmoothCcTensorH1
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[ext] theorem ext {S T : SmoothCcTensorH1 g r s}
     (h : S.toCcTensor = T.toCcTensor) : S = T := by
   cases S; cases T; congr
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toCcTensor_injective :
     Function.Injective (fun S : SmoothCcTensorH1 g r s => S.toCcTensor) := by
   intro S T h
@@ -153,26 +161,26 @@ instance : Sub (SmoothCcTensorH1 g r s) :=
 instance : SMul ℝ (SmoothCcTensorH1 g r s) :=
   ⟨fun c S => ⟨c • S.toCcTensor⟩⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_zero :
     (0 : SmoothCcTensorH1 g r s).toCcTensor = 0 := rfl
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_add (S T : SmoothCcTensorH1 g r s) :
     (S + T).toCcTensor = S.toCcTensor + T.toCcTensor := rfl
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_neg (S : SmoothCcTensorH1 g r s) :
     (-S).toCcTensor = -S.toCcTensor := rfl
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_sub (S T : SmoothCcTensorH1 g r s) :
     (S - T).toCcTensor = S.toCcTensor - T.toCcTensor := rfl
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_smul (c : ℝ) (S : SmoothCcTensorH1 g r s) :
     (c • S).toCcTensor = c • S.toCcTensor := rfl
 
 instance : SMul ℕ (SmoothCcTensorH1 g r s) := ⟨nsmulRec⟩
 instance : SMul ℤ (SmoothCcTensorH1 g r s) := ⟨zsmulRec⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_nsmul (S : SmoothCcTensorH1 g r s) (n : ℕ) :
     (n • S).toCcTensor = n • S.toCcTensor := by
   induction n with
@@ -185,7 +193,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
       have hn : (nsmulRec n S).toCcTensor = n • S.toCcTensor := ih
       rw [toCcTensor_add, hn, succ_nsmul]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_zsmul (S : SmoothCcTensorH1 g r s) (z : ℤ) :
     (z • S).toCcTensor = z • S.toCcTensor := by
   rcases z with n | n
@@ -258,6 +266,8 @@ noncomputable instance instInnerProductSpace
   InnerProductSpace.ofCore _
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem SmoothCcTensorH1.inner_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensorH1 g r s) :
@@ -265,6 +275,8 @@ noncomputable instance instInnerProductSpace
       tensorH1Inner (I := I) (M := M) g r s S.toCcTensor T.toCcTensor := rfl
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem SmoothCcTensorH1.norm_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :

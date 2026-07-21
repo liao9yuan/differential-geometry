@@ -9,7 +9,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
@@ -39,6 +38,7 @@ section ModelCovariantDerivative
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensorRSModel_eval_slots {r s : ℕ}
     (T : E → TensorRSModel r s 𝕜 E)
     (β : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r)
@@ -145,6 +145,7 @@ theorem covariantDeriv_tensorRSModelWithin_eval_derivation {r s : ℕ}
 
 section ChristoffelModelRS
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModel_eval_update_basis_sum_modelRS {d s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -182,6 +183,7 @@ private theorem continuousMultilinearMap_basis_apply_basis {d s : ℕ}
     lower
   simpa [Module.Basis.repr_self, Finsupp.single_apply] using h.symm
 
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
 private theorem basis_coord_update_sum_comm {d r : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (ΓX : E →L[𝕜] E)

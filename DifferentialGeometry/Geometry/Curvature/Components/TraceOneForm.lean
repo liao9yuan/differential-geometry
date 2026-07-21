@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.Lowering
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -60,6 +59,7 @@ def CurvatureTraceOneFormEqRicVectorAt
     curvatureTraceOneFormAt (I := I) Rm13 alpha basis gInv Y =
       Ric x (vec2 Y curvatureVector)
 
+omit [DecidableEq Idx] in
 theorem curvatureActionTraceEqualsRicVectorCoord_of_tensor
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -85,6 +85,7 @@ theorem curvatureActionTraceEqualsRicVectorCoord_of_tensor
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem basis_coord_eq_sum_inv_inner
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

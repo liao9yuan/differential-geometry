@@ -31,7 +31,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -66,6 +65,7 @@ noncomputable def Diffeomorph.pullbackInnerCross
     ContinuousLinearMap.precomp ℝ (mfderiv I J Φ x)
   precompOp.comp step1
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInnerCross_symm
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N)
     (x : M) (v w : TangentSpace I x) :
@@ -75,6 +75,7 @@ theorem Diffeomorph.pullbackInnerCross_symm
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
   exact g.symm (Φ x) _ _
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInnerCross_pos
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
@@ -97,12 +98,14 @@ theorem Diffeomorph.pullbackInnerCross_pos
 
 
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 theorem inner_comp_smooth_along_diffeoCross
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
     ContMDiff I (J.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) ∞
       ((fun b ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) b (g.inner b)) ∘ (Φ : M → N)) :=
   g.contMDiff.comp Φ.contMDiff
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem pullbackInnerCross_eval
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N)
     (x : M) (v w : TangentSpace I x) :
@@ -111,6 +114,7 @@ private theorem pullbackInnerCross_eval
   unfold Diffeomorph.pullbackInnerCross
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 private theorem mfderiv_eq_mfderivCLE_applyCross
     (Φ : M ≃ₘ⟮I, J⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Φ infty_ne_zero_cross x v
@@ -120,6 +124,7 @@ private theorem mfderiv_eq_mfderivCLE_applyCross
 
 
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 theorem Diffeomorph.pullbackInnerCross_isVonNBounded
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
     ∀ x : M, Bornology.IsVonNBounded ℝ
@@ -159,6 +164,7 @@ theorem Diffeomorph.pullbackInnerCross_isVonNBounded
 
 
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
 private theorem mfderiv_apply_section_smooth_along_diffeoCross
     (Φ : M ≃ₘ⟮I, J⟯ N)
     (Y : ∀ x : M, TangentSpace I x)
@@ -240,6 +246,7 @@ noncomputable def Diffeomorph.pullbackMetricCross
     rfl
 
 
+omit [FiniteDimensional ℝ F] in
 theorem diffeomorph_pullback_metric_existsCross
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
@@ -249,6 +256,7 @@ theorem diffeomorph_pullback_metric_existsCross
 
 
 
+omit [FiniteDimensional ℝ F] in
 theorem Diffeomorph.pullbackMetricCross_inner
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) (x : M) (v w : TangentSpace I x) :
@@ -258,6 +266,7 @@ theorem Diffeomorph.pullbackMetricCross_inner
 
 
 
+omit [FiniteDimensional ℝ F] in
 theorem Diffeomorph.pullbackInnerCross_contMDiff
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (Φ : M ≃ₘ⟮I, J⟯ N) :
@@ -268,6 +277,7 @@ theorem Diffeomorph.pullbackInnerCross_contMDiff
 
 
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 theorem Diffeomorph.mfderiv_contMDiffCross
     (Φ : M ≃ₘ⟮I, J⟯ N) :
     ContMDiff I J ∞ (Φ : M → N) :=

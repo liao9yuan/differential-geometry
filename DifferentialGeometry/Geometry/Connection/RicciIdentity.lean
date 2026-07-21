@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -27,12 +26,11 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [Module.Finite Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [T2Space M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -84,7 +82,9 @@ theorem oneFormRicciIdentity_algebra
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 theorem oneFormRicciIdentity_of_connection
+    [FiniteDimensional Real E]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (x : M)
@@ -98,7 +98,7 @@ theorem oneFormRicciIdentity_of_connection
     (hcurv : ConnectionCurvatureCoordAt (I := I) cov x)
     (hcoord : OneFormThirdCommChristoffelCoordAt (I := I) cov x alpha nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha :=
-  one_form_third_comm_coord_of_christoffelCurv (I := I) cov hcov Rm13 x alpha
+  one_form_third_comm_coord_of_christoffelCurv (I := I) inferInstance cov hcov Rm13 x alpha
     nabla2Alpha hRm hcurv hcoord
 
 
@@ -106,7 +106,10 @@ theorem oneFormRicciIdentity_of_connection
 
 
 
+omit [FiniteDimensional ℝ E] in
+omit [IsManifold I 2 M] in
 theorem oneFormRicciIdentity_of_smooth_connection
+    [FiniteDimensional Real E]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (x : M)
@@ -125,7 +128,10 @@ theorem oneFormRicciIdentity_of_smooth_connection
     hRm hcov_one (connection_curvature_coord_of_christoffel (I := I) cov hcov x) hcoord
 
 
+omit [FiniteDimensional ℝ E] in
+omit [IsManifold I 2 M] in
 theorem oneFormRicciIdentity_of_connection_apply
+    [FiniteDimensional Real E]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (x : M)
@@ -146,7 +152,10 @@ theorem oneFormRicciIdentity_of_connection_apply
       hRm hcov hcurv hcoord) X Y Z
 
 
+omit [FiniteDimensional ℝ E] in
+omit [IsManifold I 2 M] in
 theorem oneFormRicciIdentity_of_smooth_connection_apply
+    [FiniteDimensional Real E]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (x : M)

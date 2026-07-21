@@ -17,7 +17,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ section LowerOrderWkpNormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -170,6 +171,7 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_indicatorFactor_mul_atom_le_uniform
     (α : M) (K : ℕ) {coef : EuclN → ℝ}
     (hcoef : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -245,6 +247,7 @@ private lemma exists_uniform_const_of_finite_wkpNorm_bounds_uniform
   exact Finset.single_le_sum
     (f := fun j' => Cf j') (fun j' _ => hCf_nn j') (Finset.mem_univ j)
 
+omit [CompleteSpace E] in
 theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -395,6 +398,7 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
 
+omit [CompleteSpace E] in
 theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -735,6 +739,7 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                     EuclN → ℝ) y) Ω)) := by
       rw [mul_add]
 
+omit [CompleteSpace E] in
 theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))

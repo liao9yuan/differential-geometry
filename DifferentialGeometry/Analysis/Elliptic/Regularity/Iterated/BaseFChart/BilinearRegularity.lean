@@ -19,7 +19,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedBaseFChartRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,6 +46,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -76,6 +77,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) (m + 1)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -106,6 +108,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) m
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g)
     (i : Fin (Module.finrank ℝ E)) :
@@ -879,6 +882,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
         wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
             rw [ENNReal.ofReal_add hC_grad_pos.le hC_lap_pos.le]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothFChartResidual_memWkp_m
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp

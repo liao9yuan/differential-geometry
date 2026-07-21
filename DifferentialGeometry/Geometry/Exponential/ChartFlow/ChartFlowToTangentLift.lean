@@ -18,7 +18,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,7 +34,7 @@ def chartFlowOrbitLift (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) :
   fun s => (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
     (Φ (((extChartAt I p p, v) : E × E), s))
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbitLift_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) (s : ℝ) :
     chartFlowOrbitLift (I := I) Φ p v s =
@@ -47,7 +47,7 @@ section InverseChart
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_extChartAt_tangent_zero_target
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -66,7 +66,7 @@ lemma mem_extChartAt_tangent_zero_target
       (extChartAt I p).map_target hz1_target
     rwa [extChartAt_source] at hz1_src
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma extChartAt_tangent_zero_symm_proj
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -100,7 +100,7 @@ lemma extChartAt_tangent_zero_symm_proj
     (extChartAt I p).left_inv hq_extsrc_base
   rw [h_z1, hinv]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma extChartAt_tangent_zero_apply_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -109,7 +109,7 @@ lemma extChartAt_tangent_zero_apply_symm
   (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).right_inv
     (mem_extChartAt_tangent_zero_target (I := I) (p := p) hz)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartAt_source_of_extChartAt_tangent_zero_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -134,6 +134,7 @@ section InitialValue
 variable [I.Boundaryless]
 
 omit [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLift_zero
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E}
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -198,7 +199,7 @@ section ProjectionIdentity
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_proj
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -208,7 +209,7 @@ theorem chartFlowOrbitLift_proj
   unfold chartFlowOrbitLift
   exact extChartAt_tangent_zero_symm_proj (I := I) p hΦ_target
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_proj_mem_chartAt_source
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -224,6 +225,7 @@ section ChartPushLiftIdentification
 variable [I.Boundaryless]
 
 omit [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLift_chartPushLift_eq
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -251,7 +253,7 @@ section Continuity
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLift_continuousOn
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} {T : ℝ}
     (hΦ_cont : ContinuousOn (fun s : ℝ => Φ (((extChartAt I p p, v) : E × E), s))
@@ -281,6 +283,7 @@ section IntegralCurveAtZero
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -393,6 +396,7 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
   exact hleft.symm
 
 omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLift_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -423,6 +427,8 @@ section HeadlineUniform
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_chartFlowOrbitLift_data_uniform
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

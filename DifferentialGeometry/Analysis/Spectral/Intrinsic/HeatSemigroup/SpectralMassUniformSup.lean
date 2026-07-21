@@ -11,7 +11,7 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,6 +32,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {a : ℝ} {T : ℝ}
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem forcingMass_summable_of_couple (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) {b : ℝ}
     (hcouple : ∀ d : ℝ,
@@ -42,6 +44,8 @@ private theorem forcingMass_summable_of_couple (hT : 0 ≤ T)
   hcouple σ
     (solFieldMass_summable_all (I := I) (M := M) hT f hcouple hbase (σ + 1))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem weighted_perModeConv_sq_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) (σ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ}
@@ -90,6 +94,8 @@ private theorem weighted_perModeConv_sq_le (hT : 0 ≤ T)
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
     _ = T * forcingMass (I := I) (M := M) f σ i := by rw [forcingMass]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem spectralMass_sup_le_of_timeL2_allHs (hT : 0 < T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) {b : ℝ}
     (hcouple : ∀ d : ℝ,

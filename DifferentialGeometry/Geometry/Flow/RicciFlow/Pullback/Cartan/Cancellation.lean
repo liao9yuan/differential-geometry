@@ -21,12 +21,14 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem neg_lieDerivMetric_eq_neg_killing_sum
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -39,6 +41,8 @@ theorem neg_lieDerivMetric_eq_neg_killing_sum
   rw [cartan_formula_for_lie_deriv_metric (I := I) g X y p q]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lie_deriv_metric_neg_eq_pushforward_variation_sum
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -63,6 +67,8 @@ theorem pushforward_pairing_deriv_eq_neg_lieDerivMetric_of_sum
     Lpush = -lieDerivMetric (I := I) g X y p q := by
   rw [h_sum, h_AB]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem cartan_cancellation_value_identity
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -78,6 +84,8 @@ theorem cartan_cancellation_value_identity
     (lie_deriv_metric_neg_eq_pushforward_variation_sum (I := I) g X y p q
       A' B' h_A_value h_B_value)
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem hasDerivAt_pushforward_pairing_eq_neg_lieDerivMetric
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -127,6 +135,8 @@ theorem hasDerivAt_pushforward_pairing_eq_neg_lieDerivMetric
   convert h_total using 1
   exact hL.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurck_pullback_cartan_cancellation
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (g_bg : SmoothRiemannianMetric I M)

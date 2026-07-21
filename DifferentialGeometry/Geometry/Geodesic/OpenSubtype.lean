@@ -105,6 +105,7 @@ private theorem chartGramOnE_open [I.Boundaryless]
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_open [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : U)
@@ -176,6 +177,7 @@ theorem christoffel_open [I.Boundaryless]
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem contr_open [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : U) (v w : E) :
@@ -194,6 +196,7 @@ theorem contr_open [I.Boundaryless]
   intro j _
   rw [christoffel_open (I := I) g U a i j k]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem geodesicEq_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) (t : Real) :
@@ -228,6 +231,7 @@ private theorem geodesicEq_open_iff [I.Boundaryless]
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem geodesicOn_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) (s : Set Real) :
@@ -241,6 +245,7 @@ theorem geodesicOn_open_iff [I.Boundaryless]
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem geodesic_open_iff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (gamma : Real → U) :

@@ -23,7 +23,7 @@ open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section UpperBoundViaTwist
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -55,6 +56,7 @@ theorem exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
       (I := I) (M := M) g r s α hb_base T T] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -85,6 +87,7 @@ end UpperBoundViaTwist
 
 section UpperBoundViaTrivProj
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_tensorInnerPointwise_upper_bound_via_trivProj_norm_sq_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

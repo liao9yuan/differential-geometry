@@ -23,7 +23,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -55,12 +55,14 @@ noncomputable def scalarSmul
       show TensorRSSpace.toModel (w.toSection x) = w.toFun x from rfl, hw_zero,
       smul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma scalarSmul_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
     (scalarSmul (I := I) (M := M) g r s ζ w).toSection x =
       (ζ : M → ℝ) x • w.toSection x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma scalarSmul_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
@@ -70,6 +72,7 @@ noncomputable def scalarSmul
     TensorRSSpace.toModel_smul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivAt_scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -124,6 +127,8 @@ noncomputable def tensorCovDerivCrossRight
           (TensorRSSpace.toModel
             (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j))))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivCrossLeft_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -137,6 +142,8 @@ lemma tensorCovDerivCrossLeft_def
                   ((chartModelBasis E) i)))
               (S.toFun x)) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivCrossRight_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -150,6 +157,7 @@ lemma tensorCovDerivCrossRight_def
                 (tensorCovDerivAt (I := I) (M := M) g r s S x
                   ((chartModelBasis E) j)))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -187,6 +195,7 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
   simp only [tensorInnerPointwise_smul_left]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -224,6 +233,8 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
   simp only [tensorInnerPointwise_smul_right]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smul_const_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -244,6 +255,7 @@ private lemma smul_const_tensorCovDerivPointwiseInner
   intro i _
   rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorCovDerivPointwiseInner_scalarSmul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :

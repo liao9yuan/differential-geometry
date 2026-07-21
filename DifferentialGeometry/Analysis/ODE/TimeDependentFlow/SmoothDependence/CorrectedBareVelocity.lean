@@ -43,10 +43,10 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hq_src]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chartflow_eq_bareflow
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (flow : E → ℝ → E) (y : E) {a b : ℝ}
     (hconf : ∀ t ∈ Set.Ioo a b, flow y t ∈ (extChartAt I α).target)

@@ -13,13 +13,14 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -301,6 +302,7 @@ lemma partialDeriv_chartInvGramOnE_eq
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv2_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (i j : Fin (Module.finrank ℝ E))
@@ -712,6 +714,7 @@ lemma partialDeriv2_chartInvGramOnE_eq
     rw [hsymm l s]]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramOnE_symm_fun
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -719,6 +722,7 @@ lemma chartGramOnE_symm_fun
   funext y
   exact chartGramOnE_symm (I := I) g α i j y
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartInvGramOnE_symm_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :

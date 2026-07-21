@@ -23,6 +23,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_sobolev_intrinsic_nabla_equivalence_tensors_h1
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

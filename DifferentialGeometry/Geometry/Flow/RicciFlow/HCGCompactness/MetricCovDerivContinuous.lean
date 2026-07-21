@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFr
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -44,7 +43,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+  [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -81,6 +80,7 @@ private noncomputable def orthoFrameBasis
         exact absurd (Finset.mem_univ b) hb)
     (by rw [Fintype.card_fin]; rfl)
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 private lemma orthoFrameBasis_apply
     (gRef : SmoothRiemannianMetric I M) (z₀ : M) {y : M}
@@ -100,6 +100,7 @@ private noncomputable def orthoFrameSection
   ContMDiffSection.mk (smoothOrthoFrame (I := I) gRef z₀ i)
     (smoothOrthoFrame_smooth (I := I) gRef z₀ i)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 private lemma orthoFrameSection_apply
     (gRef : SmoothRiemannianMetric I M) (z₀ : M)
@@ -109,6 +110,8 @@ private lemma orthoFrameSection_apply
 
 
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma metricCovDerivNorm_eq_sum_sq_on_nbhd
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) (z₀ : M) {z : M}
     (hz : z ∈ smoothOrthoFrameNbhd (I := I) (M := M) z₀) :
@@ -148,6 +151,8 @@ private lemma metricCovDerivNorm_eq_sum_sq_on_nbhd
 
 
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_continuousAt
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) (z₀ : M) :
     ContinuousAt (fun z : M => metricCovDerivNorm (I := I) q h gRef z) z₀ := by
@@ -202,6 +207,8 @@ theorem metricCovDerivNorm_continuousAt
 
 
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_continuous
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) :
     Continuous (fun z : M => metricCovDerivNorm (I := I) q h gRef z) :=
@@ -212,6 +219,8 @@ theorem metricCovDerivNorm_continuous
 
 
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_bddAbove_of_isCompact
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
     BddAbove ((fun z : M => metricCovDerivNorm (I := I) q h gRef z) '' K) :=
@@ -219,6 +228,8 @@ theorem metricCovDerivNorm_bddAbove_of_isCompact
 
 
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_le_of_isCompact
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
     ∃ C : Real, ∀ z : M, z ∈ K -> metricCovDerivNorm (I := I) q h gRef z <= C := by
@@ -238,6 +249,7 @@ theorem metricCovDerivNorm_le_of_isCompact
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem smoothRiemannianMetric_eq_of_inner
     {h₁ h₂ : SmoothRiemannianMetric I M}
     (hinner : (fun x => h₁.inner x) = fun x => h₂.inner x) :
@@ -250,6 +262,8 @@ theorem smoothRiemannianMetric_eq_of_inner
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem restrictOpen_eq_of_eqOn
     (h₁ h₂ : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -265,6 +279,8 @@ theorem restrictOpen_eq_of_eqOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_eq_of_eqOn
     (h₁ h₂ gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -280,6 +296,8 @@ theorem metricCovDeriv_eq_of_eqOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivNorm_eq_of_eqOn
     (h₁ h₂ gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U]

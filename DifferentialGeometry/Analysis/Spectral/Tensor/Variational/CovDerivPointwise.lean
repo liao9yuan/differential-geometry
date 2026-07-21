@@ -39,7 +39,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -57,6 +57,8 @@ noncomputable def tensorCovDerivAt
   tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     (fun y : M => S.toSection y) x v
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -64,6 +66,8 @@ lemma tensorCovDerivAt_def
       tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun y : M => S.toSection y) x v := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -95,6 +99,8 @@ lemma tensorCovDerivAt_add
   rw [hclm]
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivAt_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -138,6 +144,8 @@ noncomputable def tensorCovDerivPointwiseInner
         (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g r s T x ((chartModelBasis E) j)))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivPointwiseInner_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :
@@ -152,6 +160,8 @@ lemma tensorCovDerivPointwiseInner_def
               (tensorCovDerivAt (I := I) (M := M) g r s T x
                 ((chartModelBasis E) j))) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivPointwiseInner_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :
@@ -171,6 +181,8 @@ lemma tensorCovDerivPointwiseInner_symm
   rw [hG]
   rw [tensorInnerPointwise_symm]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivPointwiseInner_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) (x : M) :
@@ -192,6 +204,8 @@ lemma tensorCovDerivPointwiseInner_add_left
   rw [hAdd, TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivPointwiseInner_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S T : SmoothCcTensor g r s) (x : M) :
@@ -211,6 +225,8 @@ lemma tensorCovDerivPointwiseInner_smul_left
   rw [hSmul, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
   ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorCovDerivPointwiseInner_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -394,6 +410,8 @@ noncomputable def tensorH1Inner
     ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T x
       ∂(riemannianVolumeMeasure (I := I) (M := M) g)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorH1Inner_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

@@ -22,7 +22,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,12 +41,12 @@ def metricFlatLinear (g : SmoothRiemannianMetric I M) (x : M) :
     change g.inner x (c • v) u = c • g.inner x v u
     rw [map_smul, ContinuousLinearMap.smul_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 @[simp] lemma metricFlatLinear_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     metricFlatLinear (I := I) g x v w = g.inner x v w := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 lemma metricFlatLinear_injective (g : SmoothRiemannianMetric I M) (x : M) :
     Function.Injective (metricFlatLinear (I := I) g x) := by
   intro v w hvw
@@ -67,7 +67,7 @@ private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional ℝ (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional ℝ E)
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma metricFlatLinear_finrank_eq (x : M) :
     Module.finrank ℝ (TangentSpace I x) =
       Module.finrank ℝ (TangentSpace I x →ₗ[ℝ] ℝ) :=
@@ -80,12 +80,10 @@ def metricFlatMap (g : SmoothRiemannianMetric I M) (x : M) :
     (metricFlatLinear_injective (I := I) g x)
     (metricFlatLinear_finrank_eq (I := I) (M := M) x)
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma metricFlatMap_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     metricFlatMap (I := I) g x v w = g.inner x v w := rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma metricFlatMap_apply_symm (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
     g.inner x ((metricFlatMap (I := I) g x).symm α) w = α w := by
@@ -99,18 +97,15 @@ def metricSharp (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) : TangentSpace I x :=
   (metricFlatMap (I := I) g x).symm α
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma metricSharp_def (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) :
     metricSharp (I := I) g x α = (metricFlatMap (I := I) g x).symm α := rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma inner_metricSharp (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
     g.inner x (metricSharp (I := I) g x α) w = α w :=
   metricFlatMap_apply_symm (I := I) g x α w
 
-omit [InnerProductSpace ℝ E] in
 lemma inner_metricSharp_right (g : SmoothRiemannianMetric I M) (x : M)
     (α : TangentSpace I x →ₗ[ℝ] ℝ) (w : TangentSpace I x) :
     g.inner x w (metricSharp (I := I) g x α) = α w := by
@@ -121,26 +116,22 @@ def gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     TangentSpace I x :=
   metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma gradFun_def (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     gradFun (I := I) g f x =
       metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap := rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma inner_gradFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x (gradFun (I := I) g f x) v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   rw [gradFun_def]
   exact inner_metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap v
 
-omit [InnerProductSpace ℝ E] in
 lemma inner_gradFun_right (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x v (gradFun (I := I) g f x) = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   rw [g.symm x v (gradFun (I := I) g f x)]
   exact inner_gradFun (I := I) g f x v
 
-omit [InnerProductSpace ℝ E] in
 lemma gradFun_eq_zero_of_mfderiv_eq_zero
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) {x : M}
     (hf : mfderiv I 𝓘(ℝ, ℝ) f x = 0) :
@@ -156,7 +147,6 @@ def chartInvGramMatrix (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   (chartGramMatrix (I := I) g α x)⁻¹
 
-omit [InnerProductSpace ℝ E] in
 lemma chartInvGramMatrix_mul_chartGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -167,7 +157,6 @@ lemma chartInvGramMatrix_mul_chartGramMatrix
   unfold chartInvGramMatrix
   exact Matrix.nonsing_inv_mul _ hdet_unit
 
-omit [InnerProductSpace ℝ E] in
 lemma chartGramMatrix_mul_chartInvGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -178,7 +167,6 @@ lemma chartGramMatrix_mul_chartInvGramMatrix
   unfold chartInvGramMatrix
   exact Matrix.mul_nonsing_inv _ hdet_unit
 
-omit [InnerProductSpace ℝ E] in
 lemma chartGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -222,7 +210,6 @@ lemma chartGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (σ k) k
 
-omit [InnerProductSpace ℝ E] in
 lemma chartInvGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -266,14 +253,12 @@ noncomputable def chartInvGramMatrix_l1Sum
   ∑ ij : (Fin (Module.finrank ℝ E)) × (Fin (Module.finrank ℝ E)),
     |chartInvGramMatrix (I := I) g α x ij.1 ij.2|
 
-omit [InnerProductSpace ℝ E] in
 lemma chartInvGramMatrix_l1Sum_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-omit [InnerProductSpace ℝ E] in
 lemma chartInvGramMatrix_l1Sum_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (chartInvGramMatrix_l1Sum (I := I) (M := M) g α)
@@ -302,7 +287,6 @@ def gradChartCoeff (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     chartInvGramMatrix (I := I) g α x i j *
       partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x)
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma gradChartCoeff_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -317,7 +301,6 @@ def gradChartLocal (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x 
     gradChartCoeff (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
 
-omit [InnerProductSpace ℝ E] in
 lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
     (α : M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -402,7 +385,6 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
   rw [hmfderiv_chartBasis]
   rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma inner_gradChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -506,7 +488,6 @@ lemma inner_gradChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-omit [InnerProductSpace ℝ E] in
 lemma gradChartLocal_eq_gradFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} {x : M} (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -560,7 +541,6 @@ lemma gradChartLocal_eq_gradFun
   congr 1
   rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k, hmfderiv_basis k]
 
-omit [InnerProductSpace ℝ E] in
 theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     (g : SmoothRiemannianMetric I M) [I.Boundaryless]
     (α : M) {f : M → ℝ} {x : M}
@@ -732,7 +712,6 @@ theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     exact mul_le_mul_of_nonneg_left (h_dj_dk_le_D j k) (abs_nonneg _)
   exact h_main_le
 
-omit [InnerProductSpace ℝ E] in
 private lemma gradChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -786,7 +765,6 @@ private lemma gradChartCoeff_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-omit [InnerProductSpace ℝ E] in
 private lemma gradChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -826,7 +804,6 @@ private lemma gradChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-omit [InnerProductSpace ℝ E] in
 private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -844,7 +821,6 @@ private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     · congr 1
       exact (isOpen_extChartAt_target (I := I) α).interior_eq
 
-omit [InnerProductSpace ℝ E] in
 lemma gradFun_contMDiff_total [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -888,14 +864,12 @@ def grad_g [I.Boundaryless]
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨fun x : M => gradFun (I := I) g f x, gradFun_contMDiff_total (I := I) g hf⟩
 
-omit [InnerProductSpace ℝ E] in
 @[simp] lemma grad_g_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     (grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       gradFun (I := I) g f x := rfl
 
-omit [InnerProductSpace ℝ E] in
 theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -907,7 +881,6 @@ theorem tangentSectionAction_eq_inner_grad_g [I.Boundaryless]
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
 
-omit [InnerProductSpace ℝ E] in
 theorem inner_grad_g_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
@@ -918,7 +891,6 @@ theorem inner_grad_g_symm [I.Boundaryless]
         ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) :=
   g.symm x _ _
 
-omit [InnerProductSpace ℝ E] in
 lemma gradFun_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ))) :
@@ -928,7 +900,6 @@ lemma gradFun_eq_zero_of_eventuallyEq_zero
   rw [mfderiv_const]
   rfl
 
-omit [InnerProductSpace ℝ E] in
 lemma support_gradFun_subset
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     Function.support (fun x : M => gradFun (I := I) g f x) ⊆ tsupport f := by
@@ -941,7 +912,6 @@ lemma support_gradFun_subset
     exact hy (subset_tsupport _ hne)
   exact hx (gradFun_eq_zero_of_eventuallyEq_zero (I := I) g hev)
 
-omit [InnerProductSpace ℝ E] in
 lemma hasCompactSupport_grad_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hf_cs : HasCompactSupport f) :

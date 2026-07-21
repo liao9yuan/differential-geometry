@@ -77,18 +77,20 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRHS_diff_frame_component_apply
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -100,12 +102,14 @@ theorem deTurckRHS_diff_frame_component_apply
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) := by
   rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRHS_diff_frame_component_contMDiffOn
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -128,7 +132,6 @@ theorem deTurckRHS_diff_frame_component_contMDiffOn
   exact deTurckRHS_diff_frame_component_apply (I := I) g_bg g₁ g₂ α x i j
 
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -143,6 +146,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem deTurckRHS_diff_gNorm_le_modelNorm_pointwise
     (g₀ : SmoothRiemannianMetric I M) (x₀ : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
@@ -159,6 +163,7 @@ def metricDiff02 (g₁ g₂ : SmoothRiemannianMetric I M) :
     Π b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
   fun b => metricTensor02 (I := I) g₁ b - metricTensor02 (I := I) g₂ b
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem metricDiff02_apply
     (g₁ g₂ : SmoothRiemannianMetric I M) (b : M) (v w : TangentSpace I b) :
     metricDiff02 (I := I) g₁ g₂ b v w =
@@ -183,6 +188,8 @@ def metricDiff02Cov (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (b : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem metricDiff02Cov_eq_sub
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (b : M) :
     metricDiff02Cov (I := I) g₀ g₁ g₂ b =
@@ -237,6 +244,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricTensor02Cov_mdiffAtTensor03
     (g₀ g : SmoothRiemannianMetric I M) (x : M) :
     MDiffAtTensor03 (I := I)
@@ -279,6 +288,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff02CovIterate_eq_sub
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (b : M) :
     metricDiff02CovIterate (I := I) g₀ g₁ g₂ b =
@@ -320,6 +331,7 @@ theorem metricDiff02CovIterate_eq_sub
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor03_pairing_contMDiff
     {S : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hS : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -364,6 +376,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor03Cov_quad_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -449,6 +462,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem tensor03Cov_output_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -498,6 +512,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor02CovIterate_metric_contMDiff
     (g₀ g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))))) ∞
@@ -534,6 +550,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor02Cov_metric_contMDiff
     (g₀ g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -562,6 +580,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private theorem continuous_riemannian_fiber_norm_of_continuous_section
     {F₀ : Type*} [NormedAddCommGroup F₀] [NormedSpace ℝ F₀]
     {V₀ : M → Type*} [∀ x, NormedAddCommGroup (V₀ x)] [∀ x, InnerProductSpace ℝ (V₀ x)]
@@ -581,6 +600,7 @@ private theorem continuous_riemannian_fiber_norm_of_continuous_section
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor02_pairing_contMDiff
     {S : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hS : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -612,6 +632,7 @@ private theorem tensor02_pairing_contMDiff
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor04_pairing_contMDiff
     {S : Π x : M, TangentSpace I x →L[ℝ]
       (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)))}
@@ -644,6 +665,7 @@ private theorem tensor04_pairing_contMDiff
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem chartFrame_component_contMDiffOn_aux
     {S : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hS : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -680,6 +702,7 @@ private theorem chartFrame_component_contMDiffOn_aux
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff02_contMDiff (g₁ g₂ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
@@ -703,6 +726,7 @@ private def metricDiff02ModelFun (g₁ g₂ : SmoothRiemannianMetric I M) (x : M
   Tensor0SSpace.ofModel (I := I)
     (biForm₂ToModel (TangentSpace I x) (metricDiff02 (I := I) g₁ g₂ x))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff02ModelFun_toModel_apply
     (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02ModelFun (I := I) g₁ g₂ x) v =
@@ -744,6 +768,7 @@ def metricDiff02Field (g₁ g₂ : SmoothRiemannianMetric I M) :
     rw [metricDiff02ModelFun_toModel_apply]
     rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem metricDiff02Field_toModel_apply
     (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02Field (I := I) g₁ g₂ x) v =
@@ -755,6 +780,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem metricDiff02Cov_contMDiff (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
@@ -781,6 +808,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 800000 in
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem chartFrame_component3_contMDiffOn_aux
     {S : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hS : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -825,6 +853,8 @@ private def metricDiff02CovModelFun (g₀ g₁ g₂ : SmoothRiemannianMetric I M
   Tensor0SSpace.ofModel (I := I)
     (triFormToModel (TangentSpace I x) (metricDiff02Cov (I := I) g₀ g₁ g₂ x))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff02CovModelFun_toModel_apply
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 3 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02CovModelFun (I := I) g₀ g₁ g₂ x) v =
@@ -869,6 +899,8 @@ def metricDiff02CovField (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
     rw [metricDiff02CovModelFun_toModel_apply]
     rfl⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem metricDiff02CovField_toModel_apply
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 3 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02CovField (I := I) g₀ g₁ g₂ x) v =
@@ -880,6 +912,8 @@ set_option synthInstance.maxHeartbeats 800000 in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem metricDiff02CovIterate_contMDiff (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))))) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))))
@@ -907,6 +941,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 800000 in
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem chartFrame_component4_contMDiffOn_aux
     {S : Π x : M, TangentSpace I x →L[ℝ]
       (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)))}
@@ -952,6 +987,8 @@ private def metricDiff02CovIterateModelFun (g₀ g₁ g₂ : SmoothRiemannianMet
   Tensor0SSpace.ofModel (I := I)
     (quadFormToModel (TangentSpace I x) (metricDiff02CovIterate (I := I) g₀ g₁ g₂ x))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff02CovIterateModelFun_toModel_apply
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02CovIterateModelFun (I := I) g₀ g₁ g₂ x) v =
@@ -996,6 +1033,8 @@ def metricDiff02CovIterateField (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
     rw [metricDiff02CovIterateModelFun_toModel_apply]
     rfl⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem metricDiff02CovIterateField_toModel_apply
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel (metricDiff02CovIterateField (I := I) g₀ g₁ g₂ x) v =
@@ -1056,6 +1095,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff2JetNorm_eq_riemannianNorm_sum
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
@@ -1077,6 +1118,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff2JetNorm_nonneg
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     0 ≤ metricDiff2JetNorm (I := I) g₀ g₁ g₂ x := by
@@ -1107,6 +1150,8 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff2JetNorm_continuous
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
     Continuous (fun x : M => metricDiff2JetNorm (I := I) g₀ g₁ g₂ x) := by
@@ -1157,13 +1202,13 @@ def chartDeTurckRHSComp (g_bg g : SmoothRiemannianMetric I M) (α : M)
   (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
     + chartLieDeTurckComp (I := I) g g_bg α i j y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem chartDeTurckRHSComp_def (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartDeTurckRHSComp (I := I) g_bg g α i j y =
       (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
         + chartLieDeTurckComp (I := I) g g_bg α i j y := rfl
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -1190,6 +1235,8 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

@@ -21,7 +21,6 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -53,7 +52,6 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -183,6 +181,7 @@ def ham3Scalar
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalarSTCont
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -310,6 +309,7 @@ abbrev limit (L : Ham3CGHLimitData (I := I) M) :
 def subseq (L : Ham3CGHLimitData (I := I) M) : Nat -> Nat :=
   fun k => L.origIndex (L.cghSubseq k)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem subseq_strict (L : Ham3CGHLimitData (I := I) M) :
     StrictMono L.subseq :=
   L.origStrict.comp L.cghStrict
@@ -710,6 +710,7 @@ def ham3ScalarLap
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalarRegular
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -841,6 +842,7 @@ def Ham3Section9PinchFixed
           (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
           P.S.scalar T delta
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem Ham3Section9PinchFixed.toVarying
     {g0 : SmoothRiemannianMetric I M}
     {P : Ham3FlowPackage (I := I) (M := M) g0} {omega : Real}
@@ -1008,6 +1010,7 @@ structure Ham3CompactInput
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_time74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1019,6 +1022,7 @@ theorem ham3_time74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar0_cont74
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
@@ -1063,6 +1067,7 @@ theorem ham3_scalar0_cont74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ricci_pos0
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1088,6 +1093,7 @@ theorem ham3_ricci_pos0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar0_pos74
     (hdim : Module.finrank Real E = 3)
     {omega : Real} (h0ω : 0 < omega)
@@ -1120,6 +1126,7 @@ theorem ham3_scalar0_pos74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_init74
     [CompactSpace M] [Nonempty M]
     (hdim : Module.finrank Real E = 3)
@@ -1140,6 +1147,7 @@ theorem ham3_init74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_cont74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1165,6 +1173,7 @@ theorem ham3_cont74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_evol74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1201,6 +1210,7 @@ theorem ham3_evol74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_lap74
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (T : Real) :
@@ -1218,6 +1228,7 @@ theorem ham3_lap74
         rfl)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_reg74
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1249,6 +1260,7 @@ theorem ham3_reg74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ricBound74
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
@@ -1288,6 +1300,7 @@ theorem ham3_ricBound74
     using h
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_lip74
     [CompactSpace M]
     {omega : Real}
@@ -1362,6 +1375,7 @@ theorem ham3_lip74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar74
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1430,6 +1444,7 @@ theorem ham3_scalar74
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_finite_time
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1454,6 +1469,7 @@ theorem ham3_finite_time
       hricci hF_lip
   exact ⟨c0, hfinite.1, hfinite.2⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ham3_rm_scalar_ctl
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1538,6 +1554,7 @@ private theorem scalar_gt_of_rm {A R rm : Real}
     mul_nonneg hdiff hsum
   nlinarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ham3_scalar_cont_slab
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1551,6 +1568,7 @@ private theorem ham3_scalar_cont_slab
   intro hTω
   exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem slab_max_of_continuousOn
     [CompactSpace M]
     {f : Real × M -> Real}
@@ -1601,6 +1619,7 @@ private theorem ham3PointLevel_ge_index (B : Real) (i : Nat) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar_blowup
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -1636,6 +1655,7 @@ theorem ham3_scalar_blowup
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_point_select
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -1832,6 +1852,7 @@ theorem ham3_point_select
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch9_fixed
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1886,6 +1907,7 @@ theorem ham3_pinch9_fixed
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch9
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1901,6 +1923,7 @@ theorem ham3_pinch9
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_ric_nonneg9
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1951,6 +1974,7 @@ theorem ham3_ric_nonneg9
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rescaled_ric_nonneg
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2004,6 +2028,7 @@ theorem ham3_rescaled_ric_nonneg
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_scalar_pos
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
@@ -2116,6 +2141,7 @@ theorem ham3_scalar_pos
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp_can
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2156,6 +2182,7 @@ theorem ham3_pinch_imp_can
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_pinch_imp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2194,6 +2221,7 @@ theorem ham3_pinch_imp
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rm_bound
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2291,6 +2319,7 @@ theorem ham3_rm_bound
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_r0_window
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2309,6 +2338,7 @@ theorem ham3_r0_window
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_radius_event
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2349,6 +2379,7 @@ theorem ham3_radius_event
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rm_control
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2430,6 +2461,7 @@ theorem ham3_rm_control
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_noncollapse_of
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2494,6 +2526,7 @@ theorem ham3_cgh_limit
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_mid_regular
     {L : Ham3CGHLimitData (I := I) M}
     (hreg : Ham3LimitRegWin (I := I) L) :
@@ -2504,6 +2537,7 @@ theorem limit_mid_regular
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_ric_nonneg
     (_hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2527,6 +2561,7 @@ theorem limit_ric_nonneg
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_base_scalar_one
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2561,6 +2596,7 @@ theorem limit_base_scalar_one
   simpa [LimitBaseScalarOne] using heq
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_scalar_nonneg
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2622,6 +2658,7 @@ theorem limit_scalar_nonneg
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_inherit
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2665,6 +2702,7 @@ theorem limit_inherit
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_tf_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2688,6 +2726,7 @@ theorem limit_tf_decay
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_tf_zero_of_decay
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2721,6 +2760,7 @@ theorem limit_tf_zero_of_decay
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_tf_zero
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
@@ -2746,6 +2786,7 @@ theorem limit_tf_zero
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limitEinstein_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2853,6 +2894,7 @@ theorem limitEinstein_of_tf0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_round_of_ein
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2972,6 +3014,7 @@ theorem limit_round_of_ein
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_const_sec_of_einstein
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2994,6 +3037,7 @@ theorem limit_const_sec_of_einstein
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem const_pos_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -3011,6 +3055,7 @@ theorem const_pos_of_tf0
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limit_const_pos
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -3143,6 +3188,7 @@ theorem ham3_limit_const_metric
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 theorem ham3_const_of_limit
     (hlim : exists gInf : SmoothRiemannianMetric I M,
       ConstPosSecMetric (I := I) (M := M) gInf) :
@@ -3217,6 +3263,7 @@ theorem ham3_space_box
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem spaceForm_const_metric
     (hM : Closed3Manifold (I := I) (M := M))
     (model : IsSphericalSpaceFormQuotient I M) :
@@ -3236,6 +3283,7 @@ theorem spaceForm_const_metric
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_const_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hsph : SphericalSpaceForm (I := I) (M := M)) :

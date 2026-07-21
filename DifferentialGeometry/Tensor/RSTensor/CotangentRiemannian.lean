@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -36,6 +35,7 @@ def cotangentToDual_gen {x : M} (α : Tensor0SSpace 1 I x) :
     Module.Dual Real (TangentSpace I x) :=
   (cotangentToCLM_gen (I := I) α).toLinearMap
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem cotangentToDual_apply_gen {x : M}
     (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
     cotangentToDual_gen (I := I) α X = α (fun _ : Fin 1 => X) := by
@@ -56,11 +56,13 @@ def cotangentToDualLinear_gen {x : M} :
     ext X
     rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem cotangentToDualLinear_apply_gen {x : M}
     (α : Tensor0SSpace 1 I x) :
     cotangentToDualLinear_gen (I := I) α = cotangentToDual_gen (I := I) α := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 theorem cotangentToDualLinear_injective_gen {x : M} :
     Function.Injective (cotangentToDualLinear_gen (I := I) (x := x)) := by
   intro α β h
@@ -418,6 +420,7 @@ theorem basisInvMetric_real {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
               simp [hij, hji]
 
 
+omit [FiniteDimensional ℝ E] in
 theorem invBasis_unique {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -445,6 +448,7 @@ theorem invBasis_unique {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   simpa [A, B] using hAB
 
 
+omit [FiniteDimensional ℝ E] in
 theorem invMetric_symm {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -481,6 +485,7 @@ theorem invMetric_symm {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem coord_eq_invInner {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -568,6 +573,7 @@ theorem cotangentInner_dualToCotangent_tangentFlat_gen
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem eq_of_inner_basis_eq_gen
     {Idx : Type*} [Finite Idx]
     (g : SmoothMetric_gen I M) (x : M)

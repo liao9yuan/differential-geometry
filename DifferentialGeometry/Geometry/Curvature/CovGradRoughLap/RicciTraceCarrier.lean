@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open TensorMultilinear
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -59,6 +59,8 @@ def ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M) :
         rfl }
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricEndoRaisedFib_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ricEndoRaisedFib (I := I) g x v =
@@ -66,6 +68,9 @@ omit [CompactSpace M] [I.Boundaryless] in
   rw [ricEndoRaisedFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g.inner x (ricEndoRaisedFib (I := I) g x v) w = ricciTensor (I := I) g x v w := by
@@ -74,6 +79,8 @@ lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricEndoRaisedFib_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -145,6 +152,8 @@ def ricSlotOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma ricSlotOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) :
     ricSlotOpFib (I := I) (M := M) g s x D =
@@ -156,6 +165,9 @@ omit [CompactSpace M] [I.Boundaryless] in
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :
     Tensor0SSpace.toModel (ricSlotOpFib (I := I) (M := M) g s x D) (Fin.cons v0 vs) =
@@ -174,6 +186,8 @@ lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel (s + 1) (s + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel (s + 1) (s + 1) ℝ E)
@@ -243,6 +257,7 @@ def ricSlotOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricSlotOpField_toSection (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (ricSlotOpField (I := I) (M := M) g s).toSection x =
       (show TensorRSSpace (s + 1) (s + 1) I x from ricSlotOpFib (I := I) (M := M) g s x) := rfl
@@ -253,6 +268,7 @@ def ricTraceSection (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTens
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricTraceSection_toSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) (x : M) :
     (ricTraceSection (I := I) (M := M) g s S).toSection x =
@@ -302,6 +318,7 @@ theorem exists_ricTraceSection_fiberNormSq_bound
   nlinarith [h, hfgS_nn, hfS_nn, hC_nn s, mul_nonneg (hC_nn s) hfgS_nn]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricTraceSection_zero_apply (g : SmoothRiemannianMetric I M) (f : SmoothCcTensor g 0 0)
     (x : M) (v : E) :
     Tensor0SSpace.toModel

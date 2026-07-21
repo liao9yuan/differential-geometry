@@ -31,7 +31,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -58,6 +58,7 @@ lemma chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
   rw [tensorTrivProj_eq_chartRSTwistInv_toFun (I := I) (M := M) g r s α S hb]
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb r s (S.toFun b)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorTrivProj_norm_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -113,6 +114,7 @@ lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
     Finset.sum_nonneg (fun _ _ => norm_nonneg _)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -220,6 +222,7 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     rw [hzero_sq]
     exact h_RHS_nn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -326,6 +329,7 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -393,6 +397,7 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -30,6 +30,7 @@ variable [CompleteSpace E]
 
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_proportional_recCurvDiffOp
     (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))

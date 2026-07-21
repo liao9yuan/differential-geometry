@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -80,7 +79,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -95,6 +93,7 @@ variable {n : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (A B C : TangentSpace I x)
@@ -128,6 +127,7 @@ private theorem tensor04_vec4_sum_last
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_orthoBasis_expand
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
@@ -173,6 +173,7 @@ private theorem cotangentSharp_orthoBasis_expand
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_orthoBasis_eq_sum
     (g : SmoothRiemannianMetric I M) {x : M} {s : ℕ}
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -227,6 +228,7 @@ theorem curvatureAction0SAt_orthoBasis_eq_sum
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_curvatureAction0SAt_orthoBasis_le
     (g : SmoothRiemannianMetric I M) {x : M} {s : ℕ}
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -300,6 +302,8 @@ section OrthoBasisFrame
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem exists_orthoBasisFrameAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :
@@ -358,6 +362,7 @@ variable {n : ℕ}
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem abs_nablaLapComm_T2_orthoBasis_le
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
@@ -455,6 +460,7 @@ theorem compNormSqMulti_eq_compNormSq5
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem abs_nablaLapComm_T2_orthoFrame_le
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :

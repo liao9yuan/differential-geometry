@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -38,7 +37,7 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -67,6 +66,7 @@ noncomputable def covDerivOfField
           metricCovDerivStep (I := I) gRef a A)
 
 
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_succ
     (gRef : SmoothRiemannianMetric I M)
     (A0 :
@@ -78,6 +78,7 @@ theorem covDerivOfField_succ
   rfl
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ
     (h gRef : SmoothRiemannianMetric I M) (a : Nat) :
     metricCovDeriv (I := I) h gRef (a + 1)
@@ -86,6 +87,7 @@ theorem metricCovDeriv_succ
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_eq_covDerivOfField
     (h gRef : SmoothRiemannianMetric I M) (a : Nat) :
     metricCovDeriv (I := I) h gRef a
@@ -95,6 +97,7 @@ theorem metricCovDeriv_eq_covDerivOfField
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_apply
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
     (A :
@@ -113,6 +116,7 @@ theorem metricCovDerivStep_apply
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_eval_smooth_slots_gen
     (h gRef : SmoothRiemannianMetric I M) (a : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -138,6 +142,7 @@ theorem metricCovDeriv_succ_eval_smooth_slots_gen
     (metricCovDeriv (I := I) h gRef a) x
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real) (a : Nat)
     (A :
@@ -150,6 +155,7 @@ theorem metricCovDerivStep_smul
     metricCovDerivStep_apply, Tensor0SBundle.totalNabla0SFun_smul]
 
 
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real)
     (A0 :
@@ -164,6 +170,7 @@ theorem covDerivOfField_smul
       rw [covDerivOfField_succ, covDerivOfField_succ, ih, metricCovDerivStep_smul]
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_add
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
     (A B :
@@ -177,6 +184,7 @@ theorem metricCovDerivStep_add
     Tensor0SBundle.totalNabla0SFun_add]
 
 
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_add
     (gRef : SmoothRiemannianMetric I M)
     (A0 B0 :
@@ -193,6 +201,7 @@ theorem covDerivOfField_add
 
 
 
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_sub
     (gRef : SmoothRiemannianMetric I M)
     (A0 B0 :
@@ -240,6 +249,7 @@ noncomputable def covStep
       (I := I) (M := M) s cov A hreg
 
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem covStep_apply
     (gRef : SmoothRiemannianMetric I M) (s : Nat)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -252,6 +262,7 @@ noncomputable def covStep
   rfl
 
 
+omit [SigmaCompactSpace M] in
 theorem covStep_add
     (gRef : SmoothRiemannianMetric I M) (s : Nat)
     (A B : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -276,6 +287,7 @@ noncomputable def iterCov
   Nat.rec A0 (fun a A => covStep (I := I) gRef (r + a) A)
 
 
+omit [SigmaCompactSpace M] in
 theorem iterCov_succ
     (gRef : SmoothRiemannianMetric I M) (r : Nat)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -286,6 +298,7 @@ theorem iterCov_succ
   rfl
 
 
+omit [SigmaCompactSpace M] in
 theorem iterCov_add
     (gRef : SmoothRiemannianMetric I M) (r : Nat)
     (A0 B0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -329,6 +342,7 @@ noncomputable def telescAccum
 
 
 
+omit [SigmaCompactSpace M] in
 theorem iterCov_telescoping
     (g₁ g₂ : SmoothRiemannianMetric I M) (r : Nat)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)

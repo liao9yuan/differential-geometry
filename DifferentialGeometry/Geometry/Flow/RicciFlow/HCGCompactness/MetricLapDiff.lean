@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -30,18 +29,17 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold ContDiff Topology BigOperators
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E]
-  [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [CompactSpace M] [NeZero (Module.finrank Real E)]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem mtf_eq_mt0S
     (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.metricTensorField (I := I) g x =
@@ -49,6 +47,8 @@ private theorem mtf_eq_mt0S
   ext v
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
 
+omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 private theorem diffZero_eq
     (h g gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDiffCovDerivAt (I := I) 0 h g gRef x =
@@ -58,6 +58,8 @@ private theorem diffZero_eq
       Tensor0SBundle.metricTensorField (I := I) g x = _
   rw [mtf_eq_mt0S, mtf_eq_mt0S]
 
+omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 private theorem covSelfOneAt
     (g : SmoothRiemannianMetric I M) (x : M) :
     metricCovDeriv (I := I) g g 1 x = 0 := by
@@ -93,6 +95,8 @@ private theorem covSelfOneAt
     _ = 0 := by rw [hzero]; rfl
     _ = (0 : Tensor0SBundle.Tensor0SSpace 3 I x) slots := rfl
 
+omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 private theorem covOne_eq_deriv
     (h g : SmoothRiemannianMetric I M) (x : M) :
     metricCovDerivNorm (I := I) 1 h g x =
@@ -104,6 +108,7 @@ private theorem covOne_eq_deriv
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (1 + 2) A))
     (sub_zero (metricCovDeriv (I := I) h g 1 x))).symm
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem normSq0S_nonneg'
     (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A : Tensor0SBundle.Tensor0SSpace s I x) :
@@ -120,6 +125,7 @@ private theorem normSq0S_nonneg'
     (I := I) g x s basis hinv A]
   exact Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem normSqRS_nonneg'
     (g : SmoothRiemannianMetric I M) (x : M) (r s : Nat)
     (A : Tensor0SBundle.TensorRSSpace r s I x) :
@@ -138,6 +144,7 @@ private theorem normSqRS_nonneg'
   exact Finset.sum_nonneg fun _ _ =>
     Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [NeZero (Module.finrank ℝ E)] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem trace_sq_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace 2 I x) :
@@ -161,6 +168,8 @@ private theorem trace_sq_le
 
 
 
+omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lcDiff_norm_le
     {K : Set M} (g h : SmoothRiemannianMetric I M) {C : Real}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -183,6 +192,9 @@ theorem lcDiff_norm_le
     (I := I) h g hx C hEq basis hhinv
   simpa only [covOne_eq_deriv] using hdiff
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 private theorem delta_eq_lap
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
@@ -191,6 +203,8 @@ private theorem delta_eq_lap
   exact (laplacian_levi_eq (E := E) (H := H) (I := I) (M := M)
     (g := g) (f := f) hf x).symm
 
+omit [CompactSpace M] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private theorem lapDiff_sq_core
     (g h : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
@@ -409,6 +423,8 @@ private theorem lapDiff_sq_core
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem lapDiff_sq_le
     (g h : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)

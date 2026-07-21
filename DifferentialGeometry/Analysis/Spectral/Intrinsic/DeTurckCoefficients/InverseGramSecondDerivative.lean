@@ -17,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -144,6 +144,7 @@ private lemma abs_prod3_lip
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -230,6 +231,7 @@ theorem invGramD2_abs_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -386,6 +388,7 @@ theorem invGramD2_sub_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_bnd
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -448,6 +451,7 @@ theorem invGramD2_pou_bnd
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_lip
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)

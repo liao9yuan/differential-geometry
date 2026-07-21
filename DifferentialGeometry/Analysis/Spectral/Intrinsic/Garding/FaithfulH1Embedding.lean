@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -243,6 +243,9 @@ theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
         eigenvectorResolvent (I := I) (M := M) g 0 2 i := by
   exact smoothEigen_h1_eq (I := I) (M := M) g 2 i
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorEigenIdx_val_pos
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -254,6 +257,9 @@ theorem tensorEigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem one_add_lambda_eq_inv_val
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

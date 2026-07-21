@@ -117,7 +117,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -129,6 +128,9 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_eq_ricci_add_lie
     (g_bg g : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -151,7 +153,6 @@ theorem abstractRHSFrameComponent_eq_ricci_add_lie
     ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -161,6 +162,9 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_eq
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -185,12 +189,14 @@ theorem abstractRHSFrameComponent_diff_eq
     abstractRHSFrameComponent_eq_ricci_add_lie (I := I) g_bg g₂ α x i j]
   ring
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractLieFrameComponent_eq_chartMatrix
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -220,6 +226,9 @@ theorem abstractLieFrameComponent_eq_chartMatrix
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity
     (g : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -240,6 +249,9 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannOp_eq_chartRiemannCLM_apply'
     (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     riemannOp (cov := LeviCivita (I := I) (smoothRiemannianMetricToInfty (I := I) g)) x v w u =
@@ -251,6 +263,9 @@ theorem riemannOp_eq_chartRiemannCLM_apply'
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_eq_chartRicciSwap
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -268,6 +283,9 @@ theorem ricciTensor_eq_chartRicciSwap
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFun_eq_ricciTensor_swap
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -283,6 +301,9 @@ theorem ricciFun_eq_ricciTensor_swap
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciFun_eq_ricciTensor
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -298,6 +319,9 @@ theorem ricciFun_eq_ricciTensor
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRicciFrameComponent_eq_chartRicciSwap
     (g : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -312,7 +336,6 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap
     (chartRiemannBasisIdentity_holds (I := I)
       (smoothRiemannianMetricToInfty (I := I) g) x)
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -321,6 +344,9 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRicciFrameComponent_eq_chartRicciAlpha
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q : Fin (Module.finrank ℝ E)) {x : M}
@@ -333,13 +359,14 @@ theorem abstractRicciFrameComponent_eq_chartRicciAlpha
   exact ricciTensor_chartBasisVec_alpha_eq (I := I)
     (smoothRiemannianMetricToInfty (I := I) g) α p q hx
 
-set_option linter.unusedSectionVars false in
 
 
 
 
 
 
+omit [CompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartCarrierRHSComp_diff_abs_le_jet2
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -350,7 +377,6 @@ theorem chartCarrierRHSComp_diff_abs_le_jet2
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   exists_chartDeTurckRHSComp_lipschitz_on_compact (I := I) g_bg g₁ g₂ α hK hKsub
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -360,6 +386,9 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_eq_chartCarrier
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -376,10 +405,12 @@ theorem abstractRHSFrameComponent_eq_chartCarrier
   rw [chartDeTurckRHSComp_def]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -392,9 +423,9 @@ theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
     abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₁ α i j hx,
     abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₂ α i j hx]
 
-set_option linter.unusedSectionVars false in
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     (extChartAt I α).symm y ∈ chartLeviCivitaGoodSet (I := I) α ∧
@@ -409,7 +440,6 @@ private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
     rw [extChartAt_source] at hsrc; exact hsrc
   · rw [hround]; exact hy
 
-set_option linter.unusedSectionVars false in
 
 
 
@@ -427,6 +457,8 @@ set_option linter.unusedSectionVars false in
 
 
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem abstractRHSFrameComponent_diff_abs_le_jet2
     (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

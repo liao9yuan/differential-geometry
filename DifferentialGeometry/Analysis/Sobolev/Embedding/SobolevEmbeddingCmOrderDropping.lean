@@ -22,7 +22,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   DifferentialGeometry.Analysis.Laplacian.TensorRegularity in
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGradCompPull_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -86,6 +87,7 @@ private lemma rawPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       rawPull (I := I) (M := M) g r s T α Idx Jdx := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -98,6 +100,7 @@ private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -108,6 +111,7 @@ private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGrad_iteratedFDeriv_eq (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -156,6 +160,7 @@ private lemma chartPushedRaw_eventuallyEq_rawPull (g : SmoothRiemannianMetric I 
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartial_term_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -213,6 +218,8 @@ private lemma euclidPartial_term_iteratedFDeriv_norm_le
     _ = ‖iteratedFDeriv ℝ (j + 1) u y‖ := h_fderiv_iter
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivLowerOrderCoeff_contDiffAt (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (m : Fin (Module.finrank ℝ E))
     (Idx Idx' : Fin r → Fin (Module.finrank ℝ E))
@@ -302,6 +309,7 @@ private lemma exists_lowerOrderCoeff_uniform_bound
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerOrderTerm_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
@@ -394,6 +402,7 @@ private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
   rw [h_round]; simp
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covGrad_component_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (_hΓbd_nn : 0 ≤ Γbd)
@@ -573,6 +582,7 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
+omit [BoundarylessManifold I M] in
 private lemma covGradComp_basisSum_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)
@@ -732,7 +742,7 @@ private lemma covGradComp_basisSum_le_rhsHsContent
       _ = (n : ℝ) ^ (2 * σ) * B0 ^ 2 * R := by ring
   exact key
 
-private def combinedConst (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+private def combinedConst (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] (r s σ : ℕ) (Γbd : ℝ) : ℝ :=
   (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin (s + 1) → Fin (Module.finrank ℝ E))) : ℝ) * ((2 * σ + 1 : ℕ) : ℝ) *
@@ -744,6 +754,7 @@ private lemma combinedConst_nonneg (r s σ : ℕ) {Γbd : ℝ} (hΓbd_nn : 0 ≤
     0 ≤ combinedConst E r s σ Γbd := by
   unfold combinedConst; positivity
 
+omit [BoundarylessManifold I M] in
 private lemma covGrad_pointwise_integrand_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)
@@ -866,6 +877,7 @@ private lemma pouPullCont (α : M) :
   exact hPOU_cont.comp_continuousOn h_inner
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma rawPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -906,6 +918,7 @@ private lemma rawPullIntegrand_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma sumIntegrals_eq_integral_sum
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1101,6 +1114,7 @@ private lemma sumIntegrals_eq_integral_sum
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
+omit [BoundarylessManifold I M] in
 private lemma covGrad_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γfun : M → ℝ) (Γmax : ℝ) (hΓmax_nn : 0 ≤ Γmax)
@@ -1234,6 +1248,7 @@ private lemma covGrad_per_alpha_inner_bound
     rw [hzero]
     exact zero_le _
 
+omit [BoundarylessManifold I M] in
 theorem exists_covGrad_tensorPouSobolevHsNorm_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1316,6 +1331,7 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
         rw [ENNReal.ofReal_rpow_of_nonneg hCmax_nn (by norm_num : (0 : ℝ) ≤ 1 / 2),
           ← Real.sqrt_eq_rpow]
 
+omit [BoundarylessManifold I M] in
 theorem covGrad_toHs_norm_le
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1344,6 +1360,7 @@ theorem covGrad_toHs_norm_le
     _ = C * (tensorPouSobolevHsNorm (I := I) (M := M) g (σ + 1) T).toReal := by
         rw [ENNReal.toReal_ofReal hC_nn]
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toHs_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (j σ : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1379,6 +1396,7 @@ theorem iteratedCovGrad_toHs_norm_le
               ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (σ + (j + 1)) T‖ := by
             rw [hord]; ring
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGradSobolevNorm_le_baseSpectral
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (hjk : j ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1405,6 +1423,7 @@ theorem iteratedCovGradSobolevNorm_le_baseSpectral
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
@@ -1453,6 +1472,7 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2_singleNorm
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :

@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
     reindexCoeffFibGen_apply)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -42,6 +42,8 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem deTurckLieDLbCoeffField_eq_slotInsert_sum
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg =
@@ -173,6 +175,8 @@ private theorem deTurckLieDLbCoeffField_eq_slotInsert_sum
     simp only [hcond]
   rw [harg]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem normSq_iteratedCovGrad_le_scaled_of_pointwise
     (g₀ : SmoothRiemannianMetric I M) (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1)
     (i : ℕ) (c : ℝ)

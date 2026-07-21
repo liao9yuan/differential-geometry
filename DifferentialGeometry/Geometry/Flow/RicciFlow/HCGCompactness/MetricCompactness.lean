@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -24,7 +23,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -116,6 +115,7 @@ def map
     (X.obj (subseq k)).charted
   exact fun x => (Φ.partialDiffeomorph k) x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem source_open
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -131,6 +131,7 @@ theorem source_open
     (X.obj (subseq k)).charted
   exact (Φ.partialDiffeomorph k).open_source
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem target_open
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -146,6 +147,7 @@ theorem target_open
     (X.obj (subseq k)).charted
   exact (Φ.partialDiffeomorph k).open_target
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem source_subset
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -181,6 +183,7 @@ def unrepoint
   base_mem := Φ.base_mem
   basepoint_map := hbase
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem unrepoint_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)
@@ -319,6 +322,7 @@ noncomputable def metricSourceDomSmooth
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceDomSigmaOf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -414,6 +418,7 @@ noncomputable def metricTargetDomSmooth
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricTargetDomSigmaOf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -433,6 +438,7 @@ theorem metricTargetDomSigmaOf
   change SigmaCompactSpace {x : (X.obj (subseq k)).M // x ∈ Φ.target k}
   exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 private theorem metricContMDiffOpenCod
     {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [TopologicalSpace N] [ChartedSpace H N]
@@ -521,6 +527,7 @@ noncomputable def metricSourceTargetDiff
         (f := fun z : (X.obj (subseq k)).M => e.toPartialEquiv.symm z) (x := y)).2 hAt
     exact metricContMDiffOpenCod (I := I) (U := metricSourceOpen (I := I) Φ k) hbase
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp]
 theorem metricSourceTargetDiff_apply
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -546,6 +553,7 @@ theorem metricSourceTargetDiff_apply
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceTargetDiff_mfderiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -649,6 +657,7 @@ theorem metricSourceTargetDiff_mfderiv
   rw [htarget, hsource] at happ
   exact happ
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp]
 theorem metricSourceTargetDiff_symm_apply
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -682,6 +691,7 @@ def metricSourceCompactSet
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem metricSourceCompactSet_isCompact
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
@@ -1135,6 +1145,7 @@ noncomputable def derivNormSupOn
     (metricSourceCompactSet (I := I) Φ k K) p
     D.pullbackMetric D.limitMetric D.referenceMetric
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem unrepoint_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : forall i : Nat, (X.obj i).M)

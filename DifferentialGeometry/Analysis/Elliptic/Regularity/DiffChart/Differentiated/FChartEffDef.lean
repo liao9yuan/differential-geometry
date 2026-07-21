@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace FChartEffDef
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -204,6 +204,7 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -239,6 +240,7 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -350,6 +352,7 @@ private lemma densityDerivOnEuclid_mul_f_chart_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (densityDerivOnEuclid_continuousOn (I := I) g α l) h_f_chart_K
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :
@@ -462,6 +465,7 @@ private lemma diffChartForcingNumerator_memLp_vol_K
   unfold diffChartForcingNumerator
   convert h_step4 using 2 with y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun y => 1 / densityOnEuclid (I := I) g α y)

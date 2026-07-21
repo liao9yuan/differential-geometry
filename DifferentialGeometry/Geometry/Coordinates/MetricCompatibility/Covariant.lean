@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -46,6 +45,7 @@ def InverseMetricComponentsForMetricInFrameOn [DecidableEq Idx]
         (if i = j then 1 else 0)
 
 
+omit [FiniteDimensional ℝ E] in
 theorem gInvForMetric_symm [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
@@ -85,6 +85,7 @@ def inverseMetricCovDerivForMetricCompAlongInFrame
     (∑ a : Idx,
       christoffelAlongInFrame cov frame hframe x X a l * gInv x k a)
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] in
 private theorem metric_localFrame_mdiffAt
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -92,6 +93,7 @@ private theorem metric_localFrame_mdiffAt
     MDiffAt (T% (frame i)) x :=
   (hframe.contMDiffAt hu hx i).mdifferentiableAt one_ne_zero
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] in
 theorem metricComp_mdiffAt
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -123,6 +125,7 @@ theorem metricComp_mdiffAt
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -161,6 +164,7 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem metricComp_extDeriv_tangent
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -276,6 +280,7 @@ theorem metricComp_extDeriv_tangent
           · refine Finset.sum_congr rfl fun p _ => ?_
             rw [hAlongB p]
 
+omit [FiniteDimensional ℝ E] in
 theorem metricCompForMetricInFrame_extDerivFun_eq_christoffelAlong
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -322,6 +327,7 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffelAlong
   simp [metricCompForMetricInFrame, map_sum]
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem mdiffAt_finset_sum_real
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -341,6 +347,7 @@ theorem mdiffAt_finset_sum_real
       simpa [Finset.sum_insert, hit] using hadd
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_finset_sum_real
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -373,6 +380,7 @@ theorem extDerivFun_finset_sum_real
               simp [Finset.sum_insert, hit]
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_mul_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -388,6 +396,7 @@ theorem extDerivFun_mul_real
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem deriv_congr_nhds
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :
@@ -508,6 +517,7 @@ theorem inverseMetric_derivative_solve
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
     [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -789,6 +799,7 @@ theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
   rw [hDU]
   ring
 
+omit [FiniteDimensional ℝ E] in
 theorem inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero
     [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

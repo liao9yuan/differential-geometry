@@ -19,7 +19,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 lemma sharp_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -196,6 +197,7 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma sharp_memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -251,6 +253,7 @@ private lemma sharp_wkpNorm_sub_le
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -276,6 +279,7 @@ private lemma sharp_layerA_coeff_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [CompleteSpace E] in
 lemma sharp_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -299,6 +303,7 @@ lemma sharp_eigen_inv_one_le
         exact one_ne_zero h_norm.symm)
   exact (one_le_inv₀ hμ_unit.1).mpr hμ_unit.2
 
+omit [CompleteSpace E] in
 lemma sharp_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -310,6 +315,7 @@ lemma sharp_ofReal_const_pow_eigen_inv_le
   exact pow_le_pow_right₀
     (sharp_eigen_inv_one_le (I := I) (M := M) g r s i) hke
 
+omit [CompleteSpace E] in
 private lemma sharp_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -327,6 +333,7 @@ private lemma sharp_iter_memWkp
   exact (eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (I := I) (M := M) g r s i α P₀ j K h_chart_cpt idx).1
 
+omit [CompleteSpace E] in
 lemma sharp_invGramDerivCoeff_mul_iteratedPartial_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -557,6 +564,7 @@ lemma sharp_invGramDerivCoeff_mul_iteratedPartial_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
+omit [CompleteSpace E] in
 lemma sharp_invGramCoeff_mul_iteratedPartialWeakDeriv_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -817,6 +825,7 @@ lemma sharp_invGramCoeff_mul_iteratedPartialWeakDeriv_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
+omit [CompleteSpace E] in
 lemma sharp_densityDeriv_mul_iteratedPartial_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -868,6 +877,7 @@ lemma sharp_densityDeriv_mul_iteratedPartial_wkpNorm_le
   refine le_trans (mul_le_mul' (le_refl _) (hAtomC_bd i)) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hKc_nn, mul_assoc Kc CatomC]
 
+omit [CompleteSpace E] in
 lemma sharp_densityDeriv_mul_prevChartFun_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -911,6 +921,7 @@ lemma sharp_densityDeriv_mul_prevChartFun_wkpNorm_le
   refine le_trans (mul_le_mul' (le_refl _) (hAtomD_bd i)) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hKc_nn, mul_assoc Kc CatomD]
 
+omit [CompleteSpace E] in
 lemma sharp_density_mul_prevChartFunWeakDeriv_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -977,6 +988,7 @@ lemma sharp_density_mul_prevChartFunWeakDeriv_wkpNorm_le
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

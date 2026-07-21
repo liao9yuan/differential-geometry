@@ -67,6 +67,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
 
 
 
+omit [FiniteDimensional ℝ E] in
 private lemma differentiableAt_chartTrivRepr_of_contMDiff_section
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ)
     (hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞

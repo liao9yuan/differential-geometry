@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace ResidualLpDecomposition
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -32,6 +32,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -46,6 +47,7 @@ lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
   rw [fHLeibnizGeneralResidualCLM_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -74,6 +76,7 @@ theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
   rw [h_diff_eq] at h_preimage_smoothMulH1Compl
   exact h_preimage_smoothMulH1Compl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

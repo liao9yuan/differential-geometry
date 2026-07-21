@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -15,13 +14,11 @@ open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -64,6 +61,7 @@ private theorem reactionErr_lt_gain
 
 
 
+omit [IsManifold I 2 M] in
 theorem strictBarrierBounds
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -175,6 +173,7 @@ structure TensorParabolicSupersolutionWithDriftOn
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_initial_positive
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -240,6 +239,7 @@ private theorem exists_small_delta
 
 
 
+omit [IsManifold I 2 M] in
 theorem tensorBarrier_strict_supersolution
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -286,6 +286,7 @@ theorem tensorBarrier_strict_supersolution
 
 
 
+omit [IsManifold I 2 M] in
 theorem certSlab_of_reg
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -408,6 +409,7 @@ theorem strictCert_sec
 
 
 
+omit [IsManifold I 2 M] in
 theorem certSlab_of_sectionReg
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

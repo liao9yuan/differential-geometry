@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCNorma
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCWeights
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -32,6 +31,7 @@ variable {E' : Type*} [NormedAddCommGroup E'] [NormedSpace Real E']
 
 
 
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem raw_eq_normWeights {ι : Type uι} [Fintype ι]
     (num : ι → E' → Real) (z : E') (i : ι) :
     rawWeights num z i = normWeights num i z := by
@@ -39,6 +39,7 @@ theorem raw_eq_normWeights {ι : Type uι} [Fintype ι]
 
 
 
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem cutRaw_eq_bumpNum {ι : Type uι} [DecidableEq ι]
     (χ : E' → Real) (ψ : ι → E' → Real) (J : ι → E' → E')
     (i0 i : ι) (z : E') :
@@ -51,6 +52,7 @@ theorem cutRaw_eq_bumpNum {ι : Type uι} [DecidableEq ι]
 
 
 
+omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem rawBump_eq_weight {ι : Type uι} [Fintype ι] [DecidableEq ι]
     (χ : E' → Real) (ψ : ι → E' → Real) (J : ι → E' → E')
     (i0 i : ι) (z : E') :
@@ -78,6 +80,8 @@ variable [IsManifold I0 ∞ M0] [T2Space M0] [T2Space (TangentBundle I0 M0)]
 
 
 
+omit [T2Space M0] in
+omit [NeZero (Module.finrank ℝ E0)] in
 theorem normalRaw_eq_bump {ι : Type*} [DecidableEq ι]
     (g : SmoothRiemannianMetric I0 M0) (p : ι → M0)
     (cut : ContDiffBump (0 : E0)) (f : ι → ContDiffBump (0 : E0))
@@ -93,6 +97,8 @@ theorem normalRaw_eq_bump {ι : Type*} [DecidableEq ι]
 
 
 
+omit [T2Space M0] in
+omit [NeZero (Module.finrank ℝ E0)] in
 theorem normalWeight_eq {ι : Type} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I0 M0) (p : ι → M0)
     (cut : ContDiffBump (0 : E0)) (f : ι → ContDiffBump (0 : E0))

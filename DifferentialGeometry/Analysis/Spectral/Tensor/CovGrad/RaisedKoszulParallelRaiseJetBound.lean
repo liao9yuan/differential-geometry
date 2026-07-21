@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -29,6 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedCovGrad_smul' (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -48,6 +50,7 @@ private lemma riemannianFiberNormSq_smul' (g : SmoothRiemannianMetric I M) (r s 
     tensorInnerPointwise_smul_right]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {R : ℝ}
@@ -101,6 +104,7 @@ theorem rfns_iteratedCovGrad_symmS_le
         · exact mul_le_mul_of_nonneg_left hRB (by norm_num)
     _ = R ^ 2 := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rfns_iteratedCovGrad_domDomCongr_symmSCovGrad3_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {R : ℝ}
@@ -119,6 +123,7 @@ private lemma rfns_iteratedCovGrad_domDomCongr_symmSCovGrad3_le
   have hbnd := rfns_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ a T hTjet (i + 1) (by omega) x
   exact le_trans (le_of_eq hcomm) hbnd
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_koszulCovecCc_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {R : ℝ}

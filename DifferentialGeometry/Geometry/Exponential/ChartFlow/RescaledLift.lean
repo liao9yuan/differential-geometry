@@ -17,7 +17,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,7 +34,7 @@ def chartFlowOrbitLiftRescaled
   fun s => (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
     (rescaleChartOrbit (E := E) t' (Φ (((extChartAt I p p, v) : E × E), t' * s)))
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbitLiftRescaled_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) (v : E) (s : ℝ) :
     chartFlowOrbitLiftRescaled (I := I) Φ p t' v s =
@@ -47,7 +47,7 @@ section ChartTargetInterior
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
 lemma rescaleChartOrbit_mem_chartTargetInterior
     {p : M} (t' : ℝ) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -64,6 +64,7 @@ section InitialValue
 variable [I.Boundaryless]
 
 omit [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLiftRescaled_zero
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E}
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -88,7 +89,7 @@ section ProjectionIdentity
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLiftRescaled_proj
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), t' * s) ∈
@@ -105,7 +106,7 @@ theorem chartFlowOrbitLiftRescaled_proj
   rw [h]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartFlowOrbitLiftRescaled_proj_mem_chartAt_source
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), t' * s) ∈
@@ -139,6 +140,7 @@ lemma mul_mem_Ioo_of_pos_of_lt
       field_simp
     linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma rescaled_orbit_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M} {Φ : (E × E) × ℝ → E × E}
     {T t' : ℝ} (ht'_pos : 0 < t') (v : E)
@@ -172,6 +174,7 @@ section LocalLiftAtsZero
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (t' : ℝ)
     {Φ : (E × E) × ℝ → E × E} {s₀ : ℝ}
@@ -341,6 +344,7 @@ section IntegralCurveOnIoo
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -409,6 +413,7 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
   exact hx.symm
 
 omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -438,6 +443,7 @@ private lemma isPreconnected_Ioo_real (a b : ℝ) :
   (convex_Ioo a b).isPreconnected
 
 omit [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rescaled_lift_witness_data
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -461,6 +467,7 @@ private lemma rescaled_lift_witness_data
   · exact chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo (I := I) g p v
       ht'_pos hΦ_target_Icc hΦ_phase_Ioo
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -549,6 +556,7 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
   rw [this]
   exact hproj' s
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartFlowOrbitLiftRescaled_proj_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t') (ht'_lt : t' < T)

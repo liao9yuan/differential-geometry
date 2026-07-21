@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricKoszul
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
 import DifferentialGeometry.Geometry.Metric.BumpExtend
+import DifferentialGeometry.Geometry.Metric.MetricExistence
 import DifferentialGeometry.Geometry.Metric.PullbackCross
 
 set_option autoImplicit false
@@ -29,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -381,13 +382,44 @@ theorem normalInner_sub
 
 
 
-private noncomputable def modelFlatMetric :
-    SmoothRiemannianMetric 𝓘(Real, E) E where
-  inner := (riemannianMetricVectorSpace E).inner
-  symm := (riemannianMetricVectorSpace E).symm
-  pos := (riemannianMetricVectorSpace E).pos
-  isVonNBounded := (riemannianMetricVectorSpace E).isVonNBounded
-  contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
+private noncomputable def modelFlatMetric
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    SmoothRiemannianMetric 𝓘(Real, E) E := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  let B : E →L[Real] E →L[Real] Real := normalCoordMetric (I := I) Y x 0
+  have hBsymm : ∀ v w : E, B v w = B w v := by
+    intro v w
+    dsimp only [B]
+    rw [normalMetric_zero (I := I)]
+    exact Y.metric.symm x v w
+  have hBpos : ∀ v : E, v ≠ 0 → 0 < B v v := by
+    intro v hv
+    dsimp only [B]
+    rw [normalMetric_zero (I := I)]
+    exact Y.metric.pos x v hv
+  exact
+    { inner := fun _ ↦ B
+      symm := fun _ ↦ hBsymm
+      pos := fun _ ↦ hBpos
+      isVonNBounded := fun _ ↦
+        DifferentialGeometry.Geometry.posDef_isVonNBounded
+          B hBpos
+      contMDiff := by
+        intro y
+        rw [contMDiffAt_section]
+        convert contMDiffAt_const (I := 𝓘(Real, E))
+          (I' := 𝓘(Real, E →L[Real] E →L[Real] Real))
+          (x := y) (c := B)
+        ext v w
+        rw [DifferentialGeometry.Geometry.metricCoeffInModel_apply
+          (I := 𝓘(Real, E)) y (by simp) B v w]
+        rw [TangentBundle.symmL_model_space]
+        rfl }
 
 noncomputable def normalTotal
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -406,7 +438,7 @@ noncomputable def normalTotal
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   letI : SigmaCompactSpace (normalBall (I := I) Y x) :=
     normalBallSigma (I := I) Y x
-  exact (modelFlatMetric (E := E)).bumpExtendOpen
+  exact (modelFlatMetric (I := I) Y x).bumpExtendOpen
     (normalBall (I := I) Y x) (normalMetric (I := I) Y x)
     (normalCut (I := I) Y x : E → Real)
     (normalCut_smooth (I := I) Y x) (normalCut_range (I := I) Y x)
@@ -443,7 +475,7 @@ theorem normalTotal_inner
         (normalMetric (I := I) Y x).inner ⟨z, hsub hz⟩ v w := by
       simpa only [normalTotal] using
         bumpExtendOpen_eq_gU_on (I := 𝓘(Real, E))
-          (modelFlatMetric (E := E)) (normalBall (I := I) Y x)
+          (modelFlatMetric (I := I) Y x) (normalBall (I := I) Y x)
           (normalMetric (I := I) Y x) (normalCut (I := I) Y x : E → Real)
           (normalCut_smooth (I := I) Y x) (normalCut_range (I := I) Y x)
           (normalCut_supp (I := I) Y x)

@@ -13,7 +13,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,6 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] in
 theorem tensorEigenIdx_one_add_lambda_lt_finite
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Λ : ℝ) :
     {i : TensorEigenIdx (I := I) (M := M) g r s |
@@ -100,6 +101,7 @@ def eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ) :
   (tensorEigenIdx_one_add_lambda_lt_finite
     (I := I) (M := M) g r s ((n : ℝ) + 1)).toFinset
 
+omit [CompleteSpace E] in
 lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     i ∈ eigenFinset (I := I) (M := M) g r s n ↔
@@ -108,6 +110,7 @@ lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
   rw [Set.Finite.mem_toFinset]
   rfl
 
+omit [CompleteSpace E] in
 lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Monotone (eigenFinset (I := I) (M := M) g r s) := by
   intro m n hmn i hi
@@ -117,6 +120,7 @@ lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     linarith
   exact hi.trans_le hcast
 
+omit [CompleteSpace E] in
 lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ∃ n : ℕ, i ∈ eigenFinset (I := I) (M := M) g r s n := by
@@ -126,6 +130,7 @@ lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [mem_eigenFinset]
   linarith
 
+omit [CompleteSpace E] in
 lemma eigenFinset_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Tendsto (eigenFinset (I := I) (M := M) g r s) atTop atTop :=
   tendsto_atTop_finset_of_monotone
@@ -137,6 +142,8 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -148,6 +155,8 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
   positivity
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ)
     (hd : Tendsto (fun n => ‖d n‖) atTop (𝓝 0))
@@ -187,6 +196,7 @@ lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
 
 end tensorHs
 
+omit [CompleteSpace E] in
 theorem tendsto_of_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
     (hσ'σ'' : σ' < σ'')
@@ -386,6 +396,7 @@ theorem tendsto_of_coeff
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
+omit [CompleteSpace E] in
 theorem cont_of_coeff
     {X : Type*} [TopologicalSpace X] [FirstCountableTopology X]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
@@ -428,6 +439,7 @@ theorem cont_of_coeff
     simp only [d, map_sub]
   exact tendsto_sub_nhds_zero_iff.mp hsub
 
+omit [CompleteSpace E] in
 theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
     (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
@@ -449,6 +461,8 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
   exact tendsto_of_coeff (I := I) (M := M) hσ'σ'' d hC hCbd hcoeff0
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_le_sqrt_of_weightedMass_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ'' : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ'') {B : ℝ}
@@ -460,6 +474,7 @@ private lemma norm_le_sqrt_of_weightedMass_le
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg T)] at h
 
+omit [CompleteSpace E] in
 theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
     (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')

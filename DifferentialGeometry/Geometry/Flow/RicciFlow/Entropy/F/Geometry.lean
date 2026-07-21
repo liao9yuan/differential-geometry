@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Functional
 
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -28,7 +27,7 @@ section Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem weightedIBP
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -98,6 +98,7 @@ theorem weightedIBP
 
 
 
+omit [TopologicalSpace M] in
 theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
     (mu : Measure M)
     (scalarCurvature lapPotential gradPotentialNormSq potential : M -> Real)
@@ -150,6 +151,7 @@ theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem weightedGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -226,6 +228,7 @@ theorem weightedGreen
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem weightedDivZero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -260,6 +263,7 @@ theorem weightedDivZero
           (I := I) g X
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem expNegPotentialDensity_contMDiff
     {potential : M -> Real}
     (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential) :
@@ -268,6 +272,7 @@ theorem expNegPotentialDensity_contMDiff
     Real.contDiff_exp.contMDiff.comp hpotential.neg
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem tangentSectionAction_expNeg
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
     {potential : M -> Real}
@@ -307,6 +312,7 @@ def connTraceVec
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem connTraceDivEq
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -343,6 +349,7 @@ theorem connTraceDivEq
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem weightedDivZero_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -376,6 +383,7 @@ theorem weightedDivZero_of_connTrace
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem weighted_grad_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -412,6 +420,7 @@ theorem weighted_grad_zero
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem shiftIntEq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -495,6 +504,7 @@ theorem shiftIntEq
       ring
 
 
+omit [InnerProductSpace ℝ E] in
 theorem expWeightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -577,6 +587,7 @@ def fFunctionalBracketVariation
     M -> Real :=
   fun x => scalarCurvatureVariation x + gradPotentialNormSqVariation x
 
+omit [TopologicalSpace M] in
 theorem fFunctionalBracket_hasDerivAt
     {scalarCurvaturePath gradPotentialNormSqPath : Real -> M -> Real}
     {s0 : Real}
@@ -601,6 +612,7 @@ theorem fFunctionalBracket_hasDerivAt
   simpa [fFunctionalBracket, fFunctionalBracketVariation] using h
 
 
+omit [TopologicalSpace M] in
 theorem closedBracket_deriv
     {scalarCurvaturePath lapPotentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -627,6 +639,7 @@ theorem closedBracket_deriv
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem fFunctionalBaseIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -701,6 +714,7 @@ theorem fFunctionalBaseIntegral_hasDerivAt_at
 
 
 
+omit [InnerProductSpace ℝ E] in
 theorem closedBase_deriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -773,6 +787,7 @@ theorem closedBase_deriv
 
 
 
+omit [TopologicalSpace M] in
 theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
     {muPath : Real -> Measure M}
@@ -805,6 +820,7 @@ theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
   exact hbase.congr_of_eventuallyEq hbase_eq
 
 
+omit [InnerProductSpace ℝ E] in
 theorem FFunctionalHasFirstVariationAt_of_volumeVariation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

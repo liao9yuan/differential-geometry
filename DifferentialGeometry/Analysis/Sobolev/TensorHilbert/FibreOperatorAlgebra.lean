@@ -37,6 +37,7 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {Dom : Type*} [NormedAddCommGroup Dom] [NormedSpace ℝ Dom]
 
 
+omit [InnerProductSpace ℝ E] in
 theorem contDiffOn_inverseGram_clm
     (g₀ : SmoothRiemannianMetric I M) {s : Set Dom}
     {L : Dom →L[ℝ] FibreOpL2Algebra (I := I) (M := M) g₀}
@@ -45,6 +46,7 @@ theorem contDiffOn_inverseGram_clm
     ContDiffOn ℝ n (fun x => Ring.inverse (1 - L x) * c) s :=
   contDiffOn_oneSub_inverse_clm_mul_const (A := FibreOpL2Algebra (I := I) (M := M) g₀) hlt
 
+omit [InnerProductSpace ℝ E] in
 theorem contDiffOn_inverseGram_entry_clm
     (g₀ : SmoothRiemannianMetric I M) {s : Set Dom}
     {L : Dom →L[ℝ] FibreOpL2Algebra (I := I) (M := M) g₀}
@@ -55,6 +57,7 @@ theorem contDiffOn_inverseGram_entry_clm
   contDiffOn_continuousLinearMap_comp_oneSub_inverse_clm
     (A := FibreOpL2Algebra (I := I) (M := M) g₀) Φ hlt
 
+omit [InnerProductSpace ℝ E] in
 theorem contDiffOn_inverseGram_of_uniform_bound
     (g₀ : SmoothRiemannianMetric I M) {s : Set Dom}
     {L : Dom →L[ℝ] FibreOpL2Algebra (I := I) (M := M) g₀}

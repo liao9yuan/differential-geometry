@@ -34,6 +34,9 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundar
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricRm04StdAt_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (x : M) (X Y Z W : TangentSpace I x) :
     metricRm04StdAt (I := I) g x X Y Z W

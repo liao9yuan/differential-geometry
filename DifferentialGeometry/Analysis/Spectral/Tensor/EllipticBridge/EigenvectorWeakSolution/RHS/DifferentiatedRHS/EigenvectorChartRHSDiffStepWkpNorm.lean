@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -162,6 +163,7 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -289,6 +291,7 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -319,6 +322,7 @@ private lemma memWkp_finset_sum
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -328,6 +332,7 @@ lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma layerA_coeff_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (lₙ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
@@ -350,6 +355,7 @@ private lemma layerA_coeff_contDiffOn_chartTargetEuclid
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -494,6 +500,7 @@ lemma eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
   unfold eigenvectorChartRHSDiffNumerator
   rw [hA, hB, hC, hD, hE]; ring
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_memWkp_of_iter
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -696,6 +703,7 @@ lemma eigenvectorChartRHSDiffNumerator_memWkp_of_iter
 
 section DivDensityBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -764,6 +772,7 @@ theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le
     _ = ENNReal.ofReal (C₂ * C₁) * A := by
           rw [ENNReal.ofReal_mul hC₂_nn, mul_assoc]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -844,6 +853,7 @@ end DivDensityBoundUnconditional
 
 section IteratedStepBoundUnconditional
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -947,6 +957,7 @@ theorem eigenvectorChartIteratedStep_wkpNorm_le
   rw [h_norm_eq, hQ_def]
   exact hC
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

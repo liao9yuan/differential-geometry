@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,8 @@ private abbrev TensorSmooth (t : ℕ) (A : Π b : M, Tensor0SSpace t I b) : Prop
     (fun b => TotalSpace.mk' (Tensor0SModel t ℝ E)
       (E := fun z : M => Tensor0SSpace t I z) b (A b))
 
+omit [CompleteSpace E] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma scalarFn_covApply_tensor0SCov_zero
     (g : SmoothRiemannianMetric I M) (A : Π b : M, Tensor0SSpace 0 I b)
     (W : Π b : M, TangentSpace I b) (b : M) :
@@ -39,6 +41,8 @@ private lemma scalarFn_covApply_tensor0SCov_zero
   rw [scalarFn_apply, covApply_apply, tensor0SCovariantDerivative_apply_zero]
   exact (tensor0Iso I M b).apply_symm_apply _
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_tensor0SCov_zero_eq_zero
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -132,6 +136,8 @@ noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
 
 omit [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -188,6 +194,8 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   exact hgoal
 
 omit [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -236,6 +244,8 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
   rw [hcurry_covApply W, hcurry_covApply X]
 
 omit [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_tensor0SCov_succ_consEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -289,6 +299,8 @@ theorem riemannSec_tensor0SCov_succ_consEval
 
   congr 1
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannSec_tensor0SCov_apply_eval
     (g : SmoothRiemannianMetric I M) (t : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

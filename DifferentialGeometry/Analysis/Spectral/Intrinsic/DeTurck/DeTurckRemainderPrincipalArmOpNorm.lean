@@ -42,7 +42,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1175,6 +1175,8 @@ theorem exists_deTurckPrincipalCometricCoeff_realize_coeffJetEnvelope_le
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem pje_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =
@@ -1205,6 +1207,7 @@ private lemma riemannianFiberNormSq_toSection_smul (g : SmoothRiemannianMetric I
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem pje_normSq_icg_reindex_eq (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (ρ : Equiv.Perm (Fin 4)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -1824,16 +1827,31 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_coeffJetEnvelope_le
     have hprod2_nn : (0 : ℝ) ≤ (2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
       mul_nonneg (by have := hKdevF_nn i; have := hcB_nn i; linarith) h1S_nn
-    have htower := armField_pathIntegral_jetL2_perOrder_le (I := I) (M := M) g₀ 4
-      (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+    let Φ : ℝ → SmoothCcTensor g₀ 4 2 := fun s =>
+      deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
-          (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))
-      hSI hSopen hj2 i
-      (B := Real.sqrt ((2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
-        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)))
-      (Real.sqrt_nonneg _)
-      (fun s hs => by rw [Real.sq_sqrt hprod2_nn]; exact hbare s hs)
-    rw [Real.sq_sqrt hprod2_nn] at htower
+          (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s)
+    let B₂ : ℝ := Real.sqrt ((2 * KdevF i + 2 * cB i) *
+      (1 + ∑ l ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2))
+    have hB₂_sq : B₂ ^ 2 = (2 * KdevF i + 2 * cB i) *
+        (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+      change Real.sqrt ((2 * KdevF i + 2 * cB i) *
+        (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)) ^ 2 = _
+      exact Real.sq_sqrt hprod2_nn
+    have hj2' : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ
+        (δ := δ) (δ' := δ) := by
+      simpa only [Φ] using hj2
+    have hΦjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i (Φ s)‖ ^ 2 ≤ B₂ ^ 2 := by
+      intro s hs
+      rw [hB₂_sq]
+      exact hbare s hs
+    have htower := armField_pathIntegral_jetL2_perOrder_le (I := I) (M := M) g₀ 4 Φ
+      hSI hSopen hj2' i (B := B₂) (Real.sqrt_nonneg _) hΦjet
+    rw [hB₂_sq] at htower
     have hPeq : deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
         (0 : SmoothCcTensor g₀ 0 2)
         (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
@@ -1844,10 +1862,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_coeffJetEnvelope_le
                 from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
               tensorHs_norm_smul]
             simpa using hR₀)) =
-        pathIntegralCoeffField (I := I) (M := M) g₀ 4 2
-          (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
-            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
-              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))
+        pathIntegralCoeffField (I := I) (M := M) g₀ 4 2 Φ
           (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hj2 := rfl
     have htower' : ‖iteratedCovGrad (I := I) g₀ 4 2 i
         (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
@@ -2713,6 +2728,8 @@ theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_threeArmCoeff
     nlinarith [hD, hr, hSig_nn]
 
 open DifferentialGeometry.Integral.Measure in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_comp_l2_sq_eq_rs
     (g₀ : SmoothRiemannianMetric I M) (r s m l : ℕ) (W : SmoothCcTensor g₀ r s) :
     ‖iteratedCovGrad (I := I) g₀ r (s + m) l (iteratedCovGrad (I := I) g₀ r s m W)‖ ^ 2 =
@@ -2958,6 +2975,8 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_
   exact mul_le_mul_of_nonneg_right hDle (Real.sqrt_nonneg _)
 
 open DifferentialGeometry.Integral.Measure in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_comp_l2_sq_eq
     (g₀ : SmoothRiemannianMetric I M) (m l : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l (iteratedCovGrad (I := I) g₀ 0 2 m W)‖ ^ 2 =
@@ -2984,6 +3003,8 @@ private theorem iteratedCovGrad_comp_l2_sq_eq
   simpa only [Nat.add_assoc] using hrw
 
 open DifferentialGeometry.Integral.Measure in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_comp_jetSum_le
     (g₀ : SmoothRiemannianMetric I M) (p m : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     (∑ l ∈ Finset.range (p + 1),
@@ -3755,6 +3776,7 @@ theorem exists_smoothCcToTensorHs_coeffAction_fibreSmallCoeff_opNorm_le
       rw [hnormL, hnorm2, hnorm1]
       exact hb
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
     {δ : ℝ}
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -3776,6 +3798,7 @@ private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
   exact le_trans (abs_nonneg _) hb
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_le_of_ccTensorBilinSymm_gFibreOpBound [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) {δ : ℝ}
     (T₀ : SmoothCcTensor g₀ 0 2)

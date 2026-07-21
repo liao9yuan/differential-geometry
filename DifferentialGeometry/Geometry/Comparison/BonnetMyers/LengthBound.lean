@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -35,7 +34,7 @@ namespace Riemannian
 namespace BonnetMyers
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -56,6 +55,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
     (g : SmoothRiemannianMetric I M) (x : M) (X : E)
     (hUnit : g.inner x X X = 1)
@@ -208,6 +208,7 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
 
 
 
+omit [SigmaCompactSpace M] in
 theorem sum_index_form_integrand_eval
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {L : ℝ} (_hL : 0 < L) (uPrime : ℝ → E)
@@ -495,6 +496,7 @@ theorem sum_index_form_integrand_eval
 
 
 
+omit [SigmaCompactSpace M] in
 theorem sum_index_form_frame_evaluation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
     (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))
@@ -615,6 +617,7 @@ theorem sum_index_form_frame_evaluation
 
 
 
+omit [SigmaCompactSpace M] in
 theorem sum_index_form_bound_by_curvature_hypothesis
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {L : ℝ} (hL : 0 < L)
     (_hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L))

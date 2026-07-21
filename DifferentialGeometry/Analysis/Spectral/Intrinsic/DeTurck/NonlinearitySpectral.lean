@@ -30,6 +30,8 @@ def realizeToL2 (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
   tensorHsToL2 (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
     h_compact (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem realizeToL2_opNorm_le_one (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (h_compact : IsCompactOperator
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
@@ -38,6 +40,8 @@ theorem realizeToL2_opNorm_le_one (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (g := g_bg) (r := 0) (s := 2)
     (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem realizeToL2_tensorL2Coeff_ofCompact
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (h_compact : IsCompactOperator
@@ -49,6 +53,8 @@ theorem realizeToL2_opNorm_le_one (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
   tensorHsToL2_tensorL2Coeff (I := I) (M := M)
     (by have : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a; linarith) u i
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem realizeToL2_zero (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (h_compact : IsCompactOperator
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
@@ -61,12 +67,16 @@ def firstOrderRemainderInclusion (g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
   tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
     (by linarith : (a : ℝ) ≤ (a : ℝ) + 1)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem firstOrderRemainderInclusion_opNorm_le_one
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
     ‖firstOrderRemainderInclusion (I := I) (M := M) g_bg a‖ ≤ 1 :=
   tensorHsInclusion_opNorm_le_one (I := I) (M := M)
     (g := g_bg) (r := 0) (s := 2) (by linarith)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem firstOrderRemainderInclusion_coeff
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (v : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
@@ -75,6 +85,8 @@ theorem firstOrderRemainderInclusion_opNorm_le_one
       v.coeff i :=
   tensorHsInclusion_coeff_apply (I := I) (M := M) (by linarith) v i
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem firstOrderRemainder_lands_in_Ha
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (R : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2) →L[ℝ]
@@ -97,6 +109,7 @@ theorem firstOrderRemainder_lands_in_Ha
       _ = ‖R‖ := one_mul _
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem deTurckNonlinearitySpectral_principalPart_cancels
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

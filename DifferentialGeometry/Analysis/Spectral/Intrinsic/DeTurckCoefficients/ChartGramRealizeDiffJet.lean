@@ -18,7 +18,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -26,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramOnE_realize_delta_irrel
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -40,6 +41,8 @@ theorem chartGramOnE_realize_delta_irrel
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ_lt hδ,
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ'_lt hδ']
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramOnE_realize_sub_eqOn_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -73,6 +76,7 @@ def tensorChartComponentOnModel (g : SmoothRiemannianMetric I M) (S : SmoothCcTe
 open DifferentialGeometry.Analysis.Sobolev.Chart in
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
@@ -108,6 +112,8 @@ lemma bareChartJetContentOnE_nonneg (g : SmoothRiemannianMetric I M) (S : Smooth
     0 ≤ chartComponentJetSeminormSum (I := I) (M := M) g S α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

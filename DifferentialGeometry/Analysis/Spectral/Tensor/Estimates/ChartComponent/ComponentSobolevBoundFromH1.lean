@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -130,6 +130,8 @@ private lemma ofReal_tensorL2Norm_toFun_eq_nnnorm_toCcTensor
     SmoothCcTensor.norm_def (I := I) (M := M) S.toCcTensor
   rw [← h_norm_eq, ← coe_nnnorm_eq_ofReal_norm]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma nnnorm_toCcTensor_le_nnnorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -139,6 +141,7 @@ private lemma nnnorm_toCcTensor_le_nnnorm
   rw [coe_nnnorm_eq_ofReal_norm, coe_nnnorm_eq_ofReal_norm]
   exact ENNReal.ofReal_le_ofReal h_real
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -227,6 +230,7 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     _ ≤ ENNReal.ofReal (C₁ * C₂) * (‖S‖₊ : ℝ≥0∞) :=
         mul_le_mul_of_nonneg_left h_le (by exact zero_le _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -244,6 +248,7 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_foral
   eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (I := I) (M := M) g r s α β
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_single_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

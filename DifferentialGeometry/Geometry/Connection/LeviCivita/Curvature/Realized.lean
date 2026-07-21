@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -17,7 +16,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 
@@ -35,6 +34,9 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [I.Boundaryless] in
+omit [IsManifold I 1 M] in
+omit [SigmaCompactSpace M] in
 theorem canScalTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -168,6 +170,7 @@ private theorem update_comp_perm {s : ℕ} {β : Type*}
       exact σ.injective (by simpa using h)
     simp [Function.update, hq, hne]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0S_update_zero {s : ℕ} {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s -> TangentSpace I x) (a : Fin s) :
@@ -175,6 +178,7 @@ private theorem tensor0S_update_zero {s : ℕ} {x : M}
   exact A.map_coord_zero a (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem nabla0SFun_perm
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -296,6 +300,7 @@ private theorem nabla0SFun_perm
   rw [hleft, hright, hderiv, hsum]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem finCons_vec4_eq_vec5 {x : M}
     (A W X Y Z : TangentSpace I x) :
     Fin.cons A (vec4 (I := I) W X Y Z) =
@@ -303,6 +308,7 @@ private theorem finCons_vec4_eq_vec5 {x : M}
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem slots4_eq_vec4 {x : M}
     (slots : Fin 4 -> TangentSpace I x) :
     slots = vec4 (I := I) (slots 0) (slots 1) (slots 2) (slots 3) := by
@@ -311,6 +317,7 @@ private theorem slots4_eq_vec4 {x : M}
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4OutSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -339,6 +346,7 @@ theorem nabla4OutSkew
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4InSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -369,6 +377,7 @@ theorem nabla4InSkew
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4Pair
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -398,6 +407,8 @@ theorem nabla4Pair
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem canRmSymm
     (g : SmoothRiemannianMetric I M)
     {x : M} :
@@ -532,6 +543,8 @@ theorem canRmSymm
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem canRmSecond
     (g : SmoothRiemannianMetric I M)
     {x : M} :
@@ -907,6 +920,7 @@ theorem canRmSecond
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [I.Boundaryless] in
 theorem canRicField
     (g : SmoothRiemannianMetric I M) :
     let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g

@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,8 @@ variable {L : ℝ≥0}
   {N : tensorHs (I := I) (M := M) g r s (a + 1) →
     tensorHs (I := I) (M := M) g r s a}
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memLp_comp_nemytskiiHa1 (hN : LipschitzWith L N)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     MemLp (fun t => N (f t)) 2 (timeMeasure T) := by
@@ -63,11 +65,15 @@ def nemytskiiHa1 (hN : LipschitzWith L N) :
       timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   fun f => (memLp_comp_nemytskiiHa1 (I := I) (M := M) hN f).toLp (fun t => N (f t))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nemytskiiHa1_coeFn (hN : LipschitzWith L N)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     nemytskiiHa1 (I := I) (M := M) hN f =ᵐ[timeMeasure T] fun t => N (f t) :=
   (memLp_comp_nemytskiiHa1 (I := I) (M := M) hN f).coeFn_toLp
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nemytskiiHa1_dist_sq_le (hN : LipschitzWith L N)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     ‖nemytskiiHa1 (I := I) (M := M) hN f -
@@ -110,6 +116,8 @@ theorem nemytskiiHa1_dist_sq_le (hN : LipschitzWith L N)
         ≤ ((L : ℝ) * ‖f t - f' t‖) ^ 2 := hsq
       _ = (L : ℝ) ^ 2 * ‖(f - f') t‖ ^ 2 := by rw [htf, mul_pow]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nemytskiiHa1_lipschitzWith (hN : LipschitzWith L N) :
     LipschitzWith L (nemytskiiHa1 (I := I) (M := M) (T := T) hN) := by
   refine LipschitzWith.of_dist_le_mul (fun f f' => ?_)
@@ -125,6 +133,8 @@ theorem nemytskiiHa1_lipschitzWith (hN : LipschitzWith L N) :
 
 end Nemytskii
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -139,6 +149,8 @@ theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolFieldHa1, maxRegDuhamelSolFieldHa1]
   abel
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -165,6 +177,8 @@ def quasilinearDuhamelMapHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
   fun gforce => nemytskiiHa1 (I := I) (M := M) hN
     (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem quasilinearDuhamelMapHa1_apply (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
@@ -177,6 +191,8 @@ def quasilinearDuhamelMapHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) :=
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -249,6 +265,8 @@ theorem smallTime_contraction_const_lt_one {L : ℝ≥0} {T : ℝ}
     _ < 1 := by
         rw [div_lt_one hLp1_pos]; linarith
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
     {L : ℝ≥0} (hTL : T ≤ smallTimeHorizon L)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -273,6 +291,8 @@ theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
 
 end FixedPoint
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quasilinear_strong_existence_smallTime {L : ℝ≥0}
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}

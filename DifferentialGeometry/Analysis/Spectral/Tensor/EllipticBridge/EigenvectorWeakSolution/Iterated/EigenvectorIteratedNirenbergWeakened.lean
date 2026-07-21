@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -194,6 +194,7 @@ def eigenvectorIteratedTensorChartBilinearData_toData
     eigenvectorIteratedChartBilinearH1ComplData
       (I := I) (M := M) g r s i α P₀ D_m h_parent
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

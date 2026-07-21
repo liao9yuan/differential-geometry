@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -23,7 +22,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -50,6 +49,7 @@ def HasInjRadiusAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hasInjRadiusAt_iff
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M)
     (rho : Real) :
@@ -64,6 +64,7 @@ theorem hasInjRadiusAt_iff
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hasInjRadiusAt_of_le_injRadius
     {X : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : X.M}
     {rho : Real} (hpos : 0 < rho)
@@ -77,6 +78,7 @@ theorem hasInjRadiusAt_of_le_injRadius
   ⟨hpos, h⟩
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem HasInjRadiusAt.mono
     {X : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : X.M}
     {rho rho' : Real} (h : HasInjRadiusAt (I := I) X x rho)

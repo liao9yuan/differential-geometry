@@ -44,7 +44,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Analysis.Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -75,6 +75,7 @@ private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1 + 1) ℝ E) (a : E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -91,6 +92,7 @@ private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset
       c f rest]
   exact Finset.sum_congr rfl fun j _ => by rw [hcur]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I M) (b : M)
     (u : TangentSpace I b) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -173,6 +175,7 @@ private lemma armResidual_covDivergence_toSection (g₀ : SmoothRiemannianMetric
   rw [tensorCovDerivAt_def (I := I) (M := M) g₀ 0 (s + 1) V b
     (smoothOrthoFrame (I := I) g₀ b i b)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric I M) (b : M)
     (W : Tensor0SSpace (2 + 2) I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (DeTurck.cometricDoubleTraceFib (I := I) g₀ 2 b W) m =
@@ -198,6 +201,7 @@ private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric 
     (v0 := ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E))
     (vs := Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E) m)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I M) (b : M)
     (T : Tensor0SBundle.Tensor0SModel (2 + 1 + 1) ℝ E) (m : Fin 2 → E) :
     (∑ i : Fin (Module.finrank ℝ E),
@@ -247,6 +251,7 @@ private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I
   rw [hco]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 s) (b : M) (D : Tensor0SSpace 0 I b)
     (v0 : E) (vs : Fin s → E) :
@@ -265,6 +270,7 @@ private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : 
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from
         tensorCovDerivAt (I := I) (M := M) g₀ 0 s W b v0) D) w) ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E)
     (i : Fin (Module.finrank ℝ E)) :
@@ -338,6 +344,7 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
       ((ei : TangentSpace I b) : E)
       (Fin.cons ((Λf b (ei : TangentSpace I b) : TangentSpace I b) : E) m)).symm
 
+omit [BoundarylessManifold I M] in
 private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel

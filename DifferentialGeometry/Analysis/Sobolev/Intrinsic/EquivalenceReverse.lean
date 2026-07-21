@@ -14,7 +14,7 @@ namespace Analysis
 namespace Sobolev
 namespace EquivalenceReverse
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1244,7 +1244,7 @@ private lemma chartPushed_eq_zero_of_pou_zero
   simp
 
 theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

@@ -23,6 +23,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_vf_time_family_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

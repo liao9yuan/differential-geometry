@@ -21,7 +21,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -56,6 +57,7 @@ private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentPou (I := I) (M := M) g r s S α p.1 p.2) hy]
 
+omit [CompleteSpace E] in
 theorem covDerivLowerOrderTerm_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -103,6 +105,7 @@ noncomputable def covGradChristoffelLimit
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem covGradChristoffelLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -135,6 +138,7 @@ private noncomputable def covGradChristoffelUnscaledLimit
         (componentLpLimit (I := I) (M := M) g r s i α p :
           EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 private theorem covGradChristoffelUnscaledLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -151,6 +155,7 @@ private theorem covGradChristoffelUnscaledLimit_memLp
         g r s α k P₀.1 p.1 P₀.2 p.2)
       (componentLpLimit (I := I) (M := M) g r s i α p))
 
+omit [CompleteSpace E] in
 private theorem covDerivLowerOrderTerm_pouSmul_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -232,6 +237,7 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma smul_componentLpLimit_coeFn_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -264,6 +270,7 @@ private lemma smul_componentLpLimit_coeFn_ae
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma smul_unscaledLimit_toLp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -303,6 +310,7 @@ private lemma smul_unscaledLimit_toLp_eq
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [mul_left_comm, hy_all p]
 
+omit [CompleteSpace E] in
 theorem covGradChristoffel_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -21,18 +21,18 @@ open DifferentialGeometry.Tensor
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorRSSpace_norm_eq_fwd (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
     ‖T‖ = ‖tensorRSSpace_continuousLinearEquiv (𝕜 := ℝ) (M := M) (I := I) r s b T‖ :=
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality_fwd
     (r s : ℕ) (b₀ : M) {b : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -56,7 +56,7 @@ private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality_fwd
   rw [h_subB]
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma trivAt_clmAt_norm_eq_on_locality
     (r s : ℕ) (b₀ : M) {b : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -80,7 +80,7 @@ private lemma trivAt_clmAt_norm_eq_on_locality
   rw [h_apply]
   exact (tensorRSSpace_norm_eq_fwd (I := I) (M := M) r s b T).symm
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartFiberToModel_norm_le_coordChangeL_norm_on_locality
     (r s : ℕ) (α : M) {b₀ b : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -152,7 +152,7 @@ private lemma chartFiberToModel_norm_le_coordChangeL_norm_on_locality
   rw [h_norm_T] at h_le_op
   exact h_le_op
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma continuousOn_RS_coordChangeL_b₀_α (r s : ℕ) (α b₀ : M) :
     ContinuousOn
       (fun b : M => ((trivializationAt (TensorRSModel r s ℝ E)
@@ -194,7 +194,7 @@ private lemma continuousOn_RS_coordChangeL_b₀_α (r s : ℕ) (α b₀ : M) :
   rw [h_base_α, h_base_b₀] at h_smooth
   exact h_smooth.continuousOn
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma exists_opNorm_bound_on_compact_of_continuousOn_fwd
     {r s : ℕ} (f : M → TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)
     {K : Set M} (hK : IsCompact K) (h_cont : ContinuousOn f K) :

@@ -29,7 +29,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [T2Space M] [SigmaCompactSpace M]
 
 
@@ -63,6 +62,7 @@ def paraBall
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M] [SigmaCompactSpace M] in
 theorem paraBall_setAt
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -77,6 +77,7 @@ theorem paraBall_setAt
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M] [SigmaCompactSpace M] in
 theorem paraBall_set
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -88,6 +89,7 @@ theorem paraBall_set
     paraBall_setAt (I := I) S tau R hR htau s B (s : Real)
 
 
+omit [CompleteSpace E] in
 theorem paraBall_volume
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -112,6 +114,7 @@ theorem paraBall_volume
 
 
 
+omit [CompleteSpace E] in
 theorem paraBall_kappa
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -157,6 +160,7 @@ private theorem paraWindow
   constructor <;> linarith
 
 
+omit [SigmaCompactSpace M] in
 theorem paraBall_rm
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -214,8 +218,8 @@ def backBall
   radius := B.radius / Real.sqrt R
   radius_pos := div_pos B.radius_pos (Real.sqrt_pos.2 hR)
 
-set_option linter.unusedSectionVars false in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M] [SigmaCompactSpace M] in
 theorem paraBall_back
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -230,6 +234,7 @@ theorem paraBall_back
 
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M] [SigmaCompactSpace M] in
 theorem backBall_setAt
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -245,6 +250,7 @@ theorem backBall_setAt
 
 
 
+omit [CompleteSpace E] in
 theorem backBall_volume
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -259,6 +265,7 @@ theorem backBall_volume
 
 
 
+omit [CompleteSpace E] in
 theorem backBall_kappa
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -313,6 +320,7 @@ private theorem backWindow
 
 
 
+omit [SigmaCompactSpace M] in
 theorem backBall_rm
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -355,9 +363,9 @@ theorem backBall_rm
     rw [hscale]
     simpa only [mul_assoc] using hold
 
-set_option linter.unusedSectionVars false in
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [T2Space M] [SigmaCompactSpace M] in
 theorem backBall_para
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -371,6 +379,7 @@ theorem backBall_para
       field_simp [ne_of_gt (Real.sqrt_pos.2 hR)]
 
 
+omit [SigmaCompactSpace M] in
 theorem paraBall_rm_iff
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
@@ -387,6 +396,7 @@ theorem paraBall_rm_iff
 
 
 
+omit [CompleteSpace E] in
 theorem paraBall_kappa_iff
     (S : SolutionOn (I := I) (M := M) D)
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)

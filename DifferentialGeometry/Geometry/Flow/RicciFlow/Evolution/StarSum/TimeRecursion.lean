@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -36,7 +35,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +49,8 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRicReal_frame
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -172,7 +173,10 @@ theorem nablaRicReal_frame
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem ricciCovDeriv_trace_nablaRm
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (frame : Idx → (y : M) → TangentSpace I y)
@@ -268,7 +272,10 @@ def lfChr
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceOrthoEq
+    [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
@@ -296,7 +303,10 @@ def gammaStarCost (k : ℕ) : Real :=
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 private theorem gammaStarU
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     {u : Set M}
     (frame : Fin 3 → (y : M) → TangentSpace I y)
@@ -480,6 +490,7 @@ private theorem gammaStarU
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtGerm {Idx : Type*} {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     {A1 A2 : M → (Fin r → Idx) → Real} {y : M}
@@ -508,7 +519,10 @@ open DifferentialGeometry.Dim3Reaction in
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem resStarLFU
+    [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
     {u : Set M}

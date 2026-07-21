@@ -16,11 +16,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -55,6 +56,7 @@ private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
         (W : ∀ x : M, TangentSpace I x) hy_base]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma differentiableAt_chartE_pullback_W_alpha
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -65,6 +67,9 @@ private lemma differentiableAt_chartE_pullback_W_alpha
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hW_at
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -233,6 +238,7 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     rw [hrepr_chartCoeff j']
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma metric_compat_coord_identity_alpha
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -250,6 +256,7 @@ private lemma metric_compat_coord_identity_alpha
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartLieDerivMetricMatrix_alpha_algebraic
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -430,6 +437,8 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
   rw [hreshape_H1, hreshape_H2]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

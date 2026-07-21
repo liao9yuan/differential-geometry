@@ -43,6 +43,7 @@ theorem precompMap_chartPoint
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem hagree_of_cocycle_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (ΦE : E × ℝ → E)
     (hrealΨ : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
@@ -90,6 +91,7 @@ theorem spatial_fderiv_precomp_factor
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
 theorem chartPrecomp_spatialFderiv_hasDerivAt
     {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
     (hΦE : IsLocalFlow f t x₀ r tmin tmax ΦE)
@@ -164,6 +166,7 @@ theorem precompMap_differentiableAt
     hmdW.mdifferentiableAt (by rw [hrange]; exact univ_mem)
   rwa [mdifferentiableAt_iff_differentiableAt] at hmd
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_of_localGeometricFlow
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x)
     {f : ℝ → E → E} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
@@ -363,6 +366,7 @@ theorem exists_chartPicard_and_cocycle_realisation
   refine ⟨hpt, ?_⟩
   exact hΦconf ((Φ_fam t : M → M) y) hyU s (hsub_T hs)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem rawVariationalIdentityFlat_of_jointSmoothBareField
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

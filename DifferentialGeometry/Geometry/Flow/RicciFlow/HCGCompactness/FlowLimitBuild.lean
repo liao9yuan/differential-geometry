@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -48,7 +47,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [BoundarylessManifold I M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 
 
 
@@ -66,6 +65,8 @@ variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem isSolutionOn_of_reg
     {D : RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M)

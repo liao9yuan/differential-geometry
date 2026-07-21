@@ -639,7 +639,8 @@ private theorem raisedKoszul_eq [CompleteSpace E0]
     {B : E0 →L[Real] E0 →L[Real] Real} (hB : IsCoercive B)
     (D : E0 →L[Real] E0 →L[Real] E0 →L[Real] Real) (u v : E0) :
     raisedKoszul B D u v = MetricKoszul.koszulVec hB D u v := by
-  rw [raisedKoszul, gram_inv_eq hB, koszulRieszCLM_apply]
+  rw [raisedKoszul, gramCLM_apply, koszulRieszCLM_apply,
+    ← hB.sharp_eq_inverse]
   rfl
 
 
@@ -2020,6 +2021,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normalTrans_isom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -2125,6 +2127,7 @@ theorem normalTrans_isom
 
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_bij
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U : Set E'} (hx : NormalCoordMetricEquivOn (I := I) Y x U) :
@@ -2157,6 +2160,7 @@ theorem normal_fderiv_bij
 
 
 
+omit [NeZero (Module.finrank Real E')] in
 theorem normal_fderiv_le_two
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
     {U V : Set E'}

@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,7 @@ private lemma covGradBundle_trivFibre_eq'
         (Φ.comp ((trivializationAt E (TangentSpace I) α).symmL ℝ b)) :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentRaw_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

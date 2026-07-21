@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -82,6 +82,7 @@ private lemma sqrt_geometricEnergy_le
     _ = C₂ * (A + B) := by
         rw [hC₂_def, Real.sqrt_sq (by linarith [hA, hB])]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma eLpNorm_volume_restrict_compact_le_weighted
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -128,6 +129,7 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -177,6 +179,7 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -837,6 +840,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ} :

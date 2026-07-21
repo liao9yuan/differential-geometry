@@ -87,6 +87,7 @@ omit [InnerProductSpace ℝ E] in
     funext x; rw [mul_zero]
   rw [h, integral_zero]
 
+omit [InnerProductSpace ℝ E] in
 theorem chartBoundaryFaceIntegral_eq_neg_tangentSectionAction_of_interior_support
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -214,6 +215,7 @@ lemma chartLocalMeasure_chart_boundary_zero
     rw [h_eq, MeasureTheory.Measure.smul_apply, h_fb, smul_zero]
   exact MeasureTheory.measure_mono_null hsub h_mh_zero
 
+omit [InnerProductSpace ℝ E] in
 private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -239,6 +241,7 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     rw [← I.compl_interior]
     exact hx_int
 
+omit [InnerProductSpace ℝ E] in
 private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -330,6 +333,7 @@ private lemma integrable_chartLocalMeasure_of_cs_chartSource
           simp
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
+omit [InnerProductSpace ℝ E] in
 theorem stokes_compact_via_pou
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

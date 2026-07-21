@@ -34,7 +34,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -73,6 +73,7 @@ set_option linter.unusedVariables false in
 
 
 
+omit [BoundarylessManifold I M] in
 theorem forcing_continuous_interior
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

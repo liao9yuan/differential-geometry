@@ -21,7 +21,9 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDim
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
+theorem posDef_isVonNBounded
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E] (g : E →L[ℝ] E →L[ℝ] ℝ)
     (hpos : ∀ v : E, v ≠ 0 → 0 < g v v) :
     Bornology.IsVonNBounded ℝ {v : E | g v v < 1} := by
   have hcont : Continuous (fun v : E => g v v) :=

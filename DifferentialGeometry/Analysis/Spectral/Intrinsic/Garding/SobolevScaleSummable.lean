@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ noncomputable def oneMinusConnLapSmooth
     SmoothCcTensor g r s :=
   T - rawTensorConnLapSmooth (I := I) g r s T
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma oneMinusConnLapSmooth_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (x : M) :
@@ -155,6 +156,8 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
   ring
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorParseval_l2Coeff_ofCompact_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -169,6 +172,8 @@ theorem tensorParseval_l2Coeff_ofCompact_sq
     Real.norm_eq_abs, sq_abs]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Coeff_ofCompact_summable_sq'
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -179,6 +184,8 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
   tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem summable_tensorSobolevWeight_of_even
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)

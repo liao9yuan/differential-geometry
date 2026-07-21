@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   {H : Type*} [TopologicalSpace H]
   {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,7 +33,7 @@ noncomputable def tensor0SChartE_section_repr (s : ℕ) (α : M)
   (trivializationAt (Tensor0SModel s ℝ E)
       (fun y : M => Tensor0SSpace s I y) α).continuousLinearMapAt ℝ b (T b)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma tensor0SChartE_section_repr_apply (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
     tensor0SChartE_section_repr (I := I) s α T b =
@@ -41,7 +41,7 @@ omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space 
           (fun y : M => Tensor0SSpace s I y) α).continuousLinearMapAt ℝ b (T b) :=
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensor0SChartE_section_repr_add (s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace s I b) :
     tensor0SChartE_section_repr (I := I) s α (T₁ + T₂) =
@@ -57,7 +57,7 @@ lemma tensor0SChartE_section_repr_add (s : ℕ) (α : M)
         (T₁ b + T₂ b) = _
   exact map_add _ (T₁ b) (T₂ b)
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensor0SChartE_section_repr_smul (s : ℕ) (α : M) (c : ℝ)
     (T : Π b : M, Tensor0SSpace s I b) :
     tensor0SChartE_section_repr (I := I) s α (c • T) =
@@ -86,7 +86,7 @@ noncomputable def tensor0SIntrinsicChartCLM (s : ℕ) (α : M)
         (extChartAt I α b)).comp
       (trivToE (I := I) α b))
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensor0SIntrinsicChartCLM_apply (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) (v : TangentSpace I b) :
     tensor0SIntrinsicChartCLM (I := I) s α T b v =
@@ -98,7 +98,7 @@ lemma tensor0SIntrinsicChartCLM_apply (s : ℕ) (α : M)
   unfold tensor0SIntrinsicChartCLM
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensor0SIntrinsicChartCLM_add_section (s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace s I b) (b : M)
     (h₁ : DifferentiableAt ℝ
@@ -141,7 +141,7 @@ lemma tensor0SIntrinsicChartCLM_add_section (s : ℕ) (α : M)
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [ContinuousLinearMap.add_apply, map_add]
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensor0SIntrinsicChartCLM_smul_section (s : ℕ) (α : M)
     (c : ℝ) (T : Π b : M, Tensor0SSpace s I b) (b : M)
     (hT : DifferentiableAt ℝ
@@ -184,12 +184,14 @@ noncomputable def tensor0SChartChristoffelCorrection (s : ℕ) (α : M)
   (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b -
     tensor0SIntrinsicChartCLM (I := I) s α T b
 
+omit [CompleteSpace E] in
 lemma tensor0SChartChristoffelCorrection_def (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
     tensor0SChartChristoffelCorrection (I := I) cov s α T b =
       (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b -
         tensor0SIntrinsicChartCLM (I := I) s α T b := rfl
 
+omit [CompleteSpace E] in
 theorem tensor0SCovariantDerivative_chart_decomp (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b =
@@ -199,6 +201,7 @@ theorem tensor0SCovariantDerivative_chart_decomp (s : ℕ) (α : M)
   rw [tensor0SChartChristoffelCorrection_def]
   abel
 
+omit [CompleteSpace E] in
 theorem tensor0SCovariantDerivative_chart_decomp_apply (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) (v : TangentSpace I b) :
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b v =
@@ -208,6 +211,7 @@ theorem tensor0SCovariantDerivative_chart_decomp_apply (s : ℕ) (α : M)
   rw [tensor0SCovariantDerivative_chart_decomp (I := I) cov s α T b]
   rw [ContinuousLinearMap.add_apply]
 
+omit [CompleteSpace E] in
 theorem tensor0SCovariantDerivative_chart_decomp_vectorField
     (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b)

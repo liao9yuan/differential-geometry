@@ -37,7 +37,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -614,6 +614,8 @@ theorem smoothCcToTensorHs_smul (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (
     tensorL2Coeff_smul]
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHs_norm_smul (g₀ : SmoothRiemannianMetric I M) {σ : ℝ} (c : ℝ)
     (x : tensorHs (I := I) (M := M) g₀ 0 2 σ) :
     ‖c • x‖ = |c| * ‖x‖ := by
@@ -1117,6 +1119,8 @@ theorem exists_norm_smoothCcToTensorHs_symmS_le (g₀ : SmoothRiemannianMetric I
         mul_le_mul_of_nonneg_left h2 hCa_nn
     _ = Ca * Cb * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ) T‖ := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem symmS_eq_self_of_ccTensorBilin_symm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),

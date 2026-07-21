@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInput
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -28,7 +27,7 @@ open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]

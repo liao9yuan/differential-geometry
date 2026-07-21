@@ -18,7 +18,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -196,6 +196,7 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpDiff_wkpNorm_indicator_eq
     (α : M) (K : ℕ) {Q : EuclN → ℝ}
     (hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
@@ -253,6 +254,7 @@ lemma sharpDiff_wkpNorm_indicator_eq
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma sharpDiff_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -276,6 +278,7 @@ lemma sharpDiff_eigen_inv_one_le
         exact one_ne_zero h_norm.symm)
   exact (one_le_inv₀ hμ_unit.1).mpr hμ_unit.2
 
+omit [CompleteSpace E] in
 lemma sharpDiff_eigen_inv_nn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -283,6 +286,7 @@ lemma sharpDiff_eigen_inv_nn
   le_trans zero_le_one
     (sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i)
 
+omit [CompleteSpace E] in
 lemma sharpDiff_pow_eigen_inv_mono
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {a b : ℕ} (hab : a ≤ b) :
@@ -290,6 +294,7 @@ lemma sharpDiff_pow_eigen_inv_mono
   pow_le_pow_right₀
     (sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i) hab
 
+omit [CompleteSpace E] in
 lemma sharpDiff_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -436,6 +441,7 @@ structure eigenvectorChartRHSDiffSharpWkpBounds
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiff_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -451,6 +457,7 @@ private lemma sharpDiff_diff_memWkp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiff_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
@@ -521,6 +528,7 @@ private lemma sharpDiff_level_zero_wkpNorm
 set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma sharpDiff_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -807,6 +815,7 @@ private lemma sharpDiff_recursion
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

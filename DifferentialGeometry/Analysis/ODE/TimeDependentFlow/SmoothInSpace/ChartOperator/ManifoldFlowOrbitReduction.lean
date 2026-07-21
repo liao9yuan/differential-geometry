@@ -46,6 +46,8 @@ theorem chartCloseDop_eventuallyEq_mfderiv_orbit
   filter_upwards [hmem] with s hs
   exact chartCloseDop_apply_eq_mfderiv (I := I) Φ_fam (Φ_fam t x) x s v hs
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem rawVariationalIdentity_iff_hasDerivAt_chartCloseDop
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

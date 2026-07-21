@@ -46,7 +46,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,6 +83,7 @@ theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric
   rwa [hfun] at h
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     (g₁ : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
     cometricLmodel (I := I) g₁ x (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -202,6 +203,7 @@ theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     · rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
     (h : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin (2 + 2) → Fin (Module.finrank ℝ E)) :
@@ -252,6 +254,7 @@ noncomputable def arm2ReadoutCovDerivPair (g₀ : SmoothRiemannianMetric I M)
         (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad1_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
     (h : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) :
@@ -696,6 +699,7 @@ private lemma gradCoeff02_center_eq
   simp only [chartChristoffelEuclid_def, hsymm]
 
 omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma valueCoeff02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m a : Fin (Module.finrank ℝ E))
@@ -777,6 +781,7 @@ lemma arm1ReadoutCovDeriv_center_eq
   exact covDerivLowerOrderTerm02_center_eq (I := I) (M := M) g₀ h x a b c
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartial_covDerivLowerOrderTerm02_center_eq_sum
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -872,6 +877,7 @@ private lemma sum_two_slot_indicator_collapse
   · intro h; exact absurd (Finset.mem_univ c) h
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma arm2ReadoutPairTerm1_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -973,6 +979,7 @@ private lemma arm2ReadoutPairTerm1_center_eq
   · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rawCompCovGrad03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (p q r : Fin (Module.finrank ℝ E)) :
@@ -1008,6 +1015,7 @@ private lemma rawCompCovGrad03_center_eq
   rw [covDerivLowerOrderTerm02_center_eq (I := I) (M := M) g₀ h x p q r]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma arm2ReadoutPairTerm2_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -1103,6 +1111,7 @@ private lemma arm2ReadoutPairTerm2_center_eq
     rw [rawCompCovGrad03_center_eq (I := I) (M := M) g₀ h x b c r] ]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma arm2ReadoutCovDerivPair_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :

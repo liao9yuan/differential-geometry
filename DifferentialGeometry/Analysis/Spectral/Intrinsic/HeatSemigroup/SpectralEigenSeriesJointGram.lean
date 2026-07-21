@@ -42,7 +42,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (S + T) x v w =
@@ -96,6 +97,7 @@ private theorem tensorL2_ext_of_tensorL2Coeff'
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) hc T i := rfl
   rw [hS, hT, h i]
 
+omit [BoundarylessManifold I M] in
 private theorem allHs_of_weighted_summable
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hsum : ∀ σ : ℝ, 0 ≤ σ →
@@ -117,6 +119,7 @@ private theorem allHs_of_weighted_summable
   refine tensorL2_ext_of_tensorL2Coeff' (I := I) (M := M) g (fun i => ?_)
   rw [tensorHsToL2_tensorL2Coeff]
 
+omit [BoundarylessManifold I M] in
 private theorem ccTensorBilinSymm_finiteEigenCombo
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -147,6 +150,7 @@ def fibreSymmBilinForm (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
       (T (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![w, v])
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_eq_fibreSymmBilinForm (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g S x v w =
@@ -183,6 +187,7 @@ theorem fibreSymmBilinForm_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSp
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem fibreSymmBilinForm_sum {ι : Type*} (s : Finset ι) (x : M)
     (c : ι → ℝ) (T : ι → Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
@@ -201,6 +206,7 @@ theorem fibreSymmBilinForm_sum {ι : Type*} (s : Finset ι) (x : M)
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (tensorChartComponentRaw) in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_eq_sum_chartBasis (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (β : M) {b : M} (hb : b ∈ (chartAt H β).source)
     (v w : TangentSpace I b) :
@@ -216,6 +222,7 @@ theorem ccTensorBilinSymm_eq_sum_chartBasis (g : SmoothRiemannianMetric I M)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
 
+omit [BoundarylessManifold I M] in
 theorem spectralChartComponent_tendsto
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hcauchy : ∀ k : ℕ, CauchySeq (fun n =>
@@ -709,6 +716,7 @@ def eigenRawIncrementMode
     φ i q.1 * tensorChartComponentOnModel (I := I) (M := M) g
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2
 
+omit [BoundarylessManifold I M] in
 lemma eigenRawIncrementMode_contDiffOn_ofOrder
     (g : SmoothRiemannianMetric I M) {T : ℝ} (kk : ℕ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -985,6 +993,7 @@ lemma exists_rawComponentRaw_eigen_pointwise_le_lambda_pow
   rw [heq, hxy, Real.norm_eq_abs] at h0
   exact h0
 
+omit [BoundarylessManifold I M] in
 lemma tensorChartComponentRaw_finiteEigenCombo
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -1010,6 +1019,8 @@ lemma tensorChartComponentRaw_finiteEigenCombo
         tensorChartComponentRaw_smul (I := I) (M := M), ih]
       simp [smul_eq_mul]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma pdIter_rawCompOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (L : List E) :
@@ -1268,6 +1279,8 @@ theorem eigenTimeSpatialProductMode_iteratedFDerivWithin_summable_majorant_ofOrd
             gcongr
           · exact mul_nonneg hSs_nn (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
 
+omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 lemma chartGramOnE_realize_eq_add_half_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

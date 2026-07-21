@@ -73,6 +73,7 @@ private lemma intervalIntegrable_chartTrivRepr_along_orbit
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chart_anchor_flow_build
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))

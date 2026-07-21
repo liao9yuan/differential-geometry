@@ -198,7 +198,7 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+  [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
@@ -221,6 +221,7 @@ noncomputable def model_applyInput_bilinear (r s : ℕ) :
   ContinuousLinearMap.flip
     (ContinuousLinearMap.id 𝕜 (TensorRSModel r s 𝕜 E))
 
+omit [CompleteSpace 𝕜] in
 @[simp]
 theorem model_applyInput_bilinear_apply (r s : ℕ)
     (θ : Tensor0SModel r 𝕜 E) (T : TensorRSModel r s 𝕜 E) :
@@ -228,6 +229,7 @@ theorem model_applyInput_bilinear_apply (r s : ℕ)
 
 
 
+omit [CompleteSpace 𝕜] in
 theorem tensor0SModelAt_applyInput_eq
     (r s : ℕ) {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -313,6 +315,8 @@ noncomputable def tensorRSField_applyInput
   exact tensor0SModelAt_applyInput_eq (𝕜 := 𝕜) (E := E) (I := I)
     (M := M) r s hx (T x) (θ x)
 
+omit [IsManifold I (n + 1) M] in
+omit [CompleteSpace 𝕜] in
 @[simp]
 theorem tensorRSField_applyInput_apply
     (T : TensorRSField n r s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
@@ -355,7 +359,7 @@ noncomputable def Tensor0SField.one0 [CompleteSpace 𝕜] :
     Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) :=
   Tensor0SField.fromScalarField n (fun _ : M => (1 : 𝕜)) contMDiff_const
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I (n + 1) M] in
 @[simp]
 theorem Tensor0SField.one0_apply [CompleteSpace 𝕜]
     (x : M) (v : Fin 0 → TangentSpace I x) :
@@ -393,7 +397,7 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+  [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 variable {s q : ℕ}

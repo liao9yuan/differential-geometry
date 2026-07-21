@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +39,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffComponentEuclid_contDiff_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -53,6 +55,8 @@ private lemma cutoffComponentEuclid_contDiff_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_hasCompactSupport_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -66,6 +70,8 @@ private lemma cutoffComponentEuclid_hasCompactSupport_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_tsupport_subset_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -79,6 +85,8 @@ private lemma cutoffComponentEuclid_tsupport_subset_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffComponentEuclid_memLp_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -97,6 +105,8 @@ private lemma cutoffComponentEuclid_memLp_section
   rw [chartL2Measure]
   exact h_vol.restrict _
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_cutoffComponentEuclid_section_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -159,6 +169,9 @@ def crossRightDivFactor
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
       crossRightTestGradCoeff (I := I) (M := M) g r s α P₀ Q l y
 
+omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -170,6 +183,9 @@ lemma crossRightDivFactor_contDiffOn
       (covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q)).mul
     (crossRightTestGradCoeff_contDiffOn (I := I) (M := M) g r s α P₀ Q l)
 
+omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -182,6 +198,7 @@ lemma euclidPartial_crossRightDivFactor_contDiffOn
   euclidPartial_contDiffOn_target (I := I) (M := M) α l
     (crossRightDivFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -207,6 +224,7 @@ lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     exact hb_supp hc
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ htar]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) (j : Fin (Module.finrank ℝ E)) {y : EuclN}
     (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
@@ -239,6 +257,7 @@ lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma crossRightTestGradCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -251,6 +270,7 @@ private lemma crossRightTestGradCoeff_eq_zero_off_chartPouKernel
   rw [euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) α j hy, mul_zero]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -262,6 +282,7 @@ lemma crossRightDivFactor_eq_zero_off_chartPouKernel
     crossRightTestGradCoeff_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s α P₀ Q l hy, mul_zero]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -296,6 +317,7 @@ lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma densityOnEuclid_mul_crossRightTestGradTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -317,6 +339,8 @@ private lemma densityOnEuclid_mul_crossRightTestGradTerm_eq
   rw [crossRightDivFactor]
   ring
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -334,6 +358,8 @@ lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
     ((cutoffComponentEuclid_contDiff_section (I := I) (M := M)
       g r s S α P.1 P.2).contDiffOn)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma integrable_euclidPartial_crossRightTestGradTerm_mul_test
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -365,6 +391,8 @@ private lemma integrable_euclidPartial_crossRightTestGradTerm_mul_test
     hasCompactSupport_partial_coeff_mul_test (E := E) l hφ_cs
   exact hcontDiff.continuous.integrable_of_hasCompactSupport hsupp
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem crossRightTestGradTerm_byParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -424,6 +452,8 @@ theorem crossRightTestGradTerm_byParts
     (integrable_euclidPartial_crossRightTestGradTerm_mul_test
       (I := I) (M := M) g r s S α P₀ l hφ hφ_cs hφ_supp).restrict)]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_cutoffComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -434,6 +464,7 @@ private lemma differentiableAt_cutoffComponentEuclid
   ((cutoffComponentEuclid_contDiff_section (I := I) (M := M)
     g r s S α Idx Jdx).differentiable (by norm_num)).differentiableAt
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tendsto_sum3
     (α : M) {κ₁ κ₂ κ₃ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃]
@@ -484,6 +515,7 @@ def cutoffPartialLpLimit
     eigenvectorCutoffChartPartialLp (I := I) (M := M)
       g r s i α P k
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma memLp_indicatorFactor_mul_cutoffLp
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -525,6 +557,7 @@ noncomputable def crossRightGradCoeffDivLimit
                   g r s i α P l :
                   EuclN → ℝ) y
 
+omit [CompleteSpace E] in
 theorem crossRightGradCoeffDivLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -555,6 +588,7 @@ theorem crossRightGradCoeffDivLimit_memLp
             (cutoffPartialLpLimit (I := I) (M := M)
               g r s i α P l))))
 
+omit [CompleteSpace E] in
 private lemma memLp_factor_mul_cutoffComponentAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -596,6 +630,7 @@ private lemma memLp_factor_mul_cutoffComponentAtom
       (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P.1 P.2)
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_cutoffComponentEuclid_approx_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -615,6 +650,7 @@ private lemma euclidPartial_cutoffComponentEuclid_approx_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
       α P.1 P.2 k)
 
+omit [CompleteSpace E] in
 private lemma memLp_factor_mul_cutoffPartialAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -659,6 +695,7 @@ private lemma memLp_factor_mul_cutoffPartialAtom
     (euclidPartial_cutoffComponentEuclid_approx_memLp (I := I) (M := M)
       g r s i α P k n)
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_densityOnEuclid_mul_crossRightTestGradTerm_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -727,6 +764,7 @@ private lemma euclidPartial_densityOnEuclid_mul_crossRightTestGradTerm_eqOn
     (differentiableAt_cutoffComponentEuclid (I := I) (M := M) g r s wₙ α
       P.1 P.2 y)
 
+omit [CompleteSpace E] in
 private lemma tendsto_cutoffComponentSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -805,6 +843,7 @@ private lemma tendsto_cutoffComponentSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
+omit [CompleteSpace E] in
 private lemma tendsto_cutoffPartialSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -927,6 +966,7 @@ private lemma tendsto_cutoffPartialSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
+omit [CompleteSpace E] in
 theorem crossRightGradCoeffDivSum_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -996,6 +1036,7 @@ theorem crossRightGradCoeffDivSum_memLp
       (I := I) (M := M) g r s i α P₀ l n hy),
     Finset.sum_add_distrib]
 
+omit [CompleteSpace E] in
 theorem crossRightGradCoeffDivSum_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

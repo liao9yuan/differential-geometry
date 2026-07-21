@@ -20,7 +20,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -28,6 +28,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivAlong_locality
     (g : SmoothRiemannianMetric I M) (γ₁ γ₂ : ℝ → M)
     (V₁ : ∀ s, TangentSpace I (γ₁ s)) (V₂ : ∀ s, TangentSpace I (γ₂ s)) (t : ℝ)
@@ -224,6 +225,8 @@ private lemma exists_chartLineCurve_global
     rw [ContinuousLinearMap.id_comp] at hcomp'
     simpa [chartLineCurve, hφ] using hcomp'
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem conjugating_flow_covariant_variational_eq
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

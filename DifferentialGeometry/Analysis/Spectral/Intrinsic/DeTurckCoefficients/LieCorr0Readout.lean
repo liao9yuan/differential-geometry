@@ -16,7 +16,6 @@ set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
@@ -32,7 +31,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -49,14 +48,14 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization (chartDeTurckCorrPrin
 open DifferentialGeometry.Integral.DivergenceTheorem (partialDeriv chartGramOnE chartInvGramOnE)
 open DifferentialGeometry.Integral.Measure (chartGramMatrix)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_frame0_eq_unitTensor (x b : M) :
     chartFrameBasisModel (I := I) (M := M) x b 0 ![] = unitTensor (I := I) (M := M) b := by
   apply ContinuousMultilinearMap.ext
   intro v
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_rawComponent_eq_unitModel_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) {b : M}
@@ -67,7 +66,7 @@ private lemma lieArm_rawComponent_eq_unitModel_frame
   rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g 0 s W x hb ![] Jdx]
   rw [lieArm_frame0_eq_unitTensor (I := I) (M := M) x b]
   rfl
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_symmS_rawComponent
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (x : M)
     (c d : Fin (Module.finrank ℝ E)) {b : M}
@@ -93,7 +92,7 @@ private lemma lieArm_symmS_rawComponent
   rw [tensorChartComponentRaw_smul, tensorChartComponentRaw_add, hswap]
   rw [smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 private lemma lieArm_scalarOnE_symmS_eventuallyEq_realizedGramDeriv
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -124,7 +123,8 @@ private lemma lieArm_scalarOnE_symmS_eventuallyEq_realizedGramDeriv
   rw [DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_def,
     DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_def]
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_unitModel3_basisChart_readout_split
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c : Fin (Module.finrank ℝ E)) :
@@ -162,6 +162,7 @@ private lemma lieArm_unitModel3_basisChart_readout_split
 
 
 
+omit [BoundarylessManifold I M] in
 theorem lieU3_readout (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ'_lt : δ' < 1)
@@ -206,6 +207,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (arm2ReadoutCovDeriv
 open DifferentialGeometry.Analysis.Sobolev.Chart (chartPushedRaw chartPushedRaw_apply_of_mem chartTargetEuclid chartTargetEuclid_isOpen)
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity (euclidPartial euclidPartial_def chartChristoffelEuclid chartChristoffelEuclid_def chartPushedRaw_tensorChartComponentRaw_contDiffOn)
 
+omit [BoundarylessManifold I M] in
 private lemma lieCorr0_raw_readout (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ'_lt : δ' < 1)
@@ -224,6 +226,7 @@ private lemma lieCorr0_raw_readout (hδ_lt : δ < 1)
   exact hpt
 
 
+omit [BoundarylessManifold I M] in
 theorem lieArm1_center (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ'_lt : δ' < 1)
@@ -246,6 +249,7 @@ theorem lieArm1_center (hδ_lt : δ < 1)
   · refine congrArg Neg.neg (Finset.sum_congr rfl (fun r _ => ?_))
     rw [lieCorr0_raw_readout (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x b r]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieCorr0_euclid_christoffel_bridge (g : SmoothRiemannianMetric I M) (x : M)
     (m a b r : Fin (Module.finrank ℝ E)) :
     euclidPartial (E := E) m
@@ -277,6 +281,7 @@ private lemma lieCorr0_euclid_christoffel_bridge (g : SmoothRiemannianMetric I M
   rw [ContinuousLinearEquiv.coe_coe]
   rw [chartModelBasis_apply]
 
+omit [BoundarylessManifold I M] in
 private lemma lieCorr0_euclid_f_bridge (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ'_lt : δ' < 1)
@@ -355,6 +360,7 @@ private lemma lieCorr0_euclid_f_bridge (hδ_lt : δ < 1)
   simp only [smul_eq_mul]
 
 
+omit [BoundarylessManifold I M] in
 theorem lieR4_center (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ'_lt : δ' < 1)

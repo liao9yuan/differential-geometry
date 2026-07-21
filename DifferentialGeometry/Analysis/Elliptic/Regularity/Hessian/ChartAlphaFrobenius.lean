@@ -12,7 +12,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianChartAlphaFrobenius
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -112,6 +112,7 @@ private lemma g_inner_bilinear_expand_two_sums
         c i * d j * g.inner x (u i) (w j) :=
   clm_bilinear_expand_two_sums (I := I) (g.inner x) n c d u w
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_eq_PGPt
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -150,6 +151,7 @@ private lemma chartGramMatrix_alpha_eq_PGPt
     rw [chartBasisVecFiber_self (I := I) x l]
   rw [h_inner]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_eq_PGPt_matrix
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -205,6 +207,7 @@ private lemma chartGramMatrix_x_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g x hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartAlphaCoBchange_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -235,6 +238,7 @@ private lemma chartAlphaCoBchange_isUnit
     ring
   exact isUnit_iff_ne_zero.mpr hAne
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -294,6 +298,7 @@ private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
   rw [h_inv]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :
@@ -342,6 +347,8 @@ private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
   exact h_entry
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma chartHessianTensor_alpha_eq_P_chartHessianTensor_x
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M} (hx : x ∈ (chartAt H α).source)
@@ -612,6 +619,9 @@ private lemma nested_sum_perm
   intro i _
   rw [Finset.sum_comm]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartFrobeniusInvariance_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -778,6 +788,8 @@ theorem chartFrobeniusInvariance_holds
   rw [h_factor]
   rw [h_inverse a c, h_inverse b d]
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem chartFrobeniusSqHSBridge_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -790,6 +802,8 @@ theorem chartFrobeniusSqHSBridge_holds
   rw [h_inv]
   exact (frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x).symm
 
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem smoothTensorPairingChart_eq_hessPairingChart_pullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)

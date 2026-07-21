@@ -14,7 +14,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (α : M) {gE : E → ℝ} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -64,6 +65,7 @@ lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
   rw [hscalar_eq.fderiv_eq]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartChristoffel_contDiffAt_alpha
     (g : SmoothRiemannianMetric I M) (α : M)
     (b i m : Fin (Module.finrank ℝ E)) {x : M}
@@ -77,6 +79,7 @@ lemma chartChristoffel_contDiffAt_alpha
     chartChristoffel_contDiffOn_interior (I := I) g α b i m
   exact hon.contDiffAt (isOpen_interior.mem_nhds hxint)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma exists_globalSmooth_chartBasisVec_ext_alpha
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -107,6 +110,8 @@ lemma exists_globalSmooth_chartBasisVec_ext_alpha
     chartBasisVecFiber (I := I) α j y
   rw [hχ_one_y, one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma LeviCivita_chartBasisVec_secondCovDeriv_alpha [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b i : Fin (Module.finrank ℝ E)) {x : M}
@@ -278,7 +283,7 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv_alpha [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -318,7 +323,7 @@ lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) α j hx
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma mlieBracket_chartBasisVec_ext_self_eq_zero_alpha [I.Boundaryless]
     (α : M) (j k : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -347,6 +352,8 @@ lemma mlieBracket_chartBasisVec_ext_self_eq_zero_alpha [I.Boundaryless]
   rw [ContinuousLinearMap.zero_apply, ContinuousLinearMap.zero_apply, sub_self,
     ContinuousLinearMap.map_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma riemannOp_chartBasisVec_alpha_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {x : M}
@@ -441,6 +448,8 @@ lemma riemannOp_chartBasisVec_alpha_eq [I.Boundaryless]
   rw [← hcoeff l]
   exact (sub_smul _ _ _).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_chartBasisVec_alpha_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q : Fin (Module.finrank ℝ E)) {x : M}

@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -73,6 +72,7 @@ theorem rm04LowersRm13At_convention
   h X Y Z W
 
 
+omit [FiniteDimensional ℝ E] in
 theorem tensor04StdAt_convention
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (X Y Z W : TangentSpace I x) :
@@ -151,6 +151,7 @@ variable {x : M}
 
 
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem standardRmCompAt_slot_convention
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))

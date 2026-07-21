@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -38,7 +37,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -124,6 +123,7 @@ noncomputable def sourceFlow
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem isSolutionOn_sourceFlow
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -217,6 +217,7 @@ theorem isSolutionOn_sourceFlow
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem sourceFlow_metric_eq
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -273,6 +274,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_restrictOpen
     (K : Set M) (gRef h : SmoothRiemannianMetric I M) (C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
@@ -287,6 +289,7 @@ theorem metricUniformEquivalentOn_restrictOpen
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_restrictOpen
     (K : Set M) (β ψ : Real) (gRef : SmoothRiemannianMetric I M)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M) (B : Real -> Real)

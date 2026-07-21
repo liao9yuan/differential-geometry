@@ -6,7 +6,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -25,7 +24,7 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -36,6 +35,7 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_zero_restrictOpen_apply
     (g gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (x : U)
@@ -47,6 +47,7 @@ theorem metricCovDeriv_zero_restrictOpen_apply
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_restrictOpen_apply
     (h gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] :
@@ -225,6 +226,7 @@ theorem metricCovDeriv_restrictOpen_apply
             rw [hrightSlots]
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_restrictOpen_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : Nat) (x : U) :
@@ -252,6 +254,7 @@ theorem metricDiffCovDerivAt_restrictOpen_apply
 
 
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSq0S_restrictOpen_apply
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (s : Nat) (x : U)
@@ -294,6 +297,7 @@ theorem normSq0S_restrictOpen_apply
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_restrictOpen
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (a : Nat) (x : U) :
@@ -310,6 +314,7 @@ theorem metricDerivNorm_restrictOpen
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_restrictOpen
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] (K : Set U) (p : Nat) :

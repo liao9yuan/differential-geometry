@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebr
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -22,7 +21,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section TraceRoute
@@ -46,6 +44,7 @@ def ScalarRmRicciTraceInFrame
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     [DecidableEq Idx]
@@ -104,6 +103,7 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
 
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     [DecidableEq Idx]
@@ -159,6 +159,7 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -189,6 +190,7 @@ theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -268,6 +270,7 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -346,6 +349,7 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -402,6 +406,7 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

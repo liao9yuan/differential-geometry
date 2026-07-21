@@ -11,7 +11,7 @@ namespace Analysis
 namespace Laplacian
 namespace HessianBridgeSmoothLp
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perChartAeTransferable_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (α : M) :
@@ -138,6 +139,7 @@ omit [NeZero (Module.finrank ℝ E)] in
             smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v
               ((toEuclidean (E := E)) (extChartAt I α x))) := Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perChartAeTransferableSmoothCase_holds
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     perChartAeTransferableSmoothCase (I := I) (M := M) g φ v := by
@@ -244,6 +246,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (I := I) (M := M) g φ v h_transfer h_discharge
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     hessPairingMOnLapDom (I := I) (M := M) g φ

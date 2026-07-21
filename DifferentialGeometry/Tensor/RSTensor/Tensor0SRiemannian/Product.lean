@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -803,6 +802,7 @@ theorem inner0S_two_metricCompatible_coord_algebra
       (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
         U i k * U j l * (NA i j * B k l + A i j * NB k l)) := hright.symm
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem deriv4sum
     {Idx : Type*} [Fintype Idx]
     (U A B : M -> Idx -> Idx -> Real)

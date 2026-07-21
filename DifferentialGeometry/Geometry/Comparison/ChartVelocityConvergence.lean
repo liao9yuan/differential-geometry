@@ -39,7 +39,7 @@ open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+  [Module.Finite ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -48,7 +48,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel
     {P P' : ℝ → E} {b C : ℝ}
     (hderiv : ∀ s : ℝ, s < b → HasDerivAt P (P' s) s)
@@ -102,7 +102,7 @@ theorem velocity_converges_of_bounded_accel
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel_Ioo
     {P P' : ℝ → E} {a b C : ℝ} (hab : a < b)
     (hderiv : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt P (P' s) s)
@@ -165,7 +165,7 @@ theorem velocity_converges_of_bounded_accel_Ioo
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -197,7 +197,7 @@ theorem chartChristoffelContraction_continuousOn_prod
     exact this.comp continuous_fst
   exact (hΓp.mul hci.continuousOn).mul hcj.continuousOn
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -241,7 +241,7 @@ theorem chartVelocity_converges_at_finite_endpoint
   exact velocity_converges_of_bounded_accel (P := u') (P' := P') (b := b) (C := C)
     hderiv_pf hbound_pf
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -292,7 +292,7 @@ private def chartGramQuad (g : SmoothRiemannianMetric I M) (y : M)
     chartGramOnE (I := I) g y i j z *
       chartCoord (E := E) i V * chartCoord (E := E) j V
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -310,7 +310,7 @@ private lemma chartGramQuad_eq_inner
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
   rw [chartGramOnE_def, hx_def]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -338,7 +338,7 @@ private lemma chartGramQuad_pos
     exact hround.symm
   exact g.pos x _ hsymm_ne
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -354,7 +354,7 @@ private lemma chartGramQuad_smul
   rw [chartCoord_smul, chartCoord_smul]
   ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -375,7 +375,7 @@ private lemma chartGramQuad_continuousOn
     (((chartModelBasis E).coord j).toContinuousLinearMap).continuous.comp continuous_snd
   exact (hG.mul hci.continuousOn).mul hcj.continuousOn
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless]
+omit [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
@@ -434,7 +434,7 @@ private lemma exists_chartGramQuad_lower_bound
       _ ≤ ‖V‖ ^ 2 * chartGramQuad (I := I) g y z Vhat :=
           mul_le_mul_of_nonneg_left hmin hr2_nn
 
-omit [InnerProductSpace ℝ E]
+omit
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in

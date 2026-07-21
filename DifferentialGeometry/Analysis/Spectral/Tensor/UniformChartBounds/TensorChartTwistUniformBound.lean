@@ -23,12 +23,13 @@ open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
 
+omit [T2Space M] in
 lemma chartRSTwist_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwist (I := I) (M := M) α b r s T‖ ≤
@@ -90,6 +91,7 @@ lemma chartRSTwist_opNorm_le
   exact h_combined
 
 
+omit [T2Space M] in
 lemma chartRSTwistInv_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwistInv (I := I) (M := M) α b r s T‖ ≤

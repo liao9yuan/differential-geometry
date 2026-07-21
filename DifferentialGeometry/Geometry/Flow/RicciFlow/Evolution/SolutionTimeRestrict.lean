@@ -40,6 +40,7 @@ omit [FiniteDimensional Real E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space
     (S.timeRestrict D').base = S.base := by
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem timeRestrict_metric
     {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -50,6 +51,7 @@ end SolutionOn
 
 
 
+omit [SigmaCompactSpace M] in
 theorem isSoln_timeRestrict
     {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -112,6 +114,7 @@ theorem isSoln_timeRestrict
 
 
 
+omit [SigmaCompactSpace M] in
 theorem isSoln_tailRestrict
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -131,6 +134,7 @@ theorem isSoln_tailRestrict
 
 
 
+omit [SigmaCompactSpace M] in
 theorem tailFrameTimeReg
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

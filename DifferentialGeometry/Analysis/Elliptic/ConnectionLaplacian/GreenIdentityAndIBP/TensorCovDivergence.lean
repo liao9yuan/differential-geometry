@@ -25,8 +25,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open Tensor0SNabla TensorRSNabla TensorMetricLowering
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -168,6 +168,7 @@ noncomputable def covDivergenceBilinear
         exact contract_covariant_add_left s y (Y y) (Y' y) _)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem codiffPsi_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (y : M)
     {X Y : Π b : M, TangentSpace I b}
@@ -198,6 +199,8 @@ def covDivergenceFixedFrame
     contract_covariant 0 s b (B i b)
       (tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) V b (B i b))
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDivergenceFixedFrame_eq_sum_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -207,6 +210,8 @@ lemma covDivergenceFixedFrame_eq_sum_section
           (covDerivAlongVFSectionRS (I := I) (M := M) g 0 (s + 1) V.toSection (B i)) (B i)) b :=
   rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma covDivergenceFixedFrame_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -295,6 +300,7 @@ lemma covDivergenceRaw_eq_fixedFrame_on_nbhd
   rw [codiffPsi_apply (I := I) (M := M) g s V b hSmooth_at hSmooth_at]
   rfl
 
+omit [CompactSpace M] in
 theorem covDivergenceRaw_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
@@ -325,6 +331,7 @@ theorem covDivergenceRaw_contMDiff
       (covDivergenceRaw_eq_fixedFrame_on_nbhd (I := I) (M := M) g s V x₀ hb)
   exact h_fixed_at.congr_of_eventuallyEq h_eventuallyEq
 
+omit [CompactSpace M] in
 lemma covDivergenceRaw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     {b : M} (hb : b ∉ tsupport V.toFun) :
@@ -618,6 +625,7 @@ private lemma contract_bare_eval (s : ℕ) (x : M) (v : TangentSpace I x)
         (Fin.cons (v : E) m) := rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma D_eq_scalar_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (tensor00Scalar (I := I) (M := M) x D) • (unitZeroSec (I := I) (M := M) x) := by
   apply Tensor0SSpace.toModel_injective
@@ -632,6 +640,7 @@ private lemma D_eq_scalar_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
   congr 1
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma contract_eq_tensor0SAsRS_curry (s : ℕ) (x : M) (v : TangentSpace I x)
     (A : TensorRSSpace 0 (s+1) I x) :
     contract_covariant 0 s x v A =
@@ -671,6 +680,7 @@ private lemma contract_eq_tensor0SAsRS_curry (s : ℕ) (x : M) (v : TangentSpace
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rs_zero_recover (s : ℕ) (x : M) (Φ : TensorRSSpace 0 s I x) :
     Φ = tensor0SToTensorRS (I := I) (M := M) x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Φ)
@@ -698,6 +708,8 @@ private lemma tensor0SAsRS_add (s : ℕ) (x : M) (C D : Tensor0SSpace s I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SToTensorRS (I := I) (M := M) x D) u
   rw [tensor0SAsRS_apply, tensor0SAsRS_apply, smul_add]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma contract_covariant_leibniz
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s+1))
     {W X : Π b:M, TangentSpace I b}
@@ -739,6 +751,7 @@ private lemma contract_covariant_leibniz
   exact hleib.symm
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma contract_covGrad_eq_covDeriv
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T : SmoothCcTensor g 0 s) (x : M)
     (v : TangentSpace I x) :
@@ -833,6 +846,7 @@ private lemma contractFrameSection_apply
     contractFrameSection (I := I) (M := M) g s V b i y =
       contract_covariant 0 s y (smoothOrthoFrame (I := I) g b i y) (V.toSection y) := rfl
 
+omit [CompactSpace M] in
 private lemma divergence_oneSidedVF_summand_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g 0 s) (V : SmoothCcTensor g 0 (s + 1)) (b : M)

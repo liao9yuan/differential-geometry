@@ -15,7 +15,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,7 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Output
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (v₁ + v₂) i =
@@ -31,7 +31,7 @@ private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
   rw [← Module.Basis.coord_apply, ← Module.Basis.coord_apply, ← Module.Basis.coord_apply,
     map_add]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_smul (a : ℝ) (v : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (a • v) i = a * (chartModelBasis E).repr v i := by
@@ -80,6 +80,7 @@ def deTurckCorrectionSymbolOutput (g g' : SmoothRiemannianMetric I M) (x : M) (�
       ring) :
     E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma deTurckCorrectionSymbolOutput_apply_apply (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :
@@ -89,6 +90,7 @@ def deTurckCorrectionSymbolOutput (g g' : SmoothRiemannianMetric I M) (x : M) (�
           (chartModelBasis E).repr v i * (chartModelBasis E).repr w j *
             deTurckCorrSymbolComp (I := I) g g' x ξ t i j := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma deTurckCorrectionSymbolOutput_add (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     deTurckCorrectionSymbolOutput (I := I) g g' x ξ (t + t') =
@@ -104,6 +106,7 @@ lemma deTurckCorrectionSymbolOutput_add (g g' : SmoothRiemannianMetric I M) (x :
   rw [deTurckCorrSymbolComp_add]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma deTurckCorrectionSymbolOutput_smul (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (a : ℝ) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     deTurckCorrectionSymbolOutput (I := I) g g' x ξ (a • t) =
@@ -130,11 +133,13 @@ def deTurckCorrectionSymbol (g g' : SmoothRiemannianMetric I M) :
       map_smul' := fun a t => by
         simpa using deTurckCorrectionSymbolOutput_smul (I := I) g g' x ξ a t }
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma deTurckCorrectionSymbol_apply (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
     deTurckCorrectionSymbol (I := I) g g' x ξ t =
       deTurckCorrectionSymbolOutput (I := I) g g' x ξ t := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrectionSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -159,6 +164,7 @@ theorem deTurckCorrectionSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) 
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrectionSymbol_apply_eq_closedForm (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -172,6 +178,7 @@ theorem deTurckCorrectionSymbol_apply_eq_closedForm (g g' : SmoothRiemannianMetr
           formMetricTrace (I := I) g x t := by
   rw [deTurckCorrectionSymbol_apply_apply, deTurckCorrSymbolComp_eq_closedForm]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrectionSymbol_apply_symm (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :
@@ -184,6 +191,7 @@ theorem deTurckCorrectionSymbol_apply_symm (g g' : SmoothRiemannianMetric I M) (
   rw [deTurckCorrSymbolComp_symm (I := I) g g' x ξ t j i]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrectionSymbol_background_independent
     (g g'₁ g'₂ : SmoothRiemannianMetric I M) :
     deTurckCorrectionSymbol (I := I) g g'₁ = deTurckCorrectionSymbol (I := I) g g'₂ := by

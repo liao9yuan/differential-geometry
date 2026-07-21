@@ -22,7 +22,7 @@ namespace Geometry
 namespace Riemannian
 namespace Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -32,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ContinuousAt (maximalGeodesic (I := I) g p v) 0 := by
@@ -54,6 +55,7 @@ theorem maximalGeodesic_continuousAt_zero
       Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hε)
     filter_upwards [h_ball] with t ht using h_eq t ht
   exact hproj_cont.congr h_eventually.symm
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 lemma IsGeodesicOnWithInitial.continuousOn_base
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {J : Set ℝ}
     {p : M} {v : TangentSpace I p}
@@ -67,6 +69,8 @@ lemma IsGeodesicOnWithInitial.continuousOn_base
     hπ.comp_continuousOn hf_cont
   exact hcomp.congr (fun t _ht => (hproj t).symm)
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma maximalGeodesic_eqOn_lift_of_footInSource
     {g : SmoothRiemannianMetric I M} {p : M} {v : E}
     {f : ℝ → TangentBundle I M} {J : Set ℝ}
@@ -109,6 +113,8 @@ lemma maximalGeodesic_eqOn_lift_of_footInSource
     exact (hproj' t).symm
   exact hval
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma maximalGeodesic_continuousOn_of_footInSource
     {g : SmoothRiemannianMetric I M} {p : M} {v : E}
     {f : ℝ → TangentBundle I M} {J : Set ℝ}

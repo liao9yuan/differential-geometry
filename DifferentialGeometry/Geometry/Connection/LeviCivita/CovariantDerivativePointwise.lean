@@ -16,7 +16,7 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open VectorField
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -88,6 +88,8 @@ def conjCovFun
       ((LeviCivita (I := I) g).toFun (Diffeomorph.pushforward Φ Y) (Φ x))
   inner.comp (mfderiv I I (⇑Φ) x)
 
+omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma conjCovFun_apply
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (Y : ∀ x : M, TangentSpace I x) (x : M) (v : TangentSpace I x) :
@@ -168,6 +170,7 @@ private lemma pushforward_mdiffAt
   rw [hfun_total]
   exact hmpb
 
+omit [SigmaCompactSpace M] in
 private lemma conjCovFun_torsion_free
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {X Y : ∀ x : M, TangentSpace I x} {x : M}

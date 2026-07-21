@@ -48,6 +48,7 @@ private lemma le_sum_of_mem_finset_nonneg
     Finset.sum_nonneg (fun j _ => hf_nn j)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
@@ -89,6 +90,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     mul_le_mul_of_nonneg_right h_ofReal_le (by exact zero_le _)
   exact (hCIJ_le (Idx, Jdx)).trans h_envelope_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∀ S : SmoothCcTensorH1 g r s,
@@ -102,6 +104,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved_forall
   tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     (I := I) (M := M) g r s α S
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sum_tensorChartComponentScalar_wkpNormChart_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :

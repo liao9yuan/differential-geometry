@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -35,7 +34,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,7 +45,10 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem nabla_roughLap0S_nablaKRm
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -92,7 +94,10 @@ theorem nabla_roughLap0S_nablaKRm
 
 
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem spatialComm_nablaKRm_traceDiff
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -137,7 +142,10 @@ theorem spatialComm_nablaKRm_traceDiff
 
 
 
+omit [Module.Finite ℝ E] in
+omit [SigmaCompactSpace M] in
 theorem spatialComm_nablaKRm_split
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

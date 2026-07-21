@@ -38,6 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 private theorem chartRep_sec_diff
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (X : ∀ x : M, TangentSpace I x)
@@ -57,6 +58,7 @@ private theorem chartRep_sec_diff
   exact (contMDiffAt_iff_contDiffAt.mp hcomp).differentiableAt (by simp)
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem deriv_comp_grad
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -81,6 +83,8 @@ private theorem deriv_comp_grad
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv2_comp_geo
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -136,6 +140,8 @@ theorem deriv2_comp_geo
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv2_comp_geo_on
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
@@ -162,6 +168,8 @@ theorem deriv2_comp_geo_on
 
 
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem strictConvex_geo
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)

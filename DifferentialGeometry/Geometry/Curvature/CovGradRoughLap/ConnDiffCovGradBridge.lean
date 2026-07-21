@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open TensorMultilinear
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,7 +38,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
-omit [InnerProductSpace ℝ E] in
 private lemma tensor0SOne_apply_add (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     om (fun _ : Fin 1 => a + b) = om (fun _ : Fin 1 => a) + om (fun _ : Fin 1 => b) := by
@@ -56,7 +55,6 @@ private lemma tensor0SOne_apply_add (x : M) (om : Tensor0SSpace 1 I x)
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
-omit [InnerProductSpace ℝ E] in
 private lemma tensor0SOne_apply_smul (x : M) (om : Tensor0SSpace 1 I x)
     (c : ℝ) (a : TangentSpace I x) :
     om (fun _ : Fin 1 => c • a) = c • om (fun _ : Fin 1 => a) := by
@@ -72,7 +70,6 @@ private lemma tensor0SOne_apply_smul (x : M) (om : Tensor0SSpace 1 I x)
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
-omit [InnerProductSpace ℝ E] in
 private lemma tensor0SOne_apply_neg (x : M) (om : Tensor0SSpace 1 I x)
     (a : TangentSpace I x) :
     om (fun _ : Fin 1 => -a) = -om (fun _ : Fin 1 => a) := by
@@ -83,7 +80,6 @@ private lemma tensor0SOne_apply_neg (x : M) (om : Tensor0SSpace 1 I x)
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
-omit [InnerProductSpace ℝ E] in
 private lemma tensor0SOne_apply_sub (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     om (fun _ : Fin 1 => a - b) = om (fun _ : Fin 1 => a) - om (fun _ : Fin 1 => b) := by
@@ -125,6 +121,8 @@ def connDiffPairing (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffPairing_apply (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     (connDiffPairing (I := I) g₁ g₀ x om) YZ =
@@ -132,6 +130,8 @@ omit [CompactSpace M] [I.Boundaryless] in
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffPairing_add (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om om' : Tensor0SSpace 1 I x) :
     connDiffPairing (I := I) g₁ g₀ x (om + om') =
@@ -142,6 +142,8 @@ lemma connDiffPairing_add (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffPairing_smul (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (c : ℝ) (om : Tensor0SSpace 1 I x) :
     connDiffPairing (I := I) g₁ g₀ x (c • om) =
@@ -160,6 +162,8 @@ def connDiffFib (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffFib_apply (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from connDiffFib (I := I) g₁ g₀ x) om =
@@ -167,6 +171,8 @@ omit [CompactSpace M] [I.Boundaryless] in
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffFib_apply_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from connDiffFib (I := I) g₁ g₀ x) om) YZ =
@@ -174,6 +180,8 @@ lemma connDiffFib_apply_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
   rw [connDiffFib_apply, connDiffPairing_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiffFib_contMDiff (g₁ g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
@@ -245,10 +253,13 @@ def connDiffSection (g₁ g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma connDiffSection_toSection (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffSection (I := I) g₁ g₀).toSection x = connDiffFib (I := I) g₁ g₀ x := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiffSection_tensorCovDerivAt_homSplit
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -291,6 +302,8 @@ private lemma connDiffSection_tensorCovDerivAt_homSplit
 
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma tensorSectionMDiffAt_connDiffPairing
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) (x : M) :
@@ -326,6 +339,7 @@ private lemma tensorSectionMDiffAt_connDiffPairing
 
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiffPairing_covariantDerivative02_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -429,6 +443,7 @@ private lemma connDiffPairing_covariantDerivative02_eval
 
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiffPairing_covariantDerivative01_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -513,6 +528,7 @@ private lemma connDiffPairing_covariantDerivative01_eval
   rw [hbase, hcorr]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffSection_covGrad_eq_covDerivConnDiff
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)

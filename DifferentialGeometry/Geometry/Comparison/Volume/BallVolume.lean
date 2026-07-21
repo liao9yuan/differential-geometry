@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -31,8 +30,8 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 open Bundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -60,6 +59,7 @@ def Rm04GlobalBound (g : SmoothRiemannianMetric I M) (Rm : ℝ) : Prop :=
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 lemma modelHaar_ball {R : ℝ} (hR : 0 < R) :
     (modelHaar (E := E)) (Metric.ball (0 : E) R) =
       ENNReal.ofReal (R ^ Module.finrank ℝ E) *
@@ -70,6 +70,7 @@ lemma modelHaar_ball {R : ℝ} (hR : 0 < R) :
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma ball_tgt_of_radius
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) :
@@ -86,6 +87,7 @@ lemma ball_tgt_of_radius
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem vol_ge_of_density
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -119,6 +121,7 @@ theorem vol_ge_of_density
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem vol_le_ball_of_density
     (g : SmoothRiemannianMetric I M) (p : M)
     {A : Set M} (hA_meas : MeasurableSet A)
@@ -154,6 +157,8 @@ theorem vol_le_ball_of_density
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma coordBall_meas
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hball_target : Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target) :
@@ -344,6 +349,7 @@ theorem coordBall_vol_scale_c2
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coordBall_vol_ge
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R : ℝ}
@@ -383,6 +389,7 @@ theorem coordBall_vol_ge
   simpa [φ] using hge
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem coordBall_vol_ge_sc
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R : ℝ} (hRpos : 0 < R)
@@ -493,6 +500,7 @@ theorem exists_coordBall_subset_smallNormalBall
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smallNormalBall_vol_ge_sc
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -576,6 +584,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem smallNormalBall_subset_metricBall
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -599,6 +609,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
+omit [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem metricBall_subset_smallNormalBall
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -619,6 +631,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem metricBall_meas
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -670,6 +683,8 @@ theorem exists_metricBall_vol_ge_sc_local
     (hsmall hRpos hR hρball hgs hdens)
     (MeasureTheory.measure_mono (smallNormalBall_subset_metricBall (I := I) (M := M)))
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma norm_le_sqrt_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     ‖x‖ ≤ Real.sqrt (g.inner p x x) / Real.sqrt (gpCoerciveConst (I := I) g p) := by
@@ -687,6 +702,7 @@ private lemma norm_le_sqrt_div_sqrt_coercive
   rw [le_div_iff₀ hsc_pos, mul_comm]
   exact hkey
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_opNorm_const
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     Real.sqrt (g.inner p x x) ≤ (Real.sqrt ‖g.inner p‖ + 1) * ‖x‖ := by
@@ -717,6 +733,7 @@ private noncomputable def basisNormSupBV : ℝ :=
       exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun k => ‖(chartModelBasis E) k‖)
 
+omit [CompleteSpace E] in
 private lemma basisNormSupBV_nonneg : 0 ≤ basisNormSupBV (E := E) := by
   classical
   unfold basisNormSupBV
@@ -728,6 +745,7 @@ private lemma basisNormSupBV_nonneg : 0 ≤ basisNormSupBV (E := E) := by
   exact hnn.trans (Finset.le_sup'
     (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
 
+omit [CompleteSpace E] in
 private lemma norm_basis_le_supBV
     (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ basisNormSupBV (E := E) := by
@@ -737,6 +755,7 @@ private lemma norm_basis_le_supBV
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
+omit [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma exists_basis_upper_const
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ A : ℝ, ∀ k : Fin (Module.finrank ℝ E),
@@ -747,6 +766,7 @@ private lemma exists_basis_upper_const
     (mul_le_mul_of_nonneg_left (norm_basis_le_supBV (E := E) k)
       (by nlinarith [Real.sqrt_nonneg ‖g.inner p‖]))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma exists_metric_upper_launch_const
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ {R : ℝ}, 0 ≤ R →
@@ -969,6 +989,7 @@ theorem metricBall_vol_scale [PseudoMetricSpace M]
     metricBall_vol_le (I := I) g p hB hR hball_meas hball_source hball_coord hJ
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricBall_vol_scale_density [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {C R s : ℝ}
@@ -1184,6 +1205,7 @@ structure RadialExtData
     Set.EqOn (gamma w) (radialCurve (I := I) g p w) (Set.Icc 0 b)
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radialExtData
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hb1 : b ≤ 1)
@@ -1231,6 +1253,7 @@ lemma exists_radialExtData
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialExt_eventuallyEq
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (D : RadialExtData (I := I) g p R b) :
@@ -1261,6 +1284,8 @@ attribute [instance] ExtFrameData.nonempty
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 lemma exists_extFrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1369,6 +1394,7 @@ def rm04FrameDataOfExt
   F := fun w i t => radialFrameOfExt (I := I) g D Fd w i t
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_card
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1388,6 +1414,7 @@ lemma rm04FrameDataOfExt_card
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_ON
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1409,6 +1436,7 @@ lemma rm04FrameDataOfExt_ON
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialFrameOfExt_evEq
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1427,6 +1455,7 @@ lemma radialFrameOfExt_evEq
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_par
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1453,6 +1482,7 @@ lemma rm04FrameDataOfExt_par
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma rm04FrameDataOfExt_diff
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {p : M} {R b : ℝ}
@@ -1474,6 +1504,7 @@ lemma rm04FrameDataOfExt_diff
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04FrameData_radius
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
@@ -1501,6 +1532,9 @@ lemma exists_rm04FrameData_radius
 
 
 
+omit [CompleteSpace E] in
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space (TangentBundle I M)] in
 lemma exists_rm04FrameData
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ} (hb : 0 < b)
@@ -1682,6 +1716,7 @@ structure IsRm04VolPairHyp
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma IsRm04VolHyp.radialC2
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     {g : SmoothRiemannianMetric I M} {p : M}
@@ -1694,6 +1729,7 @@ lemma IsRm04VolHyp.radialC2
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma IsRm04VolPairHyp.radialC2
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     {g : SmoothRiemannianMetric I M} {p : M}
@@ -1706,6 +1742,7 @@ lemma IsRm04VolPairHyp.radialC2
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialC1AtBall
     (g : SmoothRiemannianMetric I M) (p : M) {R b : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) (hb : b ≤ 1) :
@@ -1720,6 +1757,7 @@ lemma radialC1AtBall
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_hyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1795,6 +1833,8 @@ lemma exists_rm04_hyp
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma scalarModel_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b A B : ℝ} (ha : 0 < a)
@@ -1826,6 +1866,8 @@ lemma scalarModel_smul
 
 
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma scalarModel_pair_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b A Blo Bhi : ℝ} (ha : 0 < a)
@@ -1860,6 +1902,7 @@ lemma scalarModel_pair_smul
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_scalar
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1907,6 +1950,7 @@ lemma exists_rm04_scalar
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_hyp
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1984,6 +2028,7 @@ lemma exists_rm04_pair_hyp
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_scalar
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -2033,6 +2078,7 @@ lemma exists_rm04_pair_scalar
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_scale
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -2048,6 +2094,7 @@ lemma exists_rm04_scale
   exact ⟨a, H a ha hsmallBasis hsmallDir⟩
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rm04_pair_scale
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -4988,6 +5035,7 @@ theorem exists_vol_two_meas
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricBall_vol_ge [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R s : ℝ}
@@ -5003,6 +5051,7 @@ theorem metricBall_vol_ge [PseudoMetricSpace M]
     (MeasureTheory.measure_mono hcoord_subset)
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricBall_vol_ge_sc [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
     {c R s : ℝ} (hRpos : 0 < R)

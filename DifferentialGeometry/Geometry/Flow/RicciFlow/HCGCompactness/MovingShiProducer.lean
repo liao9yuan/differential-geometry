@@ -21,13 +21,13 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless] [IsManifold I 2 M]
   [CompactSpace M] [BoundarylessManifold I M] in
 
 
+omit [SigmaCompactSpace M] in
 theorem rm04_bound_can
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

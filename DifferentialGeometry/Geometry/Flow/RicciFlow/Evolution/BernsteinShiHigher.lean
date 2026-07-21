@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -45,6 +44,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_finset_sum_smul
     {ι : Type*} (s : Finset ι) (f : ι -> M -> Real) (c : ι -> Real) (y : M)
     (hf : ∀ i ∈ s, MDifferentiableAt I 𝓘(Real, Real) (f i) y) :
@@ -65,6 +65,7 @@ theorem mdifferentiableAt_finset_sum_smul
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdiffAt_gradientFun_finset_sum_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -166,6 +167,7 @@ theorem mdiffAt_gradientFun_finset_sum_smul
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem laplacianAt_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -218,6 +220,7 @@ theorem laplacianAt_linear_combo_finset
       ring
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem heatOperator_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -548,6 +551,7 @@ variable {G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I :
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sqrt_pow_mul_w_le (B : BernsteinTower (I := I) G) (j : ℕ)
     {t : Real} {x : M}
     (hbound : t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
@@ -586,6 +590,7 @@ theorem tpow_mul_sqrt_triple {t : Real} (ht : 0 <= t) (k j : ℕ) (hj : j <= k)
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tpow_mul_reactionSum_le (B : BernsteinTower (I := I) G) (k : ℕ)
     {t : Real} (htpos : 0 < t) {x : M}
     (hIH : ∀ j, j <= k -> t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
@@ -654,6 +659,7 @@ theorem sum_range_succ_split {α : Type*} [AddCommMonoid α] (f : ℕ -> α) {m 
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     {t : Real} (htpos : 0 < t) {x : M}
     (hmem : t ∈ Set.Icc 0 B.T)
@@ -804,6 +810,7 @@ def Gfun (B : BernsteinTower (I := I) G) (m : ℕ) (s : Real) (y : M) : Real :=
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem Gfun_heatOp (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (hmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M) :
     DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
@@ -825,6 +832,7 @@ theorem Gfun_heatOp (B : BernsteinTower (I := I) G) (m : ℕ)
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem Gfun_hasDerivWithin (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (_htmem : t ∈ Set.Icc 0 B.T) (_htpos : 0 < t) (x : M)
     (dvec : ℕ -> Real)
@@ -856,6 +864,7 @@ theorem Gfun_hasDerivWithin (B : BernsteinTower (I := I) G) (m : ℕ)
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
     (dvec : ℕ -> Real)
@@ -886,6 +895,7 @@ theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (htK : t * B.K <= B.α) (x : M) :
     (∑ i ∈ Finset.range (m + 1),

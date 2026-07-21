@@ -30,7 +30,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -52,6 +51,7 @@ namespace MetricFiberData
 
 variable {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
 
+omit [FiniteDimensional ℝ V] in
 private theorem dual_finrank_eq :
     Module.finrank Real V = Module.finrank Real (Module.Dual Real V) :=
   Subspace.dual_finrank_eq.symm
@@ -90,6 +90,7 @@ def tangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     change g.inner x (c • v) u = c • g.inner x v u
     simp
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tangentFlatLinear_apply_gen
     (g : SmoothMetric_gen I M) (x : M)
     (v w : TangentSpace I x) :
@@ -97,6 +98,7 @@ def tangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
   rfl
 
 
+omit [FiniteDimensional ℝ E] in
 theorem tangentFlatLinear_injective_gen
     (g : SmoothMetric_gen I M) (x : M) :
     Function.Injective (tangentFlatLinear_gen (I := I) g x) := by

@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1137,6 +1137,7 @@ private lemma tensorChartComponentRaw_congr_toSection
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_sub_eq
     (g : SmoothRiemannianMetric I M) (S₁ S₂ : SmoothCcTensor g 0 2) (α : M)
     (Idx : Fin 0 → Fin (Module.finrank ℝ E))
@@ -1170,7 +1171,7 @@ private lemma reconFO_raw_eq_chartRHS
         (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS) g_bg α (Jdx 0) (Jdx 1)
         (extChartAt I α x) := by
   have hgood : x ∈ chartLeviCivitaGoodSet (I := I) α := by
-    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
       (I := I) α, extChartAt_source (I := I)]
     exact hx
   have hcongr := tensorChartComponentRaw_congr_toSection
@@ -1414,7 +1415,7 @@ private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
           chartLeviCivitaGoodSet (I := I) α := by
         constructor
         · exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hbU))
-        · rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+        · rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
             (I := I) α]
           exact (extChartAt I α).map_target hbT
       set Qm : SmoothCcTensor g₀ 0 2 :=
@@ -1550,6 +1551,7 @@ private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
     (g : SmoothRiemannianMetric I M) {T : ℝ} (k : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)

@@ -22,9 +22,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [CompleteSpace 𝕜]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
+omit [IsManifold I ∞ M] in
 theorem nabla0SFun_apply_selfChart_slots (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -64,7 +64,7 @@ open Bundle
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace Real E₀]
-variable [Module.Finite Real E₀] [FiniteDimensional Real E₀]
+variable [FiniteDimensional Real E₀]
 variable {H₀ : Type*} [TopologicalSpace H₀]
 variable {I₀ : ModelWithCorners Real E₀ H₀}
 variable {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H₀ M₀]

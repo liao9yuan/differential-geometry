@@ -272,6 +272,7 @@ theorem variationalSolution_compare_norm
 
 
 
+omit [CompleteSpace E] in
 theorem opNorm_sub_le_of_var
     {α₁ α₂ : ℝ → E} {T M ε : ℝ}
     (hT : 0 < T) (hM : 0 ≤ M) (hε : 0 ≤ ε)

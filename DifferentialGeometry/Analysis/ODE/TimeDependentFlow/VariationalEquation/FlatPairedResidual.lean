@@ -38,6 +38,9 @@ theorem trivFromE_basepoint (α : M) (v : TangentSpace I α) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
+omit [InnerProductSpace ℝ E] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem leviCivita_basepoint_eq_rawFderiv_add_corrections
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π y : M, TangentSpace I y) (w : TangentSpace I α)
@@ -71,6 +74,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem variational_flow_flat_paired_residual_hasDerivAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

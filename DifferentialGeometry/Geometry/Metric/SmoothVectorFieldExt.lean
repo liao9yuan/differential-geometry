@@ -20,7 +20,6 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
@@ -30,7 +29,7 @@ namespace Geometry
 namespace Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -39,6 +38,7 @@ def chartConstVecFiber (x₀ : M) (c : E) (x : M) : TangentSpace I x :=
   (trivializationAt E (TangentSpace I) x₀).symm x c
 
 
+omit [FiniteDimensional ℝ E] in
 lemma chartConstVecFiber_self (q : M) (v : TangentSpace I q) :
     chartConstVecFiber (I := I) q
       ((trivializationAt E (TangentSpace I) q ⟨q, v⟩).2) q = v := by
@@ -48,6 +48,7 @@ lemma chartConstVecFiber_self (q : M) (v : TangentSpace I q) :
   exact (trivializationAt E (TangentSpace I) q).symm_apply_apply_mk hq v
 
 
+omit [FiniteDimensional ℝ E] in
 lemma chartConstVec_contMDiffOn (x₀ : M) (c : E) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x => TotalSpace.mk' E (E := fun y : M => TangentSpace I y) x

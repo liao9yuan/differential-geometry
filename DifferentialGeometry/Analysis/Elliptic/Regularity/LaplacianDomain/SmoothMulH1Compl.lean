@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainSmoothMul
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -81,6 +81,7 @@ noncomputable def smoothScalarMulLin
   map_smul' c v := smoothScalarMulFun_smul (I := I) (M := M) g φ c v
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma smoothScalarMulLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothScalarMulLin (I := I) (M := M) g φ v =
@@ -99,6 +100,7 @@ lemma gradFun_smoothScalarMulFun
   exact LaplacianDomainVariationalLimitGeneral.gradFun_smul_smooth_eq_pointwise
     (I := I) (M := M) g φ.contMDiff v.smooth x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma sq_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -116,16 +118,19 @@ private lemma sq_phi_mul_v_le
   rw [h_eq]
   exact mul_le_mul_of_nonneg_right h_phi_sq_le h_v_sq_nn
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v :=
   SmoothRiemannianMetric_inner_self_nonneg g x v
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma inner_grad_self_nonneg
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (x : M) :
     0 ≤ g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g φ x) :=
   metric_inner_self_nonneg (I := I) (M := M) g x _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma inner_grad_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -220,6 +225,7 @@ private lemma inner_grad_phi_mul_v_le
   rw [h_AA, h_BB] at h_CS_bound ⊢
   linarith [h_CS_bound]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma integral_sq_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (∫ x, ((φ : M → ℝ) x * v.toFun x) ^ 2
@@ -251,6 +257,7 @@ private lemma integral_sq_phi_mul_v_le
   rw [integral_const_mul] at h_int_le
   exact h_int_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma integral_inner_grad_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (∫ x, g.inner x (gradFun (I := I) g
@@ -469,11 +476,13 @@ noncomputable def smoothMulH1ComplConst
   Real.sqrt (2 * (phiSupBound (I := I) (M := M) g φ ^ 2 +
     gradSupBound (I := I) (M := M) g φ ^ 2))
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothMulH1ComplConst_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     0 ≤ smoothMulH1ComplConst (I := I) (M := M) g φ :=
   Real.sqrt_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothMulH1ComplConst_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     smoothMulH1ComplConst (I := I) (M := M) g φ ^ 2 =
@@ -485,6 +494,7 @@ lemma smoothMulH1ComplConst_sq
   have h_grad_nn := sq_nonneg (gradSupBound (I := I) (M := M) g φ)
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_smoothScalarMulFun_sq_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖smoothScalarMulFun (I := I) (M := M) g φ v‖ ^ 2 ≤
@@ -554,6 +564,7 @@ theorem norm_smoothScalarMulFun_sq_le
   have h_grad_sq_nn := sq_nonneg (gradSupBound (I := I) (M := M) g φ)
   nlinarith [h_l2_le, h_grad_le]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_smoothScalarMulFun_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖smoothScalarMulFun (I := I) (M := M) g φ v‖ ≤
@@ -570,6 +581,7 @@ theorem norm_smoothScalarMulFun_le
     exact h_sq
   exact abs_le_of_sq_le_sq' h_sq_le h_rhs_nn |>.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma norm_smoothScalarMulLin_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖smoothScalarMulLin (I := I) (M := M) g φ v‖ ≤
@@ -583,6 +595,7 @@ noncomputable def smoothScalarMul
     (smoothMulH1ComplConst (I := I) (M := M) g φ)
     (fun v => norm_smoothScalarMulLin_le (I := I) (M := M) g φ v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smoothScalarMul_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothScalarMul (I := I) (M := M) g φ v =
@@ -594,6 +607,7 @@ private noncomputable def smoothMulH1ComplOnSmooth
   (smoothToH1Compl (I := I) (M := M) g).comp
     (smoothScalarMul (I := I) (M := M) g φ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma smoothMulH1ComplOnSmooth_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1ComplOnSmooth (I := I) (M := M) g φ v =
@@ -628,6 +642,7 @@ noncomputable def smoothMulH1Compl
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem smoothMulH1Compl_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -641,6 +656,7 @@ noncomputable def smoothMulH1Compl
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     H1ComplToLp (I := I) (M := M) g
@@ -673,6 +689,7 @@ private lemma H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
   filter_upwards [h_rhs_aeEq, h_smoothToLp_v_aeEq] with x h_rhs h_v
   rw [h_rhs, h_v]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     (H1ComplToLp (I := I) (M := M) g).comp
@@ -699,6 +716,7 @@ theorem H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp
     exact H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
       (I := I) (M := M) g φ v
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem H1ComplToLp_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (u : H1Compl g) :
     H1ComplToLp (I := I) (M := M) g (smoothMulH1Compl (I := I) (M := M) g φ u) =
@@ -729,6 +747,7 @@ noncomputable def leibnizCompensatedSourceResidualCLMOfSmoothFactor
       (smoothLaplacianBundle (I := I) (M := M) g φ)).comp
       (H1ComplToLp (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma fHLeibnizGeneralResidualCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
@@ -756,6 +775,7 @@ private noncomputable def smoothMulH1ComplInnerCLM
     (smoothToH1Compl (I := I) (M := M) g vT)).comp
     (smoothMulH1Compl (I := I) (M := M) g φ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma smoothMulH1ComplInnerCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     (u_h : H1Compl g) :
@@ -772,6 +792,7 @@ private noncomputable def innerSmoothMulH1ComplCLM
     (smoothMulH1Compl (I := I) (M := M) g φ
       (smoothToH1Compl (I := I) (M := M) g vT))
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma innerSmoothMulH1ComplCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     (u_h : H1Compl g) :
@@ -779,6 +800,7 @@ private noncomputable def innerSmoothMulH1ComplCLM
       ⟪u_h, smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g vT)⟫_ℝ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (uT vT : SmoothScalar g) :
@@ -791,6 +813,7 @@ private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth
   rw [smoothToH1Compl_apply, smoothToH1Compl_apply]
   exact UniformSpace.Completion.inner_coe _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth_eq_integral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (uT vT : SmoothScalar g) :
@@ -809,6 +832,7 @@ private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth_eq_integral
     (smoothScalarMulFun (I := I) (M := M) g φ uT) vT
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [CompactSpace M] in
 private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g)
     (x : M) :
@@ -845,6 +869,7 @@ private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
       uT.toFun x * Δ_g (I := I) g φ.contMDiff x
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fHLeibnizGeneral_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g) :
     leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ
@@ -944,6 +969,7 @@ private theorem fHLeibnizGeneral_smoothToH1Compl
   exact smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     (I := I) (M := M) g φ uT x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -956,6 +982,7 @@ private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
   exact (smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M)
     (smoothScalarMulFun (I := I) (M := M) g φ uT))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma smoothMulLp_inner_left_eq_inner_right
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -991,6 +1018,7 @@ private noncomputable def rewrittenRHSCLM
       (smoothToLp (I := I) (M := M) g vT)).comp
       (leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g φ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma rewrittenRHSCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     (u_h : H1Compl g) :
@@ -1002,6 +1030,7 @@ private noncomputable def rewrittenRHSCLM
   unfold rewrittenRHSCLM
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (uT vT : SmoothScalar g) :
@@ -1079,6 +1108,7 @@ private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
   rw [h_lpCompat, h_oneSubLap_smooth]
   exact h_var_id
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothMulH1ComplInner_eq_rewrittenRHS
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     (u_h : H1Compl g) :
@@ -1106,6 +1136,7 @@ private theorem smoothMulH1ComplInner_eq_rewrittenRHS
     exact smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
       (I := I) (M := M) g φ uT vT
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1150,6 +1181,7 @@ private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (resolvent_inner_eq_lpFunctional (I := I) (M := M) g _ _).symm]
   rw [h_resolvent_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothMulH1ComplInner_eq_lpFunctional_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1168,6 +1200,7 @@ private lemma continuous_innerSL_right
     Continuous (fun w : H1Compl _g => ⟪w, x⟫_ℝ) := by
   exact ((innerSL ℝ : H1Compl _g →L[ℝ] H1Compl _g →L[ℝ] ℝ).flip x).continuous
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1203,6 +1236,7 @@ theorem smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral
       (I := I) (M := M) g φ vT hu_h]
     rw [resolvent_inner_eq_lpFunctional]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothMulH1Compl_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1212,6 +1246,7 @@ theorem smoothMulH1Compl_mem_laplacianDomain
   exact ⟨leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h,
     smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral (I := I) (M := M) g φ hu_h⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_preimage_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :

@@ -29,12 +29,13 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -98,6 +99,7 @@ private theorem chartRepr_jointContMDiffOn
       ((F p.2).toSection p.1) = _
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -169,6 +171,9 @@ private theorem chartRepr_euclid_jointContDiffWithinAt
   rw [contMDiffWithinAt_iff_contDiffWithinAt] at hself
   exact hself
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -388,6 +393,9 @@ private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
     simp only [Function.comp_apply] at hform
     exact hform
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApply_chartRepr_manifold_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -447,6 +455,9 @@ private theorem covApply_chartRepr_manifold_jointContMDiffOn
     have hpsrc : p.1 ∈ φ.source := by rw [hφ, extChartAt_source]; exact hpx
     rw [φ.left_inv hpsrc]
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApply_section_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -547,6 +558,8 @@ private theorem covApply_section_jointContMDiffOn
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_step_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r sIdx : ℕ)
     (Ψ : ℝ → SmoothCcTensor g₀ r sIdx) (S : Set ℝ)
@@ -587,6 +600,7 @@ theorem covGrad_step_jointContMDiffOn
 
 section PathIntegralComm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem toModel_section_intervalIntegrable
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -600,6 +614,7 @@ private theorem toModel_section_intervalIntegrable
       (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
   ((jointContMDiff_toModel_continuous_slice (I := I) g₀ r s Φ S hjoint x).mono hSI).intervalIntegrable
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartRepr_pathIntegralCoeffField_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -635,6 +650,7 @@ private theorem chartRepr_pathIntegralCoeffField_eq
     ContinuousLinearMap.comp_apply]
   congr 1
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartRepr_comp_symm_jointContDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -652,6 +668,7 @@ private theorem chartRepr_comp_symm_jointContDiffOn
   obtain ⟨hqS, hqtgt⟩ := hq
   exact chartRepr_euclid_jointContDiffWithinAt (I := I) g₀ r s F S α hF hqS hqtgt
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem fderiv_chartRepr_jointContinuousOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -698,6 +715,7 @@ private theorem fderiv_chartRepr_jointContinuousOn
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem hasFDerivAt_chartRepr_pathIntegral
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -853,6 +871,7 @@ private theorem hasFDerivAt_chartRepr_pathIntegral
   rw [hLHSeq] at hkey
   exact hkey
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartE_repr_slice_continuousOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -880,6 +899,7 @@ private theorem chartE_repr_slice_continuousOn
     ContinuousLinearMap.comp_apply]
   congr 1
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem intervalIntegrable_slotInput
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -919,6 +939,7 @@ private theorem intervalIntegrable_slotInput
       DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
   exact hcont.intervalIntegrable
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem intervalIntegrable_slotOutput
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -960,6 +981,8 @@ private theorem intervalIntegrable_slotOutput
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApply_chartE_pathIntegral_comm
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -1230,6 +1253,8 @@ private theorem covApply_chartE_pathIntegral_comm
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -1361,6 +1386,9 @@ private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covGradParametric_tcd_toModel_continuousOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -1420,6 +1448,8 @@ private theorem covGradParametric_tcd_toModel_continuousOn
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem toModel_covGrad_pathIntegralCoeffField_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -1510,6 +1540,8 @@ private theorem toModel_covGrad_pathIntegralCoeffField_eq
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_pathIntegral_comm
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)

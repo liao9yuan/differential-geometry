@@ -15,12 +15,14 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_cocycle (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (w v : TangentSpace I x) :
     connDiff (I := I) g₁ g₂ x w v =
@@ -36,6 +38,8 @@ theorem connDiff_cocycle (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
   rw [h12, h10, h02]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_sub_eq_connDiff_trace
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g₁ g_bg :
@@ -75,6 +79,7 @@ private def famCoord (x : M) (F : Fin (Module.finrank ℝ E) → TangentSpace I 
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem famCoord_gram_eq_one (g : SmoothRiemannianMetric I M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
     (hxsrc : x ∈ (extChartAt I x).source)
@@ -107,6 +112,7 @@ private theorem famCoord_gram_eq_one (g : SmoothRiemannianMetric I M) {x : M}
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
     (hxsrc : x ∈ (extChartAt I x).source)
@@ -133,6 +139,7 @@ private theorem sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) {x
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem bilin_ortho_family_diag_eq_chartGram_trace
     (g : SmoothRiemannianMetric I M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
@@ -169,6 +176,7 @@ private theorem bilin_ortho_family_diag_eq_chartGram_trace
   rw [← Finset.sum_smul]
   rw [sum_famCoord_eq_chartInvGram (I := I) g hx hxsrc F hF m n]
 
+omit [SigmaCompactSpace M] in
 theorem deTurckVF_eq_orthoFrame_trace
     (g g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g g_bg :
@@ -187,6 +195,8 @@ theorem deTurckVF_eq_orthoFrame_trace
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)
     (connDiff (I := I) g g_bg x)]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_symm (g g' : SmoothRiemannianMetric I M) (x : M) (w v : TangentSpace I x) :
     connDiff (I := I) g g' x w v = connDiff (I := I) g g' x v w := by
   classical
@@ -213,6 +223,8 @@ theorem connDiff_symm (g g' : SmoothRiemannianMetric I M) (x : M) (w v : Tangent
   abel_nf at this
   linear_combination (norm := abel) this
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem connDiff_outerCovDeriv_eq (g g_bg : SmoothRiemannianMetric I M)
     {X Y Z : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))

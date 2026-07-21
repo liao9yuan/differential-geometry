@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -266,6 +265,7 @@ def swapFirstTwo0S {x : M}
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
   A.domDomCongr (Equiv.swap (0 : Fin 3) 1)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem swapFirstTwo0S_apply_vec3 {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (X Y Z : TangentSpace I x) :
@@ -347,6 +347,7 @@ def OneFormLastTwoSymmAt {x : M}
   ∀ X Y Z : TangentSpace I x,
     nabla2Alpha (vec3 X Y Z) = nabla2Alpha (vec3 X Z Y)
 
+omit [FiniteDimensional ℝ E] in
 theorem one_form_last_two_symm {x : M}
     (nabla2Alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -416,6 +417,7 @@ def ricciVectorCoord
     (k : Idx) : Real :=
   Ric x (vec2 (basis k) curvatureVector)
 
+omit [FiniteDimensional ℝ E] in
 theorem nabla2OneFormTrailingSymmCoord_of_tensor
     {Idx : Type*}
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -477,6 +479,7 @@ theorem oneFormRicciTraceComm_basisCoord_of_identities
     (ricciVectorCoord (I := I) Ric basis curvatureVector)
     h_symm h_comm h_trace
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem metricTraceInput_one_eq_vec3 {x : M}
     (X Y Z : TangentSpace I x) :
     metricTraceInput (I := I) X Y (fun _ : Fin 1 => Z) = vec3 X Y Z := by

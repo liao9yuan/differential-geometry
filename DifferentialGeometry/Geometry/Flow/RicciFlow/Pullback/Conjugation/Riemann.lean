@@ -36,6 +36,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemann_pullback_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)

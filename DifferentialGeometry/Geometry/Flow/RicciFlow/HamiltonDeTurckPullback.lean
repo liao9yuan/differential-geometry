@@ -22,24 +22,14 @@ open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.PDE.RicciFlow.ODE
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-theorem deTurckRicciRHS_apply
-    (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
-    deTurckRicciRHS (I := I) g_bg g x v w
-      = (-2 : ℝ) * ricciTensor (I := I) g x v w
-        + lieDerivMetric (I := I) g (deTurckVF (I := I) g g_bg) x v w := by
-  unfold deTurckRicciRHS
-  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
-      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
-  rw [lieDerivMetricClm_apply]
-  simp only [smul_eq_mul]
-  rfl
-
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurck_metric_slot_hasDerivWithinAt
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
@@ -63,6 +53,8 @@ theorem deTurck_metric_slot_hasDerivWithinAt
     (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
   rwa [deTurckRicciRHS_apply] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurck_pushforward_slot_hasDerivWithinAt
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)

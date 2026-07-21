@@ -32,8 +32,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
+section InnerProductSpaceModel
+
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -76,6 +78,7 @@ private lemma rawConnLapPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       rawConnLapPull (I := I) (M := M) g r s T α Idx Jdx := rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawConnLapPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -88,6 +91,7 @@ private lemma rawConnLapPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : 
   rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawConnLapPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -257,6 +261,8 @@ private lemma chartPushedRaw_eventuallyEq_rawConnLapPull
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
   rfl
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawConnLapPull_contDiffAt'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -280,6 +286,8 @@ private lemma euclidPartialIter_chartPushedRaw_norm_le_zero
     (chartPushedRaw_eventuallyEq_rawConnLapPull (I := I) (M := M) g r s T α q hz).iteratedFDeriv
       ℝ m |>.self_of_nhds]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartialIter_chartPushedRaw_norm_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -312,6 +320,8 @@ private lemma euclidPartialIter_chartPushedRaw_norm_le_one
   exact euclidPartial_iteratedFDeriv_norm_le (E := E) k
     (rawConnLapPull_contDiffAt' (I := I) (M := M) g r s T α q hz) m
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartialIter_chartPushedRaw_norm_le_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -369,6 +379,7 @@ private lemma euclidPartialIter_chartPushedRaw_norm_le_two
     _ = ‖iteratedFDeriv ℝ (m + 2) u z‖ := by ring_nf
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_raw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -381,6 +392,7 @@ private lemma chartPushedRaw_raw_contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hz)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartialIter1_chartPushedRaw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -393,6 +405,8 @@ private lemma euclidPartialIter1_chartPushedRaw_contDiffAt
   euclidPartial_contDiffAt (E := E) k
     (chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α q hz)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartialIter2_chartPushedRaw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -412,6 +426,7 @@ private noncomputable def invGramCoeffPull
   fun y => chartInvGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k l
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma invGramCoeffPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -457,6 +472,7 @@ private noncomputable def naiveSecondCovDerivGlobalCorr0
         (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma naiveSecondCovDerivGlobalCorr_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -473,6 +489,7 @@ private lemma naiveSecondCovDerivGlobalCorr_contDiffOn
           (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma naiveSecondCovDerivGlobalCorr0_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -844,6 +861,7 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_preimage_mem_goodSet
     (α : M) {y : EuclN} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ chartLeviCivitaGoodSet (I := I) α ∧
@@ -1369,6 +1387,8 @@ private lemma rawConnLapPouPullCont (α : M) :
     exact hy
   exact hPOU_cont.comp_continuousOn h_inner
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma rawConnLapPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1408,6 +1428,8 @@ private lemma rawConnLapPullIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma rawConnLapSumIntegrals_eq_integral_sum
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : Integral.L2.SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1742,6 +1764,7 @@ private lemma rawConnLap_pointwise_integrand_le
       rawConnLapPouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
+omit [CompactSpace M] in
 private lemma rawConnLap_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -2011,6 +2034,7 @@ theorem exists_rawConnLapIter_toHs_le_toHs
         _ = C1 * Ci * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2)
               (k + (i + 1)) T‖ := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem toHs_norm_mono (g : SmoothRiemannianMetric I M) {r s : ℕ} {m n : ℕ} (hmn : m ≤ n)
     (T : Integral.L2.SmoothCcTensor g r s) :
     ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) m T‖ ≤
@@ -2048,7 +2072,17 @@ theorem SmoothCcTensor.toHs_sub {g : SmoothRiemannianMetric I M} {r s : ℕ} (k 
   rw [← UniformSpace.Completion.coe_sub]
   rfl
 
+end InnerProductSpaceModel
+
 section LinearityT2
+
+variable
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Integral.Connection Bundle Tensor0SBundle
 
@@ -2112,6 +2146,19 @@ theorem rawTensorConnLapSmooth_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 end LinearityT2
 
+section InnerProductSpaceModel
+
+variable
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [BoundarylessManifold I M] in
 theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -2155,6 +2202,7 @@ theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
     _ = Real.sqrt (C₁ * C₂) * N := by
         rw [Real.sqrt_mul (mul_nonneg hC₁_nn hC₂_nn), Real.sqrt_sq hN_nn]
 
+omit [BoundarylessManifold I M] in
 theorem exists_l2Norm_le_toHs_zero
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -2166,5 +2214,7 @@ theorem exists_l2Norm_le_toHs_zero
   refine ⟨C, hC_nn, fun T => ?_⟩
   rw [Integral.L2.SmoothCcTensor.norm_toL2, tensorPouSobolevHilbert_norm_eq]
   exact hC T
+
+end InnerProductSpaceModel
 
 end DifferentialGeometry.PDE.RicciFlow

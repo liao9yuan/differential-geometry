@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (ricciArmOrder0RiemannCoeff raisedKoszul)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,8 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet realizedSmallSet)
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -45,6 +47,8 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem diagonalProductTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -1244,6 +1248,8 @@ noncomputable def cometricDoubleTraceCastG0 (g₀ g₁ : SmoothRiemannianMetric 
       (I := I) g₁ 1).hasCompactSupport
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciArmOrder1KoszulCoeff_eq_raisedKoszul_contract_cometricDoubleTraceCastG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder1KoszulCoeff
         (I := I) g₀ g₁ =
@@ -1262,6 +1268,7 @@ private lemma raisedKoszul_norm_eq_of_sq_eq {a b : ℝ} (ha : 0 ≤ a) (hb : 0 �
   have hsqrt := congrArg Real.sqrt h
   rwa [Real.sqrt_sq_eq_abs, Real.sqrt_sq_eq_abs, abs_of_nonneg ha, abs_of_nonneg hb] at hsqrt
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S : SmoothCcTensor g₀ 0 s) (n : ℕ) :
@@ -1280,6 +1287,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
       riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) g₀ σ S n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 m (ccTensor02Symm (I := I) g₀ P)‖ ≤
@@ -1291,6 +1299,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1312,6 +1321,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
       riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) g₀ P n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ P)‖ ≤
@@ -1462,6 +1472,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cometricDoubleTraceFib_sub_toModel_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (w : Tensor0SSpace (p + 2) I x) (m : Fin p → E) :
@@ -1506,6 +1517,7 @@ lemma cometricDoubleTraceFib_sub_toModel_eq
     ((Module.finBasis ℝ E).cDualBasis k)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma cometricCastG0_sub_doubleTrace_clm
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 1 I x from
@@ -1517,6 +1529,7 @@ private lemma cometricCastG0_sub_doubleTrace_clm
   rw [hcast, cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem cometricCastG0_eq_doubleTrace_add_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     cometricDoubleTraceCastG0 (I := I) g₀ g₁ =

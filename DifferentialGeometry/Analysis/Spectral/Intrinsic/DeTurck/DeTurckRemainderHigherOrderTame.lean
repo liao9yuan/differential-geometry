@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -602,6 +602,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 theorem deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -742,6 +743,8 @@ theorem deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
           (le_trans hcs (mul_le_mul_of_nonneg_left hwin2 (by positivity))) (by positivity)
     _ = (3 * D ^ 2 * ((L + 1 : ℕ) : ℝ)) * RHS := by ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_compWindow_l2_eq
     (g₀ : SmoothRiemannianMetric I M) (m l : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l (iteratedCovGrad (I := I) g₀ 0 2 m W)‖ ^ 2 =
@@ -767,6 +770,8 @@ private theorem iteratedCovGrad_compWindow_l2_eq
   have hrw := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l W x
   simpa only [Nat.add_assoc] using hrw
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_compWindow_jetSum_le
     (g₀ : SmoothRiemannianMetric I M) (q m : ℕ) (W : SmoothCcTensor g₀ 0 2) :
     (∑ l ∈ Finset.range (q + 1),

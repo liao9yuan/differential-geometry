@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.H
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -18,7 +17,7 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -27,6 +26,7 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
 
 
+omit [TopologicalSpace M] in
 theorem tfHeat_eigen
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap
@@ -65,6 +65,7 @@ theorem tfHeat_eigen
 
 
 
+omit [TopologicalSpace M] in
 theorem tfHeat_diag
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap
@@ -104,7 +105,9 @@ theorem tfHeat_diag
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_sec6
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     {Idx : Type*} [Fintype Idx]
@@ -156,7 +159,9 @@ theorem tfHeat_sec6
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_point
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -228,7 +233,9 @@ theorem tfHeat_point
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_pfirst
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -301,7 +308,9 @@ theorem tfHeat_pfirst
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_eig
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -426,7 +435,9 @@ theorem tfHeat_eig
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_can
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -518,7 +529,9 @@ theorem tfHeat_can
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_canR
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -653,7 +666,9 @@ theorem tfHeat_canR
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_scalar
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -728,7 +743,9 @@ theorem tfHeat_scalar
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_trace
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -803,7 +820,9 @@ theorem tfHeat_trace
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_lc
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -912,7 +931,9 @@ theorem tfHeat_lc
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_metric
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -976,7 +997,9 @@ theorem tfHeat_metric
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_metric_smooth
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1032,7 +1055,9 @@ theorem tfHeat_metric_smooth
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_ricci
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1169,7 +1194,9 @@ theorem tfHeat_ricci
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_mc
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]

@@ -19,7 +19,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 

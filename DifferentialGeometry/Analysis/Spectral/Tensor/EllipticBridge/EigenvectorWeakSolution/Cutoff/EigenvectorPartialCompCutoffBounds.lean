@@ -17,7 +17,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,6 +51,7 @@ private lemma mu_mul_inv_pow_le_inv_pow_local
     mul_le_mul_of_nonneg_right hμ_le_one hμ_inv_pow_nn
   simpa using h
 
+omit [CompleteSpace E] in
 private lemma vec_norm_eq_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -62,6 +63,7 @@ private lemma vec_norm_eq_one_local
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
+omit [CompleteSpace E] in
 private lemma eigenval_pos_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -77,6 +79,7 @@ private lemma eigenval_pos_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
+omit [CompleteSpace E] in
 private lemma eigenval_le_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -92,6 +95,7 @@ private lemma eigenval_le_one_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).2
 
+omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -151,6 +155,7 @@ private lemma eigenvectorVec_pou_memWkp_local
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
+omit [CompleteSpace E] in
 theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -325,6 +330,7 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
                 g r s) i‖ :=
       h_step2
 
+omit [CompleteSpace E] in
 theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -562,6 +568,7 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
                 g r s) i‖ :=
       h_step_absorb
 
+omit [CompleteSpace E] in
 theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)

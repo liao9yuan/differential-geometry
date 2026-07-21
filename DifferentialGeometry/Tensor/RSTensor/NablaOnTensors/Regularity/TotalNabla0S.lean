@@ -13,7 +13,6 @@ import Mathlib.Geometry.Manifold.BumpFunction
 
 
 
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 
@@ -23,13 +22,11 @@ open scoped Manifold ContDiff Topology
 noncomputable section
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 set_option backward.isDefEq.respectTransparency false in
 

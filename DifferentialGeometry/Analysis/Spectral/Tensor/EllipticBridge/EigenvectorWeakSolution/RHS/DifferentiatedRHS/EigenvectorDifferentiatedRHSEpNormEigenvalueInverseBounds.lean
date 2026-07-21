@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -38,6 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] in
 lemma eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -63,6 +64,7 @@ lemma eigen_inv_one_le
   have hμ_le_one : i.fst.val ≤ 1 := hμ_unit.2
   exact (one_le_inv₀ hμ_pos).mpr hμ_le_one
 
+omit [CompleteSpace E] in
 private lemma pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -71,6 +73,7 @@ private lemma pow_eigen_inv_le
   exact pow_le_pow_right₀
     (eigen_inv_one_le (I := I) (M := M) g r s i) hke
 
+omit [CompleteSpace E] in
 lemma ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

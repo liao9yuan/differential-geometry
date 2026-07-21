@@ -37,7 +37,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -142,6 +142,7 @@ private theorem jointField_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointField_neg {d : ℕ} {S : Set ℝ}
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -157,6 +158,8 @@ private theorem jointField_neg {d : ℕ} {S : Set ℝ}
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) p.1 t) ?_
   rw [neg_one_smul]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem slotPermField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d)) {S : Set ℝ}
     (Z : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hZ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -248,6 +251,7 @@ private theorem tensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem connContrField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     (Bf : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace 1 (k + 1) I p.1)
     (hBf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (k + 1) ℝ E)) ∞
@@ -334,41 +338,53 @@ private theorem connDiffSection_realizedFam_jointContMDiffOn
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 2 I z) p.1
         ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  let φ : ∀ p : M × ℝ,
+      Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 :=
+    fun p =>
+      (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        raisedKoszulFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1).comp
+          ((g0FlatCLM (I := I) g₀ p.1).comp
+            (inverseMetricSharpFib (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1))
+  have happly : ∀ om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E,
+      (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z)⟯,
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 (φ p (om p.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    intro om
+    have homj : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) p.1 (om p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+      om.contMDiff.comp_contMDiffOn contMDiffOn_fst
+    have hsharpom := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
+      (inverseMetricSharpField_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ') homj
+    have hflatj : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+        (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)
+          (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 1 I z) p.1
+          (g0FlatCLM (I := I) g₀ p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+      (g0FlatField_contMDiff (I := I) g₀).comp_contMDiffOn contMDiffOn_fst
+    have hflatom := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hflatj hsharpom
+    have hkosom := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
+      (corrField_raisedKoszulFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ') hflatom
+    refine hkosom.congr (fun p _ => ?_)
+    rfl
   have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E)
     (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
-    (φ := fun p : M × ℝ =>
-      (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
-          raisedKoszulFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1).comp
-        ((g0FlatCLM (I := I) g₀ p.1).comp
-          (inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
+    (φ := φ)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
-    (fun om => by
-      have homj : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
-          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-            (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) p.1 (om p.1))
-          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-        om.contMDiff.comp_contMDiffOn contMDiffOn_fst
-      have hsharpom := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
-        (inverseMetricSharpField_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ') homj
-      have hflatj : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
-          (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
-          (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)
-            (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 1 I z) p.1
-            (g0FlatCLM (I := I) g₀ p.1))
-          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-        (g0FlatField_contMDiff (I := I) g₀).comp_contMDiffOn contMDiffOn_fst
-      have hflatom := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hflatj hsharpom
-      have hkosom := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
-        (corrField_raisedKoszulFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ') hflatom
-      refine hkosom.congr (fun p _ => ?_)
-      exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
-        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl)
+    happly
   refine hCLM.congr (fun p _ => ?_)
   refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 1 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 2 I z) p.1 t) ?_
+  dsimp only [φ]
   rw [connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' p.2)]
   rw [appCcRS_toSection, raisedKoszul_toSection, sharpFlatEndoCc_toSection]
@@ -532,6 +548,7 @@ private theorem order0CLM_realizedFam_jointContMDiffOn
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
 private theorem fourTrace_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

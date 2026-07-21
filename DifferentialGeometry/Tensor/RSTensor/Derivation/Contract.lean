@@ -35,7 +35,7 @@ noncomputable def model_interior_product (s : ℕ) (v : E) :
 
 noncomputable def model_interior_bilinear (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     [CompleteSpace 𝕜] (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] (s : ℕ) :
+    [FiniteDimensional 𝕜 E] (s : ℕ) :
     E →L[𝕜] (Tensor0SModel (s + 1) 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E) :=
   ContinuousLinearMap.flip
     (continuousMultilinearCurryLeftEquiv 𝕜

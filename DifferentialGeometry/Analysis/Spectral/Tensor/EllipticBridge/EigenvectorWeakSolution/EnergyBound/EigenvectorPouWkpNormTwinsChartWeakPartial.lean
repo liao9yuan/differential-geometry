@@ -18,7 +18,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -52,6 +54,7 @@ private lemma eigenIdx_val_pos
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -185,6 +188,7 @@ lemma eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le
         (chartCompNorm_center_le_covGradAggregate (I := I) (M := M)
           g r s i K β P) (zero_le _)
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartWeakPartial_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)

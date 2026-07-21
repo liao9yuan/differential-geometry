@@ -87,7 +87,7 @@ open DifferentialGeometry.Analysis.Sobolev.EuclideanIteratedEmbedding
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -104,6 +104,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen' (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
@@ -113,6 +114,7 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen' (α : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_subset' (α : M) :
     chartTargetEuclid (I := I) (M := M) α \
         chartPouKernel (I := I) (M := M) α ⊆
@@ -122,6 +124,7 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_subset' (α : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma superCriticalChartComponent_ae_zero_off_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : TensorL2 r s g) (α : M)
@@ -466,6 +469,7 @@ private lemma wSmooth_eq (w : TensorL2 r s g)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -653,6 +657,7 @@ private def chartKernelCutoffPushed (γ : M) : EuclN → ℝ :=
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
     (γ : M) {y : EuclN}
     (hy : y ∈ chartPouKernel (I := I) (M := M) γ) :
@@ -676,6 +681,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
     (γ : M) {z : M} (hz : z ∈ (chartAt H γ).source) :
     chartKernelCutoffPushed (I := I) (M := M) γ
@@ -689,6 +695,7 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedPouWeight_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α
@@ -702,6 +709,7 @@ private lemma chartPushedPouWeight_toEuclidean_extChartAt'
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma wChartComp_ae_eq_chartKernelCutoffPushed_mul (w : TensorL2 r s g)
     (γ : M) (Q : TensorCompIdx (E := E) r s) :
     wChartComp (I := I) (M := M) g r s w γ Q
@@ -788,6 +796,7 @@ private lemma chosenComp_w_comp_chartTransition_ae_eq (w : TensorL2 r s g)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma wChartComp_comp_chartTransition_ae_eq_cutoff_mul (w : TensorL2 r s g)
     (β γ : M) (Q : TensorCompIdx (E := E) r s) :
     (fun y => wChartComp (I := I) (M := M) g r s w γ Q
@@ -1087,6 +1096,7 @@ private lemma wSmoothChart_tensorL2ChartComponent_eq_transport_sum
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma wChartComp_ite_chartPushedPouWeight_zero_ae_zero (w : TensorL2 r s g)
     (α : M) (Q : TensorCompIdx (E := E) r s) :
     (fun y => if chartPushedPouWeight (I := I) (M := M) α y = 0 then

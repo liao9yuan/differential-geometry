@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -446,6 +445,7 @@ open DifferentialGeometry.Tensor.Coordinates (extDerivFun_mul_real
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_finset_prod_real
     {ι : Type} [DecidableEq ι] (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -489,6 +489,8 @@ theorem extDerivFun_finset_prod_real
 
 
 
+omit [Fintype Idx] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_coordContract_summand {s : Nat}
     (U : M -> Idx -> Idx -> Real)
     (cA cB : M -> (Fin s -> Idx) -> Real)
@@ -536,6 +538,7 @@ theorem extDerivFun_coordContract_summand {s : Nat}
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_coordContract {s : Nat}
     (U : M -> Idx -> Idx -> Real)
     (cA cB : M -> (Fin s -> Idx) -> Real)

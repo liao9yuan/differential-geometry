@@ -68,6 +68,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma tensorChartComp_tsupport_subset_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -141,6 +142,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   rw [show ((f x) ^ 2 : ℝ) = ‖f x‖ ^ 2 from by rw [Real.norm_eq_abs, sq_abs],
     ENNReal.ofReal_pow (norm_nonneg _) 2, ofReal_norm_eq_enorm]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma repr_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -197,6 +199,7 @@ lemma repr_symm_differentiableAt
   rwa [he_eq] at hdiff
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma raw_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -209,6 +212,8 @@ private lemma raw_symm_differentiableAt
   tensorChartComponentRaw_symm_differentiableAt
     (I := I) (M := M) g r s T α Idx Jdx he
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_pou_raw_symm_eq_chain
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -229,6 +234,7 @@ private lemma fderiv_pou_raw_symm_eq_chain
   exact fderiv_tensorChartComp_toEuclidean (I := I) (M := M) g r s T α Idx Jdx e
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma fderiv_pou_raw_symm_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -261,6 +267,7 @@ private lemma fderiv_pou_raw_symm_leibniz
     raw_symm_differentiableAt (I := I) (M := M) g r s T α Idx Jdx he
   exact fderiv_fun_mul hP_diff hR_diff
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -418,6 +425,8 @@ lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
   rw [h_pair_to_nest] at h_combined
   exact h_combined
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma pou_sq_fderiv_repr_sq_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (K_pou : ℝ) (hK_pou_nn : 0 ≤ K_pou)
@@ -683,6 +692,7 @@ lemma pou_sq_fderiv_repr_sq_pointwise
   exact le_trans h_scaled h_sum_per
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -733,6 +743,7 @@ lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     h_raw_sym_ae.pow_const 2
   exact ENNReal.measurable_ofReal.comp_aemeasurable h_sq_ae
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -751,6 +762,8 @@ private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     exact this.continuous_fderiv (by simp)
   exact h_fderiv_cont.norm.measurable
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.Components
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -51,6 +50,7 @@ def coframeInFrame
     (x : M) (i : Idx) : TangentSpace I x →ₗ[𝕜] 𝕜 :=
   hframe.coeff i x
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem coframeInFrame_apply
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E n frame u)
@@ -67,6 +67,7 @@ def tensor0SComponentInFrame {s : Nat}
     (vectorSlots : Fin s -> Idx) : 𝕜 :=
   T x (fun a => frame (vectorSlots a) x)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem tensor0SComponentInFrame_eval {s : Nat}
     (T : FrameTensor0SField (I := I) (M := M) s)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -91,6 +92,7 @@ def tensor0SComponentInFrameAt {s : Nat} [Fintype Idx] [DecidableEq Idx]
     (slots : Fin s -> Idx) : 𝕜 :=
   Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hx) (T x) slots
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem tensor0SComponentInFrameAt_eval {s : Nat}
     [Fintype Idx] [DecidableEq Idx]
     (T : FrameTensor0SField (I := I) (M := M) s)
@@ -112,6 +114,7 @@ def tensorRSComponentFromCovariantInputInFrame {r s : Nat}
     (vectorSlots : Fin s -> Idx) : 𝕜 :=
   (T x (input x)) (fun a => frame (vectorSlots a) x)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem tensorRSComponentFromCovariantInputInFrame_eval {r s : Nat}
     (T : FrameTensorRSField (I := I) (M := M) r s)
     (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := 𝕜) r I x)
@@ -257,6 +260,7 @@ def tensor02CompInFrame [Fintype Idx] [DecidableEq Idx]
     (x : M) (hx : x ∈ u) (i j : Idx) : 𝕜 :=
   tensor0SComponentInFrameAt T frame hframe x hx (slots2 i j)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem tensor02CompInFrame_eval [Fintype Idx] [DecidableEq Idx]
     (T : FrameTensor0SField (I := I) (M := M) 2)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -274,6 +278,7 @@ def tensor04CompInFrame [Fintype Idx] [DecidableEq Idx]
     (x : M) (hx : x ∈ u) (i j k l : Idx) : 𝕜 :=
   tensor0SComponentInFrameAt T frame hframe x hx (slots4 i j k l)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 @[simp] theorem tensor04CompInFrame_eval [Fintype Idx] [DecidableEq Idx]
     (T : FrameTensor0SField (I := I) (M := M) 4)
     (frame : Idx -> (x : M) -> TangentSpace I x)

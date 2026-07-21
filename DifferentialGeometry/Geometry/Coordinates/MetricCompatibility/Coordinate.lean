@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -34,6 +33,7 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
+omit [FiniteDimensional ℝ E] in
 theorem invCovZeroLocal
     [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

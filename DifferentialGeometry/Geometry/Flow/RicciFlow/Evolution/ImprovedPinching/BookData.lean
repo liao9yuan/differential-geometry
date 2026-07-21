@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.T
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -18,12 +17,11 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 def scalGradSq
@@ -96,7 +94,9 @@ def pinchCoupleSol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_solSec
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -196,7 +196,9 @@ theorem pinchEvol_solSec
     exact hf.contMDiffAt.mdifferentiableAt (by simp)
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciSym_can
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -272,7 +274,9 @@ theorem ricciSym_can
 
 
 
+omit [Module.Finite ℝ E] in
 theorem traceData_can
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -340,7 +344,9 @@ theorem traceData_can
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfReactSmooth
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -399,7 +405,9 @@ theorem tfReactSmooth
 
 
 
+omit [Module.Finite ℝ E] in
 theorem ricciDataSmooth
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -425,7 +433,9 @@ theorem ricciDataSmooth
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfLapBook_eq
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -448,7 +458,9 @@ theorem tfLapBook_eq
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfDataSmooth
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -479,7 +491,9 @@ theorem tfDataSmooth
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfBookData
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -513,7 +527,9 @@ theorem tfBookData
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_book
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -590,7 +606,9 @@ theorem tfHeat_book
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfHeat_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -612,7 +630,9 @@ theorem tfHeat_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfNonneg_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -667,7 +687,9 @@ theorem tfNonneg_sol
   exact DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
 
 
+omit [Module.Finite ℝ E] in
 theorem tfDiff_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -686,7 +708,9 @@ theorem tfDiff_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem tfGrad_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -752,7 +776,9 @@ theorem tfGrad_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem scalarPowGrad_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
@@ -823,7 +849,9 @@ theorem scalarPowGrad_sol
 
 
 
+omit [Module.Finite ℝ E] in
 theorem pinchEvol_sol
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]

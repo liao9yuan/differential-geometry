@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.Field
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -21,7 +20,7 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +39,7 @@ def RicciRealizesRm04TraceInFrame
   forall x X Y, Ric x X Y =
     ricciFromRiemann04TraceInFrame (I := I) Riemann04 gInv frame x X Y
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem ricci_comp_eq_trace
     (Ric : RawTwoTensorField (I := I) (M := M))
     (Riemann04 : RawFourTensorField (I := I) (M := M))
@@ -69,6 +69,8 @@ abbrev scalarCurvatureFromRicciTraceInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x) : M -> Real :=
   scalarFromRicciTraceInFrame (I := I) Ric gInv frame
 
+omit [FiniteDimensional ℝ E] in
+omit [IsManifold I ∞ M] in
 @[simp]
 theorem scalarCurvatureFromRicciTraceInFrame_apply
     (Ric : RawTwoTensorField (I := I) (M := M))
@@ -86,6 +88,7 @@ def ScalarRealizesRicciTraceInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
   forall x, scalar x = scalarFromRicciTraceInFrame (I := I) Ric gInv frame x
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem scalar_eq_trace
     (scalar : M -> Real)
     (Ric : RawTwoTensorField (I := I) (M := M))
@@ -98,6 +101,7 @@ theorem scalar_eq_trace
   simpa [scalarFromRicciTraceInFrame] using hScalar x
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem scalarCurvatureFromRicciTraceInFrame_realizes
     (Ric : RawTwoTensorField (I := I) (M := M))
     (gInv : InverseMetricComponents M Idx)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Compone
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -140,6 +139,7 @@ def iteratedRmComp
         (chr t x)
         (iteratedRmComp frame chr base k t x)
 
+omit [DecidableEq Idx] in
 @[simp] theorem iteratedRmComp_zero
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -149,6 +149,7 @@ def iteratedRmComp
     (base : Real → M → (Fin 4 → Idx) → Real) :
     iteratedRmComp (I := I) frame chr base 0 = base := rfl
 
+omit [DecidableEq Idx] in
 theorem iteratedRmComp_succ
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -191,6 +192,7 @@ def multiNormRaised {r : ℕ}
 
 
 
+omit [Fintype Idx] in
 theorem prod_delta_eq {r : ℕ} (m n : Fin r → Idx) :
     (∏ s : Fin r, (if m s = n s then (1 : Real) else 0)) =
       (if m = n then 1 else 0) := by
@@ -331,6 +333,7 @@ structure IteratedRmTowerOn
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem abs_towerReactionMulti_le
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {level : (k : ℕ) → Real → M → (Fin (4 + k) → Idx) → Real}
@@ -355,6 +358,7 @@ theorem abs_towerReactionMulti_le
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iteratedRmTower_heatBoundSharp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {level : (k : ℕ) → Real → M → (Fin (4 + k) → Idx) → Real}
@@ -396,6 +400,7 @@ theorem iteratedRmTower_heatBoundSharp
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iteratedRmTower_heatBound
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {level : (k : ℕ) → Real → M → (Fin (4 + k) → Idx) → Real}

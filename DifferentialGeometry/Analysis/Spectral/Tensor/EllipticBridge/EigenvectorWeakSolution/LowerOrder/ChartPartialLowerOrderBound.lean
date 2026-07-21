@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,6 +77,7 @@ private lemma abs_sum_coeff_kronecker_le
     _ ≤ ∑ _i ∈ t, Cχ := Finset.sum_le_sum hbound
     _ = t.card * Cχ := by rw [Finset.sum_const, nsmul_eq_mul]
 
+omit [CompleteSpace E] in
 private theorem exists_const_covDerivLowerOrderCoeff_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -163,6 +164,7 @@ private theorem exists_const_covDerivLowerOrderCoeff_bdd
   rw [add_mul]
   linarith
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_raw_eq_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -183,6 +185,7 @@ private lemma chartPushedRaw_pou_mul_raw_eq_component
       (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) hy]
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_lowerOrderTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -209,6 +212,7 @@ private lemma chartPushedRaw_pou_mul_lowerOrderTerm_eq
     chartPushedRaw_pou_mul_raw_eq_component (I := I) (M := M) g r s S α
       p.1 p.2 hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma tensorChartComponent_continuous'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -217,6 +221,7 @@ private lemma tensorChartComponent_continuous'
     Continuous (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -250,6 +255,7 @@ private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
     (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) hρ_ne
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma eLpNorm_coeff_mul_component_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -302,6 +308,7 @@ private lemma eLpNorm_coeff_mul_component_le
     _ = ENNReal.ofReal Ccoeff * eLpNorm comp 2 μ := by
         rw [Real.enorm_eq_ofReal hCcoeff_nn]
 
+omit [CompleteSpace E] in
 theorem exists_const_sum_eLpNorm_pou_covDerivLowerOrderTerm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)

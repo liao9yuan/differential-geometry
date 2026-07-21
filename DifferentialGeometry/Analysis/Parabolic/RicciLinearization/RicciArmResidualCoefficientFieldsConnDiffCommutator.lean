@@ -36,7 +36,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -64,6 +64,8 @@ def connDiffIteratedCommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x 
         rw [smul_sub] }
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffAACommKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (p q v0 v1 : TangentSpace I x) :
     connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
@@ -115,6 +117,9 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma frameConnDiffAACommKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (v0 v1 p q : TangentSpace I x) :
     frameConnDiffAACommKernel (I := I) g₀ g₁ x v0 v1 p q =
@@ -138,6 +143,8 @@ def connDiffAACommSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
           RingHom.id_apply, mul_smul] }
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffAACommSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffAACommSummandFib (I := I) g₀ g₁ x p q D) v =
@@ -154,6 +161,9 @@ def connDiffAACommBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     connDiffAACommSummandFib (I := I) g₀ g₁ x (B a x) (B b x)
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -171,6 +181,8 @@ lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, connDiffAACommSummandFib_toModel]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffAACommKernelBilin_homSection_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
@@ -232,6 +244,8 @@ theorem connDiffAACommKernelBilin_homSection_contMDiff
   rw [connDiffAACommKernelBilin_apply]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffAACommBiContrFibFixedFrame_apply_section_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -321,6 +335,8 @@ theorem connDiffAACommBiContrFibFixedFrame_apply_section_contMDiff
     Finset.sum_congr rfl (fun a _ => ContinuousLinearMap.sum_apply _ _ _)]
   rw [← hval]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffAACommBiContrFibFixedFrame_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
@@ -343,6 +359,9 @@ def connDiffAACommBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   connDiffAACommBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₁ x) x
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffAACommBiContrFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffAACommBiContrFib (I := I) g₀ g₁ x D) v =
@@ -355,6 +374,9 @@ lemma connDiffAACommBiContrFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) 
             (v 0) (v 1) := by
   rw [connDiffAACommBiContrFib, connDiffAACommBiContrFibFixedFrame_toModel]
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem connDiffAACommBiContrFib_eq_fixedFrame_on_nbhd
     (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
@@ -393,6 +415,7 @@ theorem connDiffAACommBiContrFib_eq_fixedFrame_on_nbhd
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem connDiffAACommBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -424,6 +447,7 @@ def ricciArmOrder0AACommCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := connDiffAACommBiContrFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 @[simp] theorem ricciArmOrder0AACommCoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁).toSection x =
@@ -431,6 +455,9 @@ def ricciArmOrder0AACommCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
         TensorRSSpace.ofCLM (connDiffAACommBiContrFib (I := I) g₀ g₁ x)) := rfl
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M) :
     connDiffAACommBiContrFib (I := I) g₀ g₀ x = 0 := by
   classical
@@ -457,6 +484,7 @@ theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M
     ContinuousMultilinearMap.zero_apply]
 
 
+omit [I.Boundaryless] in
 theorem ricciArmOrder0AACommCoeffField_self (g₀ : SmoothRiemannianMetric I M) :
     ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₀ = 0 := by
   classical

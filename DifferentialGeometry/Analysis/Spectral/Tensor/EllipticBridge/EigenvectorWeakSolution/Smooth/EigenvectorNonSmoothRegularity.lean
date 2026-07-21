@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -52,6 +52,7 @@ private lemma self_subset_thickening_of_pos
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
+omit [CompleteSpace E] in
 private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -161,6 +162,7 @@ private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

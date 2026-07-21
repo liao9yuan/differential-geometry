@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -108,6 +109,7 @@ private lemma eigenvectorVec_pou_memWkp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma componentLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
@@ -138,6 +140,7 @@ lemma componentLpLimit_ae_zero_off_chartPouKernel
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma partialLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)

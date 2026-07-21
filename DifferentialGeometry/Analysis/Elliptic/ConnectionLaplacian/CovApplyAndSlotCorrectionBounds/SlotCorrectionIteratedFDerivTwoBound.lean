@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma input_slot_pulled_eq_kernel_repr_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -83,6 +84,7 @@ private lemma input_slot_pulled_eq_kernel_repr_eventually
   exact h_factor
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma output_slot_pulled_eq_kernel_repr_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -135,6 +137,8 @@ private lemma output_slot_pulled_eq_kernel_repr_eventually
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -182,6 +186,8 @@ private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -229,17 +235,19 @@ private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have h_eq :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -281,6 +289,7 @@ private lemma inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
   have h := hC_mem ⟨b, hb_K, rfl⟩
   exact le_trans h (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma outputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :

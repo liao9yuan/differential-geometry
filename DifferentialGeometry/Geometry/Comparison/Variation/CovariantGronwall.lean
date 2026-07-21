@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -52,6 +51,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGronwall_bounds_at
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {K b : ℝ}
@@ -219,6 +221,9 @@ theorem covGronwall_bounds_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGronwall_bounds
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 γ)
@@ -264,6 +269,9 @@ theorem covGronwall_bounds
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGronwall_ne_zero_at
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {K b : ℝ}
@@ -433,6 +441,9 @@ theorem covGronwall_ne_zero_at
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGronwall_ne_zero
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I 1 γ)

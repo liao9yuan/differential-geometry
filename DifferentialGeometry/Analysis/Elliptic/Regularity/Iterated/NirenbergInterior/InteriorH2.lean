@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace IteratedNirenbergInterior
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -70,6 +70,7 @@ private lemma fin_cons_last_succ {α : Type*} {m : ℕ}
     (Fin.cons x p : Fin (m + 2) → α) (Fin.last (m + 1)) = p (Fin.last m) := by
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -343,6 +344,7 @@ private lemma weakPartial_ae_zero_off_inline_aux
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -409,6 +411,7 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       exact weakPartial_ae_zero_off_inline_aux hΩ_open hU_open hU_sub
         (i := dirs (Fin.last m)) h_isWeak hw_li h_ih_zero
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulledWeighted_le_volume_on_compact_aux
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -444,6 +447,7 @@ private lemma chartPulledWeighted_le_volume_on_compact_aux
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenMthMixedPartialChartPushedU_memLp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -564,6 +568,7 @@ private noncomputable def iterated_weak_partial
     (iterated_u_chart (I := I) (M := M) g α u_h m dirs)
     (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iterated_weak_partial_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -583,6 +588,7 @@ private lemma iterated_weak_partial_isWeakPartial
       (I := I) (M := M) g α u_h m h_parent_m_plus_1 dirs
   exact chosenWeakPartial'_isWeakPartial_of_mem h_memW1p i
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma iterated_weak_partial_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

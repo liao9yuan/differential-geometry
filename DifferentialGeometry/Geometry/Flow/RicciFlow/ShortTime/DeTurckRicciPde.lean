@@ -39,7 +39,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -167,6 +167,8 @@ theorem deturck_metric_pde_interior
   exact hpush
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_metric_pde_at_zero
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x)

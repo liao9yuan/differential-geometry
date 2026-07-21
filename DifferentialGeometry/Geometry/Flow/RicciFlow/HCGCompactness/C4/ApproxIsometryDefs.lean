@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -40,7 +39,7 @@ open Bundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -55,8 +54,6 @@ section MapLevel
 
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
 variable [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
 
 
 
@@ -360,6 +357,7 @@ structure IsTwoSidedApproxIsometryOn
       forall x : M, x ∈ K ->
         metricCovDerivNorm (I := I) a g h x <= eps
 
+omit [SigmaCompactSpace M] in
 theorem IsTwoSidedApproxIsometryOn.toApprox
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}

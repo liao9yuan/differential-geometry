@@ -13,7 +13,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -35,7 +34,7 @@ variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
 
@@ -85,6 +84,7 @@ def Rm04RealizesSolutionConnectionOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem rm04Realizes_metric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -106,6 +106,7 @@ def curvatureNormSq
   fun t x =>
     Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4 ((Rm04 t) x)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 @[simp] theorem curvatureNormSq_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -138,6 +139,7 @@ def Rm04NormSqBoundedAt
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem rmBounded_of_not_unbounded
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

@@ -14,7 +14,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -60,12 +60,14 @@ private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
   rw [h_tsupp_empty]
   rw [Set.image_empty, Set.image_empty]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPouKernel_eq_empty_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     chartPouKernel (I := I) (M := M) α = (∅ : Set EuclN) :=
   chartPouKernel_eq_empty_of_pou_zero
     (chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα)
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -90,6 +92,7 @@ private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
   rw [h_set_eq] at h_ae
   exact h_ae
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeFinset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -133,6 +136,7 @@ private noncomputable def perAlphaPCConstant
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -143,6 +147,7 @@ private lemma perAlphaPCConstant_nonneg
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -169,6 +174,7 @@ private noncomputable def totalActivePCConstant
     ∑ P₀ : TensorCompIdx (E := E) r s,
       perAlphaPCConstant (I := I) (M := M) g r s α P₀
 
+omit [CompleteSpace E] in
 private lemma totalActivePCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ totalActivePCConstant (I := I) (M := M) g r s := by
@@ -178,6 +184,7 @@ private lemma totalActivePCConstant_nonneg
   exact Finset.sum_nonneg fun P₀ _ =>
     perAlphaPCConstant_nonneg (I := I) (M := M) g r s α P₀
 
+omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_le_totalActivePCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∈ chartAtlasPOU_activeFinset I M)
@@ -213,6 +220,7 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
 set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -19,7 +19,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,6 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorSectionMDiffAt_tensorPartialEval
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -63,7 +65,7 @@ private lemma tensorSectionMDiffAt_tensorPartialEval
     (v := fun y : M => chartTensor0SParallelExtend (I := I) r α b α_input y)
     hT_at hW_at
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartTensor0SParallelExtend_at_self
     (r : ℕ) (α : M) {b : M}
     (hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -83,7 +85,7 @@ private lemma chartTensor0SParallelExtend_at_self
       (fun y : M => Tensor0SSpace r I y) α).symmL_continuousLinearMapAt
     (R := ℝ) hb_base_tensor α_input
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
     (r : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -108,7 +110,7 @@ private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
       α_input m]
   rfl
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -126,6 +128,7 @@ private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
   unfold chartTensorRSInputSlotCorrection
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -160,6 +163,8 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
     α_input m]
   rfl
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

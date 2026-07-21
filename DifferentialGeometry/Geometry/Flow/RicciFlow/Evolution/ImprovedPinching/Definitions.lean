@@ -13,7 +13,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -32,12 +31,11 @@ open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 abbrev Tensor02Fam : Type _ :=
@@ -101,6 +99,7 @@ abbrev tfRicNormSq
   tracefreeRicciNormSqOf scalar ricciNormSq
 
 
+omit [TopologicalSpace M] in
 theorem tfRicNormSq_compat
     (scalar ricciNormSq : Real -> M -> Real) (t : Real) (x : M) :
     tfRicNormSq scalar ricciNormSq t x =
@@ -178,6 +177,7 @@ theorem cubicQ_pinch
 
 
 
+omit [TopologicalSpace M] in
 theorem cubicQ_pinchOn
     (l1 l2 l3 : Real -> M -> Real) {delta epsilon : Real}
     (hctx : EigenPinchCtxOn (M := M) l1 l2 l3 delta)
@@ -251,6 +251,7 @@ def diagReact3
         DifferentialGeometry.Integral.Connection.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) i j *
           DifferentialGeometry.Integral.Connection.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) k l
 
+omit [TopologicalSpace M] in
 @[simp]
 theorem diagReact3_apply
     (l1 l2 l3 : Real -> M -> Real) (t : Real) (x : M) :
@@ -261,6 +262,7 @@ theorem diagReact3_apply
             DifferentialGeometry.Integral.Connection.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) k l := by
   rfl
 
+omit [TopologicalSpace M] in
 theorem diagReact3_eq
     (l1 l2 l3 : Real -> M -> Real) (t : Real) (x : M) :
     diagReact3 (M := M) l1 l2 l3 t x =
@@ -301,6 +303,7 @@ def tfRicReactRel
 
 
 
+omit [TopologicalSpace M] in
 theorem tfRel_from_eigen
     (scalar ricciNormSq ricciTraceCube reaction : Real -> M -> Real)
     (l1 l2 l3 : Real -> M -> Real)
@@ -329,6 +332,7 @@ theorem tfRel_from_eigen
 
 
 
+omit [TopologicalSpace M] in
 theorem tfRel_from_diag
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
     (l1 l2 l3 : Real -> M -> Real)
@@ -512,6 +516,7 @@ def ricciCubeAt {x : M}
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric j k *
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric k i
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciCubeAt_diag {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
@@ -527,6 +532,7 @@ theorem ricciCubeAt_diag {x : M}
   simp [Fin.sum_univ_three]
   ring
 
+omit [IsManifold I 1 M] in
 theorem ricciEnd_diagVec {x : M}
     (g : SmoothRiemannianMetric I M)
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -587,6 +593,7 @@ def ricciCubeInvAt {x : M}
   let T := DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
   LinearMap.trace Real (TangentSpace I x) (T.comp (T.comp T))
 
+omit [IsManifold I 1 M] in
 theorem ricciCubeInv_diag {x : M}
     (g : SmoothRiemannianMetric I M)
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -696,6 +703,7 @@ private theorem sum4ikjl {α : Type*} [AddCommMonoid α]
       exact fin4ikjl.left_inv I0
     rw [hslot]
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordPair04 {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
@@ -833,6 +841,7 @@ private theorem sum2ij {α : Type*} [AddCommMonoid α]
       exact fin2ij.left_inv I0
     rw [hslot]
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 private theorem coordRic02 {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
@@ -844,6 +853,7 @@ private theorem coordRic02 {x : M}
   rw [sum2ij]
   simp [tensor0SComponent, DifferentialGeometry.Integral.Connection.ricciCompAt, DifferentialGeometry.Integral.Connection.slots2]
 
+omit [IsManifold I 1 M] in
 theorem ricciNorm_inner {x : M}
     (g : SmoothMetric_gen I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -854,6 +864,7 @@ theorem ricciNorm_inner {x : M}
   rw [normSq0S_eq_coord (I := I) g x 2 basis DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
   exact (coordRic02 (I := I) Ric basis).symm
 
+omit [IsManifold I 1 M] in
 theorem ricciNorm_frame {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -869,6 +880,7 @@ theorem ricciNorm_frame {x : M}
   rw [ricciNorm_inner (I := I) g Ric basis₁ hinv₁,
     ricciNorm_inner (I := I) g Ric basis₂ hinv₂]
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciNormAt_diag {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
@@ -884,6 +896,7 @@ theorem ricciNormAt_diag {x : M}
   simp [Fin.sum_univ_three]
   ring
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem reactAt_diag {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x}
@@ -905,6 +918,7 @@ theorem reactAt_diag {x : M}
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_basis {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x}
@@ -934,6 +948,8 @@ theorem tfRel_basis {x : M}
 
 
 
+omit [IsManifold I 1 M] in
+omit [FiniteDimensional ℝ E] in
 theorem diag_neg {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -953,6 +969,7 @@ theorem diag_neg {x : M}
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_trace {x : M}
     {g : SmoothRiemannianMetric I M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -1222,6 +1239,8 @@ theorem tfRel_pfirst
   exact DifferentialGeometry.Integral.Connection.traceDataOfFirst (I := I) (M := M) (heig t x)
     (hcurv t x) (hRicFirst t x) (hScalarTrace t x)
 
+omit [IsManifold I 1 M] in
+omit [FiniteDimensional ℝ E] in
 theorem scalar_eq_diag {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {scalar scalar0 l1 l2 l3 : Real}
@@ -1249,6 +1268,7 @@ theorem scalar_eq_diag {x : M}
 
 
 
+omit [IsManifold I 1 M] in
 theorem scalarTrace_delta {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -1268,6 +1288,7 @@ theorem scalarTrace_delta {x : M}
 
 
 
+omit [IsManifold I 1 M] in
 theorem firstTrace_delta
     [SigmaCompactSpace M] [T2Space M]
     {x : M} (g : SmoothRiemannianMetric I M)
@@ -1321,6 +1342,7 @@ private theorem sum_fin_two_fun_local {Idx : Type*} [Fintype Idx]
     funext a
     fin_cases a <;> simp [finTwoArrowEquiv]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] in
 private theorem vec2_update_zero {x : M}
     (X Y X' : TangentSpace I x) :
     Function.update (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Y)
@@ -1329,6 +1351,7 @@ private theorem vec2_update_zero {x : M}
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] in
 private theorem vec2_update_one {x : M}
     (X Y Y' : TangentSpace I x) :
     Function.update (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Y)
@@ -1339,6 +1362,7 @@ private theorem vec2_update_one {x : M}
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_of_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}
@@ -1473,6 +1497,7 @@ theorem ricciSym_of_basis
 
 
 
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_rm04
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}

@@ -164,6 +164,8 @@ private theorem slot_step_exp (g : SmoothRiemannianMetric I M) (σ k : ℕ)
   unfold slotEnergy
   ring
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_comp_norm (g : SmoothRiemannianMetric I M) (σ m p : ℕ)
     (V : SmoothCcTensor g 0 σ) :
     ‖iteratedCovGrad (I := I) g 0 (σ + m) p
@@ -197,6 +199,8 @@ private theorem jet_comp_norm (g : SmoothRiemannianMetric I M) (σ m p : ℕ)
   have hright_nn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 σ (m + p) V‖ := norm_nonneg _
   rw [← Real.sqrt_sq hleft_nn, ← Real.sqrt_sq hright_nn, hsq]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_shift_le (g : SmoothRiemannianMetric I M) (σ m c : ℕ)
     (V : SmoothCcTensor g 0 σ) :
     ∑ p ∈ Finset.range c,
@@ -225,6 +229,8 @@ private theorem jet_shift_le (g : SmoothRiemannianMetric I M) (σ m c : ℕ)
   rw [Finset.mem_range]
   omega
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_one_win (g : SmoothRiemannianMetric I M) (σ m : ℕ)
     (V : SmoothCcTensor g 0 σ) (p : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 (σ + m) p
@@ -248,6 +254,7 @@ private def ShiftWin (g : SmoothRiemannianMetric I M)
       cc p * ∑ j ∈ Finset.range (p + m + 1),
         ‖iteratedCovGrad (I := I) g 0 sigma j V‖
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem app_shift_win (g : SmoothRiemannianMetric I M)
     (σ m c : ℕ) (Φ : SmoothCcTensor g (σ + m) c) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧

@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -44,6 +44,7 @@ local notation "chartHaar" =>
 def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
   (extChartAt I α).symm '' ((toEuclidean (E := E)).symm '' tsupport φ)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma euclTestLift_isCompact (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -64,6 +65,7 @@ lemma euclTestLift_isCompact (α : M)
     (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     euclTestLift (I := I) (M := M) α φ ⊆ (chartAt H α).source := by
@@ -80,6 +82,7 @@ lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     rw [← hz_eq]; exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α φ) ⊆
       euclTestLift (I := I) (M := M) α φ := by
@@ -97,6 +100,7 @@ lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α φ hx_src] at hx
     exact (hx rfl).elim
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma chartTestPullback_tsupport_subset_source (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -105,6 +109,7 @@ lemma chartTestPullback_tsupport_subset_source (α : M)
     (euclTestLift_isCompact (I := I) (M := M) α hφ_cs hφ_supp).isClosed).trans
     (euclTestLift_subset_source (I := I) (M := M) α φ hφ_supp)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartTestPullback_contMDiffOn (α : M)
     {φ : EuclN → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
@@ -202,6 +207,7 @@ lemma integrable_of_contDiff_hasCompactSupport
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     Set.EqOn (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -219,6 +225,7 @@ lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     rw [(extChartAt I α).right_inv hy', ContinuousLinearEquiv.apply_symm_apply]
   rw [hb_eq]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     (α : M) (φ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     Set.EqOn
@@ -284,6 +291,7 @@ lemma density_scalarPrincipal_eq_principalIntegrand
     rw [euclidPartial_def] at this
     rw [this]; ring
 
+omit [CompleteSpace E] in
 theorem tensorComponent_chartBilinIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -909,6 +917,7 @@ theorem tensorComponent_chartBilinIdentity
   rw [hbilin_eq, hWeakRHS_volume]
   linarith [hweak_v]
 
+omit [CompleteSpace E] in
 theorem tensorComponentWeakRHS_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -998,6 +1007,7 @@ theorem tensorComponentWeakRHS_tsupport_subset
   · exact hy (tensorComponentWeakRHS_apply_of_notMem (I := I) (M := M)
       g r s T F α hK hK_target P₀ hyT)
 
+omit [CompleteSpace E] in
 theorem tensorComponentWeakRHS_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -1026,6 +1036,7 @@ theorem tensorComponentWeakRHS_hasCompactSupport
   exact HasCompactSupport.of_support_subset_isCompact hcomp_cs
     (subset_trans (subset_tsupport _) hRHS_supp)
 
+omit [CompleteSpace E] in
 theorem tensorComponent_isSmoothWeakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

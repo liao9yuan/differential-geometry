@@ -67,6 +67,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffOn_jointDet {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s) :
@@ -83,6 +84,7 @@ private lemma contDiffOn_jointDet {s : Set (ℝ × E)}
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffOn_jointAdjugate {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s) (a b : n) :
@@ -108,6 +110,7 @@ private lemma contDiffOn_jointAdjugate {s : Set (ℝ × E)}
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s)
@@ -126,6 +129,7 @@ private lemma contDiffOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     hdet_sm.inv hdet
   exact hinv_sm.mul (contDiffOn_jointAdjugate hA a b)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
     (hsI : IsOpen sI) (hU : IsOpen U)
     {F : ℝ × E → ℝ} (hF : ContDiffOn ℝ ∞ F (sI ×ˢ U))
@@ -186,6 +190,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma symm_mem_baseSet_of_mem_interior {α : M} {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -199,6 +204,7 @@ private lemma symm_mem_baseSet_of_mem_interior {α : M} {y : E}
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma gramOnE_matrix_eq (g : SmoothRiemannianMetric I M) (α : M) (y : E) :
     (Matrix.of fun i j => chartGramOnE (I := I) g α i j y)
       = chartGramMatrix (I := I) g α ((extChartAt I α).symm y) := by
@@ -206,6 +212,7 @@ private lemma gramOnE_matrix_eq (g : SmoothRiemannianMetric I M) (α : M) (y : E
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartInvGramOnE_eq_matrixInv
     (g : SmoothRiemannianMetric I M) (α : M) (a b : Fin (Module.finrank ℝ E)) (y : E) :
     chartInvGramOnE (I := I) g α a b y
@@ -216,6 +223,8 @@ private lemma chartInvGramOnE_eq_matrixInv
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInvGramOnE_joint_contDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram_E : ∀ i j : Fin (Module.finrank ℝ E),
@@ -249,6 +258,8 @@ private lemma chartInvGramOnE_joint_contDiffOn
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_joint_contDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram_E : ∀ i j : Fin (Module.finrank ℝ E),
@@ -292,6 +303,7 @@ private lemma chartChristoffel_joint_contDiffOn
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma contDiffOn_snd_of_contDiffOn_interior {α : M} (T : ℝ)
     {F : E → ℝ} (hF : ContDiffOn ℝ ∞ F (interior (extChartAt I α).target)) :
     ContDiffOn ℝ ∞ (fun p : ℝ × E => F p.2)
@@ -306,6 +318,8 @@ private lemma contDiffOn_snd_of_contDiffOn_interior {α : M} (T : ℝ)
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartDeTurckVFComp_joint_contDiffOn_E
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -333,6 +347,7 @@ private lemma chartDeTurckVFComp_joint_contDiffOn_E
   exact contDiffOn_snd_of_contDiffOn_interior (I := I) T
     (chartChristoffel_contDiffOn_interior (I := I) g_bg α a b k)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramOnE_joint_contDiffOn_of_manifold
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gDT : ∀ (i j : Fin (Module.finrank ℝ E)),
@@ -380,6 +395,8 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp'
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartDeTurckVFComp_joint_contMDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -419,6 +436,9 @@ private lemma chartDeTurckVFComp_joint_contMDiffOn
   have hcomp := hE'.comp hΦ_smooth hmaps
   exact hcomp
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
     [I.Boundaryless]
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
@@ -447,6 +467,7 @@ private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointDet {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s) :
@@ -462,6 +483,7 @@ private lemma continuousOn_jointDet {s : Set (ℝ × E)}
   exact continuousOn_finset_prod _ (fun i _ => hA (σ i) i)
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s) (a b : n) :
@@ -484,6 +506,7 @@ private lemma continuousOn_jointAdjugate {s : Set (ℝ × E)}
     rw [hcongr]; exact hA i j
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     {A : ℝ × E → Matrix n n ℝ}
     (hA : ∀ i j, ContinuousOn (fun p : ℝ × E => A p i j) s)
@@ -499,6 +522,8 @@ private lemma continuousOn_jointMatrixInv_entry {s : Set (ℝ × E)}
   exact ((continuousOn_jointDet hA).inv₀ hdet).mul (continuousOn_jointAdjugate hA a b)
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartInvGramOnE_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -527,6 +552,8 @@ private lemma chartInvGramOnE_joint_continuousOn
     exact ne_of_gt hpos
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartChristoffel_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -562,6 +589,8 @@ private lemma chartChristoffel_joint_continuousOn
   exact ((h_partial i l j).add (h_partial j l i)).sub (h_partial l i j)
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartDeTurckVFComp_joint_continuousOn_E
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -604,6 +633,8 @@ private lemma chartDeTurckVFComp_joint_continuousOn_E
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartDeTurckVFComp_joint_continuousOn_M
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -644,6 +675,7 @@ private lemma chartDeTurckVFComp_joint_continuousOn_M
   exact hcomp
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
@@ -655,6 +687,8 @@ private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -693,12 +727,14 @@ private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
   · exact h_partial l a b
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_const_mul_eq {f : E → ℝ} {y : E} (c : ℝ)
     (l : Fin (Module.finrank ℝ E)) (hf : DifferentiableAt ℝ f y) :
     partialDeriv (E := E) l (fun x => c * f x) y = c * partialDeriv (E := E) l f y := by
   unfold partialDeriv; rw [fderiv_const_mul hf]; simp
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
     {F : ι → E → ℝ} {y : E} (l : Fin (Module.finrank ℝ E))
     (hF : ∀ i ∈ t, DifferentiableAt ℝ (F i) y) :
@@ -708,6 +744,7 @@ private lemma partialDeriv_finset_sum_eq {ι : Type*} (t : Finset ι)
   rw [fderiv_fun_sum hF]; simp
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_add_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
@@ -715,6 +752,7 @@ private lemma partialDeriv_add_eq {f h : E → ℝ} {y : E}
       = partialDeriv (E := E) l f y + partialDeriv (E := E) l h y := by
   unfold partialDeriv; rw [fderiv_fun_add hf hh]; simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_sub_eq {f h : E → ℝ} {y : E}
     (l : Fin (Module.finrank ℝ E))
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
@@ -725,6 +763,8 @@ private lemma partialDeriv_sub_eq {f h : E → ℝ} {y : E}
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartChristoffel_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ i j : Fin (Module.finrank ℝ E),
@@ -837,6 +877,8 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -945,6 +987,7 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_eq_partialDeriv_sum (F : E → ℝ) (y : E) :
     fderiv ℝ F y = ∑ m : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) m F y) •
@@ -962,6 +1005,8 @@ private lemma fderiv_eq_partialDeriv_sum (F : E → ℝ) (y : E) :
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_chartDeTurckVFComp_joint_continuousOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g₀ : SmoothRiemannianMetric I M)
     (α : M) (T : ℝ)
@@ -1004,6 +1049,7 @@ private lemma fderiv_chartDeTurckVFComp_joint_continuousOn
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma psi_continuousOn_Icc (α : M) (T : ℝ) :
     ContinuousOn (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2))
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) ∧
@@ -1028,6 +1074,7 @@ private lemma psi_continuousOn_Icc (α : M) (T : ℝ) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (h_gram0 : ∀ (i j : Fin (Module.finrank ℝ E)),
@@ -1059,6 +1106,7 @@ private lemma chartGramOnE_joint_continuousOn_of_manifold_Icc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma iteratedFDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ) (k : ℕ)
     (i j : Fin (Module.finrank ℝ E))
@@ -1083,6 +1131,7 @@ private lemma iteratedFDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartGramOnE_eq_iteratedFDeriv_one
     (g : SmoothRiemannianMetric I M) (α : M) (i j l : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y =
@@ -1091,6 +1140,7 @@ private lemma partialDeriv_chartGramOnE_eq_iteratedFDeriv_one
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv2_chartGramOnE_eq_iteratedFDeriv_two
     (g : SmoothRiemannianMetric I M) (α : M) (i j m l : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -1119,6 +1169,7 @@ private lemma partialDeriv2_chartGramOnE_eq_iteratedFDeriv_two
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (l i j : Fin (Module.finrank ℝ E))
@@ -1140,6 +1191,7 @@ private lemma partialDeriv_chartGramOnE_joint_continuousOn_of_manifold_Icc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv2_chartGramOnE_joint_continuousOn_of_manifold_Icc
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
     (m l i j : Fin (Module.finrank ℝ E))
@@ -1177,6 +1229,8 @@ private lemma partialDeriv2_chartGramOnE_joint_continuousOn_of_manifold_Icc
 
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem deturck_vf_chartFrame_continuity_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ)
@@ -1229,6 +1283,9 @@ theorem deturck_vf_chartFrame_continuity_data
 
 end DeTurckVFSmoothnessKeystone
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_vf_joint_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
@@ -1313,6 +1370,10 @@ theorem deturck_vf_joint_smoothness
     heqOn (by exact ⟨hq₀.1, hα ▸ hα_mem⟩)
   exact hsum_within'.congr_of_eventuallyEq hev hxeq
 
+omit [CompactSpace M] in
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_vf_continuous_up_to_zero
     (g₀ : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
@@ -1405,6 +1466,9 @@ theorem deturck_vf_continuous_up_to_zero
     exact DeTurckVFSmoothnessKeystone.fderiv_chartDeTurckVFComp_joint_continuousOn
       (I := I) g_DT g₀ α T (h_gram0 α) (h_partial α) (h_partial2 α) k
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deturck_solution_joint_smooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (h_smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),

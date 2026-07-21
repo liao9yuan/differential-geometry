@@ -34,7 +34,7 @@ namespace Riemannian
 namespace Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -45,7 +45,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem speed_positivity_near
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f)
@@ -97,7 +97,7 @@ theorem speed_positivity_near
     hUV_in_S (Set.mk_mem_prod hs_in_U ht_in_V)
   exact Real.sqrt_le_sqrt (le_of_lt h_st_in_S)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem S2_diff_under_interval_integral_general
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -231,6 +231,7 @@ private theorem S2_diff_under_interval_integral_general
   exact key.2
 
 omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem first_variation_of_arcLength_at_regular_parameter
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

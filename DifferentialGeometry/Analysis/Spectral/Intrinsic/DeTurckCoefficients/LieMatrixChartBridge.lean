@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,8 @@ lemma chartCoeff_eq_repr_trivToE (α : M)
     (trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem hx]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) {x : M}
@@ -78,6 +80,8 @@ theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
   rw [if_pos (Finset.mem_univ k)]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartCoeffOnE_deTurckVF_eqOn_goodSet_image
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -91,6 +95,8 @@ theorem chartCoeffOnE_deTurckVF_eqOn_goodSet_image
   exact chartCoeff_deTurckVF_eq_chartDeTurckVFComp (I := I) g g_bg α k hb_good
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem partialDeriv_chartCoeffOnE_deTurckVF_eq
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {x : M}
@@ -111,6 +117,8 @@ theorem partialDeriv_chartCoeffOnE_deTurckVF_eq
   rw [partialDeriv, partialDeriv, heventually.fderiv_eq]
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}

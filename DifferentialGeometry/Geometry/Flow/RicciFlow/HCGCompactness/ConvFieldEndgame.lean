@@ -11,7 +11,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompact
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -37,7 +36,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -185,6 +184,7 @@ noncomputable def flowUpgrade_of_maps
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowLimit_of_maps
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
@@ -220,6 +220,7 @@ theorem flowLimit_of_maps
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowLimit_of_co
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
@@ -314,6 +315,7 @@ noncomputable def flowUpgrade_of_mc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowLimit_of_mc
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)
@@ -467,6 +469,7 @@ noncomputable def endgameCo
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem endgameCo_zero
     {P : PointedRiemannianManifold (I := I)} {subseq : Nat -> Nat}
     (Φ : PointedCGHMaps (I := I) X P subseq)
@@ -590,6 +593,7 @@ theorem endgameCo_zero
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem flowLimit_endgame
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)

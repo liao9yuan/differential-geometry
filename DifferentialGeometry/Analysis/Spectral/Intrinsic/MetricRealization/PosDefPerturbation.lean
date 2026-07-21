@@ -22,7 +22,7 @@ open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,7 +41,7 @@ noncomputable def perturbedInner
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   g.inner x + h x
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 @[simp] lemma perturbedInner_apply
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -49,6 +49,7 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
     perturbedInner g h x v w = g.inner x v w + h x v w := by
   simp only [perturbedInner, ContinuousLinearMap.add_apply]
 
+omit [Module.Finite ℝ E] in
 theorem perturbedInner_symm
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -57,6 +58,7 @@ theorem perturbedInner_symm
     perturbedInner g h x v w = perturbedInner g h x w v := by
   rw [perturbedInner_apply, perturbedInner_apply, g.symm x v w, hsymm x v w]
 
+omit [Module.Finite ℝ E] in
 private lemma abs_h_diag_le
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -72,6 +74,7 @@ private lemma abs_h_diag_le
     _ = δ * (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x v v)) := by ring
     _ = δ * g.inner x v v := by rw [hsq]
 
+omit [Module.Finite ℝ E] in
 theorem perturbedInner_self_lower_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -84,6 +87,7 @@ theorem perturbedInner_self_lower_bound
   rw [perturbedInner_apply]
   nlinarith [hge]
 
+omit [Module.Finite ℝ E] in
 theorem perturbedInner_pos_of_metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -96,7 +100,7 @@ theorem perturbedInner_pos_of_metricCauchySchwarzBound
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma gSublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (x : M) {r : ℝ} (hr : 0 < r) :
     Bornology.IsVonNBounded ℝ
@@ -146,6 +150,7 @@ private lemma gSublevel_isVonNBounded
   rw [hset_eq]
   exact himg
 
+omit [Module.Finite ℝ E] in
 theorem perturbedInner_isVonNBounded
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)

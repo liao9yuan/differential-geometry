@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasePoint_mem_goodSet
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -73,6 +74,8 @@ private lemma tangent_baseSet_eq_chart_source (α : M) :
   rfl
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -116,6 +119,8 @@ private noncomputable def covNormSumFun
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -140,6 +145,8 @@ private lemma covNormSqSum_continuousOn_chart_source
   exact (hcov.norm).pow 2
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covNormSumFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -176,6 +183,8 @@ private lemma covNormSumFun_continuous
   exact hρ_contAt.smul hw_contAt
 
 omit [CompleteSpace E] in
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covNormSumFun_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -183,6 +192,7 @@ private lemma covNormSumFun_measurable
   (covNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
 omit [CompleteSpace E] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covNormSumFun_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -212,6 +222,9 @@ private lemma covNormSumFun_tsupport_subset
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
 
+omit [CompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pou_covDerivComponent_le_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -370,6 +383,8 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
       (covNormSumFun (I := I) (M := M) g r s S α) y
     rw [hcov_zero, mul_zero]
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)
@@ -494,6 +509,8 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_const_sum_eLpNorm_pou_covDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)

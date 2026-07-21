@@ -14,7 +14,7 @@ namespace Analysis
 namespace Laplacian
 namespace SmoothApproxSeqIdentificationW22
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -493,6 +493,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_two_two (fun y => u n y - F_lim y) Ω)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -528,6 +529,7 @@ private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothFChartResidual_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (μ : Measure EuclN) :
@@ -536,6 +538,7 @@ private lemma smoothFChartResidual_aestronglyMeasurable
   unfold smoothFChartResidual fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fChartResidual_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (α : M) (u_h : H1Compl (I := I) (M := M) g)
     (μ : Measure EuclN) :
@@ -545,6 +548,7 @@ private lemma fChartResidual_aestronglyMeasurable
   unfold fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_subseq_ae_volume_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
     {v : ℕ → SmoothScalar g} {F_lim : EuclN → ℝ}
@@ -581,6 +585,7 @@ private lemma exists_subseq_ae_volume_restrict
       h_aesm_n hF_aesm h_tendsto
   exact h_tim.exists_seq_tendsto_ae
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_subseq_ae_weighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
     {v : ℕ → SmoothScalar g} {F : EuclN → ℝ}

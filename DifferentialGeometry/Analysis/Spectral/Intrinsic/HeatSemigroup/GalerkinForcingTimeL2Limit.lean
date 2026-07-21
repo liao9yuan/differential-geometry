@@ -28,7 +28,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable {T : ℝ}
 
+omit [BoundarylessManifold I M] in
 theorem galerkinForcing_eq_galerkinCoordEmbed
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ) :
@@ -52,6 +53,7 @@ theorem galerkinForcing_eq_galerkinCoordEmbed
     rfl
   · rw [if_neg hi, dif_neg hi]
 
+omit [BoundarylessManifold I M] in
 theorem continuousOn_galerkinForcing_field
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ)
@@ -466,6 +468,7 @@ private theorem tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
+omit [BoundarylessManifold I M] in
 theorem tendsto_finiteEigenComboHs_of_coeff_tendsto_of_succWeighted_bound
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (S : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -614,7 +617,7 @@ theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncation
         (continuousOn_galerkinForcing_field (I := I) (M := M) g₀ a U N (hUcont N)) =
       maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-        (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N
+        (timeL2EigenProj (I := I) (M := M) (g := g₀) (a : ℝ) T N
           (nemytskii (I := I) (M := M)
             (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
               a ha_super)

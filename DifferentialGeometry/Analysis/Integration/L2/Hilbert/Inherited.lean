@@ -33,7 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section InheritedInstances
 
-variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     NormedAddCommGroup (TensorL2 r s g) := inferInstance

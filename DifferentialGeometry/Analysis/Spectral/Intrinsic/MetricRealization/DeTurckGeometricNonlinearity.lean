@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -157,6 +157,7 @@ private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
 
 
 omit [BoundarylessManifold I M] in
+omit [CompactSpace M] in
 theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -195,6 +196,7 @@ theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
 
 set_option maxHeartbeats 3200000 in
 
+omit [CompactSpace M] in
 theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -314,6 +316,7 @@ theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     exact (Bb.equivFun.symm_apply_apply _).symm
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem smoothCcChartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -377,6 +380,7 @@ private theorem smoothCcChartRepr_jointContMDiffOn
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -451,6 +455,8 @@ private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -627,6 +633,8 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothCcCovApplyChartRepr_manifold_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -688,6 +696,8 @@ private theorem smoothCcCovApplyChartRepr_manifold_jointContMDiffOn
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem smoothCcCovApplySection_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -787,6 +797,7 @@ private theorem smoothCcCovApplySection_jointContMDiffOn
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem genChartRepr_jointContMDiffOn
     (S : Set ℝ) (α : M)
     (Tfam : ℝ → Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -864,6 +875,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
 
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApplyGenFamily_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (S : Set ℝ)
@@ -897,6 +909,7 @@ private def covApplySection
     covApplyRS_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma covApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -919,6 +932,8 @@ private def christoffelSelfField
     exact hOn.contMDiffAt (Filter.univ_mem)
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] private lemma christoffelSelfField_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -927,6 +942,7 @@ omit [CompactSpace M] [I.Boundaryless] in
 
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem traceTerm1_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -951,6 +967,8 @@ private theorem traceTerm1_jointContMDiffOn
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem traceTerm2_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -985,6 +1003,8 @@ private def iteratedCovApplySection
   contMDiff_toFun :=
     covApply_covApply_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma iteratedCovApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1007,6 +1027,8 @@ private def covApplyChristoffelSection
   contMDiff_toFun :=
     covApply_christoffel_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma covApplyChristoffelSection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

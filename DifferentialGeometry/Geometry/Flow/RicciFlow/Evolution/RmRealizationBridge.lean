@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -60,7 +59,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -85,6 +83,7 @@ def frameComp0S {r : ℕ}
     M → (Fin r → Idx) → Real :=
   fun x m => A x (frameTuple (I := I) frame x m)
 
+omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 @[simp] theorem frameComp0S_apply {r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r)
@@ -93,6 +92,7 @@ def frameComp0S {r : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem frameTuple_eq_cons {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x) (x : M) (n : Fin (r + 1) → Idx) :
     frameTuple (I := I) frame x n =
@@ -128,6 +128,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
 
 
 
+omit [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem covDerivStepComp_frameComp_eq {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -249,6 +250,8 @@ section Solution
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connSmoothInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -259,6 +262,7 @@ theorem connSmoothInf
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem extDerivFun_eventuallyEq_congr
     {f g : M → Real} {x : M} (V : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -313,6 +317,8 @@ def nabla3Rm04Field
       6 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nabla2Rm04Field (I := I) S t))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRm04Field_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -323,6 +329,8 @@ theorem nablaRm04Field_realizes
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       4 (S.family.connection t) (connSmoothInf (I := I) S t) (S.base.rm04 t))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nabla2Rm04Field_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -335,6 +343,8 @@ theorem nabla2Rm04Field_realizes
       5 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nablaRm04Field (I := I) S t))
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nabla3Rm04Field_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -373,6 +383,8 @@ def realizedRmBase
     Real → M → (Fin 4 → CoordinateIdx (𝕜 := Real) E) → Real :=
   fun t => frameComp0S (I := I) (S.base.rm04 t) (coordinateFrameAt (I := I) x₀)
 
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem realizedRmBase_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M)
@@ -390,6 +402,8 @@ def realizedRmBase
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_one_eq_nablaRm04Field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -419,6 +433,8 @@ theorem iteratedRmComp_one_eq_nablaRm04Field
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_two_eq_nabla2Rm04Field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -487,6 +503,8 @@ section RicciIdentity
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem rm04_nabla0SSectionRealizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -497,6 +515,8 @@ theorem rm04_nabla0SSectionRealizes
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRm04_nabla0SSectionRealizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -509,6 +529,8 @@ theorem nablaRm04_nabla0SSectionRealizes
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem rm04_nabla20SRealizesAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -522,6 +544,8 @@ theorem rm04_nabla20SRealizesAt
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRm04_nabla20SRealizesAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -536,6 +560,8 @@ theorem nablaRm04_nabla20SRealizesAt
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem rm04_ricciIdentityAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -565,6 +591,8 @@ theorem rm04_ricciIdentityAt
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRm04_ricciIdentityAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

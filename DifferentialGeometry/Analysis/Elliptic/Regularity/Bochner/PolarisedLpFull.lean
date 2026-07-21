@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace BochnerPolarisedLpFull
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -130,6 +130,7 @@ theorem preimageLift_smoothCase
   exact H1ComplToLp_injOn_laplacianDomain (I := I) (M := M) g h_pl_dom h_st_dom
     h_H1ComplToLp_eq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerLapU_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerLapU (I := I) (M := M) g φ
@@ -147,12 +148,15 @@ theorem gradInnerLapU_smoothCase
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem v_sub_oneSubLap_eq_lap
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) (x : M) :
     v.toFun x - v.oneSubLapClassical.toFun x = Δ_g (I := I) g v.smooth x := by
   rw [SmoothScalar.oneSubLapClassical_toFun, Pi.sub_apply]
   ring
 
+omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmoothBundle_sub_oneSubLap_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (b : M) :
@@ -210,6 +214,7 @@ lemma smoothLaplacianBundle_toFun_eq_smoothLaplacianAsScalar
     ((smoothLaplacianBundle (I := I) (M := M) g φ) : M → ℝ) =
       (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun := rfl
 
+omit [CompactSpace M] in
 theorem oneSubLapClassical_gradInner_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :

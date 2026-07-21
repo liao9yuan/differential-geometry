@@ -19,7 +19,7 @@ namespace Geometry
 namespace Riemannian
 namespace Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -27,7 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartFiberCoord_eq_tangentCoordChange
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -60,6 +60,7 @@ lemma chartFiberCoord_eq_tangentCoordChange
     E → E) p.snd = _
   rw [happ]
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fst_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -261,6 +262,7 @@ lemma fst_continuousLinearMapAt_secondaryTriv
     rfl
   exact hgoal
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma extChartAt_tangent_apply_snd_tangentCoordChange
     (q : TangentBundle I M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -285,6 +287,7 @@ lemma extChartAt_tangent_apply_snd_tangentCoordChange
 def secondaryTrivFiberComponentMap (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2
 
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma snd_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -419,6 +422,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
   rw [hfderivWithin_eq]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M}
@@ -500,6 +504,7 @@ theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     exact hself_snd
   exact this
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem IsMIntegralCurveAt.mfderiv_proj_one [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     {α : M} {t₀ : ℝ}

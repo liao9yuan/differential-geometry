@@ -8,7 +8,6 @@ import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -129,19 +128,19 @@ theorem sqrt_sum_sq_sub_le_of_hasDerivAt {ι : Type*} [Fintype ι] {β ψ L : Re
 noncomputable section ManifoldSection
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
 
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem sqrtNormSq0S_add_le
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (u w : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -171,6 +170,8 @@ theorem sqrtNormSq0S_add_le
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_triangle
     (a : Nat) (A B C gRef : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) a A C gRef x ≤
@@ -184,6 +185,8 @@ theorem metricDerivNorm_triangle
   exact sqrtNormSq0S_add_le (I := I) gRef x (a + 2) _ _
 
 
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_le_of_forall
     (K : Set M) (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M)
     (c : Real) (hc : 0 ≤ c)
@@ -204,6 +207,8 @@ theorem metricDerivNormSupOn_le_of_forall
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem timeLipschitz_of_hasDerivAt
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
     (g : Real → SmoothRiemannianMetric I M)
@@ -259,6 +264,8 @@ theorem timeLipschitz_of_hasDerivAt
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem windowPreconv
     (K : Set M) (β ψ : Real) (p : Nat)
     (gSeq : Nat → Real → SmoothRiemannianMetric I M)

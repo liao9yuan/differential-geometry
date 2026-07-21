@@ -38,7 +38,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -49,6 +49,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilinSymm_eq_half_rawComponent
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (α : M) (a b : Fin (Module.finrank ℝ E)) {p : M}
@@ -96,6 +97,7 @@ lemma ccTensorBilinSymm_eq_half_rawComponent
     rfl
   rw [hrawAB, hrawBA, hbilin a b, hbilin b a]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : E}
@@ -143,6 +145,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 lemma exists_rawCompOnE_jet_le_toHs_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m k : ℕ)

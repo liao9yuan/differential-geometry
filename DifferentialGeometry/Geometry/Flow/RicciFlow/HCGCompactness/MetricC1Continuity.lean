@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -27,20 +26,23 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology BigOperators
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCov_cont
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -99,7 +101,11 @@ theorem metricCov_cont
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [SigmaCompactSpace M] in
 theorem metricCov_smooth
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -119,7 +125,11 @@ theorem metricCov_smooth
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -218,7 +228,11 @@ private theorem metric_c_patch
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c1_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -244,7 +258,11 @@ private theorem metric_c1_patch
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_patch
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -349,7 +367,11 @@ variable [CompactSpace M]
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_event
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -382,7 +404,11 @@ private theorem metric_b_event
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_b_compact
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -409,7 +435,11 @@ private theorem metric_b_compact
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_cp_bdd
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -433,7 +463,11 @@ theorem metric_cp_bdd
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem metric_c_event
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -464,7 +498,11 @@ private theorem metric_c_event
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_cp_tendsto
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -519,7 +557,11 @@ theorem metric_cp_tendsto
 
 
 
+omit [Module.Finite ℝ E] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem metric_c1_tendsto
+    [Module.Finite ℝ E]
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)

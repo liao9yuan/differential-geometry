@@ -20,7 +20,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff
@@ -83,7 +82,6 @@ namespace Tensor0SBundle
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap TensorLieDeriv
 open scoped Manifold Topology Bundle ContDiff
@@ -95,7 +93,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
@@ -121,6 +118,7 @@ noncomputable def totalNabla0SFun (s : ℕ)
         s x₀ x₀ (α x₀)))
 
 
+omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_congr (s : ℕ)
     {cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {α β : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -166,6 +164,7 @@ noncomputable def totalNabla0S (s : ℕ)
   ⟨totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     s cov α, hreg⟩
 
+omit [IsManifold I ∞ M] in
 @[simp] theorem totalNabla0S_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -180,6 +179,7 @@ noncomputable def totalNabla0S (s : ℕ)
 
 
 
+omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_apply_tangentConstInChart (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -228,6 +228,7 @@ theorem totalNabla0SFun_apply_tangentConstInChart (s : ℕ)
 
 
 
+omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_apply_section (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -379,6 +380,7 @@ def TotalNablaRSRealizes (r s : ℕ)
         nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
           r s cov X T x β slots
 
+omit [IsManifold I ∞ M] in
 theorem TotalNabla0SRealizes.apply {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -396,6 +398,7 @@ theorem TotalNabla0SRealizes.apply {s : ℕ}
 
 
 
+omit [IsManifold I ∞ M] in
 theorem totalNabla0S_realizes (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -506,6 +509,7 @@ theorem TotalNabla0SRealizes.eval_C1_slots {s : ℕ}
             (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             cov X V α x₀ hV_at
 
+omit [IsManifold I ∞ M] in
 theorem TotalNablaRSRealizes.apply {r s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -620,7 +624,9 @@ inductive HigherCovDerivRSRealizes
             TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
               (n := (∞ : WithTop ℕ∞)) r ((k + 1) + s))
 
+omit [IsManifold I ∞ M] in
 theorem higherCovDeriv0SRealizes_two_apply {s : ℕ}
+    [IsManifold I ∞ M]
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)}
@@ -650,7 +656,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 

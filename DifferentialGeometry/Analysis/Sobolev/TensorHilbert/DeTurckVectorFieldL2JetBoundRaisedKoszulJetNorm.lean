@@ -25,7 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -33,6 +33,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -48,6 +50,7 @@ lemma raisedKoszul_norm_eq_of_sq_eq {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
   have hsqrt := congrArg Real.sqrt h
   rwa [Real.sqrt_sq_eq_abs, Real.sqrt_sq_eq_abs, abs_of_nonneg ha, abs_of_nonneg hb] at hsqrt
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S : SmoothCcTensor g₀ 0 s) (n : ℕ) :
@@ -66,6 +69,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
       riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) g₀ σ S n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 m (ccTensor02Symm (I := I) g₀ P)‖ ≤
@@ -77,6 +81,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -98,6 +103,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
       riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) g₀ P n x
   rw [hpt]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (n : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ P)‖ ≤

@@ -19,7 +19,7 @@ namespace Analysis
 namespace Laplacian
 namespace TwiceDifferentiatedVariationalIdentity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -141,6 +141,7 @@ private lemma chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_aeEq l₂
   exact h_congr
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma exists_smooth_global_extension_chart
     {φ : EuclN → ℝ} {α : M}
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))

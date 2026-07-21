@@ -34,6 +34,15 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+section DifferentialIdentities
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
 theorem covGradRoughLapCurv_toSection_eq_sub
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     (covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x =
@@ -57,6 +66,7 @@ theorem rawTensorConnLap_gradTensor_toSection_eq_frame_trace
   exact rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 3
     (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem secondCovDeriv_gradTensor_antisymm_eq_riemannOp
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} {x : M}
@@ -72,6 +82,9 @@ theorem secondCovDeriv_gradTensor_antisymm_eq_riemannOp
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
 
+end DifferentialIdentities
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannOp_gradTensor_offDiag_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     ∃ Cx : ℝ, 0 ≤ Cx ∧

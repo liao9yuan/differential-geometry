@@ -34,7 +34,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -111,6 +111,7 @@ private theorem exists_smooth_q
 
 omit [CompleteSpace E] [I.Boundaryless] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem normal_enorm
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :
     letI : TopologicalSpace Y.M := Y.topology

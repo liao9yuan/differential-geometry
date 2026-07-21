@@ -13,7 +13,7 @@ open DifferentialGeometry.Integral.Measure
 section Bridge
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -27,7 +27,7 @@ def chartTrivRepr (α : M) (X : Π y : M, TangentSpace I y) (z : E) : E :=
 def chartMovingTriv (α : M) (z : E) : E →L[ℝ] E :=
   trivToE (I := I) α ((extChartAt I α).symm z)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartTrivRepr_eq_movingTriv_rawRepr
     (α : M) (X : Π y : M, TangentSpace I y) (z : E) :
     chartTrivRepr (I := I) α X z
@@ -35,7 +35,7 @@ lemma chartTrivRepr_eq_movingTriv_rawRepr
   unfold chartTrivRepr chartMovingTriv chartRawRepr
   rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartMovingTriv_basepoint
     (α : M) (v : E) :
     chartMovingTriv (I := I) α (extChartAt I α α) v = v := by
@@ -51,7 +51,7 @@ lemma chartMovingTriv_basepoint
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartTrivRepr_fderiv_eq
     (α : M) (X : Π y : M, TangentSpace I y) (h : E)
     (hR : DifferentiableAt ℝ (chartRawRepr (I := I) α X) (extChartAt I α α))
@@ -71,7 +71,7 @@ theorem chartTrivRepr_fderiv_eq
     ContinuousLinearMap.flip_apply]
   rw [chartMovingTriv_basepoint (I := I) α (fderiv ℝ (chartRawRepr (I := I) α X) z₀ h)]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLeviCivita_flat_summand_eq_rawRepr
     (α : M) (X : Π y : M, TangentSpace I y) (w : E)
     (hR : DifferentiableAt ℝ (chartRawRepr (I := I) α X) (extChartAt I α α))

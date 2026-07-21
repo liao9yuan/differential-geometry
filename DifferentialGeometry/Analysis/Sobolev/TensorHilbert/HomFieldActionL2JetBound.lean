@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -43,6 +43,7 @@ theorem sqrt_finset_sum_sq_le_sum {ι : Type*} (s : Finset ι) (f : ι → ℝ)
         Real.sqrt_le_sqrt hsq
     _ = ∑ i ∈ s, f i := Real.sqrt_sq hsum_nn
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
     (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
@@ -107,6 +108,16 @@ theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
   exact sqrt_finset_sum_sq_le_sum (Finset.range (k + 1))
     (fun i => ‖iteratedCovGrad g r m i W‖) (fun i _ => norm_nonneg _)
 
+section NormedAppCc
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem exists_appCcRS_l2_norm_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ V : SmoothCcTensor g 0 b,
@@ -145,6 +156,7 @@ theorem exists_appCcRS_l2_norm_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
   calc Real.sqrt (‖Z‖ ^ 2) ≤ Real.sqrt (Cop * ‖V‖ ^ 2) := Real.sqrt_le_sqrt hZsq_le
     _ = Real.sqrt Cop * ‖V‖ := by rw [Real.sqrt_mul hCop_nn, Real.sqrt_sq hVnn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric I M)
     (b c : ℕ) (Φ : SmoothCcTensor g b c) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
@@ -173,6 +185,9 @@ theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric
   refine le_trans (Finset.sum_le_sum hterm) ?_
   rw [← Finset.sum_mul]
 
+end NormedAppCc
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_appFullSec_norm_le (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ C : ℝ, 0 ≤ C ∧

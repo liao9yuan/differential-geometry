@@ -10,7 +10,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -29,7 +28,6 @@ open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -76,6 +74,7 @@ def metricTracePair0SAt (g : SmoothRiemannianMetric I M)
     Real :=
   inner0S (I := I) g x 2 (metricTensor0S (I := I) g x) B
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_apply_cons_local
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -93,6 +92,7 @@ private theorem tensor0S_curry_apply_cons_local
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {x : M} {s : ℕ}
     (T : ι -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (v : Fin s -> TangentSpace I x) :
@@ -109,6 +109,7 @@ private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {x : M} {s : �
       change T a v + (∑ i ∈ S, T i) v = T a v + ∑ i ∈ S, T i v
       rw [ih]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0SSpace_smul_apply {x : M} {s : ℕ}
     (c : Real)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
@@ -116,6 +117,7 @@ private theorem tensor0SSpace_smul_apply {x : M} {s : ℕ}
     (c • T) v = c * T v := by
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem metricTraceInput_update_first {x : M} {s : ℕ}
     (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
     (X : TangentSpace I x) :
@@ -128,6 +130,7 @@ private theorem metricTraceInput_update_first {x : M} {s : ℕ}
     simp [metricTraceInput, Function.update]
   · simp [metricTraceInput, Function.update]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem metricTraceInput_update_second {x : M} {s : ℕ}
     (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
     (Y : TangentSpace I x) :
@@ -151,6 +154,7 @@ private theorem metricTraceInput_update_second {x : M} {s : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -237,6 +241,7 @@ def freezeFirstTwo0S {x : M} {s : ℕ}
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   Classical.choose (exists_freezeFirstTwo0S (I := I) T tail)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeFirstTwo0S_apply {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -256,6 +261,7 @@ def freezeFirstTwoArgs0S {x : M} {s : ℕ}
   tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) (s + 1) x T X) Y
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeFirstTwoArgs0S_apply {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -269,6 +275,7 @@ theorem freezeFirstTwoArgs0S_apply {x : M} {s : ℕ}
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem exists_freezeLastTwo0S3 {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (Y : TangentSpace I x) :
@@ -293,6 +300,7 @@ def freezeLastTwo0S3 {x : M}
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
   Classical.choose (exists_freezeLastTwo0S3 (I := I) T Y)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem freezeLastTwo0S3_apply {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -341,6 +349,7 @@ def metricTrace0S2TensorInBasis
   ∑ i : Idx, ∑ j : Idx,
     gInv i j • freezeFirstTwoArgs0S (I := I) T (basis i) (basis j)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem metricTrace0S2TensorInBasis_apply
     {Idx : Type*} [Fintype Idx]
@@ -360,6 +369,7 @@ theorem metricTrace0S2TensorInBasis_apply
   intro j _
   rw [tensor0SSpace_smul_apply, freezeFirstTwoArgs0S_apply]
 
+omit [FiniteDimensional ℝ E] in
 private theorem metricInverseInBasis_contract_left
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -378,6 +388,7 @@ private theorem metricInverseInBasis_contract_left
           ring
     _ = (if j = k then 1 else 0) := (hinv j k).2
 
+omit [FiniteDimensional ℝ E] in
 private theorem metricInverseInBasis_contract_metric
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1087,6 +1098,7 @@ def RoughLap0SRealizesMetricTraceInBasis
   ∀ tail : Fin s -> TangentSpace I x,
     roughA tail = roughLap0SAt (I := I) basis gInv nabla2A tail
 
+omit [FiniteDimensional ℝ E] in
 theorem roughLap0SAt_eq_of_realizes
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1099,6 +1111,7 @@ theorem roughLap0SAt_eq_of_realizes
     roughA tail = roughLap0SAt (I := I) basis gInv nabla2A tail :=
   h tail
 
+omit [FiniteDimensional ℝ E] in
 theorem roughLap1FormAt_eq_of_realizes
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))

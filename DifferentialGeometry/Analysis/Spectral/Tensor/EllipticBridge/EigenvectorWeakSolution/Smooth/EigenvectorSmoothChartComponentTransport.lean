@@ -26,7 +26,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -60,6 +60,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     (β γ : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) β) :
@@ -92,6 +93,7 @@ private def chartKernelCutoffPushed (γ : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) γ
     (fun x => ((chartKernelCutoff (I := I) (M := M) γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
     (γ : M) {y : EuclN}
     (hy : y ∈ chartPouKernel (I := I) (M := M) γ) :
@@ -113,6 +115,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) γ _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) γ hw_supp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
     (γ : M) {z : M} (hz : z ∈ (chartAt H γ).source) :
     chartKernelCutoffPushed (I := I) (M := M) γ
@@ -123,6 +126,7 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) γ hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) γ hz]
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -183,6 +187,7 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
   · exact hy_on hy_mem
   · exact hy_off hy_mem
 
+omit [CompleteSpace E] in
 private lemma chosenComp_comp_chartTransition_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -204,6 +209,7 @@ private lemma chosenComp_comp_chartTransition_ae_eq
       (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) γ β)) h_target
   exact chartTransitionEuclid_comp_ae_eq_restrict (I := I) (M := M) β γ h_overlap
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -235,6 +241,7 @@ private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 theorem eigenvectorSmoothChart_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

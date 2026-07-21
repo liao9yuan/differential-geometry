@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -77,6 +77,7 @@ lemma tensorComponentEuclid_apply_of_notMem
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -86,6 +87,7 @@ theorem tensorComponentEuclid_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α P₀.1 P₀.2
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -99,6 +101,7 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
   rw [hx, map_zero, map_zero]
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -121,6 +124,7 @@ lemma tensorChartComponentRaw_tsupport_subset
     (I := I) (M := M) g r s T α Idx Jdx hsec)
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -133,6 +137,7 @@ private lemma tensorChartComponentRaw_tsupport_subset_chart_source
     hT_supp
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -179,6 +184,7 @@ theorem tensorComponentEuclid_contDiff
         (I := I) (M := M) g r s T α P₀ hzT
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -221,6 +227,7 @@ theorem tensorComponentEuclid_tsupport_subset
   exact (closure_minimal hsupp hK_compact.isClosed).trans hK_target
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

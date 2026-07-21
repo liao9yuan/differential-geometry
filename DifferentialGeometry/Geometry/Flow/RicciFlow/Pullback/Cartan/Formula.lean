@@ -18,12 +18,13 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metric_compat_coord_identity
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -40,7 +41,7 @@ theorem metric_compat_coord_identity
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   classical
@@ -54,7 +55,7 @@ private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
   rw [show trivToE (I := I) x x v = (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) v
         from rfl, h2]; rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
@@ -63,6 +64,7 @@ private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
   have h := trivToE_trivFromE (I := I) x hbase w
   rwa [cartan_trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x : M) (i : Fin (Module.finrank ℝ E)) :
@@ -98,6 +100,7 @@ private lemma chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq
         (W : ∀ x : M, TangentSpace I x) hy_base]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 private lemma differentiableAt_chartE_pullback_self
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     DifferentiableAt ℝ
@@ -109,6 +112,8 @@ private lemma differentiableAt_chartE_pullback_self
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) x hx_good hW_at
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chart_christoffel_expansion_of_nabla_on_vf
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -263,6 +268,8 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
     refine Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => ?_))
     rw [hrepr_chartCoeff j']
 
+omit [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cartan_formula_chart_algebra
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -444,6 +451,8 @@ theorem cartan_formula_chart_algebra
   rw [hreshape_H1, hreshape_H2]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem cartan_formula_for_lie_deriv_metric
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -42,7 +42,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open scoped Manifold Topology ContDiff
 
@@ -50,7 +49,7 @@ namespace Tensor0SBundle
 
 variable {K : Type*} [NontriviallyNormedField K]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace K E]
-  [Module.Finite K E] [FiniteDimensional K E]
+  [FiniteDimensional K E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners K E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
@@ -66,6 +65,7 @@ variable [AddCommGroup A] [Module K A]
 
 
 
+omit [FiniteDimensional K E] [IsManifold I 1 M] in
 theorem tensorialAt_apply_linearMap {x : M} (L : V x →ₗ[K] A) :
     TensorialAt I F (fun σ : (p : M) -> V p => L (σ x)) x := by
   refine ⟨?_, ?_⟩
@@ -85,6 +85,7 @@ namespace Tensor0SSpace
 
 
 
+omit [FiniteDimensional K E] in
 theorem tensorialAt_evalSlot {s : ℕ} {x : M}
     (A : Tensor0SSpace s I x) (i : Fin s)
     (slots : Fin s -> (p : M) -> TangentSpace I p) :
@@ -126,6 +127,7 @@ theorem tensorialAt_applyInput {r s : ℕ} {x : M}
 
 
 
+omit [FiniteDimensional K E] in
 theorem tensorialAt_evalOutputSlot {r s : ℕ} {x : M}
     (T : TensorRSSpace r s I x) (input : Tensor0SSpace r I x) (i : Fin s)
     (slots : Fin s -> (p : M) -> TangentSpace I p) :

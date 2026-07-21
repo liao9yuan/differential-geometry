@@ -13,13 +13,14 @@ namespace Geometry
 namespace Riemannian
 namespace Geodesic
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
     (g : SmoothRiemannianMetric I M) [I.Boundaryless] [CompleteSpace E]
     (p : M) (v : TangentSpace I p) :
@@ -49,11 +50,11 @@ theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
 
 def projectCurve (f : ℝ → TangentBundle I M) : ℝ → M := fun t => (f t).proj
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma projectCurve_apply (f : ℝ → TangentBundle I M) (t : ℝ) :
     projectCurve (I := I) f t = (f t).proj := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma projectCurve_zero_of_lift {f : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf0 : f 0 = (⟨p, v⟩ : TangentBundle I M)) :
     projectCurve (I := I) f 0 = p := by
@@ -63,6 +64,7 @@ section ChartedPicardLindelof
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_geodesic_with_initial_velocity_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ∃ γ : ℝ → M, ∃ f : ℝ → TangentBundle I M,
@@ -79,6 +81,7 @@ theorem exists_geodesic_with_initial_velocity_at
   have h0 : (f 0).proj = p := projectCurve_zero_of_lift (I := I) hf0
   rw [h0]; exact mem_chart_source H p
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem hasMFDerivAt_lift_zero
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     (hf : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g

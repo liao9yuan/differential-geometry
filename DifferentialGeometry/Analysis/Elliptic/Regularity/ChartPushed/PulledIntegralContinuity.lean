@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace ChartPulledIntegralContinuity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,6 +46,7 @@ private def chartSrcPreimage (α : M) (θ : EuclN → ℝ) : Set M :=
   (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y)) ''
     (tsupport θ)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartSrcPreimage_isCompact
     (α : M) {θ : EuclN → ℝ} (hθ_cs : HasCompactSupport θ)
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -55,6 +56,7 @@ private lemma chartSrcPreimage_isCompact
   exact (hθ_cs : IsCompact (tsupport θ)).image_of_continuousOn
     ((continuousOn_symm_toEuclideanSymm (I := I) (M := M) α).mono hθ_supp)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartSrcPreimage_subset_chartSource
     (α : M) {θ : EuclN → ℝ}
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -137,6 +139,7 @@ private lemma chartPulledIntegralWeight_support_subset
       (I := I) (M := M) g α θ hx_src
     exact (hx h_zero).elim
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ}
     (hθ_cs : HasCompactSupport θ)
@@ -148,6 +151,7 @@ private lemma chartPulledIntegralWeight_tsupport_subset
     (chartPulledIntegralWeight_support_subset (I := I) (M := M) g α θ) ?_
   exact (chartSrcPreimage_isCompact (I := I) (M := M) α hθ_cs hθ_supp).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledIntegralWeight_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ}
     (hθ_cs : HasCompactSupport θ)
@@ -157,6 +161,7 @@ private lemma chartPulledIntegralWeight_hasCompactSupport
     (chartSrcPreimage_isCompact (I := I) (M := M) α hθ_cs hθ_supp)
     (chartPulledIntegralWeight_support_subset (I := I) (M := M) g α θ)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_tsupport_subset_chartSource
     (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ}
     (hθ_cs : HasCompactSupport θ)
@@ -167,6 +172,7 @@ private lemma chartPulledIntegralWeight_tsupport_subset_chartSource
       hθ_cs hθ_supp).trans
     (chartSrcPreimage_subset_chartSource (I := I) (M := M) α hθ_supp)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chart_map_continuousOn (α : M) :
     ContinuousOn (fun x : M => (toEuclidean (E := E)) ((extChartAt I α) x))
       (chartAt H α).source := by
@@ -177,6 +183,7 @@ private lemma chart_map_continuousOn (α : M) :
     rw [h_src]; exact continuousOn_extChartAt α
   exact (toEuclidean (E := E)).continuous.continuousOn.comp h_ext (Set.mapsTo_univ _ _)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) :
@@ -211,6 +218,7 @@ private lemma chartPulledIntegralWeight_continuousOn_chartSource
       (I := I) g α hx_base).ne'
   exact h_num_cont.div h_dens_cont h_dens_ne_zero
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartPulledIntegralWeight_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -248,6 +256,7 @@ lemma chartPulledIntegralWeight_continuous
     refine ContinuousAt.congr ?_ h_ev.symm
     exact continuousAt_const
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPulledIntegralWeight_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -269,6 +278,7 @@ noncomputable def chartPulledIntegralWeightLp
   (chartPulledIntegralWeight_memLp (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma weight_smul_continuous_aux
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -279,6 +289,7 @@ private lemma weight_smul_continuous_aux
   (chartPulledIntegralWeight_continuous (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp).mul hv_cont
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma weight_smul_tsupport_subset_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cs : HasCompactSupport θ)
@@ -318,6 +329,7 @@ private lemma density_mul_weight_eq_theta
     DifferentialGeometry.Integral.Measure.chartDensity_pos (I := I) g α hx_base
   field_simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma integral_weight_smul_eq_chartPulled
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -387,6 +399,7 @@ noncomputable def chartPulledIntegralCLM
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ)
     (chartPulledIntegralWeightLp (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPulledIntegralCLM_norm_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -399,6 +412,7 @@ theorem chartPulledIntegralCLM_norm_le
   exact le_of_eq (innerSL_apply_norm (𝕜 := ℝ)
     (chartPulledIntegralWeightLp (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_smoothToLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -443,6 +457,7 @@ theorem chartPulledIntegralCLM_smoothToLp
   exact integral_weight_smul_eq_chartPulled (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp v.smooth.continuous
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPulledIntegralCLM_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -451,6 +466,7 @@ theorem chartPulledIntegralCLM_continuous
       hθ_cont hθ_cs hθ_supp) :=
   (chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp).continuous
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chartPulledIntegralCLM_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -465,6 +481,7 @@ theorem chartPulledIntegralCLM_tendsto
   ((chartPulledIntegralCLM_continuous (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp).tendsto _).comp h_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_tendsto_of_smoothToLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -490,6 +507,7 @@ theorem chartPulledIntegralCLM_tendsto_of_smoothToLp_tendsto
   exact chartPulledIntegralCLM_tendsto (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp h_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothToLp (I := I) (M := M) g
@@ -513,6 +531,7 @@ lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     pouScalar_oneSubLap_aeEq_fHLeibniz_smooth (I := I) (M := M) g α v
   exact h_lhs_aeeq.trans h_rhs_aeeq
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_pouScalar_oneSubLap_eq_fHLeibniz_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) (hθ_cs : HasCompactSupport θ)
@@ -527,6 +546,7 @@ theorem chartPulledIntegralCLM_pouScalar_oneSubLap_eq_fHLeibniz_smooth
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)) := by
   rw [smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz (I := I) (M := M) g α v]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -569,6 +589,7 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
   exact chartPulledIntegralCLM_tendsto (I := I) (M := M) g α
     hθ_cont hθ_cs hθ_supp h_fHLeibniz_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -690,6 +711,7 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
   exact chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (I := I) (M := M) g α u_h hu_h hθ_cont hθ_cs hθ_supp h_fHLeibniz_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_variational_identity_general_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)

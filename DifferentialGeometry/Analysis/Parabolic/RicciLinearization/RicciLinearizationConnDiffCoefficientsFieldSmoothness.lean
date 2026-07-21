@@ -32,7 +32,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -76,6 +76,7 @@ private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -142,6 +143,8 @@ private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem connContrCLM_field_contMDiff (m k : ℕ)
     (Bf : ∀ x : M, Tensor0SBundle.TensorRSSpace 1 (k + 1) I x)
     (hBf : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (k + 1) ℝ E)) ∞
@@ -201,6 +204,9 @@ theorem connContrCLM_field_contMDiff (m k : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -242,6 +248,7 @@ theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 2 I x)
@@ -321,6 +328,8 @@ theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciCometricFourTraceCLM_field_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
@@ -364,6 +373,8 @@ noncomputable def linearizedRicciConnDiffOrder0CometricTracedCLM (g₀ g₁ : Sm
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
@@ -388,6 +399,7 @@ theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff (g₀ g₁ : Sm
 set_option backward.isDefEq.respectTransparency false in
 set_option maxRecDepth 8000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
@@ -430,6 +442,8 @@ noncomputable def linearizedRicciConnDiffOrder0CoeffField
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] theorem linearizedRicciConnDiffOrder1CoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁).toSection x =
@@ -437,6 +451,7 @@ noncomputable def linearizedRicciConnDiffOrder0CoeffField
         linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem linearizedRicciConnDiffOrder0CoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁).toSection x =

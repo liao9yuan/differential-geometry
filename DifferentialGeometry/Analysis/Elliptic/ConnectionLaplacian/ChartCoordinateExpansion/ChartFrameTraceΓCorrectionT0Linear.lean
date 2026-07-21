@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Sobolev.Chart hiding chartTargetEuclid
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -66,6 +66,7 @@ private noncomputable def leviCivitaFrameSelfCoord
     else 0
 
 omit [I.Boundaryless] in
+omit [BoundarylessManifold I M] in
 private lemma lcFrameSelfCoord_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
@@ -80,6 +81,7 @@ private lemma lcFrameSelfCoord_of_mem
   rw [dif_pos hb]
 
 omit [I.Boundaryless] in
+omit [BoundarylessManifold I M] in
 private lemma lcFrameSelfCoord_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
@@ -105,6 +107,7 @@ private lemma lcFrameSelfCoord_eq_clmAt_proj
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))) h
 
 omit [I.Boundaryless] in
+omit [BoundarylessManifold I M] in
 private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -142,6 +145,7 @@ private noncomputable def lcFrameSelfCoordPullback
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))))
 
+omit [BoundarylessManifold I M] in
 private lemma lcFrameSelfCoordPullback_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) :
@@ -167,6 +171,7 @@ private noncomputable def chartFrameTraceΓPrincipalCoeff
       ∑ i : Fin (Module.finrank ℝ E),
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameTraceΓPrincipalCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -196,6 +201,7 @@ private noncomputable def chartFrameTraceΓZerothCoeff
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y *
           covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx I' Jdx J' y
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameTraceΓZerothCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -266,6 +272,8 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
   simp only [hL_def, hLcov_def, ContinuousLinearMap.comp_apply] at hApply
   exact hApply
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lower
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

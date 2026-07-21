@@ -11,7 +11,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -116,6 +117,7 @@ def mk_from_hypotheses
 
 end eigenvectorIteratedTensorChartBilinearData
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_memWkp_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -158,6 +160,7 @@ theorem eigenvectorChartIteratedPartial_memWkp_of_memWkp
       rw [eigenvectorChartIteratedPartial_succ]
       exact h_step
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_memW1p_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -187,6 +190,7 @@ theorem eigenvectorChartIteratedPartial_memW1p_of_memWkp
     at h_memWkp_1
   exact h_memWkp_1
 
+omit [CompleteSpace E] in
 theorem eigenvector_per_pair_ibp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -278,6 +282,7 @@ def eigenvectorChartIteratedStepNumerator
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 l
         fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -311,6 +316,7 @@ def eigenvectorChartIteratedStep
         (I := I) (M := M) g r s i α P₀ m dirs fChartEffPrev l y /
       densityOnEuclid (I := I) g α y)
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_eq_rhsDiff_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -333,6 +339,7 @@ theorem eigenvectorChartIteratedStep_eq_rhsDiff_succ
     (eigenvectorChartRHSDiff (I := I) (M := M) g r s i α P₀ m dirs) l
   rw [h_num, h_init]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -345,6 +352,7 @@ theorem eigenvectorChartIteratedStep_eq_zero_off_chartPouKernel
         g r s i α P₀ m dirs fChartEffPrev l y = 0 := by
   rw [eigenvectorChartIteratedStep, Set.indicator_of_notMem hy]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_support_subset_chartPouKernel
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {i : TensorEigenIdx (I := I) (M := M) g r s}
@@ -359,6 +367,7 @@ theorem eigenvectorChartIteratedStep_support_subset_chartPouKernel
   unfold eigenvectorChartIteratedStep
   exact Set.support_indicator_subset
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedStep_memLp_two_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -423,6 +432,7 @@ theorem eigenvectorChartIteratedStep_memLp_two_weighted
         (I := I) (M := M) g r s i α P₀ m dirs fChartEffPrev l hy))
     h_plain
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartIteratedPartial_one_cons_elim0_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -437,6 +447,7 @@ private lemma eigenvectorChartIteratedPartial_one_cons_elim0_eq
     eigenvectorChartIteratedPartial_zero]
   rfl
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartWeakPartial_ae_eq_iteratedPartial_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

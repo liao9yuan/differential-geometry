@@ -22,7 +22,7 @@ open DifferentialGeometry.Tensor
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,6 +36,7 @@ private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
   haveI : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
+omit [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompactSpace M] [T2Space M] in
 private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] [T2Space M] : RegularSpace M := by
   haveI : LocallyCompactSpace M := locallyCompactSpace_M (E := E) (H := H) (M := M) I
@@ -51,6 +52,7 @@ private lemma pouTsupport_subset_chartAt_source (α : M) :
   (chartAtlasPOU_isSubordinate I M) α
 
 omit [ChartedSpace H M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma exists_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -61,6 +63,7 @@ private lemma exists_open_closure_subset_open_of_isCompact
   exact hK.exists_isOpen_closure_subset hU_nhdsSet
 
 omit [ChartedSpace H M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_open_closure_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -77,6 +80,7 @@ private lemma exists_open_closure_open_closure_subset_open_of_isCompact
   refine ⟨V₁, V₂, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_U⟩
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_globalBump_data (α : M) :
     ∃ V₁ V₂ : Set M, ∃ ψ : M → ℝ,
       IsOpen V₁ ∧ IsOpen V₂ ∧
@@ -135,6 +139,7 @@ private noncomputable def globalBumpψ (α : M) : M → ℝ :=
     (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma globalBumpData_spec (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) ∧
       IsOpen (globalBumpV₂ (I := I) (M := M) α) ∧
@@ -157,11 +162,13 @@ private lemma globalBumpData_spec (α : M) :
       (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma globalBumpV₁_isOpen (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).1
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma pouTsupport_subset_globalBumpV₁ (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -169,28 +176,33 @@ private lemma pouTsupport_subset_globalBumpV₁ (α : M) :
   (globalBumpData_spec (I := I) (M := M) α).2.2.1
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma closure_globalBumpV₁_subset_globalBumpV₂ (α : M) :
     closure (globalBumpV₁ (I := I) (M := M) α) ⊆
       globalBumpV₂ (I := I) (M := M) α :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.1
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma closure_globalBumpV₂_subset_chartAt_source (α : M) :
     closure (globalBumpV₂ (I := I) (M := M) α) ⊆ (chartAt H α).source :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.1
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma globalBumpψ_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ) ∞ (globalBumpψ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.1
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma globalBumpψ_eq_one_on_closure_V₁ (α : M) {b : M}
     (hb : b ∈ closure (globalBumpV₁ (I := I) (M := M) α)) :
     globalBumpψ (I := I) (M := M) α b = 1 :=
   ((globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.2.2.1 b).mp hb
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma globalBumpψ_eq_zero_off_V₂ (α : M) {b : M}
     (hb : b ∈ (globalBumpV₂ (I := I) (M := M) α)ᶜ) :
     globalBumpψ (I := I) (M := M) α b = 0 :=

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatSo
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -84,12 +83,11 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [InnerProductSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
@@ -108,6 +106,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_identity_of_orthonormal
     (g : SmoothMetric_gen I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -142,7 +141,10 @@ theorem metricInverseInBasis_identity_of_orthonormal
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_orthoBasis_eq_normSq0S
+    [FiniteDimensional Real E]
     (g : SmoothMetric_gen I M) {x : M} {s : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx,
@@ -177,7 +179,11 @@ variable {n : ℕ}
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -212,7 +218,11 @@ theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
@@ -281,7 +291,10 @@ end ProducerNorms
 
 
 
+omit [Module.Finite ℝ E] in
+omit [InnerProductSpace ℝ E] in
 theorem abs_spatialCommNablaRm_intrinsic_le
+    [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

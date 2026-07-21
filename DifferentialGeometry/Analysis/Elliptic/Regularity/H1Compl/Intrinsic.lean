@@ -13,7 +13,7 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -28,43 +28,44 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_zero_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     g.inner x v (0 : TangentSpace I x) = 0 := by
   rw [ContinuousLinearMap.map_zero]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y w : TangentSpace I x) :
     g.inner x v (y + w) = g.inner x v y + g.inner x v w :=
   ContinuousLinearMap.map_add (g.inner x v) y w
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
+omit [Module.Finite ℝ E] in
 private lemma g_inner_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) (c : ℝ)
     (y : TangentSpace I x) :
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
+omit [Module.Finite ℝ E] in
 private lemma g_inner_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (v + w) (v + w) =
@@ -74,6 +75,7 @@ private lemma g_inner_add_diag
   have hsymm : g.inner x w v = g.inner x v w := g.symm x w v
   rw [hsymm]; ring
 
+omit [Module.Finite ℝ E] in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -151,6 +153,7 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
+omit [Module.Finite ℝ E] in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -27,7 +26,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -71,6 +70,7 @@ noncomputable def frameGInvCLM
   ∑ i : Idx, ∑ j : Idx,
     gInv p.1 p.2 i j • frameEntryCLM (Idx := Idx) i j
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem frameGramCLM_apply
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -82,6 +82,7 @@ noncomputable def frameGInvCLM
   classical
   simp [frameGramCLM, Finset.sum_apply, mul_comm]
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem frameGInvCLM_apply
     [DecidableEq Idx]
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -103,6 +104,7 @@ noncomputable def matrixCLM
   classical
   simp [matrixCLM, Finset.sum_apply]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_finset_sum
     {ι V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     {n : WithTop ℕ∞}
@@ -129,6 +131,7 @@ theorem contMDiffOn_finset_sum
       exact ih (fun x hx => hf x (Finset.mem_insert_of_mem hx))
     simpa [Finset.sum_insert ha] using hfa.add hsum
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -239,6 +242,7 @@ theorem matrixInvDerivEntry
           refine Finset.sum_congr rfl fun b _hb => ?_
           rw [hsymm b j]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_comp_frameGInvCLM
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -258,6 +262,7 @@ theorem frameGramCLM_comp_frameGInvCLM
       (fun a b => (hinv p.1 p.2 a b).2)
       v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_comp_frameGramCLM
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -277,6 +282,7 @@ theorem frameGInvCLM_comp_frameGramCLM
       (fun a b => (hinv p.1 p.2 a b).1)
       v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_isInvertible
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -290,6 +296,7 @@ theorem frameGramCLM_isInvertible
     (frameGramCLM_comp_frameGInvCLM (I := I) S gInv frame hinv p)
     (frameGInvCLM_comp_frameGramCLM (I := I) S gInv frame hinv p)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_eq_inverse
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -304,6 +311,7 @@ theorem frameGInvCLM_eq_inverse
     (frameGramCLM_comp_frameGInvCLM (I := I) S gInv frame hinv p)
     (frameGInvCLM_comp_frameGramCLM (I := I) S gInv frame hinv p)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_comp_frameGInvCLM_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -329,6 +337,7 @@ theorem frameGramCLM_comp_frameGInvCLM_at
       (gInv := fun a b => gInv p.1 p.2 a b)
       hright v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_comp_frameGramCLM_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -354,6 +363,7 @@ theorem frameGInvCLM_comp_frameGramCLM_at
       (gInv := fun a b => gInv p.1 p.2 a b)
       hleft v i
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGramCLM_isInvertible_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -374,6 +384,7 @@ theorem frameGramCLM_isInvertible_at
     (frameGramCLM_comp_frameGInvCLM_at (I := I) S gInv frame p hleft hright)
     (frameGInvCLM_comp_frameGramCLM_at (I := I) S gInv frame p hleft hright)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_eq_inverse_at
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -395,6 +406,7 @@ theorem frameGInvCLM_eq_inverse_at
     (frameGramCLM_comp_frameGInvCLM_at (I := I) S gInv frame p hleft hright)
     (frameGInvCLM_comp_frameGramCLM_at (I := I) S gInv frame p hleft hright)
 
+omit [SigmaCompactSpace M] in
 theorem frameGramCLM_hasDerivWithinAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -480,6 +492,7 @@ theorem coordInvCLM_eq
           simpa [coordInv, metricCompInFrame,
             DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
 
+omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_spacetimeSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -604,6 +617,7 @@ theorem coordInvSmooth
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_contOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -739,6 +753,7 @@ theorem coordInvSmoothAt
       (prod_mem_nhds (D.regular_isOpen.mem_nhds t.2)
         ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) x0).mem_nhds hx))
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameGInvCLM_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -813,6 +828,7 @@ theorem frameGInvCLM_spacetimeSmooth
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem gInv_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -855,6 +871,7 @@ theorem gInv_spacetimeSmooth
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -888,6 +905,7 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

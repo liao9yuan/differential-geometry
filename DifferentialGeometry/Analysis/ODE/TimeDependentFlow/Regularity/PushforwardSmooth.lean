@@ -155,6 +155,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompactSpace M] in
 theorem flowFamily_regularity_package
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

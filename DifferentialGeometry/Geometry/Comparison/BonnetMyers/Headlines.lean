@@ -59,7 +59,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 
@@ -67,6 +67,7 @@ variable {H : Type*} [TopologicalSpace H]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tangent_closedBall_isCompact
     {M : Type*}
     (I : ModelWithCorners ℝ E H)

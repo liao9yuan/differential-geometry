@@ -17,7 +17,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option backward.isDefEq.respectTransparency false
@@ -38,13 +37,10 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 def differential1FormFun (u : M -> Real) (x : M) :
@@ -209,6 +205,7 @@ theorem differential1FormFun_apply_eq_inner_gradientFun
   simpa [differential1FormFun] using
     (inner_gradientFun (I := I) g u x v).symm
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_real_eq_mfderiv
     (u : M -> Real) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) u x v =

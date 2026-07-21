@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -29,10 +28,11 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (∞ : WithTop ℕ∞) M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [T2Space M]
 
 
+omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) {s q : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -91,6 +91,7 @@ theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) {s s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))

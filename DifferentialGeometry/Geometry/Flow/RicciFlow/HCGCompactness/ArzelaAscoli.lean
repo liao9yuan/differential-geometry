@@ -39,6 +39,7 @@ variable {X : Type*} [TopologicalSpace X] [LocallyCompactSpace X]
 
 
 
+omit [T2Space X] in
 theorem arzelaAscoli_subseq_tendsto
     (f : Nat -> C(X, Real))
     (hequi : Equicontinuous (fun k => (f k : X -> Real)))
@@ -120,6 +121,7 @@ theorem arzelaAscoli_subseq_tendsto
 
 
 
+omit [T2Space X] in
 theorem arzelaAscoli_subseq_tendstoUniformlyOnCompacts
     (f : Nat -> C(X, Real))
     (hequi : Equicontinuous (fun k => (f k : X -> Real)))

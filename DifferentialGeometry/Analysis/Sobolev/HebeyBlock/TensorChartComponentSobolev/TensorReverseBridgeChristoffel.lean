@@ -46,6 +46,7 @@ private lemma coe_nnnorm_eq_ofReal_norm
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_eLpNorm_le_h1Norm_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -69,6 +70,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_h1Norm_uniform
   rw [h_coe] at h_bound
   exact h_bound
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hGrad : ∃ C_grad : ℝ, 0 ≤ C_grad ∧

@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open TensorMultilinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,6 +31,8 @@ variable [CompleteSpace E]
 
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [CompleteSpace E] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -151,6 +153,7 @@ lemma rfns_repr_of_orthoFrame_cb
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private lemma fiberNormSqComponent_comp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φx : TensorRSSpace r s I x) (Wx : TensorRSSpace 0 r I x)
@@ -206,6 +209,8 @@ private lemma fiberNormSqComponent_comp_eq
   rw [hwcomp, smul_eq_mul]
 
 
+omit [CompactSpace M] [I.Boundaryless] [CompleteSpace E] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_comp_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φx : TensorRSSpace r s I x) (Wx : TensorRSSpace 0 r I x) :
@@ -260,6 +265,8 @@ theorem riemannianFiberNormSq_comp_le_mul
     hΦrepr]
 
 
+omit [CompleteSpace E] in
+omit [BoundarylessManifold I M] in
 theorem exists_uniform_riemannianFiberNormSq_appCc_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (W : SmoothCcTensor g 0 r) (x : M),

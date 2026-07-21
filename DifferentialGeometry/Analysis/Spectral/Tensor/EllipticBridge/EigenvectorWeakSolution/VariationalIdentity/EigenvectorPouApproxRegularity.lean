@@ -30,7 +30,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -87,6 +87,7 @@ def eigenvectorPouApprox
     (eigenvectorSmoothApprox (I := I) (M := M)
       g r s i n).toCcTensor
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_zero_off_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -99,6 +100,7 @@ lemma euclidPartial_zero_off_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma densityOnEuclid_mul_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -128,6 +130,9 @@ private def principalSymbolTest
     weightedInvGramOnEuclid (I := I) g α i' j y *
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma principalSymbolTest_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -188,6 +193,7 @@ private lemma principalSymbolTest_memLp
     exact hcd.continuous.memLp_of_hasCompactSupport hcs
   exact hsum_memLp.restrict _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma density_coeff_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -218,6 +224,7 @@ lemma pouSmul_eq_scalarSmul
     pouSmul (I := I) (M := M) g r s α S =
       scalarSmul (I := I) (M := M) g r s (chartAtlasPOU I M α) S := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma density_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M) {w : EuclN → ℝ}
     (hw : MemLp w 2
@@ -245,6 +252,7 @@ lemma density_memLp2_test_integrable
   simp only []
   ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma density_coeff_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -275,6 +283,7 @@ lemma density_coeff_memLp2_test_integrable
   simp only []
   ring
 
+omit [CompleteSpace E] in
 lemma eigenvectorPouApprox_component_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -296,6 +305,7 @@ lemma eigenvectorPouApprox_tsupport_subset_source
         g r s i α n).toFun ⊆ (chartAt H α).source :=
   pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α _
 
+omit [CompleteSpace E] in
 private lemma eigenvectorPouApprox_component_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -307,6 +317,7 @@ private lemma eigenvectorPouApprox_component_contDiff
     (eigenvectorPouApprox_tsupport_subset_source (I := I) (M := M)
       g r s i α n)
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_eigenvectorPouApprox_component_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -319,6 +330,7 @@ private lemma euclidPartial_eigenvectorPouApprox_component_contDiff
     (eigenvectorPouApprox_component_contDiff (I := I) (M := M)
       g r s i α P₀ n) k
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_eigenvectorPouApprox_component_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -348,6 +360,7 @@ private lemma euclidPartial_eigenvectorPouApprox_component_hasCompactSupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_eigenvectorPouApprox_component_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -366,6 +379,7 @@ private lemma euclidPartial_eigenvectorPouApprox_component_memLp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -433,6 +447,7 @@ private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
   refine (h4.trans h2).trans ?_
   rw [h3]
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_eigenvectorPouApprox_toLp_eq_clm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -449,6 +464,7 @@ private lemma euclidPartial_eigenvectorPouApprox_toLp_eq_clm
   exact (eigenvectorChartPartialCLM_smoothApprox_coeFn_eq (I := I) (M := M)
     g r s i α P₀ k n).symm
 
+omit [CompleteSpace E] in
 private lemma euclidPartial_eigenvectorPouApprox_toLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -479,6 +495,7 @@ private lemma euclidPartial_eigenvectorPouApprox_toLp_tendsto
         g r s i α P₀ k n]
   exact h_scaled.congr h_eq
 
+omit [CompleteSpace E] in
 private lemma principalIntegrand_eigenvectorPouApprox_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -567,6 +584,7 @@ private lemma principalIntegrand_eigenvectorPouApprox_eqOn
     rw [hLHS_zero, hRHS_zero]
 
 
+omit [CompleteSpace E] in
 private lemma bilin_eigenvectorPouApprox_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -843,6 +861,7 @@ private lemma bilin_eigenvectorPouApprox_eq_sum
   rw [hbilin_eq, hPI_volume_to_target, hPI_target_eq, hreorg]
 
 
+omit [CompleteSpace E] in
 lemma bilin_eigenvectorPouApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -20,7 +20,7 @@ namespace DeTurckCoefficients
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -31,14 +31,14 @@ def chartGramJetDiffSeminormSum (N : ℕ) (g₁ g₂ : SmoothRiemannianMetric I 
     iteratedFDerivSeminorm N
       (fun z => chartGramOnE (I := I) g₁ α a b z - chartGramOnE (I := I) g₂ α a b z) s y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramJetDiffSeminormSum_nonneg (N : ℕ)
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E) :
     0 ≤ chartGramJetDiffSeminormSum (I := I) (M := M) N g₁ g₂ α s y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ =>
     iteratedFDerivSeminorm_nonneg _ _ _ _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E) :
     chartGramJetDiffSeminormSum (I := I) (M := M) N g₁ g₂ α s y ≤
@@ -48,7 +48,7 @@ lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
   refine Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ => ?_
   exact iteratedFDerivSeminorm_mono hN _ _ _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -71,6 +71,7 @@ lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (fun _ _ => Finset.sum_nonneg fun _ _ => iteratedFDerivSeminorm_nonneg _ _ _ _)
     (Finset.mem_univ a)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartInvGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -78,6 +79,7 @@ lemma chartInvGramOnE_contDiffOn_int
       (interior (extChartAt I α).target) :=
   (chartInvGramOnE_contDiffOn (I := I) g α k l).mono interior_subset
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) :

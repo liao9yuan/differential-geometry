@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -44,7 +43,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -65,6 +64,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem isConvexWith_smallNormalBall
     (join : M → M → ℝ → M) (O : M) {r : ℝ}
     (hjoin : ∀ a ∈ smallNormalBall (I := I) O r, ∀ b ∈ smallNormalBall (I := I) O r,

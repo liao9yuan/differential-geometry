@@ -351,6 +351,7 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
   intros j _
   rw [h_outer_inner i j]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartHessianTensor_quad_form_nonpos_at_max
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -453,6 +454,7 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
   rw [h2]
   exact sndFDeriv_apply_self_nonpos_of_isLocalMax hftilde_max hftilde_C2_at v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacian_nonpos_at_max
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -510,6 +512,7 @@ section MaxPrinciple
 
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weak_maximum_principle_of_closed
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (u : ℝ → M → ℝ)

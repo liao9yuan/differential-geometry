@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -30,6 +30,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cutoffComponentEuclid_contDiff'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -46,6 +47,7 @@ private lemma cutoffComponentEuclid_contDiff'
   · exact cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_hasCompactSupport'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -59,6 +61,7 @@ private lemma cutoffComponentEuclid_hasCompactSupport'
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_tsupport_subset'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -72,6 +75,7 @@ private lemma cutoffComponentEuclid_tsupport_subset'
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoffComponentEuclid_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -96,6 +100,7 @@ lemma cutoffComponentEuclid_memW1p
       hp_one 1
   exact MemWkp.one_iff_memW1p.mp h_W1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chosenWeakPartial'_cutoffComponentEuclid_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -120,6 +125,7 @@ private def smoothCutoffChartPartialLp
   (chosenWeakPartial'_cutoffComponentEuclid_memLp
     (I := I) (M := M) g r s S α P₀.1 P₀.2 k).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothCutoffChartPartialLp_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -134,6 +140,7 @@ private lemma smoothCutoffChartPartialLp_coeFn
   unfold smoothCutoffChartPartialLp
   exact MemLp.coeFn_toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothCutoffChartPartialLp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensorH1 g r s) (α : M)
@@ -186,6 +193,7 @@ private lemma smoothCutoffChartPartialLp_add
     (smoothCutoffChartPartialLp_coeFn (I := I) (M := M) g r s S₂ α P₀ k)).symm.trans
     h_add.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothCutoffChartPartialLp_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensorH1 g r s) (α : M)
@@ -246,6 +254,7 @@ private def smoothCutoffChartPartialLpLin
   map_smul' c S :=
     smoothCutoffChartPartialLp_smul (I := I) (M := M) g r s c S α P₀ k
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma smoothCutoffChartPartialLpLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -345,6 +354,8 @@ private def smoothCutoffChartPartialLpCLM
     smoothCutoffChartPartialLpCLM (I := I) (M := M) g r s α P₀ k S =
       smoothCutoffChartPartialLp (I := I) (M := M) g r s S α P₀ k := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_smoothToTensorH1Compl'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsUniformInducing (smoothToTensorH1Compl (I := I) (M := M) g r s) := by

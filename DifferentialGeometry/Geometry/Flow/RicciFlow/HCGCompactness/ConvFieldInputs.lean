@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPull
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -56,7 +55,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -67,9 +66,9 @@ section Prelims
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem equivOn_trans {K : Set M} {g h f : SmoothRiemannianMetric I M} {C₁ C₂ : Real}
     (h₁ : MetricUniformEquivalentOn (I := I) K g h C₁)
     (h₂ : MetricUniformEquivalentOn (I := I) K h f C₂) :
@@ -94,6 +93,8 @@ theorem equivOn_trans {K : Set M} {g h f : SmoothRiemannianMetric I M} {C₁ C�
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem covNorm_le_add
     (a : Nat) (g h gRef : SmoothRiemannianMetric I M) (x : M) :
     metricCovDerivNorm (I := I) a g gRef x <=
@@ -108,6 +109,7 @@ theorem covNorm_le_add
   rw [hcancel] at htri
   linarith [htri]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private theorem mtf_eq_mt0S (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.metricTensorField (I := I) g x = metricTensor0S (I := I) g x := by
   ext v
@@ -117,6 +119,7 @@ private theorem mtf_eq_mt0S (g : SmoothRiemannianMetric I M) (x : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem covNorm0_le
     (h gRef : SmoothRiemannianMetric I M) (x : M) {C : Real} (hC1 : 1 <= C)
     (hpair : forall v : TangentSpace I x,
@@ -161,6 +164,8 @@ theorem covNorm0_le
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private theorem covDeriv_self_one (g : SmoothRiemannianMetric I M) :
     metricCovDeriv (I := I) g g 1 = 0 := by
   refine DFunLike.ext _ _ (fun x => ?_)
@@ -190,6 +195,8 @@ private theorem covDeriv_self_one (g : SmoothRiemannianMetric I M) :
           (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (1 + 2)) x slots := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covDeriv_self_succ (g : SmoothRiemannianMetric I M) (a : Nat) :
     metricCovDeriv (I := I) g g (a + 1) = 0 := by
   induction a with
@@ -203,6 +210,8 @@ theorem covDeriv_self_succ (g : SmoothRiemannianMetric I M) (a : Nat) :
       exact hz
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem covNorm_self_succ (g : SmoothRiemannianMetric I M) (a : Nat) (x : M) :
     metricCovDerivNorm (I := I) (a + 1) g g x = 0 := by
   have h := covDeriv_self_succ (I := I) g a
@@ -221,6 +230,8 @@ theorem covNorm_self_succ (g : SmoothRiemannianMetric I M) (a : Nat) (x : M) :
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 theorem derivNorm_congr_diff
     (a : Nat) (g₁ g₂ h₁ h₂ gRef : SmoothRiemannianMetric I M) (x : M)
     (hdiff : Tensor0SBundle.metricTensorField (I := I) g₁
@@ -292,6 +303,7 @@ noncomputable def tgtRefSrc
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem srcEquivOn
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -370,6 +382,7 @@ theorem srcEquivOn
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem srcShi
     (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : Real) (N : Nat) (KShi : Real)
@@ -454,6 +467,7 @@ theorem srcShi
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hbound_of_equiv
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -536,6 +550,8 @@ theorem hbound_of_equiv
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 theorem conv0_of_cp
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -680,6 +696,7 @@ theorem conv0_of_cp
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem lipTail_of_src
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -830,6 +847,7 @@ def chiRes (bf : BumpFamily (I := I) Φ) (k : Nat) :
   fun y => bf.chi k (y : P.M)
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem chiRes_smooth (bf : BumpFamily (I := I) Φ) (k : Nat) :
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
     letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
@@ -849,6 +867,7 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem extEquivOn
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -950,6 +969,7 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem covTail_of_bounds
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -1330,6 +1350,7 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lipSrc_of_soln
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;

@@ -24,7 +24,6 @@ import Mathlib.Geometry.Manifold.BumpFunction
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
@@ -34,7 +33,7 @@ namespace Geometry
 namespace Riemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]

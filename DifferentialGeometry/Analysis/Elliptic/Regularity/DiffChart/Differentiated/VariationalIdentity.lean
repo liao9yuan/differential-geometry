@@ -16,7 +16,7 @@ namespace Analysis
 namespace Laplacian
 namespace DifferentiatedVariationalIdentity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -652,6 +652,7 @@ private lemma weightedInvGram_ibp_double_sum
   rw [hLHS_neg]
   exact h_distribute
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma density_coef_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))

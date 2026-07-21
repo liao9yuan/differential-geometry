@@ -30,7 +30,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -72,6 +72,7 @@ theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
     (v w : TangentSpace I x) :
@@ -239,6 +240,7 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   · rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hnorm_nn,
       Real.sqrt_mul hvv_nn, mul_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_scalar_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     (Y W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -267,6 +269,7 @@ theorem ccTensorBilin_scalar_contMDiff (g : SmoothRiemannianMetric I M)
   funext i
   fin_cases i <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ccTensorBilin_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -308,12 +311,14 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
   simp only [ccTensorBilinSymm, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.add_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_symm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g T x v w =
       ccTensorBilinSymm (I := I) g T x w v := by
   rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply, add_comm]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -358,6 +363,7 @@ def tensorSectionRealizeMetric (g : SmoothRiemannianMetric I M)
     (ccTensorBilinSymm_symm (I := I) g T)
     (ccTensorBilinSymm_contMDiff (I := I) g T) hδ_lt hδ
 
+omit [CompactSpace M] in
 @[simp] theorem tensorSectionRealizeMetric_inner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -368,6 +374,7 @@ def tensorSectionRealizeMetric (g : SmoothRiemannianMetric I M)
   unfold tensorSectionRealizeMetric
   rw [perturbedMetric_inner, perturbedInner_apply]
 
+omit [CompactSpace M] in
 theorem exists_smooth_metric_of_smooth_tensor_small
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -394,12 +401,14 @@ theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
   rw [ContMDiffSection.coe_smul, Pi.smul_apply, ContinuousLinearMap.smul_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorModel_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (c • T) x = c • ccTensorModel (I := I) g T x := by
   unfold ccTensorModel
   rw [ccTensorMultilinear_smul, Tensor0SSpace.toModel_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (c • T) x v w =
@@ -408,6 +417,7 @@ theorem ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :

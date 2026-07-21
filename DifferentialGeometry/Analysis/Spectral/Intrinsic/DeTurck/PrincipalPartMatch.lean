@@ -16,6 +16,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem deTurckRicciRHS_principalSymbol_eq_roughLaplacianSymbol [I.Boundaryless]
     (g_bg g₀ : SmoothRiemannianMetric I M) :
     ∃ σ : DifferentialGeometry.PDE.DeTurck.TensorSymbol (E := E) I M,
@@ -28,12 +30,14 @@ theorem deTurckRicciRHS_principalSymbol_eq_roughLaplacianSymbol [I.Boundaryless]
         g₀ σ :=
   deturck_ricci_rhs_linearization_at_g0 (I := I) g_bg g₀
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckRicciRHS_symbolCoeff_eq_covectorNormSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀ x ξ =
       -DifferentialGeometry.PDE.DeTurck.metricCovectorNormSq (I := I) g₀ x ξ :=
   DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply (I := I) g₀ x ξ
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckRicciRHS_principalSymbol_apply_eq_smul
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :
@@ -46,6 +50,7 @@ theorem deTurckRicciRHS_principalSymbol_apply_eq_smul
   rw [DifferentialGeometry.PDE.DeTurck.isotropicSymbol_apply_apply,
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deturck_ricci_principal_symbol_matches_rough_laplacian_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

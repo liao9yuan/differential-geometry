@@ -16,7 +16,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -60,6 +60,7 @@ private lemma covGradBundle_trivFibre_eq
         (Φ.comp ((trivializationAt E (TangentSpace I) α).symmL ℝ b)) :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentRaw_prependCovGradSlot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (α : M)
@@ -122,6 +123,7 @@ theorem tensorChartComponentRaw_prependCovGradSlot
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_scalarOnE_eq_euclidPartial
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -154,6 +156,7 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
     (ζ : C^∞⟮I, M; ℝ⟯) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -184,6 +187,8 @@ private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
   exact partialDeriv_scalarOnE_eq_euclidPartial (I := I) (M := M)
     (ζ : M → ℝ) α m hy
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorCovDerivAt_sum_smul_dir
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (b : M)
@@ -223,6 +228,7 @@ private lemma symm_mem_chartLeviCivitaGoodSet
   · rw [extChartAt_source]; exact hb_chart
   · rw [TangentBundle.trivializationAt_baseSet]; exact hb_chart
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentRaw_covDerivAlongGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (α : M)
@@ -300,6 +306,7 @@ lemma crossLeftTestCoeff_def
         covChartMetricGramInv (I := I) (M := M) g r s α y
           (Q.1, Matrix.vecTail Q.2) P₀ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem crossLeftTestCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r (s + 1)) :
@@ -323,6 +330,7 @@ theorem crossLeftTestCoeff_contDiffOn
       (Q.1, Matrix.vecTail Q.2) P₀
   exact hpartial.mul hGinv
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -371,6 +379,7 @@ noncomputable def gradChartCoeffEuclid
       chartInvGramEuclid (I := I) g α m j y *
         euclidPartial (E := E) j (chartPushedRaw I α ζ) y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem gradChartCoeff_eq_gradChartCoeffEuclid
     (g : SmoothRiemannianMetric I M) (α : M) (ζ : M → ℝ)
     (m : Fin (Module.finrank ℝ E))
@@ -388,6 +397,7 @@ theorem gradChartCoeff_eq_gradChartCoeffEuclid
   rw [partialDeriv_scalarOnE_eq_euclidPartial (I := I) (M := M) ζ α j hy]
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradChartCoeffEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ζ : M → ℝ} (hζ : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ ζ (chartAt H α).source)
@@ -402,6 +412,8 @@ theorem gradChartCoeffEuclid_contDiffOn
   exact (chartInvGramEuclid_contDiffOn (I := I) (M := M) g α m j).mul
     (euclidPartial_contDiffOn_target (I := I) (M := M) α j hbump)
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma covDerivLowerOrderTerm_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -462,6 +474,8 @@ lemma crossRightTestValueCoeff_def
               (gramInvEntry (I := I) (M := M) g r s α Q P₀) y +
             lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ m Q y) := rfl
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem crossRightTestGradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s)
@@ -472,6 +486,8 @@ theorem crossRightTestGradCoeff_contDiffOn
       (chartAtlasPOU I M α).contMDiff.contMDiffOn l).mul
     (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem crossRightTestValueCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s) :
@@ -497,6 +513,7 @@ theorem crossRightTestValueCoeff_contDiffOn
     lowerOrderRotationLOCoeff_contDiffOn (I := I) (M := M) g r s α P₀ m Q
   exact hgrad.mul (hGinvPartial.add hLO)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -564,6 +581,7 @@ theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
   simp only [crossRightTestValueCoeff_def, crossRightTestGradCoeff_def,
     Finset.sum_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_chartTestPullback_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -591,6 +609,7 @@ theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_chartTestPul
   beta_reduce
   rw [chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α ψ hy]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_chartTestPullback_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)

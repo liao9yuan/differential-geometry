@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -101,8 +100,8 @@ lemma sqrt_pow_le_sqrt_det_of_rayleigh
 
 end MatrixBounds
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -116,32 +115,38 @@ section NormalChart
 variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y w : TangentSpace I x) :
     g.inner x v (y + w) = g.inner x v y + g.inner x v w :=
   ContinuousLinearMap.map_add (g.inner x v) y w
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) (c : ℝ)
     (y : TangentSpace I x) :
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma g_inner_smul_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (t : ℝ) (v w : TangentSpace I x) :
     g.inner x (t • v + w) (t • v + w) =
@@ -159,6 +164,7 @@ private lemma g_inner_smul_add_diag
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma riemannian_inner_cauchy_schwarz
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -223,6 +229,7 @@ private lemma riemannian_inner_cauchy_schwarz
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialEntry_le_of_length_bound
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {B : ℝ}
     (hB : 0 ≤ B)
@@ -243,6 +250,7 @@ lemma radialEntry_le_of_length_bound
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma radialJacobiGram_quadratic
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (v : Fin (Module.finrank ℝ E) → ℝ) :
@@ -290,6 +298,7 @@ lemma radialJacobiGram_quadratic
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_le_of_radial_entry_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {C : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -319,6 +328,7 @@ lemma normalDensity_le_of_radial_entry_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_le_of_radial_length_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -343,6 +353,7 @@ lemma normalDensity_le_of_radial_length_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -406,6 +417,7 @@ lemma density_le_gronwall
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_init_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -466,6 +478,7 @@ lemma density_le_gronwall_of_init_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_deriv_eq
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -526,6 +539,7 @@ lemma density_le_gronwall_of_deriv_eq
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_radius_deriv
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {r K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -589,6 +603,7 @@ lemma density_le_gronwall_of_radius_deriv
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_le_gronwall_of_scaled_radius
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a r K b A B : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -758,6 +773,7 @@ theorem exists_dens_le_rm04
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialJacobiGram_posDef
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -772,6 +788,7 @@ lemma radialJacobiGram_posDef
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_eigen_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -794,6 +811,7 @@ lemma normalDensity_ge_of_eigen_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_rayleigh_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -814,6 +832,7 @@ lemma normalDensity_ge_of_rayleigh_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_combo_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -833,6 +852,7 @@ lemma normalDensity_ge_of_combo_bound
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma normalDensity_ge_of_dir_bound
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {a : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -1211,6 +1231,7 @@ theorem exists_dens_two_rm04
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma ball_src_of_radius
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p) :
@@ -1224,6 +1245,7 @@ lemma ball_src_of_radius
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_det
     (g : SmoothRiemannianMetric I M) (p : M) {x : E} {c : ℝ}
     (hxsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source)
@@ -1235,6 +1257,7 @@ lemma density_ge_det
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_det_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R c : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1253,6 +1276,7 @@ lemma density_ge_det_ball
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_rayleigh_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1274,6 +1298,7 @@ lemma density_ge_rayleigh_ball
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_combo_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)
@@ -1296,6 +1321,7 @@ lemma density_ge_combo_ball
 
 
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma density_ge_dir_ball
     (g : SmoothRiemannianMetric I M) (p : M) {R a : ℝ}
     (hR : R ≤ expMapC2Radius (I := I) g p)

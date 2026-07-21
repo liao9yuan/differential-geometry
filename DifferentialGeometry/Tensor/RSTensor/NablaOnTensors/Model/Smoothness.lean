@@ -9,7 +9,6 @@ namespace TensorLieDeriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.unusedSectionVars false
 
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff

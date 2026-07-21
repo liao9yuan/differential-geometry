@@ -15,7 +15,7 @@ open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry.Geometry.Riemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -23,7 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor0SBundle_enorm_eq_riemannianBundle_enorm
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v : TangentSpace I x) :

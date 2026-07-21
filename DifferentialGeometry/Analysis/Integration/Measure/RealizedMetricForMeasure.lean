@@ -17,7 +17,6 @@ import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.Integral.Measure
 
@@ -28,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
@@ -44,6 +43,7 @@ abbrev metricForMeasure (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I M :=
   g
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
     (metricForMeasure (I := I) (M := M) g).inner x = g.inner x := rfl

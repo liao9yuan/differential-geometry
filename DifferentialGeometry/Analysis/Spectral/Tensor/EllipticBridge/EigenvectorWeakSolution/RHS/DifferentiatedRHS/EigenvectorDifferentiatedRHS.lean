@@ -12,7 +12,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -52,6 +52,7 @@ private lemma chosenWeakPartial'_memLp_volume_unconditional
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn'
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -112,6 +113,7 @@ def eigenvectorChartComponentFun
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartComponentFun_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -137,6 +139,7 @@ def eigenvectorChartIteratedPartial
         (eigenvectorChartIteratedPartial g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
 
+omit [CompleteSpace E] in
 @[simp] theorem eigenvectorChartIteratedPartial_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -147,6 +150,7 @@ def eigenvectorChartIteratedPartial
       eigenvectorChartComponentFun (I := I) (M := M)
         g r s i α P₀ := rfl
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -159,6 +163,7 @@ theorem eigenvectorChartIteratedPartial_succ
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α) := rfl
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -178,6 +183,7 @@ theorem eigenvectorChartIteratedPartial_memLp_volume
       exact chosenWeakPartial'_memLp_volume_unconditional
         (l (Fin.last m)) _
 
+omit [CompleteSpace E] in
 private lemma eigenvectorChartIteratedPartial_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -227,6 +233,7 @@ def eigenvectorChartRHSDiffNumerator
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
         fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
 
+omit [CompleteSpace E] in
 lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -361,6 +368,7 @@ def eigenvectorChartRHSDiff
             (eigenvectorChartRHSDiff g r s i α P₀ m (Fin.init l)) y /
           densityOnEuclid (I := I) g α y)
 
+omit [CompleteSpace E] in
 @[simp] theorem eigenvectorChartRHSDiff_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -369,6 +377,7 @@ def eigenvectorChartRHSDiff
     eigenvectorChartRHSDiff (I := I) (M := M) g r s i α P₀ 0 l =
       eigenvectorChartRHS (I := I) (M := M) g r s i α P₀ := rfl
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -383,6 +392,7 @@ theorem eigenvectorChartRHSDiff_succ
               g r s i α P₀ m (Fin.init l)) y /
           densityOnEuclid (I := I) g α y) := rfl
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -393,6 +403,7 @@ theorem eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
         g r s i α P₀ (m + 1) l y = 0 := by
   rw [eigenvectorChartRHSDiff_succ, Set.indicator_of_notMem hy]
 
+omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

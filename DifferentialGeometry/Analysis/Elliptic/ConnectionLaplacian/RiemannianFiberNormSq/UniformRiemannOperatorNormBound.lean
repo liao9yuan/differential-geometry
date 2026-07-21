@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
@@ -39,13 +39,14 @@ private lemma metric_inner_self_nonneg
   · exact (g.pos x v hv0).le
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have heq : chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
-    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
           (I := I) α]
     exact extChartAt_source_eq_chartAt_source (I := I) α
   rw [heq]
@@ -267,6 +268,8 @@ private lemma gInner_self_eq_chartGram_quadForm
 
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -369,6 +372,8 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
   rw [Finset.sum_comm]
 
 omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma riemannOp_normSq_le_chartConstants
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)

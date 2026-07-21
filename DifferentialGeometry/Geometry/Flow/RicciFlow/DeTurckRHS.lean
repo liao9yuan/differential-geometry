@@ -16,7 +16,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -81,6 +81,20 @@ noncomputable def deTurckRicciRHS
     lieDerivMetricClm (I := I) g
       (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g)
         (smoothRiemannianMetricToInfty (I := I) g_bg)) x
+
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
+theorem deTurckRicciRHS_apply
+    (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    deTurckRicciRHS (I := I) g_bg g x v w
+      = (-2 : ℝ) * ricciTensor (I := I) g x v w
+        + lieDerivMetric (I := I) g (deTurckVF (I := I) g g_bg) x v w := by
+  unfold deTurckRicciRHS
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+  rw [lieDerivMetricClm_apply]
+  simp only [smul_eq_mul]
+  rfl
 
 end RicciFlow
 end PDE

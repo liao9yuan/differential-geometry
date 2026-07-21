@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -56,6 +55,7 @@ def christoffelVariationCovDerivCoordAt
 
 
 
+omit [SigmaCompactSpace M] in
 private theorem christoffelCoordAt_symm_of_isSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -82,6 +82,7 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -111,6 +112,7 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -138,6 +140,7 @@ private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
 
 
 
+omit [SigmaCompactSpace M] in
 theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -274,6 +277,7 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (christoffel_curv_variation_algebra Γ A dA hΓsymm i k j m)
 
 
+omit [SigmaCompactSpace M] in
 theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -323,6 +327,7 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -381,6 +386,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem gammaCovNab2Core
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -593,6 +599,7 @@ theorem gammaCovNab2Core
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -683,6 +690,7 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciVarCore
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -821,6 +829,7 @@ theorem ricciVarCore
 
 
 
+omit [SigmaCompactSpace M] in
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

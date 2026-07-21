@@ -43,6 +43,9 @@ def ricciDiffBasisSummand (g₀ gₖ : SmoothRiemannianMetric I M) (x : M)
             (smoothExtensionTangent (I := I) x w) x)
           (smoothExtensionTangent (I := I) x v x))
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_sub_eq_basisSum_summand (g₀ gₖ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciTensor (I := I) gₖ x v w - ricciTensor (I := I) g₀ x v w =
@@ -51,6 +54,9 @@ theorem ricciTensor_sub_eq_basisSum_summand (g₀ gₖ : SmoothRiemannianMetric 
   rw [ricciTensor_sub_eq_basisSum_difference (I := I) g₀ gₖ x v w]
   rfl
 
+omit [InnerProductSpace ℝ E] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem ricciTensor_sub_telescope (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciTensor (I := I) g₁ x v w - ricciTensor (I := I) g₂ x v w =

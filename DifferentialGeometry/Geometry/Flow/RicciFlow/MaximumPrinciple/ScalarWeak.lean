@@ -8,7 +8,6 @@ import Mathlib.Tactic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -310,6 +309,7 @@ private theorem derivWithin_nonpos_at_Icc_min_of_pos
   exact nonpos_of_mul_nonneg_right hnonneg htneg
 
 
+omit [TopologicalSpace M] in
 private theorem derivWithin_add_eps_mul_time
     {w : Real -> M -> Real} {T t ε : Real} {x : M}
     (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
@@ -1469,6 +1469,7 @@ theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
 
 
 
+omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values
     (F : Real -> Real -> Real)
     (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
@@ -1512,6 +1513,7 @@ theorem exists_time_dependent_lipschitz_bound_on_values
     exact Classical.choose_spec (hExists t ht) (u t x) hu_mem (c t) hc_mem
 
 
+omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
     (F : Real -> Real -> Real)
     (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
@@ -1531,6 +1533,7 @@ def scalarWMPValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Se
   (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
 
 
+omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_u_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) (x : M) :
@@ -1540,6 +1543,7 @@ theorem scalarWMPValueSet_u_mem
   exact ⟨ht, trivial⟩
 
 
+omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_c_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) :
@@ -1562,6 +1566,7 @@ theorem scalarWMPValueSet_isCompact
 
 
 
+omit [TopologicalSpace M] in
 theorem scalarWMP_lipschitz_on_valueSet_bound
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (F : Real -> Real -> Real) (K : NNReal)

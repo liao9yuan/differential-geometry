@@ -19,6 +19,7 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [CompleteSpace Real]
 
+omit [IsManifold I ω M] in
 theorem nabla0S_one_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -59,6 +60,7 @@ theorem nabla0S_one_model_coord
   simp only [modelDeriv0SAt]
   simp_rw [tensor0SModelAt_coordComponent0SAt (I := I)]
 
+omit [IsManifold I ω M] in
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -78,6 +80,7 @@ theorem nabla0S_one_coord
             coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
   rw [nabla0S_one_model_coord (I := I) cov X α x₀ j, hderiv]
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -285,6 +288,7 @@ theorem covariantDerivative_finset_sum
               simp [Finset.sum_insert, hit]
 
 omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [IsManifold I 1 M] [IsManifold I 2 M] in
 private theorem coordinateFrame_coeff_at_base_eq_coord
     (x₀ : M) (Z : TangentSpace I x₀) (j : CoordinateIdx E) :
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j x₀ Z =
@@ -311,6 +315,7 @@ private theorem extDerivFun_congr_eventually
   rw [hmf, hx]
 
 omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [IsManifold I 2 M] in
 private theorem oneForm_pair_coordFrame_eventually
     (Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -394,6 +399,7 @@ private theorem oneForm_pair_coordFrame_eventually
           rw [hbase, smul_eq_mul]
 
 omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [IsManifold I 2 M] in
 theorem oneForm_pair_coordFrame_product_rule
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -468,6 +474,7 @@ theorem oneForm_pair_coordFrame_product_rule
     exact (hdiff_z j).mul (hdiff_α j)
 
 omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [IsManifold I 2 M] in
 theorem oneForm_covariantDerivative_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -704,6 +711,7 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
     rw [hsmul2]
     simp [h_eval_cov, smul_eq_mul]]
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -727,6 +735,7 @@ theorem nabla0SFun_one_eval_coordFrame_expanded
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [nabla0SFun_one_eval_coordFrame (I := I) cov X α x₀ hderiv j]
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_of_coordFrame_product
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -766,6 +775,7 @@ theorem nabla0SFun_one_eval_of_coordFrame_product
   simp_rw [Finset.sum_add_distrib]
   ring
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_of_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -808,6 +818,7 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rule
       (I := I) X Z α x₀ z dz hz hdz hdiff_z hdiff_α)
     hcovZ
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -839,6 +850,7 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (oneForm_covariantDerivative_coordFrame_product_rule
       (I := I) cov X Z α x₀ z dz hz hdz hdiff_z)
 
+omit [IsManifold I ω M] in
 theorem nabla0SFun_one_eval_coordFrame_moving
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

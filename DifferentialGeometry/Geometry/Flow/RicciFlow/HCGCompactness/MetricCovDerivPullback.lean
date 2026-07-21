@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -30,7 +29,7 @@ open DifferentialGeometry.Integral.Connection.CovariantDerivative
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -39,6 +38,7 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCovDeriv_one_pullback_sections
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -100,6 +100,7 @@ theorem metricCovDeriv_one_pullback_sections
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCovDeriv_one_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -133,6 +134,7 @@ theorem metricCovDeriv_one_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem metricCovDeriv_succ_eval_smooth_slots'
     [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -163,6 +165,7 @@ private theorem metricCovDeriv_succ_eval_smooth_slots'
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem covDerivOfField_succ_eval_smooth_slots
     [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -194,6 +197,7 @@ private theorem covDerivOfField_succ_eval_smooth_slots
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCovDeriv_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -365,6 +369,7 @@ theorem metricCovDeriv_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivOfField_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -533,6 +538,7 @@ theorem covDerivOfField_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSection_eq_ricciTensor
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
@@ -548,6 +554,7 @@ theorem ricciSection_eq_ricciTensor
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRm04StdAt_eq_inner_riemannOp
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (X Y Z W : TangentSpace I x) :
@@ -571,6 +578,7 @@ theorem metricRm04StdAt_eq_inner_riemannOp
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciTensor_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -609,6 +617,7 @@ theorem ricciTensor_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSection_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -637,6 +646,7 @@ theorem ricciSection_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiffCovDerivAt_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -679,6 +689,7 @@ private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
 
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem normSq0S_pullback_eval_of_orthonormal
     [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 1 M] [IsManifold I 1 N]
@@ -753,6 +764,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDerivNorm_pullback_of_orthonormal
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -786,6 +798,7 @@ theorem metricDerivNorm_pullback_of_orthonormal
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDerivNorm_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -810,6 +823,7 @@ theorem metricDerivNorm_pullback
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDerivNormSupOn_pullback_image
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -840,6 +854,7 @@ theorem metricDerivNormSupOn_pullback_image
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCInf_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
@@ -866,6 +881,7 @@ set_option maxHeartbeats 400000 in
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricScalarAt_pullback
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]

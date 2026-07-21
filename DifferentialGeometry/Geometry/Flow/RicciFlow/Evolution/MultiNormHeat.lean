@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -159,6 +158,7 @@ def multiReactionDown {r : ℕ}
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (level levelDt : Real -> M -> (Fin r → Idx) → Real)
@@ -214,6 +214,7 @@ theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem multiNormHeatEquationOn_of_components {r : ℕ}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin r → Idx) → Real)
@@ -328,6 +329,7 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem multiReactionDown_eq_of_residual {r : ℕ}
     (level levelDt levelLap star : Real -> M -> (Fin r → Idx) → Real)
     (t : Real) (x : M)

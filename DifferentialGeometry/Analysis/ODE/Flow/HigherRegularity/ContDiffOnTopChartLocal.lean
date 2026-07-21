@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 
 
@@ -49,6 +48,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {Φ : E × ℝ → E}
 
 
 
+omit [CompleteSpace E] in
 private theorem contDiffOn_variational_coeff_aux_local
     {n : ℕ} {T : ℝ} {ρ : ℝ}
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -84,6 +84,8 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 
 
 
+omit [FiniteDimensional ℝ E] in
+omit [CompleteSpace E] in
 private theorem continuousOn_fderiv_jointly_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -119,6 +121,8 @@ private theorem continuousOn_fderiv_jointly_local
   exact hG
 
 
+omit [FiniteDimensional ℝ E] in
+omit [CompleteSpace E] in
 private theorem IsLocalFlow.continuousOn_fderiv_along_orbit_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -143,6 +147,7 @@ private theorem IsLocalFlow.continuousOn_fderiv_along_orbit_local
 
 
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem continuousOn_timePiece_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)}
@@ -171,6 +176,7 @@ private theorem continuousOn_timePiece_local
 
 
 
+omit [CompleteSpace E] in
 theorem exists_fderiv_bound_on_flow_tube_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -223,6 +229,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem contDiffOn_timePieceFn_local
     {k : ℕ∞} {U : Set (E × ℝ)} {Ω : Set (ℝ × E)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) Ω)
@@ -244,6 +251,7 @@ private theorem contDiffOn_timePieceFn_local
   exact horbit.continuousLinearMap_comp S
 
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem contDiffOn_flow_succ_of_spatial_smooth_local
     {U : Set (E × ℝ)} (hU_open : IsOpen U)
     {Ω : Set (ℝ × E)}
@@ -278,6 +286,8 @@ private theorem contDiffOn_flow_succ_of_spatial_smooth_local
 
 
 
+omit [FiniteDimensional ℝ E] in
+omit [CompleteSpace E] in
 private theorem exists_uniform_partial_fderiv_local
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) Ω)
@@ -327,6 +337,7 @@ private theorem exists_uniform_partial_fderiv_local
 
 
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem exists_orbit_tube_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -360,6 +371,7 @@ set_option maxHeartbeats 1200000 in
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem hasFDerivAt_flow_at_initial_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -922,6 +934,7 @@ set_option maxHeartbeats 1600000 in
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem hasFDerivAt_flow_jointly_center_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)
@@ -1267,6 +1280,7 @@ private theorem hasFDerivAt_flow_jointly_center_local
 
 
 
+omit [FiniteDimensional ℝ E] in
 private theorem hasFDerivAt_flow_jointly_at_local
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {Ω : Set (ℝ × E)} (hΩ : IsOpen Ω)

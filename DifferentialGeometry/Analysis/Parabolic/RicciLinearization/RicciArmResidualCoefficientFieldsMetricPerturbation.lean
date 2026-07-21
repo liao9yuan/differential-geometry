@@ -45,6 +45,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+section NormedMetricPerturbation
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 def metricCcTensorFib (g : SmoothRiemannianMetric I M) (x : M) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
     { toFun := fun m => g.inner x (m 0) (m 1)
@@ -74,6 +85,7 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
     metricCcTensorFib (I := I) g x m = g.inner x (m 0) (m 1) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCcTensorFib_section_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -118,6 +130,8 @@ def metricCcTensor (g₀ g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
 def metricDifferenceCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
   metricCcTensor (I := I) (M := M) g₀ g₁ - metricCcTensor (I := I) (M := M) g₀ g₀
 
+omit [I.Boundaryless] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem metricDifferenceCcTensor_self (g₀ : SmoothRiemannianMetric I M) :
     metricDifferenceCcTensor (I := I) (M := M) g₀ g₀ = 0 :=
   sub_self _
@@ -129,6 +143,7 @@ def ccTensorUnitValueSection (g : SmoothRiemannianMetric I M) (T : SmoothCcTenso
       (unitZeroSec (I := I) (M := M) y)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -145,6 +160,8 @@ theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (v := fun y : M => unitZeroSec (I := I) (M := M) y)
     T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
@@ -159,10 +176,13 @@ private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I 
   rw [hround]
   rfl
 
+end NormedMetricPerturbation
+
 def gInvDiffQuadResidualField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   connDiffBiContrCoeffField (I := I) (M := M) g₁ g₀ g₁ g₀
 
+omit [I.Boundaryless] in
 @[simp] theorem gInvDiffQuadResidualField_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
     (gInvDiffQuadResidualField (I := I) (M := M) g₀ g₁).toSection x =
@@ -170,6 +190,7 @@ def gInvDiffQuadResidualField (g₀ g₁ : SmoothRiemannianMetric I M) :
         TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x)) := rfl
 
 
+omit [I.Boundaryless] in
 theorem gInvDiffQuadResidualField_self (g₀ : SmoothRiemannianMetric I M) :
     gInvDiffQuadResidualField (I := I) (M := M) g₀ g₀ = 0 := by
   classical

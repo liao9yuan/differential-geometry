@@ -24,7 +24,7 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,12 +46,14 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq_local (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
         (I := I) (M := M) α := rfl
 
 omit [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel_local
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ c : ℝ, 0 ≤ c ∧
@@ -92,6 +94,7 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel_lo
 
 omit [CompleteSpace E] in
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform_local
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     {f : ι → EuclN → ℝ}
@@ -167,6 +170,7 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
+omit [CompleteSpace E] in
 private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -218,6 +222,7 @@ private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
 
+omit [CompleteSpace E] in
 private lemma resolventChartComponent_memWkp_arbitrary_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K' : ℕ)
@@ -273,6 +278,7 @@ private lemma resolventChartComponent_memWkp_arbitrary_local
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_eigen i.fst.val)
 
+omit [CompleteSpace E] in
 private lemma sharpDiff_eigen_inv_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -280,6 +286,7 @@ private lemma sharpDiff_eigen_inv_nonneg
   le_trans zero_le_one (sharpDiff_eigen_inv_one_le
     (I := I) (M := M) g r s i)
 
+omit [CompleteSpace E] in
 private lemma sharpDiff_eigen_inv_pow_le_inv_pow_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (e : ℕ) :
@@ -288,6 +295,7 @@ private lemma sharpDiff_eigen_inv_pow_le_inv_pow_succ
     sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i
   exact pow_le_pow_right₀ h1 (by omega)
 
+omit [CompleteSpace E] in
 private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) (C_IH : ℝ) (hC_IH_nn : 0 ≤ C_IH)
@@ -970,6 +978,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       ((DirCard : ℝ) * C_IH + C_cmp * Sum_p5)) * (i.fst.val)⁻¹ ^ (m + 2)) =
       C * (i.fst.val)⁻¹ ^ (m + 2) by rw [hC_def]; ring]
 
+omit [CompleteSpace E] in
 private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) :
@@ -1058,6 +1067,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
           (I := I) (M := M) g r s i hα P₀ ((m + 1) + 2)]
         exact zero_le _
 
+omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_arbitrary
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s) :

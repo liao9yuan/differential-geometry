@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 

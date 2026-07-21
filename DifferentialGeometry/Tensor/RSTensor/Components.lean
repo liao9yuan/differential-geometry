@@ -67,7 +67,6 @@ import DifferentialGeometry.Bundle.SectionRealized
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -98,6 +97,7 @@ section Covariant
 variable {s q : Nat}
 variable (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_add_gen
     (A B : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -105,6 +105,7 @@ theorem component0S_add_gen
       component0S (I := I) basis A slots + component0S (I := I) basis B slots := by
   rfl
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_neg_gen
     (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -112,6 +113,7 @@ theorem component0S_neg_gen
       -component0S (I := I) basis A slots := by
   rfl
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_sub_gen
     (A B : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -119,6 +121,7 @@ theorem component0S_sub_gen
       component0S (I := I) basis A slots - component0S (I := I) basis B slots := by
   rfl
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_smul_gen
     (c : 𝕜) (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -126,6 +129,7 @@ theorem component0S_smul_gen
       c * component0S (I := I) basis A slots := by
   rfl
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_nsmul
     (n : ℕ) (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -134,6 +138,7 @@ theorem component0S_nsmul
   rfl
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 theorem component0S_product_gen
     (A : Tensor0SSpace s I x) (B : Tensor0SSpace q I x)
     (slots : Fin (s + q) -> Idx) :

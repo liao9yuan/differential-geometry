@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MultiNormHeat
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -110,6 +109,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 
 
+omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundSharp_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (u uLap nabla2 reaction v : Real -> M -> Real) (cReact : Real)
@@ -143,6 +143,7 @@ theorem nablaRm04NormHeatBoundSharp_scalar
 
 
 
+omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundOn_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (u uLap nabla2 reaction v : Real -> M -> Real) (cReact : Real)
@@ -207,6 +208,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatEquationOn_of_multiBochner
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin 5 → Idx) → Real)
@@ -240,6 +242,7 @@ theorem nablaRm04NormHeatEquationOn_of_multiBochner
 
 
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin 5 → Idx) → Real)

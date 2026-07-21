@@ -35,7 +35,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -129,6 +129,8 @@ private noncomputable def eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
   Finset.univ.map ⟨Sigma.mk i.1, sigma_mk_injective⟩
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mem_eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} :
     j ∈ eigenBlockFinset (I := I) (M := M) g₀ i ↔ j.1 = i.1 := by
@@ -291,6 +293,8 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
   rw [htoL2, tensorL2Coeff_smul, tensorL2Coeff_add,
     tensorL2Coeff_toL2_swap_eq_blockSum (I := I) (M := M) g₀ X i]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} (h : j.1 = i.1) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) j σ = tensorSobolevWeight (I := I) (M := M) i σ := by

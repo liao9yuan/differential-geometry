@@ -21,7 +21,7 @@ namespace Analysis
 namespace Sobolev
 namespace EquivalenceFull
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -119,7 +119,7 @@ lemma hasWeakRiemannianGradLp_gradFun
   exact h_lp
 
 theorem MemW1pIntrinsicLp_of_MemWkpChart_smooth
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -137,7 +137,7 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart_smooth
     memLp_g_norm_gradFun_smooth (I := I) (M := M) g p hu_smooth⟩
 
 theorem w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -160,7 +160,7 @@ theorem w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth
   exact hG_p.2
 
 theorem MemW1pIntrinsicLp_of_MemWkpChart
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -178,7 +178,7 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart
   exact MemW1pIntrinsicLp_of_MemWkpChart_smooth (I := I) (M := M) g p hu_smooth
 
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -233,7 +233,7 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
   linarith
 
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -363,7 +363,7 @@ private lemma eLpNorm_g_norm_gradFun_chart_local_lt_top_smooth
   exact (MemLp.of_bound hmeas.aestronglyMeasurable C h_ae_bound).2
 
 theorem eLpNorm_g_norm_gradFun_chart_local_le_const_mul_wkpNormChart_smooth
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

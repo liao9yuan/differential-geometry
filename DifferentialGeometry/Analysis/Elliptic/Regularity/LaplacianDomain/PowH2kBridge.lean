@@ -13,7 +13,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainPowH2kBridge
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -144,6 +144,7 @@ theorem laplacianDomainPow_memWkpChart_2k_two_sided_of_chartSideBridges
   exact wkpNormChart_2k_lt_top_of_chartSideH2kBridge
     (I := I) (M := M) g (k + 1) h_bridge_rhs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartSideH2kBridge_zero
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -156,6 +157,7 @@ theorem chartSideH2kBridge_zero
   rw [h_eq]
   exact h α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge_zero
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) :

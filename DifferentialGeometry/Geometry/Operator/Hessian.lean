@@ -14,7 +14,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -75,7 +75,7 @@ def frobeniusSqFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
     ∑ j : Fin (Module.finrank ℝ E),
       (B x ((chartModelBasis E) i) ((chartModelBasis E) j))^2
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma frobeniusSqFun_def (B : pointwiseBilin (M := M) I) (x : M) :
     frobeniusSqFun (I := I) (M := M) B x =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -86,20 +86,20 @@ def traceFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     B x ((chartModelBasis E) i) ((chartModelBasis E) i)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma traceFun_def (B : pointwiseBilin (M := M) I) (x : M) :
     traceFun (I := I) (M := M) B x =
       ∑ i : Fin (Module.finrank ℝ E),
         B x ((chartModelBasis E) i) ((chartModelBasis E) i) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma frobeniusSqFun_nonneg (B : pointwiseBilin (M := M) I) (x : M) :
     0 ≤ frobeniusSqFun (I := I) (M := M) B x := by
   unfold frobeniusSqFun
   exact Finset.sum_nonneg
     (fun i _ => Finset.sum_nonneg (fun j _ => sq_nonneg _))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem traceFun_sq_le_dim_mul_frobeniusSqFun
     (B : pointwiseBilin (M := M) I) (x : M) :
     (traceFun (I := I) (M := M) B x)^2 ≤
@@ -109,7 +109,7 @@ theorem traceFun_sq_le_dim_mul_frobeniusSqFun
   simp only [traceFun_def, frobeniusSqFun_def]
   exact h
 
-omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
+omit [IsManifold I ∞ M] in
 theorem traceFun_sq_div_dim_le_frobeniusSqFun
     (B : pointwiseBilin (M := M) I) (x : M) :
     (traceFun (I := I) (M := M) B x)^2 / (Module.finrank ℝ E : ℝ) ≤
@@ -125,14 +125,14 @@ def chartGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartGramOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartGramOnE (I := I) g α i j y =
       chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -149,7 +149,7 @@ def chartChristoffel (g : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
        partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartChristoffel_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -160,7 +160,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
            partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
            partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffel_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -184,7 +184,7 @@ def chartIteratedPartialDeriv
     (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   partialDeriv (E := E) i (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartIteratedPartialDeriv_def
     (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartIteratedPartialDeriv (I := I) α f i j y =
@@ -198,7 +198,7 @@ def chartHessianTensor (g : SmoothRiemannianMetric I M)
       chartChristoffel (I := I) g α i j k (extChartAt I α x) *
         partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartHessianTensor_def
     (g : SmoothRiemannianMetric I M)
     (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -208,7 +208,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
           chartChristoffel (I := I) g α i j k (extChartAt I α x) *
             partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartIteratedPartialDeriv_symm_of_contDiff
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -258,7 +258,7 @@ lemma chartIteratedPartialDeriv_symm_of_contDiff
   rw [hkey i j, hkey j i]
   exact hsymm_2 _ _
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessianTensor_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -274,7 +274,7 @@ theorem chartHessianTensor_symm
   intro k _
   rw [chartChristoffel_symm (I := I) g α i j k]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHessianTensor_symm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -356,7 +356,7 @@ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
       intro j _
       ring)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp]
 lemma hessFun_apply (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v w : TangentSpace I x) :
@@ -368,7 +368,7 @@ lemma hessFun_apply (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
             chartHessianTensor (I := I) g x f i j x := by
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessFun_symm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -399,7 +399,7 @@ def chartHessFrobeniusSq (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M
         chartHessianTensor (I := I) g x f i j x *
           chartHessianTensor (I := I) g x f k l x
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartHessFrobeniusSq_def (g : SmoothRiemannianMetric I M)
     (f : M → ℝ) (x : M) :
     chartHessFrobeniusSq (I := I) g f x =
@@ -418,7 +418,7 @@ def chartHessTrace (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : �
     chartInvGramMatrix (I := I) g x x i j *
       chartHessianTensor (I := I) g x f i j x
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartHessTrace_def (g : SmoothRiemannianMetric I M)
     (f : M → ℝ) (x : M) :
     chartHessTrace (I := I) g f x =
@@ -427,7 +427,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
         chartInvGramMatrix (I := I) g x x i j *
           chartHessianTensor (I := I) g x f i j x := rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hessFun_basis_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -465,7 +465,7 @@ lemma hessFun_basis_apply
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma traceFun_hessFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
@@ -475,7 +475,7 @@ lemma traceFun_hessFun
   intro i _
   exact hessFun_basis_apply (I := I) g f x i i
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma frobeniusSqFun_hessFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x =
@@ -489,7 +489,7 @@ lemma frobeniusSqFun_hessFun
   intro j _
   rw [hessFun_basis_apply]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartHess_trace_sq_le_dim_mul_frobenius_sq
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (∑ i : Fin (Module.finrank ℝ E), chartHessianTensor (I := I) g x f i i x)^2 ≤
@@ -505,7 +505,7 @@ theorem chartHess_trace_sq_le_dim_mul_frobenius_sq
       frobeniusSqFun_hessFun (I := I) g f x] at hbound
   exact hbound
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -523,7 +523,6 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
   rw [← htr]
   exact hbound
 
-omit [InnerProductSpace ℝ E] in
 theorem laplacian_sq_div_dim_le_frobenius_sq_of_trace_eq
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -543,7 +542,7 @@ theorem laplacian_sq_div_dim_le_frobenius_sq_of_trace_eq
     laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq (I := I) g hf x htr
   exact (div_le_iff₀ hpos).mpr (by linarith [hbound])
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem traceFun_hessFun_sq_le_dim_mul_frobeniusSqFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     (traceFun (I := I) (M := M) (hessFun (I := I) g f) x)^2 ≤

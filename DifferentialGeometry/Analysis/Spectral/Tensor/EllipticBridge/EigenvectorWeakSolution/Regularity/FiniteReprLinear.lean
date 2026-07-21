@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -61,6 +61,7 @@ noncomputable def finiteReprLin
     (finiteCoeffLin (I := I) (M := M) g r s σ)
 
 
+omit [CompleteSpace E] in
 @[simp] theorem finiteReprLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
     (v : tensorHs.finiteSupportSubmodule

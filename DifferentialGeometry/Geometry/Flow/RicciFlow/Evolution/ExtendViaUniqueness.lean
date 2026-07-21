@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -207,6 +206,8 @@ theorem ricci_flow_forward_unique
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem extend_construction_of_restart
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -416,6 +417,9 @@ private theorem expBounds_of_logDiff {fa fb R : ℝ}
 
 
 
+omit [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem metricEquiv_of_ricBound
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     {K : ℝ} (hK : 0 ≤ K)

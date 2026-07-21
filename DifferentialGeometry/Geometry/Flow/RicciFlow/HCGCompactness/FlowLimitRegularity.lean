@@ -70,13 +70,13 @@ theorem chartGramBound_contOn
   exact (Real.continuous_sqrt.comp_continuousOn hii).mul
     (Real.continuous_sqrt.comp_continuousOn hjj)
 
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 
 
 
 
 
+omit [SigmaCompactSpace M] in
 theorem chartGram_sub_le
     (gRef u u' : SmoothRiemannianMetric I M) (x₀ x : M)
     (i j : Fin (Module.finrank Real E)) :
@@ -123,6 +123,7 @@ theorem chartGram_sub_le
 
 
 
+omit [SigmaCompactSpace M] in
 theorem chartGramLim_contOn
     [LocallyCompactSpace M]
     (gSeq : ℕ → ℝ → SmoothRiemannianMetric I M)
@@ -205,6 +206,7 @@ set_option maxHeartbeats 1000000 in
 
 
 
+omit [SigmaCompactSpace M] in
 theorem metricTensorContLim
     [LocallyCompactSpace M]
     (gSeq : ℕ → ℝ → SmoothRiemannianMetric I M)

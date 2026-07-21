@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Coordinates.Christoffel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 
 
@@ -30,7 +29,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -46,6 +45,8 @@ def metricCompInFrame
     (t : Real) (x : M) (i j : Idx) : Real :=
   (S.family.metric t).inner x (frame i x) (frame j x)
 
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem metricCompInFrame_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -56,6 +57,8 @@ def metricCompInFrame
   rfl
 
 
+omit [Fintype Idx] in
+omit [SigmaCompactSpace M] in
 theorem metricCompInFrame_hasDerivWithinAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -74,6 +77,7 @@ theorem metricCompInFrame_hasDerivWithinAt
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordMetricSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -91,6 +95,7 @@ theorem coordMetricSmooth
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordMetricSmoothAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -115,6 +120,7 @@ theorem coordMetricSmoothAt
 
 
 
+omit [SigmaCompactSpace M] in
 theorem coordMetricContOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -200,6 +206,7 @@ def SymmetricInverseMetricComponentsInFrameOn
 
 
 
+omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal" (since := "2026-05-22")]
 theorem gInv_symm [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

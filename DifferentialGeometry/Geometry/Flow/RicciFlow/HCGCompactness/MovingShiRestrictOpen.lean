@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestr
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -43,18 +42,20 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
-  [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+  [IsManifold I 1 M] [IsManifold I 2 M]
 
 
 
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private theorem covDerivOfField_succ_eval
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -89,6 +90,8 @@ private theorem covDerivOfField_succ_eval
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 theorem covDerivOfField_restrictOpen
     (gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -255,6 +258,9 @@ theorem covDerivOfField_restrictOpen
 
 
 
+omit [I.Boundaryless] in
+omit [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciSection_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -297,6 +303,9 @@ theorem ricciSection_restrictOpen
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
+omit [SigmaCompactSpace M] in
 private theorem covDerivOfField_apply_eq_iterCov'
     (gRef : SmoothRiemannianMetric I M)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -313,6 +322,8 @@ private theorem covDerivOfField_apply_eq_iterCov'
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricCovTower_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -342,6 +353,8 @@ theorem ricCovTower_restrictOpen
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricCovTower_normSq0S_restrictOpen
     (g : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -368,6 +381,8 @@ theorem ricCovTower_normSq0S_restrictOpen
 
 
 
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem movingShiBoundOn_restrictOpen
     (gSeq : ℕ → ℝ → SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]

@@ -22,7 +22,7 @@ open Tensor0SNabla
 open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -36,7 +36,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma zeroTensor_eq_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (tensor0Iso (I := I) M x D) • unitZeroSec (I := I) (M := M) x := by
   classical
@@ -47,7 +48,8 @@ lemma zeroTensor_eq_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
   apply (tensor0Iso (I := I) M x).injective
   rw [map_smul, hunit, smul_eq_mul, mul_one]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensor03_ext_unit {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :
@@ -57,6 +59,8 @@ lemma tensor03_ext_unit {x : M}
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D]
   rw [map_smul, map_smul, h]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curry_unitGradField_eq (g : SmoothRiemannianMetric I M)
     (T₀ : SmoothCcTensor g 0 2) (y : M) (w : TangentSpace I y) :
     tensor0S_curry (I := I) (M := M) 2 y (unitGradField (I := I) (M := M) g T₀ y) w =
@@ -79,6 +83,8 @@ lemma curry_unitGradField_eq (g : SmoothRiemannianMetric I M)
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curry_covGrad_unit_eval (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (w : TangentSpace I x) :
     tensor0S_curry (I := I) (M := M) 2 x
@@ -108,6 +114,7 @@ lemma curry_covGrad_unit_eval (g : SmoothRiemannianMetric I M)
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curry_abstract_covDeriv_unitGrad_unfold
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} {x : M}
@@ -154,6 +161,8 @@ lemma curry_abstract_covDeriv_unitGrad_unfold
       ((LeviCivita (I := I) g).toFun Y x (X x))
   rw [hsec, hchr]
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma contMDiff_unitGradField (g : SmoothRiemannianMetric I M)
     (T₀ : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
@@ -176,6 +185,8 @@ lemma contMDiff_unitGradField (g : SmoothRiemannianMetric I M)
     (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace 3 I z)
     (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 3 ℝ E) hϕ hv
 
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma contMDiff_curried_unitGradField (g : SmoothRiemannianMetric I M)
     (T₀ : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel 2 ℝ E)) ∞
@@ -186,6 +197,7 @@ lemma contMDiff_curried_unitGradField (g : SmoothRiemannianMetric I M)
     (unitGradField (I := I) (M := M) g T₀)).mp
     (contMDiff_unitGradField (I := I) (M := M) g T₀)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma curry_abstract_covDeriv_unitGrad_unfold'
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} {x : M}

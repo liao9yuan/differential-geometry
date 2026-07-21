@@ -6,7 +6,6 @@ import Mathlib.Analysis.Convex.Function
 import Mathlib.Topology.UnitInterval
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 
 
@@ -341,7 +340,7 @@ theorem metricEnergy_min_dist_le (μ : ι -> Real) (pts : ι -> X) {q qstar : X}
 end Metric
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -360,6 +359,7 @@ def centerEnergy (g : SmoothRiemannianMetric I M) (μ : ι -> Real) (pts : ι ->
   (1 / 2 : Real) * ∑ i : ι, μ i * (riemannianEDist I q (pts i)).toReal ^ 2
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem centerEnergy_congr (g : SmoothRiemannianMetric I M) (μ : ι → Real)
     {pts pts' : ι → M} (hpts : ∀ i, μ i ≠ 0 → pts i = pts' i) (q : M) :
     centerEnergy (I := I) g μ pts q = centerEnergy (I := I) g μ pts' q := by
@@ -373,6 +373,7 @@ theorem centerEnergy_congr (g : SmoothRiemannianMetric I M) (μ : ι → Real)
   · rw [hpts i hi]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_cont (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     Continuous (centerEnergy (I := I) g μ pts) := by
@@ -399,6 +400,7 @@ theorem centerEnergy_cont (g : SmoothRiemannianMetric I M)
   simpa [centerEnergy] using continuous_const.mul hsum
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem exists_minOn_compact (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) {K : Set M}
     (hK : IsCompact K) (hne : K.Nonempty) :
@@ -442,6 +444,7 @@ theorem exists_minOn_ball [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_eq_dist [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) (q : M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -461,6 +464,7 @@ theorem centerEnergy_eq_dist [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) {q qstar : M} {ε : Real} :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -490,6 +494,7 @@ theorem centerEnergy_min_dist_le [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem grad_centerEnergy [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -523,6 +528,7 @@ theorem grad_centerEnergy [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem sum_grad_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -558,6 +564,7 @@ theorem sum_grad_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem sum_expInv_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -607,6 +614,8 @@ theorem sum_expInv_eq_zero [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem halfSqDist_deriv_of_lengthVariation [MetricSpace M]
     (g : SmoothRiemannianMetric I M) (pt : M) (beta gamma : Real -> M)
     (f : Real -> Real -> M) (L : Real)
@@ -650,6 +659,7 @@ theorem halfSqDist_deriv_of_lengthVariation [MetricSpace M]
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem grad_halfSqDist_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
     (pt q : M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -673,6 +683,7 @@ theorem grad_halfSqDist_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem sum_expInv_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
     {κ : Type} [Fintype κ] :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -704,6 +715,7 @@ theorem sum_expInv_of_flat [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_strict [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -733,6 +745,7 @@ theorem centerEnergy_strict [T3Space M] (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_lt_far [T3Space M] (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

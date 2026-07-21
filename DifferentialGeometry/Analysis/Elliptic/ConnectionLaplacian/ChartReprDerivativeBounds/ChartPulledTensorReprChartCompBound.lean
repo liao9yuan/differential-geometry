@@ -27,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRepr_norm_le_sum_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -212,6 +213,7 @@ lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
   rw [fderiv_smul_const (hdiff_each Idx Jdx)]
   rw [ContinuousLinearMap.norm_smulRight_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chart_pulled_tensor_repr_norm_le_chartComp_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

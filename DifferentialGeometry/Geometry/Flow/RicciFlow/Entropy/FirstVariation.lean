@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 set_option linter.style.longLine false
 
 
@@ -183,7 +182,7 @@ def wEntropyWeightedIntegralVariationIntegrand (n : Nat)
 section Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -367,6 +366,7 @@ theorem wEntropyBaseIntegral_hasDerivAt_at
 
 
 
+omit [TopologicalSpace M] in
 theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
     {muPath : Real -> Measure M} {n : Nat} {tauPath : Real -> Real}

@@ -15,7 +15,7 @@ namespace Analysis
 namespace Laplacian
 namespace LaplacianDomainSmoothMul
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,6 +37,7 @@ noncomputable def fHLeibnizResidualCLM
       (laplacianOfChartPOU (I := I) (M := M) g α)).comp
       (H1ComplToLp (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma fHLeibnizResidualCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M) (u_h : H1Compl g) :
     fHLeibnizResidualCLM (I := I) (M := M) g α u_h =
@@ -48,6 +49,7 @@ noncomputable def fHLeibnizResidualCLM
   unfold fHLeibnizResidualCLM
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fHLeibnizResidualCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     fHLeibnizResidualCLM (I := I) (M := M) g α
@@ -68,6 +70,7 @@ noncomputable def phiMulU_h
   resolvent (I := I) (M := M) g
     (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem phiMulU_h_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -77,6 +80,7 @@ theorem phiMulU_h_mem_laplacianDomain
   rw [laplacianDomain_mem_iff]
   exact ⟨leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h, rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_preimage_phiMulU_h
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -88,6 +92,7 @@ theorem laplacianDomain_preimage_phiMulU_h
   apply resolvent_injective (I := I) (M := M) g
   rw [resolvent_laplacianDomain_preimage_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem phiMulU_h_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     phiMulU_h (I := I) (M := M) g α

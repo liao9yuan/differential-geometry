@@ -7,7 +7,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 set_option autoImplicit false
 set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 
 
@@ -43,7 +42,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -56,6 +54,8 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcChrist_e_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -81,6 +81,7 @@ theorem lcChrist_e_mdiffOn
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem frame_e_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -93,6 +94,7 @@ theorem frame_e_mdiffOn
 set_option backward.isDefEq.respectTransparency false in
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem tensorComp_mdiffOn {r : ℕ}
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -136,6 +138,8 @@ def akCompField
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem akCompField_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -150,6 +154,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem gCompField_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -187,6 +192,7 @@ def gramE
     Matrix Idx Idx Real :=
   Matrix.of fun i j => g.inner y (e₀.localFrame basisE i y) (e₀.localFrame basisE j y)
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem gramE_herm
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -198,6 +204,7 @@ theorem gramE_herm
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [DecidableEq Idx] in
 theorem gramE_dotVec
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -229,6 +236,7 @@ theorem gramE_dotVec
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem gramE_posDef
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -256,6 +264,7 @@ def ginvCompField
 
 
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ginv_hinv
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -304,6 +313,7 @@ theorem ginv_hinv
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 private theorem chr_eq_chartChr {u : Set M}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -317,6 +327,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [I.Boundaryless] [DecidableEq Idx] in
+omit [SigmaCompactSpace M] in
 theorem koszulComp_at
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
     (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
@@ -501,6 +513,7 @@ theorem koszulComp_at
 
 
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem ginv_compL2_le
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -587,6 +600,9 @@ theorem ginv_compL2_le
 
 
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem compL2_tower_eq
     (gRef : SmoothRiemannianMetric I M) {r : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -627,6 +643,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
+omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 theorem claim1_geom
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
