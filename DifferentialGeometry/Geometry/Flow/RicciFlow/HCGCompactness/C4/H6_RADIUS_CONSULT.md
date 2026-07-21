@@ -8,6 +8,35 @@ The checked local aligned worktree is `codex/short-time-existence-align` at
 declarations quoted below. Those local signatures and verification results are
 newer than the remote branch and are authoritative for this consultation.
 
+## Decision and execution status
+
+The consultation verdict is accepted: use Route A for the canonical geometry
+and Route C at the H6 producer boundary. There must be one total intrinsic
+framed exponential, one induced pullback metric, and one intrinsic geometric
+radius API; the H6-specific partial diffeomorphism is only a witness used while
+constructing the chosen bounds/profile package.
+
+The Lean import DAG requires one adjustment to the proposed order. The current
+`FramedNormalCoordinates.lean` cannot import the intrinsic stack without a cycle
+through Hopf-Rinow, Gauss, injectivity, and framed coordinates. Stage 1 therefore
+lives temporarily in
+`Geometry/Exponential/IntrinsicFramedCoordinates.lean`, above both stacks.
+It is focused-green and exact-green and proves the intrinsic framed map is smooth,
+fixes the origin, has the normal-frame derivative there, and agrees with the
+legacy map on a positive ball. The fixed-model-norm bridge is explicit as
+`intrFrameCLM`. It also provides the migration-only intrinsic local partial
+diffeomorphism and the pullback metric of the total intrinsic map, with agreement
+to the legacy metric on the migration source.
+
+Current status: geometry Stages 1--3 complete; the canonical migration is about
+35% complete. The next target is the HCG consumer boundary, where the consultation
+pseudocode omitted a live formal dependency: `expMapIntrinsic` requires
+`[CompleteSpace M]`, but the current public `normalCoordMetric Y x` and
+`NormalCoordMetricBoundInput` carry no `MetricComplete Y`. Completeness must be
+threaded or packaged explicitly before the existing HCG name can be switched.
+The `NormalRadiusProfile` producer theorem remains 0%; no consumer radius-floor
+assumption or second chart hierarchy has been introduced.
+
 ## Goal
 
 Choose the smallest mathematically honest architecture that lets Hamilton H6

@@ -127,11 +127,12 @@ replace it by an endpoint wrapper or synonym assumption on
 - Sequence-uniform relative-radius/profile theorem: 0%; its dedicated
   zero-order Jacobi/Rm04 machinery is about 99%. Natural-domain containment,
   global spray smoothness, intrinsic-lift identification, and smooth time-one
-  dependence plus the intrinsic Jacobi endpoint differential are proved; the
-  remaining zero-order gap is the canonical intrinsic-vs-chart-fixed radius
-  architecture and the partial diffeomorphism on that geometric ball. The
-  profile must be packaged with a chosen H6 bounds record, not an arbitrary
-  shrinkable one.
+  dependence plus the intrinsic Jacobi endpoint differential are proved. The
+  Route-A-plus-Route-C architecture is now fixed, and its first intrinsic framed
+  migration brick is focused-green. The remaining zero-order gap is the single
+  intrinsic local branch, canonical name/radius migration, and final H6 choice
+  of bounds together with its profile; the profile cannot target an arbitrary
+  shrinkable bounds record.
 - Native all-order `NormalCoordMetricBoundInput` producer theorem: 0%; its
   dedicated machinery is about 35%, because the high-order curvature-to-metric
   jet induction has not been formalized.
@@ -140,17 +141,19 @@ replace it by an endpoint wrapper or synonym assumption on
 
 ## Next target
 
-The representation, explicit Jacobi/Rm04 endpoint package, scalar budget,
-clamped sequence-uniform zero-order estimate, sub-injectivity-ball `expDomain`
-containment, global spray smoothness, intrinsic-lift identification, and
-smooth time-one endpoint are focused- and exact-green. The natural intrinsic
-Jacobi equation and endpoint differential are focused- and exact-green. First resolve the
-canonical radius architecture recorded in `H6_RADIUS_CONSULT.md`: either
-migrate the framed normal-coordinate API to the intrinsic exponential or
-justify one non-parallel geometric branch, and make H6 choose its bounds and
-profile together. Then derive differential nondegeneracy from Rm04 and
-construct the injective partial diffeomorphism. Higher coordinate derivatives
-remain a separate curvature-jet induction.
+The canonical architecture in `H6_RADIUS_CONSULT.md` is resolved as Route A
+plus Route C. Geometry Stages 1--3 are focused- and exact-green in
+`Geometry/Exponential/IntrinsicFramedCoordinates.lean`: the total intrinsic
+framed map, its migration-only local partial diffeomorphism, and its total-map
+pullback metric are implemented, including local agreement with the legacy
+objects. The next target is the HCG completeness boundary. The intrinsic map
+requires `[CompleteSpace M]`, while the current `normalCoordMetric Y x` and
+`NormalCoordMetricBoundInput` do not carry `MetricComplete Y`; this dependency
+must be threaded or packaged honestly before switching the existing public
+metric name. After that, flip the canonical framed names and make injectivity
+and `expRadiusGp` intrinsic. H6 must finally choose its metric-bound record and
+relative profile together. Higher coordinate derivatives remain a separate
+curvature-jet induction.
 
 ## Migration audit
 
