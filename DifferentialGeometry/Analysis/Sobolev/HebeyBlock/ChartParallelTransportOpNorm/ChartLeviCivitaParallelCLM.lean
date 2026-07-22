@@ -22,8 +22,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
@@ -131,8 +129,6 @@ private lemma exists_W_and_constant_tangent_symmL
       _ = C₁ * C₂ * ‖w‖ := by ring
   exact ContinuousLinearMap.opNorm_le_bound _ (by positivity) h_norm_w
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
@@ -280,8 +276,6 @@ private lemma norm_basis_le_modelBasisVecSup
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private lemma christoffelCorrection_summand_opNorm_le_unconditional
@@ -428,8 +422,6 @@ private lemma christoffelCorrection_summand_opNorm_le_unconditional
         modelBasisVecSup (E := E) := by ring
   linarith
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
@@ -560,8 +552,6 @@ theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
   rw [h_C_eq] at h_outer_norm
   exact h_outer_norm
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
