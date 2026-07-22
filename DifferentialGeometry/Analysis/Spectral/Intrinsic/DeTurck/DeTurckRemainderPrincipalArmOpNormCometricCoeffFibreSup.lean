@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingSharpC0Je
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.ChartH2GardingConstant
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Weitzenbock
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.TensorPointwiseNormAffineIntegral
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
@@ -56,8 +57,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma kscr_g1_inner_injective (g₁ : SmoothRiemannianMetric I M) (x : M)
     {a b : TangentSpace I x} (hab : ∀ u : TangentSpace I x, g₁.inner x a u = g₁.inner x b u) :
     a = b := by
@@ -73,8 +72,6 @@ private lemma kscr_g1_inner_injective (g₁ : SmoothRiemannianMetric I M) (x : M
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma kscr_cometricLmodel_covectorOfCLM_inner_loc
     (g₁ : SmoothRiemannianMetric I M) (y : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
@@ -92,8 +89,6 @@ private lemma kscr_cometricLmodel_covectorOfCLM_inner_loc
   rw [Tensor0SBundle.model_covectorOfCLM_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma kscr_cometricLmodel_covOf_g0flat_eq (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
@@ -107,8 +102,6 @@ private lemma kscr_cometricLmodel_covOf_g0flat_eq (g₀ : SmoothRiemannianMetric
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma kscr_flatRecon_eq_basisVec (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (b : Fin n) :
@@ -152,8 +145,6 @@ private lemma kscr_flatRecon_eq_basisVec (g₀ : SmoothRiemannianMetric I M) (x 
   exact kscr_cometricLmodel_covOf_g0flat_eq (I := I) g₀ x (e b)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma kscr_deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (w : Tensor0SSpace 4 I x) (m : Fin 2 → E) :
@@ -198,8 +189,6 @@ private lemma kscr_deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
     ((Module.finBasis ℝ E).cDualBasis k)]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma kscr_deTurckCoeff_component_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -267,8 +256,6 @@ private lemma kscr_deTurckCoeff_component_eq (g₀ g₁ : SmoothRiemannianMetric
   rw [← hpull, kscr_flatRecon_eq_basisVec (I := I) g₀ x e (K 1)]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma kscr_sum_pi_fin_succ {n : ℕ} {β : Type*} [AddCommMonoid β]
     {N : ℕ} (g : (Fin (N + 1) → Fin n) → β) :
     (∑ p : Fin (N + 1) → Fin n, g p)
@@ -279,8 +266,6 @@ private lemma kscr_sum_pi_fin_succ {n : ℕ} {β : Type*} [AddCommMonoid β]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma kscr_deTurckCoeff_componentSqSum_eq (n : ℕ) (f : Fin n → Fin n → ℝ) :
     (∑ K : Fin 4 → Fin n, ∑ J : Fin 2 → Fin n,
       (f (K 0) (K 1) *
@@ -361,8 +346,6 @@ private lemma kscr_deTurckCoeff_componentSqSum_eq (n : ℕ) (f : Fin n → Fin n
   rw [Finset.sum_congr rfl (fun a _ => hstep a), ← Finset.mul_sum]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (g₀ ga gb : SmoothRiemannianMetric I M)
@@ -478,8 +461,6 @@ private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (g₀ g
 
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma kscr_combinedTrace42Model_apply_symbolic
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -495,8 +476,6 @@ private lemma kscr_combinedTrace42Model_apply_symbolic
   congr 1
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma kscr_ricciArmPrincipalCoeff_sub_add_self_eq_reindexSum
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -537,8 +516,6 @@ private lemma kscr_ricciArmPrincipalCoeff_sub_add_self_eq_reindexSum
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma kscr_traceHessianCoeff_sub_eq_reindex_pcc
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -558,8 +535,6 @@ private lemma kscr_traceHessianCoeff_sub_eq_reindex_pcc
     ContinuousLinearMap.comp_apply, domDomCongrFib_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem reindexCoeffGen_map_sub (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 4 2) (ρ : Equiv.Perm (Fin 4)) :
@@ -579,8 +554,6 @@ theorem reindexCoeffGen_map_sub (g₀ : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private theorem kscr_jointTotalSpaceRS_sub {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -615,8 +588,6 @@ private theorem kscr_jointTotalSpaceRS_sub {r s : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private theorem kscr_jointTotalSpaceRS_add {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -650,8 +621,6 @@ private theorem kscr_jointTotalSpaceRS_add {r s : ℕ} {S : Set ℝ}
       (A p₀) (B p₀)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 private lemma kscr_phiMet_realizedFam_eq_lieSubLich
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -677,8 +646,6 @@ private lemma kscr_phiMet_realizedFam_eq_lieSubLich
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 theorem deTurckPhiMetTotal_jointSmooth_along_realizedFam
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -714,8 +681,378 @@ theorem deTurckPhiMetTotal_jointSmooth_along_realizedFam
     SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
-set_option maxHeartbeats 25600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private lemma kscr_path_ratio_le (t δ : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+    (hδ0 : 0 ≤ δ) (hδ_lt : δ < 1) :
+    t * δ / (1 - t * δ) ≤ t * (δ / (1 - δ)) := by
+  have h1δ : (0 : ℝ) < 1 - δ := sub_pos.mpr hδ_lt
+  have htδ_le : t * δ ≤ δ := by
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right ht1 hδ0
+  calc
+    t * δ / (1 - t * δ) ≤ t * δ / (1 - δ) :=
+      div_le_div_of_nonneg_left (mul_nonneg ht0 hδ0) h1δ (sub_le_sub_left htδ_le 1)
+    _ = t * (δ / (1 - δ)) := by ring
+
+set_option backward.isDefEq.respectTransparency false in
+private lemma kscr_path_cometric_difference_ratio_le (t δ : ℝ)
+    (ht1 : t ≤ 1) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3) :
+    (1 - t) * δ / ((1 - t * δ) * (1 - δ)) ≤
+      (3 / 2) * ((1 - t) * (δ / (1 - δ))) := by
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
+  have h1δ : (0 : ℝ) < 1 - δ := sub_pos.mpr hδ_lt
+  have htδ_le : t * δ ≤ δ := by
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right ht1 hδ0
+  have h1tδ : (0 : ℝ) < 1 - t * δ := sub_pos.mpr (lt_of_le_of_lt htδ_le hδ_lt)
+  have hden : (2 / 3 : ℝ) ≤ 1 - t * δ := by
+    linarith [le_trans htδ_le hδ_le]
+  have hinv : 1 / (1 - t * δ) ≤ (3 / 2 : ℝ) := by
+    rw [div_le_iff₀ h1tδ]
+    calc
+      (1 : ℝ) = (3 / 2) * (2 / 3) := by norm_num
+      _ ≤ (3 / 2) * (1 - t * δ) :=
+        mul_le_mul_of_nonneg_left hden (by norm_num)
+  have hA : 0 ≤ (1 - t) * (δ / (1 - δ)) :=
+    mul_nonneg (sub_nonneg.mpr ht1) (div_nonneg hδ0 (le_of_lt h1δ))
+  calc
+    (1 - t) * δ / ((1 - t * δ) * (1 - δ)) =
+        ((1 - t) * (δ / (1 - δ))) * (1 / (1 - t * δ)) := by
+          field_simp
+    _ ≤ ((1 - t) * (δ / (1 - δ))) * (3 / 2) :=
+      mul_le_mul_of_nonneg_left hinv hA
+    _ = (3 / 2) * ((1 - t) * (δ / (1 - δ))) := by ring
+
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem kscr_deTurckPhiTotPath_integrand_fibreSup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (hδ0 : 0 ≤ δ) (hδ_lt : δ < 1)
+    (h1δ : (0 : ℝ) < 1 - δ)
+    (hδT : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T₀) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (g₁ : SmoothRiemannianMetric I M)
+    (hg₁_def : g₁ = tensorSectionRealizeMetric (I := I) g₀ T₀
+      (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) hδT)
+    (C1 Δ1 : SmoothCcTensor g₀ 4 2)
+    (hC1_def : C1 = deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)
+    (hΔ1_def : Δ1 = deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)
+    (Φ : ℝ → SmoothCcTensor g₀ 4 2)
+    (hΦ_def : Φ = fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+      (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s))
+    (x : M) (Cx : Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+    (hCx_def : Cx = Tensor0SBundle.TensorRSSpace.toModel (C1.toSection x)
+      + Tensor0SBundle.TensorRSSpace.toModel (Δ1.toSection x))
+    (fC κ : ℝ) (hfC_nn : 0 ≤ fC)
+    (hκ_def : κ = δ / (1 - δ))
+    (htpn_val : ∀ W : SmoothCcTensor g₀ 4 2,
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+          (Tensor0SBundle.TensorRSSpace.toModel (W.toSection x)) =
+        Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (W.toSection x)))
+    (htpn_neg : ∀ m : Tensor0SBundle.TensorRSModel 4 2 ℝ E,
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x (-m) =
+        tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x m)
+    (hsqrt_n3 : ∀ r : ℝ, 0 ≤ r →
+      Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3 * r ^ 2) = fC * r)
+    (hIccS : Set.Icc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ)) :
+    ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+          (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx) ≤
+        fC * κ * (4 * t + (3 / 2) * (1 - t)) := by
+  intro t ht
+  have ht0 : (0 : ℝ) ≤ t := ht.1
+  have ht1 : t ≤ 1 := ht.2
+  set g_t : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ t with hg_t_def
+  set Δt : SmoothCcTensor g₀ 4 2 :=
+    deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g_t with hΔt_def
+  clear_value Δt
+  have htδ_nn : (0 : ℝ) ≤ t * δ := mul_nonneg ht0 hδ0
+  have htδ_le : t * δ ≤ δ := by
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right ht1 hδ0
+  have htδ_lt : t * δ < 1 := lt_of_le_of_lt htδ_le hδ_lt
+  have h1tδ : (0 : ℝ) < 1 - t * δ := sub_pos.mpr htδ_lt
+  have htie_t : ∀ (y : M) (v w : TangentSpace I y),
+      g_t.inner y v w = g₀.inner y v w +
+        ccTensorBilinSymm (I := I) g₀
+          (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+      hδT hδZ (hIccS ht) y v w
+  clear_value g_t
+  have hcp : convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t
+      = t • T₀ := by
+    rw [show convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t =
+        (1 - t) • (0 : SmoothCcTensor g₀ 0 2) + t • T₀ from rfl, smul_zero, zero_add]
+  have hbilin_cp : ∀ (y : M) (v w : TangentSpace I y),
+      ccTensorBilinSymm (I := I) g₀
+        (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w =
+        t * ccTensorBilinSymm (I := I) g₀ T₀ y v w := by
+    intro y v w
+    rw [hcp, ccTensorBilinSymm_smul]
+  have hδa : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀
+        (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t)) (t * δ) := by
+    intro y v w
+    rw [hbilin_cp y v w, abs_mul, abs_of_nonneg ht0]
+    have hbase := hδT y v w
+    have hs1 : (0 : ℝ) ≤ Real.sqrt (g₀.inner y v v) := Real.sqrt_nonneg _
+    have hs2 : (0 : ℝ) ≤ Real.sqrt (g₀.inner y w w) := Real.sqrt_nonneg _
+    calc t * |ccTensorBilinSymm (I := I) g₀ T₀ y v w|
+        ≤ t * (δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w)) :=
+          mul_le_mul_of_nonneg_left hbase ht0
+      _ = t * δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by ring
+  have hδab : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (fun y => ccTensorBilinSymm (I := I) g₀
+          (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y
+        - ccTensorBilinSymm (I := I) g₀ T₀ y) ((1 - t) * δ) := by
+    intro y v w
+    beta_reduce
+    have hval : (ccTensorBilinSymm (I := I) g₀
+        (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y
+        - ccTensorBilinSymm (I := I) g₀ T₀ y) v w =
+        ccTensorBilinSymm (I := I) g₀
+          (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w
+          - ccTensorBilinSymm (I := I) g₀ T₀ y v w := rfl
+    rw [hval, hbilin_cp y v w]
+    have hfact : t * (ccTensorBilinSymm (I := I) g₀ T₀ y v w)
+        - ccTensorBilinSymm (I := I) g₀ T₀ y v w =
+        (t - 1) * (ccTensorBilinSymm (I := I) g₀ T₀ y v w) := by ring
+    rw [hfact, abs_mul, abs_of_nonpos (sub_nonpos.mpr ht1)]
+    have hbase := hδT y v w
+    have habs_nn : (0 : ℝ) ≤ |ccTensorBilinSymm (I := I) g₀ T₀ y v w| := abs_nonneg _
+    calc -(t - 1) * |ccTensorBilinSymm (I := I) g₀ T₀ y v w|
+        = (1 - t) * |ccTensorBilinSymm (I := I) g₀ T₀ y v w| := by ring
+      _ ≤ (1 - t) * (δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w)) :=
+          mul_le_mul_of_nonneg_left hbase (sub_nonneg.mpr ht1)
+      _ = (1 - t) * δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by ring
+  have htie_1 : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₀ y v w := by
+    intro y v w
+    rw [hg₁_def]
+    exact tensorSectionRealizeMetric_inner (I := I) g₀ T₀
+      (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) hδT y v w
+  have hΔt_rfns : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 * (t * δ / (1 - t * δ)) ^ 2 := by
+    rw [hΔt_def]
+    exact riemannianFiberNormSq_deTurckPrincipalCometricCoeff_le (I := I) (M := M)
+      g₀ g_t _ htie_t htδ_lt htδ_nn hδa x
+  have hΔt_sqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      (Δt.toSection x)) ≤ fC * (t * δ / (1 - t * δ)) := by
+    refine le_trans (Real.sqrt_le_sqrt hΔt_rfns) ?_
+    rw [hsqrt_n3 _ (div_nonneg htδ_nn (le_of_lt h1tδ))]
+  have hdev_rfns : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      ((Δt - Δ1).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 *
+        ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) ^ 2 := by
+    rw [hΔt_def, hΔ1_def]
+    exact riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (I := I) (M := M) g₀ g_t g₁ _ _
+      htie_t htie_1 htδ_lt hδa hδ_lt hδ0 hδT
+      (mul_nonneg (sub_nonneg.mpr ht1) hδ0) hδab htδ_nn x
+  have hdev_sqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      ((Δt - Δ1).toSection x)) ≤
+      fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
+    refine le_trans (Real.sqrt_le_sqrt hdev_rfns) ?_
+    rw [hsqrt_n3 _ (div_nonneg (mul_nonneg (sub_nonneg.mpr ht1) hδ0)
+      (le_of_lt (mul_pos h1tδ h1δ)))]
+  have hdec_t := deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g_t
+  have hdec_0 := deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g₀
+  set ρA : Equiv.Perm (Fin 4) := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA
+    with hρA_def
+  set ρAT : Equiv.Perm (Fin 4) := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT
+    with hρAT_def
+  set A1 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
+    (reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt traceHessianSlotPerm) ρA with hA1_def
+  set A2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
+    (reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt traceHessianSlotPerm) ρAT with hA2_def
+  set R1 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt
+    koszulDoubleTraceSlotPerm with hR1_def
+  set R2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 4 2 (Equiv.swap (0 : Fin 2) 1) Δt)
+    koszulDoubleTraceSlotPerm with hR2_def
+  clear_value A1 A2 R1 R2
+  have hXX : (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
+        + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
+      - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
+        + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) = R1 + R2 - Δt := by
+    have h691 := kscr_ricciArmPrincipalCoeff_sub_add_self_eq_reindexSum
+      (I := I) (M := M) g₀ g_t
+    calc (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
+          + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
+        - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
+          + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)
+        = (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
+            - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)
+          + (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
+            - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) := by abel
+      _ = R1 + R2 - Δt := by rw [h691, hR1_def, hR2_def, hΔt_def]
+  have hΨ : Φ t - C1 - Δ1 = A1 + A2 - R1 - R2 + (Δt - Δ1) := by
+    have h327 := kscr_traceHessianCoeff_sub_eq_reindex_pcc (I := I) (M := M) g₀ g_t
+    calc Φ t - C1 - Δ1
+        = (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g_t) ρA
+            - reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₀) ρA)
+          + (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g_t) ρAT
+            - reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₀) ρAT)
+          - ((ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
+              + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
+            - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
+              + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
+          - Δ1 := by
+          rw [hΦ_def]
+          beta_reduce
+          rw [show deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+              (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ t) =
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g_t from by rw [hg_t_def]]
+          rw [hdec_t, hC1_def, hdec_0, hρA_def, hρAT_def]
+          abel
+      _ = (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+            (traceHessianCoeff (I := I) (M := M) g₀ g_t
+              - traceHessianCoeff (I := I) (M := M) g₀ g₀) ρA)
+          + (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+            (traceHessianCoeff (I := I) (M := M) g₀ g_t
+              - traceHessianCoeff (I := I) (M := M) g₀ g₀) ρAT)
+          - (R1 + R2 - Δt) - Δ1 := by
+          rw [reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρA,
+            reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρAT, hXX]
+      _ = A1 + A2 - R1 - R2 + (Δt - Δ1) := by
+          rw [h327, ← hΔt_def, hA1_def, hA2_def]
+          abel
+  have hΨsec : ((Φ t - C1 - Δ1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
+      A1.toSection x + A2.toSection x - R1.toSection x - R2.toSection x
+        + (Δt - Δ1).toSection x := by
+    rw [hΨ]
+    rw [show ((A1 + A2 - R1 - R2 + (Δt - Δ1)).toSection x :
+        Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        (A1 + A2 - R1 - R2).toSection x + (Δt - Δ1).toSection x from by
+      rw [SmoothCcTensor.toSection_add]; rfl]
+    rw [show ((A1 + A2 - R1 - R2).toSection x :
+        Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        (A1 + A2 - R1).toSection x - R2.toSection x from by
+      rw [SmoothCcTensor.toSection_sub]; rfl]
+    rw [show ((A1 + A2 - R1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        (A1 + A2).toSection x - R1.toSection x from by
+      rw [SmoothCcTensor.toSection_sub]; rfl]
+    rw [show ((A1 + A2).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        A1.toSection x + A2.toSection x from by
+      rw [SmoothCcTensor.toSection_add]; rfl]
+  have hΨmodel : Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx =
+      Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x) := by
+    rw [show ((Φ t - C1 - Δ1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        (Φ t - C1).toSection x - Δ1.toSection x from by
+      rw [SmoothCcTensor.toSection_sub]; rfl]
+    rw [show ((Φ t - C1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
+        (Φ t).toSection x - C1.toSection x from by
+      rw [SmoothCcTensor.toSection_sub]; rfl]
+    rw [Tensor0SBundle.TensorRSSpace.toModel_sub,
+      Tensor0SBundle.TensorRSSpace.toModel_sub, hCx_def]
+    abel
+  have hexA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (A1.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
+    rw [hA1_def]
+    rw [reindexCoeffGen_toSection]
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g₀ 4 2 x ρA _]
+    rw [reindexCoeffGen_toSection]
+    exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g₀ 4 2 x traceHessianSlotPerm _
+  have hexA2 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (A2.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
+    rw [hA2_def]
+    rw [reindexCoeffGen_toSection]
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g₀ 4 2 x ρAT _]
+    rw [reindexCoeffGen_toSection]
+    exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g₀ 4 2 x traceHessianSlotPerm _
+  have hexR1 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R1.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
+    rw [hR1_def, reindexCoeffGen_toSection]
+    exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g₀ 4 2 x koszulDoubleTraceSlotPerm _
+  have hexR2 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R2.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
+    have h20 := rfns_iteratedCovGrad_rsDomDomCongr_both_eq (I := I) (M := M) g₀ 4 2
+      koszulDoubleTraceSlotPerm (Equiv.swap (0 : Fin 2) 1) Δt 0 x
+    rw [hR2_def]
+    simpa [iteratedCovGrad_zero] using h20
+  have htpn_piece : ∀ (W : SmoothCcTensor g₀ 4 2),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (W.toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) →
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+          (Tensor0SBundle.TensorRSSpace.toModel (W.toSection x)) ≤
+        fC * (t * δ / (1 - t * δ)) := by
+    intro W hW
+    rw [htpn_val W, hW]
+    exact hΔt_sqrt
+  have htpn_sub_le : ∀ u v : Tensor0SBundle.TensorRSModel 4 2 ℝ E,
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x (u - v) ≤
+        tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x u
+          + tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x v := by
+    intro u v
+    rw [sub_eq_add_neg]
+    refine le_trans (tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x u (-v)) ?_
+    rw [htpn_neg v]
+  have htri : tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+      (Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x)) ≤
+      4 * (fC * (t * δ / (1 - t * δ)))
+        + fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
+    rw [hΨsec]
+    rw [Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_sub,
+      Tensor0SBundle.TensorRSSpace.toModel_sub, Tensor0SBundle.TensorRSSpace.toModel_add]
+    have t4 := tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x
+      (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
+        + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x)
+        - Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x)
+        - Tensor0SBundle.TensorRSSpace.toModel (R2.toSection x))
+      (Tensor0SBundle.TensorRSSpace.toModel ((Δt - Δ1).toSection x))
+    have t3 := htpn_sub_le
+      (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
+        + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x)
+        - Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x))
+      (Tensor0SBundle.TensorRSSpace.toModel (R2.toSection x))
+    have t2 := htpn_sub_le
+      (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
+        + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x))
+      (Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x))
+    have t1 := tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x
+      (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x))
+      (Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x))
+    have b1 := htpn_piece A1 hexA1
+    have b2 := htpn_piece A2 hexA2
+    have b3 := htpn_piece R1 hexR1
+    have b4 := htpn_piece R2 hexR2
+    have b5 : tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+        (Tensor0SBundle.TensorRSSpace.toModel ((Δt - Δ1).toSection x)) ≤
+        fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
+      rw [htpn_val (Δt - Δ1)]
+      exact hdev_sqrt
+    linarith [t1, t2, t3, t4, b1, b2, b3, b4, b5]
+  have hrate1 : t * δ / (1 - t * δ) ≤ t * κ := by
+    rw [hκ_def]
+    exact kscr_path_ratio_le t δ ht0 ht1 hδ0 hδ_lt
+  have hrate2 : (1 - t) * δ / ((1 - t * δ) * (1 - δ)) ≤ (3 / 2) * ((1 - t) * κ) := by
+    rw [hκ_def]
+    exact kscr_path_cometric_difference_ratio_le t δ ht1 hδ0 hδ_le
+  calc tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+        (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)
+      = tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+        (Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x)) := by
+        rw [hΨmodel]
+    _ ≤ 4 * (fC * (t * δ / (1 - t * δ)))
+        + fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := htri
+    _ ≤ 4 * (fC * (t * κ)) + fC * ((3 / 2) * ((1 - t) * κ)) := by
+        have e1 : fC * (t * δ / (1 - t * δ)) ≤ fC * (t * κ) :=
+          mul_le_mul_of_nonneg_left hrate1 hfC_nn
+        have e2 : fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) ≤
+            fC * ((3 / 2) * ((1 - t) * κ)) :=
+          mul_le_mul_of_nonneg_left hrate2 hfC_nn
+        exact add_le_add (mul_le_mul_of_nonneg_left e1 (by norm_num)) e2
+    _ = fC * κ * (4 * t + (3 / 2) * (1 - t)) := by ring
+
+
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoeff_fibreSup_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -761,7 +1098,14 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
     have hκ_nn : (0 : ℝ) ≤ δ / (1 - δ) := div_nonneg hδ0 (le_of_lt h1δ)
     refine ⟨(11 / 4 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)),
       mul_nonneg (mul_nonneg (by norm_num) hfC_nn) hκ_nn,
-      fun _ => by nlinarith [mul_nonneg hfC_nn hκ_nn], ?_⟩
+      fun _ => by
+        calc
+          (11 / 4 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) =
+              (11 / 4 : ℝ) * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by ring
+          _ ≤ 3 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) :=
+            mul_le_mul_of_nonneg_right (by norm_num) (mul_nonneg hfC_nn hκ_nn)
+          _ = 3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) := by ring,
+      ?_⟩
     intro T₀ hTsymm hball x
     set fC : ℝ := deTurckArmFibreConst (Module.finrank ℝ E) with hfC_def
     have hfC_sqrt : fC = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) := rfl
@@ -866,310 +1210,10 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
         Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3 * r ^ 2) = fC * r := by
       intro r hr
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hr, hfC_sqrt]
-    have hsup : ∀ t ∈ Set.Icc (0 : ℝ) 1,
-        tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-            (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx) ≤
-          fC * κ * (4 * t + (3 / 2) * (1 - t)) := by
-      intro t ht
-      have ht0 : (0 : ℝ) ≤ t := ht.1
-      have ht1 : t ≤ 1 := ht.2
-      set g_t : SmoothRiemannianMetric I M :=
-        realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ t with hg_t_def
-      set Δt : SmoothCcTensor g₀ 4 2 :=
-        deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g_t with hΔt_def
-      clear_value Δt
-      have htδ_nn : (0 : ℝ) ≤ t * δ := mul_nonneg ht0 hδ0
-      have htδ_le : t * δ ≤ δ := by nlinarith
-      have htδ_lt : t * δ < 1 := lt_of_le_of_lt htδ_le hδ_lt
-      have h1tδ : (0 : ℝ) < 1 - t * δ := by linarith
-      have htie_t : ∀ (y : M) (v w : TangentSpace I y),
-          g_t.inner y v w = g₀.inner y v w +
-            ccTensorBilinSymm (I := I) g₀
-              (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w :=
-        fun y v w => realizedFam_inner_of_mem (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
-          hδT hδZ (hIccS ht) y v w
-      clear_value g_t
-      have hcp : convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t
-          = t • T₀ := by
-        rw [show convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t =
-            (1 - t) • (0 : SmoothCcTensor g₀ 0 2) + t • T₀ from rfl, smul_zero, zero_add]
-      have hbilin_cp : ∀ (y : M) (v w : TangentSpace I y),
-          ccTensorBilinSymm (I := I) g₀
-            (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w =
-            t * ccTensorBilinSymm (I := I) g₀ T₀ y v w := by
-        intro y v w
-        rw [hcp, ccTensorBilinSymm_smul]
-      have hδa : metricCauchySchwarzBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀
-            (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t)) (t * δ) := by
-        intro y v w
-        rw [hbilin_cp y v w, abs_mul, abs_of_nonneg ht0]
-        have hbase := hδT y v w
-        have hs1 : (0 : ℝ) ≤ Real.sqrt (g₀.inner y v v) := Real.sqrt_nonneg _
-        have hs2 : (0 : ℝ) ≤ Real.sqrt (g₀.inner y w w) := Real.sqrt_nonneg _
-        calc t * |ccTensorBilinSymm (I := I) g₀ T₀ y v w|
-            ≤ t * (δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w)) :=
-              mul_le_mul_of_nonneg_left hbase ht0
-          _ = t * δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by ring
-      have hδab : metricCauchySchwarzBound (I := I) (M := M) g₀
-          (fun y => ccTensorBilinSymm (I := I) g₀
-              (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y
-            - ccTensorBilinSymm (I := I) g₀ T₀ y) ((1 - t) * δ) := by
-        intro y v w
-        beta_reduce
-        have hval : (ccTensorBilinSymm (I := I) g₀
-            (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y
-            - ccTensorBilinSymm (I := I) g₀ T₀ y) v w =
-            ccTensorBilinSymm (I := I) g₀
-              (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y v w
-              - ccTensorBilinSymm (I := I) g₀ T₀ y v w := rfl
-        rw [hval, hbilin_cp y v w]
-        have hfact : t * (ccTensorBilinSymm (I := I) g₀ T₀ y v w)
-            - ccTensorBilinSymm (I := I) g₀ T₀ y v w =
-            (t - 1) * (ccTensorBilinSymm (I := I) g₀ T₀ y v w) := by ring
-        rw [hfact, abs_mul, abs_of_nonpos (by linarith : t - 1 ≤ 0)]
-        have hbase := hδT y v w
-        have habs_nn : (0 : ℝ) ≤ |ccTensorBilinSymm (I := I) g₀ T₀ y v w| := abs_nonneg _
-        calc -(t - 1) * |ccTensorBilinSymm (I := I) g₀ T₀ y v w|
-            = (1 - t) * |ccTensorBilinSymm (I := I) g₀ T₀ y v w| := by ring
-          _ ≤ (1 - t) * (δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w)) :=
-              mul_le_mul_of_nonneg_left hbase (by linarith)
-          _ = (1 - t) * δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by ring
-      have htie_1 : ∀ (y : M) (v w : TangentSpace I y),
-          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₀ y v w := by
-        intro y v w
-        rw [hg₁_def]
-        exact tensorSectionRealizeMetric_inner (I := I) g₀ T₀
-          (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball) y v w
-      have hΔt_rfns : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) ≤
-          (Module.finrank ℝ E : ℝ) ^ 3 * (t * δ / (1 - t * δ)) ^ 2 := by
-        rw [hΔt_def]
-        exact riemannianFiberNormSq_deTurckPrincipalCometricCoeff_le (I := I) (M := M)
-          g₀ g_t _ htie_t htδ_lt htδ_nn hδa x
-      have hΔt_sqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-          (Δt.toSection x)) ≤ fC * (t * δ / (1 - t * δ)) := by
-        refine le_trans (Real.sqrt_le_sqrt hΔt_rfns) ?_
-        rw [hsqrt_n3 _ (div_nonneg htδ_nn (le_of_lt h1tδ))]
-      have hdev_rfns : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-          ((Δt - Δ1).toSection x) ≤
-          (Module.finrank ℝ E : ℝ) ^ 3 *
-            ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) ^ 2 := by
-        rw [hΔt_def, hΔ1_def]
-        exact riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (I := I) (M := M) g₀ g_t g₁ _ _
-          htie_t htie_1 htδ_lt hδa hδ_lt hδ0 hδT
-          (mul_nonneg (by linarith) hδ0) hδab htδ_nn x
-      have hdev_sqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-          ((Δt - Δ1).toSection x)) ≤
-          fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
-        refine le_trans (Real.sqrt_le_sqrt hdev_rfns) ?_
-        rw [hsqrt_n3 _ (div_nonneg (mul_nonneg (by linarith) hδ0)
-          (le_of_lt (mul_pos h1tδ h1δ)))]
-      have hdec_t := deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g_t
-      have hdec_0 := deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g₀
-      set ρA : Equiv.Perm (Fin 4) := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA
-        with hρA_def
-      set ρAT : Equiv.Perm (Fin 4) := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT
-        with hρAT_def
-      set A1 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
-        (reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt traceHessianSlotPerm) ρA with hA1_def
-      set A2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
-        (reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt traceHessianSlotPerm) ρAT with hA2_def
-      set R1 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt
-        koszulDoubleTraceSlotPerm with hR1_def
-      set R2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 2 (Equiv.swap (0 : Fin 2) 1) Δt)
-        koszulDoubleTraceSlotPerm with hR2_def
-      clear_value A1 A2 R1 R2
-      have hXX : (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
-            + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
-          - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
-            + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) = R1 + R2 - Δt := by
-        have h691 := kscr_ricciArmPrincipalCoeff_sub_add_self_eq_reindexSum
-          (I := I) (M := M) g₀ g_t
-        calc (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
-              + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
-            - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
-              + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)
-            = (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
-                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)
-              + (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
-                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) := by abel
-          _ = R1 + R2 - Δt := by rw [h691, hR1_def, hR2_def, hΔt_def]
-      have hΨ : Φ t - C1 - Δ1 = A1 + A2 - R1 - R2 + (Δt - Δ1) := by
-        have h327 := kscr_traceHessianCoeff_sub_eq_reindex_pcc (I := I) (M := M) g₀ g_t
-        calc Φ t - C1 - Δ1
-            = (reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                  (traceHessianCoeff (I := I) (M := M) g₀ g_t) ρA
-                - reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                  (traceHessianCoeff (I := I) (M := M) g₀ g₀) ρA)
-              + (reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                  (traceHessianCoeff (I := I) (M := M) g₀ g_t) ρAT
-                - reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                  (traceHessianCoeff (I := I) (M := M) g₀ g₀) ρAT)
-              - ((ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
-                  + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
-                - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀
-                  + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
-              - Δ1 := by
-              rw [hΦ_def]
-              beta_reduce
-              rw [show deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
-                  (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ t) =
-                  deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g_t from by rw [hg_t_def]]
-              rw [hdec_t, hC1_def, hdec_0, hρA_def, hρAT_def]
-              abel
-          _ = (reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                (traceHessianCoeff (I := I) (M := M) g₀ g_t
-                  - traceHessianCoeff (I := I) (M := M) g₀ g₀) ρA)
-              + (reindexCoeffGen (I := I) (M := M) g₀ 4 2
-                (traceHessianCoeff (I := I) (M := M) g₀ g_t
-                  - traceHessianCoeff (I := I) (M := M) g₀ g₀) ρAT)
-              - (R1 + R2 - Δt) - Δ1 := by
-              rw [reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρA,
-                reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρAT, hXX]
-          _ = A1 + A2 - R1 - R2 + (Δt - Δ1) := by
-              rw [h327, ← hΔt_def, hA1_def, hA2_def]
-              abel
-      have hΨsec : ((Φ t - C1 - Δ1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
-          A1.toSection x + A2.toSection x - R1.toSection x - R2.toSection x
-            + (Δt - Δ1).toSection x := by
-        rw [hΨ]
-        rw [show ((A1 + A2 - R1 - R2 + (Δt - Δ1)).toSection x :
-            Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            (A1 + A2 - R1 - R2).toSection x + (Δt - Δ1).toSection x from by
-          rw [SmoothCcTensor.toSection_add]; rfl]
-        rw [show ((A1 + A2 - R1 - R2).toSection x :
-            Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            (A1 + A2 - R1).toSection x - R2.toSection x from by
-          rw [SmoothCcTensor.toSection_sub]; rfl]
-        rw [show ((A1 + A2 - R1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            (A1 + A2).toSection x - R1.toSection x from by
-          rw [SmoothCcTensor.toSection_sub]; rfl]
-        rw [show ((A1 + A2).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            A1.toSection x + A2.toSection x from by
-          rw [SmoothCcTensor.toSection_add]; rfl]
-      have hΨmodel : Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx =
-          Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x) := by
-        rw [show ((Φ t - C1 - Δ1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            (Φ t - C1).toSection x - Δ1.toSection x from by
-          rw [SmoothCcTensor.toSection_sub]; rfl]
-        rw [show ((Φ t - C1).toSection x : Tensor0SBundle.TensorRSSpace 4 2 I x) =
-            (Φ t).toSection x - C1.toSection x from by
-          rw [SmoothCcTensor.toSection_sub]; rfl]
-        rw [Tensor0SBundle.TensorRSSpace.toModel_sub,
-          Tensor0SBundle.TensorRSSpace.toModel_sub, hCx_def]
-        abel
-      have hexA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (A1.toSection x) =
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
-        rw [hA1_def]
-        rw [reindexCoeffGen_toSection]
-        rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x ρA _]
-        rw [reindexCoeffGen_toSection]
-        exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x traceHessianSlotPerm _
-      have hexA2 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (A2.toSection x) =
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
-        rw [hA2_def]
-        rw [reindexCoeffGen_toSection]
-        rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x ρAT _]
-        rw [reindexCoeffGen_toSection]
-        exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x traceHessianSlotPerm _
-      have hexR1 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R1.toSection x) =
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
-        rw [hR1_def, reindexCoeffGen_toSection]
-        exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x koszulDoubleTraceSlotPerm _
-      have hexR2 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R2.toSection x) =
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
-        have h20 := rfns_iteratedCovGrad_rsDomDomCongr_both_eq (I := I) (M := M) g₀ 4 2
-          koszulDoubleTraceSlotPerm (Equiv.swap (0 : Fin 2) 1) Δt 0 x
-        rw [hR2_def]
-        simpa [iteratedCovGrad_zero] using h20
-      have htpn_piece : ∀ (W : SmoothCcTensor g₀ 4 2),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (W.toSection x) =
-            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) →
-          tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-              (Tensor0SBundle.TensorRSSpace.toModel (W.toSection x)) ≤
-            fC * (t * δ / (1 - t * δ)) := by
-        intro W hW
-        rw [htpn_val W, hW]
-        exact hΔt_sqrt
-      have htpn_sub_le : ∀ u v : Tensor0SBundle.TensorRSModel 4 2 ℝ E,
-          tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x (u - v) ≤
-            tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x u
-              + tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x v := by
-        intro u v
-        rw [sub_eq_add_neg]
-        refine le_trans (tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x u (-v)) ?_
-        rw [htpn_neg v]
-      have htri : tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-          (Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x)) ≤
-          4 * (fC * (t * δ / (1 - t * δ)))
-            + fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
-        rw [hΨsec]
-        rw [Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_sub,
-          Tensor0SBundle.TensorRSSpace.toModel_sub, Tensor0SBundle.TensorRSSpace.toModel_add]
-        have t4 := tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x
-          (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
-            + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x)
-            - Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x)
-            - Tensor0SBundle.TensorRSSpace.toModel (R2.toSection x))
-          (Tensor0SBundle.TensorRSSpace.toModel ((Δt - Δ1).toSection x))
-        have t3 := htpn_sub_le
-          (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
-            + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x)
-            - Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x))
-          (Tensor0SBundle.TensorRSSpace.toModel (R2.toSection x))
-        have t2 := htpn_sub_le
-          (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x)
-            + Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x))
-          (Tensor0SBundle.TensorRSSpace.toModel (R1.toSection x))
-        have t1 := tensorPointwiseNorm_add_le (I := I) (M := M) g₀ 4 2 x
-          (Tensor0SBundle.TensorRSSpace.toModel (A1.toSection x))
-          (Tensor0SBundle.TensorRSSpace.toModel (A2.toSection x))
-        have b1 := htpn_piece A1 hexA1
-        have b2 := htpn_piece A2 hexA2
-        have b3 := htpn_piece R1 hexR1
-        have b4 := htpn_piece R2 hexR2
-        have b5 : tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-            (Tensor0SBundle.TensorRSSpace.toModel ((Δt - Δ1).toSection x)) ≤
-            fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := by
-          rw [htpn_val (Δt - Δ1)]
-          exact hdev_sqrt
-        linarith [t1, t2, t3, t4, b1, b2, b3, b4, b5]
-      have hrate1 : t * δ / (1 - t * δ) ≤ t * κ := by
-        rw [hκ_def, div_le_iff₀ h1tδ]
-        have h1 : t * (δ / (1 - δ)) * (1 - t * δ) = (t * δ * (1 - t * δ)) / (1 - δ) := by
-          field_simp
-        rw [h1, le_div_iff₀ h1δ]
-        nlinarith [mul_nonneg (mul_nonneg (mul_nonneg ht0 hδ0) hδ0)
-          (by linarith : (0:ℝ) ≤ 1 - t)]
-      have hrate2 : (1 - t) * δ / ((1 - t * δ) * (1 - δ)) ≤ (3 / 2) * ((1 - t) * κ) := by
-        rw [hκ_def, div_le_iff₀ (mul_pos h1tδ h1δ)]
-        have h1 : (3 / 2 : ℝ) * ((1 - t) * (δ / (1 - δ))) * ((1 - t * δ) * (1 - δ)) =
-            (3 / 2) * ((1 - t) * δ) * (1 - t * δ) := by
-          field_simp
-        rw [h1]
-        have hkey : (0 : ℝ) ≤ 1 / 2 - (3 / 2) * (t * δ) := by nlinarith
-        nlinarith [mul_nonneg (mul_nonneg (by linarith : (0:ℝ) ≤ 1 - t) hδ0) hkey]
-      calc tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-            (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)
-          = tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-            (Tensor0SBundle.TensorRSSpace.toModel ((Φ t - C1 - Δ1).toSection x)) := by
-            rw [hΨmodel]
-        _ ≤ 4 * (fC * (t * δ / (1 - t * δ)))
-            + fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) := htri
-        _ ≤ 4 * (fC * (t * κ)) + fC * ((3 / 2) * ((1 - t) * κ)) := by
-            have e1 : fC * (t * δ / (1 - t * δ)) ≤ fC * (t * κ) :=
-              mul_le_mul_of_nonneg_left hrate1 hfC_nn
-            have e2 : fC * ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) ≤
-                fC * ((3 / 2) * ((1 - t) * κ)) :=
-              mul_le_mul_of_nonneg_left hrate2 hfC_nn
-            linarith
-        _ = fC * κ * (4 * t + (3 / 2) * (1 - t)) := by ring
+    have hsup :=
+      kscr_deTurckPhiTotPath_integrand_fibreSup_le (I := I) (M := M) g₀ g_bg T₀
+        hδ_le hδ0 hδ_lt h1δ hδT hδZ g₁ hg₁_def C1 Δ1 hC1_def hΔ1_def
+        Φ hΦ_def x Cx hCx_def fC κ hfC_nn hκ_def htpn_val htpn_neg hsqrt_n3 hIccS
     have hrfns_tpn : riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x
         ((P - C1 - Δ1).toSection x) =
         tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
@@ -1178,53 +1222,18 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
       unfold tensorPointwiseNorm
       rw [Real.sq_sqrt (tensorInnerPointwise_nonneg (I := I) (M := M) g₀ 4 2 x _)]
     rw [hrfns_tpn, hDmodel]
-    have hcont_shift : ContinuousOn (fun t : ℝ =>
-        Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)
-        (Set.Icc (0 : ℝ) 1) := hcontIcc.sub continuousOn_const
-    have hint_le := tensorPointwiseNorm_intervalIntegral_le (I := I) (M := M) g₀ 4 2 x
-      (fun t => Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx) hcont_shift
-    have hint1 : IntervalIntegrable (fun t : ℝ =>
-        tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-          (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx))
-        MeasureTheory.volume 0 1 :=
-      ((tensorPointwiseNorm_continuous (I := I) (M := M) g₀ 4 2 x).comp_continuousOn
-        hcont_shift).intervalIntegrable_of_Icc (by norm_num)
-    have hint2 : IntervalIntegrable (fun t : ℝ => fC * κ * (4 * t + (3 / 2) * (1 - t)))
-        MeasureTheory.volume 0 1 := by
-      apply Continuous.intervalIntegrable
-      continuity
-    have hmono : (∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-        (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)) ≤
-        ∫ t in (0 : ℝ)..1, fC * κ * (4 * t + (3 / 2) * (1 - t)) :=
-      intervalIntegral.integral_mono_on (by norm_num) hint1 hint2 hsup
-    have hwval : (∫ t in (0 : ℝ)..1, fC * κ * (4 * t + (3 / 2) * (1 - t))) =
-        (11 / 4) * fC * κ := by
-      rw [intervalIntegral.integral_const_mul]
-      rw [show (fun t : ℝ => 4 * t + (3 / 2) * (1 - t)) =
-          fun t : ℝ => (5 / 2) * t + 3 / 2 from funext fun t => by ring]
-      rw [intervalIntegral.integral_add ((intervalIntegral.intervalIntegrable_id).const_mul _)
-        intervalIntegrable_const]
-      rw [intervalIntegral.integral_const_mul, integral_id, intervalIntegral.integral_const]
-      norm_num
-      ring
-    have htpn_nn : (0 : ℝ) ≤ tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-        (∫ t in (0 : ℝ)..1,
-          (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)) :=
-      tensorPointwiseNorm_nonneg (I := I) (M := M) g₀ 4 2 x _
-    have hfinal : tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
-        (∫ t in (0 : ℝ)..1,
-          (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)) ≤
-        (11 / 4) * fC * κ := by
-      refine le_trans hint_le ?_
-      rw [← hwval]
-      exact hmono
-    calc tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
+    calc
+      tensorPointwiseNorm (I := I) (M := M) g₀ 4 2 x
           (∫ t in (0 : ℝ)..1,
             (Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)) ^ 2
-        ≤ ((11 / 4) * fC * κ) ^ 2 := by
-          exact pow_le_pow_left₀ htpn_nn hfinal 2
-      _ = ((11 / 4 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) ^ 2 := by
-          rw [hfC_def, hκ_def]
+        ≤ ((fC * κ) * (((4 : ℝ) + 3 / 2) / 2)) ^ 2 :=
+          tensorPointwiseNorm_intervalIntegral_sq_le_of_affine_bound
+            (I := I) (M := M) g₀ 4 2 x
+            (fun t => Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x) - Cx)
+            (fC * κ) 4 (3 / 2) (hcontIcc.sub continuousOn_const) hsup
+      _ = ((11 / 4 : ℝ) * fC * κ) ^ 2 := by ring
+      _ = ((11 / 4 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) *
+            (δ / (1 - δ))) ^ 2 := by rw [hfC_def, hκ_def]
 
 end
 
