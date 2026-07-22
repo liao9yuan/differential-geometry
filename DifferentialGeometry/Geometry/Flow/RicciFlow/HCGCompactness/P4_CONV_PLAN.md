@@ -40,7 +40,47 @@ the flows with metrics `Φ_k^* g_k(t)` near any compact of `M_∞ = mc.limit.M`;
 subsequence converging C^∞-window-uniformly to a limit family `g_∞(t)`; `g_∞` is the metric
 of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 
-## Current status (2026-07-19)
+## Current status (2026-07-22)
+
+The P4 analytic ruling has been corrected after a theorem-shape review.  The
+solution curvature tower must be produced directly as a costed
+`TowerHeatBoundOn`: the old fixed-`card^2`, per-`j` `IteratedRmTowerOn.starBound`
+is not implied by the concrete `StarSum2Cost` factorization.  The next genuine
+theorem is therefore arbitrary-dimensional `residualStarCosted`, followed by
+direct `towerHeatSol` and migration of `towerHeatSol_any` to the explicit
+`rmTowerCost d k`.  The sorry-backed `exists_rmTowerSol` is legacy and must
+leave the trusted route.
+
+The live dependency audit refines the first brick.  Arbitrary-dimensional
+`realizedRmBase_timeDeriv` already differentiates the lowered curvature through
+the `Rm13` variation, and `tailTowerData` supplies positive-tail time/swap
+regularity.  However `iteratedRmComp_hasDerivWithinAt` still consumes that base
+derivative conditionally.  The first missing proof is the level-zero identity
+turning the expanded `nabla^2 Ric` RHS into `roughLap Rm04` plus a costed
+quadratic `StarSum2` residual; only then can the explicit cost recursion be
+lifted to all orders.
+
+The bookkeeping part of that brick is now checked.  `rmResidualCost`,
+`rmTowerCost`, their nonnegativity API, `TowerHeatBoundOn.mono_cost`,
+`e0Field_cost_any`, and `e0Field_comp_any` are focused-green, and
+`rmBaseReact` records the exact eight-term level-zero reaction expression.  The
+remaining content is not another cost estimate: it is the
+arbitrary-dimensional Hamilton identity
+`partial_t Rm04 = roughLap Rm04 + rmBaseReact`.  The generic Uhlenbeck theorem
+still takes this pre-Uhlenbeck evolution as an input, while `rm04Base_of_sol`
+proves only the dimension-three route.  See
+[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) for the exact API consultation.  The
+current `Fin 3` successor recursion should be generalized only after this base
+identity is settled.
+
+The complete-noncompact Bernstein signature is also corrected.  Anchor
+completeness, metric equivalence, and a Ricci lower bound do not by themselves
+produce a parabolic cutoff or an unrestricted scalar maximum principle.  The
+internal route now requires an explicit quantitative cutoff/exhaustion package
+and the actual curvature-tower Kato estimate; both are solution-specific
+producers, not new HCG assumptions.  The conditional abstract theorem is
+`estimate_complete_of_cutoff`; the no-extra-input theorem is proved only in the
+Ricci-flow solution layer.
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -106,10 +146,11 @@ do not uniformize memberwise existentials.
 `CurvBoundInput.movingShi_open` are now focused- and exact-green.  The
 chart-local curvature/tower/norm regularity chain was weakened honestly to the
 complete-noncompact setting, and the anchor-norm statement mismatch was
-repaired.  Their trusted lower work remains split visibly between the explicit
-`exists_rmTowerSol` commuted-curvature frontier and the explicit
-`BernsteinTower.estimate_complete` complete-noncompact maximum-principle
-frontier.
+repaired.  Their trusted lower work remains split visibly between two corrected
+theorem frontiers: arbitrary-dimensional costed residual/direct tower heat, and
+the solution-specific cutoff/Kato localized Bernstein estimate.  Both theorem
+frontiers are 0%; their dedicated machinery is about 60-65% and 30-35%,
+respectively.  Green wrappers are not counted as analytic completion.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` is focused-green and records constants before `k`; its producer

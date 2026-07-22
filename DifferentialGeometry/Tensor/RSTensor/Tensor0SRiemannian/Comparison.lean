@@ -234,6 +234,33 @@ theorem normSq0S_identity_eq_sum_sq
   intro slots _
   rfl
 
+/-- In an orthonormal basis, the squared norm of a rank-`s + 1` covariant
+tensor is the sum of the squared norms of its first-slot curries. -/
+theorem normSq0S_curry_sum
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis_gen (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace (s + 1) I x) :
+    (∑ i : Idx,
+        normSq0S (I := I) g x s
+          (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x A (basis i))) =
+      normSq0S (I := I) g x (s + 1) A := by
+  classical
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x (s + 1) basis hinv A]
+  rw [sum_fin_succ_fun s]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
+  apply Finset.sum_congr rfl
+  intro tail _
+  congr 1
+  rw [component0S_apply, component0S_apply,
+    tensor0S_curry_apply_cons (I := I)]
+  congr 1
+  funext a
+  exact Fin.cases rfl (fun _ => rfl) a
+
 /-- If every component of a covariant tensor in an orthonormal basis is bounded
 by `B`, then its squared fibre norm is bounded by the number of components
 times `B ^ 2`. -/

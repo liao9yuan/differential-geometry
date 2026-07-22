@@ -462,6 +462,37 @@ def normSq0S
     normSq0S (I := I) g x s A = inner0S (I := I) g x s A A := by
   rfl
 
+/-- Cauchy--Schwarz for the metric-induced inner product on covariant tensor
+fibres. -/
+theorem inner0S_sq_le_mul
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (A B : Tensor0SSpace s I x) :
+    (inner0S (I := I) g x s A B) ^ 2 <=
+      normSq0S (I := I) g x s A * normSq0S (I := I) g x s B := by
+  let D := tensor0SMetricData (I := I) g x s
+  letI : PreInnerProductSpace.Core Real (Tensor0SSpace s I x) :=
+    D.toCore.toCore
+  letI : Inner Real (Tensor0SSpace s I x) :=
+    D.toCore.toCore.toInner
+  have hcs :=
+    InnerProductSpace.Core.inner_mul_inner_self_le
+      (𝕜 := Real) (F := Tensor0SSpace s I x) A B
+  have hAB :
+      Inner.inner Real A B = inner0S (I := I) g x s A B := by
+    rfl
+  have hBA :
+      Inner.inner Real B A = inner0S (I := I) g x s A B := by
+    change D.inner B A = D.inner A B
+    exact D.inner_comm B A
+  have hAA :
+      Inner.inner Real A A = normSq0S (I := I) g x s A := by
+    rfl
+  have hBB :
+      Inner.inner Real B B = normSq0S (I := I) g x s B := by
+    rfl
+  rw [hAB, hBA, hAA, hBB] at hcs
+  simpa [Real.norm_eq_abs, pow_two] using hcs
+
 /-- The metric-induced squared norm of a covariant tensor is nonnegative. -/
 theorem normSq0S_nonneg
     (g : SmoothMetric I M) (x : M) (s : Nat)

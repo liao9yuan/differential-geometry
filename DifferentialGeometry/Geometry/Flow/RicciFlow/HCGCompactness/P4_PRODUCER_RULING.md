@@ -2,11 +2,14 @@
 
 ## Scope and baseline
 
-Treat commit `b63efe882031def127790cdac3b6adef72ff6e34` as the source
-baseline and the focused-green post-baseline theorem `open_upgrade_of_raw` as
-the consumer endpoint.  This document governs only the remaining producers of
-that theorem.  It does not change the public statement of Theorem 3.9 or add a
-new hypothesis to `compactnessSol`.
+This ruling was re-audited against the aligned short-time-existence branch on
+2026-07-22.  It supersedes the earlier ruling that treated
+`IteratedRmTowerOn` and the weakly-hypothesized
+`BernsteinTower.estimate_complete` as the two canonical solution producers.
+The focused-green theorem `open_upgrade_of_raw` remains the consumer endpoint.
+This document governs only the remaining producers of that theorem.  It does
+not change the public statement of Theorem 3.9 or add a new hypothesis to
+`compactnessSol`.
 
 The producer architecture has two independent lanes that meet only near
 `ConvFieldOpenAssembly`:
@@ -24,14 +27,60 @@ whole-source bump-collar covariant estimate.
 
 ### Arbitrary-dimensional curvature tower
 
-The canonical owner is a new
-`Evolution/IteratedRmTowerSolution.lean`.  It must complete the existing
-variable-rank `IteratedRmTowerOn` route rather than modify the `Fin 3` residual
-files.  The missing mathematical content is the solution-specific construction
-of `IteratedRmTowerOn`: the all-order commuted-curvature identity split into
-genuine `nabla^j Rm * nabla^(k-j) Rm` factors.  The existing generic consumer
-already supplies the orthonormal contraction estimate and the constant
-`2 * card Idx ^ (6 + k)`.
+The canonical route directly produces `TowerHeatBoundOn` from one costed whole
+residual.  The fixed-`card^2`, per-`j` contract in `IteratedRmTowerOn.starBound`
+is stronger than, and not derived by, the existing `StarSum2Cost` constructor
+tree.  `IteratedRmTowerOn` and `iteratedRmTower_heatBound` remain valid generic
+consumer APIs, but `exists_rmTowerSol` must not remain on the trusted solution
+route.
+
+The explicit structural costs `rmResidualCost d k` and `rmTowerCost d k`,
+their nonnegativity theorems, and `TowerHeatBoundOn.mono_cost` are implemented
+and focused-green.  The level-zero field has also been separated from the
+three-dimensional curvature identity: `e0Field_cost_any` proves its exact
+arbitrary-index cost, `rmBaseReact` names the eight-term quadratic expression,
+and `e0Field_comp_any` proves its component realization.
+
+The first genuine theorem frontier is now `residualStarCosted`.  It must
+simultaneously provide:
+
+1. one `(4 + k)`-covariant tensor field `T` with
+   `StarSum2Cost (Fin d) S t k T (rmResidualCost d k)`; and
+2. the exact component time-derivative identity
+   `partial_t (nabla^k Rm) = roughLap (nabla^k Rm) + T` in every orthonormal
+   basis at the point.
+
+Live dependency audit adds one important qualification.  The generic theorem
+`iteratedRmComp_hasDerivWithinAt` is conditional on the level-zero `partial_t
+Rm04` input.  The tree does contain the arbitrary-dimensional variation and
+lowering chain through `rm13Deriv_of_solution` and
+`realizedRmBase_timeDeriv`, plus the positive-tail time/swap regularity in
+`tailTowerData`.  What is not yet proved is the level-zero conversion of that
+expanded `nabla^2 Ric` derivative into `roughLap Rm04 + rmBaseReact`.  The
+costed star realization of `rmBaseReact` is checked; the missing content is the
+actual arbitrary-dimensional Hamilton curvature identity.  The generic
+Uhlenbeck theorem still consumes this pre-Uhlenbeck evolution as an input, and
+the existing solution producer `rm04Base_of_sol` is dimension three.  This is
+therefore the first proof brick inside `residualStarCosted`; the all-order
+derivative theorem cannot be cited as if it already supplied it.  The exact
+consultation target is recorded in [`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md).
+
+The cost must be the explicit recursion followed by the concrete residual
+construction, not `Classical.choose` over an existence statement.  Define the
+final direct reaction cost by
+
+```lean
+noncomputable def rmTowerCost (d k : Nat) : Real :=
+  2 * Real.sqrt (Fintype.card (Fin (4 + k) -> Fin d) : Real) *
+    (((4 + k : Nat) : Real) * (d : Real) ^ 2 + rmResidualCost d k)
+```
+
+Then assemble `towerHeatSol` pointwise using `nablaKNormHeatAt`,
+`StarSum2Cost.bound`, and `nablaKReactionAt_le`.  This requires neither a
+global frame nor a per-`j` residual field.  Also provide
+`TowerHeatBoundOn.mono_cost`; any recovery of the old literal
+`2 * d ^ (6 + k)` coefficient requires a separate proved domination lemma and
+must not be assumed.
 
 The first public capstone is:
 
@@ -48,19 +97,32 @@ theorem towerHeatSol_any
     TowerHeatBoundOn (D := D')
       (nablaKRm04NormSqIntrinsic (I := I) S')
       (nablaKNormLap (I := I) S')
-      (2 * (Module.finrank Real E : Real) ^ (6 + k)) k
+      (rmTowerCost (Module.finrank Real E) k) k
 ```
 
-It must not require `CompactSpace` or `Module.finrank Real E = 3`.
+It must not require `CompactSpace` or `Module.finrank Real E = 3`.  Its body
+must use the direct solution producer above after time restriction.  Once no
+call sites remain, delete or explicitly deprecate the sorry-backed
+`exists_rmTowerSol` rather than preserving it as an apparent trusted theorem.
 
 ### Complete-noncompact Bernstein theorem
 
-The owner is a new `Evolution/BernsteinComplete.lean`.  The low-level public
-consumer is `BernsteinTower.estimate_complete`.  It uses one fixed complete
-anchor metric, slabwise metric equivalence and Ricci lower control, spatial
-cutoffs or an exhaustion, and the existing truncated-tower induction.  It does
-not consume injectivity radius, noncollapse, connectedness, or completeness at
-every time.
+The existing abstract signature of `BernsteinTower.estimate_complete` is not a
+valid theorem.  Anchor completeness, slabwise metric equivalence, and a Ricci
+lower bound do not control the connection or time derivative of cutoffs, and
+completeness alone does not give an unrestricted scalar parabolic maximum
+principle.  Moreover `BernsteinTower` does not record the first-order Kato
+estimate needed to absorb cutoff-gradient terms.
+
+Keep the closed theorem `BernsteinTower.estimate` abstract.  The conditional
+noncompact theorem must instead be named `estimate_complete_of_cutoff` and take
+explicit quantitative parabolic cutoff/exhaustion data together with the Kato
+input actually used by the localized induction.  The cutoff package must
+record compact support, exhaustion, range, gradient control, parabolic-operator
+control, and the regularity required by product rules.  The public no-extra-
+input theorem belongs in the solution-specific Ricci-flow layer, where that
+package and the curvature-tower Kato estimate are proved from one solution and
+its curvature bound.  Do not add either datum as an HCG theorem hypothesis.
 
 ### Single-flow and sequence Shi theorems
 
@@ -224,34 +286,49 @@ exact canonical `hcp` shape.  There is no corresponding theorem for arbitrary
 
 The analytic and provenance lanes run in parallel:
 
-1. build the arbitrary-dimensional solution tower;
-2. prove `BernsteinTower.estimate_complete`;
-3. expose `movingShi_complete` and `CurvBoundInput.movingShi_open`;
-4. build `StepDCanonData`, `compactness_canon`, and `metricCanon`;
-5. prove `srcCovLip_of_soln`;
-6. consume grow-local `covTail_of_bounds` and the existing Lipschitz adapters;
+1. add the direct cost API and prove the arbitrary-dimensional
+   `residualStarCosted` theorem;
+2. assemble direct `towerHeatSol`, migrate `towerHeatSol_any` and the HCG level
+   cost, then remove `exists_rmTowerSol` from the trusted route;
+3. define the internal parabolic cutoff/exhaustion package and prove the
+   solution-specific cutoff and Kato producers;
+4. prove `estimate_complete_of_cutoff`, then the solution-specific complete
+   Bernstein theorem and revalidate `movingShi_complete` /
+   `CurvBoundInput.movingShi_open`;
+5. keep the already-complete `StepDCanonData`, `compactness_canon`, and
+   `metricCanon` provenance lane unchanged;
+6. prove `srcCovLip_of_soln` and consume the existing grow-local
+   `covTail_of_bounds` / Lipschitz adapters;
 7. keep `canon`, `mc`, `Phi`, `bf`, `srcData`, and `raw` explicit in the
    eventual `compactnessSol` proof before calling `open_upgrade_of_raw`.
 
-## Live implementation status (2026-07-18)
+## Live implementation status (2026-07-22)
 
 - `open_upgrade_of_raw`: theorem 100%; dedicated consumer machinery 100%.
 - grow-local covariant-tail migration: 100%.  The ten-module chain is
   focused-green and exact-refreshed; `hchi` and the whole-source bump-collar
   estimate have been removed from the API and every caller.
-- `towerHeatSol_any`: public assembly stated and focused-green, but theorem
-  completion remains 0% because `exists_rmTowerSol` contains the one genuine
-  commuted-curvature factorization `sorry`; dedicated arbitrary-dimensional
-  solution-tower machinery is about 70%.
-- `BernsteinTower.estimate_complete`: interface stated and focused-green;
-  theorem completion remains 0% at its single complete-noncompact scalar
-  maximum-principle/cutoff `sorry`; dedicated machinery is about 10%.
+- arbitrary-dimensional direct `residualStarCosted` / `towerHeatSol`: theorem
+  completion 0%.  The explicit costs, their monotonicity/nonnegativity API, and
+  the arbitrary-index level-zero cost/component realization are focused-green.
+  The conditional all-order component derivative, generic variation/lowering
+  chain, positive-tail swap regularity, quantitative star algebra, reaction
+  contraction, and direct scalar heat assembly also exist.  The missing
+  arbitrary-dimensional Hamilton level-zero identity
+  `partial_t Rm04 = roughLap Rm04 + rmBaseReact` is substantive; dedicated
+  machinery is about 60-65%.  The live `Fin 3` direct theorem is not the
+  arbitrary-dimensional producer.
+- complete-noncompact Bernstein, corrected architecture: theorem completion
+  0%.  The closed induction/algebra is reusable, but cutoff production,
+  barrier/localization, Kato absorption, and the exhaustion limit are missing;
+  dedicated machinery is about 30-35%.  The current weak-signature
+  `estimate_complete` is not counted as a valid theorem frontier.
 - `movingShi_complete` and `CurvBoundInput.movingShi_open`: the wrappers and a
   full source proof of `movingShi_of_bound` are assembled with one explicit
   constant chosen before the sequence member.  The HCG-facing assembly is now
   focused- and exact-green, including the noncompact tower-norm regularity and
-  anchor-norm repairs.  Its trusted analytic foundation still depends on the explicit lower-level
-  frontiers in `exists_rmTowerSol` and `BernsteinTower.estimate_complete`.
+  anchor-norm repairs.  These remain wrappers only: their trusted analytic
+  foundation is 0% until both corrected producer chains above are closed.
 - `StepDCanonData` / `compactness_canon`: 100% checked.  The sidecar,
   subsequence transport, public projection, whole-source canonical bounds, and
   flow-side `canon_cp` / `canon_rel` / `canon_init` adapters are focused- and

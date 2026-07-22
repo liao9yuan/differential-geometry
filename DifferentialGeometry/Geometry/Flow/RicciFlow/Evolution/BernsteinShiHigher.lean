@@ -484,6 +484,33 @@ def TowerHeatBoundOn
       d ≤ wLap k (t : Real) x +
         (-2 * w (k + 1) (t : Real) x + towerReactionSum (M := M) w c k (t : Real) x)
 
+/-- The schematic reaction sum is monotone in its coefficient. -/
+theorem towerReactionSum_mono
+    {w : ℕ -> Real -> M -> Real} {c₀ c₁ : Real} {k : ℕ} {t : Real} {x : M}
+    (hc : c₀ ≤ c₁) :
+    towerReactionSum (M := M) w c₀ k t x ≤
+      towerReactionSum (M := M) w c₁ k t x := by
+  unfold towerReactionSum
+  refine Finset.sum_le_sum fun j _ => ?_
+  exact mul_le_mul_of_nonneg_right
+    (mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right hc (Real.sqrt_nonneg _))
+      (Real.sqrt_nonneg _))
+    (Real.sqrt_nonneg _)
+
+/-- A tower heat bound remains valid after increasing the reaction cost. -/
+theorem TowerHeatBoundOn.mono_cost
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {w wLap : ℕ -> Real -> M -> Real} {c₀ c₁ : Real} {k : ℕ}
+    (hc : c₀ ≤ c₁) (h : TowerHeatBoundOn (D := D) w wLap c₀ k) :
+    TowerHeatBoundOn (D := D) w wLap c₁ k := by
+  intro t x
+  obtain ⟨d, hd, hle⟩ := h t x
+  refine ⟨d, hd, hle.trans ?_⟩
+  apply add_le_add_right
+  apply add_le_add_right
+  exact towerReactionSum_mono (M := M) hc
+
 /-- A uniform Bernstein–Bando–Shi derivative tower over the slab `[0,T]`.
 This bundles the level fields `w k = |∇ᵏRm|²`, their realized
 Laplacian fields `wLap k`, the schematic heat inequalities (eq 7.4), the

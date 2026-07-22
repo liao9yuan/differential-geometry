@@ -196,6 +196,36 @@ noncomputable def nablaKNormDu
   duSec (I := I) (nablaKRm04NormSqIntrinsic (I := I) S k t)
     (nablaKNorm_smooth (I := I) S t k)
 
+/-- The differential of `|∇^k Rm|²` satisfies the curvature-tower Kato bound
+`|d|∇^k Rm|²|² ≤ 4 |∇^k Rm|² |∇^(k+1) Rm|²`. -/
+theorem towerNorm_grad_le
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : Nat) (t : Real) (x : M) :
+    (S.base.metric t).inner x
+        (gradientFun (I := I) (S.base.metric t)
+          (nablaKRm04NormSqIntrinsic (I := I) S k t) x)
+        (gradientFun (I := I) (S.base.metric t)
+          (nablaKRm04NormSqIntrinsic (I := I) S k t) x) <=
+      4 * nablaKRm04NormSqIntrinsic (I := I) S k t x *
+        nablaKRm04NormSqIntrinsic (I := I) S (k + 1) t x := by
+  have hf := nablaKNorm_smooth (I := I) S t k
+  have hdu : DuFieldRealizes (I := I)
+      (nablaKRm04NormSqIntrinsic (I := I) S k t)
+      (nablaKNormDu (I := I) S t k) := by
+    simpa [nablaKNormDu] using
+      (duSec_realizes (I := I)
+        (nablaKRm04NormSqIntrinsic (I := I) S k t) hf)
+  have hK := normSq0S_du_le (I := I)
+    (cov := S.family.connection t) (g := S.base.metric t)
+    (solution_isMetricCompatible (I := I) S t)
+    (T := nablaKRm04Field (I := I) S t k)
+    (nablaT := nablaKRm04Field (I := I) S t (k + 1))
+    (nablaKRm04Field_realizes (I := I) S t k)
+    (du := nablaKNormDu (I := I) S t k) hdu x
+  simpa [nablaKNormDu, nablaKRm04NormSqIntrinsic, duSec_apply,
+    normSq0S_eq_inner, Nat.add_assoc,
+    inner0S_differential1FormFun_pair_eq_grad_inner] using hK
+
 /-- Canonical Hessian of the fixed-time scalar field `|∇ᵏRm|²`. -/
 noncomputable def nablaKNormHess
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

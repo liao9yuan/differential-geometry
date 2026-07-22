@@ -7,13 +7,14 @@ set_option autoImplicit false
 /-!
 # Complete noncompact Bernstein estimates
 
-This file is the noncompact maximum-principle consumer for the abstract
-Bernstein curvature tower.  The active Riemannian metric is the fixed complete
-anchor metric.  The evolving metrics are uniformly equivalent to that anchor
-on the slab and have a uniform Ricci lower bound.
+This file owns the noncompact localization interfaces for the Bernstein
+curvature tower.  A valid complete-manifold proof must consume quantitative
+parabolic cutoffs and the curvature-tower Kato estimate before discarding the
+negative next-level terms.
 
-The remaining proof is the cutoff/exhaustion maximum principle.  It is kept at
-this analytic layer rather than being turned into a compactness-side input.
+The legacy `estimate_complete` statement below predates that audit and has
+insufficient hypotheses.  It remains temporarily for its current caller, but
+must not be treated as the canonical target.
 -/
 
 noncomputable section
@@ -33,17 +34,29 @@ variable [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M
 variable [I.Boundaryless]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 
+/-- Pointwise Kato control for the gradients of a Bernstein tower.  For the
+curvature tower this is supplied by `towerNorm_grad_le`; it is generated from
+the solution and is not an HCG input. -/
+def TowerNormGradOn
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G) : Prop :=
+  ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 B.T → 0 < t → ∀ x : M,
+    (G.metric t).inner x
+        (gradientFun (I := I) (G.metric t) (B.w k t) x)
+        (gradientFun (I := I) (G.metric t) (B.w k t) x) ≤
+      4 * B.w k t x * B.w (k + 1) t x
+
 namespace BernsteinTower
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Bernstein's tower estimate on a complete, possibly noncompact manifold.
-
-The active `IsRiemannianManifold` structure is the fixed complete anchor.  The
-two displayed geometric hypotheses are exactly what the cutoff argument uses:
-uniform equivalence of the evolving metrics to the anchor, and a slabwise
-Ricci lower bound.  No injectivity-radius or compactness hypothesis occurs.
--/
+/-- **Legacy unsupported frontier.**  This statement is too weak for a
+complete-noncompact Bernstein argument: metric equivalence and a Ricci lower
+bound do not produce quantitative evolving-metric cutoffs, and the abstract
+tower does not expose the Kato estimate needed to absorb cutoff-gradient
+terms.  Replace its caller by a localized theorem consuming generated cutoff
+data and `TowerNormGradOn`; do not fill this proof under the present
+interface. -/
 theorem estimate_complete
     [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
