@@ -79,12 +79,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieArm2Princ
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen reindexCoeffFibGen reindexCoeffFibGen_apply reindexCoeffGen_toSection deTurckLieTraceCoeff deTurckLieTraceCoeff_toSection deTurckLieTraceFib traceHessianFib domDomCongrFibPerm_apply domDomCongrFib_apply traceHessianSlotPerm deTurckLieArm2DivSlotPermA deTurckLieArm2DivSlotPermAT traceHessianCoeff_toSection)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem)
 
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma b1_rfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
@@ -95,8 +91,6 @@ private lemma b1_rfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [h]
   norm_num
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma b1_sqrt_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -108,8 +102,6 @@ private lemma b1_sqrt_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   rw [b1_rfns_neg (I := I) (M := M) g r s x b]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma k1_unitModel_add (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) (x : M) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g s
@@ -123,8 +115,6 @@ private lemma k1_unitModel_add (g : SmoothRiemannianMetric I M) (s : ℕ)
     ContinuousLinearMap.add_apply, Tensor0SBundle.Tensor0SSpace.toModel_add]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma k1_unitModel_smul (g : SmoothRiemannianMetric I M) (s : ℕ)
     (c : ℝ) (A : SmoothCcTensor g 0 s) (x : M) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g s
@@ -136,8 +126,6 @@ private lemma k1_unitModel_smul (g : SmoothRiemannianMetric I M) (s : ℕ)
     ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma k1_domDomCongr_add {d : ℕ} (σ : Equiv.Perm (Fin d))
     (f g : ContinuousMultilinearMap ℝ (fun _ : Fin d => E) ℝ) :
     ContinuousMultilinearMap.domDomCongr σ (f + g) =
@@ -149,8 +137,6 @@ private lemma k1_domDomCongr_add {d : ℕ} (σ : Equiv.Perm (Fin d))
     ContinuousMultilinearMap.add_apply]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma k1_domDomCongr_smul {d : ℕ} (σ : Equiv.Perm (Fin d)) (c : ℝ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin d => E) ℝ) :
     ContinuousMultilinearMap.domDomCongr σ (c • f) =
@@ -160,8 +146,6 @@ private lemma k1_domDomCongr_smul {d : ℕ} (σ : Equiv.Perm (Fin d)) (c : ℝ)
   rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.smul_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_domDomCongrSection_add (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -177,8 +161,6 @@ private lemma k1_domDomCongrSection_add (g : SmoothRiemannianMetric I M) {s : �
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection_unitModel,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection_unitModel]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_domDomCongrSection_smul (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -192,8 +174,6 @@ private lemma k1_domDomCongrSection_smul (g : SmoothRiemannianMetric I M) {s : �
     k1_unitModel_smul (I := I) (M := M) g s c (domDomCongrSection (I := I) g σ A) x,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection_unitModel]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_domDomCongrSection_comp (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -211,8 +191,6 @@ private lemma k1_domDomCongrSection_comp (g : SmoothRiemannianMetric I M) {s : �
     ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_domDomCongrSection_refl (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -226,8 +204,6 @@ private lemma k1_domDomCongrSection_refl (g : SmoothRiemannianMetric I M) {s : �
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma k1_symmS_eq_half (g₀ : SmoothRiemannianMetric I M)
@@ -239,8 +215,6 @@ private lemma k1_symmS_eq_half (g₀ : SmoothRiemannianMetric I M)
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma k1_domDomCongrSection_symmS (g₀ : SmoothRiemannianMetric I M)
@@ -261,8 +235,6 @@ private lemma k1_domDomCongrSection_symmS (g₀ : SmoothRiemannianMetric I M)
     k1_symmS_eq_half (I := I) (M := M) g₀ T]
   abel
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_zeroTensor_eq_smul_unitTensor (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 0 I x) :
@@ -279,8 +251,6 @@ private lemma k1_zeroTensor_eq_smul_unitTensor (x : M)
   apply (Tensor0SNabla.tensor0Iso I M x).injective
   rw [map_smul, hunit, smul_eq_mul, mul_one]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma k1_symmS_toModel_rel (g₀ : SmoothRiemannianMetric I M)
@@ -307,8 +277,6 @@ private lemma k1_symmS_toModel_rel (g₀ : SmoothRiemannianMetric I M)
   simp only [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel] at hunit
   rw [← hunit]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma k1_symmSCovGrad3_swap12 (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
@@ -334,8 +302,6 @@ private lemma k1_symmSCovGrad3_swap12 (g₀ : SmoothRiemannianMetric I M)
   exact hnat.symm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma k1_rfns_add_expand (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a + b) =
@@ -356,8 +322,6 @@ private lemma k1_rfns_add_expand (g : SmoothRiemannianMetric I M) (r s : ℕ) (x
     tensorInnerPointwise_symm (I := I) (M := M) g r s x _ _]
   ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_rfns_addadd_expand (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b c : TensorRSSpace r s I x) :
@@ -376,8 +340,6 @@ private lemma k1_rfns_addadd_expand (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
   ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k1_rfns_addsub_expand (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b c : TensorRSSpace r s I x) :
@@ -407,8 +369,6 @@ private lemma k1_rfns_addsub_expand (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ring]
   ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_koszulCovecCc_le_iteratedCovGrad_symmetrization_succ (g₀ : SmoothRiemannianMetric I M)
@@ -607,58 +567,36 @@ theorem riemannianFiberNormSq_iteratedCovGrad_koszulCovecCc_le_iteratedCovGrad_s
   rw [show ((1 : ℝ) / 2) ^ 2 = 1 / 4 from by norm_num]
   linarith [hexp, habc, hpos, e_ab, e_bc, e_ac, f1, f2, g_ab, g_bc, g_ac, hNval]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm3201 : Equiv.Perm (Fin 4) :=
   ⟨![3, 2, 0, 1], ![2, 3, 1, 0], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm3102 : Equiv.Perm (Fin 4) :=
   ⟨![3, 1, 0, 2], ![2, 1, 3, 0], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm1302 : Equiv.Perm (Fin 4) :=
   ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm1203 : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm2103 : Equiv.Perm (Fin 4) :=
   ⟨![2, 1, 0, 3], ![2, 1, 0, 3], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm3012 : Equiv.Perm (Fin 4) :=
   ⟨![3, 0, 1, 2], ![1, 2, 3, 0], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kOut0Perm2013 : Equiv.Perm (Fin 4) :=
   ⟨![2, 0, 1, 3], ![1, 2, 0, 3], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kMid0Perm102 : Equiv.Perm (Fin 3) :=
   ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_kMid0Perm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem b3_b3_slotPermCc0Fib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
@@ -678,8 +616,6 @@ private theorem b3_b3_slotPermCc0Fib_contMDiff (_g₀ : SmoothRiemannianMetric I
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def b3_slotPermCc0 (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     SmoothCcTensor g₀ d d where
   toSection :=
@@ -688,8 +624,6 @@ private def b3_slotPermCc0 (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : E
       contMDiff_toFun := b3_b3_slotPermCc0Fib_contMDiff (I := I) (M := M) g₀ ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem b3_order0KernelField_eq_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁ =
@@ -731,8 +665,6 @@ private theorem b3_order0KernelField_eq_arm_combination (g₀ g₁ : SmoothRiema
   intro x
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b3_armOuter24_rfns_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g₀ 2 4) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + q) x
@@ -751,8 +683,6 @@ private theorem b3_armOuter24_rfns_eq (g₀ : SmoothRiemannianMetric I M)
         ((show Tensor0SSpace 2 I y →L[ℝ] Tensor0SSpace 4 I y from W.toSection y) d) := rfl
   rw [hy, DifferentialGeometry.Analysis.Parabolic.TensorSpectral.slotPermCLM_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b3_armOuter23_rfns_eq (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (W : SmoothCcTensor g₀ 2 3) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + q) x
@@ -771,8 +701,6 @@ private theorem b3_armOuter23_rfns_eq (g₀ : SmoothRiemannianMetric I M)
         ((show Tensor0SSpace 2 I y →L[ℝ] Tensor0SSpace 3 I y from W.toSection y) d) := rfl
   rw [hy, DifferentialGeometry.Analysis.Parabolic.TensorSpectral.slotPermCLM_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma b4_sum_atg_eq_bfgWindow (b : ℕ → ℝ) {K W : ℕ} (hW : W ≤ K + 1) :
     ∑ k ∈ Finset.range W, Combinatorics.antidiagonalTupleGrid b k =
       Combinatorics.boundedFactorGridWindow b K W := by
@@ -781,8 +709,6 @@ private lemma b4_sum_atg_eq_bfgWindow (b : ℕ → ℝ) {K W : ℕ} (hW : W ≤ 
   rw [Finset.mem_range] at hk
   exact Combinatorics.antidiagonalTupleGrid_eq_boundedFactorGrid b (by omega)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_cDCIF_le (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + n) x
         ((iteratedCovGrad (I := I) g₀ 3 4 n
@@ -807,8 +733,6 @@ private theorem b4_cDCIF_le (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (
   exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 2
     (connDiffSection (I := I) g₁ g₀) n x
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_inner_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + m) x
         ((iteratedCovGrad (I := I) g₀ 2 3 m
@@ -826,8 +750,6 @@ private theorem b4_inner_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (
   exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 2
     (connDiffSection (I := I) g₁ g₀) m x
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_gradCore_le (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + i) x
         ((iteratedCovGrad (I := I) g₀ 2 4 i
@@ -849,8 +771,6 @@ private theorem b4_gradCore_le (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ
   exact le_of_eq (rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 1 2 i
     (connDiffSection (I := I) g₁ g₀) x)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_quadArm_capped (g₀ : SmoothRiemannianMetric I M)
     (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     (core : SmoothCcTensor g₀ 3 4) (W23 : SmoothCcTensor g₀ 2 3)
@@ -942,22 +862,16 @@ private theorem b4_quadArm_capped (g₀ : SmoothRiemannianMetric I M)
   rw [← Finset.sum_mul]
   exact le_of_eq (by ring)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma b4_coeff_into_sqrt {c X w : ℝ} (hc : 0 ≤ c) :
     c * Real.sqrt (X * w) = Real.sqrt ((c ^ 2 * X) * w) := by
   rw [show (c ^ 2 * X) * w = c ^ 2 * (X * w) from by ring]
   rw [Real.sqrt_mul (sq_nonneg c) (X * w), Real.sqrt_sq hc]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma b4_sqrt_le_coeff_mul {A c B : ℝ} (hA : A ≤ c ^ 2 * B) (hc : 0 ≤ c) :
     Real.sqrt A ≤ c * Real.sqrt B := by
   refine le_trans (Real.sqrt_le_sqrt hA) ?_
   rw [Real.sqrt_mul (sq_nonneg c) B, Real.sqrt_sq hc]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma b4_young_head3 {T e btop c1 c2 c3 w : ℝ}
     (hbtop : 0 ≤ btop) (hw : 0 ≤ w) (he : 0 ≤ e)
     (hc1 : 0 ≤ c1) (hc2 : 0 ≤ c2) (hc3 : 0 ≤ c3) (hT0 : 0 ≤ T)
@@ -996,8 +910,6 @@ private lemma b4_young_head3 {T e btop c1 c2 c3 w : ℝ}
         rw [hu2]
         nlinarith [hv2]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma b4_sqrt_eightArm (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v1 v2 v3 v4 v5 v6 v7 v8 : TensorRSSpace r s I x) :
@@ -1161,8 +1073,6 @@ private lemma k2_sum_fin1 {α : Type*} [AddCommMonoid α] {n : ℕ} (f : (Fin 1 
   rw [Subsingleton.elim i 0]
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem rfns_appCcRS_sharpFlatEndoCc_contravariantSlot_op_le (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -2242,8 +2152,6 @@ private theorem k3_rfns_comp_slotExtendIterFib_op_le (g : SmoothRiemannianMetric
         (show TensorRSSpace p (b + w) I x from U) n e K P))) ?_
   rw [← Finset.mul_sum]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -2371,8 +2279,6 @@ theorem rfns_appCcRS_ricciCometricFourTraceCastG0_corner_op_le (g₀ g₁ : Smoo
     hA
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace (4 + i) I x from U.toSection x)
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_L0_topSeparated_proof (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀ : δ₀ < 1) (_hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -2832,14 +2738,12 @@ private theorem b4_L0_topSeparated_proof (g₀ : SmoothRiemannianMetric I M) {δ
     (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (2 + i) x _) htot
   refine le_trans hfin ?_
   have hcoef : (3 / 2 : ℝ) * (4 * fr * d ^ 2) ^ 2 ≤ ((21 / 4) * fr * d ^ 2) ^ 2 := by
-    nlinarith [sq_nonneg (fr * d ^ 2)]
+    nlinarith only [sq_nonneg (fr * d ^ 2)]
   have hKeq : Kfun i = 9 * (144 * fr * d ^ 2 * Qq i + 16 * fr ^ 2 * d ^ 2 * (Kc (i + 1) * ((i : ℝ) + 1)) + Clow i) := by
     simp only [hKfun_def]
   rw [hKeq]
   exact add_le_add (mul_le_mul_of_nonneg_right hcoef hbtop_nn) (le_refl _)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma b4_young_head1 {T e btop c K w : ℝ}
     (hbtop : 0 ≤ btop) (hw : 0 ≤ w) (he : 0 ≤ e) (hc : 0 ≤ c) (hK : 0 ≤ K) (hT0 : 0 ≤ T)
     (hT : Real.sqrt T ≤ e * Real.sqrt btop + c * Real.sqrt (K * w)) :
@@ -2866,8 +2770,6 @@ private lemma b4_young_head1 {T e btop c K w : ℝ}
         rw [hu2, hv2]
         ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContractionMonomialField_topSeparated_and_lowerWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2922,8 +2824,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContractionMonomialFie
       (I := I) (M := M) g₀ g₁ P htie hδ₀ hδ_le hδ0 hbound σ i x,
     hres g₁ P htie hδ_le hδ0 hbound σ i x⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem refoldKernelContractionMonomialField_eq_of_finrank_one (h1 : Module.finrank ℝ E = 1)
@@ -2974,8 +2874,6 @@ theorem refoldKernelContractionMonomialField_eq_of_finrank_one (h1 : Module.finr
               (I := I) (M := M) g₀ G x)) ρ]
   rw [hperm σ, hperm σ']
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem b4_refold_topSeparated_proof (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀ : δ₀ < 1) (_hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -3256,8 +3154,6 @@ private theorem b4_refold_topSeparated_proof (g₀ : SmoothRiemannianMetric I M)
     nlinarith [mul_le_mul_of_nonneg_right
       (mul_le_mul hfr2 hfr2 (by norm_num) (by linarith)) hd4]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContractionField_symmetrizationSecondCovGrad_topAmplitude_le
@@ -3285,8 +3181,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContractionField_symme
                   ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
   b4_refold_topSeparated_proof (I := I) (M := M) g₀ hδ₀ hδ₀half
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_topAmplitude_le
@@ -3311,8 +3205,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0Coeff
                   ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
   b4_L0_topSeparated_proof (I := I) (M := M) g₀ hδ₀ hδ₀half
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_topSeparated_budgetDualCap_le
@@ -3599,8 +3491,6 @@ private theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCom
     rw [hEamp] at hfin
     exact hfin
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder
@@ -3735,8 +3625,6 @@ private theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_
       mul_nonneg (sq_nonneg ε) (sq_nonneg _)
     nlinarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem exists_linearizedRicciArm0CorrField_realizedFam_jetL2_topArm_tameEnvelope_highOrder
@@ -3865,8 +3753,6 @@ theorem exists_linearizedRicciArm0CorrField_realizedFam_jetL2_topArm_tameEnvelop
     mul_le_mul_of_nonneg_left (hwin_ineq (i + 2)) (sq_nonneg ε)
   linarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
@@ -3948,8 +3834,6 @@ theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
       mul_nonneg (hKle_nn i) (by linarith)
     linarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem linearizedRicciThreeArmHjoint_add (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -3968,8 +3852,6 @@ theorem linearizedRicciThreeArmHjoint_add (g₀ : SmoothRiemannianMetric I M) (r
     (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem linearizedRicciThreeArmHjoint_add_smul (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -3992,8 +3874,6 @@ theorem linearizedRicciThreeArmHjoint_add_smul (g₀ : SmoothRiemannianMetric I 
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem threeArmHjoint_const_smul_fw (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -4009,8 +3889,6 @@ private theorem threeArmHjoint_const_smul_fw (g₀ : SmoothRiemannianMetric I M)
     (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem exists_riemannPalatini_curvatureRefold_data
