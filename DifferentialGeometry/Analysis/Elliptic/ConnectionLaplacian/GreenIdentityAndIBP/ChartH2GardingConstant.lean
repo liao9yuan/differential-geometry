@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -70,6 +67,17 @@ theorem exists_secondCovGrad_l2NormSq_le_rawConnLap
   refine ⟨2 + 2 * Ccross, by positivity, fun T => ?_⟩
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g 2 T Ccross hCcross (hcross T)
 
+private lemma le_sqrt_mul_add_of_sq_le (a x y z : ℝ)
+    (ha : 0 ≤ a) (hy : 0 ≤ y) (hz : 0 ≤ z)
+    (h : x ^ 2 ≤ a * (y ^ 2 + z ^ 2)) :
+    x ≤ Real.sqrt a * (y + z) := by
+  have hsqrt : Real.sqrt a ^ 2 = a := Real.sq_sqrt ha
+  have hkey : x ^ 2 ≤ (Real.sqrt a * (y + z)) ^ 2 := by
+    rw [mul_pow, hsqrt]
+    have hcross : 0 ≤ 2 * (y * z) := by positivity
+    nlinarith [mul_le_mul_of_nonneg_left hcross ha]
+  exact le_of_sq_le_sq hkey (mul_nonneg (Real.sqrt_nonneg _) (add_nonneg hy hz))
+
 
 theorem exists_secondCovGrad_l2Norm_le_rawConnLap_add_self
     (g : SmoothRiemannianMetric I M) :
@@ -89,21 +97,10 @@ theorem exists_secondCovGrad_l2Norm_le_rawConnLap_add_self
   set nLap : ℝ := tensorL2Norm (I := I) (M := M) g 0 2
     (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun with hnLap_def
   set nT : ℝ := tensorL2Norm (I := I) (M := M) g 0 2 T.toFun with hnT_def
-  have hnHess_nn : 0 ≤ nHess := tensorL2Norm_nonneg (I := I) (M := M) g 0 (3 + 1) _
   have hnLap_nn : 0 ≤ nLap := tensorL2Norm_nonneg (I := I) (M := M) g 0 2 _
   have hnT_nn : 0 ≤ nT := tensorL2Norm_nonneg (I := I) (M := M) g 0 2 _
   have hsq : nHess ^ 2 ≤ Cg * (nLap ^ 2 + nT ^ 2) := hbound T
-  have hkey : nHess ^ 2 ≤ (Real.sqrt Cg * (nLap + nT)) ^ 2 := by
-    have hsqrtCg : Real.sqrt Cg ^ 2 = Cg := Real.sq_sqrt hCg
-    have hexpand : (Real.sqrt Cg * (nLap + nT)) ^ 2 =
-        Cg * (nLap ^ 2 + 2 * (nLap * nT) + nT ^ 2) := by
-      rw [mul_pow, hsqrtCg]; ring
-    rw [hexpand]
-    have hcross_nn : 0 ≤ 2 * (nLap * nT) := by positivity
-    nlinarith [hsq, mul_le_mul_of_nonneg_left hcross_nn hCg, hCg]
-  have hrhs_nn : 0 ≤ Real.sqrt Cg * (nLap + nT) :=
-    mul_nonneg (Real.sqrt_nonneg _) (by linarith)
-  exact le_of_sq_le_sq hkey hrhs_nn
+  exact le_sqrt_mul_add_of_sq_le Cg nHess nLap nT hCg hnLap_nn hnT_nn hsq
 
 
 theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
