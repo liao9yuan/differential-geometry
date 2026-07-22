@@ -43,8 +43,6 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-set_option maxHeartbeats 2000000 in
-
 private theorem covDerivCrossLeft_weight_bound_rs
     (g : SmoothRiemannianMetric I M) (k m r : ℕ) (_hk : 1 ≤ k)
     (w : Integral.L2.SmoothCcTensor g r m) (A : ℝ) (_hA : 0 ≤ A)
@@ -186,8 +184,8 @@ private theorem covDerivCrossLeft_weight_bound_rs
           (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 :=
       Finset.sum_nonneg (fun a _ => sq_nonneg _)
     have hbound_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
-      have : (0 : ℝ) ≤ 4 * b * c := by positivity
-      positivity
+      exact mul_nonneg (mul_nonneg (sq_nonneg _) (sq_nonneg _))
+        (mul_nonneg (mul_nonneg (by norm_num) hb_nn) hc_nn)
     calc (∑ a : Fin n,
             (extDerivFun (I := I) (ζ : M → ℝ) x
               (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
@@ -210,7 +208,7 @@ private theorem covDerivCrossLeft_weight_bound_rs
   have hRHS_nn : (0 : ℝ) ≤ 2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ) := by
     have hbrpow : (0 : ℝ) ≤ b ^ ((k : ℝ) - 1) := Real.rpow_nonneg hb_nn _
     have hcrpow : (0 : ℝ) ≤ c ^ (1 / 2 : ℝ) := Real.rpow_nonneg hc_nn _
-    positivity
+    exact mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hk1) _hA) hbrpow) hcrpow
   refine le_trans hCS2 ?_
   rw [← Real.sqrt_mul hb_nn rP,
     show 2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ) =
@@ -244,8 +242,6 @@ private theorem covDerivCrossLeft_weight_bound_rs
     _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b * (b ^ (k - 2)) ^ 2 * b)) := by ring
     _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b ^ (k - 1) * b ^ (k - 1))) := by rw [hb_core]
     _ = ((k : ℝ) - 1) ^ 2 * (4 * A ^ 2) * (b ^ (k - 1) * b ^ (k - 1)) * c := by ring
-
-set_option maxHeartbeats 2000000 in
 
 theorem weightedCovIBP_lpFiberJet_sup_rs
     (g : SmoothRiemannianMetric I M) (k m r : ℕ) (_hk : 1 ≤ k)
@@ -475,8 +471,6 @@ theorem weightedCovIBP_lpFiberJet_sup_rs
     _ = (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A * (∫ x, F x ∂μ) := by ring
     _ = (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A *
           ∫ x, (b x) ^ ((k : ℝ) - 1) * (c x) ^ (1 / 2 : ℝ) ∂μ := by rw [hRHS_eq]
-
-set_option maxHeartbeats 2000000 in
 
 private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     (g : SmoothRiemannianMetric I M) (k m i r : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
@@ -766,7 +760,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
         refine Finset.sum_congr rfl (fun a _ => ?_)
         rw [hchain (Integral.Connection.smoothOrthoFrame (I := I) g x a x), mul_pow]
       rw [hrw, mul_pow]
-      exact mul_le_mul_of_nonneg_left hkato (by positivity)
+      exact mul_le_mul_of_nonneg_left hkato
+        (mul_nonneg (sq_nonneg pm1) (sq_nonneg ((bv + ε) ^ (pm1 - 1))))
     have hrP_bound : rP ≤ pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by
       rw [hrP_eq]
       calc (∑ a : Fin n,
@@ -777,7 +772,7 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
         _ = pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by ring
 
     have hRHS_nn : (0 : ℝ) ≤ 2 * pm1 * F x := by
-      have := hF_nonneg x; positivity
+      exact mul_nonneg (mul_nonneg (by norm_num) (le_of_lt hpm1_pos)) (hF_nonneg x)
     refine le_trans hCS2 ?_
     rw [← Real.sqrt_mul hbv_nn rP,
       show 2 * pm1 * F x = Real.sqrt ((2 * pm1 * F x) ^ 2) from (Real.sqrt_sq hRHS_nn).symm]
@@ -872,8 +867,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       (2 * pm1 + Real.sqrt (Module.finrank ℝ E : ℝ)) * ∫ x, F x ∂μ
   rw [hLHS_eq]
   exact hassembled
-
-set_option maxHeartbeats 1200000 in
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
