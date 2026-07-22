@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -88,7 +86,6 @@ def ricciFoldWeightB (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
           (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
     (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -193,7 +190,6 @@ private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2) (x : M)
     (p q v0 v1 : TangentSpace I x) :
@@ -365,7 +361,6 @@ private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2)
   rw [hA, hB]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
     ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S =
       (-(1 / 2) : ℝ) •
@@ -656,7 +651,6 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_bounde
         ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
     ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g =
       ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g 2)
@@ -822,7 +816,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
     (P : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -934,7 +927,6 @@ lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
 end NormedKoszulConnectionDifferenceFoldIdentity
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -1288,7 +1280,6 @@ private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
