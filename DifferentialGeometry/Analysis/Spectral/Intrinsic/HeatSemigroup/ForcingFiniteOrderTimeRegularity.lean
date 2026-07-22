@@ -354,7 +354,6 @@ private lemma iteratedFDerivWithin_isOpen_eq_of_isOpen
     iteratedFDerivWithin ℝ n f O₁ z = iteratedFDerivWithin ℝ n f O₂ z := by
   rw [iteratedFDerivWithin_of_isOpen n h₁ hz₁, iteratedFDerivWithin_of_isOpen n h₂ hz₂]
 
-set_option maxHeartbeats 1600000 in
 private theorem pdIter_rawCompOnE_eigenSeries_tsum_eq_local
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (d : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -551,7 +550,6 @@ private theorem pdIter_rawCompOnE_eigenSeries_tsum_eq_local
     _ = ∑' i, d i * DifferentialGeometry.Analysis.iteratedDirDeriv L (ψ i) y := by
         refine tsum_congr (fun i => hmode_eval i)
 
-set_option maxHeartbeats 1600000 in
 private theorem spectralPathFO_rawCompOnE_pdIter_euclidean_contDiffOn_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -1112,8 +1110,6 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma tensorChartComponentRaw_congr_toSection
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -1135,8 +1131,6 @@ private lemma tensorChartComponentRaw_congr_toSection
   rw [h x]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_sub_eq
     (g : SmoothRiemannianMetric I M) (S₁ S₂ : SmoothCcTensor g 0 2) (α : M)
@@ -1157,8 +1151,6 @@ private lemma tensorChartComponentRaw_sub_eq
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma reconFO_raw_eq_chartRHS
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1256,8 +1248,6 @@ private lemma euclidPartial_eq_pdDir (i : Fin (Module.finrank ℝ E))
     euclidPartial (E := E) i u
       = DifferentialGeometry.Analysis.dirDeriv (EuclideanSpace.single i 1) u := rfl
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1465,7 +1455,6 @@ private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
       rw [← hWm_b]
       simp only [hQm_def, hWm_def, euclidPartial_eq_pdDir]
 
-set_option maxHeartbeats 1600000 in
 private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1549,8 +1538,6 @@ private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
   exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
     (g : SmoothRiemannianMetric I M) {T : ℝ} (k : ℕ)
@@ -1653,8 +1640,20 @@ private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
           ℝ p.1 ((T_rep p.2).toSection p.1) := by
       rw [Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hpbase]
-    rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx,
-      map_sum]
+    rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx]
+    let L : Tensor0SBundle.TensorRSSpace 0 2 I p.1 →L[ℝ]
+        Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+      (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ p.1
+    change L (∑ Q : CompIdx E 0 2,
+      tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+        chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) = _
+    rw [show L (∑ Q : CompIdx E 0 2,
+        tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+          chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) =
+      ∑ Q : CompIdx E 0 2, L (tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (T_rep p.2) α Q.1 Q.2 p.1 •
+          chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) from map_sum L _ _]
     refine Finset.sum_congr rfl (fun Q _ => ?_)
     rw [map_smul]
     congr 1
@@ -1692,8 +1691,6 @@ end IterLaplacianInduction
 end FiniteOrderAnisotropicReconstruction
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiffOn
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1729,8 +1726,6 @@ private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiff
 end FiniteOrderReconJetEnergy
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_pathCoeff_timeContDiff_spectralJetMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1927,8 +1922,6 @@ private theorem deTurckRHSReconSectionFO_pathCoeff_timeContDiff_spectralJetMass
     _ = C ^ 2 * tensorSobolevWeight (I := I) (M := M) i (-sW) := by ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2087,8 +2080,6 @@ private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
       hφκ_smooth hκcoeff hκmass
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realization
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
