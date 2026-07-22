@@ -3382,7 +3382,7 @@ private lemma lieArm_o1raw_center_eq (g₀ g_bg : SmoothRiemannianMetric I M) (T
     PDE.DeTurck.DeTurckLinearization.chartLinearizedChristoffelPrincipalRaw
   simp only [lieArm_chartInvGramOnE_center, lieArm_chartGramOnE_center]
 
-private lemma lieArm_arm1_value_eq_order1Raw_add_tail (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+lemma lieArm_arm1_value_eq_order1Raw_add_tail (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
