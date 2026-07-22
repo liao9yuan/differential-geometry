@@ -610,12 +610,12 @@ private lemma card_component_index_le_pow
       Fintype.card_fin, Fintype.card_fin, Fintype.card_fin, ← pow_add]]
   exact_mod_cast pow_le_pow_right₀ hn (by omega)
 
-private def rawPullOrderBound
+def rawPullOrderBoundOn (K : Set EuclN)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P j : ℕ) (C : ℝ) : Prop :=
   ∀ (T : SmoothCcTensor g r s) (l : ℕ), l ≤ j → ∀ (p : ℕ), p + l ≤ P →
     ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
-      ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
+      ∀ y ∈ K,
         ‖iteratedFDeriv ℝ l
             (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
               (iteratedCovGrad g r s p T) α Idx Jdx) y‖ ≤
@@ -623,27 +623,28 @@ private def rawPullOrderBound
             tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
               (iteratedCovGrad g r s (p + i) T) α y
 
-private def christoffelOrderBound
+def christoffelOrderBoundOn (K : Set EuclN)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ) (Γ : ℝ) : Prop :=
   ∀ p ≤ P, ∀ (m : Fin (Module.finrank ℝ E))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E))
     (q : (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin (s + p) → Fin (Module.finrank ℝ E))),
-    ∀ l ≤ P, ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
+    ∀ l ≤ P, ∀ y ∈ K,
       ‖iteratedFDeriv ℝ l
         (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx q.1 Jdx q.2) y‖ ≤ Γ
 
 omit [BoundarylessManifold I M] in
-private lemma iteratedFDeriv_euclidPartial_le
+lemma iteratedFDeriv_euclidPartial_le_of_order_bounds
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ)
-    (Γ : ℝ) (hΓ_nn : 0 ≤ Γ) (hΓ : christoffelOrderBound (I := I) (M := M) g r s α P Γ)
+    (K : Set EuclN) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α)
+    (Γ : ℝ) (hΓ_nn : 0 ≤ Γ) (hΓ : christoffelOrderBoundOn (I := I) (M := M) K g r s α P Γ)
     (j : ℕ) (Cj : ℝ) (hCj_nn : 0 ≤ Cj)
-    (hCj : rawPullOrderBound (I := I) (M := M) g r s α P j Cj)
+    (hCj : rawPullOrderBoundOn (I := I) (M := M) K g r s α P j Cj)
     (T : SmoothCcTensor g r s) (p : ℕ) (hpj : p + (j + 1) ≤ P)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E))
-    (y : EuclN) (hy : y ∈ chartImagePOUTsupport (I := I) (M := M) α)
+    (y : EuclN) (hy : y ∈ K)
     (m : Fin (Module.finrank ℝ E)) :
     ‖iteratedFDeriv ℝ j
         (fun z => euclidPartial (E := E) m
@@ -655,10 +656,10 @@ private lemma iteratedFDeriv_euclidPartial_le
           tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
             (iteratedCovGrad g r s (p + i) T) α y := by
   classical
-  rw [rawPullOrderBound] at hCj
-  rw [christoffelOrderBound] at hΓ
+  rw [rawPullOrderBoundOn] at hCj
+  rw [christoffelOrderBoundOn] at hΓ
   have hy_mem : y ∈ chartTargetEuclid (I := I) (M := M) α :=
-    chartImagePOUTsupport_subset_target (I := I) (M := M) α hy
+    hK_sub hy
   set R : ℝ := ∑ i ∈ Finset.range (j + 1 + 1),
     tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
       (iteratedCovGrad g r s (p + i) T) α y with hR_def
@@ -784,7 +785,8 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
   classical
   obtain ⟨Γ, hΓ_nn, hΓ⟩ :=
     exists_christoffel_bound_valence_range (I := I) (M := M) g r s α P P
-  change christoffelOrderBound (I := I) (M := M) g r s α P Γ at hΓ
+  change christoffelOrderBoundOn (I := I) (M := M)
+    (chartImagePOUTsupport (I := I) (M := M) α) g r s α P Γ at hΓ
   set n : ℕ := Module.finrank ℝ E with hn_def
   intro j
   induction j with
@@ -808,7 +810,8 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
   | succ j ih =>
       intro hjP
       obtain ⟨Cj, hCj_nn, hCj⟩ := ih (by omega)
-      change rawPullOrderBound (I := I) (M := M) g r s α P j Cj at hCj
+      change rawPullOrderBoundOn (I := I) (M := M)
+        (chartImagePOUTsupport (I := I) (M := M) α) g r s α P j Cj at hCj
       set Np : ℝ := (n : ℝ) ^ (r + (s + P)) with hNp_def
       set Cstep : ℝ := (n : ℝ) ^ j *
         (Cj + (Np : ℝ) * ((2 : ℝ) ^ j) * Γ * Cj) with hCstep_def
@@ -837,8 +840,10 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
               Cm * RHSsum := by
           intro m
           simpa only [hCm_def, hNp_def, hn_def, hRHSsum_def] using
-            iteratedFDeriv_euclidPartial_le (I := I) (M := M)
-              g r s α P Γ hΓ_nn hΓ j Cj hCj_nn hCj T p (by omega)
+            iteratedFDeriv_euclidPartial_le_of_order_bounds (I := I) (M := M)
+              g r s α P (chartImagePOUTsupport (I := I) (M := M) α)
+              (chartImagePOUTsupport_subset_target (I := I) (M := M) α)
+              Γ hΓ_nn hΓ j Cj hCj_nn hCj T p (by omega)
               Idx Jdx y hy m
         have h_peel := iteratedFDeriv_succ_norm_le_sum_euclidPartial (E := E)
           (u := tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
