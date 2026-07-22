@@ -62,7 +62,7 @@ lemma smoothOrthoFrame_parsevalExpand
   conv_lhs => rw [← bse.sum_repr u]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [hbse_eq a]
-  congr 1
+  apply congrArg (fun c : ℝ => c • e a)
   have hrepr : g.inner x (e a) u =
       ∑ b : Fin (Module.finrank ℝ E), bse.repr u b * g.inner x (e a) (e b) := by
     conv_lhs => rw [show u = ∑ b : Fin (Module.finrank ℝ E),
@@ -389,7 +389,7 @@ lemma gradArmFib_covGrad_slice_eq
   rw [gradArmDirCLM_apply (I := I) (M := M) g s B x Wx (B a x)]
 
   rw [Finset.sum_sub_distrib, Finset.smul_sum]
-  congr 1
+  apply congrArg₂ (fun T U => T - U)
   · refine Finset.sum_congr rfl (fun i _ => ?_)
 
     rw [hWx, slot0SliceFib_covGrad_eq (I := I) (M := M) g s S x (B i x)]
