@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.DifferentiatedCurvature
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 
 noncomputable section
