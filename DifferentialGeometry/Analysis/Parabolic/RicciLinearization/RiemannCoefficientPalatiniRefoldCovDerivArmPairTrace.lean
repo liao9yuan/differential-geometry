@@ -20,8 +20,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -325,7 +323,6 @@ private lemma bdG1_inner_gInvRaisedEndo_left (g₀ g₁ : SmoothRiemannianMetric
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (metricComparisonEndo gInvRaisedEndo_apply
   inverseMetricSharpFib_g0FlatCLM g0FlatCLM) in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bdPureDT_eq_trace_fullRaised (g₀ g₁ : SmoothRiemannianMetric I M)
     (s : ℕ) :
@@ -467,7 +464,6 @@ def armPairTraceOpCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma bdPairTraceOp_apply_toModel (g₀ gm : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -1592,6 +1588,14 @@ private lemma bdKernelCLM_apply (gA gB : SmoothRiemannianMetric I M) (x : M)
 
 private noncomputable def bdFixLoweredCovec (g₀ gA gB : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 4 I x :=
+  letI : NormedAddCommGroup (TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    ContinuousLinearMap.toNormedAddCommGroup (𝕜 := ℝ) (𝕜₂ := ℝ)
+      (E := TangentSpace I x) (F := TangentSpace I x) (σ₁₂ := RingHom.id ℝ)
+  letI : NormedAddCommGroup
+      (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    ContinuousLinearMap.toNormedAddCommGroup (𝕜 := ℝ) (𝕜₂ := ℝ)
+      (E := TangentSpace I x) (F := TangentSpace I x →L[ℝ] TangentSpace I x)
+      (σ₁₂ := RingHom.id ℝ)
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 4 => TangentSpace I x) ℝ from
     { toFun := fun m =>
         g₀.inner x (bdKernelCLM (I := I) (M := M) gA gB x (m 1) (m 2) (m 3)) (m 0)
@@ -1612,7 +1616,7 @@ private noncomputable def bdFixLoweredCovec (g₀ gA gB : SmoothRiemannianMetric
         fin_cases i <;>
           simp only [Fin.reduceFinMk, Fin.isValue, Function.update_self, ne_eq,
             Function.update_of_ne, h01, h02, h03, h10, h12, h13, h20, h21, h23, h30, h31, h32,
-            not_false_eq_true, map_add, ContinuousLinearMap.add_apply]
+            not_false_eq_true, ContinuousLinearMap.map_add, ContinuousLinearMap.add_apply]
       map_update_smul' := by
         have h01 : (0 : Fin 4) ≠ 1 := by decide
         have h02 : (0 : Fin 4) ≠ 2 := by decide
@@ -1630,7 +1634,7 @@ private noncomputable def bdFixLoweredCovec (g₀ gA gB : SmoothRiemannianMetric
         fin_cases i <;>
           simp only [Fin.reduceFinMk, Fin.isValue, Function.update_self, ne_eq,
             Function.update_of_ne, h01, h02, h03, h10, h12, h13, h20, h21, h23, h30, h31, h32,
-            not_false_eq_true, map_smul, ContinuousLinearMap.smul_apply]
+            not_false_eq_true, ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply]
       cont := by
         have hK : Continuous (fun m : Fin 4 → TangentSpace I x =>
             bdKernelCLM (I := I) (M := M) gA gB x (m 1) (m 2) (m 3)) :=
@@ -2110,7 +2114,6 @@ private lemma bdXd_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     show (Equiv.swap (0 : Fin 4) 1) 3 = 3 from by decide]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private theorem bdCovDerivArmDiff_eq_pairTrace
     (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
     deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg -
@@ -2738,6 +2741,16 @@ private theorem bdQuadLow_movingArm_gridWindow (g₀ g_bg : SmoothRiemannianMetr
     (appCcGdiag_nonneg (E := E) l)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
+private lemma bd_seven_term_binary_bound
+    {z s1 s2 s3 s4 s5 a b c d e f g A B C D E F G W : ℝ}
+    (h1 : z ≤ 2 * s1 + 2 * g) (h2 : s1 ≤ 2 * s2 + 2 * f)
+    (h3 : s2 ≤ 2 * s3 + 2 * e) (h4 : s3 ≤ 2 * s4 + 2 * d)
+    (h5 : s4 ≤ 2 * s5 + 2 * c) (h6 : s5 ≤ 2 * a + 2 * b)
+    (ha : a ≤ A * W) (hb : b ≤ B * W) (hc : c ≤ C * W)
+    (hd : d ≤ D * W) (he : e ≤ E * W) (hf : f ≤ F * W) (hg : g ≤ G * W) :
+    z ≤ (64 * A + 64 * B + 32 * C + 16 * D + 8 * E + 4 * F + 2 * G) * W := by
+  linarith
+
 private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
@@ -2789,10 +2802,6 @@ private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
     (connDiffQuadraticLoweredCc (I := I) (M := M) g₀ g₁ g_bg) with hG_def
   have hlow : dLaCovKernelDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg = ((((A + B) - Cc) - Dd) - Ee) + Ff + Gg := by
     rw [dLaCovKernelDiffLoweredCc, hA_def, hB_def, hC_def, hD_def, hE_def, hF_def, hG_def]
-  have hrfns : ∀ (Z : SmoothCcTensor g₀ 0 4), (0 : ℝ) ≤
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
-        ((iteratedCovGrad (I := I) g₀ 0 4 l Z).toSection x) :=
-    fun Z => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x _
   have hA' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
       ((iteratedCovGrad (I := I) g₀ 0 4 l A).toSection x) ≤ cF l * W := by
     rw [hA_def, iteratedCovGrad_smul_real]
@@ -2803,8 +2812,9 @@ private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
       rw [SmoothCcTensor.toSection_smul]
       rfl]
     rw [riemannianFiberNormSq_smul]
-    have h := hcF l x
-    nlinarith [hcF_nn l, hW1]
+    norm_num
+    exact (hcF l x).trans (by
+      simpa using mul_le_mul_of_nonneg_left hW1 (hcF_nn l))
   have hddc : ∀ (σ : Equiv.Perm (Fin 4)) (Q : SmoothCcTensor g₀ 0 4),
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
         ((iteratedCovGrad (I := I) g₀ 0 4 l
@@ -2816,8 +2826,8 @@ private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
   have hQfix : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
       ((iteratedCovGrad (I := I) g₀ 0 4 l
         (connDiffQuadraticLoweredCc (I := I) (M := M) g₀ g_bg g_bg)).toSection x) ≤ cQ l * W := by
-    have h := hcQ l x
-    nlinarith [hcQ_nn l, hW1]
+    exact (hcQ l x).trans (by
+      simpa using mul_le_mul_of_nonneg_left hW1 (hcQ_nn l))
   have hB' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
       ((iteratedCovGrad (I := I) g₀ 0 4 l B).toSection x) ≤ cQ l * W := by
     rw [hB_def, hddc]; exact hQfix
@@ -2847,10 +2857,7 @@ private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
   have h4 := bdRfns_iCG_sub_le (I := I) (M := M) g₀ 0 4 l ((A + B) - Cc) Dd x
   have h5 := bdRfns_iCG_sub_le (I := I) (M := M) g₀ 0 4 l (A + B) Cc x
   have h6 := bdRfns_iCG_add_le (I := I) (M := M) g₀ 0 4 l A B x
-  linarith [h1, h2, h3, h4, h5, h6, hA', hB', hC', hD', hE', hF', hG',
-    hrfns (((((A + B) - Cc) - Dd) - Ee) + Ff), hrfns ((((A + B) - Cc) - Dd) - Ee),
-    hrfns (((A + B) - Cc) - Dd), hrfns ((A + B) - Cc), hrfns (A + B),
-    hrfns A, hrfns B, hrfns Cc, hrfns Dd, hrfns Ee, hrfns Ff, hrfns Gg]
+  exact bd_seven_term_binary_bound h1 h2 h3 h4 h5 h6 hA' hB' hC' hD' hE' hF' hG'
 
 private theorem bdXd_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
