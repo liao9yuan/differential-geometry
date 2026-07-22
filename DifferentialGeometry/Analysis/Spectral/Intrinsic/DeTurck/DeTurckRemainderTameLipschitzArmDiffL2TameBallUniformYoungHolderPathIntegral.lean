@@ -685,8 +685,6 @@ theorem iteratedCovGrad_smul' (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_covGrad_step_jointSmooth
@@ -705,8 +703,6 @@ private theorem armField_covGrad_step_jointSmooth
     (I := I) (M := M) g₀ r sIdx Ψ S hjoint
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_jointSmooth_rfns_jointContinuous
@@ -768,8 +764,6 @@ private theorem armField_jointSmooth_rfns_jointContinuous
       ((Ψ t).toSection x),
     DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_covGrad_pathIntegral_comm
@@ -792,8 +786,6 @@ private theorem armField_covGrad_pathIntegral_comm
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_pathIntegral_comm
     (I := I) (M := M) g₀ r sIdx Ψ S hS hSI hjoint hjg
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem pathIntegralCoeffField_congr
@@ -817,8 +809,6 @@ private theorem pathIntegralCoeffField_congr
   intro x
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_jointSmooth
@@ -839,8 +829,6 @@ private theorem armField_iteratedCovGrad_jointSmooth
     exact armField_covGrad_step_jointSmooth (I := I) g₀ r (sIdx + j)
       (fun t => iteratedCovGrad (I := I) g₀ r sIdx j (Φ t)) S ih
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_rfns_jointContinuous
@@ -860,8 +848,6 @@ private theorem armField_iteratedCovGrad_rfns_jointContinuous
     (by rw [Set.uIcc_of_le (zero_le_one (α := ℝ))] at hSI; exact hSI)
     (armField_iteratedCovGrad_jointSmooth (I := I) g₀ r sIdx i Φ S hjoint)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_normSq_intervalIntegrable
@@ -908,8 +894,6 @@ private theorem armField_iteratedCovGrad_normSq_intervalIntegrable
   rw [heq]
   exact hcontInt.intervalIntegrable_of_Icc (by norm_num)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem armField_iteratedCovGrad_pathIntegral_comm
@@ -960,8 +944,6 @@ private theorem armField_iteratedCovGrad_pathIntegral_comm
       (fun t => iteratedCovGrad (I := I) g₀ r sIdx (j + 1) (Φ t)) S hS hSI hjgsucc hji
       (by funext t; rw [iteratedCovGrad_succ])
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem pathIntegralCoeffField_jetL2_tower_le
