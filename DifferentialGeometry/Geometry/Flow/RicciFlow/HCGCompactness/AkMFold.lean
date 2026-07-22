@@ -185,8 +185,7 @@ private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
         (rotEquiv p q i) := by
   funext i
   refine Fin.addCases (fun i' => ?_) (fun k => ?_) i
-  ·
-    rw [Fin.append_left,
+  · rw [Fin.append_left,
       show rotEquiv p q (Fin.castAdd (q + 1) i') = (Fin.castAdd q i').succ by
         apply Fin.ext
         simp only [rotEquiv, Equiv.trans_apply, Fin.val_succ, Fin.val_castAdd]
@@ -194,14 +193,12 @@ private theorem slotId2 {p q : ℕ} (d : Idx) (aPart : Fin p → Idx) (bPart : F
         simp,
       Fin.cons_succ, Fin.append_left]
   · refine Fin.cases ?_ (fun j => ?_) k
-    ·
-      rw [Fin.append_right, Fin.cons_zero,
+    · rw [Fin.append_right, Fin.cons_zero,
         show rotEquiv p q (Fin.natAdd p (0 : Fin (q + 1))) = 0 by
           simp only [rotEquiv, Equiv.trans_apply]
           rw [Fin.cycleRange_of_eq (by apply Fin.ext; simp)],
         Fin.cons_zero]
-    ·
-      rw [Fin.append_right, Fin.cons_succ,
+    · rw [Fin.append_right, Fin.cons_succ,
         show rotEquiv p q (Fin.natAdd p j.succ) = (Fin.natAdd p j).succ by
           simp only [rotEquiv, Equiv.trans_apply]
           rw [Fin.cycleRange_of_gt (by rw [Fin.lt_def]; simp)]

@@ -455,10 +455,8 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
 
     rw [contMDiffAt_totalSpace]
     refine ⟨?_, ?_⟩
-    ·
-      exact (contMDiff_proj E₁).contMDiffAt
-    ·
-      let e₁ := trivializationAt F₁ E₁ p₀.proj
+    · exact (contMDiff_proj E₁).contMDiffAt
+    · let e₁ := trivializationAt F₁ E₁ p₀.proj
       let e₂ := trivializationAt F₂ E₂ p₀.proj
       let b₁ := Module.finBasis ℝ F₁
       have he₁ : p₀.proj ∈ e₁.baseSet := mem_baseSet_trivializationAt F₁ E₁ p₀.proj
@@ -503,9 +501,7 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
       apply ContMDiffAt.sum
       intro i _
       apply ContMDiffAt.smul
-      ·
-
-        have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
+      · have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
             (fun x => (e₁ x).2) p₀ :=
           (contMDiffAt_totalSpace (f := _root_.id)).mp contMDiffAt_id |>.2
 
@@ -514,10 +510,7 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
           (ContinuousLinearMap.proj i |>.comp
             b₁.equivFun.toContinuousLinearEquiv.toContinuousLinearMap).contDiff
         exact hcl.contDiffAt.contMDiffAt.comp _ h_e₁_snd
-      ·
-
-
-        have h_sect : ContMDiffAt I 𝓘(ℝ, F₂) (↑n)
+      · have h_sect : ContMDiffAt I 𝓘(ℝ, F₂) (↑n)
             (fun q => (e₂ ⟨q, (F (σ' i)) q⟩).2) p₀.proj :=
           (contMDiffAt_section p₀.proj).mp (F (σ' i)).contMDiff.contMDiffAt
 

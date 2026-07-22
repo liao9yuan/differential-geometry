@@ -275,25 +275,20 @@ theorem extends_of_rmBounded
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε) hwide) :=
     { base := { metric := g_ext } }
   refine ⟨ε, hε, hwide, Shat, ?_, ?_⟩
-  ·
-    exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
+  · exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
       hwide hαω g_ext S _hS hagree _hsmooth _hcont hpde
-  ·
-    intro t ht
+  · intro t ht
     have htlt : t < omega := ht.2
     have hteq : g_ext t = g_fam t := hagree t htlt
     refine ⟨?_, ?_, ?_⟩
-    ·
-      show S.family.metric t = Shat.family.metric t
+    · show S.family.metric t = Shat.family.metric t
       change S.base.metric t = g_ext t
       exact hteq.symm
-    ·
-      show S.family.connection t = Shat.family.connection t
+    · change S.family.connection t = Shat.family.connection t
       change S.base.connection t = (SolutionFamily.connection { metric := g_ext }) t
       simp only [SolutionFamily.connection]
       congr 1; exact hteq.symm
-    ·
-      show S.ricci t = Shat.ricci t
+    · show S.ricci t = Shat.ricci t
       change S.base.ricci t = SolutionFamily.ricci { metric := g_ext } t
       simp only [SolutionFamily.ricci]
       congr 1; exact hteq.symm

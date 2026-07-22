@@ -500,7 +500,7 @@ theorem trace_eq_ortho_sum
       OrthonormalBasis.mk hON hspan
     have hb : ∀ i, b i = B i := by
       intro i
-      show (OrthonormalBasis.mk hON hspan) i = B i
+      change (OrthonormalBasis.mk hON hspan) i = B i
       rw [OrthonormalBasis.coe_mk]
     rw [LinearMap.trace_eq_sum_inner T b]
     refine Finset.sum_congr rfl fun i _ => ?_

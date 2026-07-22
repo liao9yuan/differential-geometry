@@ -110,7 +110,7 @@ private theorem tail_snoc_cons {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx)
     Fin.tail (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) =
       (Fin.snoc Y c : Fin (p + 1) → Idx) := by
   funext i
-  show (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) i.succ =
+  change (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) i.succ =
     (Fin.snoc Y c : Fin (p + 1) → Idx) i
   rcases Fin.eq_castSucc_or_eq_last i with ⟨j, rfl⟩ | rfl
   · rw [Fin.succ_castSucc, Fin.snoc_castSucc, Fin.cons_succ, Fin.snoc_castSucc]

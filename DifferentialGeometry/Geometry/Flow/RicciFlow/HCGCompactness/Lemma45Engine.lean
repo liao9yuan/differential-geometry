@@ -336,8 +336,7 @@ theorem corrSlotMap_injective {r' : ℕ} (s : Fin (r' + 1)) :
     (fun ia => Fin.addCases (fun ib => ?_) (fun ib => ?_) b) a <;>
     intro hab <;>
     simp only [corrSlotMap, Fin.addCases_left, Fin.addCases_right] at hab
-  ·
-    congr 1
+  · congr 1
     by_cases h1 : ia = 0 <;> by_cases h2 : ib = 0
     · rw [h1, h2]
     · rw [if_pos h1, if_neg h2] at hab
@@ -345,22 +344,19 @@ theorem corrSlotMap_injective {r' : ℕ} (s : Fin (r' + 1)) :
     · rw [if_neg h1, if_pos h2] at hab
       exact absurd hab (Fin.succ_ne_zero s)
     · omega
-  ·
-    by_cases h1 : ia = 0
+  · by_cases h1 : ia = 0
     · rw [if_pos h1] at hab
       exact absurd hab.symm (Fin.succ_ne_zero _)
     · rw [if_neg h1] at hab
       have hs := Fin.succ_injective _ hab
       exact absurd hs.symm (Fin.succAbove_ne s ib)
-  ·
-    by_cases h2 : ib = 0
+  · by_cases h2 : ib = 0
     · rw [if_pos h2] at hab
       exact absurd hab (Fin.succ_ne_zero _)
     · rw [if_neg h2] at hab
       have hs := Fin.succ_injective _ hab
       exact absurd hs (Fin.succAbove_ne s ia)
-  ·
-    have hs := Fin.succ_injective _ hab
+  · have hs := Fin.succ_injective _ hab
     have hi : ia = ib := Fin.succAbove_right_injective (p := s) hs
     rw [hi]
 
@@ -389,15 +385,15 @@ theorem chrCorrField_eq_contrTail {r' : ℕ}
   rw [chrCorrField, contrTail_apply]
   refine Finset.sum_congr rfl fun c _ => ?_
   have hcorr0 : corrSlotEquiv s (Fin.castAdd r' (0 : Fin 2)) = 0 := by
-    show corrSlotMap s (Fin.castAdd r' (0 : Fin 2)) = 0
+    change corrSlotMap s (Fin.castAdd r' (0 : Fin 2)) = 0
     rw [corrSlotMap, Fin.addCases_left, if_pos rfl]
   have hcorr1 : corrSlotEquiv s (Fin.castAdd r' (1 : Fin 2)) = s.succ := by
-    show corrSlotMap s (Fin.castAdd r' (1 : Fin 2)) = s.succ
+    change corrSlotMap s (Fin.castAdd r' (1 : Fin 2)) = s.succ
     rw [corrSlotMap, Fin.addCases_left, if_neg (by decide)]
   have hcorrR : ∀ i : Fin r',
       corrSlotEquiv s (Fin.natAdd 2 i) = (s.succAbove i).succ := by
     intro i
-    show corrSlotMap s (Fin.natAdd 2 i) = (s.succAbove i).succ
+    change corrSlotMap s (Fin.natAdd 2 i) = (s.succAbove i).succ
     rw [corrSlotMap, Fin.addCases_right]
   have h0 : (Fin.snoc (fun i : Fin 2 => n (corrSlotEquiv s (Fin.castAdd r' i))) c
       : Fin (2 + 1) → Idx) 0 = n 0 := by
@@ -449,7 +445,7 @@ theorem iterCov_one_chr_change {r : ℕ}
       iterCovComp (I := I) frame chrH X 1 y n -
         ∑ s : Fin r,
           chrCorrField (fun z d b p => chrG z d b p - chrH z d b p) X s y n := by
-  show covDerivStepComp (frameExtData (I := I) frame X y) (chrG y) (X y) n = _
+  change covDerivStepComp (frameExtData (I := I) frame X y) (chrG y) (X y) n = _
   rw [covDerivStepComp_chr_sub (frameExtData (I := I) frame X y) (chrG y) (chrH y) (X y) n]
   rfl
 

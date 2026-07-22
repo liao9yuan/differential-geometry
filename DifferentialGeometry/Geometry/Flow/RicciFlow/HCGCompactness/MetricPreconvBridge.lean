@@ -96,12 +96,10 @@ theorem metricDerivNorm_le_compSq_uniform
     exists_goodFrame_compBound (I := I) gRef x
   refine ⟨basisE, u', ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2),
     hopen, hxu', hsub, ?_, fun gk gInf z hzu' hz => ?_⟩
-  ·
-    have hcard : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
+  · have hcard : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
       Nat.cast_nonneg _
     exact one_le_pow₀ (by nlinarith)
-  ·
-    set bz := (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+  · set bz := (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
         I 1 basisE).toBasisAt hz) with hbz
     have hcomp : ∀ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
         Tensor0SBundle.component0S (I := I) bz
@@ -236,12 +234,10 @@ theorem exists_subseq_hconv
     (fun n φ => ∀ ε : Real, 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p → ∀ x ∈ K,
       metricDerivNorm (I := I) a (gSeq (φ k) (e n)) (gInf (e n)) gRef x < ε)
     hstep ?_ ?_
-  ·
-    intro n φ ψ hψ hP ε hε
+  · intro n φ ψ hψ hP ε hε
     obtain ⟨k0, hk0⟩ := hP ε hε
     exact ⟨k0, fun k hk a hap x hxK => hk0 (ψ k) (le_trans hk hψ.le_apply) a hap x hxK⟩
-  ·
-    intro n φ m hP ε hε
+  · intro n φ m hP ε hε
     obtain ⟨k0, hk0⟩ := hP ε hε
     refine ⟨k0 + m, fun k hk a hap x hxK => ?_⟩
     have hval := hk0 (k - m) (by omega) a hap x hxK

@@ -157,24 +157,18 @@ noncomputable def flowUpgrade_of_maps
       hσtgt := ?_
       refMetric := ?_
       conv := ?_ }
-  ·
-    intro k
+  · intro k
     exact Geometry.isSigmaCompact_of_isOpen I (PointedCGHMaps.source_open (I := I) Φ' k)
-  ·
-    intro k
+  · intro k
     letI : TopologicalSpace (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).topology
     letI : ChartedSpace H (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).charted
     letI : SigmaCompactSpace (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).sigmaCompact
     exact Geometry.isSigmaCompact_of_isOpen I (PointedCGHMaps.target_open (I := I) Φ' k)
-  ·
-    intro k
+  · intro k
     exact fun _ => refRes (I := I) Φ' R
       (fun j => Geometry.isSigmaCompact_of_isOpen I
         (PointedCGHMaps.source_open (I := I) Φ' j)) k
-  ·
-
-
-    intro K hK p a b hab ε hε
+  · intro K hK p a b hab ε hε
     have hbridge := ofRP_supOn_conv (I := I) (Φ) R bf hsrc htgt β ψ
       co (letI : TopologicalSpace L.M := L.topology; letI : ChartedSpace H L.M := L.charted; letI : IsManifold I ∞ L.M := L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := (by change IsManifold I ∞ L.M; infer_instance); letI : SigmaCompactSpace L.M := L.sigmaCompact; letI : T2Space L.M := L.t2; L.S.family.metric) hLm K hK p ε hε
     obtain ⟨k0, hk0⟩ := hbridge

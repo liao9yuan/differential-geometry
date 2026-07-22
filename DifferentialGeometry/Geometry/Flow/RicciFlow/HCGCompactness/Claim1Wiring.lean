@@ -482,14 +482,14 @@ theorem koszulComp_at
         frameTuple (I := I) frame y w := by
       funext q
       refine Fin.cases ?_ (fun q' => ?_) q
-      · show frame v0 y = frame (w 0) y
+      · change frame v0 y = frame (w 0) y
         rw [hw0]
       · refine Fin.cases ?_ (fun q'' => ?_) q'
-        · show (if (0 : Fin 2) = 0 then frame v1 y else frame v2 y) = frame (w 1) y
+        · change (if (0 : Fin 2) = 0 then frame v1 y else frame v2 y) = frame (w 1) y
           rw [if_pos rfl, hw1]
         · have hq2 : q'' = 0 := Subsingleton.elim _ _
           subst hq2
-          show (if (Fin.succ 0 : Fin 2) = 0 then frame v1 y else frame v2 y) =
+          change (if (Fin.succ 0 : Fin 2) = 0 then frame v1 y else frame v2 y) =
             frame (w 2) y
           rw [if_neg (by decide), hw2]
     rw [← h1', hW, hvw,
@@ -498,13 +498,13 @@ theorem koszulComp_at
 
   have hb1 := hbr X (idx 0) (idx 1) (idx 2) (fun j => idx (Equiv.refl (Fin 3) j)) hX rfl rfl rfl
   have hb2 := hbr Y (idx 1) (idx 0) (idx 2) (fun j => idx (Equiv.swap (0 : Fin 3) 1 j)) hY
-    (by show idx (Equiv.swap (0 : Fin 3) 1 0) = idx 1; congr 1)
-    (by show idx (Equiv.swap (0 : Fin 3) 1 1) = idx 0; congr 1)
-    (by show idx (Equiv.swap (0 : Fin 3) 1 2) = idx 2; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 0) = idx 1; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 1) = idx 0; congr 1)
+    (by change idx (Equiv.swap (0 : Fin 3) 1 2) = idx 2; congr 1)
   have hb3 := hbr Z (idx 2) (idx 0) (idx 1) (fun j => idx ((finRotate 3).symm j)) hZ
-    (by show idx ((finRotate 3).symm 0) = idx 2; congr 1)
-    (by show idx ((finRotate 3).symm 1) = idx 0; congr 1)
-    (by show idx ((finRotate 3).symm 2) = idx 1; congr 1)
+    (by change idx ((finRotate 3).symm 0) = idx 2; congr 1)
+    (by change idx ((finRotate 3).symm 1) = idx 0; congr 1)
+    (by change idx ((finRotate 3).symm 2) = idx 1; congr 1)
   rw [hLHS, hkos, hb1, hb2, hb3]
   ring
 

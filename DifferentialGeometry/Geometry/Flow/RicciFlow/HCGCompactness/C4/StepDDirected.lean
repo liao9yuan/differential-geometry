@@ -613,7 +613,7 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     intro s y
     have hz : Tensor0SBundle.inner0S (I := I) g y s
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 = 0 := by
-      show (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
+      change (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
       rw [(Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat.map_zero]
       exact LinearMap.zero_apply _
     rw [Tensor0SBundle.normSq0S_eq_inner, hz, Real.sqrt_zero]
@@ -635,7 +635,7 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [Tensor0SBundle.metricTensorField_apply, hΦ x, hΦd x]
       simp only [ContinuousLinearMap.id_apply]
     · intro x _
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
         (Tensor0SBundle.metricTensorField (I := I) g x
           - Tensor0SBundle.metricTensorField (I := I) g x)) ≤ ε
       have hs : (Tensor0SBundle.metricTensorField (I := I) g x
@@ -646,11 +646,11 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       exact le_of_lt hε
     · intro a ha1 _ x _
       obtain ⟨a', rfl⟩ : ∃ a', a = a' + 1 := ⟨a - 1, by omega⟩
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (tensor02CovDeriv (I := I) (Tensor0SBundle.metricTensorField (I := I) g) g (a' + 1) x))
         ≤ ε
       rw [tensor02CovDeriv_metric_zero]
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M')
           (a' + 1 + 2) x)) ≤ ε
       rw [hnz]
@@ -689,7 +689,7 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     intro s y
     have hz : Tensor0SBundle.inner0S (I := I) g y s
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 = 0 := by
-      show (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
+      change (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
       rw [(Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat.map_zero]
       exact LinearMap.zero_apply _
     rw [Tensor0SBundle.normSq0S_eq_inner, hz, Real.sqrt_zero]
@@ -711,7 +711,7 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [Tensor0SBundle.metricTensorField_apply, hΦ x, hΦd x]
       simp only [ContinuousLinearMap.id_apply]
     · intro x _
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
         (Tensor0SBundle.metricTensorField (I := I) g x
           - Tensor0SBundle.metricTensorField (I := I) g x)) ≤ 0
       have hs : (Tensor0SBundle.metricTensorField (I := I) g x
@@ -721,11 +721,11 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [hs, hnz]
     · intro a ha1 _ x _
       obtain ⟨a', rfl⟩ : ∃ a', a = a' + 1 := ⟨a - 1, by omega⟩
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (tensor02CovDeriv (I := I) (Tensor0SBundle.metricTensorField (I := I) g) g (a' + 1) x))
         ≤ 0
       rw [tensor02CovDeriv_metric_zero]
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M')
           (a' + 1 + 2) x)) ≤ 0
       rw [hnz]
@@ -1194,7 +1194,7 @@ theorem exists_strictMono_ge (T : ℕ → ℕ) :
   refine ⟨fun j => j + Finset.sup (Finset.range (j + 1)) T, ?_, ?_⟩
   · apply strictMono_nat_of_lt_succ
     intro n
-    show n + Finset.sup (Finset.range (n + 1)) T
+    change n + Finset.sup (Finset.range (n + 1)) T
         < (n + 1) + Finset.sup (Finset.range (n + 1 + 1)) T
     have hsub : Finset.range (n + 1) ⊆ Finset.range (n + 1 + 1) :=
       Finset.range_mono (Nat.le_succ (n + 1))
@@ -1205,7 +1205,7 @@ theorem exists_strictMono_ge (T : ℕ → ℕ) :
         ≤ n + Finset.sup (Finset.range (n + 1 + 1)) T := Nat.add_le_add_left hmono n
       _ < (n + 1) + Finset.sup (Finset.range (n + 1 + 1)) T := by omega
   · intro j
-    show T j ≤ j + Finset.sup (Finset.range (j + 1)) T
+    change T j ≤ j + Finset.sup (Finset.range (j + 1)) T
     exact le_trans (Finset.le_sup (Finset.self_mem_range_succ j)) (Nat.le_add_left _ j)
 
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

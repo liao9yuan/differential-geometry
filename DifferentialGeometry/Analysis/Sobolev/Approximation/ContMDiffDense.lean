@@ -1423,7 +1423,7 @@ theorem contMDiff_dense_in_WkpChart
           simp [Finset.sum_mul]
         _ = ENNReal.ofReal ((K_total - 1) * ε_per) := by
           rw [hK_total_def]
-          ring
+          ring_nf
         _ ≤ ENNReal.ofReal (K_total * ε_per) :=
           ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_right (by
             have : 0 ≤ 1 := by norm_num

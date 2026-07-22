@@ -144,8 +144,7 @@ theorem nabla3FrameTuple_eq_cons_slotFields
   funext q
   refine Fin.cases ?_ (fun q => ?_) q
   · rfl
-  ·
-    simp only [nabla3FrameTuple, nabla3InnerSlots, metricTraceInput, nabla3SlotFields,
+  · simp only [nabla3FrameTuple, nabla3InnerSlots, metricTraceInput, nabla3SlotFields,
       Fin.cons_succ]
     refine Fin.cases ?_ (fun q => ?_) q
     · rfl
@@ -327,8 +326,7 @@ theorem fin6_comp_swap_eq_metricTraceInput {x : M} (W : Fin 6 → TangentSpace I
   · refine Fin.cases ?_ (fun j => ?_) j
     · change W (Equiv.swap (0 : Fin 6) 1 1) = _
       rw [Equiv.swap_apply_right]; rfl
-    ·
-      have hne0 : Fin.succ (Fin.succ j) ≠ (0 : Fin 6) := Fin.succ_ne_zero _
+    · have hne0 : Fin.succ (Fin.succ j) ≠ (0 : Fin 6) := Fin.succ_ne_zero _
       have hne1 : Fin.succ (Fin.succ j) ≠ (1 : Fin 6) := by
         rw [show (1 : Fin 6) = Fin.succ 0 from rfl]
         exact fun h => Fin.succ_ne_zero _ (Fin.succ_injective _ h)
@@ -522,17 +520,12 @@ theorem nablaLapComm_T1_eq_covDeriv_curvatureAction
     ∀ Ebc Ecb Cbc Ccb : Real, (Ebc - Cbc) - (Ecb - Ccb) = (Ebc - Ecb) - (Cbc - Ccb)
     from fun _ _ _ _ => by ring]
   congr 1
-  ·
-    rw [← extDerivFun_sub_at (I := I) (frame a x₀)
+  · rw [← extDerivFun_sub_at (I := I) (frame a x₀)
       (nabla2Rm04Field_slotFields_mdifferentiableAt (I := I) S (t : Real) x₀ b c m)
       (nabla2Rm04Field_slotFields_mdifferentiableAt (I := I) S (t : Real) x₀ c b m)]
 
     rw [nabla2Rm04Field_antisym_eq_curvatureAction_field (I := I) S hS t x₀ b c m]
-  ·
-
-
-
-    have hStep1 :
+  · have hStep1 :
         (∑ q : Fin 6,
             nabla2Rm04Field (I := I) S (t : Real) x₀
               (Function.update

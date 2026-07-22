@@ -421,21 +421,18 @@ theorem gluedFamily_pde_cross_of_matching
   refine hasDerivWithinAt_Iic_of_tendsto_deriv (s := Set.Ioo α omega) (e := (-2 : ℝ) *
       DifferentialGeometry.Integral.Connection.ricciTensor (I := I) gomega x v w)
     (f := f) ?_ ?_ (Ioo_mem_nhdsLT hαomega) ?_
-  ·
-    intro s hs
+  · intro s hs
     have hg0d : DifferentiableWithinAt ℝ g0 (Set.Ioo α omega) s :=
       (hg0_hasDeriv s hs).differentiableAt.differentiableWithinAt
     exact hg0d.congr (fun t ht => hfg0 t ht) (hfg0 s hs)
-  ·
-    have hg0_lim : Tendsto g0 (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) :=
+  · have hg0_lim : Tendsto g0 (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) :=
       (hcont x v w).mono_left (nhdsWithin_mono omega (fun s hs => hs.2))
     have hf_lim : Tendsto f (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) := by
       refine hg0_lim.congr' ?_
       filter_upwards [self_mem_nhdsWithin] with s hs using (hfg0 s hs).symm
     rw [ContinuousWithinAt, hf_omega]
     exact hf_lim
-  ·
-    refine (hderiv_lim x v w).congr' ?_
+  · refine (hderiv_lim x v w).congr' ?_
     filter_upwards [Ioo_mem_nhdsLT hαomega] with s hs
 
     have hev : f =ᶠ[𝓝 s] g0 := by
@@ -498,8 +495,7 @@ theorem gluedFamily_pde
         (Set.Ici α) t := by
   intro t ht x v w
   rcases lt_trichotomy t omega with htlt | hteq | htgt
-  ·
-    have hg_t : gluedFamily (I := I) g_fam r omega t = g_fam t :=
+  · have hg_t : gluedFamily (I := I) g_fam r omega t = g_fam t :=
       gluedFamily_of_lt (I := I) g_fam r omega htlt
     have hleftt := hleft t ⟨ht.1, htlt⟩ x v w
 
@@ -512,9 +508,7 @@ theorem gluedFamily_pde
     rw [hg_t]
     exact hleftt.congr_of_eventuallyEq hev
       (by rw [gluedFamily_of_lt (I := I) g_fam r omega htlt])
-  ·
-
-    subst hteq
+  · subst hteq
 
     have h0memT : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_refl 0, lt_of_lt_of_le hε hεT⟩
     have hr_pde0 := hright 0 h0memT x v w
@@ -559,8 +553,7 @@ theorem gluedFamily_pde
             (gluedFamily (I := I) g_fam r t t) x v w)
         t := hasDerivWithinAt_univ.mp hunion
     exact hderiv.hasDerivWithinAt
-  ·
-    have hg_t : gluedFamily (I := I) g_fam r omega t = r (t - omega) :=
+  · have hg_t : gluedFamily (I := I) g_fam r omega t = r (t - omega) :=
       gluedFamily_of_ge (I := I) g_fam r omega (le_of_lt htgt)
     have htmem : t - omega ∈ Set.Ico (0 : ℝ) T :=
       ⟨by linarith, by linarith [hε, hεT, ht.2]⟩
@@ -741,11 +734,9 @@ theorem ricci_flow_extends_construction
     gluedFamily_pde_cross_of_matching (I := I) g_fam r limit.limitMetric
       hαomega hr0 hleft hcont hderiv_lim
   refine ⟨ε, hε, gluedFamily (I := I) g_fam r omega, ?_, ?_, ?_, ?_⟩
-  ·
-    exact gluedFamily_eq_left (I := I) g_fam r omega
+  · exact gluedFamily_eq_left (I := I) g_fam r omega
   · exact hglue.gram_smooth
   · exact hglue.gram_cont
-  ·
-    exact gluedFamily_pde (I := I) g_fam r hαomega hε hεT hleft hr_pde hcross
+  · exact gluedFamily_pde (I := I) g_fam r hαomega hε hεT hleft hr_pde hcross
 
 end DifferentialGeometry.PDE.RicciFlow

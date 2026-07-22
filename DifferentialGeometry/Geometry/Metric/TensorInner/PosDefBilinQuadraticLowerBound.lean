@@ -23,7 +23,6 @@ theorem posDef_bilin_quadratic_lower_bound
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
     (B : F →L[ℝ] F →L[ℝ] ℝ)
     (hPD : ∀ v : F, v ≠ 0 → 0 < B v v)
-    (hNN : ∀ v : F, 0 ≤ B v v)
     (hsl : ∀ (c : ℝ) (v w : F), B (c • v) w = c * B v w)
     (hsr : ∀ (c : ℝ) (v w : F), B v (c • w) = c * B v w) :
     ∃ c : ℝ, 0 < c ∧ ∀ v : F, c * ‖v‖ ^ 2 ≤ B v v := by

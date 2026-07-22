@@ -115,3 +115,9 @@ theorem covD3_starAg_leibniz
     exact Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun k _ => by ring
   rw [hC1, hC2, hC3, hcancel]
   ring
+
+end RicciFlow
+
+end PDE
+
+end DifferentialGeometry

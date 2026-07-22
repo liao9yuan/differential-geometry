@@ -82,11 +82,9 @@ theorem contDiffOn_glue_of_seam_param
     rintro m ⟨y1, y2⟩ hy
     obtain ⟨hy1, hy2⟩ := hy
     rcases eq_or_lt_of_le (Set.mem_Ici.mp hy1) with hy0 | hy0
-    ·
-      subst hy0
+    · subst hy0
       simp only [hp_def, if_pos (le_refl (0:ℝ)), hmatchP m y2 hy2]
-    ·
-      simp only [hp_def, if_neg (not_le.mpr hy0)]
+    · simp only [hp_def, if_neg (not_le.mpr hy0)]
 
   have hzero : ∀ x : ℝ × E, x ∈ ((Set.univ : Set ℝ) ×ˢ V) → (p x 0).curry0 = f x := by
     rintro ⟨x1, x2⟩ hx
@@ -109,8 +107,7 @@ theorem contDiffOn_glue_of_seam_param
     have hpR_succ : ∀ y : ℝ × E, 0 < y.1 → p y m.succ = pR y m.succ :=
       fun y hy => by simp only [hp_def, if_neg (not_le.mpr hy)]
     rcases lt_trichotomy x1 0 with hx1 | hx1 | hx1
-    ·
-      have hxle : x1 ≤ 0 := le_of_lt hx1
+    · have hxle : x1 ≤ 0 := le_of_lt hx1
       have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (x1, x2) m.succ).curryLeft sL (x1, x2) :=
         hTL.fderivWithin m (hm_lt m) (x1, x2) ⟨hxle, hx2⟩
       have hsub : Set.Iio (0:ℝ) ×ˢ V ⊆ sL := Set.prod_mono Set.Iio_subset_Iic_self (Set.Subset.refl V)
@@ -124,8 +121,7 @@ theorem contDiffOn_glue_of_seam_param
         hdL'.congr_of_eventuallyEq hee
       rw [hpL_succ (x1, x2) hxle]
       exact hfd.hasFDerivWithinAt
-    ·
-      subst hx1
+    · subst hx1
       have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL ((0:ℝ), x2) m.succ).curryLeft sL
           ((0:ℝ), x2) := hTL.fderivWithin m (hm_lt m) ((0:ℝ), x2) ⟨Set.self_mem_Iic, hx2⟩
       have hdL0' : HasFDerivWithinAt (fun y => p y m) (pL ((0:ℝ), x2) m.succ).curryLeft sL
@@ -145,8 +141,7 @@ theorem contDiffOn_glue_of_seam_param
       rw [hsetUnion] at hunion
       rw [hpL_succ ((0:ℝ), x2) (le_refl (0:ℝ))]
       exact hunion
-    ·
-      have hxge : (0:ℝ) ≤ x1 := le_of_lt hx1
+    · have hxge : (0:ℝ) ≤ x1 := le_of_lt hx1
       have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (x1, x2) m.succ).curryLeft sR (x1, x2) :=
         hTR.fderivWithin m (hm_lt m) (x1, x2) ⟨hxge, hx2⟩
       have hsub : Set.Ioi (0:ℝ) ×ˢ V ⊆ sR := Set.prod_mono Set.Ioi_subset_Ici_self (Set.Subset.refl V)

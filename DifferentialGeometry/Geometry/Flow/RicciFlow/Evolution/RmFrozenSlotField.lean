@@ -365,8 +365,7 @@ private theorem allBut04FreezeNabla
           Function.update (fun i : Fin 4 => Y i x) q (Usec x) :=
       freezeAllButSlots_apply (I := I) Y q Usec x
     rw [Finset.sum_eq_single q]
-    ·
-      have hVq : (fun p : M => V4 q p) = (fun p : M => Usec p) := by
+    · have hVq : (fun p : M => V4 q p) = (fun p : M => Usec p) := by
         funext p
         simp [V4, freezeAllButSlots]
       rw [hVq, hV4x]
@@ -376,8 +375,7 @@ private theorem allBut04FreezeNabla
       by_cases hi : i = q
       · subst hi; simp
       · simp [Function.update_of_ne hi]
-    ·
-      intro a _ ha
+    · intro a _ ha
       have hVa : (fun p : M => V4 a p) = (fun p : M => Y a p) := by
         funext p
         simp [V4, freezeAllButSlots, Function.update_of_ne ha]

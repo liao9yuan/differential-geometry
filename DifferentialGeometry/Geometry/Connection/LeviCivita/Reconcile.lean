@@ -62,10 +62,7 @@ theorem leviCivitaConnectionOfMetric_apply_eq_leviCivita
   refine LeviCivita_unique g (leviCivitaConnectionOfMetric (I := I) g) ?_ ?_ hσ v
   · funext y
     exact (leviCivitaConnectionOfMetric_isLeviCivita (I := I) g).2 y
-  ·
-
-
-    intro Y Z x hY hZ _ w
+  · intro Y Z x hY hZ _ w
     classical
     obtain ⟨X, hXx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
       (F := E) (V := (TangentSpace I : M → Type _)) x w

@@ -345,16 +345,14 @@ theorem nabla_partialEval0S {s : ℕ}
               ((cov (fun p : M => V b p) x) (X x))) := by
     rw [Fin.sum_univ_succ]
     congr 1
-    ·
-      rw [show (fun p : M => V3 0 p) = (fun p : M => Y p) from funext hV30]
+    · rw [show (fun p : M => V3 0 p) = (fun p : M => Y p) from funext hV30]
       congr 1
       rw [hV3x]
       funext a
       refine Fin.cases ?_ (fun b => ?_) a
       · simp [Function.update]
       · simp [Function.update, Fin.cons_succ]
-    ·
-      refine Finset.sum_congr rfl fun b _ => ?_
+    · refine Finset.sum_congr rfl fun b _ => ?_
       rw [show (fun p : M => V3 b.succ p) = (fun p : M => V b p) from funext (hV3succ b)]
       rw [hBeval x (Function.update (fun a : Fin s => V a x) b
         ((cov (fun p : M => V b p) x) (X x)))]

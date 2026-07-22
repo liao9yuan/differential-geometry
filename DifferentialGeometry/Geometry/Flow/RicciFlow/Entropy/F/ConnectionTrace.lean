@@ -427,9 +427,7 @@ private theorem connTraceRawDiv_eq_productSum
 
   rw [Finset.sum_add_distrib]
   congr 1
-  ·
-
-    refine Finset.sum_congr rfl fun p _ => ?_
+  · refine Finset.sum_congr rfl fun p _ => ?_
     have hev' :
         (fun y : M =>
             (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff p y (Z.toFun y))
@@ -463,10 +461,7 @@ private theorem connTraceRawDiv_eq_productSum
       (fun i _ j _ => compFun_mdifferentiableAt (I := I) A x p i j)]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
-  ·
-
-
-    have hcoeff_l : ∀ l : CoordinateIdx (𝕜 := Real) E,
+  · have hcoeff_l : ∀ l : CoordinateIdx (𝕜 := Real) E,
         (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff l x (Z.toFun x) =
           ∑ i : CoordinateIdx (𝕜 := Real) E,
             ∑ j : CoordinateIdx (𝕜 := Real) E,

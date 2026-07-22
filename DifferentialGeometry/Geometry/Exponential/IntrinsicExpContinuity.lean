@@ -403,8 +403,7 @@ private theorem dist_le_of_speed_bound_on_Icc
     rcases lt_or_eq_of_le hs.2 with hst | hst
     · obtain ⟨t, ht_G, hst'⟩ := exists_lt_of_lt_csSup hG_ne hst
       exact ht_G.2 s ⟨hs.1, le_of_lt hst'⟩
-    ·
-      rw [hst]
+    · rw [hst]
       rcases eq_or_lt_of_le ht0_nonneg with h0 | h0
       · rw [← h0, hc0, dist_self]; exact le_of_lt hR_pos
       · have hsub_cwa : ContinuousWithinAt (fun r => c r - z₀) (Set.Ico 0 t0) t0 :=
@@ -441,7 +440,7 @@ private theorem dist_le_of_speed_bound_on_Icc
       refine ⟨⟨le_trans ht0_nonneg (le_of_lt ht1_gt), ht1_le⟩, fun s hs => ?_⟩
       by_cases hsl : s ≤ t0
       · exact ht0_G.2 s ⟨hs.1, hsl⟩
-      · push_neg at hsl
+      · push Not at hsl
         have hs_time : s ∈ Metric.ball t0 δ ∩ Set.Icc (0:ℝ) T'' := by
           refine ⟨?_, ⟨hs.1, le_trans hs.2 ht1_le⟩⟩
           rw [Metric.mem_ball, Real.dist_eq, abs_lt]
@@ -463,7 +462,7 @@ omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun
 omit [I.Boundaryless] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem chartPhaseVF_bddOn_closedBall
-    (g : SmoothRiemannianMetric I M) (α : M) (z₀ : E × E) {R : ℝ} (hR : 0 ≤ R)
+    (g : SmoothRiemannianMetric I M) (α : M) (z₀ : E × E) {R : ℝ}
     (hsub : Metric.closedBall z₀ R ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
     ∃ M : ℝ, 0 < M ∧
@@ -482,7 +481,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] 
 private theorem orbit_speed_confined_fwd
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : ℝ → E × E} {z₀ : E × E} {R ρ M T_f : ℝ}
-    (hMpos : 0 < M) (hRρ : ρ < R) (hρ_nonneg : 0 ≤ ρ) (hT_f : 0 < T_f)
+    (hMpos : 0 < M) (hRρ : ρ < R) (hT_f : 0 < T_f)
     (hz_c : dist (c 0) z₀ ≤ ρ)
     (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min T_f ((R - ρ) / M)),
       HasDerivWithinAt c (chartPhaseVF (I := I) g α (c s))
@@ -527,7 +526,7 @@ private theorem flowOrbit_speed_confined_uniform
     {N : Type*} [TopologicalSpace N]
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : N → E × E} {S : Set N}
     {R ρ Mb T_f : ℝ}
-    (hMpos : 0 < Mb) (hRρ : ρ < R) (hρ_nonneg : 0 ≤ ρ) (hT_f : 0 < T_f)
+    (hMpos : 0 < Mb) (hRρ : ρ < R) (hT_f : 0 < T_f)
     (hRMT : R - ρ < Mb * T_f)
     (hz_ball : ∀ v ∈ S, dist (z v) z₀ ≤ ρ)
     (hΦinit : ∀ v ∈ S, Φ (z v, 0) = z v)
@@ -540,8 +539,8 @@ private theorem flowOrbit_speed_confined_uniform
   have hdivlt : (R - ρ) / Mb < T_f := by rw [div_lt_iff₀ hMpos]; linarith [hRMT]
   have hmin : min T_f ((R - ρ) / Mb) = (R - ρ) / Mb := min_eq_right (le_of_lt hdivlt)
   have hconf := orbit_speed_confined_fwd g α (c := fun τ => Φ (z v, τ)) (z₀ := z₀)
-    (R := R) (ρ := ρ) (T_f := T_f) hMpos hRρ hρ_nonneg hT_f
-    (by show dist (Φ (z v, 0)) z₀ ≤ ρ; rw [hΦinit v hv]; exact hz_ball v hv)
+    (R := R) (ρ := ρ) (T_f := T_f) hMpos hRρ hT_f
+    (by change dist (Φ (z v, 0)) z₀ ≤ ρ; rw [hΦinit v hv]; exact hz_ball v hv)
     (fun s' hs' => by
       rw [hmin] at hs'
       have hs'_Ioo : s' ∈ Set.Ioo (-T_f) T_f :=
@@ -564,7 +563,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] 
 private theorem flowOrbit_cutoff_confined_explicit
     (g : SmoothRiemannianMetric I M) (α : M)
     {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
-    (hMpos : 0 < Mb) (hρ_nonneg : 0 ≤ ρ) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
+    (hMpos : 0 < Mb) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
     (hzc : dist z_c z₀ ≤ ρ) (horbit0 : orbit 0 = z_c)
     (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min εPL ((b.rIn - ρ) / Mb)),
       HasDerivWithinAt orbit
@@ -614,7 +613,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] 
 private theorem flowOrbit_cutoff_confined_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
-    (hMpos : 0 < Mb) (hρ_nonneg : 0 ≤ ρ) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
+    (hMpos : 0 < Mb) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
     (hRMT : b.rIn - ρ < Mb * εPL)
     (hzc : dist z_c z₀ ≤ ρ) (horbit0 : orbit 0 = z_c)
     (hderiv : ∀ s ∈ Set.Ioo (-εPL) εPL,
@@ -629,7 +628,7 @@ private theorem flowOrbit_cutoff_confined_symm
   have hT'_pos : 0 < T' := div_pos (by linarith) hMpos
   have hMT' : Mb * T' ≤ b.rIn - ρ := le_of_eq (by rw [hT'_def]; field_simp)
   have hfwd : ∀ s ∈ Set.Icc (0:ℝ) T', orbit s ∈ Metric.closedBall z₀ b.rIn := by
-    have h := flowOrbit_cutoff_confined_explicit g α b hMpos hρ_nonneg hρ_lt hεPL hzc
+    have h := flowOrbit_cutoff_confined_explicit g α b hMpos hρ_lt hεPL hzc
       horbit0
       (by
         rw [hmin]
@@ -670,7 +669,7 @@ private theorem flowOrbit_cutoff_confined_symm
   intro s hs
   by_cases hs0 : (0:ℝ) ≤ s
   · exact hfwd s ⟨hs0, le_of_lt hs.2⟩
-  · push_neg at hs0
+  · push Not at hs0
     have hneg := hbwd (-s) ⟨by linarith, by linarith [hs.1]⟩
     rwa [neg_neg] at hneg
 
@@ -2103,7 +2102,7 @@ private theorem exists_chartFlowData_of_zContinuousAt
       Metric.ball_subset_closedBall (horbit_in v hv s hs)
     have hVF : chartPhaseVFTime (I := I) g α ((z₀).1, (z₀).2) b s (Φ (z v, s))
         = chartPhaseVF (I := I) g α (Φ (z v, s)) := by
-      show chartPhaseVFCutoff (I := I) g α ((z₀).1, (z₀).2) b (Φ (z v, s))
+      change chartPhaseVFCutoff (I := I) g α ((z₀).1, (z₀).2) b (Φ (z v, s))
         = chartPhaseVF (I := I) g α (Φ (z v, s))
       exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α
         ((z₀).1, (z₀).2) b horbit_rin
@@ -2151,7 +2150,7 @@ private theorem exists_chartFlow_confined
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
     subset_trans (Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)) hb_sub
   obtain ⟨Mb, hMb_pos, hMb⟩ :=
-    chartPhaseVF_bddOn_closedBall (I := I) g α z₀ (le_of_lt b.rIn_pos) hballIn_sub
+    chartPhaseVF_bddOn_closedBall (I := I) g α z₀ hballIn_sub
 
   set ρ_z : ℝ := b.rIn - min b.rIn (Mb * εN) / 2 with hρz_def
   have hmin_pos : 0 < min b.rIn (Mb * εN) := lt_min b.rIn_pos (by positivity)
@@ -2193,7 +2192,7 @@ private theorem exists_chartFlow_confined
     have hzc : dist w z₀ ≤ ρ_z :=
       le_of_lt (lt_of_lt_of_le (Metric.mem_ball.mp hw) hρw_le_ρz)
     have hconf := flowOrbit_cutoff_confined_symm (I := I) g α b hMb_pos
-      (le_of_lt hρz_pos) hρz_lt hεN hRMT hzc
+      hρz_lt hεN hRMT hzc
       (hflow.apply_initial w (hw_ball_rN w hw)) hderiv_v hMb
     exact hconf s ⟨by linarith [hs.1, hT'_le_Tconf], by linarith [hs.2, hT'_le_Tconf]⟩
   refine ⟨Φ, b, T', ρ_w, hT'_pos, hρw_pos, hb_sub, ?_, ?_, hΦ_in, ?_⟩
@@ -2296,7 +2295,7 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
       simpa [hcγ_def, DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
         using h
     rw [hpsiS_def]
-    show γ t = (extChartAt I α).symm (phiS t).1
+    change γ t = (extChartAt I α).symm (phiS t).1
     rw [← h1]
     exact ((extChartAt I α).left_inv
       (by rw [extChartAt_source (I := I) α]; exact hsrc)).symm
@@ -2496,7 +2495,7 @@ private theorem intrinsicVelocityLift_window_of_flow
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) (v₀ : TangentSpace I p)
     (α : M) {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
-    {T' ρ : ℝ} (hT'_pos : 0 < T') (hρ_pos : 0 < ρ)
+    {T' ρ : ℝ}
     (hballOut : Metric.closedBall z₀ b.rOut ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
     (hΦ_cont : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T'))
@@ -2841,12 +2840,10 @@ private theorem intrinsicVelocityLift_window_base
     refine ⟨min (min δ rS) (min δz 1), min δ T', lt_min (lt_min hδ_pos hrS_pos)
       (lt_min hδz_pos one_pos), lt_min hδ_pos hT'_pos, le_trans (min_le_right _ _)
       (min_le_right _ _), ?_, ?_, ?_, ?_⟩
-    ·
-      intro v hv
+    · intro v hv
       exact hδz_sub (Metric.ball_subset_ball
         (le_trans (min_le_right _ _) (min_le_left _ _)) hv)
-    ·
-      intro v hv t ht
+    · intro v hv t ht
       have hvS : v ∈ Metric.ball v₀ rS := Metric.ball_subset_ball
         (le_trans (min_le_left _ _) (min_le_right _ _)) hv
       have htT' : t ∈ Set.Ioo (-T') T' := by
@@ -2854,8 +2851,7 @@ private theorem intrinsicVelocityLift_window_base
         exact ⟨by linarith [ht.1, min_le_right δ T'], by linarith [ht.2, min_le_right δ T']⟩
       have h := (hB2 v hvS t htT').1
       rwa [zero_add] at h
-    ·
-      intro v hv t ht
+    · intro v hv t ht
       have hvS : v ∈ Metric.ball v₀ rS := Metric.ball_subset_ball
         (le_trans (min_le_left _ _) (min_le_right _ _)) hv
       have htT' : t ∈ Set.Ioo (-T') T' := by
@@ -2877,8 +2873,7 @@ private theorem intrinsicVelocityLift_window_base
           rw [Set.mem_Ioo] at ht
           exact ⟨by linarith [ht.1, min_le_left δ T'], by linarith [ht.2, min_le_left δ T']⟩
       exact Metric.ball_subset_closedBall (hδ_sub hvt_δ).2
-    ·
-      intro v _
+    · intro v _
       rfl
   obtain ⟨r, ε, hr, hε, hlift⟩ :=
     intrinsicVelocityLift_window_of_junction_data (I := I) g hEnorm p v₀ p
@@ -2903,7 +2898,7 @@ private theorem intrinsicVelocityLift_step_uniformWidth
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) (v₀ : TangentSpace I p) (α : M) (τ : ℝ)
     {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
-    {T' ρ : ℝ} (hT'_pos : 0 < T') (hρ_pos : 0 < ρ)
+    {T' ρ : ℝ}
     (hballOut : Metric.closedBall z₀ b.rOut ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E))
     (hΦ_cont : ContinuousOn Φ ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T') T'))
@@ -2980,7 +2975,7 @@ private theorem intrinsicVelocityLift_step_uniformWidth
     exact (hδ_sub hvτ).2
 
   refine intrinsicVelocityLift_window_of_flow (I := I) g hEnorm p v₀ α
-    (z₀ := z₀) (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hT'_pos hρ_pos hballOut
+    (z₀ := z₀) (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hballOut
     hΦ_cont hΦ_phase hΦ_in hΦinit
     (z := z) (tₖ := τ) (rz := min rz δ) (lt_min hrz hδ_pos)
     (hz_cont.mono (Metric.ball_subset_ball (min_le_left _ _)))
@@ -3036,7 +3031,7 @@ theorem intrinsicGeodesic_jointContinuity
     have hS_pos : 0 < S := lt_of_lt_of_le (lt_min hεb (by norm_num)) hc0_le_S
     have hS_gt1 : 1 < S := by
       by_contra hle
-      push_neg at hle
+      push Not at hle
 
 
       set αS : M := intrinsicGeodesic (I := I) g hEnorm p v₀ S with hαS_def
@@ -3127,7 +3122,7 @@ theorem intrinsicGeodesic_jointContinuity
               (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
             deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
               (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E))
-          (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hT'_pos hρ_pos hballOut
+          (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hballOut
           hΦ_cont hΦ_phase hΦ_in hΦinit hα_src_τ hphase_near
           (r₀ := r') (a := a') (c := c') hr' hτ_mem hcont'
 
@@ -3143,7 +3138,7 @@ theorem intrinsicGeodesic_jointContinuity
             ⟨Metric.ball_subset_ball (min_le_left _ _) hv, ⟨hs.1, hsc⟩⟩
           exact ((hcont' _ hmem1).continuousAt
             ((Metric.isOpen_ball.prod isOpen_Ioo).mem_nhds hmem1)).continuousWithinAt
-        · push_neg at hsc
+        · push Not at hsc
           have hs_lt : s < τ + T' := (lt_max_iff.mp hs.2).resolve_left (not_lt.mpr hsc)
           have hmem2 : ((v, s) : TangentSpace I p × ℝ) ∈
               (Metric.ball v₀ r'') ×ˢ Set.Ioo (τ - T') (τ + T') :=

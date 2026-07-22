@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
 
 
 noncomputable section

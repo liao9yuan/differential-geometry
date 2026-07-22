@@ -207,8 +207,8 @@ class TensorBundleCore
     letI := fiberBundleInst
     VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)
 
-attribute [instance] TensorBundleCore.totalSpaceTop
-attribute [instance] TensorBundleCore.fiberBundleInst
+attribute [reducible, instance] TensorBundleCore.totalSpaceTop
+attribute [reducible, instance] TensorBundleCore.fiberBundleInst
 attribute [instance] TensorBundleCore.vectorBundleInst
 attribute [instance] TensorBundleCore.toTensorFiberTopologies
 

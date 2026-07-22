@@ -125,17 +125,17 @@ theorem metricQuadFormDiff_le_metricDerivNorm
       metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
         = gk.inner x v v - gInf.inner x v v := by
-    show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+    change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = _
     have hk : metricCovDeriv (I := I) gk gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gk x
+      change Tensor0SBundle.metricTensorField (I := I) gk x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
     have hI : metricCovDeriv (I := I) gInf gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gInf x
+      change Tensor0SBundle.metricTensorField (I := I) gInf x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
@@ -182,17 +182,17 @@ theorem metricDiffCovDerivAt_zero_apply
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     change IsManifold I ∞ M; infer_instance
-  show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+  change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = _
   have hk : metricCovDeriv (I := I) gk gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gk x
+    change Tensor0SBundle.metricTensorField (I := I) gk x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
   have hI : metricCovDeriv (I := I) gInf gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gInf x
+    change Tensor0SBundle.metricTensorField (I := I) gInf x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]

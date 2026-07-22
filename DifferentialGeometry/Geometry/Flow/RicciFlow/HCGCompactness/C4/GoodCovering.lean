@@ -585,7 +585,7 @@ theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.Rea
     z ∈ hd.lambdaBallC D k c x ↔
       hd.dist k z x < c * hd.lambda D (hd.dist k x (X.obj k).basepoint) := by
   letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
-  show edist z x < ENNReal.ofReal (c * hd.lambda D (hd.dist k x (X.obj k).basepoint)) ↔ _
+  change edist z x < ENNReal.ofReal (c * hd.lambda D (hd.dist k x (X.obj k).basepoint)) ↔ _
   rw [hre.edist_eq k z x]
   exact ENNReal.ofReal_lt_ofReal_iff_of_nonneg (hre.dist_nonneg k z x)
 

@@ -586,7 +586,7 @@ theorem ham3_short_solution_candidate
   obtain ⟨T, hT, g_fam, hg0, hsmooth, hcont, hpde⟩ :=
     ham3_short_exists hM g0
   refine ⟨T, hT, ⟨⟨g_fam⟩⟩, ?_, ?_, ?_, ?_⟩
-  · show g_fam 0 = g0
+  · change g_fam 0 = g0
     exact hg0
   · intro x0 i j
     exact hsmooth x0 i j
@@ -613,7 +613,7 @@ theorem ham3_short_isSolution
   obtain ⟨T, hT, g, hstart, hjoint, hpde⟩ :=
     DifferentialGeometry.PDE.RicciFlow.short_time_joint (I := I) (M := M) g0
   refine ⟨T, hT, ⟨⟨g⟩⟩, ?_, ?_⟩
-  · show g 0 = g0
+  · change g 0 = g0
     exact hstart
   · exact DifferentialGeometry.PDE.RicciFlow.solutionOn_of_joint
       (I := I) (M := M) hT g hjoint hpde

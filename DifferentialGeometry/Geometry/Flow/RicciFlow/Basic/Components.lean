@@ -656,7 +656,7 @@ theorem ricciNormSq_basis
   simp only [ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.ricciNormSqInFrame_apply,
     ricciTwoTensorField_apply, SolutionOn.ricciAt_eq,
     DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame_apply, SolutionOn.ricci_eq,
-    SolutionFamily.ricci_apply, DifferentialGeometry.Integral.Connection.vec2, hbasis, Fin.isValue,
+    SolutionFamily.ricci_apply, hbasis, Fin.isValue,
     Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_

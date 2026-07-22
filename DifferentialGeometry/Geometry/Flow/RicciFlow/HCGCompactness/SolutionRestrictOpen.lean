@@ -255,10 +255,10 @@ theorem restrictOpenPush_contMDiffWithinAt
     intro z hz
     have hcz : cor z = ⟨z, hz⟩ := by simp only [hcor_def, dif_pos hz]
     rw [dif_pos hz, hcz]
-    show tangentMap I I (Subtype.val : U → M)
+    change tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) (⟨z, hz⟩ : U) (frame i ⟨z, hz⟩))
       = TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (frame i ⟨z, hz⟩)
-    show TotalSpace.mk' E (E := fun w : M => TangentSpace I w) ((⟨z, hz⟩ : U) : M)
+    change TotalSpace.mk' E (E := fun w : M => TangentSpace I w) ((⟨z, hz⟩ : U) : M)
         (mfderiv I I (Subtype.val : U → M) (⟨z, hz⟩ : U) (frame i ⟨z, hz⟩))
       = TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (frame i ⟨z, hz⟩)
     rw [mfderiv_subtype_val_apply]

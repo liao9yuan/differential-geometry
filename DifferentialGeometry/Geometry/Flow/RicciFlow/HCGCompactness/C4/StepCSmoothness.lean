@@ -234,8 +234,7 @@ theorem implicitSol_hasStrictFDerivAt
     (ContinuousLinearMap.fst ℝ E ((ι → ℝ) × (ι → E))).comp
       (fderiv ℝ (φ.implicitFunction (φ.leftFun φ.pt)) (φ.rightFun φ.pt)),
     hf0, cmSolution_hasStrictFDerivAt φ, ?_, ?_⟩
-  ·
-    have htend : Filter.Tendsto
+  · have htend : Filter.Tendsto
         (fun params : (ι → ℝ) × (ι → E) => (φ.leftFun φ.pt, params))
         (nhds params₀) (nhds (φ.prodFun φ.pt)) :=
       tendsto_const_nhds.prodMk_nhds Filter.tendsto_id
@@ -249,8 +248,7 @@ theorem implicitSol_hasStrictFDerivAt
       _ = φ.leftFun x := by rw [← hr']
       _ = φ.leftFun φ.pt := hl
       _ = 0 := hz₀
-  ·
-    filter_upwards [φ.leftFun_eq_iff_implicitFunction] with zp hzp hGzp
+  · filter_upwards [φ.leftFun_eq_iff_implicitFunction] with zp hzp hGzp
     have hle : φ.leftFun zp = φ.leftFun φ.pt := hGzp.trans hz₀.symm
     exact congrArg Prod.fst (hzp.mp hle).symm
 

@@ -168,7 +168,7 @@ theorem metricCovDerivDeriv_of_solution
     simp only [ricciCovDerivCompInFrame, RicciAtFamily.toTensorField_apply,
       ContinuousLinearMap.smul_apply, smul_eq_mul]
     ring
-  show HasDerivWithinAt
+  change HasDerivWithinAt
       (fun s : Real => metricCovDerivCompInFrameAtBase (I := I) S frame (t : Real) s x d a b)
       ((-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame (t : Real) x d a b)
       D.carrier (t : Real)

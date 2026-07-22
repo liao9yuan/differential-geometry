@@ -88,7 +88,7 @@ theorem metric_lower_bound_of_compact
       have hfp : c ≤ f p := (isMinOn_iff.mp hmin) p (Set.mem_univ p)
       have hfp_eq : f p = s⁻¹ * s⁻¹ * h.inner x v v := by
         rw [hquad_eq p]
-        show h.inner x u u = _
+        change h.inner x u u = _
         rw [hu_def, metric_smul2]
       rw [hfp_eq] at hfp
       have hkey : c * (s * s) ≤ h.inner x v v := by

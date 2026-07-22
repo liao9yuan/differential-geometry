@@ -97,34 +97,26 @@ theorem isSolutionOn_of_reg
       rm04Cont := ?_
       ricciNormSpace := ?_
       ricciNormGrad := ?_ }
-  ·
-    intro t
+  · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
       RealizedMetricFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I)
         (g (t : Real))
-  ·
-
-    intro t x X Y
+  · intro t x X Y
     have h : HasDerivWithinAt (fun s : Real => (g s).inner x X Y)
         ((-2 : Real) * ricciTensor (I := I) (g (t : Real)) x X Y)
         D.carrier (t : Real) :=
       (hpde (t : Real) t.2 x X Y).hasDerivWithinAt
     simpa [SolutionFamily.ricciAt, metricRicciAt,
       metricRicciAt_apply_eq_ricciTensor] using h
-  ·
-    exact hscalarCont.congr (fun q _ => rfl)
-  ·
-    intro K t htK hKsub x
+  · exact hscalarCont.congr (fun q _ => rfl)
+  · intro K t htK hKsub x
     exact (hscalarTime t (hKsub htK) x).mono hKsub
-  ·
-    refine Tensor0SFamilyContinuousOnSet.congr hricciCont (fun t _ x => ?_)
+  · refine Tensor0SFamilyContinuousOnSet.congr hricciCont (fun t _ x => ?_)
     simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
-  ·
-    refine Tensor0SFamilyContinuousOnSet.congr hrm04Cont (fun t _ x => ?_)
+  · refine Tensor0SFamilyContinuousOnSet.congr hrm04Cont (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
-  ·
-    intro t ht x
+  · intro t ht x
     have h := (normSq02_smooth (I := I) (M := M)
       (g (t : Real)) (metricRicci (I := I) (M := M) (g (t : Real)))).mdifferentiableAt
       (by simp) (x := x)
@@ -132,8 +124,7 @@ theorem isSolutionOn_of_reg
     filter_upwards with y
     simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
       SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
-  ·
-    intro t ht x
+  · intro t ht x
     have hsm : ContMDiff I 𝓘(Real, Real) ∞
         (ricciNorm (I := I)
           ({ base := { metric := g } } : SolutionOn (I := I) (M := M) D)

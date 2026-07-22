@@ -1032,13 +1032,11 @@ theorem estimate (B : BernsteinTower (I := I) G) :
   induction m using Nat.strong_induction_on with
   | _ m IH =>
     rcases Nat.eq_zero_or_pos m with hm0 | hmpos
-    ·
-      subst hm0
+    · subst hm0
       intro t htmem htpos x
       simp only [pow_zero, one_mul, towerConst_zero, one_pow]
       exact B.hw0_bound t htmem x
-    ·
-      classical
+    · classical
       set C : ℕ -> Real := towerConst B.c B.α with hC
       set β : Real := towerBeta B.c B.α C m with hβ
       have hβ_nonneg : 0 <= β := towerBeta_nonneg B.hc B.hα m
@@ -1230,8 +1228,7 @@ theorem estimate (B : BernsteinTower (I := I) G) :
           (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) B.T) := by
         apply ContinuousOn.sub
         · exact (continuous_const.add (continuous_const.mul continuous_fst)).continuousOn
-        ·
-          have heq : (fun p : Real × M => Gfun (I := I) B m p.1 p.2) =
+        · have heq : (fun p : Real × M => Gfun (I := I) B m p.1 p.2) =
               (fun p : Real × M =>
                 ∑ i ∈ Finset.range (m + 1),
                   Gcoef (I := I) B m i * p.1 ^ i * B.w i p.1 p.2) := by
@@ -1250,8 +1247,7 @@ theorem estimate (B : BernsteinTower (I := I) G) :
           (fun s hs hsp y => hGtime s hs hsp y)
           (fun s hs hsp y => hGspace s hs hsp y)
           (fun s hs hsp y => hGgrad s hs hsp y)
-        ·
-          intro y
+        · intro y
           have h0 : Gfun (I := I) B m 0 y =
               Gcoef (I := I) B m 0 * B.w 0 0 y := by
             rw [Gfun]

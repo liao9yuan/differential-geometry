@@ -53,7 +53,7 @@ theorem injective_of_ball_ne_zero (L : E →L[ℝ] F) {r : ℝ} (hr : 0 < r)
   · rw [hnorm]; positivity
   · rw [hnorm]; linarith
   · rw [map_smul]
-    show c • L w = 0
+    change c • L w = 0
     rw [hw, smul_zero]
 
 end LinearAlgebra

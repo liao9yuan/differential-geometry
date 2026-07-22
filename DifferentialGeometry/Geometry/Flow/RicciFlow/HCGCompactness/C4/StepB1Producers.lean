@@ -1224,7 +1224,7 @@ theorem mfderivNormalCenter
     rw [NormalCoordinates.expMapDiffeo_zero] at h0
     exact h0
   have hcsymm0 : (NormalCoordinates.normalChartAt (I := I) gk y).symm (0 : E) = y := by
-    show NormalCoordinates.expMapDiffeo (I := I) gk y (0 : E) = y
+    change NormalCoordinates.expMapDiffeo (I := I) gk y (0 : E) = y
     exact NormalCoordinates.expMapDiffeo_zero (I := I) gk y
 
   have hysrc : y ∈ (NormalCoordinates.normalChartAt (I := I) gk y).source :=
@@ -1244,7 +1244,7 @@ theorem mfderivNormalCenter
           (NormalCoordinates.normalChartAt (I := I) gk y q)) y :=
     hGm.comp y hcm
   have h0tgt : (0 : E) ∈ (NormalCoordinates.normalChartAt (I := I) gn (F y)).symm.source := by
-    show (0 : E) ∈ (NormalCoordinates.expMapDiffeo (I := I) gn (F y)).source
+    change (0 : E) ∈ (NormalCoordinates.expMapDiffeo (I := I) gn (F y)).source
     exact NormalCoordinates.zero_mem_expMapDiffeo_source (I := I) gn (F y)
   have hdsymm_m : MDifferentiableAt 𝓘(ℝ, E) I
       ((NormalCoordinates.normalChartAt (I := I) gn (F y)).symm)

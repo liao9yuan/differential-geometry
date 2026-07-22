@@ -85,7 +85,7 @@ theorem exists_diffeo_of_injOn [Nonempty M]
     have hmem : invFunOn f s (φ x') ∈ s := invFunOn_mem ⟨x', hx's, h2⟩
     have happ : f (invFunOn f s (φ x')) = φ x' := invFunOn_eq ⟨x', hx's, h2⟩
     have h1 : φ.toPartialEquiv.symm (φ x') = x' := φ.toPartialEquiv.left_inv hx'φ
-    show invFunOn f s (φ x') = φ.toPartialEquiv.symm (φ x')
+    change invFunOn f s (φ x') = φ.toPartialEquiv.symm (φ x')
     rw [h1]
     exact hinj hmem hx's (by rw [happ, h2])
   refine ⟨{

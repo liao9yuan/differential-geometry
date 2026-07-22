@@ -111,12 +111,10 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
   have hcard : (0 : Real) <= (Fintype.card Idx : Real) := by positivity
   have hpow : (Fintype.card Idx : Real) ^ (6 + k) <= (Fintype.card Idx : Real) ^ (6 + m) := by
     rcases Nat.eq_zero_or_pos (Fintype.card Idx) with hc0 | hcpos
-    ·
-      rw [hc0]
+    · rw [hc0]
       simp only [Nat.cast_zero]
       rw [zero_pow (by omega : 6 + k ≠ 0), zero_pow (by omega : 6 + m ≠ 0)]
-    ·
-      have h1 : (1 : Real) <= (Fintype.card Idx : Real) := by
+    · have h1 : (1 : Real) <= (Fintype.card Idx : Real) := by
         have : (1 : ℕ) <= Fintype.card Idx := hcpos
         exact_mod_cast this
       exact pow_le_pow_right₀ h1 (by omega)
@@ -235,18 +233,15 @@ theorem bernsteinShi_solution_estimate
 
         intro k τ y
         rcases lt_trichotomy k m with hlt | heq | hgt
-        ·
-          have hk_le : k <= m := le_of_lt hlt
+        · have hk_le : k <= m := le_of_lt hlt
           have hk1_le : k + 1 <= m := hlt
           obtain ⟨d, hderiv, hle⟩ :=
             iteratedRmTower_heatBound tower k τ y
           refine ⟨d, ?_, ?_⟩
-          ·
-            have : (fun s : Real => w' k s y) = (fun s : Real => w k s y) := by
+          · have : (fun s : Real => w' k s y) = (fun s : Real => w k s y) := by
               funext s; rw [hw'_val_le k hk_le]
             rw [this]; exact hderiv
-          ·
-            rw [hwLap'_val_le k hk_le, hw'_val_le (k + 1) hk1_le,
+          · rw [hwLap'_val_le k hk_le, hw'_val_le (k + 1) hk1_le,
               hreact_eq k hk_le]
             have hmono : towerReactionSum (M := M) w
                   (2 * (Fintype.card Idx : Real) ^ (6 + k)) k (τ : Real) y <=
@@ -254,8 +249,7 @@ theorem bernsteinShi_solution_estimate
               towerReactionSum_mono_const w (towerLevelConst_mono (Idx := Idx) hk_le)
                 k (τ : Real) y
             linarith [hle, hmono]
-        ·
-          subst heq
+        · subst heq
           have hk_le : k <= k := le_refl k
           have hk1_gt : ¬ k + 1 <= k := by omega
           obtain ⟨d, hderiv, hle⟩ :=
@@ -275,8 +269,7 @@ theorem bernsteinShi_solution_estimate
               rw [tower.wDef (k + 1) (τ : Real) y]
               exact compNormSqMulti_nonneg _
             nlinarith [hle, hnn]
-        ·
-          have hk_gt : ¬ k <= m := by omega
+        · have hk_gt : ¬ k <= m := by omega
           have hk1_gt : ¬ k + 1 <= m := by omega
           refine ⟨0, ?_, ?_⟩
           · have : (fun s : Real => w' k s y) = (fun _s : Real => (0 : Real)) := by
@@ -294,12 +287,10 @@ theorem bernsteinShi_solution_estimate
       hLap := by
         intro k s hs hspos y
         by_cases hk : k <= m
-        ·
-          have hfun : (w' k s) = (w k s) := by funext z; rw [hw'_val_le k hk]
+        · have hfun : (w' k s) = (w k s) := by funext z; rw [hw'_val_le k hk]
           rw [hwLap'_val_le k hk, hfun]
           exact hLap k s hs hspos y
-        ·
-          have hfun : (w' k s) = (fun _z : M => (0 : Real)) := by
+        · have hfun : (w' k s) = (fun _z : M => (0 : Real)) := by
             funext z; rw [hw'_val_gt k hk]
           rw [hwLap'_val_gt k hk, hfun]
           rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,

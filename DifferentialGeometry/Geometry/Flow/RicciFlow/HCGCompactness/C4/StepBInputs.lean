@@ -1170,13 +1170,13 @@ theorem normalChartAt_contMDiffAt_infty
     have hv'_symmsrc : v' ∈ (normalChartAt (I := I) g p).symm.source :=
       (normalChartAt (I := I) g p).map_source hq'_src
     have hfv' : fexp v' = q' := by
-      show (expMap (I := I) g p (show TangentSpace I p from v') : M) = q'
+      change (expMap (I := I) g p (show TangentSpace I p from v') : M) = q'
       rw [← normalChartAt_symm_apply (I := I) g p hv'_symmsrc]
       exact normalChartAt_left_inv (I := I) g p hq'_src
     have hΦv' : Φ v' = χ q' := by
       have hc : (χ ∘ fexp) v' = χ q' := by rw [Function.comp_apply, hfv']
       rw [hΦcoe]; exact hc
-    show normalChartAt (I := I) g p q' = (Φ.symm ∘ χ) q'
+    change normalChartAt (I := I) g p q' = (Φ.symm ∘ χ) q'
     rw [Function.comp_apply, ← hΦv', Φ.left_inv hq'_pre]
   exact hcomp.congr_of_eventuallyEq heqEv
 

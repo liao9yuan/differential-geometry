@@ -616,8 +616,7 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
         ≤ r + 1}) :=
     (hcpt k _ (r + 1)).image (S.toSeqSystem.continuous_incl k)
   refine IsCompact.of_isClosed_subset himg ?_ ?_
-  ·
-    letI : IsManifold I 1 S.toSeqSystem.Lim :=
+  · letI : IsManifold I 1 S.toSeqSystem.Lim :=
       IsManifold.of_le (by decide : (1 : WithTop ℕ∞) ≤ ∞)
     letI : TopologicalSpace.MetrizableSpace S.toSeqSystem.Lim :=
       Manifold.metrizableSpace I S.toSeqSystem.Lim
@@ -633,8 +632,7 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
         = (fun w : S.toSeqSystem.Lim => edist z w) ⁻¹' (Set.Iic r) := rfl
     rw [hset]
     exact IsClosed.preimage hcont isClosed_Iic
-  ·
-    intro w hw
+  · intro w hw
     have hw' : Manifold.riemannianEDist I z w ≤ r := hw
     have hwr : w ∈ Set.range (S.toSeqSystem.incl k) :=
       hk w (hw'.trans le_self_add)

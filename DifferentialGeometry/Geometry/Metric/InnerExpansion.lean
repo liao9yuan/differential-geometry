@@ -95,7 +95,7 @@ theorem expand_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
   let b : OrthonormalBasis ι ℝ (TangentSpace I x) := OrthonormalBasis.mk hONi hspan
   have hb : ∀ i, b i = v i := by
     intro i
-    show (OrthonormalBasis.mk hONi hspan) i = v i
+    change (OrthonormalBasis.mk hONi hspan) i = v i
     rw [OrthonormalBasis.coe_mk]
   calc u = ∑ i, (Inner.inner ℝ (b i) u : ℝ) • b i := (b.sum_repr' u).symm
     _ = ∑ i, g.inner x (v i) u • v i := by

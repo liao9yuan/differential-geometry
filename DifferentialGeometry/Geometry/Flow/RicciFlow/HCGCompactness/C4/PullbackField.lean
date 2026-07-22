@@ -113,7 +113,7 @@ theorem exists_pullbackField
       Gmetric.inner x v w = h.inner ((Φ : M → N) x)
         (mfderiv I I (Φ : M → N) x v) (mfderiv I I (Φ : M → N) x w) := by
     intro x hx v w
-    show G x v w = _
+    change G x v w = _
     rw [hGapply, hχK hx]
     simp
   refine ⟨Tensor0SBundle.metricTensorField (I := I) Gmetric, Gmetric, rfl, hGinner, ?_⟩
@@ -159,7 +159,7 @@ theorem image_opens_isOpen (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ�
     · rintro ⟨v, hv, rfl⟩
       refine ⟨Φ.map_source' (hV hv), ?_⟩
       have hl : (Φ.symm : N → M) ((Φ : M → N) v) = v := Φ.left_inv' (hV hv)
-      show (Φ.symm : N → M) ((Φ : M → N) v) ∈ (V : Set M)
+      change (Φ.symm : N → M) ((Φ : M → N) v) ∈ (V : Set M)
       rw [hl]
       exact hv
     · rintro ⟨hy1, hy2⟩
@@ -181,7 +181,7 @@ noncomputable def PartialDiffeomorph.toOpensDiffeo
     obtain ⟨v, hv, hveq⟩ := q.2
     rw [← hveq]
     have hl : (Φ.symm : N → M) ((Φ : M → N) v) = v := Φ.left_inv' (hV hv)
-    show (Φ.symm : N → M) ((Φ : M → N) v) ∈ V
+    change (Φ.symm : N → M) ((Φ : M → N) v) ∈ V
     rw [hl]
     exact hv⟩
   left_inv p := by
@@ -210,7 +210,7 @@ noncomputable def PartialDiffeomorph.toOpensDiffeo
       obtain ⟨v, hv, hveq⟩ := y.2
       rw [← hveq]
       have hl : (Φ.symm : N → M) ((Φ : M → N) v) = v := Φ.left_inv' (hV hv)
-      show (Φ.symm : N → M) ((Φ : M → N) v) ∈ V
+      change (Φ.symm : N → M) ((Φ : M → N) v) ∈ V
       rw [hl]
       exact hv
     have hbase : ContMDiffAt I I (∞ : WithTop ℕ∞)
@@ -528,7 +528,7 @@ theorem tensor02_eq_covDOF
   induction a with
   | zero => rfl
   | succ a ih =>
-      show metricCovDerivStep (I := I) gRef a (tensor02CovDeriv (I := I) A gRef a)
+      change metricCovDerivStep (I := I) gRef a (tensor02CovDeriv (I := I) A gRef a)
         = covDerivOfField (I := I) gRef A (a + 1)
       rw [ih, covDerivOfField_succ]
 
@@ -640,7 +640,7 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
       δMV p slots = δNW (F p) (fun q => mfderiv I I (F : V → W) p (slots q)) := by
     intro p slots
     rw [hδMV_apply, hδNW_apply, hδ (p : M) p.2]
-    show δN ((Φ : M → N) (p : M)) _ = δN ((F p : W) : N) _
+    change δN ((Φ : M → N) (p : M)) _ = δN ((F p : W) : N) _
     congr 1
     funext q
     rw [hmfd]
@@ -1824,8 +1824,7 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     have : 0 < ε₀ := div_pos hε0 h1ε
     nlinarith [mul_nonneg hε'0 hCm0]
   refine ⟨⟨hKsrc, ?_, ?_⟩⟩
-  ·
-    exact
+  · exact
       { eps_pos := hε''0
         eps_lt_one := hub
         smoothOn := Ψ.contMDiffOn_toFun.mono hKsrc
@@ -1834,8 +1833,7 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
         c0_small := fun x hx => le_trans (hc0P'' x hx) harithc0
         cov_deriv_small := fun a h1 h2 x hx =>
           le_trans (hcovP'' a h1 h2 x hx) harithcov }
-  ·
-    refine
+  · refine
       { eps_pos := hε''0
         eps_lt_one := hub
         smoothOn := Ψ.symm.contMDiffOn_toFun.mono

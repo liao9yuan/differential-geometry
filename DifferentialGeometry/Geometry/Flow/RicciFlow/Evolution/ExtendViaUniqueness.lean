@@ -271,8 +271,7 @@ theorem extend_construction_of_restart
       (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
     (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
   refine ⟨ε, hε, g_ext, hagree, ?_, ?_, ?_⟩
-  ·
-    intro x₀ i j
+  · intro x₀ i j
     apply contMDiffOn_of_locally_contMDiffOn
     intro p hp
     by_cases hpo : p.1 < omega
@@ -299,8 +298,7 @@ theorem extend_construction_of_restart
       refine (hcomp.mono Set.inter_subset_right).congr ?_
       intro q hq
       rw [hext_eq_r q.1 (le_of_lt hq.2.1.1)]
-  ·
-    intro x₀ i j
+  · intro x₀ i j
     set B := (trivializationAt E (TangentSpace I) x₀).baseSet with hB
     set m : ℝ := (t_star + omega) / 2 with hm
     have hm1 : t_star < m := by rw [hm]; linarith
@@ -356,8 +354,7 @@ theorem extend_construction_of_restart
         rw [closure_prod_eq]
         rintro ⟨hc1, _⟩
         exact absurd (closure_minimal Set.Ico_subset_Icc_self isClosed_Icc hc1).1 (not_le.mpr h2)
-  ·
-    intro t ht x v w
+  · intro t ht x v w
     by_cases hto : t < omega
     · have hfun : (fun s : ℝ => (g_ext s).inner x v w) =ᶠ[𝓝[Set.Ici α] t]
           (fun s : ℝ => (g_fam s).inner x v w) := by

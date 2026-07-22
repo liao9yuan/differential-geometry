@@ -72,7 +72,7 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
   rw [FiberBundle.continuousAt_totalSpace]
   refine ⟨continuous_snd.continuousAt, ?_⟩
 
-  show ContinuousAt
+  change ContinuousAt
       (fun q : {t : Real // t ∈ K} × M =>
         (trivializationAt (Tensor0SModel s Real E)
           (fun x : M => Tensor0SSpace s I x) q₀.2

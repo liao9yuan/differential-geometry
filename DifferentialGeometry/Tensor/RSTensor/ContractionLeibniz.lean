@@ -211,8 +211,7 @@ theorem nabla0SFun_product_eval {s q : ℕ}
                 ((cov (fun p : M => Vlast a p) x) (X x)))) := by
     rw [Fin.sum_univ_add]
     congr 1
-    ·
-      rw [Finset.sum_mul]
+    · rw [Finset.sum_mul]
       refine Finset.sum_congr rfl fun a _ => ?_
       dsimp only [P]
       change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
@@ -220,8 +219,7 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           ((cov (fun p : M => V (Fin.castAdd q a) p) x) (X x))) = _
       rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply]
         by_cases hb : b = a
@@ -229,14 +227,12 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           rw [Function.update_self, Function.update_self]
         · rw [Function.update_of_ne hb,
             Function.update_of_ne (fun h => hb (Fin.castAdd_injective _ _ h))]
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply, Vlast]
         rw [Function.update_of_ne (fun h => by
           exact absurd h.symm (castAdd_natAdd_ne a b))]
-    ·
-      rw [Finset.mul_sum]
+    · rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun a _ => ?_
       dsimp only [P]
       change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
@@ -244,14 +240,12 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           ((cov (fun p : M => V (Fin.natAdd s a) p) x) (X x))) = _
       rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply, Vfirst]
         rw [Function.update_of_ne (fun h => by
           exact absurd h (castAdd_natAdd_ne b a))]
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply]
         by_cases hb : b = a

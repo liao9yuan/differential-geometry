@@ -658,7 +658,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
-    {lo hi : ℝ} (hlohi : lo ≤ hi)
+    {lo hi : ℝ}
     (V W : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc lo hi,
       DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
@@ -771,7 +771,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
-    {lo hi : ℝ} (hlohi : lo ≤ hi)
+    {lo hi : ℝ}
     (V W : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc lo hi,
       DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
@@ -807,7 +807,7 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     rw [hVpar t ht, hWpar t ht]
     simp
   have hDt₀ : D t₀ = 0 := by rw [hD_def]; simp only; rw [hagree]; abel
-  have hconst := parallel_transport_preserves_inner_product (I := I) g γ hN hγ hlohi D D
+  have hconst := parallel_transport_preserves_inner_product (I := I) g γ hN hγ D D
     hDdiff hDdiff hDpar hDpar
   intro t ht
   have hzero_t₀ : g.inner (γ t₀) (D t₀) (D t₀) = 0 := by
@@ -974,7 +974,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
         rw [hov_lo] at hs
         refine ⟨by linarith [hs.1, hstep_pos], by linarith [hs.2, hstep_pos]⟩
       have hagree : ∀ s ∈ Set.Icc ov_lo (c n), Vn s = Vp s := by
-        refine parallel_transport_unique_of_eq_at_point (I := I) g γ hN hγ hov_lo_lt Vn Vp
+        refine parallel_transport_unique_of_eq_at_point (I := I) g γ hN hγ Vn Vp
           (fun s hs => hVn_diff s (hVn_dom hs)) (fun s hs => hVp_diff s (hVp_dom hs))
           (fun s hs => hVn_par s (hVn_dom hs)) (fun s hs => hVp_par s (hVp_dom hs))
           ⟨hov_lo_lt, le_refl _⟩ ?_

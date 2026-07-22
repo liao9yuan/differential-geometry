@@ -51,7 +51,7 @@ theorem _root_.IsLocalFrameOn.pushforward
       rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
         ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
         Φ.mfderivToContinuousLinearEquiv_coe]
-    show LinearIndependent ℝ (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
+    change LinearIndependent ℝ (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
     rw [hb]
     exact Module.Basis.linearIndependent _
   generating {y} hy := by
@@ -64,7 +64,7 @@ theorem _root_.IsLocalFrameOn.pushforward
       rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
         ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
         Φ.mfderivToContinuousLinearEquiv_coe]
-    show ⊤ ≤ Submodule.span ℝ (Set.range
+    change ⊤ ≤ Submodule.span ℝ (Set.range
       (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y))))
     rw [hb]
     exact (Module.Basis.span_eq _).ge

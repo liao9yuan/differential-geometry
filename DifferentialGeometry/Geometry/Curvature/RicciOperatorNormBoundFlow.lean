@@ -74,7 +74,7 @@ omit [I.Boundaryless] in
 theorem twoTensorQuadBound_of_solutions
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
-    (K : Set M) (β ψ C : Real) (hC : 0 <= C)
+    (K : Set M) (β ψ C : Real)
     (hwin : Set.Icc β ψ ⊆ D.carrier)
     (hcurv : forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
       normSq0S (I := I) ((S i).base.metric t) x 4 ((S i).base.rm04 t x) <= C) :

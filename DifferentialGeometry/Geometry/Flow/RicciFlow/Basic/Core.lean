@@ -773,8 +773,7 @@ theorem isSolutionOn_timeShift
     IsSolutionOn (I := I) (S.timeShift τ) where
   smoothMetric := by
     refine ⟨?_, ?_, ?_, ?_⟩
-    ·
-      intro x X Y
+    · intro x X Y
       have hOld := hS.smoothMetric.coeff x X Y
       have haff : ContDiff Real ∞ (fun s : Real => s + τ) :=
         contDiff_id.add contDiff_const
@@ -788,8 +787,7 @@ theorem isSolutionOn_timeShift
             (D.timeShift τ).regular := by
         simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
       simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
-    ·
-      intro x X Y
+    · intro x X Y
       have hOld := hS.smoothMetric.coeff_cont x X Y
       have htime : Continuous (fun s : Real => s + τ) :=
         (continuous_id.add continuous_const)

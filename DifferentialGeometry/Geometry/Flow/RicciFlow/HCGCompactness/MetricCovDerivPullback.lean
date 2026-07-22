@@ -726,7 +726,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
       basis' i = mfderiv I I (Phi : M -> N) x (basis i) := by
     intro i
     have hmap : basis' i = dPhi (basis i) := by
-      show (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
+      change (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
       rw [Module.Basis.map_apply]
       rfl
     rw [hmap, hdPhi_apply (basis i)]
@@ -900,7 +900,7 @@ theorem metricScalarAt_pullback
     intro i
     have hco :=
       Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
-    show (basis.map dPhi.toLinearEquiv) i = _
+    change (basis.map dPhi.toLinearEquiv) i = _
     rw [Module.Basis.map_apply]
     exact congrArg
       (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f (basis i)) hco

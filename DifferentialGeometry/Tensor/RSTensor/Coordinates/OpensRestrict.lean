@@ -54,13 +54,13 @@ theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
         = (chartAt H (p : M)).symm (I.symm y) := by
       rw [TopologicalSpace.Opens.chartAt_eq] at hy' ⊢
       exact OpenPartialHomeomorph.subtypeRestr_symm_apply _ _ hy'
-    show extChartAt I q ((extChartAt I p).symm y)
+    change extChartAt I q ((extChartAt I p).symm y)
         = extChartAt I (q : M) ((extChartAt I (p : M)).symm y)
     have hsy : (extChartAt I p).symm y = ((chartAt H p).symm (I.symm y) : V) := rfl
     have hsy' : (extChartAt I (p : M)).symm y
         = (chartAt H (p : M)).symm (I.symm y) := rfl
     rw [hsy, hsy']
-    show I (chartAt H q ((chartAt H p).symm (I.symm y)))
+    change I (chartAt H q ((chartAt H p).symm (I.symm y)))
         = I (chartAt H (q : M) ((chartAt H (p : M)).symm (I.symm y)))
     rw [← hw]
     rfl

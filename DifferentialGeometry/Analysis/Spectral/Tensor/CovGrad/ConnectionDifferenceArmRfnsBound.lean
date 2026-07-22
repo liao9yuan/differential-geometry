@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -31,6 +29,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma coframeS_one_eq_g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -184,7 +188,7 @@ private lemma g1_self_upper_bound
   have hle : ccTensorBilinSymm (I := I) g₀ T x v v ≤ δ * g₀.inner x v v :=
     le_trans (le_abs_self _) habs
   rw [h x v v]
-  nlinarith [hle]
+  linarith [hle]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_inner_sharpFlatRaiseEndo_le
@@ -479,7 +483,7 @@ private lemma sqrt_g0_inner_add_le_arm
     rw [hexpand]
     have hsq : (na + nb) ^ 2 = na ^ 2 + 2 * (na * nb) + nb ^ 2 := by ring
     rw [hsq, hna_sq, hnb_sq]
-    nlinarith [hcross]
+    linarith [hcross]
   have hsum_pos_nn : 0 ≤ na + nb := add_nonneg hna_nn hnb_nn
   calc Real.sqrt (g₀.inner x (a + b) (a + b))
       ≤ Real.sqrt ((na + nb) ^ 2) := Real.sqrt_le_sqrt hle_sq
@@ -592,7 +596,7 @@ private lemma covDerivRaisedKoszulVec_eq_endoCov_add_sharpFlat
         (Y x) gradZ = PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) gradZ from rfl]
   rw [show CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) x
         gradY (Z x) = PDE.DeTurck.connDiff (I := I) g₁ g₀ x gradY (Z x) from rfl]
-  abel
+  abel_nf
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cotangent_g0FlatY_mdiffAtCotangent_g1
@@ -761,6 +765,115 @@ private lemma sqrt_g1_le_sqrt_g0_of_realize
       _ = Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x a a) := by
           rw [Real.sqrt_mul (le_of_lt hd)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma abs_g1_inner_le_one_add_delta_mul_sqrt_g0
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (h : ∀ y v w, g₁.inner y v w =
+      g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {δ : ℝ} (hδ0 : 0 ≤ δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (x : M) (u v : TangentSpace I x) :
+    |g₁.inner x u v| ≤
+      (1 + δ) * Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v) := by
+  have hu := sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x u
+  have hv := sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x v
+  have hcs := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₁ x u v
+  have h1δ_nn : 0 ≤ 1 + δ := by linarith
+  have hroot_nn : 0 ≤ Real.sqrt (1 + δ) := Real.sqrt_nonneg _
+  calc |g₁.inner x u v|
+      ≤ Real.sqrt (g₁.inner x u u) * Real.sqrt (g₁.inner x v v) := hcs
+    _ ≤ (Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x u u)) *
+          (Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x v v)) := by
+        refine mul_le_mul hu hv (Real.sqrt_nonneg _) ?_
+        exact mul_nonneg hroot_nn (Real.sqrt_nonneg _)
+    _ = (1 + δ) * Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v) := by
+        rw [show (Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x u u)) *
+              (Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x v v)) =
+            (Real.sqrt (1 + δ) * Real.sqrt (1 + δ)) *
+              (Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v)) from by ring,
+          Real.mul_self_sqrt h1δ_nn]
+        ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma connDiff_quadratic_inner_bounds
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (h : ∀ y v w, g₁.inner y v w =
+      g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {δ : ℝ} (hδ0 : 0 ≤ δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (C G : ℝ) (hC0 : 0 ≤ C) (hG0 : 0 ≤ G)
+    (x : M)
+    (hpw : ∀ v w : TangentSpace I x,
+      Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)) ≤
+        C * G * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w))
+    (X Y Z ζ : TangentSpace I x) :
+    |g₁.inner x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x Y Z)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ X)| ≤
+      (1 + δ) * C ^ 2 * G ^ 2 *
+        Real.sqrt (g₀.inner x X X) * Real.sqrt (g₀.inner x Y Y) *
+          Real.sqrt (g₀.inner x Z Z) * Real.sqrt (g₀.inner x ζ ζ) ∧
+    |g₁.inner x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x Y Z) X) ζ| ≤
+      (1 + δ) * C ^ 2 * G ^ 2 *
+        Real.sqrt (g₀.inner x X X) * Real.sqrt (g₀.inner x Y Y) *
+          Real.sqrt (g₀.inner x Z Z) * Real.sqrt (g₀.inner x ζ ζ) := by
+  set NX : ℝ := Real.sqrt (g₀.inner x X X)
+  set NY : ℝ := Real.sqrt (g₀.inner x Y Y)
+  set NZ : ℝ := Real.sqrt (g₀.inner x Z Z)
+  set Nζ : ℝ := Real.sqrt (g₀.inner x ζ ζ)
+  have hNX0 : 0 ≤ NX := Real.sqrt_nonneg _
+  have hNY0 : 0 ≤ NY := Real.sqrt_nonneg _
+  have hNZ0 : 0 ≤ NZ := Real.sqrt_nonneg _
+  have hNζ0 : 0 ≤ Nζ := Real.sqrt_nonneg _
+  have h1δ0 : 0 ≤ 1 + δ := by linarith
+  set cYZ : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x Y Z
+  set cζX : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ X
+  set cWX : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x cYZ X
+  have hcYZ : Real.sqrt (g₀.inner x cYZ cYZ) ≤ C * G * NY * NZ := by
+    simpa only [cYZ, NY, NZ] using hpw Y Z
+  have hcζX : Real.sqrt (g₀.inner x cζX cζX) ≤ C * G * Nζ * NX := by
+    simpa only [cζX, Nζ, NX] using hpw ζ X
+  have hcWX : Real.sqrt (g₀.inner x cWX cWX) ≤ C * G * (C * G * NY * NZ) * NX := by
+    have hraw := hpw cYZ X
+    change Real.sqrt (g₀.inner x cWX cWX) ≤
+      C * G * Real.sqrt (g₀.inner x cYZ cYZ) * NX at hraw
+    refine hraw.trans ?_
+    apply mul_le_mul_of_nonneg_right _ hNX0
+    exact mul_le_mul_of_nonneg_left hcYZ (mul_nonneg hC0 hG0)
+  have hT2 : |g₁.inner x cYZ cζX| ≤
+      (1 + δ) * C ^ 2 * G ^ 2 * NX * NY * NZ * Nζ := by
+    have hbase := abs_g1_inner_le_one_add_delta_mul_sqrt_g0
+      (I := I) g₀ g₁ T h hδ0 hbound x cYZ cζX
+    have hp : Real.sqrt (g₀.inner x cYZ cYZ) * Real.sqrt (g₀.inner x cζX cζX) ≤
+        (C * G * NY * NZ) * (C * G * Nζ * NX) :=
+      mul_le_mul hcYZ hcζX (Real.sqrt_nonneg _)
+        (mul_nonneg (mul_nonneg (mul_nonneg hC0 hG0) hNY0) hNZ0)
+    have hc := mul_le_mul_of_nonneg_left hp h1δ0
+    calc |g₁.inner x cYZ cζX|
+        ≤ (1 + δ) * Real.sqrt (g₀.inner x cYZ cYZ) *
+            Real.sqrt (g₀.inner x cζX cζX) := hbase
+      _ = (1 + δ) *
+          (Real.sqrt (g₀.inner x cYZ cYZ) * Real.sqrt (g₀.inner x cζX cζX)) := by ring
+      _ ≤ (1 + δ) * ((C * G * NY * NZ) * (C * G * Nζ * NX)) := hc
+      _ = (1 + δ) * C ^ 2 * G ^ 2 * NX * NY * NZ * Nζ := by ring
+  have hT5 : |g₁.inner x cWX ζ| ≤
+      (1 + δ) * C ^ 2 * G ^ 2 * NX * NY * NZ * Nζ := by
+    have hbase := abs_g1_inner_le_one_add_delta_mul_sqrt_g0
+      (I := I) g₀ g₁ T h hδ0 hbound x cWX ζ
+    change |g₁.inner x cWX ζ| ≤
+      (1 + δ) * Real.sqrt (g₀.inner x cWX cWX) * Nζ at hbase
+    have hp := mul_le_mul_of_nonneg_right hcWX hNζ0
+    have hc := mul_le_mul_of_nonneg_left hp h1δ0
+    calc |g₁.inner x cWX ζ|
+        ≤ (1 + δ) * Real.sqrt (g₀.inner x cWX cWX) * Nζ := hbase
+      _ = (1 + δ) * (Real.sqrt (g₀.inner x cWX cWX) * Nζ) := by ring
+      _ ≤ (1 + δ) * ((C * G * (C * G * NY * NZ) * NX) * Nζ) := hc
+      _ = (1 + δ) * C ^ 2 * G ^ 2 * NX * NY * NZ * Nζ := by ring
+  exact ⟨hT2, hT5⟩
+
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_self_of_inner_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) (K : ℝ) (hK : 0 ≤ K)
@@ -859,14 +972,16 @@ private lemma sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le
     have hd_nn : 0 ≤ (1:ℝ) + δ := by linarith
     have hroot_sq : Real.sqrt (1 + δ) * Real.sqrt (1 + δ) = 1 + δ := by
       rw [← Real.sqrt_mul hd_nn, Real.sqrt_mul_self hd_nn]
-    have hCGnn : 0 ≤ C₀ * G * Nw * Nv := by positivity
-    have hCGnn' : 0 ≤ C₀ * G * Nz * Nv := by positivity
+    have hCGnn : 0 ≤ C₀ * G * Nw * Nv :=
+      mul_nonneg (mul_nonneg (mul_nonneg hC₀0 hG_nn) hNw_nn) hNv_nn
+    have hCGnn' : 0 ≤ C₀ * G * Nz * Nv :=
+      mul_nonneg (mul_nonneg (mul_nonneg hC₀0 hG_nn) hNz_nn) hNv_nn
     have hterm1 : g₁.inner x cw z ≤ (1 + δ) * (C₀ * G * Nw * Nv) * Nz := by
       calc g₁.inner x cw z
           ≤ Real.sqrt (g₁.inner x cw cw) * Real.sqrt (g₁.inner x z z) := hcs1
         _ ≤ (Real.sqrt (1 + δ) * (C₀ * G * Nw * Nv)) * (Real.sqrt (1 + δ) * Nz) := by
             refine mul_le_mul hcw_g1 hz_g1 (Real.sqrt_nonneg _) ?_
-            positivity
+            exact mul_nonneg h1d_nn hCGnn
         _ = (1 + δ) * (C₀ * G * Nw * Nv) * Nz := by
             rw [show (Real.sqrt (1 + δ) * (C₀ * G * Nw * Nv)) * (Real.sqrt (1 + δ) * Nz)
                 = (Real.sqrt (1 + δ) * Real.sqrt (1 + δ)) * ((C₀ * G * Nw * Nv) * Nz) from by ring,
@@ -876,7 +991,7 @@ private lemma sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le
           ≤ Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x cz cz) := hcs2
         _ ≤ (Real.sqrt (1 + δ) * Nw) * (Real.sqrt (1 + δ) * (C₀ * G * Nz * Nv)) := by
             refine mul_le_mul hw_g1 hcz_g1 (Real.sqrt_nonneg _) ?_
-            positivity
+            exact mul_nonneg h1d_nn hNw_nn
         _ = (1 + δ) * (C₀ * G * Nz * Nv) * Nw := by
             rw [show (Real.sqrt (1 + δ) * Nw) * (Real.sqrt (1 + δ) * (C₀ * G * Nz * Nv))
                 = (Real.sqrt (1 + δ) * Real.sqrt (1 + δ)) * (Nw * (C₀ * G * Nz * Nv)) from by ring,
@@ -896,7 +1011,10 @@ private lemma sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le
         _ = (2 * (1 + δ₀) * C₀ * G * Nv * Nw) * Nz := by ring
     rw [hcw_def, hcz_def] at hsum
     exact hsum
-  have hK_nn : 0 ≤ 2 * (1 + δ₀) * C₀ * G * Nv * Nw := by positivity
+  have hK_nn : 0 ≤ 2 * (1 + δ₀) * C₀ * G * Nv * Nw :=
+    mul_nonneg
+      (mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) (by linarith)) hC₀0)
+        hG_nn) hNv_nn) hNw_nn
   have hres := sqrt_self_of_inner_le (I := I) g₀ x u (2 * (1 + δ₀) * C₀ * G * Nv * Nw) hK_nn hbd
   rw [hu_def] at hres
   rw [hG_def, hNv_def, hNw_def] at hres
@@ -953,6 +1071,73 @@ private lemma abs_unitModel4_iteratedCovGrad_symmS_le
           Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x b b) *
             Real.sqrt (g₀.inner x c c) * Real.sqrt (g₀.inner x d d) := by ring
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma half_iteratedCovGrad_symmS_combination_le
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c d : TangentSpace I x) :
+    letI : Bundle.RiemannianBundle
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+    (1 / 2 : ℝ) *
+        (unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T))
+            x ![a, b, c, d] +
+          unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T))
+            x ![a, c, b, d] -
+          unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T))
+            x ![a, d, b, c]) ≤
+      (3 / 2 : ℝ) *
+        ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+            Tensor0SBundle.TensorRSSpace 0 4 I x)‖ *
+          Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x c c) *
+            Real.sqrt (g₀.inner x b b) * Real.sqrt (g₀.inner x d d) := by
+  letI inst4 : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  let r₁ := unitModel (I := I) (M := M) g₀ 4
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, b, c, d]
+  let r₂ := unitModel (I := I) (M := M) g₀ 4
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, c, b, d]
+  let r₃ := unitModel (I := I) (M := M) g₀ 4
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, d, b, c]
+  let G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 4 I x)‖
+  let Na : ℝ := Real.sqrt (g₀.inner x a a)
+  let Nb : ℝ := Real.sqrt (g₀.inner x b b)
+  let Nc : ℝ := Real.sqrt (g₀.inner x c c)
+  let Nd : ℝ := Real.sqrt (g₀.inner x d d)
+  let A : ℝ := G * Na * Nc * Nb * Nd
+  have h₁ := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x a b c d
+  have h₂ := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x a c b d
+  have h₃ := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x a d b c
+  change |r₁| ≤ G * Na * Nb * Nc * Nd at h₁
+  change |r₂| ≤ G * Na * Nc * Nb * Nd at h₂
+  change |r₃| ≤ G * Na * Nd * Nb * Nc at h₃
+  have e₁ : r₁ ≤ A := by
+    calc r₁ ≤ |r₁| := le_abs_self r₁
+      _ ≤ G * Na * Nb * Nc * Nd := h₁
+      _ = A := by dsimp only [A]; ring
+  have e₂ : r₂ ≤ A := by
+    calc r₂ ≤ |r₂| := le_abs_self r₂
+      _ ≤ G * Na * Nc * Nb * Nd := h₂
+      _ = A := rfl
+  have e₃ : -r₃ ≤ A := by
+    calc -r₃ ≤ |r₃| := neg_le_abs r₃
+      _ ≤ G * Na * Nd * Nb * Nc := h₃
+      _ = A := by dsimp only [A]; ring
+  have hsum : r₁ + r₂ + -r₃ ≤ A + A + A := add_le_add (add_le_add e₁ e₂) e₃
+  have hscaled := mul_le_mul_of_nonneg_left hsum (show (0 : ℝ) ≤ 1 / 2 by norm_num)
+  change (1 / 2 : ℝ) * (r₁ + r₂ - r₃) ≤ (3 / 2) * G * Na * Nc * Nb * Nd
+  calc (1 / 2 : ℝ) * (r₁ + r₂ - r₃)
+      = (1 / 2) * (r₁ + r₂ + -r₃) := by rw [sub_eq_add_neg]
+    _ ≤ (1 / 2) * (A + A + A) := hscaled
+    _ = (3 / 2) * A := by ring
+    _ = (3 / 2) * G * Na * Nc * Nb * Nd := by dsimp only [A]; ring
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g0_self_of_g1_inner_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -988,9 +1173,50 @@ private lemma sqrt_g0_self_of_g1_inner_le
   have hKstep : 0 ≤ K + δ * Nu := by positivity
   have hbd' := sqrt_self_of_inner_le (I := I) g₀ x u (K + δ * Nu) hKstep hbd0
   rw [← hNu_def] at hbd'
-  have hfinal : (1 - δ) * Nu ≤ K := by nlinarith [hbd', hNu_nn, hδ0]
+  have hfinal : (1 - δ) * Nu ≤ K := by linarith [hbd']
   rw [div_mul_eq_mul_div, one_mul, le_div_iff₀ hcoeff]
-  nlinarith [hfinal]
+  simpa only [mul_comm] using hfinal
+
+private lemma sq_le_one_add_mul_of_le
+    (G Q R : ℝ) (hG_nn : 0 ≤ G) (hR0 : 0 ≤ R)
+    (hG_le_R : G ≤ R) (hG_le_Q : G ≤ Q) :
+    G ^ 2 ≤ (1 + R) * Q := by
+  have hR1_nn : 0 ≤ 1 + R := by linarith
+  have hG_le_R1 : G ≤ 1 + R := hG_le_R.trans (by linarith)
+  have hmul : G * G ≤ (1 + R) * Q :=
+    mul_le_mul hG_le_R1 hG_le_Q hG_nn hR1_nn
+  simpa only [pow_two] using hmul
+
+private lemma sq_and_linear_le_one_add_mul
+    (G1 G2 Q R : ℝ) (hG1_nn : 0 ≤ G1) (hQ_nn : 0 ≤ Q) (hR0 : 0 ≤ R)
+    (hG1_le_R : G1 ≤ R) (hG1_le_Q : G1 ≤ Q) (hG2_le_Q : G2 ≤ Q) :
+    G1 ^ 2 ≤ (1 + R) * Q ∧ G2 ≤ (1 + R) * Q := by
+  have hsq := sq_le_one_add_mul_of_le G1 Q R hG1_nn hR0 hG1_le_R hG1_le_Q
+  have hlinear : G2 ≤ (1 + R) * Q := by
+    calc G2 ≤ Q := hG2_le_Q
+      _ = 1 * Q := (one_mul Q).symm
+      _ ≤ (1 + R) * Q := mul_le_mul_of_nonneg_right (by linarith) hQ_nn
+  exact ⟨hsq, hlinear⟩
+
+private lemma product_square_bound
+    (A B G u v : ℝ) (hA0 : 0 ≤ A) (hG0 : 0 ≤ G)
+    (hu : u ≤ A * G * v) (hv : v ≤ B * G) :
+    u ≤ A * B * G ^ 2 := by
+  calc u ≤ A * G * v := hu
+    _ ≤ A * G * (B * G) := mul_le_mul_of_nonneg_left hv (mul_nonneg hA0 hG0)
+    _ = A * B * G ^ 2 := by ring
+
+private lemma perturbation_product_bound
+    (δ δ₀ C S u v : ℝ) (hδ0 : 0 ≤ δ) (hδ : δ ≤ δ₀)
+    (hC0 : 0 ≤ C) (hS0 : 0 ≤ S)
+    (hu : u ≤ (1 + δ) * v) (hv : v ≤ C * S) :
+    u ≤ (1 + δ₀) * C * S := by
+  have h1δ0 : 0 ≤ 1 + δ := by linarith
+  calc u ≤ (1 + δ) * v := hu
+    _ ≤ (1 + δ) * (C * S) := mul_le_mul_of_nonneg_left hv h1δ0
+    _ ≤ (1 + δ₀) * (C * S) :=
+      mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg hC0 hS0)
+    _ = (1 + δ₀) * C * S := by ring
 
 private lemma weighted_sum_le_of_sq_and_linear_bounds
     (G1 G2 Q NX NY NZ Nζ C₀ δ δ₀ R : ℝ)
@@ -1037,7 +1263,6 @@ private lemma weighted_sum_le_of_sq_and_linear_bounds
           2 * (1 + δ₀) * C₀ ^ 2 * ((1 + R) * Q) * (NX * NY * NZ * Nζ) := add_le_add hA hB
     _ = ((3 / 2) + 2 * (1 + δ₀) * C₀ ^ 2) * (1 + R) * Q * NX * NY * NZ * Nζ := by ring
 
-set_option maxHeartbeats 12800000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1111,11 +1336,11 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
   set Q : ℝ := Real.sqrt (G1 ^ 2 + G2 ^ 2) with hQ_def
   have hQ_nn : 0 ≤ Q := Real.sqrt_nonneg _
   have hG1_le_Q : G1 ≤ Q := by
-    have hle : G1 ^ 2 ≤ G1 ^ 2 + G2 ^ 2 := by nlinarith [sq_nonneg G2]
+    have hle : G1 ^ 2 ≤ G1 ^ 2 + G2 ^ 2 := le_add_of_nonneg_right (sq_nonneg G2)
     have h1 : Real.sqrt (G1 ^ 2) ≤ Q := by rw [hQ_def]; exact Real.sqrt_le_sqrt hle
     rwa [Real.sqrt_sq hG1_nn] at h1
   have hG2_le_Q : G2 ≤ Q := by
-    have hle : G2 ^ 2 ≤ G1 ^ 2 + G2 ^ 2 := by nlinarith [sq_nonneg G1]
+    have hle : G2 ^ 2 ≤ G1 ^ 2 + G2 ^ 2 := le_add_of_nonneg_left (sq_nonneg G1)
     have h1 : Real.sqrt (G2 ^ 2) ≤ Q := by rw [hQ_def]; exact Real.sqrt_le_sqrt hle
     rwa [Real.sqrt_sq hG2_nn] at h1
   have hjet' : G1 ≤ R := hjet
@@ -1130,9 +1355,6 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
     covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x with hD_def
   set Kc : ℝ := ((3 / 2) + 2 * (1 + δ₀) * C₀ ^ 2) * (1 + R) * Q * NX * NY * NZ with hKc_def
   have h1δ_nn : 0 ≤ 1 + δ := by linarith
-  have hroot1δ_nn : 0 ≤ Real.sqrt (1 + δ) := Real.sqrt_nonneg _
-  have hroot1δ_sq : Real.sqrt (1 + δ) * Real.sqrt (1 + δ) = 1 + δ := by
-    rw [← Real.sqrt_mul h1δ_nn, Real.sqrt_mul_self h1δ_nn]
   change g₁.inner x D ζ ≤ Kc * Real.sqrt (g₀.inner x ζ ζ)
   set Nζ : ℝ := Real.sqrt (g₀.inner x ζ ζ) with hNζ_def
   have hNζ_nn : 0 ≤ Nζ := Real.sqrt_nonneg _
@@ -1143,13 +1365,9 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
     ⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩
     with hζf_def
   have hζfx : ζf x = ζ := smoothExtensionTangent_eq (I := I) x ζ
-  have hR41 := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x
-    (X x) (Z x) (Y x) ζ
-  have hR42 := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x
-    (X x) (Y x) (Z x) ζ
-  have hR43 := abs_unitModel4_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ T x
-    (X x) ζ (Z x) (Y x)
-  rw [← hG2_def, ← hNX_def, ← hNY_def, ← hNZ_def, ← hNζ_def] at hR41 hR42 hR43
+  have hrank4 := half_iteratedCovGrad_symmS_combination_le
+    (I := I) (M := M) g₀ T x (X x) (Z x) (Y x) ζ
+  rw [← hG2_def, ← hNX_def, ← hNY_def, ← hNZ_def, ← hNζ_def] at hrank4
   set R41 : ℝ := unitModel (I := I) (M := M) g₀ 4
     (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, Z x, Y x, ζ] with hR41_def
   set R42 : ℝ := unitModel (I := I) (M := M) g₀ 4
@@ -1174,99 +1392,40 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
   rw [hT2eq, hT5eq] at hident
   set cζX : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x) with hcζX_def
   set cWX : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x cYZ (X x) with hcWX_def
-  have hcYZ_g0 : Real.sqrt (g₀.inner x cYZ cYZ) ≤ C₀ * G1 * NY * NZ := by
-    have := hconn g₁ T h hδ hδ0 hbound x (Y x) (Z x)
-    rw [← hG1_def, ← hNY_def, ← hNZ_def, ← hcYZ_def] at this
-    exact this
-  have hcζX_g0 : Real.sqrt (g₀.inner x cζX cζX) ≤ C₀ * G1 * Nζ * NX := by
-    have := hconn g₁ T h hδ hδ0 hbound x ζ (X x)
-    rw [← hG1_def, ← hNζ_def, ← hNX_def, ← hcζX_def] at this
-    exact this
-  have hcYZ_g0_nn : 0 ≤ Real.sqrt (g₀.inner x cYZ cYZ) := Real.sqrt_nonneg _
-  have hcWX_g0 : Real.sqrt (g₀.inner x cWX cWX) ≤ C₀ * G1 * (C₀ * G1 * NY * NZ) * NX := by
-    have hraw := hconn g₁ T h hδ hδ0 hbound x cYZ (X x)
-    rw [← hG1_def, ← hNX_def, ← hcWX_def] at hraw
-    refine le_trans hraw ?_
-    have hstep : C₀ * G1 * Real.sqrt (g₀.inner x cYZ cYZ) * NX ≤
-        C₀ * G1 * (C₀ * G1 * NY * NZ) * NX := by
-      apply mul_le_mul_of_nonneg_right _ hNX_nn
-      apply mul_le_mul_of_nonneg_left hcYZ_g0 (by positivity)
-    exact hstep
-  have hcYZ_g1 : Real.sqrt (g₁.inner x cYZ cYZ) ≤ Real.sqrt (1 + δ) * (C₀ * G1 * NY * NZ) := by
-    refine le_trans (sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x cYZ) ?_
-    exact mul_le_mul_of_nonneg_left hcYZ_g0 hroot1δ_nn
-  have hcζX_g1 : Real.sqrt (g₁.inner x cζX cζX) ≤ Real.sqrt (1 + δ) * (C₀ * G1 * Nζ * NX) := by
-    refine le_trans (sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x cζX) ?_
-    exact mul_le_mul_of_nonneg_left hcζX_g0 hroot1δ_nn
-  have hcWX_g1 : Real.sqrt (g₁.inner x cWX cWX) ≤
-      Real.sqrt (1 + δ) * (C₀ * G1 * (C₀ * G1 * NY * NZ) * NX) := by
-    refine le_trans (sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x cWX) ?_
-    exact mul_le_mul_of_nonneg_left hcWX_g0 hroot1δ_nn
-  have hζ_g1 : Real.sqrt (g₁.inner x ζ ζ) ≤ Real.sqrt (1 + δ) * Nζ := by
-    rw [hNζ_def]; exact sqrt_g1_le_sqrt_g0_of_realize (I := I) g₀ g₁ T h hbound x ζ
-  have hT2 : |g₁.inner x cYZ cζX| ≤ (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-    have hcs : |g₁.inner x cYZ cζX| ≤
-        Real.sqrt (g₁.inner x cYZ cYZ) * Real.sqrt (g₁.inner x cζX cζX) :=
-      abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₁ x cYZ cζX
-    calc |g₁.inner x cYZ cζX|
-        ≤ Real.sqrt (g₁.inner x cYZ cYZ) * Real.sqrt (g₁.inner x cζX cζX) := hcs
-      _ ≤ (Real.sqrt (1 + δ) * (C₀ * G1 * NY * NZ)) *
-            (Real.sqrt (1 + δ) * (C₀ * G1 * Nζ * NX)) := by
-          refine mul_le_mul hcYZ_g1 hcζX_g1 (Real.sqrt_nonneg _)
-            (mul_nonneg hroot1δ_nn (by positivity))
-      _ = (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-          rw [show (Real.sqrt (1 + δ) * (C₀ * G1 * NY * NZ)) *
-                (Real.sqrt (1 + δ) * (C₀ * G1 * Nζ * NX)) =
-              (Real.sqrt (1 + δ) * Real.sqrt (1 + δ)) *
-                ((C₀ * G1 * NY * NZ) * (C₀ * G1 * Nζ * NX)) from by ring, hroot1δ_sq]
-          ring
-  have hT5 : |g₁.inner x cWX ζ| ≤ (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-    have hcs : |g₁.inner x cWX ζ| ≤
-        Real.sqrt (g₁.inner x cWX cWX) * Real.sqrt (g₁.inner x ζ ζ) :=
-      abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₁ x cWX ζ
-    calc |g₁.inner x cWX ζ|
-        ≤ Real.sqrt (g₁.inner x cWX cWX) * Real.sqrt (g₁.inner x ζ ζ) := hcs
-      _ ≤ (Real.sqrt (1 + δ) * (C₀ * G1 * (C₀ * G1 * NY * NZ) * NX)) *
-            (Real.sqrt (1 + δ) * Nζ) := by
-          refine mul_le_mul hcWX_g1 hζ_g1 (Real.sqrt_nonneg _)
-            (mul_nonneg hroot1δ_nn (by positivity))
-      _ = (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-          rw [show (Real.sqrt (1 + δ) * (C₀ * G1 * (C₀ * G1 * NY * NZ) * NX)) *
-                (Real.sqrt (1 + δ) * Nζ) =
-              (Real.sqrt (1 + δ) * Real.sqrt (1 + δ)) *
-                ((C₀ * G1 * (C₀ * G1 * NY * NZ) * NX) * Nζ) from by ring, hroot1δ_sq]
-          ring
-  have e1 : R41 ≤ G2 * NX * NY * NZ * Nζ := by
-    refine le_trans (le_abs_self _) (le_trans hR41 (le_of_eq ?_)); ring
-  have e2 : R42 ≤ G2 * NX * NY * NZ * Nζ := by
-    refine le_trans (le_abs_self _) (le_trans hR42 (le_of_eq ?_)); ring
-  have e3 : - R43 ≤ G2 * NX * NY * NZ * Nζ := by
-    have hle := (abs_le.mp hR43).1
-    nlinarith [hle]
+  set B : ℝ := (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ with hB_def
+  have hpw : ∀ v w : TangentSpace I x,
+      Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)) ≤
+        C₀ * G1 * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+    intro v w
+    have hraw := hconn g₁ T h hδ hδ0 hbound x v w
+    rw [← hG1_def] at hraw
+    exact hraw
+  have hquad := connDiff_quadratic_inner_bounds
+    (I := I) g₀ g₁ T h hδ0 hbound C₀ G1 hC₀0 hG1_nn x hpw (X x) (Y x) (Z x) ζ
+  rw [← hNX_def, ← hNY_def, ← hNZ_def, ← hNζ_def,
+    ← hcYZ_def, ← hcζX_def, ← hcWX_def] at hquad
+  change |g₁.inner x cYZ cζX| ≤ B ∧ |g₁.inner x cWX ζ| ≤ B at hquad
+  have hT2 := hquad.1
+  have hT5 := hquad.2
   have hcombine : g₁.inner x D ζ ≤
       (3 / 2 : ℝ) * G2 * NX * NY * NZ * Nζ +
-        2 * (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
+        2 * B := by
     rw [hident]
-    have hrank4 : (1 / 2 : ℝ) * (R41 + R42 - R43) ≤
-        (3 / 2 : ℝ) * (G2 * NX * NY * NZ * Nζ) := by
-      linarith [e1, e2, e3]
-    have hT2le : - g₁.inner x cYZ cζX ≤ (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-      have := neg_le_of_abs_le hT2
-      linarith [this]
-    have hT5le : - g₁.inner x cWX ζ ≤ (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
-      have := neg_le_of_abs_le hT5
-      linarith [this]
-    nlinarith [hrank4, hT2le, hT5le]
-  have hG1sq_le : G1 ^ 2 ≤ (1 + R) * Q := by
-    have hG1_le_R1 : G1 ≤ 1 + R := le_trans hjet' (by linarith)
-    have hmul : G1 * G1 ≤ (1 + R) * Q := mul_le_mul hG1_le_R1 hG1_le_Q hG1_nn hR1_nn
-    calc G1 ^ 2 = G1 * G1 := by ring
-      _ ≤ (1 + R) * Q := hmul
-  have hG2_le_R1Q : G2 ≤ (1 + R) * Q := by
-    refine le_trans hG2_le_Q ?_
-    have hQ1 : Q = 1 * Q := (one_mul Q).symm
-    calc Q = 1 * Q := hQ1
-      _ ≤ (1 + R) * Q := mul_le_mul_of_nonneg_right (by linarith) hQ_nn
+    have hT2le : - g₁.inner x cYZ cζX ≤ B := by
+      calc -g₁.inner x cYZ cζX ≤ |g₁.inner x cYZ cζX| := neg_le_abs _
+        _ ≤ B := hT2
+    have hT5le : - g₁.inner x cWX ζ ≤ B := by
+      calc -g₁.inner x cWX ζ ≤ |g₁.inner x cWX ζ| := neg_le_abs _
+        _ ≤ B := hT5
+    have hsum := add_le_add (add_le_add hrank4 hT2le) hT5le
+    calc (1 / 2 : ℝ) * (R41 + R42 - R43) - g₁.inner x cYZ cζX - g₁.inner x cWX ζ
+        = ((1 / 2) * (R41 + R42 - R43) + -g₁.inner x cYZ cζX) +
+            -g₁.inner x cWX ζ := by ring
+      _ ≤ (((3 / 2) * G2 * NX * NY * NZ * Nζ) + B) + B := hsum
+      _ = (3 / 2) * G2 * NX * NY * NZ * Nζ + 2 * B := by ring
+  obtain ⟨hG1sq_le, hG2_le_R1Q⟩ :=
+    sq_and_linear_le_one_add_mul G1 G2 Q R hG1_nn hQ_nn hR0 hjet' hG1_le_Q hG2_le_Q
   have hδ_le_δ₀ : (1 : ℝ) + δ ≤ 1 + δ₀ := by linarith
   have hfinal : (3 / 2 : ℝ) * G2 * NX * NY * NZ * Nζ +
         2 * (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ ≤ Kc * Nζ := by
@@ -1278,6 +1437,11 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
           2 * (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ
         ≤ ((3 / 2) + 2 * (1 + δ₀) * C₀ ^ 2) * (1 + R) * Q * NX * NY * NZ * Nζ := hscalar
       _ = ((3 / 2) + 2 * (1 + δ₀) * C₀ ^ 2) * (1 + R) * Q * NX * NY * NZ * Nζ := by ring
+  have hB_scaled : 2 * B =
+      2 * (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ := by
+    rw [hB_def]
+    ring
+  rw [hB_scaled] at hcombine
   exact le_trans hcombine hfinal
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -1374,6 +1538,58 @@ private lemma sqrt_inner_covDerivConnDiff_le
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] in
+private lemma sqrt_inner_covDerivRaisedKoszul_endoArm_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      (_h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M)
+      (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+      (_hX : g₀.inner x (X x) (X x) = 1) (_hY : g₀.inner x (Y x) (Y x) = 1)
+      (_hZ : g₀.inner x (Z x) (Z x) = 1),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      Real.sqrt (g₀.inner x
+          (((endoCovariantDerivative (I := I) (M := M) g₀)
+              (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x)))
+          (((endoCovariantDerivative (I := I) (M := M) g₀)
+              (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x)))) ≤
+        C * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+          Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 := by
+  classical
+  letI inst3 : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  obtain ⟨Cendo, hCendo0, hendo⟩ :=
+    sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le (I := I) (M := M) g₀ hδ₀0 hδ₀
+  obtain ⟨Cconn, hCconn0, hconn⟩ :=
+    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+  refine ⟨Cendo * Cconn, mul_nonneg hCendo0 hCconn0, ?_⟩
+  intro g₁ T h δ hδ hδ0 hbound x X Y Z hX hY hZ
+  set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
+  have hG0 : 0 ≤ G := norm_nonneg _
+  set D : TangentSpace I x :=
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x) with hD_def
+  set A : TangentSpace I x :=
+    ((endoCovariantDerivative (I := I) (M := M) g₀)
+      (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x)) D with hA_def
+  have hAbound := hendo g₁ T h hδ hδ0 hbound x (X x) D
+  rw [← hA_def, ← hG_def, hX, Real.sqrt_one, mul_one] at hAbound
+  have hDbound := hconn g₁ T h hδ hδ0 hbound x (Y x) (Z x)
+  rw [← hD_def, ← hG_def, hY, hZ, Real.sqrt_one, mul_one, mul_one] at hDbound
+  change Real.sqrt (g₀.inner x A A) ≤ Cendo * Cconn * G ^ 2
+  exact product_square_bound Cendo Cconn G _ _ hCendo0 hG0 hAbound hDbound
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_inner_covDerivRaisedKoszulVec_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ Carm : ℝ, 0 ≤ Carm ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -1414,13 +1630,11 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
   letI inst4 : Bundle.RiemannianBundle
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
-  obtain ⟨Cendo, hCendo0, hendo⟩ :=
-    sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le (I := I) (M := M) g₀ hδ₀0 hδ₀
-  obtain ⟨Cconn, hCconn0, hconn⟩ :=
-    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+  obtain ⟨Carm, hCarm0, harm⟩ :=
+    sqrt_inner_covDerivRaisedKoszul_endoArm_le (I := I) (M := M) g₀ hδ₀0 hδ₀
   obtain ⟨Ccdc, hCcdc0, hcdc⟩ :=
     sqrt_inner_covDerivConnDiff_le (I := I) (M := M) g₀ hδ₀0 hδ₀
-  refine ⟨Cendo * Cconn + (1 + δ₀) * Ccdc, by positivity, ?_⟩
+  refine ⟨Carm + (1 + δ₀) * Ccdc, by positivity, ?_⟩
   intro g₁ T h δ hδ hδ0 hbound x X Y Z hX hY hZ R hR0 hjet
   set G1 : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG1_def
@@ -1432,9 +1646,9 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
   have hQ_nn : 0 ≤ Q := Real.sqrt_nonneg _
   have hG1_le_Q : G1 ≤ Q := by
     rw [hQ_def]
-    have : G1 = Real.sqrt (G1 ^ 2) := by rw [Real.sqrt_sq hG1_nn]
-    rw [this]
-    exact Real.sqrt_le_sqrt (by nlinarith [hG2_nn])
+    calc G1 = Real.sqrt (G1 ^ 2) := (Real.sqrt_sq hG1_nn).symm
+      _ ≤ Real.sqrt (G1 ^ 2 + G2 ^ 2) :=
+        Real.sqrt_le_sqrt (le_add_of_nonneg_right (sq_nonneg G2))
   have hjet' : G1 ≤ R := hjet
   have hR1_nn : 0 ≤ 1 + R := by linarith
   set A : TangentSpace I x :=
@@ -1449,24 +1663,10 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
     rw [hA_def, hB_def]
     exact covDerivRaisedKoszulVec_eq_endoCov_add_sharpFlat (I := I) (M := M) g₀ g₁ X Y Z x
   set NA : ℝ := Real.sqrt (g₀.inner x A A) with hNA_def
-  have hNA_le : NA ≤ Cendo * Cconn * G1 ^ 2 := by
-    have hAbound := hendo g₁ T h hδ hδ0 hbound x (X x)
-      (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
-    rw [← hA_def, ← hG1_def] at hAbound
-    rw [hX, Real.sqrt_one, mul_one] at hAbound
-    have hcn := hconn g₁ T h hδ hδ0 hbound x (Y x) (Z x)
-    rw [← hG1_def, hY, hZ, Real.sqrt_one, mul_one, mul_one] at hcn
-    have hcd_nn : 0 ≤ Real.sqrt (g₀.inner x
-        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
-        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))) := Real.sqrt_nonneg _
-    rw [hNA_def]
-    calc Real.sqrt (g₀.inner x A A)
-        ≤ Cendo * G1 * Real.sqrt (g₀.inner x
-            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
-            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))) := hAbound
-      _ ≤ Cendo * G1 * (Cconn * G1) := by
-          refine mul_le_mul_of_nonneg_left hcn (mul_nonneg hCendo0 hG1_nn)
-      _ = Cendo * Cconn * G1 ^ 2 := by ring
+  have hNA_le : NA ≤ Carm * G1 ^ 2 := by
+    have hAbound := harm g₁ T h hδ hδ0 hbound x X Y Z hX hY hZ
+    rw [← hA_def, ← hG1_def, ← hNA_def] at hAbound
+    exact hAbound
   set NB : ℝ := Real.sqrt (g₀.inner x B B) with hNB_def
   have hNB_le : NB ≤ (1 + δ₀) * Ccdc * ((1 + R) * Q) := by
     set D : TangentSpace I x :=
@@ -1477,38 +1677,24 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
     have hDbound := hcdc g₁ T h hδ hδ0 hbound x X Y Z hR0 hjet
     rw [← hD_def, ← hG1_def, ← hG2_def, ← hQ_def, hX, hY, hZ, Real.sqrt_one,
       mul_one, mul_one, mul_one] at hDbound
-    have hD_sqrt_nn : 0 ≤ Real.sqrt (g₀.inner x D D) := Real.sqrt_nonneg _
-    have h1delta_nn : 0 ≤ 1 + δ := by linarith
     have hR1Q_nn : 0 ≤ (1 + R) * Q := mul_nonneg hR1_nn hQ_nn
-    rw [hNB_def]
-    calc Real.sqrt (g₀.inner x B B)
-        ≤ (1 + δ) * Real.sqrt (g₀.inner x D D) := hneumann
-      _ ≤ (1 + δ) * (Ccdc * ((1 + R) * Q)) := by
-          refine mul_le_mul_of_nonneg_left ?_ h1delta_nn
-          calc Real.sqrt (g₀.inner x D D)
-              ≤ Ccdc * (1 + R) * Q := hDbound
-            _ = Ccdc * ((1 + R) * Q) := by ring
-      _ ≤ (1 + δ₀) * (Ccdc * ((1 + R) * Q)) := by
-          refine mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg hCcdc0 hR1Q_nn)
-      _ = (1 + δ₀) * Ccdc * ((1 + R) * Q) := by ring
+    rw [← hNB_def] at hneumann
+    have hDbound' : Real.sqrt (g₀.inner x D D) ≤ Ccdc * ((1 + R) * Q) := by
+      simpa only [mul_assoc] using hDbound
+    exact perturbation_product_bound δ δ₀ Ccdc ((1 + R) * Q) NB
+      (Real.sqrt (g₀.inner x D D)) hδ0 hδ hCcdc0 hR1Q_nn hneumann hDbound'
   have htri : Real.sqrt (g₀.inner x (A + B) (A + B)) ≤ NA + NB := by
     rw [hNA_def, hNB_def]
     exact sqrt_g0_inner_add_le_arm (I := I) (M := M) g₀ x A B
   rw [hsplit]
   refine htri.trans ?_
-  have hδ₀1_nn : 0 ≤ 1 + δ₀ := by linarith
-  have hG1sq_le : G1 ^ 2 ≤ (1 + R) * Q := by
-    have hG1_le_R1Q : G1 ≤ (1 + R) := le_trans hjet' (by linarith)
-    have : G1 * G1 ≤ (1 + R) * Q := by
-      refine mul_le_mul hG1_le_R1Q ?_ hG1_nn hR1_nn
-      exact hG1_le_Q
-    nlinarith [this]
+  have hG1sq_le := sq_le_one_add_mul_of_le G1 Q R hG1_nn hR0 hjet' hG1_le_Q
   calc NA + NB
-      ≤ Cendo * Cconn * G1 ^ 2 + (1 + δ₀) * Ccdc * ((1 + R) * Q) := add_le_add hNA_le hNB_le
-    _ ≤ Cendo * Cconn * ((1 + R) * Q) + (1 + δ₀) * Ccdc * ((1 + R) * Q) := by
+      ≤ Carm * G1 ^ 2 + (1 + δ₀) * Ccdc * ((1 + R) * Q) := add_le_add hNA_le hNB_le
+    _ ≤ Carm * ((1 + R) * Q) + (1 + δ₀) * Ccdc * ((1 + R) * Q) := by
         refine add_le_add ?_ (le_refl _)
         exact mul_le_mul_of_nonneg_left hG1sq_le (by positivity)
-    _ = (Cendo * Cconn + (1 + δ₀) * Ccdc) * (1 + R) * Q := by ring
+    _ = (Carm + (1 + δ₀) * Ccdc) * (1 + R) * Q := by ring
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1562,7 +1748,8 @@ theorem riemannianFiberNormSq_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
   have hG1_nn : 0 ≤ G1 := norm_nonneg _
   have hG2_nn : 0 ≤ G2 := norm_nonneg _
   have hjet' : G1 ≤ R := hjet
-  have hQ_nn : (0 : ℝ) ≤ G1 ^ 2 + G2 ^ 2 := by positivity
+  have hQ_nn : (0 : ℝ) ≤ G1 ^ 2 + G2 ^ 2 :=
+    add_nonneg (sq_nonneg G1) (sq_nonneg G2)
   have hiter1 : iteratedCovGrad (I := I) g₀ 1 2 1 (raisedKoszul (I := I) g₀ g₁) =
       covGrad (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) := by
     rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
@@ -1595,8 +1782,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
     have huu_nn : 0 ≤ g₀.inner x u u := metric_inner_self_nonneg (I := I) (M := M) g₀ x u
     have hsqrt_eq : Real.sqrt (g₀.inner x u u) ^ 2 = g₀.inner x u u := Real.sq_sqrt huu_nn
     have hsqrt_nn : 0 ≤ Real.sqrt (g₀.inner x u u) := Real.sqrt_nonneg _
-    have hrhs_nn : 0 ≤ Carm * (1 + R) * Real.sqrt (G1 ^ 2 + G2 ^ 2) :=
-      mul_nonneg (mul_nonneg hCarm0 hR1_nn) (Real.sqrt_nonneg _)
     have hsqrtQ_sq : Real.sqrt (G1 ^ 2 + G2 ^ 2) ^ 2 = G1 ^ 2 + G2 ^ 2 :=
       Real.sq_sqrt hQ_nn
     have huu_le : g₀.inner x u u ≤ (Carm * (1 + R)) ^ 2 * (G1 ^ 2 + G2 ^ 2) := by
@@ -1612,7 +1797,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
         rw [show Real.sqrt (G1 ^ 2 + G2 ^ 2) * Real.sqrt (G1 ^ 2 + G2 ^ 2) =
             Real.sqrt (G1 ^ 2 + G2 ^ 2) ^ 2 from by ring, hsqrtQ_sq]
       rw [hexpand] at hmul
-      nlinarith [hmul, hsqrt_nn, hroot]
+      simpa only [pow_two] using hmul
     calc (g₀.inner x (e (K 0)) u) ^ 2
         ≤ g₀.inner x u u := hcs
       _ ≤ (Carm * (1 + R)) ^ 2 * (G1 ^ 2 + G2 ^ 2) := huu_le
@@ -1743,7 +1928,9 @@ private lemma sqrt_inner_flatArmVec_le
         rw [← hG_def, ← hNv0_def] at hconn
         refine hconn.trans ?_
         have hss_sqrt_le : Real.sqrt (g₀.inner x s s) ≤ (1 / (1 - δ₀)) ^ 2 := by
-          have hsq_ge : 1 / (1 - δ₀) ≤ (1 / (1 - δ₀)) ^ 2 := by nlinarith [hge1]
+          have hsq_ge : 1 / (1 - δ₀) ≤ (1 / (1 - δ₀)) ^ 2 := by
+            simpa only [mul_one, pow_two] using
+              mul_le_mul_of_nonneg_left hge1 (le_trans (by norm_num) hge1)
           exact le_trans hs_sqrt hsq_ge
         have hC₀G_nn : 0 ≤ C₀ * G := mul_nonneg hC₀0 hG_nn
         calc C₀ * G * Real.sqrt (g₀.inner x s s) * Nv0
@@ -1809,12 +1996,17 @@ private lemma sqrt_inner_flatArmVec_le
           have hconnG : Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x p v0)
                 (PDE.DeTurck.connDiff (I := I) g₁ g₀ x p v0)) ≤ C₀ * G * Np * Nv0 := hconn_p
           have hpp_le2 : g₀.inner x p p ≤ (C₀ * G * Nv0) * Np := by
-            refine hpp_le.trans (hconnG.trans ?_)
-            nlinarith [hNp_nn, hKnn]
+            calc g₀.inner x p p ≤ C₀ * G * Np * Nv0 := hpp_le.trans hconnG
+              _ = (C₀ * G * Nv0) * Np := by ring
           have hNp_le0 : Np ≤ C₀ * G * Nv0 := by
-            nlinarith [hNp_sq, hNp_nn, hpp_le2, hKnn]
+            rw [← hNp_sq, pow_two] at hpp_le2
+            by_cases hNp0 : Np = 0
+            · rw [hNp0]
+              exact hKnn
+            · exact le_of_mul_le_mul_right hpp_le2 (lt_of_le_of_ne hNp_nn (Ne.symm hNp0))
           have hstep : C₀ * G * Nv0 ≤ C₀ * G * (1 / (1 - δ₀)) * Nv0 := by
-            nlinarith [mul_le_mul_of_nonneg_left hge1 (mul_nonneg hC₀0 hG_nn), hNv0_nn, hKnn]
+            simpa only [mul_one] using mul_le_mul_of_nonneg_right
+              (mul_le_mul_of_nonneg_left hge1 (mul_nonneg hC₀0 hG_nn)) hNv0_nn
           exact hNp_le0.trans hstep
         have hsharp := norm_inverseMetricSharpFib_g0Flat_le (I := I) g₀ g₁
           (ccTensorBilinSymm (I := I) g₀ T) hg₁

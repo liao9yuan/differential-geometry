@@ -538,7 +538,7 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
   · intro t ht i j
     have hconst :=
       DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top))
         (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
@@ -587,7 +587,7 @@ theorem exists_parallel_frame
   intro t ht i j
   have hconst :=
     DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-      (I := I) g γ hN hγ hL.le (Vfun i) (Vfun j)
+      (I := I) g γ hN hγ (Vfun i) (Vfun j)
       (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
   rw [hconst, hV0 i, hV0 j]
   exact hON0 i j
@@ -1115,7 +1115,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     intro t ht
     have hconst :=
       parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
-        (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (hγ.of_le (by exact_mod_cast le_top))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
@@ -1138,7 +1138,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     rw [hχi, hχj, one_smul, one_smul]
     have hconst :=
       parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
-        (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (hγ.of_le (by exact_mod_cast le_top))
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j

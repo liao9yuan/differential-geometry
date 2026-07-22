@@ -180,10 +180,8 @@ theorem sum_trace_coordContract_rough {s : Nat}
       gInv i j *
         ((∏ a : Fin s, gInv (I0 a) (J0 a)) *
             H2 (Fin.cons i (Fin.cons j I0)) * cT J0))
-  ·
-    simp_rw [Finset.mul_sum]
-  ·
-    rw [sum_comm_blocks (fun i j I0 J0 =>
+  · simp_rw [Finset.mul_sum]
+  · rw [sum_comm_blocks (fun i j I0 J0 =>
       gInv i j *
         ((∏ a : Fin s, gInv (I0 a) (J0 a)) *
             H2 (Fin.cons i (Fin.cons j I0)) * cT J0))]

@@ -218,7 +218,7 @@ theorem framePairs_pinned
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -300,7 +300,7 @@ theorem pairs_pinned_refs
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -604,7 +604,7 @@ theorem componentBz_eq_covDeriv
           (fun q => (∑ j : Fin (Module.finrank Real E),
             (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j) z) := by
   rw [Tensor0SBundle.component0S_apply]
-  show (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+  change (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
       (fun q => (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
           I 1 basisE).toBasisAt hzbase) (I0 q))
     = (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z

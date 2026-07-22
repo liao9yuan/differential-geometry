@@ -97,7 +97,7 @@ theorem chartGram_sub_le
     have hu' := Tensor0SBundle.metricTensorField_apply (I := I) u' x
       (fun a => (![chartBasisVecFiber (I := I) x₀ i x,
         chartBasisVecFiber (I := I) x₀ j x] : Fin 2 → TangentSpace I x) a)
-    simp only [metricDiffCovDerivAt, ContinuousMultilinearMap.sub_apply]
+    simp only [metricDiffCovDerivAt]
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _

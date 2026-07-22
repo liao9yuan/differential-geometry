@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
-import Mathlib.Topology.Covering
+import Mathlib.Topology.Covering.Basic
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
@@ -77,7 +77,7 @@ theorem hasMFDerivAt_proj
       extChartAt_target_mem_nhdsWithin x'
     refine Filter.eventuallyEq_of_mem hmem ?_
     intro y hy
-    show extChartAt I (proj (X := M) x')
+    change extChartAt I (proj (X := M) x')
         (proj (X := M) ((extChartAt I x').symm y)) = y
     have hproj :=
       (extChartAt_proj_eq (I := I) (M := M) x' ((extChartAt I x').symm y)).symm
@@ -90,7 +90,7 @@ theorem hasMFDerivAt_proj
       writtenInExtChartAt I I x'
           (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
           (extChartAt I x' x') = (id : E → E) (extChartAt I x' x') := by
-    show extChartAt I (proj (X := M) x')
+    change extChartAt I (proj (X := M) x')
         (proj (X := M) ((extChartAt I x').symm (extChartAt I x' x'))) =
         extChartAt I x' x'
     have hproj :=
@@ -477,7 +477,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     refine ⟨hmemsrc, ?_⟩
     have happ : t (t.toOpenPartialHomeomorph.symm (y, pt)) = (y, pt) :=
       t.apply_symm_apply (t.mem_target.2 hyU)
-    show t (t.toOpenPartialHomeomorph.symm (y, pt)) ∈ slice.source
+    change t (t.toOpenPartialHomeomorph.symm (y, pt)) ∈ slice.source
     rw [happ]
     exact ⟨hyU, Set.mem_singleton _⟩
   · intro z hz
@@ -495,7 +495,7 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
     have hx_src : x' n ∈ t.source := t.mem_source.2 hmemU
     rw [he_def, OpenPartialHomeomorph.trans_source]
     refine ⟨hx_src, ?_⟩
-    show t (x' n) ∈ slice.source
+    change t (x' n) ∈ slice.source
     have hfst : (t (x' n)).1 = p (x' n) := t.coe_fst hx_src
     have hsnd : (t (x' n)).2 = pt := htail_fib n hn
     rw [hslice_def]

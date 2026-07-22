@@ -89,8 +89,7 @@ noncomputable def freezeTailField {s : ℕ}
             TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y (v q y)) x₀ := by
       intro q
       refine Fin.cases ?_ (fun i => ?_) q
-      ·
-        have hframe :
+      · have hframe :
             ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
               (fun y : M =>
                 TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -102,8 +101,7 @@ noncomputable def freezeTailField {s : ℕ}
         filter_upwards with y
         simp [v, freezeTailSlots, metricTraceInput]
       · refine Fin.cases ?_ (fun c => ?_) i
-        ·
-          have hframe :
+        · have hframe :
               ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
                 (fun y : M =>
                   TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -115,8 +113,7 @@ noncomputable def freezeTailField {s : ℕ}
           filter_upwards with y
           simp only [v, freezeTailSlots, metricTraceInput, Fin.cases_succ,
             Fin.cases_zero]
-        ·
-          have hYc := (Y c).contMDiff x₀
+        · have hYc := (Y c).contMDiff x₀
           refine hYc.congr_of_eventuallyEq ?_
           filter_upwards with y
           simp [v, freezeTailSlots, metricTraceInput]

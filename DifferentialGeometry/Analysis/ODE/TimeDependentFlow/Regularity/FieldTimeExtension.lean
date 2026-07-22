@@ -39,7 +39,7 @@ theorem field_time_clamp_extension
   have hc_id : ∀ s ∈ Set.Icc (0 : ℝ) T, c s = s := by
     intro s hs
     rw [Set.mem_Icc] at hs
-    show max 0 (min s T) = s
+    change max 0 (min s T) = s
     rw [min_eq_left hs.2, max_eq_right hs.1]
   have hc_mem : ∀ s : ℝ, c s ∈ Set.Icc (0 : ℝ) T := by
     intro s
@@ -47,7 +47,7 @@ theorem field_time_clamp_extension
     exact ⟨le_max_left _ _, max_le hT.le (min_le_right _ _)⟩
   refine ⟨fun s x => X_DT (c s) x, ?_, ?_, ?_⟩
   · intro s hs x
-    show X_DT (c s) x = X_DT s x
+    change X_DT (c s) x = X_DT s x
     rw [hc_id s hs]
   · have hmaps : Continuous (fun q : ℝ × M => ((c q.1, q.2) : ℝ × M)) :=
       (hc_cont.comp continuous_fst).prodMk continuous_snd

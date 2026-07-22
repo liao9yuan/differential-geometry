@@ -609,7 +609,7 @@ theorem isCompact_image_closedBall_under_expMapIntrinsic
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) {R : ℝ} (hR : 0 ≤ R) :
+    (p : M) {R : ℝ} :
     IsCompact ((fun v => expMapIntrinsic (I := I) g hEnorm p v) ''
       Metric.closedBall (0 : TangentSpace I p) R) := by
   haveI : FiniteDimensional ℝ (TangentSpace I p) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -640,7 +640,7 @@ theorem expMapIntrinsic_surjective_on_closedBall_of_ediam_le
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {R : ℝ} (hR : 0 ≤ R)
-    (hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R) :
+    (hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R) :
     (Set.univ : Set M) ⊆ (fun v => expMapIntrinsic (I := I) g hEnorm p v) ''
       Metric.closedBall (0 : TangentSpace I p) R := by
   intro y _
@@ -653,7 +653,7 @@ theorem expMapIntrinsic_surjective_on_closedBall_of_ediam_le
     rw [← ofReal_norm_eq_enorm] at hz
     exact (ENNReal.ofReal_eq_ofReal_iff (norm_nonneg v) (Real.sqrt_nonneg _)).mp hz
   have hedist : edist p y ≤ ENNReal.ofReal R :=
-    le_trans (EMetric.edist_le_diam_of_mem (Set.mem_univ p) (Set.mem_univ y)) hdiam
+    le_trans (Metric.edist_le_ediam_of_mem (Set.mem_univ p) (Set.mem_univ y)) hdiam
   have hre : riemannianEDist I p y = edist p y := (IsRiemannianManifold.out (I := I) p y).symm
   rw [hnorm, hv_len, hre]
   calc (edist p y).toReal
@@ -690,12 +690,12 @@ theorem isCompact_univ
     have hpi_nn : (0 : ℝ) ≤ Real.pi := Real.pi_nonneg
     have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt K := Real.sqrt_nonneg K
     exact div_nonneg hpi_nn hsqrt_nn
-  have hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
+  have hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
     bonnet_myers_diameter_of_ricci_bound (E := E) g _hdim _hK _hRic hEnorm
   have hsurj :=
     expMapIntrinsic_surjective_on_closedBall_of_ediam_le (I := I) (E := E) g hEnorm p hR_nn hdiam
   have himg :=
-    isCompact_image_closedBall_under_expMapIntrinsic (I := I) (E := E) g hEnorm p hR_nn
+    isCompact_image_closedBall_under_expMapIntrinsic (I := I) (E := E) g hEnorm p (R := R)
   exact himg.of_isClosed_subset isClosed_univ hsurj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup

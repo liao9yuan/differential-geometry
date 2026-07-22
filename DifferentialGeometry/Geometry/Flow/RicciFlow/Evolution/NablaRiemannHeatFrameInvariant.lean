@@ -116,14 +116,12 @@ theorem metricInverseInBasis_identity_of_orthonormal
   classical
   intro i j
   refine ⟨?_, ?_⟩
-  ·
-    rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single i]
     · rw [identityInvMetric_apply_self, one_mul]; exact horth i j
     · intro k _ hk
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hk h.symm), zero_mul]
     · intro h; exact absurd (Finset.mem_univ i) h
-  ·
-    rw [Finset.sum_eq_single j]
+  · rw [Finset.sum_eq_single j]
     · rw [identityInvMetric_apply_self, mul_one]; exact horth i j
     · intro k _ hk
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne hk, mul_zero]

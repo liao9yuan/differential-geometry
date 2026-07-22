@@ -240,9 +240,9 @@ theorem mfderiv_mul_innerCoordFun_of_inner_eq_zero
 
   have hψCLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ψ x = (innerSL ℝ w).comp (dIncl (n := n) x) := by
     ext u
-    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ψ x u = ⟪w, dIncl (n := n) x u⟫
+    change mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ψ x u = ⟪w, dIncl (n := n) x u⟫
     exact mfderiv_innerCoordFun (E := E) (n := n) w x u
-  show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (φ * ψ) x v = φ x * ⟪w, dIncl (n := n) x v⟫
+  change mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (φ * ψ) x v = φ x * ⟪w, dIncl (n := n) x v⟫
   rw [(hφ.hasMFDerivAt.mul hψ.hasMFDerivAt).mfderiv]
   simp only [hψx, hψCLM, zero_smul, add_zero]
   change φ x • (((innerSL ℝ w).comp (dIncl (n := n) x)) v) = φ x * ⟪w, dIncl (n := n) x v⟫
@@ -328,7 +328,7 @@ theorem inner_ambDeriv_nested
       (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫) x
         = (innerSL ℝ (dIncl (n := n) x W)).comp (ambDeriv2 (n := n) Z Yf x) := by
     ext u
-    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
+    change mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
         (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫) x u
           = ⟪dIncl (n := n) x W, ambDeriv2 (n := n) Z Yf x u⟫
     rw [mfderiv_inner_left (dIncl (n := n) x W) hD u, ← ambDeriv2_apply]
@@ -337,7 +337,7 @@ theorem inner_ambDeriv_nested
   have hψCLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x
       = (innerSL ℝ (dIncl (n := n) x W)).comp (dIncl (n := n) x) := by
     ext u
-    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x u
+    change mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x u
         = ⟪dIncl (n := n) x W, dIncl (n := n) x u⟫
     exact mfderiv_innerCoordFun (E := E) (n := n) (dIncl (n := n) x W) x u
   have h2CLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
@@ -345,7 +345,7 @@ theorem inner_ambDeriv_nested
         * (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) p) x
         = (roundInner (n := n) x (Z x) (Yf x))
           • (innerSL ℝ (dIncl (n := n) x W)).comp (dIncl (n := n) x) := by
-    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ((fun p => roundInner (n := n) p (Z p) (Yf p))
+    change mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ((fun p => roundInner (n := n) p (Z p) (Yf p))
         * ⇑(innerCoordFun (E := E) (n := n) (dIncl (n := n) x W))) x = _
     rw [(hφ.hasMFDerivAt.mul ((innerCoordFun (E := E) (n := n)
       (dIncl (n := n) x W)).contMDiff.contMDiffAt.mdifferentiableAt (by simp)).hasMFDerivAt).mfderiv,

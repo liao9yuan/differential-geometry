@@ -291,15 +291,13 @@ theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
         hgc (s := grow k) (t := V)
         (hgV.trans hVopen.interior_eq.ge)
     refine ⟨fun x => f x, f.contMDiff, hf01, ?_, ?_⟩
-    ·
-      have hsupp : Function.support (fun x => f x) ⊆ V := by
+    · have hsupp : Function.support (fun x => f x) ⊆ V := by
         intro x hx
         by_contra hxV
         exact hx (hfsupp x hxV)
       calc tsupport (fun x => f x) ⊆ closure V := closure_mono hsupp
         _ ⊆ Φ.source k := hVcl
-    ·
-      have hev : {x : P.M | f x = 1} ∈ nhdsSet (grow k) :=
+    · have hev : {x : P.M | f x = 1} ∈ nhdsSet (grow k) :=
         hf1.mono fun x hx => by simpa using hx
       obtain ⟨W, hWopen, hgrowW, hWsub⟩ := mem_nhdsSet_iff_exists.mp hev
       exact ⟨W, hWopen, hgrowW, fun x hx => hWsub hx⟩
@@ -442,8 +440,7 @@ theorem hlow_gSeqExt
     · subst hv; simp
     · exact (R.pos x v hv).le
   by_cases hx : x ∈ Φ.source (rho k)
-  ·
-    letI : TopologicalSpace (SourceDomain (I := I) Φ (rho k)) := sourceDomTop (I := I) Φ (rho k)
+  · letI : TopologicalSpace (SourceDomain (I := I) Φ (rho k)) := sourceDomTop (I := I) Φ (rho k)
     letI : ChartedSpace H (SourceDomain (I := I) Φ (rho k)) := sourceDomCharted (I := I) Φ (rho k)
     letI : IsManifold I ∞ (SourceDomain (I := I) Φ (rho k)) := sourceDomSmooth (I := I) Φ (rho k)
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt (rho k) t x hx v v]
@@ -466,8 +463,7 @@ theorem hlow_gSeqExt
             mul_le_mul_of_nonneg_right hc1 (mul_nonneg h1χ hRnn)
         _ = (1 - χ) * r := one_mul _
     nlinarith [h1, hterm2, mul_le_mul_of_nonneg_left hccLow hχ0, hRnn, hχ0, hRnn]
-  ·
-    have hxsupp : x ∉ tsupport (bf.chi (rho k)) := fun h => hx (bf.chi_supp (rho k) h)
+  · have hxsupp : x ∉ tsupport (bf.chi (rho k)) := fun h => hx (bf.chi_supp (rho k) h)
     rw [gSeqExt_inner_of_notMem (I := I) Φ R bf hsrc htgt (rho k) t x hxsupp v v]
     calc c * R.inner x v v <= 1 * R.inner x v v :=
           mul_le_mul_of_nonneg_right hc1 hRnn
@@ -533,12 +529,10 @@ theorem hbdd_gSeqExt
   have hne : (Finset.range (k0 + 1)).Nonempty := ⟨0, Finset.mem_range.2 (Nat.succ_pos k0)⟩
   refine ⟨max Ctail ((Finset.range (k0 + 1)).sup' hne Chead), fun k z hz => ?_⟩
   by_cases hk : k0 <= k
-  ·
-    have hk' : k0 <= rho k := le_trans hk (hrho.id_le k)
+  · have hk' : k0 <= rho k := le_trans hk (hrho.id_le k)
     have hzsrc : z ∈ Φ.source (rho k) := bf.grow_subset (rho k) (hk0 (rho k) hk' hz)
     exact le_trans (hCtail (rho k) t ht z hzsrc) (le_max_left _ _)
-  ·
-    have hklt : k < k0 := Nat.lt_of_not_le hk
+  · have hklt : k < k0 := Nat.lt_of_not_le hk
     refine le_trans (hChead k z hz) (le_trans ?_ (le_max_right _ _))
     exact Finset.le_sup' Chead (Finset.mem_range.2 (by omega))
 
@@ -704,8 +698,7 @@ theorem hgLip_gSeqExt
     refine ⟨2 ^ p * Cx * Ls,
       mul_nonneg (mul_nonneg (by positivity) hCx0) hLs0, fun s hs t ht a ha x hx => ?_⟩
     by_cases hxsupp : x ∈ tsupport (bf.chi k)
-    ·
-      have hxU : x ∈ Φ.source k := bf.chi_supp k hxsupp
+    · have hxU : x ∈ Φ.source k := bf.chi_supp k hxsupp
       have hyC : (⟨x, hxU⟩ : SourceDomain (I := I) Φ k) ∈
           sourceCompactSet (I := I) Φ k (K' ∩ tsupport (bf.chi k)) := ⟨hx, hxsupp⟩
 
@@ -734,7 +727,7 @@ theorem hgLip_gSeqExt
                 - metricTensorField (I := I) (srcMetric (I := I) Φ hsrc htgt k t)) := by
         refine DFunLike.ext _ _ (fun y => ?_)
         refine ContinuousMultilinearMap.ext (fun v => ?_)
-        show (metricTensorField (I := I)
+        change (metricTensorField (I := I)
               ((gSeqExt (I := I) Φ R bf hsrc htgt k s).restrictOpen (I := I)
                 (sourceOpen (I := I) Φ k)) y
             - metricTensorField (I := I)
@@ -857,8 +850,7 @@ theorem hgLip_gSeqExt
           = (2 : Real) ^ a * (Cx * (Ls * |s - t|)) := by ring
         _ <= (2 : Real) ^ p * (Cx * (Ls * |s - t|)) := mul_le_mul_of_nonneg_right h2 hnn
         _ = 2 ^ p * Cx * Ls * |s - t| := by ring
-    ·
-      set U₀ : TopologicalSpace.Opens P.M :=
+    · set U₀ : TopologicalSpace.Opens P.M :=
         ⟨(tsupport (bf.chi k))ᶜ, (isClosed_tsupport (bf.chi k)).isOpen_compl⟩ with hU₀def
       letI : ChartedSpace H ↥U₀ :=
         TopologicalSpace.Opens.instChartedSpace (H := H) (M := P.M) (s := U₀)
@@ -916,11 +908,9 @@ theorem hgLip_gSeqExt
   refine ⟨max Lt ((Finset.range (k0 + 1)).sup' hne Lk),
     le_trans hLt0 (le_max_left _ _), fun k s hs t ht a ha x hx => ?_⟩
   by_cases hk : k0 <= k
-  ·
-    exact le_trans (hLt k s t hs ht a ha x (hk0 k hk hx))
+  · exact le_trans (hLt k s t hs ht a ha x (hk0 k hk hx))
       (mul_le_mul_of_nonneg_right (le_max_left _ _) (abs_nonneg _))
-  ·
-    refine le_trans (hLk k s hs t ht a ha x hx)
+  · refine le_trans (hLk k s hs t ht a ha x hx)
       (mul_le_mul_of_nonneg_right ?_ (abs_nonneg _))
     exact le_trans (Finset.le_sup' Lk (Finset.mem_range.2 (by omega)))
       (le_max_right _ _)

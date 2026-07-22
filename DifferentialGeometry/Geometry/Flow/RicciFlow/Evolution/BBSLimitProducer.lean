@@ -94,10 +94,7 @@ def cinftyLimitData_of_allMBounds
             Lambda⁻¹ * (S.base.metric alpha).inner x v v ≤
                 (S.base.metric s).inner x v v ∧
               (S.base.metric s).inner x v v ≤
-                Lambda * (S.base.metric alpha).inner x v v)
-    (hbounds : ∀ m : ℕ, ∃ C : ℝ, ∀ (t : ℝ) (x : M),
-        (alpha + omega) / 2 ≤ t → t < omega →
-          nablaKRm04NormSqIntrinsic (I := I) S m t x ≤ C) :
+                Lambda * (S.base.metric alpha).inner x v v) :
     CinftyLimitData (I := I) S.base.metric alpha omega hαω := by
   let hEnd := exists_endMetric (I := I) S hdim hS hbound hEquiv
   let gInf := Classical.choose hEnd
@@ -147,6 +144,5 @@ def cinftyLimitData_of_solution
     positivity
   have hEquiv := hell_of_soln (I := I) hS hRicConst hRic
   exact cinftyLimitData_of_allMBounds (I := I) S hS hdim hCan hEquiv
-    (bbsAllMBounds (I := I) S hS hdim Rm04 hRm ⟨K, hK⟩)
 
 end DifferentialGeometry.PDE.RicciFlow

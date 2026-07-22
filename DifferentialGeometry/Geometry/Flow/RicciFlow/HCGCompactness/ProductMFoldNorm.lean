@@ -309,7 +309,7 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
       have hnn : 0 ≤ normSq0S (I := I) gRef x s (A x) := by
         rw [normSq0S_identity_eq_sum_sq (I := I) gRef x s basis hinv]
         exact Finset.sum_nonneg fun _ _ => sq_nonneg _
-      show Real.sqrt (normSq0S (I := I) gRef x (s + q)
+      change Real.sqrt (normSq0S (I := I) gRef x (s + q)
           (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B x)) ≤
         Real.sqrt (normSq0S (I := I) gRef x s (A x)) *
@@ -426,7 +426,7 @@ theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
     intro i
     ext
     simp
-  show (φ x • B x) v =
+  change (φ x • B x) v =
     ContinuousMultilinearMap.domDomCongr (finCongr (Nat.zero_add q))
       (Bundle.continuousMultilinearMap.product_fun
         (ContinuousMultilinearMap.constOfIsEmpty Real
@@ -437,7 +437,7 @@ theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
     ContinuousMultilinearMap.constOfIsEmpty_apply, smul_eq_mul]
   congr 1
   refine congrArg (B x) (funext fun i => ?_)
-  show v i = v (finCongr (Nat.zero_add q) (Fin.natAdd 0 i))
+  change v i = v (finCongr (Nat.zero_add q) (Fin.natAdd 0 i))
   exact (congrArg v (he i)).symm
 
 

@@ -333,8 +333,7 @@ theorem of_union_closedOpen
   rw [continuous_iff_continuousAt]
   rintro q
   rcases lt_or_ge (q.1.1 : Real) c with hlt | hge
-  ·
-    have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | (q'.1.1 : Real) < c} :=
+  · have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | (q'.1.1 : Real) < c} :=
       isOpen_lt (continuous_subtype_val.comp continuous_fst) continuous_const
     have hcont : ContinuousOn
         (fun q' : {t : Real // t ∈ Set.Ico a b} × M =>
@@ -349,8 +348,7 @@ theorem of_union_closedOpen
         continuous_subtype_val).subtype_mk _).prodMk
         (continuous_snd.comp continuous_subtype_val)
     exact hcont.continuousAt (hopen.mem_nhds hlt)
-  ·
-    have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | a < (q'.1.1 : Real)} :=
+  · have hopen : IsOpen {q' : {t : Real // t ∈ Set.Ico a b} × M | a < (q'.1.1 : Real)} :=
       isOpen_lt continuous_const (continuous_subtype_val.comp continuous_fst)
     have hcont : ContinuousOn
         (fun q' : {t : Real // t ∈ Set.Ico a b} × M =>

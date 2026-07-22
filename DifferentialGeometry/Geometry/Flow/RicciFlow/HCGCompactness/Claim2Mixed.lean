@@ -156,26 +156,24 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
   rw [contrTail_apply]
   refine Finset.sum_congr rfl fun c _ => ?_
   congr 1
-  ·
-    congr 1
+  · congr 1
     funext m
     refine Fin.lastCases ?_ (fun m' => ?_) m
     · rw [Fin.snoc_last]
       rfl
     · rw [Fin.snoc_castSucc]
       refine Fin.cases ?_ (fun m'' => ?_) m'
-      · show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
+      · change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
           n (akSlotEquiv s (Fin.castAdd q (0 : Fin 2)))
         rw [akSlotEquiv_castAdd0]
         rfl
       · have hm : m'' = 0 := Subsingleton.elim _ _
         subst hm
-        show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
+        change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
           n (akSlotEquiv s (Fin.castAdd q (1 : Fin 2)))
         rw [akSlotEquiv_castAdd1]
         rfl
-  ·
-    congr 1
+  · congr 1
     funext j
     rcases eq_or_ne j s with rfl | hjs
     · rw [Function.update_self, Equiv.swap_apply_left, Fin.snoc_last]

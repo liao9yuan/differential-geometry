@@ -1108,8 +1108,7 @@ theorem covTail_of_bounds
       sourceDomSigmaOf (I := I) Φ k (hsrc k)
     letI : T2Space ↥(sourceOpen (I := I) Φ k) := sourceDomT2 (I := I) Φ k
     by_cases hzsupp : z ∈ tsupport (bf.chi k)
-    ·
-      set y : SourceDomain (I := I) Φ k := ⟨z, hz⟩ with hydef
+    · set y : SourceDomain (I := I) Φ k := ⟨z, hz⟩ with hydef
       have hysupp : (y : P.M) ∈ tsupport (bf.chi k) := hzsupp
 
       have hres : metricDerivNorm (I := I) (q' + 1)
@@ -1294,8 +1293,7 @@ theorem covTail_of_bounds
         push_cast
         ring
       rw [hsum]
-    ·
-      set U₀ : TopologicalSpace.Opens P.M :=
+    · set U₀ : TopologicalSpace.Opens P.M :=
         ⟨(tsupport (bf.chi k))ᶜ, (isClosed_tsupport (bf.chi k)).isOpen_compl⟩ with hU₀def
       letI : ChartedSpace H ↥U₀ :=
         TopologicalSpace.Opens.instChartedSpace (H := H) (M := P.M) (s := U₀)

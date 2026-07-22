@@ -190,8 +190,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
     (ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)).comp
       ((h.inner (Φ x)).comp (mfderiv I I Φ x)) with hQ
   refine ⟨χ, fun x => χ x • Q x, ?_, hχ, hχK, hχsupp, hχ01, fun x => rfl⟩
-  ·
-    apply cotangentCov_clmSection_smooth_aux
+  · apply cotangentCov_clmSection_smooth_aux
       (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (φ := fun x => χ x • Q x)
     intro Y
@@ -208,8 +207,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
     have hstage : ContMDiffAt I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (fun x => (χ x • Q x) (Y x) (W x)) x₀ := by
       by_cases hx₀ : x₀ ∈ Φ.source
-      ·
-        have hφ : ContMDiffAt I I (∞ : WithTop ℕ∞) (Φ : M → N) x₀ :=
+      · have hφ : ContMDiffAt I I (∞ : WithTop ℕ∞) (Φ : M → N) x₀ :=
           Φ.contMDiffOn_toFun.contMDiffAt (Φ.open_source.mem_nhds hx₀)
         have hg' : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (∞ : WithTop ℕ∞)
             (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
@@ -240,7 +238,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
           have hcomp := (htm.contMDiffAt (hpre_open.mem_nhds hmem)).comp x₀ hYs
           refine hcomp.congr_of_eventuallyEq ?_
           filter_upwards [Φ.open_source.mem_nhds hx₀] with x hx
-          show TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
+          change TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
               ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x (Y' x))
             = TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
               ((Φ : M → N) x)
@@ -267,8 +265,7 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
         refine hmul.congr_of_eventuallyEq ?_
         filter_upwards with x
         exact hval x
-      ·
-        have hx₀' : x₀ ∉ tsupport χ := fun hmem => hx₀ (hχsupp hmem)
+      · have hx₀' : x₀ ∉ tsupport χ := fun hmem => hx₀ (hχsupp hmem)
         have hev : (fun x => (χ x • Q x) (Y x) (W x)) =ᶠ[nhds x₀] (fun _ => (0 : ℝ)) := by
           filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx₀'] with x hx
           rw [hval x, image_eq_zero_of_notMem_tsupport hx, zero_mul]

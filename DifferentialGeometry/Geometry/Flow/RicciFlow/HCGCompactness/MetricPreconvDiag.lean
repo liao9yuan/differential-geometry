@@ -69,17 +69,15 @@ theorem exists_diag_subseq
     rw [hGstep]; exact (hstep n (Gf n) (hGmono n)).choose_spec.2
   set φ : ℕ → ℕ := fun n => Gf (n + 1) n with hφdef
   refine ⟨φ, ?_, ?_⟩
-  ·
-    apply strictMono_nat_of_lt_succ
+  · apply strictMono_nat_of_lt_succ
     intro n
     have h1 : φ (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1)) := by
-      show Gf (n + 2) (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1))
+      change Gf (n + 2) (n + 1) = Gf (n + 1) (ρ (n + 1) (n + 1))
       rw [hGstep (n + 1)]; rfl
-    show φ n < φ (n + 1)
+    change φ n < φ (n + 1)
     rw [h1]
     exact hGmono (n + 1) ((Nat.lt_succ_self n).trans_le (hρmono (n + 1)).le_apply)
-  ·
-    intro n
+  · intro n
 
     let Q : ℕ → (ℕ → ℕ) := fun m =>
       Nat.rec id (fun j Qj => Qj ∘ ρ (n + 1 + j)) m
@@ -94,7 +92,7 @@ theorem exists_diag_subseq
       induction m with
       | zero => rfl
       | succ j ih =>
-        show Gf (n + 1 + j) ∘ ρ (n + 1 + j) = Gf (n + 1) ∘ Q (j + 1)
+        change Gf (n + 1 + j) ∘ ρ (n + 1 + j) = Gf (n + 1) ∘ Q (j + 1)
         rw [ih, hQstep]
         rfl
 
@@ -102,16 +100,16 @@ theorem exists_diag_subseq
     have hτmono : StrictMono τ := by
       apply strictMono_nat_of_lt_succ
       intro m
-      show Q m (n + m) < Q (m + 1) (n + (m + 1))
+      change Q m (n + m) < Q (m + 1) (n + (m + 1))
       rw [hQstep]
-      show Q m (n + m) < Q m (ρ (n + 1 + m) (n + (m + 1)))
+      change Q m (n + m) < Q m (ρ (n + 1 + m) (n + (m + 1)))
       apply hQmono m
       exact (Nat.lt_succ_self (n + m)).trans_le
         (by rw [show n + (m + 1) = (n + m) + 1 from by ring]; exact (hρmono (n + 1 + m)).le_apply)
     have htail : (fun m => φ (n + m)) = Gf (n + 1) ∘ τ := by
       funext m
-      show φ (n + m) = Gf (n + 1) (Q m (n + m))
-      show Gf (n + m + 1) (n + m) = Gf (n + 1) (Q m (n + m))
+      change φ (n + m) = Gf (n + 1) (Q m (n + m))
+      change Gf (n + m + 1) (n + m) = Gf (n + 1) (Q m (n + m))
       rw [show n + m + 1 = n + 1 + m from by ring, hGcomp m]
       rfl
     have hPtail : P n (fun m => φ (n + m)) := by

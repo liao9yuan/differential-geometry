@@ -475,8 +475,7 @@ theorem nablaRm04NormSqInFrame_eq_compNormSq5
   refine Finset.sum_congr rfl fun a _ => ?_
 
   rw [Finset.sum_eq_single a]
-  ·
-    refine Finset.sum_congr rfl fun i _ => ?_
+  · refine Finset.sum_congr rfl fun i _ => ?_
     refine Finset.sum_congr rfl fun j _ => ?_
     refine Finset.sum_congr rfl fun k _ => ?_
     refine Finset.sum_congr rfl fun l _ => ?_
@@ -496,8 +495,7 @@ theorem nablaRm04NormSqInFrame_eq_compNormSq5
       · intro h; exact absurd (Finset.mem_univ j) h
     · intro p _ hp; simp [horth, Ne.symm hp]
     · intro h; exact absurd (Finset.mem_univ i) h
-  ·
-    intro b _ hb
+  · intro b _ hb
     simp [horth, Ne.symm hb]
   · intro h; exact absurd (Finset.mem_univ a) h
 

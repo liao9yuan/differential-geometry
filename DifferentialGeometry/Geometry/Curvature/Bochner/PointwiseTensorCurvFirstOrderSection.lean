@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderBound
-import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSValueLocal
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -583,6 +581,12 @@ private noncomputable def curvatureGradContractionBilin
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  letI : TopologicalSpace (TensorRSSpace 0 s I x) :=
+    tensorRSSpace_topologicalSpace 0 s x
+  letI : AddCommGroup (TensorRSSpace 0 s I x) := tensorRSSpace_addCommGroup 0 s x
+  letI : Module ℝ (TensorRSSpace 0 s I x) := tensorRSSpace_module 0 s x
+  letI : ContinuousAdd (TensorRSSpace 0 s I x) := tensorRSSpace_continuousAdd 0 s x
+  letI : ContinuousSMul ℝ (TensorRSSpace 0 s I x) := tensorRSSpace_continuousSMul 0 s x
   haveI iFD : FiniteDimensional ℝ (TensorRSSpace 0 s I x) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
   haveI iT2 : T2Space (TensorRSSpace 0 s I x) :=
@@ -610,19 +614,26 @@ private noncomputable def curvatureGradContractionBilin
       { toFun := fun b => tensorSlotZeroEvalFib (I := I) (M := M) x s b Wx
         map_add' := fun b b' => slot0SliceFib_dir_add (I := I) (M := M) x s b b' Wx
         map_smul' := fun c b => slot0SliceFib_dir_smul (I := I) (M := M) x s c b Wx }
+  letI : AddCommMonoid (TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 s I x) :=
+    ContinuousLinearMap.addCommMonoid
+  letI : ContinuousAdd (TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 s I x) :=
+    inferInstance
+  letI : AddCommMonoid
+      (TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 s I x) :=
+    ContinuousLinearMap.addCommMonoid
   LinearMap.toContinuousLinearMap
     { toFun := fun a => evalCLM.comp
         ((riemannOp (tensorCov (I := I) g 0 s) x a w).comp sliceDirCLM)
       map_add' := fun a a' => by
         apply ContinuousLinearMap.ext; intro b
         simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
-          map_add (riemannOp (tensorCov (I := I) g 0 s) x) a a',
-          ContinuousLinearMap.add_apply, map_add evalCLM]
+          (riemannOp (tensorCov (I := I) g 0 s) x).map_add a a']
+        exact evalCLM.map_add _ _
       map_smul' := fun c a => by
         apply ContinuousLinearMap.ext; intro b
         simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply,
-          RingHom.id_apply, map_smul (riemannOp (tensorCov (I := I) g 0 s) x) c a,
-          ContinuousLinearMap.smul_apply, map_smul evalCLM] }
+          RingHom.id_apply, (riemannOp (tensorCov (I := I) g 0 s) x).map_smul c a]
+        exact evalCLM.map_smul c _ }
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] private lemma rArmBilin_apply
@@ -980,8 +991,6 @@ lemma diffArmSection_slice_toModel_value_local
   rw [frame_sum_nablaTensor0SCurv_diag_baseSlot_eval (I := I) g s Ba A
     (contMDiff_unitEvalSection (I := I) (M := M) g s S) x m]
 
-set_option maxHeartbeats 6400000 in
-
 lemma diffArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M)
     (hx : S₁.toSection x = S₂.toSection x) :
@@ -1007,7 +1016,7 @@ lemma diffArmSection_value_local
     simp only [Tensor0SSpace.toModel_smul,
       ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [hredD, hredD]
-  congr 1
+  apply congrArg (fun z : ℝ => tensor00Scalar (I := I) (M := M) x D * z)
 
   obtain ⟨w, m, hcons⟩ : ∃ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),
       v = Fin.cons w m := ⟨v 0, Fin.tail v, (Fin.cons_self_tail v).symm⟩
@@ -1019,7 +1028,8 @@ lemma diffArmSection_value_local
     (fun a => smoothOrthoFrame (I := I) g x a x)
     (fun u => smoothOrthoFrame_parsevalExpand (I := I) (M := M) g x u) w m]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-  congr 1
+  apply congrArg (fun z : ℝ =>
+    g.inner x (smoothOrthoFrame (I := I) g x a x) w • z)
 
   have hbridge : ∀ S : SmoothCcTensor g 0 s,
       Tensor0SSpace.toModel

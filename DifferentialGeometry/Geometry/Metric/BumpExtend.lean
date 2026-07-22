@@ -128,8 +128,7 @@ lemma bumpForm_pos (R : SmoothRiemannianMetric I M) (U : Opens M)
   have ha : 0 ≤ χ x := (hχ01 x).1
   have hb : 0 ≤ 1 - χ x := by linarith [(hχ01 x).2]
   rcases lt_or_eq_of_le ha with ha' | ha'
-  ·
-    have hxU : x ∈ U := by
+  · have hxU : x ∈ U := by
       apply hχsupp
       exact subset_tsupport χ (Function.mem_support.mpr (ne_of_gt ha'))
     rw [extZeroForm_of_mem (I := I) U gU hxU v v]
@@ -139,8 +138,7 @@ lemma bumpForm_pos (R : SmoothRiemannianMetric I M) (U : Opens M)
     have h2 : 0 ≤ (1 - χ x) • R.inner x v v := by
       rw [smul_eq_mul]; exact mul_nonneg hb hR.le
     linarith
-  ·
-    rw [← ha']
+  · rw [← ha']
     simp only [zero_smul, zero_add, sub_zero, one_smul]
     exact hR
 
@@ -196,7 +194,7 @@ lemma frameVec_sub_cmdiffAt (U : Opens M)
       hf' (by simp)
   refine hpull.congr_of_eventuallyEq ?_
   filter_upwards with z
-  show TotalSpace.mk' E (E := fun z : U => TangentSpace I z) z _
+  change TotalSpace.mk' E (E := fun z : U => TangentSpace I z) z _
     = TotalSpace.mk' E (E := fun z : U => TangentSpace I z) z _
   congr 1
   have hfz : (mfderiv I I (Subtype.val : U → M) z).IsInvertible := by

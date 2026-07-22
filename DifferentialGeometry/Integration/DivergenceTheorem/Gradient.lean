@@ -303,11 +303,11 @@ theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact mem_chart_source H x
   have hy₀_target : y₀ ∈ (extChartAt I x).target := by
-    simp [y₀, (extChartAt I x).map_source hxsrc]
+    simp [y₀]
   have htarget_nhd : (extChartAt I x).target ∈ 𝓝 y₀ :=
     (isOpen_extChartAt_target (I := I) x).mem_nhds hy₀_target
   have hsymm_y₀ : (extChartAt I x).symm y₀ = x := by
-    simp [y₀, (extChartAt I x).left_inv hxsrc]
+    simp [y₀]
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact mem_chart_source H x
@@ -412,8 +412,7 @@ private lemma gradChartCoeff_contMDiffOn
   classical
   refine contMDiffOn_finset_sum (fun j _ => ?_)
   refine ContMDiffOn.mul ?_ ?_
-  ·
-    have h1 : ContMDiffOn I 𝓘(ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun x => chartInvGramMatrix (I := I) g α x i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
@@ -423,8 +422,7 @@ private lemma gradChartCoeff_contMDiffOn
     have := hx.1
     rw [extChartAt_source_eq_chartAt_source (I := I)] at this
     exact this
-  ·
-    have hpartial : ContDiffOn ℝ ∞
+  · have hpartial : ContDiffOn ℝ ∞
         (partialDeriv (E := E) j (scalarOnE (I := I) α f))
         (interior (extChartAt I α).target) := by
       have hbase : ContDiffOn ℝ ∞

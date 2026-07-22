@@ -201,10 +201,7 @@ theorem corrected_chart_anchor_flow_build
     refine hcomp.mono_of_mem_nhdsWithin ?_
     exact Filter.mem_of_superset (Ico_mem_nhdsGE (hTα (αRep x))) Set.Ico_subset_Icc_self
   refine ⟨σ, hσ_pos, Φ0, hΦ0_init, ?_, ?_, horbit_cont⟩
-  ·
-
-
-    intro t ht x
+  · intro t ht x
     have hIoo_sub : Set.Ioo (0 : ℝ) σ ⊆ Set.Icc (0 : ℝ) (Tα (αRep x)) := fun s hs =>
       ⟨hs.1.le, (lt_of_lt_of_le hs.2 (hσ_le x)).le⟩
     have hconf' : ∀ u ∈ Set.Ioo (0 : ℝ) σ,
@@ -217,11 +214,7 @@ theorem corrected_chart_anchor_flow_build
       (((hspec x).2 u (hIoo_sub hu)).1).mono hIoo_sub
     exact corrected_chartflow_eq_bareflow (I := I) X (αRep x)
       (flowα (αRep x)) (extChartAt I (αRep x) x) hconf' hode' t ht
-  ·
-
-
-
-    intro x
+  · intro x
     set α := αRep x with hαdef
     set ext := extChartAt I α with hextdef
     set g : ℝ → E := flowα α (ext x) with hgdef
@@ -240,8 +233,7 @@ theorem corrected_chart_anchor_flow_build
       rw [hΦ0_eq s, ← extChartAt_source (I := I) α]
       exact (ext).map_target hgs_target
     refine ⟨hΦ0s_src, ?_, ?_⟩
-    ·
-      have hg'_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
+    · have hg'_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
           HasDerivWithinAt g (chartTrivRepr (I := I) α (X u) (g u)) (Set.Icc (0 : ℝ) (Tα α)) u :=
         fun u hu => ((hspec x).2 u hu).1
       have hbd_full : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α),
@@ -278,8 +270,7 @@ theorem corrected_chart_anchor_flow_build
         _ = ext x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (g r) := by rw [hFTC]
         _ = ext x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (ext (Φ0 r x)) := by
             rw [intervalIntegral.integral_congr hcongr_integrand]
-    ·
-      rw [hΦ0_eq s, hext_round s hsIcc]
+    · rw [hΦ0_eq s, hext_round s hsIcc]
       exact ((hspec x).2 s hsIcc).2.2
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

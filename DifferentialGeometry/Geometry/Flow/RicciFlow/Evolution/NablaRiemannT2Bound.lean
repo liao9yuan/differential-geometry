@@ -145,13 +145,11 @@ private theorem cotangentSharp_orthoBasis_expand
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv := by
     intro i j
     refine ⟨?_, ?_⟩
-    ·
-      rw [Finset.sum_eq_single i]
+    · rw [Finset.sum_eq_single i]
       · rw [hdiag i, one_mul]; exact horth i j
       · intro k _ hk; rw [hoff i k (fun h => hk h.symm), zero_mul]
       · intro h; exact absurd (Finset.mem_univ i) h
-    ·
-      rw [Finset.sum_eq_single j]
+    · rw [Finset.sum_eq_single j]
       · rw [hdiag j, mul_one]; exact horth i j
       · intro k _ hk; rw [hoff k j hk, mul_zero]
       · intro h; exact absurd (Finset.mem_univ j) h
@@ -434,8 +432,7 @@ theorem compNormSqMulti_eq_compNormSq5
   refine Finset.sum_congr rfl fun d _ => ?_
 
   rw [Finset.sum_eq_single (default : Fin 0 → Idx)]
-  ·
-    have htuple :
+  · have htuple :
         (Fin.cons m (Fin.cons a (Fin.cons b (Fin.cons c
           (Fin.cons d (default : Fin 0 → Idx))))) : Fin 5 → Idx) =
           ![m, a, b, c, d] := by
@@ -482,8 +479,7 @@ theorem abs_nablaLapComm_T2_orthoFrame_le
   classical
   obtain ⟨n, frame, basis, hframe, horth⟩ := exists_orthoBasisFrameAt (I := I) S t x₀
   refine ⟨n, frame, ?_, deltaInvMetric_orthonormal (M := M) t x₀, ?_⟩
-  ·
-    intro i j; rw [hframe i, hframe j]; exact horth i j
+  · intro i j; rw [hframe i, hframe j]; exact horth i j
   · intro a b c m
 
     have hbnd :=

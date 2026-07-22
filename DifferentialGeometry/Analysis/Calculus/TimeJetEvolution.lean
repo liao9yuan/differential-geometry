@@ -64,13 +64,10 @@ theorem curveJet_match
   rw [iteratedDerivWithin_prodMk (hcurveL.of_le hbinf).snd.fst (hcurveL.of_le hbinf).snd.snd hsL h0L,
     iteratedDerivWithin_prodMk (hcurveR.of_le hbinf).snd.fst (hcurveR.of_le hbinf).snd.snd hsR h0R]
   refine Prod.ext ?_ ?_
-  ·
-    rw [← fderiv_iteratedDerivWithin_time_comm hsL haccL hV b h0L hw hGL,
+  · rw [← fderiv_iteratedDerivWithin_time_comm hsL haccL hV b h0L hw hGL,
       ← fderiv_iteratedDerivWithin_time_comm hsR haccR hV b h0R hw hGR]
     exact heqf.fderiv_eq
-  ·
-
-    have hKL := spatialFDeriv_contDiffOn hsL hV hGL
+  · have hKL := spatialFDeriv_contDiffOn hsL hV hGL
     have hKR := spatialFDeriv_contDiffOn hsR hV hGR
     rw [← fderiv_iteratedDerivWithin_time_comm hsL haccL hV b h0L hw hKL,
       ← fderiv_iteratedDerivWithin_time_comm hsR haccR hV b h0R hw hKR]

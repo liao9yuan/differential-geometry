@@ -83,8 +83,7 @@ omit [T2Space M] [SigmaCompactSpace M] in
     (v : Fin 2 → TangentSpace I b) :
     nablaCovTensor (I := I) g Z b v =
       g.inner b ((LeviCivita (I := I) g).toFun Z.toFun b (v 0)) (v 1) := by
-  simp only [nablaCovTensor, ContinuousLinearMap.uncurryLeft_apply,
-    ContinuousLinearMap.comp_apply]
+  simp only [nablaCovTensor]
   rfl
 
 

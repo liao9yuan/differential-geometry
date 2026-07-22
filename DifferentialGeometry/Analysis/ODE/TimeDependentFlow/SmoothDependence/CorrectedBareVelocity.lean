@@ -38,7 +38,7 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
   have hq_src : (extChartAt I α).symm c ∈ (chartAt H α).source := by
     rw [← extChartAt_source (I := I) α]
     exact (extChartAt I α).map_target hc
-  show (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
+  change (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
         (X s ((extChartAt I α).symm c)) = _
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hq_src]
   rfl

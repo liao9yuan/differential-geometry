@@ -330,8 +330,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
   refine Finset.sum_congr rfl fun l _ => ?_
   dsimp [gInv]
   congr 1
-  ·
-    have h₁ :
+  · have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (I ((chartAt H x₀) x₀)) ((Module.finBasis Real E) i) =
           directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)
@@ -749,8 +748,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
   refine Finset.sum_congr rfl fun l _ => ?_
   dsimp [gInv]
   congr 1
-  ·
-    have h₁ :
+  · have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) i) =
           directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)

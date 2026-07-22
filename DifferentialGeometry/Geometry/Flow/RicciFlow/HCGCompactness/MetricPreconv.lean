@@ -347,8 +347,7 @@ theorem fderiv_comp_le_tower
 
     refine le_trans (abs_add_le _ _) ?_
     refine add_le_add ?_ ?_
-    ·
-      have hCS := abs_apply_le_sqrt_normSq0S (I := I) gRef y (p + 3) bON hbON
+    · have hCS := abs_apply_le_sqrt_normSq0S (I := I) gRef y (p + 3) bON hbON
         (covDerivOfField (I := I) gRef A0 (p + 1) y)
         (Fin.cons (σ i y) (fun a : Fin (p + 2) => V a y))
       refine le_trans hCS ?_
@@ -369,8 +368,7 @@ theorem fderiv_comp_le_tower
       refine le_trans (mul_le_mul (hCp1 y hy) hprod
         (Finset.prod_nonneg (fun a _ => Real.sqrt_nonneg _)) hCp1nn) ?_
       exact le_of_eq rfl
-    ·
-      refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    · refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
       have hterm : ∀ a : Fin (p + 2),
           |(covDerivOfField (I := I) gRef A0 p) y
               (Function.update (fun b : Fin (p + 2) => V b y) a
@@ -1541,10 +1539,8 @@ theorem exists_chart_engineInput
     exact this.contDiffWithinAt
 
   refine ⟨fun k => fun x => χ x * cr k x, χ, ?_, ?_, ?_, fun k => rfl⟩
-  ·
-    exact fun k => bumpMul_contDiff htgt_open hχcd hχtsupp (hcrOn k)
-  ·
-    intro r
+  · exact fun k => bumpMul_contDiff htgt_open hχcd hχtsupp (hcrOn k)
+  · intro r
     set Kc : Set M := (extChartAt I x₀).symm '' (tsupport χ) with hKcdef
     have hKccpt : IsCompact Kc :=
       hχcpt.image_of_continuousOn
@@ -1597,8 +1593,7 @@ theorem exists_chart_engineInput
     simp only [hΦeq]
     exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
       hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
-  ·
-    intro y hy
+  · intro y hy
     exact hχ1.self_of_nhdsSet _ ⟨y, hy, rfl⟩
 
 

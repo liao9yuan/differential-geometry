@@ -358,7 +358,7 @@ theorem halfSqDist_flat
       (show TangentSpace I q from NormalCoordinates.normalChartAt (I := I) g q pt) w
       = L * g.inner q u w := by
     rw [← hLu, (g.inner q).map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
-  show mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q w
+  change mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q w
       = g.inner q
           (-(show TangentSpace I q from NormalCoordinates.normalChartAt (I := I) g q pt)) w
   rw [hval, (g.inner q).map_neg, ContinuousLinearMap.neg_apply, hnc, g.symm q w u,

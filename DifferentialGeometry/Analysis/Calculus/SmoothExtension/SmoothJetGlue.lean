@@ -90,11 +90,9 @@ theorem contDiff_if_le_of_jet_match
   have hEqR : ∀ m : ℕ, Set.EqOn (fun y => p y m) (fun y => pR y m) (Set.Ici (0:ℝ)) := by
     intro m y hy
     rcases eq_or_lt_of_le (Set.mem_Ici.mp hy) with hy0 | hy0
-    ·
-      subst hy0
+    · subst hy0
       simp only [hp_def, if_pos (le_refl (0:ℝ)), hjetF m]
-    ·
-      simp only [hp_def, if_neg (not_le.mpr hy0)]
+    · simp only [hp_def, if_neg (not_le.mpr hy0)]
 
   have hzero : ∀ x : ℝ, (p x 0).curry0 = f x := by
     intro x
@@ -120,8 +118,7 @@ theorem contDiff_if_le_of_jet_match
       · subst hy0; simp only [hp_def, if_pos (le_refl (0:ℝ)), hjetF]
       · simp only [hp_def, if_neg (not_le.mpr hy0)]
     rcases lt_trichotomy x 0 with hx | hx | hx
-    ·
-      have hxle : x ≤ 0 := le_of_lt hx
+    · have hxle : x ≤ 0 := le_of_lt hx
       have hdL : HasFDerivWithinAt (fun y => pL y m) (pL x m.succ).curryLeft (Set.Iic 0) x :=
         hTL.fderivWithin m (hm_lt m) x (Set.mem_Iic.mpr hxle)
 
@@ -135,8 +132,7 @@ theorem contDiff_if_le_of_jet_match
         hdL'.congr_of_eventuallyEq hee
       rw [hpL_succ x hxle]
       exact hfd.hasFDerivWithinAt
-    ·
-      subst hx
+    · subst hx
 
       have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL 0 m.succ).curryLeft (Set.Iic 0) 0 :=
         hTL.fderivWithin m (hm_lt m) 0 Set.self_mem_Iic
@@ -155,8 +151,7 @@ theorem contDiff_if_le_of_jet_match
       rw [Set.Iic_union_Ici] at hunion
       rw [hpL_succ 0 (le_refl 0)]
       exact hunion
-    ·
-      have hxge : (0:ℝ) ≤ x := le_of_lt hx
+    · have hxge : (0:ℝ) ≤ x := le_of_lt hx
       have hdR : HasFDerivWithinAt (fun y => pR y m) (pR x m.succ).curryLeft (Set.Ici 0) x :=
         hTR.fderivWithin m (hm_lt m) x (Set.mem_Ici.mpr hxge)
       have hnhds : Set.Ioi (0:ℝ) ∈ 𝓝 x := Ioi_mem_nhds hx

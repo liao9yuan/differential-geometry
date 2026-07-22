@@ -806,10 +806,7 @@ theorem metricFamilySmoothOn_of_chartGram
       ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
     exact (hcont x₀ i j).comp hincl (fun q hq => ⟨q.1.2, hq⟩)
   refine ⟨?_, ?_, ?_, ?_⟩
-  ·
-
-
-    intro x X Y
+  · intro x X Y
     have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞
         (fun t : ℝ => (t, x)) (Set.Ioo a b) :=
       contMDiffOn_id.prodMk contMDiffOn_const
@@ -839,9 +836,7 @@ theorem metricFamilySmoothOn_of_chartGram
       rw [Bundle.contMDiffWithinAt_totalSpace] at hpt
       exact hpt.2
     exact hscalar.contDiffOn
-  ·
-
-    intro x X Y
+  · intro x X Y
     have hbase :
         ContinuousOn
           (fun s : ℝ => Tensor0SBundle.metricTensorField (I := I) (g s) x
@@ -855,10 +850,8 @@ theorem metricFamilySmoothOn_of_chartGram
         (fun _ => continuous_const)
     refine hbase.congr (fun s _ => ?_)
     simp [Tensor0SBundle.metricTensorField_apply, DifferentialGeometry.Integral.Connection.vec2]
-  ·
-    exact hcontTensor
-  ·
-    intro Idx _ frame u hframe i j
+  · exact hcontTensor
+  · intro Idx _ frame u hframe i j
     exact metricFrameComp_jointContMDiffOn_of_chartGram (I := I) g a b hsmooth frame hframe i j
 
 
@@ -906,7 +899,7 @@ theorem ricciCont_of_joint [I.Boundaryless]
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 0) q.2)
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 1) q.2) := by
     funext k; fin_cases k <;> rfl
-  show metricRicciAt (I := I) (g q.1.1) q.2
+  change metricRicciAt (I := I) (g q.1.1) q.2
       (fun k : Fin 2 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) q.2) = _
   rw [hvec]
   exact metricRicciAt_apply_eq_ricciTensor (g q.1.1) q.2 _ _
@@ -1285,17 +1278,13 @@ theorem isSolutionOn_of_extendData
       rm04Cont := ?_
       ricciNormSpace := ?_
       ricciNormGrad := ?_ }
-  ·
-    exact metricFamilySmoothOn_of_chartGram (I := I) g_ext hαb hsmooth hcont
-  ·
-    intro t
+  · exact metricFamilySmoothOn_of_chartGram (I := I) g_ext hαb hsmooth hcont
+  · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
       DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g_ext (t : ℝ))
-  ·
-    exact metricVariationEquationOn_of_pde (I := I) g_ext hαb hpde
-  ·
-    have hinterior : ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_ext q.1) q.2)
+  · exact metricVariationEquationOn_of_pde (I := I) g_ext hαb hpde
+  · have hinterior : ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_ext q.1) q.2)
         (Set.Ioo α b ×ˢ (Set.univ : Set M)) :=
       scalarCont_interior_of_chartGram (I := I) g_ext α b hsmooth
     have hhalf : ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_ext q.1) q.2)
@@ -1318,13 +1307,11 @@ theorem isSolutionOn_of_extendData
         rintro ⟨t, x⟩ ⟨ht, hαt⟩
         exact ⟨⟨hαt, ht.1.2⟩, Set.mem_univ x⟩
     exact hglue.congr (fun q _ => rfl)
-  ·
-    intro K t htK hKsub x
+  · intro K t htK hKsub x
     have hmain : DifferentiableWithinAt ℝ (fun s : ℝ => metricScalarAt (I := I) (g_ext s) x)
         (Set.Ico α b) t := by
       rcases (hKsub htK).1.eq_or_lt with hα | hα
-      ·
-        have hgerm : Set.Ico α omega =ᶠ[nhds t] Set.Ico α b := by
+      · have hgerm : Set.Ico α omega =ᶠ[nhds t] Set.Ico α b := by
           have h1 : Set.Iio omega ∈ nhds t := Iio_mem_nhds (hα ▸ hαω)
           have h2 : Set.Iio b ∈ nhds t := Iio_mem_nhds (hα ▸ hαb)
           filter_upwards [h1, h2] with s hs1 hs2
@@ -1335,8 +1322,7 @@ theorem isSolutionOn_of_extendData
           subset_rfl x).congr (fun s hs => ?_) ?_
         · simp only [SolutionOn.scalar, SolutionFamily.scalar, hagree s hs.2]
         · simp only [SolutionOn.scalar, SolutionFamily.scalar, hagree t (hα ▸ hαω)]
-      ·
-        have hgerm : Set.Ioo α b =ᶠ[nhds t] Set.Ico α b := by
+      · have hgerm : Set.Ioo α b =ᶠ[nhds t] Set.Ico α b := by
           filter_upwards [Ioi_mem_nhds hα] with s hs1
           simp only [Set.mem_Ioi] at hs1
           exact propext ⟨fun h => ⟨h.1.le, h.2⟩, fun h => ⟨hs1, h.2⟩⟩
@@ -1344,8 +1330,7 @@ theorem isSolutionOn_of_extendData
         exact scalarTime_interior_of_chartGram (I := I) g_ext α b hsmooth t
           ⟨hα, (hKsub htK).2⟩ x
     exact hmain.mono hKsub
-  ·
-    have hinterior :
+  · have hinterior :
         DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
           (Set.Ioo α b) (fun t x => metricRicciAt (I := I) (g_ext t) x) :=
       ricciCont_interior_of_chartGram (I := I) g_ext α b hsmooth
@@ -1362,8 +1347,7 @@ theorem isSolutionOn_of_extendData
     refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
       hglued (fun t _ x => ?_)
     simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
-  ·
-    have hinterior :
+  · have hinterior :
         DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
           (Set.Ioo α b)
           (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g_ext t) x) :=
@@ -1382,8 +1366,7 @@ theorem isSolutionOn_of_extendData
     refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
       hglued (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
-  ·
-    intro t ht x
+  · intro t ht x
     have h := (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
       (g_ext (t : ℝ)) (metricRicci (I := I) (M := M) (g_ext (t : ℝ)))).mdifferentiableAt
       (by simp) (x := x)
@@ -1391,8 +1374,7 @@ theorem isSolutionOn_of_extendData
     filter_upwards with y
     simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
       SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
-  ·
-    intro t ht x
+  · intro t ht x
     have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
         (ricciNorm (I := I)
           ({ base := { metric := g_ext } } : SolutionOn (I := I) (M := M)

@@ -656,18 +656,14 @@ theorem cmChartDerivLe2
         ≤ Ctil j := by
   intro j hj
   obtain _ | _ | _ | n := j
-  ·
-    rw [norm_iteratedFDeriv_zero, hc0]; exact hC0
-  ·
-    have hB : ‖Dj‖ ≤ B 1 := by
+  · rw [norm_iteratedFDeriv_zero, hc0]; exact hC0
+  · have hB : ‖Dj‖ ≤ B 1 := by
       have h := hGbd 1 hj
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
     exact le_trans
       (cmChartFDerivLe (I := I) g hEnorm p z₀ params₀ hbd Dj (B 1) hG hB c Df hcderiv hc0 hc_solves)
       hC1
-  ·
-
-    have hf_ev : ∀ᶠ q in nhds params₀,
+  · have hf_ev : ∀ᶠ q in nhds params₀,
         HasFDerivAt (fun q' => (NormalCoordinates.normalChartAt (I := I) g p (c q') : E))
           (fderiv ℝ (fun q' => (NormalCoordinates.normalChartAt (I := I) g p (c q') : E)) q) q := by
       filter_upwards [hf2.eventually (by simp)] with q hq

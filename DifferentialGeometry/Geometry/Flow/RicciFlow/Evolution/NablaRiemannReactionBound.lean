@@ -211,7 +211,6 @@ theorem rmRaise_summand_covDeriv
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
     (x₀ : M) (q : Fin 4)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -333,8 +332,7 @@ theorem rmRaise_summand_covDeriv
     congr 1
     funext b
     fin_cases b <;>
-      simp [hW_def, rmRaiseSlotSections, vec4, Function.update,
-        rmFrozenSlotSharpSection_apply]
+      simp [hW_def, rmRaiseSlotSections, vec4, Function.update]
 
   rw [← hscalar]
 
@@ -633,7 +631,7 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
   congr 1
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [hg_def]
-  exact rmRaise_summand_covDeriv (I := I) S hS t x₀ q X Vb Vc Vm hVb hVc (fun i => hVm i)
+  exact rmRaise_summand_covDeriv (I := I) S t x₀ q X Vb Vc Vm hVb hVc (fun i => hVm i)
 
 
 
@@ -921,7 +919,6 @@ theorem abs_nablaLapComm_T1_covConst_le
     (a b c : Fin n) (m : Fin 4 → Fin n)
     (hXa : X x₀ = basis a) (hVb : Vb x₀ = basis b) (hVc : Vc x₀ = basis c)
     (hVm : ∀ i : Fin 4, Vm i x₀ = basis (m i))
-    (hXcov : ((S.family.connection (t : Real) (fun p : M => X p) x₀) (X x₀)) = 0)
     (hVbcov : ((S.family.connection (t : Real) (fun p : M => Vb p) x₀) (X x₀)) = 0)
     (hVccov : ((S.family.connection (t : Real) (fun p : M => Vc p) x₀) (X x₀)) = 0)
     (hVmcov : ∀ i : Fin 4,
@@ -1150,7 +1147,7 @@ theorem abs_nablaLapComm_T1_orthoBasis_le
   classical
   have hconn := connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
 
-  obtain ⟨Xa, hXa, hXacov⟩ := exists_cov_zero_at_apply (I := I)
+  obtain ⟨Xa, hXa, _⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis a)
   obtain ⟨Vb, hVb, hVbcov⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis b)
@@ -1164,26 +1161,26 @@ theorem abs_nablaLapComm_T1_orthoBasis_le
 
   have hmtail : frameTuple (I := I) frame x₀ m = (fun i : Fin 4 => Vm i x₀) := by
     funext i
-    show frame (m i) x₀ = Vm i x₀
+    change frame (m i) x₀ = Vm i x₀
     rw [hframe (m i), hVm i]
   have htuple_a :
       nabla3FrameTupleF (I := I) frame x₀ a b c m =
         Fin.cons (Xa x₀)
           (metricTraceInput (I := I) (Vb x₀) (Vc x₀) (fun i : Fin 4 => Vm i x₀)) := by
-    simp only [nabla3FrameTupleF, nabla3InnerSlotsF, metricTraceInput]
+    simp only [nabla3FrameTupleF, nabla3InnerSlotsF]
     rw [hframe a, hframe b, hframe c, hXa, hVb, hVc, hmtail]
     rfl
   have htuple_acb :
       nabla3FrameTupleF (I := I) frame x₀ a c b m =
         Fin.cons (Xa x₀)
           (metricTraceInput (I := I) (Vc x₀) (Vb x₀) (fun i : Fin 4 => Vm i x₀)) := by
-    simp only [nabla3FrameTupleF, nabla3InnerSlotsF, metricTraceInput]
+    simp only [nabla3FrameTupleF, nabla3InnerSlotsF]
     rw [hframe a, hframe c, hframe b, hXa, hVc, hVb, hmtail]
     rfl
   rw [htuple_a, htuple_acb]
   exact abs_nablaLapComm_T1_covConst_le (I := I) S hS t x₀ basis horth Xa Vb Vc Vm
     a b c m hXa hVb hVc hVm
-    (hXacov Xa) (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
+    (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
 
 end SolutionT1Bound
 
@@ -1236,7 +1233,7 @@ theorem compNormSqMulti_eq_compNormSq4_basis
           (Fin.cons l (default : Fin 0 → Fin n)))) : Fin 4 → Fin n) =
           ![i, j, k, l] := by
       funext p; fin_cases p <;> rfl
-    show (A (Fin.cons i (Fin.cons j (Fin.cons k (Fin.cons l (default : Fin 0 → Fin n)))))) ^ 2 = _
+    change (A (Fin.cons i (Fin.cons j (Fin.cons k (Fin.cons l (default : Fin 0 → Fin n)))))) ^ 2 = _
     rw [htuple, hA]
     dsimp only
     have hvec : (fun p : Fin 4 => basis ((![i, j, k, l] : Fin 4 → Fin n) p)) =

@@ -980,8 +980,7 @@ theorem normsq_evol_of_comp
       ((-2 : Real) • nablaRic i s x) I0, ?_, ?_⟩
   · rw [hU_eq]
     exact hders
-  ·
-    have habs : |∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+  · have habs : |∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
         2 * Tensor0SBundle.component0S (I := I) basis
           (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
         Tensor0SBundle.component0S (I := I) basis
@@ -1123,7 +1122,7 @@ theorem hevComp_of_solutions
   have hsec : (covDerivOfField (I := I) gRef (solnRicField (I := I) (S i) s) N) x
       = nablaRicReal (I := I) gSeq gRef N i s x := by
     rw [hsolng, covDerivOfField_eq_iterCov, ← hric]
-    show ContinuousMultilinearMap.domDomCongr (acEquiv N)
+    change ContinuousMultilinearMap.domDomCongr (acEquiv N)
         (ricCovTower (I := I) (gSeq i s) gRef N x)
       = nablaRicReal (I := I) gSeq gRef N i s x
     simp only [nablaRicReal]

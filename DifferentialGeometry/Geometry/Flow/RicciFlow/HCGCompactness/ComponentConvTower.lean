@@ -912,7 +912,7 @@ private theorem engine_input_family
     exact le_trans hbnd
       (Finset.single_le_sum (fun jj _ => hMr0 jj)
         (Finset.mem_range.2 (Nat.lt_succ_of_le hjr)))
-  show ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
+  change ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
   simp only [hΦeq]
   exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
     hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
