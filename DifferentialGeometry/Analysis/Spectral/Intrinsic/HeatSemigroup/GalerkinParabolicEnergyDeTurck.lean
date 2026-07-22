@@ -797,8 +797,6 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (smo
 
 omit [BoundarylessManifold I M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma eigenIdxFinset_mem_iff_of_eigenvalue_eq (g₀ : SmoothRiemannianMetric I M) (N : ℕ) :
     ∀ i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2, i.1 = j.1 →
       (i ∈ eigenIdxFinset (I := I) (M := M) g₀ N ↔
@@ -812,8 +810,6 @@ private lemma eigenIdxFinset_mem_iff_of_eigenvalue_eq (g₀ : SmoothRiemannianMe
   rw [hl]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
     (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
@@ -827,8 +823,6 @@ private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
     ← SmoothCcTensor.toL2_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 theorem deTurckSmoothRemainder_spectralCoercive_split'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -964,8 +958,6 @@ theorem deTurckSmoothRemainder_spectralCoercive_split'
   exact le_trans hLHS_le (hker k T₀ hTsymm hball)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1182,8 +1174,17 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
       have hwnn := tensorSobolevWeight_nonneg (I := I) (M := M) i τ
       have hsqnn : (0 : ℝ) ≤ ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2 :=
         sq_nonneg _
-      nlinarith [mul_nonneg hwnn hsqnn, hc2, hwnn, hsqnn,
-        mul_le_mul_of_nonneg_right hc2 (mul_nonneg hwnn hsqnn)]
+      calc
+        tensorSobolevWeight (I := I) (M := M) i τ *
+              (c ^ 2 * (smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i ^ 2) =
+            c ^ 2 * (tensorSobolevWeight (I := I) (M := M) i τ *
+              (smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i ^ 2) := by
+          ac_rfl
+        _ ≤ 1 * (tensorSobolevWeight (I := I) (M := M) i τ *
+              (smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i ^ 2) :=
+          mul_le_mul_of_nonneg_right hc2 (mul_nonneg hwnn hsqnn)
+        _ = tensorSobolevWeight (I := I) (M := M) i τ *
+              (smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i ^ 2 := one_mul _
     exact le_trans hstep (hD2 τ)
   have hkey := hsplit S k T₀ hTsymm hball hsupp
   rw [← hσ] at hkey
@@ -1219,8 +1220,6 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     (mul_le_mul_of_nonneg_left (hRHS_le σ) (hCrem_nn k))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma deTurckSobolevNHa2Symm_finiteEigenComboHs_eq
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -1238,8 +1237,6 @@ private lemma deTurckSobolevNHa2Symm_finiteEigenComboHs_eq
       (ccTensor02Symm (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 private lemma deTurckSobolevNHa2Symm_zero_eq
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -1268,8 +1265,6 @@ private lemma deTurckSobolevNHa2Symm_zero_eq
     hsymmS_zero, ← hzero_embed]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 private theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1364,8 +1359,6 @@ private theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
   exact hfinal
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 private theorem deTurckGalerkinForcingSymm_seed_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1393,8 +1386,6 @@ private theorem deTurckGalerkinForcingSymm_seed_mass
     _ ≤ Cseed k ^ 2 := hb N k
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 private theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1515,8 +1506,6 @@ private theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
   exact hfinal
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 theorem deTurckGalerkin_forcing_closure_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
