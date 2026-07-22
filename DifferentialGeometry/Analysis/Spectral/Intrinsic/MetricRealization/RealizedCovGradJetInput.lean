@@ -36,9 +36,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -67,6 +64,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
@@ -640,7 +643,6 @@ theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
   rw [hJ0, hJtail] at hform
   rw [hform]
 
-set_option maxHeartbeats 3200000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -715,7 +717,6 @@ theorem euclidPartial_covDerivComponentEuclid_abs_le
   refine (abs_sub _ _).trans ?_
   exact add_le_add h_raw4 h_lo3
 
-set_option maxHeartbeats 3200000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -935,9 +936,6 @@ theorem iteratedCovGrad_norm_le_jetSum
     exact norm_nonneg _
   exact Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr hj)
 
-set_option maxHeartbeats 3200000 in
-
-
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem secondCovDerivLO_valueCoeff_uniform_bound
@@ -970,9 +968,6 @@ theorem secondCovDerivLO_valueCoeff_uniform_bound
   have hp1 : p1 = (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) := Subsingleton.elim _ _
   subst hp1
   exact (hCv_bd (a, c, _, Jdx, p2) z hz).trans (Finset.le_sup' Cv (Finset.mem_univ _))
-
-set_option maxHeartbeats 3200000 in
-
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
@@ -1007,7 +1002,6 @@ theorem secondCovDerivLO_gradCoeff_uniform_bound
   subst hp1
   exact (hCg_bd (a, _, Jdx, p2) z hz).trans (Finset.le_sup' Cg (Finset.mem_univ _))
 
-set_option maxHeartbeats 4000000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -1158,8 +1152,6 @@ theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
         exact (abs_add_le _ _).trans (add_le_add h_lb h_bl)
     _ = Craw * N := by ring
 
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 6400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -1272,10 +1264,6 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
         mul_le_mul_of_nonneg_left h_sum (by norm_num)
     _ = Craw1 * N1 + CLO * N0 := by ring
     _ ≤ (Craw1 + CLO) * R := by nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
-
-set_option maxHeartbeats 1600000 in
-
-
 
 omit [BoundarylessManifold I M] in
 theorem partialDeriv2_reprDiffChartCompOnE_abs_le
@@ -1395,7 +1383,6 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
         mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add h_lb h_bl)) (by norm_num)
     _ = C2 * R := by ring
 
-set_option maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup
@@ -1469,7 +1456,6 @@ theorem hcovgrad_jet_bound_holds
       _ ≤ max C0 (max C1 C2) * R :=
           mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
 
-set_option maxHeartbeats 1600000 in
 
 
 
