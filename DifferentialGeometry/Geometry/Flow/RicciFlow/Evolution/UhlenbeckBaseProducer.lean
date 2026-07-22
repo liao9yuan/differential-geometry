@@ -517,7 +517,6 @@ theorem ricDot_ortho
   simp only [hsym j 0, hsym j 1, hsym j 2, hsym 0 i, hsym 1 i, hsym 2 i]
   ring
 
-set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Dim3Reaction in
 
 
@@ -606,7 +605,6 @@ theorem ricDot_of_solution
   rw [hreact]
   ring
 
-set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Dim3Reaction in
 
 
@@ -712,7 +710,6 @@ theorem solution_rm04_kn_all
   rw [hv]
   exact solution_rm04_kn_field (I := I) S s x hdim (v 0) (v 1) (v 2) (v 3)
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -972,7 +969,6 @@ private noncomputable def knField
     + ((1 / 2 : Real) • knScalT (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalT (I := I) S t knE2)
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1097,7 +1093,6 @@ private noncomputable def knFieldD
     + ((1 / 2 : Real) • knScalD (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalD (I := I) S t knE2)
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1171,7 +1166,6 @@ private theorem knTerm2Realizes
           (ricNablaRealizes (I := I) S t)
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1276,7 +1270,6 @@ private theorem knScal2Realizes
                 (I := I) (S.scalar t) x v))
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
 
-set_option maxHeartbeats 2000000 in
 
 
 
@@ -1386,7 +1379,6 @@ private theorem knField_eq_rm04
   simp [DifferentialGeometry.Integral.Connection.vec4]
   ring
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1407,7 +1399,6 @@ private theorem nablaRm04Kn
       (((knScalRealizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScalRealizes (I := I) S t knE2).smul (-(1 / 2) : Real)))
 
-set_option maxHeartbeats 2000000 in
 
 
 
@@ -1798,7 +1789,6 @@ private theorem lapRm04Kn_apply
   simp [vec2, vec4]
   ring
 
-set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Integral.Connection in
 
 
@@ -1886,7 +1876,6 @@ theorem roughRm04_comp
 
 end KnField
 
-set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
 
 
@@ -1975,7 +1964,6 @@ theorem rm04Base_of_sol
   rw [hrough]
   ring
 
-set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Dim3Reaction in
 
 
