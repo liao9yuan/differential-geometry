@@ -1008,6 +1008,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricCovariantSmoothness
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFields
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceJetNorm
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Nonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpectral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSymmetry
@@ -1016,6 +1020,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMat
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSAbstractJet2Bound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSChartCoverJet2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSFirstDerivativeUniform
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseBundleModels
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSUniformFamily
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
