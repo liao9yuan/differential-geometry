@@ -46,6 +46,20 @@ private local instance tensorRSModelNormedSpace_local :
     NormedSpace ℝ (Tensor0SBundle.TensorRSModel 0 2 ℝ E) :=
   Tensor0SBundle.tensorRSModel_normedSpace 0 2
 
+private lemma continuousLinearMap_map_fintype_sum
+    {ι V W : Type*} [Fintype ι]
+    [TopologicalSpace V] [AddCommMonoid V] [Module ℝ V]
+    [TopologicalSpace W] [AddCommMonoid W] [Module ℝ W]
+    (L : V →L[ℝ] W) (f : ι → V) :
+    L (∑ i, f i) = ∑ i, L (f i) := by
+  classical
+  change L (Finset.univ.sum f) = Finset.univ.sum (fun i => L (f i))
+  generalize (Finset.univ : Finset ι) = s
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert i s hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, ContinuousLinearMap.map_add, ih]
+
 
 section FiniteOrderSpectralPathEngine
 
@@ -57,8 +71,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth
   toEuclidean_extChartAt_mem_chartTargetEuclid)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem smoothCcTensor_rawChartComponent_eigenSeries_tsum_eq_local
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (d : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -238,7 +250,6 @@ theorem smoothCcTensor_rawChartComponent_eigenSeries_tsum_eq_local
     htend_raw.congr hpartial
   exact tendsto_nhds_unique htend_lhs htend_tsum
 
-set_option maxHeartbeats 1600000 in
 private theorem spectralPathFO_rawCompOnE_euclidean_contDiffOn_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -337,7 +348,6 @@ private theorem spectralPathFO_rawCompOnE_euclidean_contDiffOn_local
       rwa [iteratedDeriv_zero] at h)
     α Jdx hq_symm_src
 
-set_option maxHeartbeats 1600000 in
 private theorem spectralPathFO_rawChartComponent_jointContMDiffOn_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -428,8 +438,6 @@ private theorem spectralPathFO_rawChartComponent_fibre_contDiffWithinAt_local
   exact hcomp t ht
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem spectralPathFO_section_jointContMDiffOn_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -526,9 +534,14 @@ theorem spectralPathFO_section_jointContMDiffOn_local
       rw [Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hpbase]
     rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx,
-      map_sum]
+      continuousLinearMap_map_fintype_sum
+        ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt
+          ℝ p.1)]
     refine Finset.sum_congr rfl (fun Q _ => ?_)
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul
+      ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ p.1)]
     congr 1
     have hbs : chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1 =
         (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
@@ -558,8 +571,6 @@ theorem spectralPathFO_section_jointContMDiffOn_local
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -615,8 +626,11 @@ theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
         Tensor0SBundle.TensorRSSpace.toModel v
           = Tensor0SBundle.TensorRSSpace.toModelL (𝕜 := ℝ) (I := I) 0 2 x v := fun v => rfl
     rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 Z α hx,
-      h3, map_sum]
-    exact Finset.sum_congr rfl (fun Q _ => by rw [map_smul, ← h3, hw_def])
+      h3, continuousLinearMap_map_fintype_sum
+        (Tensor0SBundle.TensorRSSpace.toModelL (𝕜 := ℝ) (I := I) 0 2 x)]
+    exact Finset.sum_congr rfl (fun Q _ => by
+      rw [ContinuousLinearMap.map_smul
+        (Tensor0SBundle.TensorRSSpace.toModelL (𝕜 := ℝ) (I := I) 0 2 x), ← h3, hw_def])
   set rawγ : ℝ → CompIdx E 0 2 → ℝ := fun s Q =>
     tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α Q.1 Q.2 x with hrawγ_def
   have hγpath : (fun s => (T_rep s).toFun x) = fun s => A (rawγ s) :=
@@ -694,7 +708,7 @@ theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
       intro a ha i
       have h := (hCmf a ha).2 i 0 (Set.left_mem_Icc.mpr hT.le)
       have hw := tensorSobolevWeight_pos (I := I) (M := M) i σ0
-      nlinarith [sq_nonneg (iteratedDeriv a (φ i) 0), hw.le, h]
+      exact (mul_nonneg hw.le (sq_nonneg (iteratedDeriv a (φ i) 0))).trans h
     set v : ℕ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ := fun a i =>
       if a ≤ kk then CK * (Real.sqrt (Cmf a i) *
         tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) else 0 with hv_def
