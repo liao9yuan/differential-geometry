@@ -80,15 +80,11 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen rei
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private lemma dim1_smul_rep (h1 : Module.finrank ℝ E = 1) (e : E) (he : e ≠ 0) (v : E) :
     ∃ c : ℝ, c • e = v :=
   exists_smul_eq_of_finrank_eq_one (K := ℝ) (V := E) h1 he v
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma dim1_domDomCongr_eq (h1 : Module.finrank ℝ E = 1) {d : ℕ}
@@ -113,8 +109,6 @@ lemma dim1_domDomCongr_eq (h1 : Module.finrank ℝ E = 1) {d : ℕ}
     f.map_smul_univ c (fun _ => e)
   rw [hL, hR, Equiv.prod_comp ρ c]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -125,8 +119,6 @@ private lemma dim1_slotPermCLM_eq (h1 : Module.finrank ℝ E = 1) {d : ℕ}
   rw [dim1_domDomCongr_eq h1 (Tensor0SBundle.Tensor0SSpace.toModel D) ρ]
   exact Tensor0SBundle.Tensor0SSpace.ofModel_toModel (𝕜 := ℝ) D
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -161,8 +153,6 @@ private lemma ricciCometricFourTraceCLM_eq_zero_of_finrank_eq_one (h1 : Module.f
   rw [hF]
   rw [smul_zero]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma dim1_linearizedRicciConnDiffOrder0CoeffField_eq_zero
@@ -181,8 +171,6 @@ lemma dim1_linearizedRicciConnDiffOrder0CoeffField_eq_zero
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -210,8 +198,6 @@ private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
   rw [hself, smul_zero]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma dim1_smoothOrthoFrame_ne_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -225,8 +211,6 @@ private lemma dim1_smoothOrthoFrame_ne_zero (g₁ : SmoothRiemannianMetric I M) 
   rw [map_zero] at horth
   exact one_ne_zero horth.symm
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
 lemma dim1_ricciArmOrder0RiemannCoeff_eq_zero (h1 : Module.finrank ℝ E = 1)
