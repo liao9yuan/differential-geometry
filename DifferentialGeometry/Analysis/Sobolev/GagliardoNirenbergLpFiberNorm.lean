@@ -543,8 +543,6 @@ private theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le
     _ = 4 * rQ * riemannianFiberNormSq (I := I) (M := M) g 0 (p + 1) x
           ((covGrad (I := I) (M := M) g 0 p Q).toSection x) := by rw [hframe]; ring
 
-set_option maxHeartbeats 1600000 in
-
 private theorem covDerivCrossLeft_weight_bound
     (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
     (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
@@ -687,8 +685,9 @@ private theorem covDerivCrossLeft_weight_bound
           (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 :=
       Finset.sum_nonneg (fun a _ => sq_nonneg _)
     have hbound_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
-      have : (0 : ℝ) ≤ 4 * b * c := by positivity
-      positivity
+      exact mul_nonneg
+        (mul_nonneg (sq_nonneg ((k : ℝ) - 1)) (sq_nonneg (b ^ (k - 2))))
+        (mul_nonneg (mul_nonneg (by norm_num) hb_nn) hc_nn)
     calc (∑ a : Fin n,
             (extDerivFun (I := I) (ζ : M → ℝ) x
               (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
@@ -714,7 +713,8 @@ private theorem covDerivCrossLeft_weight_bound
   have hRHS_nn : (0 : ℝ) ≤ 2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ) := by
     have hbrpow : (0 : ℝ) ≤ b ^ ((k : ℝ) - 1) := Real.rpow_nonneg hb_nn _
     have hcrpow : (0 : ℝ) ≤ c ^ (1 / 2 : ℝ) := Real.rpow_nonneg hc_nn _
-    positivity
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hk1) _hA) hbrpow) hcrpow
 
   refine le_trans hCS2 ?_
   rw [← Real.sqrt_mul hb_nn rP,
@@ -751,8 +751,6 @@ private theorem covDerivCrossLeft_weight_bound
     _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b * (b ^ (k - 2)) ^ 2 * b)) := by ring
     _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b ^ (k - 1) * b ^ (k - 1))) := by rw [hb_core]
     _ = ((k : ℝ) - 1) ^ 2 * (4 * A ^ 2) * (b ^ (k - 1) * b ^ (k - 1)) * c := by ring
-
-set_option maxHeartbeats 2000000 in
 
 private theorem weightedCovIBP_lpFiberJet_fin_regIneq
     (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
@@ -1042,7 +1040,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
         refine Finset.sum_congr rfl (fun a _ => ?_)
         rw [hchain (Integral.Connection.smoothOrthoFrame (I := I) g x a x), mul_pow]
       rw [hrw, mul_pow]
-      exact mul_le_mul_of_nonneg_left hkato (by positivity)
+      exact mul_le_mul_of_nonneg_left hkato
+        (mul_nonneg (sq_nonneg pm1) (sq_nonneg ((bv + ε) ^ (pm1 - 1))))
     have hrP_bound : rP ≤ pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by
       rw [hrP_eq]
       calc (∑ a : Fin n,
@@ -1053,7 +1052,7 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
         _ = pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by ring
 
     have hRHS_nn : (0 : ℝ) ≤ 2 * pm1 * F x := by
-      have := hF_nonneg x; positivity
+      exact mul_nonneg (mul_nonneg (by norm_num) hpm1_nn) (hF_nonneg x)
     refine le_trans hCS2 ?_
     rw [← Real.sqrt_mul hbv_nn rP,
       show 2 * pm1 * F x = Real.sqrt ((2 * pm1 * F x) ^ 2) from (Real.sqrt_sq hRHS_nn).symm]
@@ -1083,7 +1082,9 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
           mul_le_mul_of_nonneg_left hrP_bound hbv_nn
       _ = pm1 ^ 2 * (4 * av * cv) * (bv * (bv + ε) ^ (pm1 - 1)) ^ 2 := by ring
       _ ≤ pm1 ^ 2 * (4 * av * cv) * ((bv + ε) ^ pm1) ^ 2 := by
-          apply mul_le_mul_of_nonneg_left _ (by positivity)
+          apply mul_le_mul_of_nonneg_left _
+            (mul_nonneg (sq_nonneg pm1)
+              (mul_nonneg (mul_nonneg (by norm_num) hav_nn) hcv_nn))
           exact pow_le_pow_left₀ hfac0_nn hfac1 2
 
   have hA_bound : ∀ x, (ζ : M → ℝ) x * |dw x| ≤
@@ -1148,8 +1149,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
       (2 * pm1 + Real.sqrt (Module.finrank ℝ E : ℝ)) * ∫ x, F x ∂μ
   rw [hLHS_eq]
   exact hassembled
-
-set_option maxHeartbeats 1200000 in
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1594,8 +1593,6 @@ private theorem weightedCovIBP_lpFiberJet_sup
 
 end SecondOrderInterpCore
 
-set_option maxHeartbeats 1600000 in
-
 private theorem secondOrderInterp_lpFiberJet_fin
     (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
     ∃ K' : ℝ, 1 ≤ K' ∧
@@ -1759,9 +1756,11 @@ private theorem secondOrderInterp_lpFiberJet_fin
     have hcoef_le : D ≤ K' := by
       have hp_le_k : p ≤ (k : ℝ) := by
         rw [hp_def, div_le_iff₀ hi1R]
-        nlinarith [hkR, hiR]
+        nlinarith only [hkR, hiR]
       have hDk : D ≤ 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) := by
-        rw [hD_def]; linarith
+        rw [hD_def]
+        linarith only [hp_le_k]
+      rw [hK'def]
       exact le_trans hDk (le_trans (le_max_left _ _) (le_max_left _ _))
 
     rw [hLHS_sq]
@@ -1784,8 +1783,6 @@ private theorem secondOrderInterp_lpFiberJet_fin
             apply mul_le_mul_of_nonneg_right hcoef_le (mul_nonneg hAw_nn hC_nn)
         _ = K' * Aw * C := by ring
   · exfalso; omega
-
-set_option maxHeartbeats 1600000 in
 
 private theorem secondOrderInterp_lpFiberJet_sup
     (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
