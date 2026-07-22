@@ -103,7 +103,6 @@ theorem opNorm₂_le
   intro v
   simpa only [mul_assoc] using hT u v
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 theorem isom_jet_one
@@ -153,9 +152,6 @@ section LoweredJet
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 
@@ -360,7 +356,6 @@ private theorem gram_inv_norm_le [CompleteSpace E0]
   norm_num at h ⊢
   exact h
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 private theorem gram_apply_norm_le [CompleteSpace E0]
     (B : E0 →L[Real] E0 →L[Real] Real) :
@@ -371,7 +366,6 @@ private theorem gram_apply_norm_le [CompleteSpace E0]
   rw [(InnerProductSpace.toDual Real E0).symm.norm_map]
   exact ContinuousLinearMap.le_opNorm B v
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 private theorem gram_comp_norm_le
@@ -385,7 +379,6 @@ private theorem gram_comp_norm_le
   change ‖gramCLM (T v)‖ ≤ ‖T‖ * ∏ i, ‖v i‖
   exact (gram_apply_norm_le (T v)).trans (T.le_opNorm v)
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 private theorem gram_deriv_le
@@ -406,7 +399,6 @@ private theorem gram_deriv_le
   rw [hderiv]
   exact gram_comp_norm_le _
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 private theorem norm_clm_apply_le
     {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
@@ -437,7 +429,6 @@ private theorem norm_clm_apply_le
       (f := V) _ hs_open hxs] at h
   exact h
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 private theorem norm_bilinAt_le
     {P X Y Z : Type*}
@@ -473,7 +464,6 @@ private theorem norm_bilinAt_le
       (f := g) _ hs_open hxs] at h
   exact h
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 private theorem norm_compAt_le
@@ -520,9 +510,6 @@ private theorem norm_compAt_le
   rw [iteratedFDerivWithin_of_isOpen m hs_open hxs] at hcomp
   simpa only [Function.comp_apply] using hcomp
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 private theorem gram_inv_deriv_le
@@ -561,9 +548,6 @@ private theorem gram_inv_deriv_le
     hunit hinv hgram
   simpa only [max_eq_left (by norm_num : (1 : Real) ≤ 2)] using h
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 private theorem gram_apply_deriv_le
@@ -740,9 +724,6 @@ private theorem koszulRieszCLM_le [CompleteSpace E0] (u v : E0) :
       MetricKoszul.koszulCov_norm_le D (norm_nonneg D) hD u v
     _ = ((3 / 2 : Real) * ‖u‖ * ‖v‖) * ‖D‖ := by ring
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 private theorem raised_deriv_le
@@ -933,9 +914,55 @@ private theorem raisedComp_nonneg [CompleteSpace E0]
     (mul_nonneg (Nat.cast_nonneg _) (raisedEnvelope_nonneg (E0 := E0) hD m))
     (pow_nonneg hP _)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
+private theorem raisedOp_deriv_summand_le
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0)
+    (m i : Nat) (D : Real)
+    (hBm : ContDiffAt Real (m : WithTop ℕ∞) B x)
+    (hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x)
+    (hlower : ∀ᶠ y in nhds x, ∀ q : E0,
+      (1 / 2 : Real) * ‖q‖ ^ 2 ≤ B y q q)
+    (hD : ∀ j, 1 ≤ j → j ≤ m + 1 →
+      ‖iteratedFDeriv Real j B x‖ ≤ D ^ j)
+    (hD_nonneg : 0 ≤ D) (him : i ≤ m) :
+    (m.choose i : Real) *
+        ‖iteratedFDeriv Real i
+          (fun y => Ring.inverse (gramCLM (B y))) x‖ *
+        ‖iteratedFDeriv Real (m - i)
+          (fun y => koszulRieszOpCLM (fderiv Real B y)) x‖ ≤
+      (m.choose i : Real) *
+        ((i.factorial : Real) *
+          ((i.factorial : Real) * 2 ^ (i + 1)) * D ^ i) *
+        (‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1)) := by
+  have hi_top : (i : WithTop ℕ∞) ≤ (m : WithTop ℕ∞) := by
+    exact_mod_cast him
+  have hBi : ContDiffAt Real (i : WithTop ℕ∞) B x := hBm.of_le hi_top
+  have hinv_i := gram_inv_deriv_le B x i D hBi hlower
+    (fun j hj hji => hD j hj (hji.trans (him.trans (Nat.le_succ m))))
+  have hmi_top : ((m - i : Nat) : WithTop ℕ∞) ≤ (m : WithTop ℕ∞) := by
+    exact_mod_cast Nat.sub_le m i
+  have hKderiv := (koszulRieszOpCLM (E0 := E0)).norm_iteratedFDeriv_comp_left
+    hfB hmi_top
+  have hmetric :
+      ‖iteratedFDeriv Real (m - i) (fderiv Real B) x‖ ≤
+        D ^ (m - i + 1) := by
+    rw [norm_iteratedFDeriv_fderiv]
+    exact hD (m - i + 1) (by omega) (by omega)
+  have hKbound :
+      ‖iteratedFDeriv Real (m - i)
+          (fun y => koszulRieszOpCLM (fderiv Real B y)) x‖ ≤
+        ‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1) :=
+    hKderiv.trans (mul_le_mul_of_nonneg_left hmetric (norm_nonneg _))
+  have hinv_rhs_nn : 0 ≤
+      (i.factorial : Real) * ((i.factorial : Real) * 2 ^ (i + 1)) * D ^ i :=
+    mul_nonneg
+      (mul_nonneg (Nat.cast_nonneg _)
+        (mul_nonneg (Nat.cast_nonneg _) (pow_nonneg (by norm_num) _)))
+      (pow_nonneg hD_nonneg _)
+  exact mul_le_mul
+    (mul_le_mul_of_nonneg_left hinv_i (Nat.cast_nonneg _)) hKbound
+    (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg _) hinv_rhs_nn)
+
 
 
 private theorem raisedOp_deriv_le
@@ -992,30 +1019,8 @@ private theorem raisedOp_deriv_le
     (norm_nonneg (postBilinCLM (E0 := E0)))
   refine Finset.sum_le_sum fun i hi_mem => ?_
   have him : i ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi_mem)
-  have hi_top : (i : WithTop ℕ∞) ≤ (m : WithTop ℕ∞) := by
-    exact_mod_cast him
-  have hBi : ContDiffAt Real (i : WithTop ℕ∞) B x := hBm.of_le hi_top
-  have hinv_i := gram_inv_deriv_le B x i D hBi hlower
-    (fun j hj hji => hD j hj (hji.trans (him.trans (Nat.le_succ m))))
-  have hmi_top : ((m - i : Nat) : WithTop ℕ∞) ≤ (m : WithTop ℕ∞) := by
-    exact_mod_cast Nat.sub_le m i
-  have hKderiv := (koszulRieszOpCLM (E0 := E0)).norm_iteratedFDeriv_comp_left
-    hfB hmi_top
-  have hmetric :
-      ‖iteratedFDeriv Real (m - i) (fderiv Real B) x‖ ≤
-        D ^ (m - i + 1) := by
-    rw [norm_iteratedFDeriv_fderiv]
-    exact hD (m - i + 1) (by omega) (by omega)
-  have hKbound :
-      ‖iteratedFDeriv Real (m - i)
-          (fun y => koszulRieszOpCLM (fderiv Real B y)) x‖ ≤
-        ‖koszulRieszOpCLM (E0 := E0)‖ * D ^ (m - i + 1) :=
-    hKderiv.trans (mul_le_mul_of_nonneg_left hmetric (norm_nonneg _))
-  gcongr
+  exact raisedOp_deriv_summand_le B x m i D hBm hfB hlower hD hD_nonneg him
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 private theorem raisedOp_contDiffAt
@@ -1055,9 +1060,6 @@ private theorem raisedOp_contDiffAt
   simpa only [raisedKoszulOp, postBilin] using
     (postBilinCLM (E0 := E0)).isBoundedBilinearMap.contDiff.comp₂_contDiffAt hinv hK
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 private theorem raisedComp_deriv_le
@@ -1101,9 +1103,6 @@ private theorem raisedComp_deriv_le
   simpa only [K] using norm_compAt_le K Phi x m
     (raisedEnvelope (E0 := E0) D m) A hK hPhi hKbound hA
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 
 
@@ -1171,9 +1170,6 @@ private theorem isom_rec_le
   rw [iteratedFDeriv_sub_apply hpost hpre]
   exact (norm_sub_le _ _).trans (add_le_add hpost_bound hpre_bound)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 private theorem isom_next_le
     [CompleteSpace E0]
@@ -1356,9 +1352,6 @@ private theorem isom_next_le
                     raisedCompBudget (E0 := E0) D P j * P ^ (i - j + 1)) *
                 P ^ (m - i + 1) := by ring)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 private theorem isom_deriv_le
     [CompleteSpace E0]
@@ -1419,9 +1412,6 @@ private theorem isom_deriv_le
       hPjets heq
     simpa only [P, isomBudget_succ, Nat.succ_eq_add_one] using hstep
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 
 private theorem isom_pos_deriv_le
@@ -1455,7 +1445,6 @@ private theorem isom_pos_deriv_le
 
 end Gram
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 theorem isom_koszul
@@ -1783,9 +1772,6 @@ section IsomBounds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 
 theorem isom_deriv_on
@@ -1844,9 +1830,6 @@ theorem isom_deriv_on
     heq r hr (fun i hi hir => hDB i hi hir x hx)
       (fun i hi hir => hDC i hi hir (Phi x) hPhiV)
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 
 
@@ -2195,9 +2178,6 @@ section NormalBounds
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1200000 in
-set_option synthInstance.maxHeartbeats 1200000 in
 
 
 theorem normal_bounds_on
