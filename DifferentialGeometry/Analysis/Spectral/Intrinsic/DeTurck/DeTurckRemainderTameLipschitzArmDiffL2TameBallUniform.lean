@@ -70,8 +70,27 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance instCompleteSpaceE_tame : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private lemma three_term_iterated_add_bound {w xy x y z : ℝ}
+    (h₁ : w ≤ 2 * xy + 2 * z) (h₂ : xy ≤ 2 * x + 2 * y) (hz : 0 ≤ z) :
+    w ≤ 4 * (x + y + z) := by
+  linarith only [h₁, h₂, hz]
+
+private lemma four_mul_le_two_mul_sq {x C : ℝ} (h : x ≤ C ^ 2) :
+    4 * x ≤ (2 * C) ^ 2 := by
+  nlinarith only [h]
+
+private lemma sum_three_sq_le_three_mul_sq {x₀ x₁ x₂ C : ℝ}
+    (h₀ : x₀ ≤ C) (h₁ : x₁ ≤ C) (h₂ : x₂ ≤ C)
+    (hx₀ : 0 ≤ x₀) (hx₁ : 0 ≤ x₁) (hx₂ : 0 ≤ x₂) :
+    x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 ≤ 3 * C ^ 2 := by
+  nlinarith only [h₀, h₁, h₂, hx₀, hx₁, hx₂]
+
 private theorem lieArm_threeArm_coeffFields_perOrder_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -822,7 +841,6 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_ballUniform
   intro v
   exact hval x v
 
-set_option maxHeartbeats 800000 in
 
 private theorem deTurckRHSArmDiff_order0_riemannianFiberNormSq_intrinsic_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -902,7 +920,7 @@ private theorem deTurckRHSArmDiff_order0_riemannianFiberNormSq_intrinsic_ballUni
     have hadd2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 2 x
       (A₀.toSection x) (A₁.toSection x)
     have h2nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x (A₂.toSection x)
-    nlinarith [hadd1, hadd2, h2nn]
+    exact three_term_iterated_add_bound hadd1 hadd2 h2nn
 
   have hcol : f 0 + f 1 + f 2 ≤ Cemb ^ 2 * S := by
     have hemb' := hemb (T - T') x
@@ -931,12 +949,13 @@ private theorem deTurckRHSArmDiff_order0_riemannianFiberNormSq_intrinsic_ballUni
         refine mul_le_mul_of_nonneg_left hcol (by positivity)
     _ ≤ (Real.sqrt (4 * 3) * (ΛC * Cemb)) ^ 2 * S := by
         rw [hΛsq]
-        have : (4 * ΛC ^ 2) * (Cemb ^ 2 * S) ≤ ((4 * 3) * (ΛC ^ 2 * Cemb ^ 2)) * S := by
-          nlinarith [hS_nn, sq_nonneg ΛC, sq_nonneg Cemb,
-            mul_nonneg (sq_nonneg ΛC) (sq_nonneg Cemb)]
-        linarith [this]
+        have hprod_nn : 0 ≤ ΛC ^ 2 * Cemb ^ 2 * S := by positivity
+        calc
+          (4 * ΛC ^ 2) * (Cemb ^ 2 * S) = 4 * (ΛC ^ 2 * Cemb ^ 2 * S) := by ring
+          _ ≤ (4 * 3) * (ΛC ^ 2 * Cemb ^ 2 * S) :=
+            mul_le_mul_of_nonneg_right (by norm_num) hprod_nn
+          _ = (4 * 3 * (ΛC ^ 2 * Cemb ^ 2)) * S := by ring
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1068,8 +1087,7 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
         (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 x ΛR hΛR_nn
         ((hc0 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
         (fun t ht => hb0 t ht x)
-    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
-      (I := I) (M := M) g₀ 2 2 x (P₀.toSection x)]
+    convert four_mul_le_two_mul_sq hPbound using 1 <;> norm_num
   · intro x
     have hsmul : ((-2 : ℝ) • P₁).toSection x = (-2 : ℝ) • P₁.toSection x := by
       rw [SmoothCcTensor.toSection_smul]; rfl
@@ -1080,8 +1098,7 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
         (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 x ΛR hΛR_nn
         ((hc1 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
         (fun t ht => hb1 t ht x)
-    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
-      (I := I) (M := M) g₀ 3 2 x (P₁.toSection x)]
+    convert four_mul_le_two_mul_sq hPbound using 1 <;> norm_num
   · intro x
     have hsmul : ((-2 : ℝ) • P₂).toSection x = (-2 : ℝ) • P₂.toSection x := by
       rw [SmoothCcTensor.toSection_smul]; rfl
@@ -1092,8 +1109,7 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
         (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 x ΛR hΛR_nn
         ((hc2 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
         (fun t ht => hb2 t ht x)
-    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
-      (I := I) (M := M) g₀ 4 2 x (P₂.toSection x)]
+    convert four_mul_le_two_mul_sq hPbound using 1 <;> norm_num
   · have htower : (∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 2 2 i P₀‖ ^ 2) ≤ B ^ 2 := by
       rw [hP₀]
@@ -1107,7 +1123,7 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
       rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
       ring
     rw [hscale]
-    nlinarith [htower, sq_nonneg B, hB_nn]
+    exact four_mul_le_two_mul_sq htower
   · have htower : (∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 3 2 i P₁‖ ^ 2) ≤ B ^ 2 := by
       rw [hP₁]
@@ -1121,7 +1137,7 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
       rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
       ring
     rw [hscale]
-    nlinarith [htower, sq_nonneg B, hB_nn]
+    exact four_mul_le_two_mul_sq htower
   · have htower : (∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 4 2 i P₂‖ ^ 2) ≤ B ^ 2 := by
       rw [hP₂]
@@ -1135,9 +1151,8 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
       rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
       ring
     rw [hscale]
-    nlinarith [htower, sq_nonneg B, hB_nn]
+    exact four_mul_le_two_mul_sq htower
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckLieArm_appCc_graded_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1274,7 +1289,6 @@ private theorem deTurckLieArm_appCc_graded_jetL2_ballUniform
   · rw [hP₂]
     exact pathIntegralCoeffField_jetL2_tower_le (I := I) g₀ 4 a Φ₂ hSI hSopen hj2 hB_nn hjet2
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -2024,8 +2038,6 @@ private theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform
     _ ≤ Cn * Real.sqrt S + Cl * Real.sqrt S := add_le_add hNarm hLarm
     _ = (Cn + Cl) * Real.sqrt S := by ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [BoundarylessManifold I M] in
@@ -2153,11 +2165,8 @@ theorem deTurckArmDiff_supercritical_pointwise_jet_le_lowerWindow
         ((iteratedCovGrad (I := I) g₀ 0 2 1 W).toSection x),
       riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 (2 + 2) x
         ((iteratedCovGrad (I := I) g₀ 0 2 2 W).toSection x)]
-    have hDS_nn : 0 ≤ D * Ssum := mul_nonneg hD_nn hSsum_nn
-    nlinarith [hpt0, hpt1, hpt2,
-      norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 0 W).toSection x),
-      norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 1 W).toSection x),
-      norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 2 W).toSection x), hDS_nn]
+    exact sum_three_sq_le_three_mul_sq hpt0 hpt1 hpt2
+      (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
   calc (∑ q ∈ Finset.range 3,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
             ((iteratedCovGrad (I := I) g₀ 0 2 q W).toSection x))
@@ -2214,7 +2223,6 @@ private theorem appCc_topOrder_l2_twoArm_mixed_ballUniform_qUniform
       ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 := by positivity
   linarith
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -2313,7 +2321,6 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
   · exact (symmAbsorbedCoeff_jet_le g₀ 1 (a + 1) C₁ σ'₁).trans h1j
   · exact (symmAbsorbedCoeff_jet_le g₀ 2 (a + 1) C₂ σ'₂).trans h2j
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (_hR : 0 ≤ R)
@@ -2434,7 +2441,6 @@ private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUn
           rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
       _ ≤ 2 * Γ ^ 2 + 2 * Γpure ^ 2 := by linarith [hC₂armjet, hpurejet]
 
-set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_intrinsicPalatini_coeffC0_jetL2_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -2488,8 +2494,6 @@ private theorem deTurckSmoothRemainderDiff_intrinsicPalatini_coeffC0_jetL2_crude
     fun x => le_trans (hC₁sup x) hΛCsq, fun x => le_trans (hC₂'sup x) hΛwsq,
     le_trans hC₀jet hΓsq, le_trans hC₁jet hΓsq, le_trans hC₂'jet hΓwsq⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_intrinsic_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
