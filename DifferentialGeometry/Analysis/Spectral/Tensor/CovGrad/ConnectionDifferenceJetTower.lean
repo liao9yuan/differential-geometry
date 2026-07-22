@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIde
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -35,6 +33,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem g0FlatField_contMDiff (g₀ : SmoothRiemannianMetric I M) :
@@ -214,7 +219,6 @@ lemma raisedKoszulVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (x 
   rw [heq]
   exact (sharpFlatRaiseEndo (I := I) g₀ g₁ x).continuous.comp hcd
 
-set_option maxHeartbeats 6400000 in
 def raisedKoszulPairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
@@ -760,7 +764,6 @@ lemma flatArmVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (kind : 
   rw [heq]
   exact (flatArmVecCLM (I := I) g₀ g₁ kind x om).continuous
 
-set_option maxHeartbeats 6400000 in
 def flatArmPairing (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
@@ -1321,7 +1324,6 @@ private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
   rw [hbridge, hpair]
   simp only [add_sub_cancel_right, ContinuousLinearMap.coe_coe]
 
-set_option maxHeartbeats 6400000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma cotangentToCLM_tensorCovDerivAt_sharpFlatEndoCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -1764,7 +1766,6 @@ theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
   rw [tensor0SOne_apply_sub' (I := I) x (om x), tensor0SOne_apply_sub' (I := I) x (om x)]
   ring
 
-set_option maxHeartbeats 6400000 in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_sharpFlatEndoCc_eq_arms (g₀ g₁ : SmoothRiemannianMetric I M) :
     covGrad (I := I) (M := M) g₀ 1 1 (sharpFlatEndoCc (I := I) g₀ g₁) =
@@ -1957,9 +1958,11 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
 omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_iteratedCovGrad_two_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M) :
-    letI : Bundle.RiemannianBundle
+    letI instTens : Bundle.RiemannianBundle
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+    letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+      fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 4 (h := instTens) y
     ‖((iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
         Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ≤
       ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
@@ -1967,6 +1970,8 @@ theorem norm_iteratedCovGrad_two_symmS_le
   letI instTens : Bundle.RiemannianBundle
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 4 (h := instTens) y
   set Tsw : SmoothCcTensor g₀ 0 2 :=
     domDomCongrSection (I := I) g₀ (Equiv.swap 0 1) T with hTsw_def
   have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T) =
