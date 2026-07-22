@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -35,6 +33,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private lemma eq_of_nonneg_sq_eq {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (h : a ^ 2 = b ^ 2) : a = b := by
+  nlinarith only [ha, hb, h]
+
+private lemma le_of_two_sq_le_two_mul {p K : ℝ} (hK : 0 ≤ K)
+    (h : 2 * p ^ 2 ≤ 2 * K * p) : p ≤ K := by
+  nlinarith only [hK, h]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma frame03_data
@@ -527,7 +539,7 @@ private lemma norm_covGrad_symmS_le
         Tensor0SBundle.TensorRSSpace 0 3 I x)‖ := norm_nonneg _
     have hnn2 : (0 : ℝ) ≤ ‖((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x :
         Tensor0SBundle.TensorRSSpace 0 3 I x)‖ := norm_nonneg _
-    nlinarith [hfib, hnn1, hnn2]
+    exact eq_of_nonneg_sq_eq hnn1 hnn2 hfib
   rw [htoSec, norm_smul]
   have habs : ‖(1 / 2 : ℝ)‖ = 1 / 2 := by
     rw [Real.norm_eq_abs]; norm_num
@@ -657,7 +669,11 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       linarith [this]
     have hK_nn : 0 ≤ (3 / 2) * Gnorm * Nv * Nw :=
       mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hGnorm_nn) hNv_nn) hNw_nn
-    nlinarith [htriple', hNp_sq, hNp_nn, hK_nn]
+    apply le_of_two_sq_le_two_mul hK_nn
+    calc
+      2 * Np ^ 2 = 2 * g₀.inner x p p := by rw [hNp_sq]
+      _ ≤ 3 * Gnorm * Nv * Nw * Np := htriple'
+      _ = 2 * ((3 / 2) * Gnorm * Nv * Nw) * Np := by ring
 
   have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
     have hsfib := norm_inverseMetricSharpFib_g0Flat_le
@@ -821,7 +837,11 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
       linarith [this]
     have hK_nn : 0 ≤ (3 / 2) * Gnorm * Nv * Nw :=
       mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hGnorm_nn) hNv_nn) hNw_nn
-    nlinarith [htriple', hNp_sq, hNp_nn, hK_nn]
+    apply le_of_two_sq_le_two_mul hK_nn
+    calc
+      2 * Np ^ 2 = 2 * g₀.inner x p p := by rw [hNp_sq]
+      _ ≤ 3 * Gnorm * Nv * Nw * Np := htriple'
+      _ = 2 * ((3 / 2) * Gnorm * Nv * Nw) * Np := by ring
   have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
     have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
