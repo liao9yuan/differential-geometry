@@ -21,7 +21,6 @@ noncomputable section
 set_option linter.style.setOption false
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
-set_option maxHeartbeats 3200000
 
 open scoped BigOperators
 
