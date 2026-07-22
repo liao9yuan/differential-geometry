@@ -50,8 +50,6 @@ section BalLadder
 variable (g₀ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 open Tensor0SBundle in
 private lemma bal_rawLap_frame_sum_eval (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) (D : Tensor0SSpace r I x)
@@ -93,8 +91,6 @@ private lemma bal_rawLap_frame_sum_eval (g : SmoothRiemannianMetric I M) (r s : 
     x D m).symm
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 open Tensor0SBundle in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
@@ -126,8 +122,6 @@ private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : 
         K.toSection x) D)) m
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 open Tensor0SBundle in
 private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
@@ -148,9 +142,6 @@ private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) 
         (iteratedCovGrad (I := I) g r s 2 Φ).toSection x) D)) m).symm
 
 set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
-
 theorem rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s Φ =

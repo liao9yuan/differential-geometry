@@ -155,7 +155,93 @@ lemma bal_sqrt_mono_pair {x' x y' y : ℝ} (hx' : 0 ≤ x') (hy' : 0 ≤ y')
   have h2 : y' ^ 2 ≤ y ^ 2 := by nlinarith
   linarith
 
-set_option maxHeartbeats 1600000 in
+lemma bal_sqrt_two_step_endpoint {u₂ u₃ a₁ a₂ a₃ q₁ q₂ : ℝ}
+    (ha₁ : 0 ≤ a₁) (ha₂ : 0 ≤ a₂) (ha₃ : 0 ≤ a₃)
+    (hq₁ : 0 ≤ q₁) (hq₂ : 0 ≤ q₂)
+    (ha₁₂ : a₁ ≤ a₂) (ha₂₃ : a₂ ≤ a₃)
+    (hu₂ : u₂ ^ 2 ≤ a₂ ^ 2 + q₁ * a₁ ^ 2)
+    (hu₃ : u₃ ^ 2 ≤ a₃ ^ 2 + q₂ * a₂ ^ 2) :
+    Real.sqrt (u₂ ^ 2 + u₃ ^ 2) ≤
+      a₃ + Real.sqrt (1 + q₁ + q₂) * a₂ := by
+  have hq : 0 ≤ 1 + q₁ + q₂ := add_nonneg (add_nonneg zero_le_one hq₁) hq₂
+  have hq_sq : Real.sqrt (1 + q₁ + q₂) ^ 2 = 1 + q₁ + q₂ :=
+    Real.sq_sqrt hq
+  have ha₁_sq : a₁ ^ 2 ≤ a₂ ^ 2 := pow_le_pow_left₀ ha₁ ha₁₂ 2
+  have ha₂_sq : a₂ ^ 2 ≤ a₃ ^ 2 := pow_le_pow_left₀ ha₂ ha₂₃ 2
+  have hcross : 0 ≤ 2 * a₃ * (Real.sqrt (1 + q₁ + q₂) * a₂) :=
+    mul_nonneg (mul_nonneg (by positivity) ha₃)
+      (mul_nonneg (Real.sqrt_nonneg _) ha₂)
+  have hsum : u₂ ^ 2 + u₃ ^ 2 ≤
+      (a₃ + Real.sqrt (1 + q₁ + q₂) * a₂) ^ 2 := by
+    nlinarith
+  calc
+    Real.sqrt (u₂ ^ 2 + u₃ ^ 2) ≤
+        Real.sqrt ((a₃ + Real.sqrt (1 + q₁ + q₂) * a₂) ^ 2) :=
+      Real.sqrt_le_sqrt hsum
+    _ = a₃ + Real.sqrt (1 + q₁ + q₂) * a₂ :=
+      Real.sqrt_sq (add_nonneg ha₃ (mul_nonneg (Real.sqrt_nonneg _) ha₂))
+
+lemma bal_add_le_eps_add_envelope {x y A C D eps f : ℝ}
+    (hx : x ≤ A * (1 + f) + eps) (hy : y ≤ D * (1 + f))
+    (hC : 0 ≤ C) (hf : 0 ≤ f) :
+    x + y ≤ eps + (A + C + D) * (1 + f) := by
+  have hAD : A + D ≤ A + C + D := by linarith
+  have hmul : (A + D) * (1 + f) ≤ (A + C + D) * (1 + f) :=
+    mul_le_mul_of_nonneg_right hAD (add_nonneg zero_le_one hf)
+  calc
+    x + y ≤ (A * (1 + f) + eps) + D * (1 + f) := add_le_add hx hy
+    _ = eps + (A + D) * (1 + f) := by ring
+    _ ≤ eps + (A + C + D) * (1 + f) := add_le_add_right hmul eps
+
+lemma bal_one_add_mul_le_mul_one_add {x f : ℝ} (hx : 0 ≤ x) (hf : 0 ≤ f) :
+    1 + x * f ≤ (1 + x) * (1 + f) := by
+  calc
+    1 + x * f ≤ 1 + x * f + (x + f) :=
+      le_add_of_nonneg_right (add_nonneg hx hf)
+    _ = (1 + x) * (1 + f) := by ring
+
+lemma bal_add_le_add_assoc {a b c d e : ℝ}
+    (h₀ : a ≤ b + c) (h₁ : d ≤ e) : a + d ≤ b + (c + e) := by
+  calc
+    a + d ≤ (b + c) + e := add_le_add h₀ h₁
+    _ = b + (c + e) := add_assoc b c e
+
+lemma bal_two_mul_add_cast_succ (p k : ℕ) :
+    (((2 * p + k : ℕ) : ℝ) + 1) = ((2 * p + (k + 1) : ℕ) : ℝ) := by
+  push_cast
+  ring
+
+lemma bal_mul_one_add_le_ball_envelope {B C R K f : ℝ}
+    (h₀ : B * K ≤ C * f * K) (h₁ : B * (K * f) ≤ C * R * (K * f)) :
+    B * (K * (1 + f)) ≤ C * (1 + R) * K * f := by
+  calc
+    B * (K * (1 + f)) = B * K + B * (K * f) := by ring
+    _ ≤ C * f * K + C * R * (K * f) := add_le_add h₀ h₁
+    _ = C * (1 + R) * K * f := by ring
+
+lemma bal_four_term_assembly {L x y z w X Y Z W Q : ℝ}
+    (hL : L ≤ x + y + (z + w)) (hx : x ≤ X) (hy : y ≤ Y)
+    (hz : z ≤ Z) (hw : w ≤ W) (hQ : 0 ≤ Q) :
+    L ≤ X + (Q + Y + (Z + W)) := by
+  calc
+    L ≤ x + y + (z + w) := hL
+    _ ≤ X + Y + (Z + W) := add_le_add (add_le_add hx hy) (add_le_add hz hw)
+    _ ≤ (X + Y + (Z + W)) + Q := le_add_of_nonneg_right hQ
+    _ = X + (Q + Y + (Z + W)) := by ring
+
+lemma bal_four_coefficient_distrib (q y a k₀ k₁ w f : ℝ) :
+    (q + (y + a * (k₀ + k₁) + w)) * f =
+      q * f + y * f + (a * k₀ * f + (a * k₁ * f + w * f)) := by
+  ring
+
+lemma bal_four_term_coefficient_assembly {L x y z w X q c a k₀ k₁ d f : ℝ}
+    (hL : L ≤ x + y + (z + w)) (hx : x ≤ X) (hy : y ≤ c * f)
+    (hz : z ≤ a * k₀ * f) (hw : w ≤ a * k₁ * f + d * f)
+    (hq : 0 ≤ q * f) :
+    L ≤ X + (q + (c + a * (k₀ + k₁) + d)) * f := by
+  rw [bal_four_coefficient_distrib]
+  exact bal_four_term_assembly hL hx hy hz hw hq
+
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma bal_h1_sum (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
