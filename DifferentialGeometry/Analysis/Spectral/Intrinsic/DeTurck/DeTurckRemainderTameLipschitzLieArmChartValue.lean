@@ -1042,10 +1042,14 @@ private def lieArm_fix3 (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e : E) :
             simp [map_smul, ContinuousLinearMap.smul_apply] }
       map_add' := fun c₁ c₂ => by
         ext v
-        simp [LinearMap.toContinuousLinearMap, map_add, ContinuousLinearMap.add_apply]
+        change f (c₁ + c₂) v e = f c₁ v e + f c₂ v e
+        rw [f.map_add]
+        rfl
       map_smul' := fun r c => by
         ext v
-        simp [LinearMap.toContinuousLinearMap, map_smul, ContinuousLinearMap.smul_apply] }
+        change f (r • c) v e = r • f c v e
+        rw [f.map_smul]
+        rfl }
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
