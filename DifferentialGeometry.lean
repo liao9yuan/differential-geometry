@@ -465,8 +465,14 @@ import DifferentialGeometry.Analysis.ODE.Flow.GlobalSliceSmoothness
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnK
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTopChartLocal
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalCoproductDerivative
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLevelOneSmoothness
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLevelOneWitness
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLevelZeroWitness
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalOrbitComparison
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalSuccessorWitness
 import DifferentialGeometry.Analysis.ODE.Flow.Inhomogeneous
 import DifferentialGeometry.Analysis.ODE.Flow.JointContinuity
 import DifferentialGeometry.Analysis.ODE.Flow.ParamTangent
