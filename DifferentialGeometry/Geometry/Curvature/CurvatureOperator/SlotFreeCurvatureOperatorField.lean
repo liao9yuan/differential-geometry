@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -437,6 +435,9 @@ set_option backward.isDefEq.respectTransparency false in
 def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
+  letI : Module ℝ (Tensor0SSpace (s + 1) I x) := tensor0SSpace_module (s + 1) x
+  letI : Module ℝ (TangentSpace I x →L[ℝ] Tensor0SSpace (s + 1) I x) :=
+    ContinuousLinearMap.module
   LinearMap.toContinuousLinearMap
     { toFun := fun A => (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
         (slotFreeCurvUCLM (I := I) (M := M) g s x A)
@@ -452,12 +453,13 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
             apply ContinuousLinearMap.ext
             intro w
             rw [ContinuousLinearMap.add_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
-              slotFreeCurvWCLM_apply,
-              map_add (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
+              slotFreeCurvWCLM_apply]
+            exact (curvatureTensorActionFib (I := I) (M := M) g s x u w).map_add A A'
           rw [ContinuousLinearMap.add_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
-            slotFreeCurvUCLM_apply, hW,
-            map_add ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
-        rw [hU, map_add ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
+            slotFreeCurvUCLM_apply, hW]
+          exact ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm).map_add _ _
+        rw [hU]
+        exact ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_add _ _
       map_smul' := fun c A => by
         have hU : slotFreeCurvUCLM (I := I) (M := M) g s x (c • A) =
             c • slotFreeCurvUCLM (I := I) (M := M) g s x A := by
@@ -468,10 +470,10 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
             apply ContinuousLinearMap.ext
             intro w
             rw [ContinuousLinearMap.smul_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
-              map_smul (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
+              (curvatureTensorActionFib (I := I) (M := M) g s x u w).map_smul]
           rw [ContinuousLinearMap.smul_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
-            hW, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
-        rw [hU, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
+            hW, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm).map_smul]
+        rw [hU, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_smul]
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
