@@ -2,7 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiema
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
-import DifferentialGeometry.Geometry.Connection.TensorNabla.IteratedTensorCovDeriv
+import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor03CovariantDerivativeCalculus
+import DifferentialGeometry.Tensor.Multilinear.FiniteCurryNorm
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RicciDiffAffine
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
 
