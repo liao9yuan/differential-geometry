@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Char
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -194,7 +192,6 @@ theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
     (fun q _ => rfl) rfl
 
-set_option maxHeartbeats 3200000 in
 
 omit [CompactSpace M] in
 theorem deTurckRHSField_realizeMetric_jointContMDiffOn
@@ -453,7 +450,6 @@ private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
   rw [contMDiffWithinAt_iff_contDiffWithinAt] at hself
   exact hself
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -631,7 +627,6 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
     rw [hchartRep]
     exact hform
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -694,7 +689,6 @@ private theorem smoothCcCovApplyChartRepr_manifold_jointContMDiffOn
     have hpsrc : p.1 ∈ φ.source := by rw [hφ, extChartAt_source]; exact hpx
     rw [φ.left_inv hpsrc]
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -873,7 +867,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
       fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z⟯) :
     (toSmoothCcTensor (I := I) g₀ σ).toSection = σ := rfl
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem covApplyGenFamily_jointContMDiffOn
@@ -940,7 +933,6 @@ omit [SigmaCompactSpace M] in
     christoffelSelfField (I := I) g₀ B y =
       covApply (LeviCivita (I := I) g₀) B.toFun B.toFun y := rfl
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem traceTerm1_jointContMDiffOn
@@ -965,7 +957,6 @@ private theorem traceTerm1_jointContMDiffOn
     (fun t => covApplySection (I := I) g₀ B (F t)) hInner
   exact hStep
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1038,7 +1029,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         (fun z : M => T.toSection z) y
         ((LeviCivita (I := I) g₀).toFun B.toFun y (B.toFun y)) := rfl
 
-set_option maxHeartbeats 3200000 in
 
 private theorem fixedFrameTrace_chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -1108,14 +1098,41 @@ private theorem fixedFrameTrace_chartRepr_jointContMDiffOn
   refine hsum.congr ?_
   intro p _hp
 
+  let L : TensorRSSpace 0 2 I p.1 →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+    (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+      (fun y : M => TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ p.1
+  let f : Fin (Module.finrank ℝ E) → TensorRSSpace 0 2 I p.1 := fun i =>
+    (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 2
+          (LeviCivita (I := I) g₀))
+          (chartFrameNormGlobalSmooth (I := I) (M := M) g₀ α i).toFun
+          (fun y : M => (F p.2).toSection y)) p.1
+        ((chartFrameNormGlobalSmooth (I := I) (M := M) g₀ α i).toFun p.1) -
+      (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀)).toFun
+        (fun y : M => (F p.2).toSection y) p.1
+        ((LeviCivita (I := I) g₀).toFun
+          (chartFrameNormGlobalSmooth (I := I) (M := M) g₀ α i).toFun p.1
+          ((chartFrameNormGlobalSmooth (I := I) (M := M) g₀ α i).toFun p.1))
   rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
-    rawTensorConnLap_fixedFrame_def, map_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
-    DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
-    ← map_sub, iteratedCovApplySection_apply, covApplyChristoffelSection_apply]
+    rawTensorConnLap_fixedFrame_def]
+  change L (∑ i, f i) = _
+  calc
+    L (∑ i, f i) = ∑ i, L (f i) := by
+      induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+      | empty =>
+          rw [Finset.sum_empty, Finset.sum_empty]
+          exact L.map_zero
+      | @insert a s ha ih =>
+          rw [Finset.sum_insert ha, Finset.sum_insert ha, L.map_add, ih]
+    _ = _ := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      simp only [f]
+      rw [hBf, DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+        iteratedCovApplySection_apply, covApplyChristoffelSection_apply]
+      change L (_ - _) = L _ - L _
+      exact ContinuousLinearMap.map_sub L _ _
 
-set_option maxHeartbeats 3200000 in
 
 theorem rawTensorConnLapSmooth_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
