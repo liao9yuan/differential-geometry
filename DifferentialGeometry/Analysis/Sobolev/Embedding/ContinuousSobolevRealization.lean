@@ -70,7 +70,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option synthInstance.maxHeartbeats 400000 in
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -80,7 +85,6 @@ def gSupVal (g : SmoothRiemannianMetric I M) (r s : ℕ)
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
   ⨆ x : M, ‖T.toSection x‖
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -98,7 +102,6 @@ lemma bddAbove_section_norm_range
   exact ⟨C * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖,
     by rintro _ ⟨x, rfl⟩; exact hC T x⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -111,7 +114,6 @@ lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
   · rw [gSupVal, Real.iSup_of_isEmpty]
   · rw [gSupVal]; exact Real.iSup_nonneg (fun x => norm_nonneg _)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -129,7 +131,6 @@ lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   · rw [Real.iSup_of_isEmpty]
   · rw [ciSup_const]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -143,7 +144,6 @@ lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
   congr 1; funext x
   rw [smoothCcTensor_toSection_neg_apply, norm_neg]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -167,7 +167,6 @@ lemma gSupVal_add_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
       rw [smoothCcTensor_toSection_add_apply]; exact norm_add_le _ _
     exact le_trans hpt (add_le_add (le_ciSup hbS x) (le_ciSup hbT x))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -190,7 +189,6 @@ lemma gSupVal_smul_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     rw [hpt]
     exact mul_le_mul_of_nonneg_left (le_ciSup hbT x) (abs_nonneg c)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -330,7 +328,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 
 end CSupTensor
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -352,7 +349,6 @@ def gSupAddGroupSeminorm (g : SmoothRiemannianMetric I M) (r s k : ℕ)
       gSupVal (I := I) (M := M) g r s S.toCc
     rw [CSupTensor.toCc_neg, gSupVal_neg]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -363,7 +359,6 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   AddGroupSeminorm.toSeminormedAddCommGroup
     (gSupAddGroupSeminorm (I := I) (M := M) g r s k hk)
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -374,7 +369,6 @@ lemma csupSeminormedAddCommGroup_norm
     @norm _ (csupSeminormedAddCommGroup (I := I) (M := M) g r s k hk).toNorm S =
       gSupVal (I := I) (M := M) g r s S.toCc := rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -422,7 +416,6 @@ instance instCSupBanachCompleteSpace
   (inferInstance :
     CompleteSpace (UniformSpace.Completion (CSupTensor g r s k)))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -438,7 +431,6 @@ noncomputable def smoothToC0Lin
       UniformSpace.Completion (CSupTensor g r s k)).toLinearMap.comp
     (CSupTensor.ofHs (g := g) (r := r) (s := s) (k := k))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -462,7 +454,6 @@ lemma norm_smoothToC0Lin
   rw [hval, csupSeminormedAddCommGroup_norm (I := I) (M := M) g r s k hk]
   rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -479,7 +470,6 @@ lemma norm_coe_toCompl_eq_toHs
     cases S; rfl
   rw [hrhs, hS]
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -506,7 +496,6 @@ lemma exists_smoothToC0Lin_norm_le
       (mul_nonneg (le_of_lt hCpos) (norm_nonneg _))
     exact hC S.toCcTensor x
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -520,7 +509,6 @@ noncomputable def tensorHsToC0
       IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →L[ℝ]
         TensorPouSobolevHilbert g r s (2 * k)).toLinearMap
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -540,7 +528,6 @@ lemma denseRange_toComplL_toLinearMap
   rw [hcoe]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -562,7 +549,6 @@ theorem tensorHsToC0_coe
     ⟨C, hC⟩ S
   exact h
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -578,7 +564,6 @@ theorem tensorHsToC0_norm_apply_le
   exact LinearMap.norm_extendOfNorm_apply_le
     (denseRange_toComplL_toLinearMap (I := I) (M := M) g r s k) C hC u
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -593,7 +578,6 @@ theorem tensorHsToC0_opNorm_le
     (denseRange_toComplL_toLinearMap (I := I) (M := M) g r s k)
     (le_of_lt hCpos) hC
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
