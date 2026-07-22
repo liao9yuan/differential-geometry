@@ -20,8 +20,6 @@ import Mathlib.MeasureTheory.Integral.IntegrableOn
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -39,7 +37,7 @@ open DifferentialGeometry.Integral.Connection
 
 section ChristoffelAtomsRiemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
   [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -50,6 +48,12 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
@@ -430,7 +434,6 @@ private lemma chrRiem_tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
   rw [h_r, h_s, Set.inter_self,
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
 
-set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -441,6 +444,8 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    letI : ∀ b : M, NormedAddCommGroup (TensorRSSpace r s I b) :=
+      fun b => tensorRSRiemannianNormedAddCommGroup r s b
     ∃ M_F : ℝ, 0 ≤ M_F ∧
       ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
         b ∈ tsupport (fun x : M =>
@@ -452,6 +457,8 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  letI : ∀ b : M, NormedAddCommGroup (TensorRSSpace r s I b) :=
+    fun b => tensorRSRiemannianNormedAddCommGroup r s b
   have hK_cpt : IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     pouTsupport_isCompact (I := I) (M := M) α
@@ -527,7 +534,6 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
           (mul_le_mul_of_nonneg_left h_to hCprod_nn) hCfrom_nn
     _ = Cfrom * Cprod * Cto * ‖T b‖ := by ring
 
-set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -538,6 +544,8 @@ theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_loca
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    letI : ∀ b : M, NormedAddCommGroup (TensorRSSpace r s I b) :=
+      fun b => tensorRSRiemannianNormedAddCommGroup r s b
     ∃ M_F : ℝ, 0 ≤ M_F ∧
       ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
         b ∈ tsupport (fun x : M =>
@@ -549,6 +557,8 @@ theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_loca
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  letI : ∀ b : M, NormedAddCommGroup (TensorRSSpace r s I b) :=
+    fun b => tensorRSRiemannianNormedAddCommGroup r s b
   have hK_cpt : IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     pouTsupport_isCompact (I := I) (M := M) α
