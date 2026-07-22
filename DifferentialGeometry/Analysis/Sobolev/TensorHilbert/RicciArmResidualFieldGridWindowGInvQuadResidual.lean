@@ -7,9 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnect
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
 
