@@ -37,8 +37,6 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
@@ -75,8 +73,6 @@ theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 
@@ -113,8 +109,6 @@ theorem joint_rs_add {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -177,8 +171,6 @@ private theorem rfns_joint_cont
       ((Φ t).toSection x),
     DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem path_field_congr
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -201,8 +193,6 @@ private theorem path_field_congr
   intro x
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_joint_smooth
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
@@ -222,8 +212,6 @@ private theorem icg_joint_smooth
     exact covGrad_step_jointContMDiffOn (I := I) (M := M) g₀ r (s + j)
       (fun t => iteratedCovGrad (I := I) g₀ r s j (Φ t)) S ih
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_rfns_cont
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
@@ -242,8 +230,6 @@ private theorem icg_rfns_cont
     (by rw [Set.uIcc_of_le (zero_le_one (α := ℝ))] at hSI; exact hSI)
     (icg_joint_smooth (I := I) g₀ r s i Φ S hjoint)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem icg_norm_sq_int
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
@@ -289,8 +275,6 @@ private theorem icg_norm_sq_int
   rw [heq]
   exact hcontInt.intervalIntegrable_of_Icc (by norm_num)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -330,8 +314,6 @@ theorem icg_path_comm
       (fun t => iteratedCovGrad (I := I) g₀ r s (j + 1) (Φ t)) S hS hSI hjgsucc hji
       (by funext t; rw [iteratedCovGrad_succ])
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 
 omit [NeZero (Module.finrank ℝ E)] in
