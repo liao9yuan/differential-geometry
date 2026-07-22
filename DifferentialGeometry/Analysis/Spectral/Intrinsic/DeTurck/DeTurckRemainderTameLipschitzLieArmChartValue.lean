@@ -70,6 +70,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance instCompleteSpaceE_tame : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+private local instance instNormedAddCommGroupCLM1 :
+    NormedAddCommGroup (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance instNormedAddCommGroupCLM2 :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
 section
 
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix)
@@ -873,24 +881,12 @@ private lemma lieArm_arm2_value_eq_principal_add_tail
     hδ_lt hδ hδ'_lt hδ' x i j l k₁]
   ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def lieArm_slot34Eval (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
     (u w : E) : E →L[ℝ] E →L[ℝ] ℝ :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun c => LinearMap.toContinuousLinearMap
-        { toFun := fun v => F c v u w
-          map_add' := fun v₁ v₂ => by simp
-          map_smul' := fun r v => by simp }
-      map_add' := fun c₁ c₂ => by
-        ext v
-        simp
-      map_smul' := fun r c => by
-        ext v
-        simp }
+  (ContinuousLinearMap.compL ℝ E (E →L[ℝ] E →L[ℝ] ℝ) ℝ
+    ((ContinuousLinearMap.apply ℝ ℝ w).comp
+      (ContinuousLinearMap.apply ℝ (E →L[ℝ] ℝ) u))).comp F
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_cometric_doubleTrace_eq_invGram
@@ -989,8 +985,6 @@ private lemma lieArm_unitModel3SlotBilin_apply
     unitModel3SlotBilin (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def lieArm_F4mul (A B : E →L[ℝ] E →L[ℝ] ℝ) :
     E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -1037,8 +1031,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_F4mul_apply (A B : E →L[ℝ] E →L[ℝ] ℝ) (c v c' v' : E) :
     lieArm_F4mul (E := E) A B c v c' v' = A c c' * B v v' := rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private def lieArm_fix3 (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e : E) :
     E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -1125,8 +1117,6 @@ private lemma lieArm_slot02_pack
   funext j
   fin_cases j <;> simp [Function.update]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1384,8 +1374,6 @@ private lemma lieArm_arm1_T14_traced
   · refine Finset.sum_congr rfl (fun k₁ _ => Finset.sum_congr rfl (fun p _ => ?_))
     rw [smul_eq_mul, lieArm_slot12_pack]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 private lemma lieArm_arm1_value_traced
@@ -1523,8 +1511,6 @@ private lemma lieArm_connDiff_chartBasis_center
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_bilin_expand_fst (F : E →L[ℝ] E →L[ℝ] ℝ)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → E) (v : E) :
@@ -1534,8 +1520,6 @@ private lemma lieArm_bilin_expand_fst (F : E →L[ℝ] E →L[ℝ] ℝ)
   refine Finset.sum_congr rfl (fun q _ => ?_)
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_bilin_expand_snd (F : E →L[ℝ] E →L[ℝ] ℝ) (u : E)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → E) :
@@ -1545,8 +1529,6 @@ private lemma lieArm_bilin_expand_snd (F : E →L[ℝ] E →L[ℝ] ℝ) (u : E)
   refine Finset.sum_congr rfl (fun q _ => ?_)
   rw [map_smul, smul_eq_mul]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_U3_sum_slot0
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1561,8 +1543,6 @@ private lemma lieArm_U3_sum_slot0
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact congrArg (HMul.hMul (c q)) (lieArm_slot02_pack (E := E) W3 u (chartModelBasis E q) v)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_U3_sum_slot1
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1577,8 +1557,6 @@ private lemma lieArm_U3_sum_slot1
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact congrArg (HMul.hMul (c q)) (lieArm_slot12_pack (E := E) W3 u (chartModelBasis E q) v)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_U3_sum_slot2
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1593,8 +1571,6 @@ private lemma lieArm_U3_sum_slot2
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact congrArg (HMul.hMul (c q)) (lieArm_slot12_pack (E := E) W3 u v (chartModelBasis E q))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1621,8 +1597,6 @@ private lemma lieArm_inner_connDiff_chartBasis_value
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact congrArg (HMul.hMul _) (lieArm_inner_chartBasis_center (I := I) gm x q d)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1647,8 +1621,6 @@ private lemma lieArm_U3_deTurckVF_slot0_value
     (fun w => PDE.DeTurck.DeTurckLinearization.chartDeTurckVFComp (I := I) gA gB x w
       (extChartAt I x x)) u v
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1673,8 +1645,6 @@ private lemma lieArm_U3_deTurckVF_slot2_value
     (fun w => PDE.DeTurck.DeTurckLinearization.chartDeTurckVFComp (I := I) gA gB x w
       (extChartAt I x x))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1706,8 +1676,6 @@ private lemma lieArm_U3_connDiff_slot0_value
       DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel (I := I) gB x c a q
         (extChartAt I x x)) u v
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1739,8 +1707,6 @@ private lemma lieArm_U3_connDiff_slot1_value
       DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel (I := I) gB x c a q
         (extChartAt I x x)) v
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma lieArm_arm1_value_realized
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (_hδ_lt : δ < 1)
@@ -3123,7 +3089,6 @@ namespace O1Abstract
 
 variable {n : ℕ}
 
-set_option maxHeartbeats 3200000 in
 private lemma o1_master (ig cg : Fin n → Fin n → ℝ)
     (dg gb dig g1 g0 gbg f3 : Fin n → Fin n → Fin n → ℝ) (w1 : Fin n → ℝ)
     (hcol : ∀ l j : Fin n, (∑ k : Fin n, cg k j * ig k l) = if l = j then (1 : ℝ) else 0)
@@ -3376,8 +3341,6 @@ private lemma lieArm_chartDeTurckVFComp_center (gA gB : SmoothRiemannianMetric I
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
   rw [lieArm_chartInvGramOnE_center (I := I) gA x a b]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 private lemma lieArm_o1raw_center_eq (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -3419,8 +3382,6 @@ private lemma lieArm_o1raw_center_eq (g₀ g_bg : SmoothRiemannianMetric I M) (T
     PDE.DeTurck.DeTurckLinearization.chartLinearizedChristoffelPrincipalRaw
   simp only [lieArm_chartInvGramOnE_center, lieArm_chartGramOnE_center]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma lieArm_arm1_value_eq_order1Raw_add_tail (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3910,9 +3871,6 @@ private theorem lieArm_hjAbsorb (g₀ : SmoothRiemannianMetric I M) {δ δ' : �
     smoothCcTensor_toSection_smul_apply, smoothCcTensor_toSection_smul_apply]
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 1600000
-
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieWEndo deTurckLieWEndo_apply deTurckLieWEndo_homSection_contMDiff deTurckVFCovDeriv connDiffOp_homSection_contMDiff metricConnDiffLoweredFib metricConnDiffLoweredFib_toModel metricConnDiffLoweredFib_contMDiff domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib tensor0SProdKappaFib_apply)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricDoubleTraceFib cometricDoubleTraceFib_toModel cometricDoubleTraceFib_contMDiff)
 
@@ -3946,8 +3904,6 @@ theorem deTurckLieCoeffField_add_deTurckLieRemainderField_realizedFam_jointSmoot
   rw [smoothCcTensor_toSection_add_apply]
 
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 lemma lieArm_chartSlope_center_value_eq_threeArm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3989,8 +3945,6 @@ lemma lieArm_chartSlope_center_value_eq_threeArm
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
   linear_combination -h0 - h1 - h2
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 theorem realizedDeTurckLie_threeArm_symmAbsorbed_perm_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
