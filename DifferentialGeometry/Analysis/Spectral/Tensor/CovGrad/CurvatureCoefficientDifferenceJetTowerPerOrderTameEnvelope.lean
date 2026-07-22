@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerCurvDiffGridWindow
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredDifference
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannMixedBiContraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerPairTraceRepresentation
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
@@ -26,8 +26,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -107,9 +105,69 @@ private lemma riemannianFiberNormSq_iteratedCovGrad_slotExtendIterDomDomCongr_le
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
           ((iteratedCovGrad (I := I) g₀ 0 4 l X).toSection x) := by ring
 
-set_option maxHeartbeats 12800000 in
+private theorem pairTraceKernel_slotExtendIter_le
+    (g₀ : SmoothRiemannianMetric I M) (cB : ℕ → ℝ)
+    (hcB0 : ∀ j, 0 ≤ cB j)
+    (hcBb : ∀ j x,
+      riemannianFiberNormSq (I := I) (M := M) g₀ (6 + j) (2 + j) x
+        ((slotExtendIter (I := I) (M := M) g₀ 6 2 j
+          (pairTraceKernel (I := I) (M := M) g₀)).toSection x) ≤ cB j)
+    (Ldiff : SmoothCcTensor g₀ 0 4) (i : ℕ) (x : M) (RHS : ℝ)
+    (hLd_le_RHS :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
+        ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤ RHS) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 i
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (pairTraceOp (I := I) (M := M) g₀ g₀)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x) ≤
+      (cB i * ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ))) * RHS := by
+  rw [pairTraceOp_self_eq (I := I) (M := M) g₀]
+  rw [iteratedCovGrad_appCcRS_parallel (I := I) (M := M) g₀ 2 6 2
+    (pairTraceKernel (I := I) (M := M) g₀) (phiDtPair_covGrad_zero (I := I) (M := M) g₀) _ i]
+  have hcomp : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+      ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 (6 + i) (2 + i)
+        (slotExtendIter (I := I) (M := M) g₀ 6 2 i (pairTraceKernel (I := I) (M := M) g₀))
+        (iteratedCovGrad (I := I) g₀ 2 6 i
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g₀ (6 + i) (2 + i) x
+          ((slotExtendIter (I := I) (M := M) g₀ 6 2 i
+            (pairTraceKernel (I := I) (M := M) g₀)).toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
+          ((iteratedCovGrad (I := I) g₀ 2 6 i
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x) := by
+    rw [appCcRS_toSection]
+    exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 2 (6 + i) (2 + i) x _ _
+  refine le_trans hcomp ?_
+  have h1 := hcBb i x
+  have h2 := riemannianFiberNormSq_iteratedCovGrad_slotExtendIterDomDomCongr_le
+    (I := I) (M := M) g₀ Ldiff i x
+  have hWB_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (6 + i) x
+    ((iteratedCovGrad (I := I) g₀ 2 6 i
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x)
+  have hdd : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ) :=
+    mul_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ (6 + i) (2 + i) x
+          ((slotExtendIter (I := I) (M := M) g₀ 6 2 i
+            (pairTraceKernel (I := I) (M := M) g₀)).toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
+          ((iteratedCovGrad (I := I) g₀ 2 6 i
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x)
+        ≤ cB i * (((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ)) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x)) :=
+          mul_le_mul h1 h2 hWB_nn (hcB0 i)
+    _ ≤ cB i * (((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ)) * RHS) :=
+      mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hLd_le_RHS hdd) (hcB0 i)
+    _ = (cB i * ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ))) * RHS := by ring
 
-set_option maxHeartbeats 12800000 in
+
 theorem riemannianFiberNormSq_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -183,9 +241,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_riemannCoeff_metricFactorTelescope
       ∑ l ∈ Finset.range (i + 1 - j), Lterm l := fun j =>
     mul_nonneg (Combinatorics.antidiagonalTupleGrid_nonneg b hb j)
       (Finset.sum_nonneg fun l _ => hLterm_nn l)
-  have hRHS_nn : 0 ≤ RHS := by
-    rw [hRHS_def]
-    exact Finset.sum_nonneg fun j _ => hRHS_cell_nn j
   have hgoal_eq : (∑ j ∈ Finset.range (i + 1),
       (∑ n ∈ Finset.range (j + 1),
         ∑ e ∈ Finset.Nat.antidiagonalTuple n j,
@@ -263,79 +318,35 @@ theorem riemannianFiberNormSq_iteratedCovGrad_riemannCoeff_metricFactorTelescope
     rw [SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add]
     rfl
   rw [hsmulsec, rfns_smul_b]
+  have hLd_le_RHS : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
+      ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤ RHS := by
+    rw [hRHS_def]
+    have hcell0 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
+        ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤
+        Combinatorics.antidiagonalTupleGrid b 0 * ∑ l ∈ Finset.range (i + 1 - 0), Lterm l := by
+      rw [Combinatorics.antidiagonalTupleGrid_zero, one_mul]
+      have hLi : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤ Lterm i := by
+        rw [hLterm_def]
+        have := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 4 i L01).toSection x)
+        linarith
+      refine le_trans hLi ?_
+      exact Finset.single_le_sum (f := fun l => Lterm l) (fun l _ => hLterm_nn l)
+        (Finset.mem_range.mpr (by omega))
+    refine le_trans hcell0 ?_
+    exact Finset.single_le_sum
+      (f := fun j => Combinatorics.antidiagonalTupleGrid b j *
+        ∑ l ∈ Finset.range (i + 1 - j), Lterm l)
+      (fun j _ => hRHS_cell_nn j) (Finset.mem_range.mpr (by omega))
   have hT2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
         (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceOp (I := I) (M := M) g₀ g₀)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x) ≤
       (cB i * (dim * dim)) * RHS := by
-    rw [pairTraceOp_self_eq (I := I) (M := M) g₀]
-    rw [iteratedCovGrad_appCcRS_parallel (I := I) (M := M) g₀ 2 6 2
-      (pairTraceKernel (I := I) (M := M) g₀) (phiDtPair_covGrad_zero (I := I) (M := M) g₀) _ i]
-    have hcomp : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-        ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 (6 + i) (2 + i)
-          (slotExtendIter (I := I) (M := M) g₀ 6 2 i (pairTraceKernel (I := I) (M := M) g₀))
-          (iteratedCovGrad (I := I) g₀ 2 6 i
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
-              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x) ≤
-        riemannianFiberNormSq (I := I) (M := M) g₀ (6 + i) (2 + i) x
-            ((slotExtendIter (I := I) (M := M) g₀ 6 2 i
-              (pairTraceKernel (I := I) (M := M) g₀)).toSection x) *
-          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
-            ((iteratedCovGrad (I := I) g₀ 2 6 i
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
-                (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x) := by
-      rw [appCcRS_toSection]
-      exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 2 (6 + i) (2 + i) x _ _
-    refine le_trans hcomp ?_
-    have h1 := hcBb i x
-    have h2 := riemannianFiberNormSq_iteratedCovGrad_slotExtendIterDomDomCongr_le (I := I) (M := M) g₀ Ldiff i x
-    rw [← hdim_def] at h2
-    have hLd_le_RHS : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
-        ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤ RHS := by
-      rw [hRHS_def]
-      have hcell0 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
-          ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤
-          Combinatorics.antidiagonalTupleGrid b 0 * ∑ l ∈ Finset.range (i + 1 - 0), Lterm l := by
-        rw [Combinatorics.antidiagonalTupleGrid_zero, one_mul]
-        have hLi : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
-            ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x) ≤ Lterm i := by
-          rw [hLterm_def]
-          have := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + i) x
-            ((iteratedCovGrad (I := I) g₀ 0 4 i L01).toSection x)
-          linarith
-        refine le_trans hLi ?_
-        exact Finset.single_le_sum (f := fun l => Lterm l) (fun l _ => hLterm_nn l)
-          (Finset.mem_range.mpr (by omega))
-      refine le_trans hcell0 ?_
-      exact Finset.single_le_sum
-        (f := fun j => Combinatorics.antidiagonalTupleGrid b j *
-          ∑ l ∈ Finset.range (i + 1 - j), Lterm l)
-        (fun j _ => hRHS_cell_nn j) (Finset.mem_range.mpr (by omega))
-    have hWB_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (6 + i) x
-      ((iteratedCovGrad (I := I) g₀ 2 6 i
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
-          (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x)
-    have hLd_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + i) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x)
-    calc riemannianFiberNormSq (I := I) (M := M) g₀ (6 + i) (2 + i) x
-          ((slotExtendIter (I := I) (M := M) g₀ 6 2 i
-            (pairTraceKernel (I := I) (M := M) g₀)).toSection x) *
-        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
-          ((iteratedCovGrad (I := I) g₀ 2 6 i
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
-              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff))).toSection x)
-        ≤ cB i * ((dim * dim) *
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
-              ((iteratedCovGrad (I := I) g₀ 0 4 i Ldiff).toSection x)) := by
-          have hdd : (0 : ℝ) ≤ dim * dim := by positivity
-          nlinarith [mul_le_mul h1 h2 hWB_nn (hcB0 i), hcB0 i]
-      _ ≤ cB i * ((dim * dim) * RHS) := by
-          have hdd : (0 : ℝ) ≤ dim * dim := by positivity
-          have hmono := mul_le_mul_of_nonneg_left hLd_le_RHS
-            (mul_nonneg (hcB0 i) hdd)
-          nlinarith [hmono]
-      _ = (cB i * (dim * dim)) * RHS := by ring
+    simpa only [← hdim_def] using
+      pairTraceKernel_slotExtendIter_le (I := I) (M := M) g₀ cB hcB0 hcBb Ldiff i x RHS hLd_le_RHS
   have hT1 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
         (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
@@ -515,11 +526,14 @@ theorem riemannianFiberNormSq_iteratedCovGrad_riemannCoeff_metricFactorTelescope
             (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceOp (I := I) (M := M) g₀ g₀)
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2 Ldiff)))).toSection x)
-        nlinarith [hT1, hT2, hadd]
+        refine mul_le_mul_of_nonneg_left (le_trans hadd ?_) (sq_nonneg 2)
+        exact add_le_add (mul_le_mul_of_nonneg_left hT1 (by norm_num))
+          (mul_le_mul_of_nonneg_left hT2 (by norm_num))
     _ ≤ (8 * (cB i * (dim * dim)) +
           8 * (diagonalGridGrowthFactor (E := E) i * (∑ j ∈ Finset.range (i + 1), CΔ j) *
             (dim * dim) * 2)) * RHS := by
-        nlinarith [hRHS_nn]
+        ring_nf
+        exact le_rfl
 
 theorem riemannianFiberNormSq_iteratedCovGrad_riemannMixedCoeff_backgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

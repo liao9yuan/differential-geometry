@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MetricDoubleTrace
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TensorSlotSwapSmoothness
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSValueLocal
 
 

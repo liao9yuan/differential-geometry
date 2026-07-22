@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TensorSlotSwap
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
 
 
 noncomputable section

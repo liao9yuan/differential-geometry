@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerCurvDiffGridWindow
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredDifference
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannMixedBiContraction
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
@@ -27,8 +27,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -228,6 +226,18 @@ theorem riemannianFiberNormSq_iteratedCovGrad_riemannMixedCoeff_backgroundDiffer
             ((iteratedCovGrad (I := I) g₀ 0 4 i
               (riemannLoweredBackgroundDifference (I := I) (M := M) g₀ g₁)).toSection x) := by
         ring
+
+private lemma diagonalGridScalarClosure (r δ S W : ℝ) (hr : 0 ≤ r) (hS : 0 ≤ S) (hW : 0 ≤ W) :
+    r ^ 3 * (S * W) ≤ (r ^ 3 * ((r ^ 2 * δ ^ 2 + 1) * S)) * W := by
+  have hr3 : 0 ≤ r ^ 3 := pow_nonneg hr 3
+  have hc : 0 ≤ r ^ 2 * δ ^ 2 := mul_nonneg (sq_nonneg r) (sq_nonneg δ)
+  have hfactor : (1 : ℝ) ≤ r ^ 2 * δ ^ 2 + 1 := by linarith
+  calc
+    r ^ 3 * (S * W) = (r ^ 3 * S) * W := by ring
+    _ ≤ (r ^ 3 * ((r ^ 2 * δ ^ 2 + 1) * S)) * W := by
+      refine mul_le_mul_of_nonneg_right ?_ hW
+      exact mul_le_mul_of_nonneg_left
+        (by simpa only [one_mul] using mul_le_mul_of_nonneg_right hfactor hS) hr3
 
 theorem riemannianFiberNormSq_iteratedCovGrad_riemannLoweredCcFirstArgDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -621,28 +631,10 @@ theorem riemannianFiberNormSq_iteratedCovGrad_riemannLoweredCcFirstArgDifference
           _ ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * BB i (i'' + 1)) * WW := by
               rw [hBBval i (i'' + 1)]
               have hsum_nn := hBBsum_nn i (i'' + 1)
-              have hc0nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 := by positivity
-              have hfr3 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ 3 := by positivity
-              have hstep : (∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
-                  (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) ≤
-                  ((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1) *
-                    ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
-                      (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l) := by
-                nlinarith [mul_nonneg hc0nn hsum_nn]
-              calc (Module.finrank ℝ E : ℝ) ^ 3 *
-                    ((∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
-                      (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) * WW)
-                  = ((Module.finrank ℝ E : ℝ) ^ 3 *
-                      ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
-                        (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l)) *
-                      WW := by ring
-                _ ≤ ((Module.finrank ℝ E : ℝ) ^ 3 *
-                      (((Module.finrank ℝ E : ℝ) ^ 2 * δ₀ ^ 2 + 1) *
-                        ∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
-                          (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l))) *
-                      WW := by
-                    refine mul_le_mul_of_nonneg_right ?_ hWW_nn
-                    exact mul_le_mul_of_nonneg_left hstep hfr3
+              exact diagonalGridScalarClosure (Module.finrank ℝ E : ℝ) δ₀
+                (∑ l ∈ Finset.range (i + 1 - (i'' + 1)),
+                  (2 * CAd l * gridSumPairCount ((i'' + 1) + 1) (l + 3) + 2 * cbg l))
+                WW (Nat.cast_nonneg _) hsum_nn hWW_nn
   calc diagonalGridGrowthFactor (E := E) i *
         ∑ i' ∈ Finset.range (i + 1),
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + i') x
