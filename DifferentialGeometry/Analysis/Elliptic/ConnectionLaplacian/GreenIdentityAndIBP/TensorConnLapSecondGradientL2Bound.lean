@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators

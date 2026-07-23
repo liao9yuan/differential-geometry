@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -59,6 +57,18 @@ theorem rawConnLap_three_l2Inner_covGrad_eq
     (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) Curv S)]
   rw [hGΔ_def, hS_def]
   rw [covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq (I := I) (M := M) g T]
+
+private lemma second_order_garding_real
+    {C nGrad nLap nT nHess : ℝ}
+    (hC : 0 ≤ C)
+    (hstep : nHess ≤ nLap ^ 2 + C * nGrad ^ 2)
+    (horder : nGrad ^ 2 ≤ nLap * nT) :
+    nHess ≤ (1 + C / 2) * (nLap ^ 2 + nT ^ 2) := by
+  have hyoung : nLap * nT ≤ (nLap ^ 2 + nT ^ 2) / 2 := by
+    nlinarith [sq_nonneg (nLap - nT)]
+  have hgrad : C * nGrad ^ 2 ≤ C * ((nLap ^ 2 + nT ^ 2) / 2) :=
+    mul_le_mul_of_nonneg_left (horder.trans hyoung) hC
+  nlinarith [sq_nonneg nT]
 
 
 theorem secondCovGrad_l2NormSq_le_rawConnLap_add_self
@@ -131,15 +141,10 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_add_self
   have horder1 : nGrad ^ 2 ≤ nLap * nT := by
     rw [hnGrad_def, hS_def, hnLap_def, hnT_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self (I := I) (M := M) g T
-  have hyoung : nLap * nT ≤ (nLap ^ 2 + nT ^ 2) / 2 := by nlinarith [sq_nonneg (nLap - nT)]
   set nHess : ℝ := tensorL2Norm (I := I) (M := M) g 0 (3 + 1)
     (covGrad (I := I) (M := M) g 0 3 S).toFun ^ 2 with hnHess_def
   have hstep1' : nHess ≤ nLap ^ 2 + C₀ * nGrad ^ 2 := hstep1
-  have hgrad_le : C₀ * nGrad ^ 2 ≤ C₀ * ((nLap ^ 2 + nT ^ 2) / 2) := by
-    have h1 : C₀ * nGrad ^ 2 ≤ C₀ * (nLap * nT) := by nlinarith [horder1, hC₀]
-    have h2 : C₀ * (nLap * nT) ≤ C₀ * ((nLap ^ 2 + nT ^ 2) / 2) := by nlinarith [hyoung, hC₀]
-    linarith [h1, h2]
-  nlinarith [hstep1', hgrad_le, sq_nonneg nT, hC₀]
+  exact second_order_garding_real hC₀ hstep1' horder1
 
 end Connection
 end Integral

@@ -11,8 +11,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -38,6 +36,22 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private lemma sq_le_two_sq_add_sq
+    {a b c m : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (hm : 0 ≤ m)
+    (h : a ≤ m * (b + c)) :
+    a ^ 2 ≤ 2 * m ^ 2 * (b ^ 2 + c ^ 2) := by
+  have hsum : 0 ≤ m * (b + c) := mul_nonneg hm (add_nonneg hb hc)
+  have hsquare : a * a ≤ (m * (b + c)) * (m * (b + c)) :=
+    mul_le_mul h h ha hsum
+  have hpair : (b + c) ^ 2 ≤ 2 * (b ^ 2 + c ^ 2) := by
+    nlinarith [sq_nonneg (b - c)]
+  calc
+    a ^ 2 ≤ (m * (b + c)) ^ 2 := by nlinarith
+    _ = m ^ 2 * (b + c) ^ 2 := by ring
+    _ ≤ m ^ 2 * (2 * (b ^ 2 + c ^ 2)) :=
+      mul_le_mul_of_nonneg_left hpair (sq_nonneg m)
+    _ = 2 * m ^ 2 * (b ^ 2 + c ^ 2) := by ring
 
 theorem exists_genuineCurvPureRSection_l2Norm_le_covGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -184,12 +198,8 @@ theorem exists_integrated_curvatureCrossBound
     have hC_sq : C ^ 2 = 2 * max K_R K_dR ^ 2 := by
       rw [hC_def, mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
     rw [hC_sq, hrC_eq, hrG_eq, hrS_eq]
-    have hsqrtrC_nn : 0 ≤ Real.sqrt rC := Real.sqrt_nonneg _
-    have hsum_nn : 0 ≤ max K_R K_dR * (Real.sqrt rG + Real.sqrt rS) :=
-      mul_nonneg hmax_nn (by positivity)
-    nlinarith [hsqrtC', sq_nonneg (Real.sqrt rG - Real.sqrt rS),
-      mul_nonneg hmax_nn hmax_nn, Real.sqrt_nonneg rG, Real.sqrt_nonneg rS,
-      mul_le_mul hsqrtC' hsqrtC' hsqrtrC_nn hsum_nn]
+    exact sq_le_two_sq_add_sq (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+      (Real.sqrt_nonneg _) hmax_nn hsqrtC'
 
   have hL2 : ‖pointwiseTensorCurv (I := I) (M := M) g s S‖ ≤
       C * (‖covGrad (I := I) (M := M) g 0 s S‖ + ‖S‖) :=

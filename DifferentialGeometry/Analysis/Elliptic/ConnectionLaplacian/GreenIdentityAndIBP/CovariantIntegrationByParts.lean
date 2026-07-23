@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationBy
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
