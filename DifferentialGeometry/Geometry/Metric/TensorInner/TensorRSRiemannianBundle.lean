@@ -399,7 +399,6 @@ theorem tensorRSRiemannianInnerCLM_diagonal_continuousAt_zero
   (tensorRSRiemannianInnerCLM_diagonal_continuous (I := I) (M := M) g r s b).continuousAt
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 private lemma innerModelRS_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Bornology.IsBounded
@@ -440,7 +439,6 @@ private lemma innerModelRS_diagonal_sublevel_isBounded
     rw [hv0, norm_zero]; exact one_pos
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 private lemma innerModelRS_diagonal_sublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -460,7 +458,6 @@ private lemma tensorRSRiemannianInner_diagonal_clm_apply
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b) T) := by
   rw [tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 800000 in
 theorem tensorRSRiemannianInnerCLM_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -504,8 +501,6 @@ theorem tensorRSRiemannianInnerCLM_isVonNBounded
   rw [← hSetEq]
   exact hImg
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup

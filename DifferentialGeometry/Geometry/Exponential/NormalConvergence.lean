@@ -38,7 +38,6 @@ theorem normalGeodesicSpray_conv
       (MetricKoszul.metricSpray gInf) :=
   MetricKoszul.metricSpray_conv hU hg_cd hgInf_cd hg_co hgInf_co hg_conv
 
-set_option maxHeartbeats 700000 in
 omit [CompleteSpace E] in
 private theorem normalSpray_time_conv
     {U : Set E} (hU : IsOpen U)
@@ -65,11 +64,6 @@ private theorem normalSpray_time_conv
     (normalGeodesicSpray_conv hU hg_cd hgInf_cd hg_co hgInf_co hg_conv)
     (fun _ => contDiff_snd.contDiffOn) contDiff_snd.contDiffOn
     hspray_cd hsprayInf_cd (fun q hq => hq.2) (fun _ q hq => hq.2)
-
-set_option maxHeartbeats 700000 in
-
-
-
 
 omit [CompleteSpace E] in
 theorem normalPhase_end_conv
@@ -118,10 +112,6 @@ theorem normalPhase_end_conv
     (fun _ => contDiff_id.contDiffOn) contDiff_id.contDiffOn
     (mapCInfConv_const id) hγ hγInf
     (fun q hq t ht => ⟨hstayInf q hq t ht, Set.mem_univ _⟩)
-
-set_option maxHeartbeats 700000 in
-
-
 
 theorem normalDiag_end_conv
     {U : Set E} (hU : IsOpen U)

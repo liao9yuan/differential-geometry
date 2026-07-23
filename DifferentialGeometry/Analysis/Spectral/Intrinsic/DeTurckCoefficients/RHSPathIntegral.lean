@@ -86,10 +86,6 @@ def realizedRHSArm
     (deTurckRHSSection (I := I) g_bg
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-
-
 theorem rhsTop_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -270,12 +266,6 @@ theorem rhsChartSum_zero
       simp only [Matrix.cons_val_zero, Matrix.cons_val_one, chartBasisVecFiber_self]
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀
       (realizedRHSArm (I := I) g₀ g_bg T' hδ'_lt hδ') x ![v, w]
-
-set_option maxHeartbeats 6400000 in
-set_option synthInstance.maxHeartbeats 3200000 in
-
-
-
 
 theorem rhsArm_sub_eq_paths
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -55,8 +53,6 @@ private lemma exists_smooth_close_to_TensorH1_intrinsic
   rw [show smoothToTensorH1Compl (I := I) (M := M) g r s S = q from hS_eq]
   rw [dist_eq_norm] at hS_close
   exact hS_close
-
-set_option maxHeartbeats 4000000 in
 
 omit [CompleteSpace E] in
 theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic

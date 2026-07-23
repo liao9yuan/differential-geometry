@@ -79,8 +79,6 @@ private lemma unitModel_zero (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) 
 variable [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 
@@ -234,8 +232,6 @@ noncomputable def phiMetCurvCoeff
           (I := I) (M := M) g₀ g)
     (gradSwapCurvCoeff (I := I) g₀)
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 

@@ -12,8 +12,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -80,7 +78,6 @@ private lemma diagonalGrid_leftFactor_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ)
         exact mul_le_mul_of_nonneg_left hB hn
     _ = (n + 1) * D := by ring
 
-set_option maxHeartbeats 6400000 in
 theorem riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (g : SmoothRiemannianMetric I M) :
     ∀ (j p a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g p a) (x : M),

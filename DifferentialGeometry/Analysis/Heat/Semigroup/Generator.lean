@@ -49,8 +49,6 @@ lemma heatSemigroupExplicitLift_zero_mem_laplacianDomain
   unfold heatSemigroupExplicitLift
   rw [iteratedResolventL2_zero_apply]
 
-set_option maxHeartbeats 800000 in
-
 theorem laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -85,8 +83,6 @@ theorem laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
   · apply Subtype.ext
     exact h_lift_eq
 
-set_option maxHeartbeats 800000 in
-
 theorem hasDerivAt_heatSemigroup_eq_laplacianOp
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -117,8 +113,6 @@ theorem hasDerivAt_heatSemigroup_eq_laplacianOp
     (I := I) (M := M) g ht u_0]
   exact h_apply
 
-set_option maxHeartbeats 800000 in
-
 lemma heatSemigroupSpectralLift_one_eq_explicit_zero
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -145,8 +139,6 @@ lemma heatSemigroupSpectralLift_one_eq_explicit_zero
     rw [H1ComplToLp_heatSemigroupExplicitLift (I := I) (M := M) g 0 ht u_0]
   exact H1ComplToLp_inj_on_laplacianDomain (I := I) (M := M) g
     (u := ⟨_, h_can_mem⟩) (v := ⟨_, h_exp_mem⟩) h_proj_eq
-
-set_option maxHeartbeats 800000 in
 
 theorem laplacianOp_heatSemigroupSpectralLift_one_eq_neg_heatPower_one
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)

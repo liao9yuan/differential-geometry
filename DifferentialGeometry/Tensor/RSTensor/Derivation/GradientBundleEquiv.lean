@@ -8,8 +8,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -149,7 +147,6 @@ private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
   conv_lhs => rw [hX]
   exact hkey
 
-set_option maxHeartbeats 1600000 in
 open TensorMultilinear in
 
 theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
@@ -311,8 +308,6 @@ end Trivialisation
 
 section SmoothEquiv
 
-set_option maxHeartbeats 1600000 in
-
 theorem covGradBundleEquiv_contMDiff_totalSpace (r s : ℕ) :
     ContMDiff (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E))
       (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E)) ∞
@@ -344,8 +339,6 @@ theorem covGradBundleEquiv_contMDiff_totalSpace (r s : ℕ) :
     ] with p hp
     exact covGradBundleEquiv_trivializationAt_eq (I := I) (M := M) r s p₀.proj hp
       p.snd
-
-set_option maxHeartbeats 1600000 in
 
 theorem covGradBundleEquiv_symm_contMDiff_totalSpace (r s : ℕ) :
     ContMDiff (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E))

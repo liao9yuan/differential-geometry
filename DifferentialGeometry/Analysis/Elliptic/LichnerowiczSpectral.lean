@@ -30,8 +30,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-set_option maxHeartbeats 6400000 in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_inj_on_laplacianDomain
     (g : SmoothRiemannianMetric I M)
@@ -73,8 +71,6 @@ private def spectralBasisFun
         Fin (Module.finrank ℝ (resolventEigenspace (I := I) (M := M) g μ.val))) :
     M → ℝ :=
   fun x => (resolventEigenbasisSigma (I := I) (M := M) g i) x
-
-set_option maxHeartbeats 6400000 in
 
 theorem laplacianEigenfunction_smooth_representative
     (g : SmoothRiemannianMetric I M)
@@ -272,8 +268,6 @@ private lemma laplacianEigenvalueOf_pos_of_lt_one
   have h_pos : 0 < μ.val := nonzeroResolventEigenvalue_pos μ
   have h_num_pos : 0 < 1 - μ.val := by linarith
   exact div_pos h_num_pos h_pos
-
-set_option maxHeartbeats 800000 in
 
 theorem lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed
     (g : SmoothRiemannianMetric I M)

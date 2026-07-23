@@ -98,8 +98,6 @@ private lemma partialLpLimit_norm_le
   rw [partialLpLimit_eq_clm (I := I) (M := M) g r s i α P k]
   exact (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k).le_opNorm _
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 theorem partialLpLimit_eLpNorm_le
@@ -189,8 +187,6 @@ private lemma cutoffPartialLpLimit_norm_le
   exact (eigenvectorCutoffChartPartialCLM (I := I) (M := M)
     g r s α P k).le_opNorm _
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 theorem cutoffPartialLpLimit_eLpNorm_le

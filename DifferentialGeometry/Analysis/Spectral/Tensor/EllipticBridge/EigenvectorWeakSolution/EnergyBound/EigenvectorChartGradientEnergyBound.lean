@@ -176,9 +176,6 @@ private lemma inv_mul_sqrt_eq_sqrt_inv {μ : ℝ} (hμ : 0 < μ) :
   field_simp
   linarith [h_mul_self]
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 800000 in
-
 private lemma eigenvectorChartPartialCLM_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -188,8 +185,6 @@ private lemma eigenvectorChartPartialCLM_norm_le
       ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k‖ * ‖x‖ :=
   (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k).le_opNorm x
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 theorem eigenvectorChartWeakPartial_eLpNorm_le

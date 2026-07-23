@@ -21,8 +21,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorCompone
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -52,6 +50,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+private local instance covariantAtomTensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma covRiem_pouTsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
@@ -80,7 +84,6 @@ private lemma covRiem_mem_baseSet_of_mem_chartSource
     rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
     exact hb
 
-set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -188,11 +191,11 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditi
           hCop_bound b hb v
         rw [h_roundtrip] at h_op
         have hX_nn : 0 ≤ ‖X‖ := norm_nonneg _
-        have h_sq := mul_self_le_mul_self hX_nn h_op
-        have h_lhs : ‖X‖ * ‖X‖ = ‖X‖ ^ 2 := by rw [sq]
-        have h_rhs : (Cop * ‖v‖) * (Cop * ‖v‖) = Cop ^ 2 * ‖v‖ ^ 2 := by ring
-        rw [hv_def] at h_sq ⊢
-        nlinarith [h_sq, h_lhs, h_rhs]
+        calc
+          ‖X‖ ^ 2 = ‖X‖ * ‖X‖ := by rw [sq]
+          _ ≤ (Cop * ‖v‖) * (Cop * ‖v‖) :=
+            mul_self_le_mul_self hX_nn h_op
+          _ = Cop ^ 2 * ‖v‖ ^ 2 := by ring
       have h_sum_le :
           (∑ k : Fin (Module.finrank ℝ E),
             ‖chartTensorRSCovariantDerivative (I := I) r s g α
