@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -28,6 +26,78 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance intrinsicPieceTwoTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance intrinsicPieceTwoTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private lemma choose_two_product_sum (p q : ℕ → ℝ) :
+    ∑ i ∈ Finset.range (2 + 1),
+        ↑((2 : ℕ).choose i) * p i * q (2 - i) =
+      p 0 * q 2 + 2 * p 1 * q 1 + p 2 * q 0 := by
+  norm_num [Finset.sum_range_succ]
+
+private lemma three_product_sum_le
+    {C A1 A2 A3 B0 B1 B2 : ℝ}
+    (hC : 0 ≤ C) (hA1 : 0 ≤ A1) (hA2 : 0 ≤ A2) (hA3 : 0 ≤ A3)
+    (hB0 : B0 ≤ C) (hB1 : B1 ≤ C) (hB2 : B2 ≤ C) :
+    A1 * B2 + 2 * A2 * B1 + A3 * B0 ≤
+      2 * C * (A3 + A2 + A1) := by
+  have h1 := mul_le_mul_of_nonneg_left hB2 hA1
+  have h2 := mul_le_mul_of_nonneg_left hB1 hA2
+  have h3 := mul_le_mul_of_nonneg_left hB0 hA3
+  have hA1C : 0 ≤ A1 * C := mul_nonneg hA1 hC
+  have hA3C : 0 ≤ A3 * C := mul_nonneg hA3 hC
+  nlinarith
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma iteratedFDeriv_two_fderiv_apply_norm_le
+    {N : Type*} [NormedAddCommGroup N] [NormedSpace ℝ N]
+    (F : E → N) (u : E → E) (U : Set E) (x : E)
+    (hF : ContDiffOn ℝ ∞ F U) (hu : ContDiffOn ℝ ∞ u U)
+    (hU : IsOpen U) (hx : x ∈ U) :
+    ‖iteratedFDeriv ℝ 2 (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+      ‖fderiv ℝ F x‖ * ‖iteratedFDeriv ℝ 2 u x‖ +
+        2 * ‖iteratedFDeriv ℝ 2 F x‖ * ‖iteratedFDeriv ℝ 1 u x‖ +
+        ‖iteratedFDeriv ℝ 3 F x‖ * ‖iteratedFDeriv ℝ 0 u x‖ := by
+  have h_top : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
+    rw [ENat.coe_top_add_one]
+  have hc : ContDiffOn ℝ ∞ (fderiv ℝ F) U :=
+    hF.fderiv_of_isOpen hU h_top
+  have h_leibniz_within :
+      ‖iteratedFDerivWithin ℝ 2 (fun y : E => (fderiv ℝ F y) (u y)) U x‖ ≤
+        ∑ i ∈ Finset.range (2 + 1),
+          ↑((2 : ℕ).choose i) *
+            ‖iteratedFDerivWithin ℝ i (fderiv ℝ F) U x‖ *
+            ‖iteratedFDerivWithin ℝ (2 - i) u U x‖ :=
+    norm_iteratedFDerivWithin_clm_apply hc hu hU.uniqueDiffOn hx
+      (by
+        show ((2 : ℕ) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+        exact WithTop.coe_le_coe.mpr le_top)
+  have h_leibniz_global :
+      ‖iteratedFDeriv ℝ 2 (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+        ∑ i ∈ Finset.range (2 + 1),
+          ↑((2 : ℕ).choose i) *
+            ‖iteratedFDeriv ℝ i (fderiv ℝ F) x‖ *
+            ‖iteratedFDeriv ℝ (2 - i) u x‖ := by
+    rw [← iteratedFDerivWithin_of_isOpen 2 hU hx]
+    refine le_trans h_leibniz_within ?_
+    apply Finset.sum_le_sum
+    intro i _
+    rw [iteratedFDerivWithin_of_isOpen i hU hx,
+      iteratedFDerivWithin_of_isOpen (2 - i) hU hx]
+  rw [choose_two_product_sum
+    (fun i => ‖iteratedFDeriv ℝ i (fderiv ℝ F) x‖)
+    (fun i => ‖iteratedFDeriv ℝ i u x‖)] at h_leibniz_global
+  rw [norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 0),
+    norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 1),
+    norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 2),
+    norm_iteratedFDeriv_one (𝕜 := ℝ) F (x := x)] at h_leibniz_global
+  exact h_leibniz_global
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -238,141 +308,34 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   have hF_cd : ContDiffOn ℝ ∞ F U :=
     R_contDiffOn_goodSet (I := I) (M := M) g r s α T
   have hu_cd : ContDiffOn ℝ ∞ u U := u_contDiffOn_goodSet' (I := I) α B
-  set c : E → (E →L[ℝ] TensorRSModel r s ℝ E) := fderiv ℝ F with hc_def
-  have hc_cd : ContDiffOn ℝ ∞ c U :=
-    c_contDiffOn_goodSet (I := I) (M := M) g r s α T
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
   have hx_mem : x ∈ U := ⟨b, hb_good, rfl⟩
-  have hUniqueDiff : UniqueDiffOn ℝ U := hU_open.uniqueDiffOn
-  have h_two_le_top : ((2 : ℕ) : WithTop ℕ∞) ≤ ∞ := by
-    show ((2 : ℕ) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
-    have h1 : ((2 : ℕ) : ℕ∞) ≤ (⊤ : ℕ∞) := le_top
-    exact (WithTop.coe_le_coe.mpr h1 : _)
-  have h_leibniz_within :
-      ‖iteratedFDerivWithin ℝ 2 (fun y : E => c y (u y)) U x‖ ≤
-        ∑ i ∈ Finset.range (2 + 1),
-          ↑((2 : ℕ).choose i) *
-            ‖iteratedFDerivWithin ℝ i c U x‖ *
-            ‖iteratedFDerivWithin ℝ (2 - i) u U x‖ :=
-    norm_iteratedFDerivWithin_clm_apply hc_cd hu_cd hUniqueDiff hx_mem h_two_le_top
-  have h_iter_c : ∀ k : ℕ,
-      iteratedFDerivWithin ℝ k c U x = iteratedFDeriv ℝ k c x := by
-    intro k; exact iteratedFDerivWithin_of_isOpen k hU_open hx_mem
-  have h_iter_u : ∀ k : ℕ,
-      iteratedFDerivWithin ℝ k u U x = iteratedFDeriv ℝ k u x := by
-    intro k; exact iteratedFDerivWithin_of_isOpen k hU_open hx_mem
-  have h_iter_clm :
-      iteratedFDerivWithin ℝ 2 (fun y : E => c y (u y)) U x =
-        iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x :=
-    iteratedFDerivWithin_of_isOpen 2 hU_open hx_mem
-  have h_norm_clm :
-      ‖iteratedFDerivWithin ℝ 2 (fun y : E => c y (u y)) U x‖ =
-        ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ := by
-    rw [h_iter_clm]
-  have h_norm_iter_c : ∀ k : ℕ,
-      ‖iteratedFDerivWithin ℝ k c U x‖ = ‖iteratedFDeriv ℝ k c x‖ := by
-    intro k; rw [h_iter_c k]
-  have h_norm_iter_u : ∀ k : ℕ,
-      ‖iteratedFDerivWithin ℝ k u U x‖ = ‖iteratedFDeriv ℝ k u x‖ := by
-    intro k; rw [h_iter_u k]
   have h_leibniz_global :
-      ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ ≤
-        ∑ i ∈ Finset.range (2 + 1),
-          ↑((2 : ℕ).choose i) *
-            ‖iteratedFDeriv ℝ i c x‖ *
-            ‖iteratedFDeriv ℝ (2 - i) u x‖ := by
-    rw [← h_norm_clm]
-    refine le_trans h_leibniz_within ?_
-    apply Finset.sum_le_sum
-    intro i _
-    rw [h_norm_iter_c i, h_norm_iter_u (2 - i)]
+      ‖iteratedFDeriv ℝ 2
+          (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+        ‖fderiv ℝ F x‖ * ‖iteratedFDeriv ℝ 2 u x‖ +
+          2 * ‖iteratedFDeriv ℝ 2 F x‖ * ‖iteratedFDeriv ℝ 1 u x‖ +
+          ‖iteratedFDeriv ℝ 3 F x‖ * ‖iteratedFDeriv ℝ 0 u x‖ :=
+    iteratedFDeriv_two_fderiv_apply_norm_le F u U x hF_cd hu_cd hU_open hx_mem
   have h_goalLHS_fn : (fun y : E =>
         fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y
           (trivToE (I := I) α ((extChartAt I α).symm y)
             (B.toFun ((extChartAt I α).symm y)))) =
-      (fun y : E => c y (u y)) := by
+      (fun y : E => (fderiv ℝ F y) (u y)) := by
     funext y
     rfl
   rw [h_goalLHS_fn]
-  have h_choose_0 : ((2 : ℕ).choose 0 : ℝ) = 1 := by norm_num
-  have h_choose_1 : ((2 : ℕ).choose 1 : ℝ) = 2 := by norm_num
-  have h_choose_2 : ((2 : ℕ).choose 2 : ℝ) = 1 := by norm_num
-  have h_sum_eq :
-      ∑ i ∈ Finset.range (2 + 1),
-        ↑((2 : ℕ).choose i) *
-          ‖iteratedFDeriv ℝ i c x‖ *
-          ‖iteratedFDeriv ℝ (2 - i) u x‖ =
-        ‖iteratedFDeriv ℝ 0 c x‖ * ‖iteratedFDeriv ℝ 2 u x‖ +
-        (2 : ℝ) * ‖iteratedFDeriv ℝ 1 c x‖ * ‖iteratedFDeriv ℝ 1 u x‖ +
-        ‖iteratedFDeriv ℝ 2 c x‖ * ‖iteratedFDeriv ℝ 0 u x‖ := by
-    rw [show (2 + 1 : ℕ) = 3 from rfl]
-    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
-      Finset.sum_range_zero]
-    simp only [zero_add, h_choose_0, h_choose_1, h_choose_2]
-    have h_sub_0 : (2 - 0 : ℕ) = 2 := by norm_num
-    have h_sub_1 : (2 - 1 : ℕ) = 1 := by norm_num
-    have h_sub_2 : (2 - 2 : ℕ) = 0 := by norm_num
-    rw [h_sub_0, h_sub_1, h_sub_2]
-    ring
-  rw [h_sum_eq] at h_leibniz_global
-  have h_c0 : ‖iteratedFDeriv ℝ 0 c x‖ = ‖iteratedFDeriv ℝ 1 F x‖ := by
-    have := norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 0)
-    convert this
-  have h_c1 : ‖iteratedFDeriv ℝ 1 c x‖ = ‖iteratedFDeriv ℝ 2 F x‖ := by
-    have := norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 1)
-    convert this
-  have h_c2 : ‖iteratedFDeriv ℝ 2 c x‖ = ‖iteratedFDeriv ℝ 3 F x‖ := by
-    have := norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 2)
-    convert this
-  rw [h_c0, h_c1, h_c2] at h_leibniz_global
-  have h_fderiv_iter :
-      ‖iteratedFDeriv ℝ 1 F x‖ = ‖fderiv ℝ F x‖ :=
-    norm_iteratedFDeriv_one (𝕜 := ℝ) F (x := x)
-  rw [h_fderiv_iter] at h_leibniz_global
   obtain ⟨hu0_le, hu1_le, hu2_le⟩ := hC_bound b hb.1
-  set A1 : ℝ := ‖fderiv ℝ F x‖ with hA1_def
-  set A2 : ℝ := ‖iteratedFDeriv ℝ 2 F x‖ with hA2_def
-  set A3 : ℝ := ‖iteratedFDeriv ℝ 3 F x‖ with hA3_def
-  set Bu0 : ℝ := ‖iteratedFDeriv ℝ 0 u x‖ with hBu0_def
-  set Bu1 : ℝ := ‖iteratedFDeriv ℝ 1 u x‖ with hBu1_def
-  set Bu2 : ℝ := ‖iteratedFDeriv ℝ 2 u x‖ with hBu2_def
-  have hA1_nn : 0 ≤ A1 := norm_nonneg _
-  have hA2_nn : 0 ≤ A2 := norm_nonneg _
-  have hA3_nn : 0 ≤ A3 := norm_nonneg _
-  have hBu0_nn : 0 ≤ Bu0 := norm_nonneg _
-  have hBu1_nn : 0 ≤ Bu1 := norm_nonneg _
-  have hBu2_nn : 0 ≤ Bu2 := norm_nonneg _
-  have h_leibniz' :
-      ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ ≤
-        A1 * Bu2 + (2 : ℝ) * A2 * Bu1 + A3 * Bu0 := h_leibniz_global
-  have h_A1Bu2 : A1 * Bu2 ≤ A1 * C :=
-    mul_le_mul_of_nonneg_left hu2_le hA1_nn
-  have h_A2Bu1 : A2 * Bu1 ≤ A2 * C :=
-    mul_le_mul_of_nonneg_left hu1_le hA2_nn
-  have h_A3Bu0 : A3 * Bu0 ≤ A3 * C :=
-    mul_le_mul_of_nonneg_left hu0_le hA3_nn
-  have h_AC_combined :
-      A1 * Bu2 + (2 : ℝ) * A2 * Bu1 + A3 * Bu0 ≤
-        A1 * C + 2 * (A2 * C) + A3 * C := by
-    have h2 : (2 : ℝ) * A2 * Bu1 ≤ 2 * (A2 * C) := by
-      have : (2 : ℝ) * A2 * Bu1 = 2 * (A2 * Bu1) := by ring
-      rw [this]
-      exact mul_le_mul_of_nonneg_left h_A2Bu1 (by norm_num)
-    linarith
   have h_final_le :
-      A1 * C + 2 * (A2 * C) + A3 * C ≤ 2 * C * (A3 + A2 + A1) := by
-    have h_A1C_nn : 0 ≤ A1 * C := mul_nonneg hA1_nn hC_nn
-    have h_A3C_nn : 0 ≤ A3 * C := mul_nonneg hA3_nn hC_nn
-    have h_A1C_double : A1 * C ≤ 2 * (A1 * C) := by linarith
-    have h_A3C_double : A3 * C ≤ 2 * (A3 * C) := by linarith
-    have hStep : A1 * C + 2 * (A2 * C) + A3 * C ≤
-        2 * (A1 * C) + 2 * (A2 * C) + 2 * (A3 * C) := by linarith
-    have h_target_eq :
-        2 * (A1 * C) + 2 * (A2 * C) + 2 * (A3 * C) =
-          2 * C * (A3 + A2 + A1) := by ring
-    linarith [hStep, h_target_eq.le, h_target_eq.symm.le]
-  exact le_trans h_leibniz' (le_trans h_AC_combined h_final_le)
+      ‖fderiv ℝ F x‖ * ‖iteratedFDeriv ℝ 2 u x‖ +
+          2 * ‖iteratedFDeriv ℝ 2 F x‖ * ‖iteratedFDeriv ℝ 1 u x‖ +
+          ‖iteratedFDeriv ℝ 3 F x‖ * ‖iteratedFDeriv ℝ 0 u x‖ ≤
+        2 * C * (‖iteratedFDeriv ℝ 3 F x‖ +
+          ‖iteratedFDeriv ℝ 2 F x‖ + ‖fderiv ℝ F x‖) :=
+    three_product_sum_le hC_nn (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      hu0_le hu1_le hu2_le
+  exact le_trans h_leibniz_global h_final_le
 
 end Connection
 end Integral
