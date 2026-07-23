@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
-
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
@@ -234,7 +231,7 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_fr
                   (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                   ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) := by
     intro i
-    rw [map_sub, map_sub]
+    rw [ContinuousLinearMap.map_sub, ContinuousLinearMap.map_sub]
     rw [chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
         (I := I) (M := M) g r s α T₀ Idx Jdx i (b := b) hb.2]
   rw [show (∑ i : Fin (Module.finrank ℝ E),

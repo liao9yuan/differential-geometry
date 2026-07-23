@@ -9,9 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
@@ -147,7 +144,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     intro k l
     rw [hΨ_def, tensorHessianBilinAt_apply (I := I) g r s
       (fun z : M => T₀.toSection z) hT_total (hChartBasis_mdiff k) (hChartBasis_mdiff l)]
-    rw [hproj_apply, map_sub, map_sub]
+    rw [hproj_apply, ContinuousLinearMap.map_sub, ContinuousLinearMap.map_sub]
 
   set A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun k l =>

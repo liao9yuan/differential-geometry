@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter NormedSpace
 open scoped Manifold Topology Bundle ContDiff BigOperators
 

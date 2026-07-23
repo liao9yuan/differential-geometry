@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
-
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
