@@ -137,6 +137,214 @@ theorem parabolic_const_sub
   rw [htime, hheat]
   ring
 
+/-- The drifted parabolic operator is additive. -/
+theorem parabolic_add
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
+    (u v : Real -> M -> Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hv_time : DifferentiableWithinAt Real
+      (fun s : Real => v s x) (Set.Icc 0 T) t)
+    (hu_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (v t) y)
+    (hu_grad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hv_grad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (v t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => u s y + v s y) t x =
+      parabolicOperatorWithDrift (I := I) G T X u t x +
+        parabolicOperatorWithDrift (I := I) G T X v t x := by
+  unfold parabolicOperatorWithDrift
+  rw [derivWithin_fun_add hu_time hv_time]
+  rw [heatDrift_add (I := I) G t (X t)
+    hu_space hv_space hu_grad hv_grad]
+  ring
+
+/-- The drifted parabolic operator scales by a fixed real scalar. -/
+theorem parabolic_smul
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
+    (a : Real) (u : Real -> M -> Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hu_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hu_grad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => a * u s y) t x =
+      a * parabolicOperatorWithDrift (I := I) G T X u t x := by
+  unfold parabolicOperatorWithDrift
+  rw [derivWithin_const_mul a hu_time]
+  have hheat := heatOperatorWithDrift_const_smul
+    (I := I) G t (X t) a hu_space hu_grad
+  have hheat' :
+      heatOperatorWithDrift (I := I) G t (X t)
+          (fun y : M => a * u t y) x =
+        a * heatOperatorWithDrift (I := I) G t (X t) (u t) x := by
+    simpa [smul_eq_mul] using hheat
+  rw [hheat']
+  ring
+
+/-- The drifted parabolic operator commutes with a finite sum. -/
+theorem parabolic_sum
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    {κ : Type} (s : Finset κ)
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
+    (u : κ -> Real -> M -> Real) (t : Real) (x : M)
+    (htime : ∀ i ∈ s, DifferentiableWithinAt Real
+      (fun a : Real => u i a x) (Set.Icc 0 T) t)
+    (hspace : ∀ i ∈ s, ∀ y : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u i t) y)
+    (hgrad : ∀ i ∈ s, ∀ y : M, MDiffAt (T% fun z : M =>
+      gradientFun (I := I) (G.metric t) (u i t) z) y) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun a y => ∑ i ∈ s, u i a y) t x =
+      ∑ i ∈ s, parabolicOperatorWithDrift (I := I) G T X (u i) t x := by
+  classical
+  have hgrad_sum : ∀ (r : Finset κ),
+      (∀ i ∈ r, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (u i t) y) ->
+      (∀ i ∈ r, ∀ y : M, MDiffAt (T% fun z : M =>
+        gradientFun (I := I) (G.metric t) (u i t) z) y) ->
+      ∀ y : M, MDiffAt (T% fun z : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun w : M => ∑ i ∈ r, u i t w) z) y := by
+    intro r hr_space hr_grad y
+    have hplain :
+        (fun z : M => gradientFun (I := I) (G.metric t)
+          (fun w : M => ∑ i ∈ r, u i t w) z) =
+        (fun z : M => ∑ i ∈ r,
+          gradientFun (I := I) (G.metric t) (u i t) z) := by
+      funext z
+      have hfunc :
+          (fun w : M => ∑ i ∈ r, u i t w) = ∑ i ∈ r, u i t := by
+        funext w
+        simp only [Finset.sum_apply]
+      rw [hfunc]
+      exact gradientFun_sum (I := I) (G.metric t) r
+        (f := fun i => u i t) (x := z)
+        (fun i hi => by simpa only using hr_space i hi z)
+    have hsection :
+        (T% fun z : M => gradientFun (I := I) (G.metric t)
+          (fun w : M => ∑ i ∈ r, u i t w) z) =
+        (T% fun z : M => ∑ i ∈ r,
+          gradientFun (I := I) (G.metric t) (u i t) z) := by
+      funext z
+      exact congrArg (fun v =>
+        (⟨z, v⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+        (congrFun hplain z)
+    rw [hsection]
+    clear hplain hsection
+    induction r using Finset.induction_on with
+    | empty =>
+        simpa using mdifferentiableAt_zeroSection
+          (𝕜 := Real) (F := E) (E := (TangentSpace I : M -> Type _)) (x := y)
+    | @insert a r ha ih =>
+        have ha_grad := hr_grad a (Finset.mem_insert_self a r) y
+        have htail := ih
+          (fun i hi => hr_space i (Finset.mem_insert_of_mem hi))
+          (fun i hi => hr_grad i (Finset.mem_insert_of_mem hi))
+        simpa [Finset.sum_insert ha] using
+          mdifferentiableAt_add_section ha_grad htail
+  induction s using Finset.induction_on with
+  | empty =>
+      have hheat_zero :
+          heatOperatorWithDrift (I := I) G t (X t)
+              (fun _ : M => (0 : Real)) x = 0 := by
+        unfold heatOperatorWithDrift laplacianAt laplacian driftTerm gradientAt
+        have hzero :
+            gradientFun (I := I) (G.metric t) (fun _ : M => (0 : Real)) = 0 := by
+          funext y
+          exact gradientFun_const (I := I) (G.metric t) 0 y
+        rw [hzero]
+        simp
+      change parabolicOperatorWithDrift (I := I) G T X
+        (fun _ _ => (0 : Real)) t x = 0
+      unfold parabolicOperatorWithDrift
+      rw [hheat_zero]
+      simp
+  | @insert a s ha ih =>
+      have ha_time := htime a (Finset.mem_insert_self a s)
+      have hs_time : DifferentiableWithinAt Real
+          (fun b : Real => ∑ i ∈ s, u i b x) (Set.Icc 0 T) t :=
+        DifferentiableWithinAt.fun_sum fun i hi =>
+          htime i (Finset.mem_insert_of_mem hi)
+      have ha_space : ∀ y : M,
+          MDifferentiableAt I 𝓘(Real, Real) (u a t) y :=
+        hspace a (Finset.mem_insert_self a s)
+      have hs_space : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real)
+          (fun z : M => ∑ i ∈ s, u i t z) y := by
+        intro y
+        have hfunc :
+            (fun z : M => ∑ i ∈ s, u i t z) = ∑ i ∈ s, u i t := by
+          funext z
+          simp only [Finset.sum_apply]
+        rw [hfunc]
+        exact MDifferentiableAt.sum (𝕜 := Real) (I := I) (E' := Real)
+          (t := s) (f := fun i => u i t) (z := y)
+          (fun i hi => by
+            simpa only using hspace i (Finset.mem_insert_of_mem hi) y)
+      have ha_grad := hgrad a (Finset.mem_insert_self a s) x
+      have hs_grad := hgrad_sum s
+        (fun i hi => hspace i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hgrad i (Finset.mem_insert_of_mem hi)) x
+      calc
+        parabolicOperatorWithDrift (I := I) G T X
+            (fun b y => ∑ i ∈ insert a s, u i b y) t x =
+          parabolicOperatorWithDrift (I := I) G T X
+            (fun b y => u a b y + ∑ i ∈ s, u i b y) t x := by
+              congr 1
+              funext b y
+              rw [Finset.sum_insert ha]
+        _ = parabolicOperatorWithDrift (I := I) G T X (u a) t x +
+              parabolicOperatorWithDrift (I := I) G T X
+                (fun b y => ∑ i ∈ s, u i b y) t x :=
+          parabolic_add (I := I) G T X (u a)
+            (fun b y => ∑ i ∈ s, u i b y) t x
+            ha_time hs_time ha_space hs_space ha_grad hs_grad
+        _ = parabolicOperatorWithDrift (I := I) G T X (u a) t x +
+              ∑ i ∈ s,
+                parabolicOperatorWithDrift (I := I) G T X (u i) t x := by
+          rw [ih
+            (fun i hi => htime i (Finset.mem_insert_of_mem hi))
+            (fun i hi => hspace i (Finset.mem_insert_of_mem hi))
+            (fun i hi => hgrad i (Finset.mem_insert_of_mem hi))]
+        _ = ∑ i ∈ insert a s,
+              parabolicOperatorWithDrift (I := I) G T X (u i) t x := by
+          rw [Finset.sum_insert ha]
+
+/-- The drifted parabolic operator satisfies the scalar product rule. -/
+theorem parabolic_mul
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
+    (u v : Real -> M -> Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hv_time : DifferentiableWithinAt Real
+      (fun s : Real => v s x) (Set.Icc 0 T) t)
+    (hu_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (v t) y)
+    (hu_grad : forall y : M, MDiffAt (T% fun z : M =>
+      gradientFun (I := I) (G.metric t) (u t) z) y)
+    (hv_grad : forall y : M, MDiffAt (T% fun z : M =>
+      gradientFun (I := I) (G.metric t) (v t) z) y) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => u s y * v s y) t x =
+      u t x * parabolicOperatorWithDrift (I := I) G T X v t x +
+        v t x * parabolicOperatorWithDrift (I := I) G T X u t x -
+          2 * (G.metric t).inner x
+            (gradientAt (I := I) G t (u t) x)
+            (gradientAt (I := I) G t (v t) x) := by
+  unfold parabolicOperatorWithDrift
+  rw [derivWithin_fun_mul hu_time hv_time]
+  rw [heatDrift_mul (I := I) G t (X t) hu_space hv_space hu_grad hv_grad]
+  ring
+
 /-! ## Algebraic core of the negative-region estimate -/
 
 /-- Lipschitz control converts the reaction difference into a lower bound on
@@ -551,6 +759,131 @@ theorem strict_barrier_posReg
     let ε : Real := -(w t x) / (2 * t)
     have hε_pos : 0 < ε := by
       exact div_pos (neg_pos.mpr hw_neg) (mul_pos two_pos ht_pos)
+    have hbarrier := hbarrier_nonneg ε hε_pos t ht x
+    have hε_mul : ε * t = -(w t x) / 2 := by
+      dsimp [ε]
+      field_simp [ht_zero]
+    have hbarrier_neg : w t x + ε * t < 0 := by
+      rw [hε_mul]
+      linarith
+    exact not_lt_of_ge hbarrier hbarrier_neg
+
+/-- Strict-barrier scalar WMP for a function supported in one compact spatial
+set throughout the time slab.  Unlike `strict_barrier_posReg`, this theorem
+does not require the ambient manifold to be compact. -/
+theorem strict_barrier_cpt
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (_hT : 0 <= T)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (w : Real -> M -> Real)
+    (K : Set M) (hK : IsCompact K)
+    (hw_out : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, x ∉ K -> 0 <= w t x)
+    (hw_cont : ContinuousOn (fun p : Real × M => w p.1 p.2) (Set.Icc 0 T ×ˢ K))
+    (hw0 : forall x : M, 0 <= w 0 x)
+    (hw_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      forall x : M, DifferentiableWithinAt Real (fun s : Real => w s x) (Set.Icc 0 T) t)
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      forall x : M, MDifferentiableAt I 𝓘(Real, Real) (w t) x)
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (w t) y) x)
+    (hnegative : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      forall x : M, w t x < 0 ->
+        0 <= parabolicOperatorWithDrift (I := I) G T X w t x) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x := by
+  classical
+  have hbarrier_nonneg :
+      forall ε : Real, 0 < ε ->
+        forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+          0 <= w t x + ε * t := by
+    intro ε hε
+    by_contra hnot
+    push Not at hnot
+    rcases hnot with ⟨tb, htb, xb, hbneg⟩
+    have hxbK : xb ∈ K := by
+      by_contra hxb
+      have hwb : 0 <= w tb xb := hw_out tb htb xb hxb
+      have hεtb : 0 <= ε * tb := mul_nonneg (le_of_lt hε) htb.1
+      linarith
+    let Φ : Real × M -> Real := fun p => w p.1 p.2 + ε * p.1
+    have hΦ_cont : ContinuousOn Φ (Set.Icc 0 T ×ˢ K) := by
+      have hlinear :
+          ContinuousOn (fun p : Real × M => ε * p.1) (Set.Icc 0 T ×ˢ K) :=
+        (continuous_const.mul continuous_fst).continuousOn
+      exact hw_cont.add hlinear
+    have hslab_compact : IsCompact (Set.Icc 0 T ×ˢ K) :=
+      isCompact_Icc.prod hK
+    have hslab_nonempty : (Set.Icc 0 T ×ˢ K).Nonempty :=
+      ⟨(tb, xb), ⟨htb, hxbK⟩⟩
+    obtain ⟨p0, hp0, hp0min⟩ :=
+      hslab_compact.exists_isMinOn hslab_nonempty hΦ_cont
+    rcases p0 with ⟨t0, x0⟩
+    have hp0_time : t0 ∈ Set.Icc 0 T := hp0.1
+    have hΦ_min_bad : Φ (t0, x0) <= Φ (tb, xb) :=
+      hp0min (show (tb, xb) ∈ Set.Icc 0 T ×ˢ K from ⟨htb, hxbK⟩)
+    have hΦ0_neg : Φ (t0, x0) < 0 := lt_of_le_of_lt hΦ_min_bad hbneg
+    have ht0_ne_zero : t0 ≠ 0 := by
+      intro ht0
+      have hnonneg0 : 0 <= Φ (t0, x0) := by
+        simp [Φ, ht0, hw0 x0]
+      exact not_lt_of_ge hnonneg0 hΦ0_neg
+    have ht0_pos : 0 < t0 := lt_of_le_of_ne hp0_time.1 (Ne.symm ht0_ne_zero)
+    have hT_pos : 0 < T := lt_of_lt_of_le ht0_pos hp0_time.2
+    have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t0 :=
+      (uniqueDiffOn_Icc hT_pos).uniqueDiffWithinAt hp0_time
+    have htime_min : IsMinOn (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 := by
+      intro s hs
+      exact hp0min (show (s, x0) ∈ Set.Icc 0 T ×ˢ K from ⟨hs, hp0.2⟩)
+    have htime_diff :
+        DifferentiableWithinAt Real (fun s : Real => w s x0 + ε * s)
+          (Set.Icc 0 T) t0 := by
+      exact (hw_time t0 hp0_time ht0_pos x0).add
+        ((differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
+    have hbarrier_deriv_nonpos :
+        derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 <= 0 :=
+      derivWithin_nonpos_at_Icc_min_of_pos htime_min hp0_time ht0_pos htime_diff
+    have hderiv_eq :
+        derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 =
+          derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 + ε :=
+      derivWithin_add_eps_mul_time (M := M) huniq (hw_time t0 hp0_time ht0_pos x0)
+    have hw_deriv_le : derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 <= -ε := by
+      linarith
+    have hw_t0_neg : w t0 x0 < 0 := by
+      have hεt_nonneg : 0 <= ε * t0 := mul_nonneg (le_of_lt hε) hp0_time.1
+      nlinarith [hΦ0_neg, hεt_nonneg]
+    have hspatial_min : IsLocalMin (w t0) x0 := by
+      unfold IsLocalMin IsMinFilter
+      exact Filter.Eventually.of_forall fun y => by
+        by_cases hyK : y ∈ K
+        · have hymin : Φ (t0, x0) <= Φ (t0, y) :=
+            hp0min (show (t0, y) ∈ Set.Icc 0 T ×ˢ K from ⟨hp0_time, hyK⟩)
+          dsimp [Φ] at hymin ⊢
+          linarith
+        · exact (le_of_lt hw_t0_neg).trans (hw_out t0 hp0_time y hyK)
+    have hheat_nonneg :
+        0 <= heatOperatorWithDrift (I := I) G t0 (X t0) (w t0) x0 :=
+      heatOperatorWithDrift_at_spatial_min_nonneg (I := I) G t0 (X t0)
+        hspatial_min (hw_mdiff t0 hp0_time ht0_pos x0)
+        (Filter.Eventually.of_forall fun y => hw_mdiff t0 hp0_time ht0_pos y)
+        (hw_grad t0 hp0_time ht0_pos x0)
+    have hP_neg :
+        parabolicOperatorWithDrift (I := I) G T X w t0 x0 < 0 := by
+      unfold parabolicOperatorWithDrift
+      linarith
+    exact not_lt_of_ge (hnegative t0 hp0_time ht0_pos x0 hw_t0_neg) hP_neg
+  intro t ht x
+  by_contra hnot
+  have hw_neg : w t x < 0 := lt_of_not_ge hnot
+  by_cases ht_zero : t = 0
+  · exact not_lt_of_ge (by simpa [ht_zero] using hw0 x) hw_neg
+  · have ht_pos : 0 < t := lt_of_le_of_ne ht.1 (Ne.symm ht_zero)
+    let ε : Real := -(w t x) / (2 * t)
+    have hε_pos : 0 < ε :=
+      div_pos (neg_pos.mpr hw_neg) (mul_pos two_pos ht_pos)
     have hbarrier := hbarrier_nonneg ε hε_pos t ht x
     have hε_mul : ε * t = -(w t x) / 2 := by
       dsimp [ε]

@@ -1,5 +1,12 @@
 # GPT Pro consultation: arbitrary-dimensional Hamilton base evolution
 
+> **Resolved 2026-07-22.**  The focused- and exact-green theorem
+> `rm04Base_of_solution_any` in
+> `Evolution/HamiltonBaseProducer.lean` proves the requested arbitrary-
+> dimensional fixed-basis flow identity directly from `IsSolutionOn`.  The
+> remainder of this file is retained as the historical consultation record;
+> it is no longer the active P4 blocker.
+
 ## Repository context
 
 Repository: <https://github.com/liao9yuan/differential-geometry>

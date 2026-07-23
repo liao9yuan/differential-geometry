@@ -63,6 +63,44 @@ theorem mdifferentiableAt_finset_sum_smul
       exact ((hfa.const_smul (c a)).congr_of_eventuallyEq
         (Filter.Eventually.of_forall fun z => by simp [smul_eq_mul])).add htail
 
+/-- The gradient of a finite scalar linear combination is the same linear
+combination of the gradients. -/
+theorem gradientFun_sum
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    {ι : Type*} (s : Finset ι)
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
+    (hf : ∀ i ∈ s, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
+    DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        (fun z : M => ∑ i ∈ s, c i * f i z) x =
+      ∑ i ∈ s, c i •
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simp only [Finset.sum_empty]
+      exact DifferentialGeometry.Integral.Connection.gradientFun_const
+        (I := I) (G.metric t) 0 x
+  | insert a s has ih =>
+      have hfa : MDifferentiableAt I 𝓘(Real, Real) (f a) x := hf a (by simp)
+      have htail_diff : MDifferentiableAt I 𝓘(Real, Real)
+          (fun z : M => ∑ i ∈ s, c i * f i z) x :=
+        mdifferentiableAt_finset_sum_smul (I := I) s f c x
+          (fun i hi => hf i (by simp [hi]))
+      rw [show (fun z : M => ∑ i ∈ insert a s, c i * f i z) =
+            (fun z : M => c a * f a z + ∑ i ∈ s, c i * f i z) from by
+        funext z
+        rw [Finset.sum_insert has]]
+      rw [DifferentialGeometry.Integral.Connection.gradientFun_add
+        (I := I) (G.metric t) (by simpa [smul_eq_mul] using hfa.const_smul (c a)) htail_diff]
+      rw [show (fun z : M => c a * f a z) = (c a • f a) from by
+        funext z
+        simp [smul_eq_mul]]
+      rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul
+        (I := I) (G.metric t) (c a) hfa]
+      rw [ih (fun i hi => hf i (by simp [hi]))]
+      rw [Finset.sum_insert has]
+
 /-- Differentiability of the gradient section of a finite scalar sum
 `Σ_{i ∈ s} c i · f i`, given the per-summand gradient-section data. -/
 theorem mdiffAt_gradientFun_finset_sum_smul
@@ -86,28 +124,7 @@ theorem mdiffAt_gradientFun_finset_sum_smul
           (c i • fun w : M =>
             DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w) y) := by
     funext y
-    induction s using Finset.induction_on with
-    | empty =>
-        simp only [Finset.sum_empty]
-        rw [show (fun z : M => (0 : Real)) =
-            (fun _z : M => (0 : Real)) from rfl]
-        exact DifferentialGeometry.Integral.Connection.gradientFun_const (I := I) (G.metric t) 0 y
-    | insert a s has ih =>
-        have hfa : MDifferentiableAt I 𝓘(Real, Real) (fun z : M => c a * f a z) y := by
-          simpa [smul_eq_mul] using (hf a (by simp) y).const_smul (c a)
-        have htail_diff : MDifferentiableAt I 𝓘(Real, Real)
-            (fun z : M => ∑ i ∈ s, c i * f i z) y :=
-          mdifferentiableAt_finset_sum_smul (I := I) s f c y
-            (fun i hi => hf i (by simp [hi]) y)
-        rw [show (fun z : M => ∑ i ∈ insert a s, c i * f i z) =
-              (fun z : M => c a * f a z + ∑ i ∈ s, c i * f i z) from by
-          funext z; rw [Finset.sum_insert has]]
-        rw [DifferentialGeometry.Integral.Connection.gradientFun_add (I := I) (G.metric t) hfa htail_diff]
-        rw [show (fun z : M => c a * f a z) = (c a • f a) from by funext z; simp [smul_eq_mul]]
-        rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t) (c a) (hf a (by simp) y)]
-        rw [ih (fun i hi => hf i (by simp [hi])) (fun i hi => hgradf i (by simp [hi]))]
-        rw [Finset.sum_insert has]
-        rfl
+    exact gradientFun_sum (I := I) s G t f c y (fun i hi => hf i hi y)
   -- Differentiability of that sum of scaled sections.
   have hsection_eq :
       (T% fun y : M =>
@@ -267,10 +284,11 @@ Bernstein quantity `G`. -/
 def towerFactCoeff (m i : ℕ) : Real :=
   (Nat.factorial (m - 1) : Real) / (Nat.factorial i : Real)
 
-/-- The Bernstein weight `β` at level `m`, chosen `≥ (C̄_m α + m)/2` so that the
-top-level bad term is dominated. -/
+/-- The Bernstein weight `β` at level `m`.  The full value `C̄_m α + m`
+dominates the top-level bad term and leaves the coefficient slack needed by
+graded cutoff localization. -/
 def towerBeta (c α : Real) (C : ℕ -> Real) (m : ℕ) : Real :=
-  (towerBarTop c C m * α + (m : Real)) / 2
+  towerBarTop c C m * α + (m : Real)
 
 /-- The squared bound constant at level `m`, defined by strong recursion from the
 lower-level constants.  For `m ≥ 1` it equals
@@ -421,7 +439,6 @@ theorem towerBarTop_nonneg {c : Real} (hc : 0 <= c) (α : Real) (m : ℕ) :
 theorem towerBeta_nonneg {c α : Real} (hc : 0 <= c) (hα : 0 <= α) (m : ℕ) :
     0 <= towerBeta c α (towerConst c α) m := by
   rw [towerBeta]
-  apply div_nonneg _ (by norm_num)
   have := towerBarTop_nonneg hc α m
   positivity
 
@@ -825,6 +842,15 @@ theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= 
 def Gcoef (B : BernsteinTower (I := I) G) (m i : ℕ) : Real :=
   if i = m then 1 else towerBeta B.c B.α (towerConst B.c B.α) m * towerFactCoeff m i
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+/-- Every coefficient in the indexed Bernstein quantity is nonnegative. -/
+theorem Gcoef_nonneg (B : BernsteinTower (I := I) G) (m i : ℕ) :
+    0 ≤ Gcoef (I := I) B m i := by
+  rw [Gcoef]
+  split_ifs
+  · norm_num
+  · exact mul_nonneg (towerBeta_nonneg B.hc B.hα m) (towerFactCoeff_nonneg m i)
+
 /-- The indexed Bernstein quantity
 `G(s,y) = Σ_{i=0}^{m} Gcoef·sⁱ·(w i s y)` of Chow–Knopf eq (between 7.5 and 7.6),
 written as a single `Finset.range (m+1)` sum. -/
@@ -1018,12 +1044,12 @@ theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     -- `(m − 2β + bt·K·t)·t^{m-1}·w m ≤ 0`, using `2β = bt·α + m` and `K·t ≤ α`.
     have htfac : t ^ m = t * t ^ (m - 1) := by
       rw [← pow_succ']; congr 1; omega
-    have h2β : 2 * β = bt * B.α + (m : Real) := by
-      rw [hβ, towerBeta]; rw [← hbt]; ring
+    have hβeq : β = bt * B.α + (m : Real) := by
+      rw [hβ, towerBeta, ← hbt]
     have hwtm_nonneg : 0 <= t ^ (m - 1) * B.w m t x :=
       mul_nonneg (pow_nonneg hht (m - 1)) (hwnn m)
     have hcoef_nonpos : (m : Real) - 2 * β + bt * B.K * t <= 0 := by
-      rw [h2β]
+      rw [hβeq]
       have hbtKt : bt * (B.K * t) <= bt * B.α := by
         apply mul_le_mul_of_nonneg_left _ hbt_nonneg
         rw [mul_comm]; exact htK
@@ -1037,6 +1063,172 @@ theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     exact mul_nonpos_of_nonpos_of_nonneg hcoef_nonpos hwtm_nonneg
   -- assemble.
   linarith [hmidsum, htop]
+
+/-- The Bernstein combination retains the top-order dissipation before the
+maximum-principle step.  Lower-level negative terms telescope against the time
+weights, while the untouched term `-2 * t^m * w (m+1)` remains available for
+absorbing cutoff-gradient errors in the complete-noncompact argument. -/
+theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
+    {m : ℕ} (hm : 1 ≤ m) {t : Real}
+    (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
+    (hIH : ∀ j, j < m →
+      t ^ j * B.w j t x ≤ (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
+    DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G B.T
+        (fun _t y => (0 : TangentSpace I y)) (Gfun (I := I) B m) t x +
+      2 * (t ^ m * B.w (m + 1) t x) ≤
+        (towerBarTop B.c (towerConst B.c B.α) m +
+          towerBeta B.c B.α (towerConst B.c B.α) m *
+            ∑ i ∈ Finset.range m,
+              towerFactCoeff m i * towerBarGood B.c (towerConst B.c B.α) i) *
+          B.K ^ 3 := by
+  classical
+  set C : ℕ → Real := towerConst B.c B.α with hC
+  set β : Real := towerBeta B.c B.α C m with hβ
+  have hβ_nonneg : 0 ≤ β := towerBeta_nonneg B.hc B.hα m
+  set bt : Real := towerBarTop B.c C m with hbt
+  have hht : (0 : Real) ≤ t := le_of_lt htpos
+  have htm_pos : 0 < t ^ m := pow_pos htpos m
+  have htK : t * B.K ≤ B.α := by
+    have htle : t ≤ B.α / B.K := htmem.2.trans B.hTK
+    calc
+      t * B.K ≤ (B.α / B.K) * B.K :=
+        mul_le_mul_of_nonneg_right htle (le_of_lt B.hK)
+      _ = B.α := div_mul_cancel₀ B.α (ne_of_gt B.hK)
+  let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime B.D :=
+    ⟨t, B.hregular t htmem htpos⟩
+  set dvec : ℕ → Real := fun i => Classical.choose (B.hheat i τ x) with hdvec
+  have hspec : ∀ i : ℕ,
+      HasDerivWithinAt (fun r : Real => B.w i r x) (dvec i) B.D.carrier t ∧
+      dvec i ≤ B.wLap i t x +
+        (-2 * B.w (i + 1) t x + towerReactionSum (M := M) B.w B.c i t x) := by
+    intro i
+    have h := Classical.choose_spec (B.hheat i τ x)
+    simpa [hdvec, τ] using h
+  have hd : ∀ i ∈ Finset.range (m + 1),
+      HasDerivWithinAt (fun r : Real => B.w i r x) (dvec i) (Set.Icc 0 B.T) t :=
+    fun i _ => (hspec i).1.mono B.hslab
+  have hIHle : ∀ k, k < m → ∀ j, j ≤ k →
+      t ^ j * B.w j t x ≤ (C j) ^ 2 * B.K ^ 2 :=
+    fun k hk j hj => by simpa only [hC] using hIH j (lt_of_le_of_lt hj hk)
+  rw [Gfun_parabolic_eq (I := I) B m htmem htpos x dvec hd]
+  have hsplit2 :
+      (∑ i ∈ Finset.range (m + 1),
+          Gcoef (I := I) B m i * t ^ i * (dvec i - B.wLap i t x)) =
+        (∑ i ∈ Finset.range m,
+          Gcoef (I := I) B m i * t ^ i * (dvec i - B.wLap i t x)) +
+          Gcoef (I := I) B m m * t ^ m * (dvec m - B.wLap m t x) :=
+    Finset.sum_range_succ _ m
+  have hR75 :
+      B.wLap m t x +
+            (-2 * B.w (m + 1) t x + towerReactionSum (M := M) B.w B.c m t x) -
+          B.wLap m t x ≤
+        -2 * B.w (m + 1) t x +
+          bt * B.K * (B.w m t x + B.K ^ 2 / t ^ m) := by
+    have hreact := reactionSum_top_le (I := I) B hm htpos htmem hIH
+    rw [← hC, ← hbt] at hreact
+    linarith
+  have htop_le :
+      Gcoef (I := I) B m m * t ^ m * (dvec m - B.wLap m t x) ≤
+        -2 * (t ^ m * B.w (m + 1) t x) +
+          bt * B.K * (t ^ m * B.w m t x) + bt * B.K ^ 3 := by
+    have hPm : dvec m - B.wLap m t x ≤
+        -2 * B.w (m + 1) t x +
+          bt * B.K * (B.w m t x + B.K ^ 2 / t ^ m) := by
+      calc
+        dvec m - B.wLap m t x ≤
+            (B.wLap m t x +
+                (-2 * B.w (m + 1) t x +
+                  towerReactionSum (M := M) B.w B.c m t x)) -
+              B.wLap m t x := by linarith [(hspec m).2]
+        _ ≤ -2 * B.w (m + 1) t x +
+              bt * B.K * (B.w m t x + B.K ^ 2 / t ^ m) := hR75
+    have hGm : Gcoef (I := I) B m m = 1 := by rw [Gcoef]; simp
+    rw [hGm, one_mul]
+    calc
+      t ^ m * (dvec m - B.wLap m t x) ≤
+          t ^ m *
+            (-2 * B.w (m + 1) t x +
+              bt * B.K * (B.w m t x + B.K ^ 2 / t ^ m)) :=
+        mul_le_mul_of_nonneg_left hPm (le_of_lt htm_pos)
+      _ = -2 * (t ^ m * B.w (m + 1) t x) +
+          bt * B.K * (t ^ m * B.w m t x) + bt * B.K ^ 3 := by
+        field_simp
+        ring
+  have hmid_term : ∀ i ∈ Finset.range m,
+      Gcoef (I := I) B m i * t ^ i * (dvec i - B.wLap i t x) ≤
+        β * towerFactCoeff m i * (-2 * (t ^ i * B.w (i + 1) t x)) +
+          β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3 := by
+    intro i hi
+    have him : i < m := Finset.mem_range.mp hi
+    have hGi : Gcoef (I := I) B m i = β * towerFactCoeff m i := by
+      rw [Gcoef, if_neg (by omega : ¬ i = m)]
+    have hR76 := tpow_mul_reactionSum_le (I := I) B i htpos (fun j hj =>
+      hIHle i him j hj)
+    rw [← hC] at hR76
+    have hPi : dvec i - B.wLap i t x ≤
+        -2 * B.w (i + 1) t x + towerReactionSum (M := M) B.w B.c i t x := by
+      linarith [(hspec i).2]
+    have hcoef_nonneg : 0 ≤ β * towerFactCoeff m i :=
+      mul_nonneg hβ_nonneg (towerFactCoeff_nonneg _ _)
+    have hti_nonneg : (0 : Real) ≤ t ^ i := pow_nonneg hht i
+    rw [hGi]
+    calc
+      β * towerFactCoeff m i * t ^ i * (dvec i - B.wLap i t x) =
+          (β * towerFactCoeff m i) * (t ^ i * (dvec i - B.wLap i t x)) := by ring
+      _ ≤ (β * towerFactCoeff m i) *
+            (t ^ i *
+              (-2 * B.w (i + 1) t x + towerReactionSum (M := M) B.w B.c i t x)) := by
+        apply mul_le_mul_of_nonneg_left _ hcoef_nonneg
+        exact mul_le_mul_of_nonneg_left hPi hti_nonneg
+      _ = (β * towerFactCoeff m i) * (-2 * (t ^ i * B.w (i + 1) t x)) +
+          (β * towerFactCoeff m i) *
+            (t ^ i * towerReactionSum (M := M) B.w B.c i t x) := by ring
+      _ ≤ (β * towerFactCoeff m i) * (-2 * (t ^ i * B.w (i + 1) t x)) +
+          (β * towerFactCoeff m i) * (towerBarGood B.c C i * B.K ^ 3) := by
+        linarith [mul_le_mul_of_nonneg_left hR76 hcoef_nonneg]
+      _ = β * towerFactCoeff m i * (-2 * (t ^ i * B.w (i + 1) t x)) +
+          β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3 := by ring
+  have hmid_le :
+      (∑ i ∈ Finset.range m,
+        Gcoef (I := I) B m i * t ^ i * (dvec i - B.wLap i t x)) ≤
+        -2 * β *
+            (∑ i ∈ Finset.range m, towerFactCoeff m i * t ^ i * B.w (i + 1) t x) +
+          β * (∑ i ∈ Finset.range m,
+            towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
+    calc
+      (∑ i ∈ Finset.range m,
+          Gcoef (I := I) B m i * t ^ i * (dvec i - B.wLap i t x)) ≤
+          ∑ i ∈ Finset.range m,
+            (β * towerFactCoeff m i * (-2 * (t ^ i * B.w (i + 1) t x)) +
+              β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3) :=
+        Finset.sum_le_sum hmid_term
+      _ = -2 * β *
+            (∑ i ∈ Finset.range m, towerFactCoeff m i * t ^ i * B.w (i + 1) t x) +
+          β * (∑ i ∈ Finset.range m,
+            towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
+        rw [Finset.sum_add_distrib]
+        congr 1
+        · rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro i _
+          ring
+        · rw [Finset.mul_sum, Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro i _
+          ring
+  rw [hsplit2]
+  have hWnonpos := Wterms_nonpos (I := I) B hm htmem htpos htK x
+  rw [← hC, ← hbt, ← hβ] at hWnonpos
+  have hforce :
+      (bt + β *
+          (∑ i ∈ Finset.range m, towerFactCoeff m i * towerBarGood B.c C i)) *
+          B.K ^ 3 =
+        bt * B.K ^ 3 +
+          β * (∑ i ∈ Finset.range m,
+            towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
+    ring
+  rw [hforce]
+  linarith [hmid_le, htop_le, hWnonpos]
 
 /-- **Bernstein–Bando–Shi higher derivative estimate (parametric core).**
 
@@ -1079,132 +1271,14 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
           DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G B.T
             (fun _t x => (0 : TangentSpace I x)) (Gfun (I := I) B m) s y <= bBar := by
         intro s hsmem hspos y
-        -- regular-time wrapper
-        let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime B.D :=
-          ⟨s, B.hregular s hsmem hspos⟩
-        -- per-level derivatives via choice
-        set dvec : ℕ -> Real := fun i => Classical.choose (B.hheat i τ y) with hdvec
-        have hspec : ∀ i : ℕ,
-            HasDerivWithinAt (fun r : Real => B.w i r y) (dvec i) B.D.carrier s ∧
-            dvec i <= B.wLap i s y +
-              (-2 * B.w (i + 1) s y + towerReactionSum (M := M) B.w B.c i s y) := by
-          intro i
-          have := Classical.choose_spec (B.hheat i τ y)
-          simpa [hdvec, τ] using this
-        -- restrict derivatives to the slab
-        have hd : ∀ i ∈ Finset.range (m + 1),
-            HasDerivWithinAt (fun r : Real => B.w i r y) (dvec i) (Set.Icc 0 B.T) s :=
-          fun i _ => (hspec i).1.mono B.hslab
-        -- IH at `(s, y)`, division-free form.
-        have hIHs : ∀ j, j < m -> s ^ j * B.w j s y <= (C j) ^ 2 * B.K ^ 2 :=
-          fun j hj => by simpa [hC] using IH j hj s hsmem hspos y
-        -- compute the parabolic operator
-        rw [Gfun_parabolic_eq (I := I) B m hsmem hspos y dvec hd]
-        have hht : (0 : Real) <= s := le_of_lt hspos
-        have htm_pos : 0 < s ^ m := pow_pos hspos m
-        -- split the second sum at the top level `i = m`.
-        have hsplit2 :
-            (∑ i ∈ Finset.range (m + 1),
-                Gcoef (I := I) B m i * s ^ i * (dvec i - B.wLap i s y)) =
-              (∑ i ∈ Finset.range m,
-                Gcoef (I := I) B m i * s ^ i * (dvec i - B.wLap i s y)) +
-                Gcoef (I := I) B m m * s ^ m * (dvec m - B.wLap m s y) :=
-          Finset.sum_range_succ _ m
-        -- IH in `≤ k` form, for the reaction lemmas.
-        have hIHle : ∀ k, k < m -> ∀ j, j <= k -> s ^ j * B.w j s y <= (C j) ^ 2 * B.K ^ 2 :=
-          fun k hk j hj => hIHs j (lt_of_le_of_lt hj hk)
-        -- (7.5): top-level reaction bound, in division form.
-        have hR75 : B.wLap m s y + (-2 * B.w (m + 1) s y + towerReactionSum (M := M) B.w B.c m s y) -
-            B.wLap m s y <= bt * B.K * (B.w m s y + B.K ^ 2 / s ^ m) := by
-          have hreact := reactionSum_top_le (I := I) B hmpos hspos hsmem
-            (fun j hj => hIHs j hj)
-          rw [← hC, ← hbt] at hreact
-          have hneg : -2 * B.w (m + 1) s y <= 0 := by
-            have := B.hw_nonneg (m + 1) s hsmem y; linarith
-          linarith
-        -- top-level term, after multiplying by `s^m`.
-        have htop_le :
-            Gcoef (I := I) B m m * s ^ m * (dvec m - B.wLap m s y) <=
-              bt * B.K * (s ^ m * B.w m s y) + bt * B.K ^ 3 := by
-          have hPm : dvec m - B.wLap m s y <= bt * B.K * (B.w m s y + B.K ^ 2 / s ^ m) := by
-            have hb := (hspec m).2
-            calc dvec m - B.wLap m s y
-                <= (B.wLap m s y + (-2 * B.w (m + 1) s y + towerReactionSum (M := M) B.w B.c m s y))
-                    - B.wLap m s y := by linarith
-              _ <= bt * B.K * (B.w m s y + B.K ^ 2 / s ^ m) := hR75
-          have hGm : Gcoef (I := I) B m m = 1 := by rw [Gcoef]; simp
-          rw [hGm, one_mul]
-          have hsm_nonneg : (0 : Real) <= s ^ m := le_of_lt htm_pos
-          calc s ^ m * (dvec m - B.wLap m s y)
-              <= s ^ m * (bt * B.K * (B.w m s y + B.K ^ 2 / s ^ m)) :=
-                mul_le_mul_of_nonneg_left hPm hsm_nonneg
-            _ = bt * B.K * (s ^ m * B.w m s y) + bt * B.K ^ 3 := by
-                field_simp
-        -- per-term bound on the lower-level terms via (7.6).
-        have hmid_term : ∀ i ∈ Finset.range m,
-            Gcoef (I := I) B m i * s ^ i * (dvec i - B.wLap i s y) <=
-              β * towerFactCoeff m i * (-2 * (s ^ i * B.w (i + 1) s y)) +
-                β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3 := by
-          intro i hi
-          have him : i < m := Finset.mem_range.mp hi
-          have hGi : Gcoef (I := I) B m i = β * towerFactCoeff m i := by
-            rw [Gcoef, if_neg (by omega : ¬ i = m)]
-          -- `s^i · reactionSum_i ≤ barGood_i K³`
-          have hR76 := tpow_mul_reactionSum_le (I := I) B i hspos (fun j hj => hIHle i him j hj)
-          rw [← hC] at hR76
-          -- `P_i ≤ −2 w(i+1) + reactionSum_i`
-          have hPi : dvec i - B.wLap i s y <=
-              -2 * B.w (i + 1) s y + towerReactionSum (M := M) B.w B.c i s y := by
-            have := (hspec i).2; linarith
-          have hcoef_nonneg : 0 <= β * towerFactCoeff m i :=
-            mul_nonneg hβ_nonneg (towerFactCoeff_nonneg _ _)
-          have hsi_nonneg : (0 : Real) <= s ^ i := pow_nonneg hht i
-          rw [hGi]
-          calc β * towerFactCoeff m i * s ^ i * (dvec i - B.wLap i s y)
-              = (β * towerFactCoeff m i) * (s ^ i * (dvec i - B.wLap i s y)) := by ring
-            _ <= (β * towerFactCoeff m i) *
-                  (s ^ i * (-2 * B.w (i + 1) s y + towerReactionSum (M := M) B.w B.c i s y)) := by
-                apply mul_le_mul_of_nonneg_left _ hcoef_nonneg
-                exact mul_le_mul_of_nonneg_left hPi hsi_nonneg
-            _ = (β * towerFactCoeff m i) *
-                  (-2 * (s ^ i * B.w (i + 1) s y)) +
-                (β * towerFactCoeff m i) * (s ^ i * towerReactionSum (M := M) B.w B.c i s y) := by ring
-            _ <= (β * towerFactCoeff m i) * (-2 * (s ^ i * B.w (i + 1) s y)) +
-                  (β * towerFactCoeff m i) * (towerBarGood B.c C i * B.K ^ 3) := by
-                have := mul_le_mul_of_nonneg_left hR76 hcoef_nonneg
-                linarith
-            _ = β * towerFactCoeff m i * (-2 * (s ^ i * B.w (i + 1) s y)) +
-                  β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3 := by ring
-        have hmid_le :
-            (∑ i ∈ Finset.range m,
-              Gcoef (I := I) B m i * s ^ i * (dvec i - B.wLap i s y)) <=
-              -2 * β * (∑ i ∈ Finset.range m, towerFactCoeff m i * s ^ i * B.w (i + 1) s y) +
-                β * (∑ i ∈ Finset.range m, towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
-          calc (∑ i ∈ Finset.range m,
-              Gcoef (I := I) B m i * s ^ i * (dvec i - B.wLap i s y))
-              <= ∑ i ∈ Finset.range m,
-                  (β * towerFactCoeff m i * (-2 * (s ^ i * B.w (i + 1) s y)) +
-                    β * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3) :=
-                Finset.sum_le_sum hmid_term
-            _ = -2 * β * (∑ i ∈ Finset.range m, towerFactCoeff m i * s ^ i * B.w (i + 1) s y) +
-                  β * (∑ i ∈ Finset.range m, towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
-                rw [Finset.sum_add_distrib]
-                congr 1
-                · rw [Finset.mul_sum]
-                  apply Finset.sum_congr rfl; intro i _; ring
-                · rw [Finset.mul_sum, Finset.sum_mul]
-                  apply Finset.sum_congr rfl; intro i _; ring
-        -- assemble: parabolicOp = sum1 + (mid + top) ≤ Wterms + bBar ≤ bBar.
-        rw [hsplit2]
-        have hWnonpos := Wterms_nonpos (I := I) B hmpos hsmem hspos (htK_slab s hsmem) y
-        rw [← hC, ← hbt, ← hβ] at hWnonpos
-        -- expand `bBar` into a sum of products that `linarith` can use.
-        have hbBar' : bBar =
-            bt * B.K ^ 3 +
-              β * (∑ i ∈ Finset.range m, towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3 := by
-          rw [hbBar]; ring
-        rw [hbBar']
-        linarith [hmid_le, htop_le, hWnonpos]
+        have hdiss := Gfun_dissipative (I := I) B hmpos hsmem hspos y
+          (fun j hj => by simpa [hC] using IH j hj s hsmem hspos y)
+        rw [← hC, ← hbt, ← hβ] at hdiss
+        have hnext : 0 <= s ^ m * B.w (m + 1) s y :=
+          mul_nonneg (pow_nonneg (le_of_lt hspos) m)
+            (B.hw_nonneg (m + 1) s hsmem y)
+        rw [hbBar]
+        linarith
       -- ===== Regularity of `Gfun` (for the maximum principle). =====
       -- Each level's gradient/spatial differentiability transfers to the sum.
       have hGspace : ∀ s : Real, s ∈ Set.Icc 0 B.T -> 0 < s -> ∀ y : M,

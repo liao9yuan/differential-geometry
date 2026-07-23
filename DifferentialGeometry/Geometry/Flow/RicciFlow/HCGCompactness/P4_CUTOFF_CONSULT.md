@@ -1,0 +1,264 @@
+# P4 complete-Shi cutoff architecture consultation
+
+Repository: `https://github.com/liao9yuan/differential-geometry`
+
+Branch: `codex/short-time-existence-align`
+
+GitHub-visible branch baseline for surrounding APIs:
+`79cfa7cba5c87ccb471389a80db54593e470ca40`
+
+Local aligned-tree HEAD: `373b2140568572659971e972d70d87f4904b2d13`
+(one commit ahead of the GitHub-visible branch at the time of this audit).
+
+The declarations and verification status quoted below are from the live aligned
+worktree and include uncommitted changes.  They are therefore authoritative for
+this consultation even when GitHub does not yet show them.
+
+## Question
+
+We need an architecture ruling for the independent Bernstein-localization
+blocker in the arbitrary-dimensional complete-noncompact Shi route: producing
+localization data from a complete bounded-curvature Ricci flow.  The separate
+direct curvature-tower and later `srcCovLip_of_soln` producers are tracked
+elsewhere and are not claimed complete here.
+
+### Verified consumer state
+
+File:
+`DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/BernsteinComplete.lean`
+
+The checked cutoff interface is:
+
+```lean
+structure ShiCutoffData
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) where
+  chi : Nat -> Real -> M -> Real
+  err : Nat -> Real
+  support : Nat -> Set M
+  err_nonneg : forall n, 0 <= err n
+  err_tendsto : Filter.Tendsto err Filter.atTop (nhds 0)
+  support_compact : forall n, IsCompact (support n)
+  support_zero : forall n t, t ∈ Set.Icc 0 T ->
+    forall x, x ∉ support n -> chi n t x = 0
+  range : forall n t x, t ∈ Set.Icc 0 T ->
+    chi n t x ∈ Set.Icc (0 : Real) 1
+  exhausts : forall t x, t ∈ Set.Icc 0 T ->
+    exists n0, forall n, n0 <= n -> chi n t x = 1
+  joint_cont : forall n, ContinuousOn
+    (fun p : Real × M => chi n p.1 p.2)
+    (spacetimeSlab (M := M) T)
+  time_diff : forall n t, t ∈ Set.Icc 0 T -> 0 < t -> forall x,
+    DifferentiableWithinAt Real
+      (fun s => chi n s x) (Set.Icc 0 T) t
+  space_smooth : forall n t, t ∈ Set.Icc 0 T ->
+    ContMDiff I 𝓘(Real, Real) ∞ (chi n t)
+  grad_sq_le : forall n t, t ∈ Set.Icc 0 T -> 0 < t -> forall x,
+    (G.metric t).inner x
+        (gradientFun (I := I) (G.metric t) (chi n t) x)
+        (gradientFun (I := I) (G.metric t) (chi n t) x)
+      <= err n * chi n t x
+  parabolic_le : forall n t, t ∈ Set.Icc 0 T -> 0 < t -> forall x,
+    parabolicOperatorWithDrift (I := I) G T
+      (fun _ y => (0 : TangentSpace I y)) (chi n) t x
+      <= err n
+```
+
+The sign is intentional: the operator is `P = partial_t - Delta`, and the
+localized upper estimate needs `P chi <= err`.
+
+The localized Bernstein algebra and capstone are now focused- and exact-green:
+
+```lean
+theorem GfunCut_parabolic_le
+    (B : BernsteinTower (I := I) G)
+    (cut : ShiCutoffData (I := I) G B.T)
+    {m n : Nat} (hm : 1 <= m)
+    (hgrad : TowerNormGradUpTo (I := I) B m)
+    {t : Real} (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t)
+    (x : M)
+    (hIH : forall j, j < m ->
+      t ^ j * B.w j t x <=
+        (towerConst B.c B.alpha j) ^ 2 * B.K ^ 2)
+    (hsmall : 2 * cut.err n * B.T * cutErrCoeff m <= 1) :
+    parabolicOperatorWithDrift ... (GfunCut ... m n) t x <=
+      textbookForce * B.K ^ 3 +
+        9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2
+
+theorem BernsteinTower.estimate_of_cutoff
+    (B : BernsteinTower (I := I) G)
+    (cut : ShiCutoffData (I := I) G B.T)
+    (hgrad : TowerNormGradOn (I := I) B) :
+    forall m t, t ∈ Set.Icc 0 B.T -> 0 < t -> forall x,
+      t ^ m * B.w m t x <=
+        (towerConst B.c B.alpha m) ^ 2 * B.K ^ 2
+```
+
+The finite telescope absorbs every positive-level cutoff error.  The capstone
+uses strong induction, `strict_barrier_cpt` on each uniform compact support,
+eventual exact exhaustion at the requested point, and `err n -> 0`.  Thus the
+Bernstein consumer should not be redesigned unless genuine `ShiCutoffData` is
+too strong or false.
+
+The curvature Kato input is also checked: `TowerNormGradOn B` is produced for
+the solution by `towerNorm_grad_le` in
+`Evolution/IteratedRmTowerHeatEq.lean`.
+
+The old `BernsteinTower.estimate_complete` still has an intentional `sorry` and
+an invalid interface.  Completeness, metric equivalence, and a Ricci lower bound
+alone do not produce its localization.  It must not be filled or treated as a
+trusted theorem.
+
+### Desired producer role
+
+The ideal solution theorem would live below HCG, probably in a new file
+`DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ShiCutoff.lean`:
+
+```lean
+theorem shiCutoff_of_sol
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (O : M)
+    {T K : Real}
+    (hT : 0 < T)
+    (hslab : Set.Icc 0 T ⊆ D.carrier)
+    (hreg : Set.Ioc 0 T ⊆ D.regular)
+    (hcomplete :
+      -- canonical completeness of the metric S.base.metric 0
+      MetricCompleteAtTheAnchor (I := I) (S.base.metric 0))
+    (hK : 0 <= K)
+    (hcurv : forall t ∈ Set.Icc 0 T, forall x : M,
+      nablaKRm04NormSqIntrinsic (I := I) S 0 t x <= K) :
+    Nonempty (ShiCutoffData (I := I) (flowG (I := I) S) T)
+```
+
+Please correct the exact lower-level completeness packaging.  Do not import
+`HCGCompactness` merely to reuse its pointed `MetricComplete` predicate.  The
+producer should need only one complete anchor slice plus the curvature bound.
+
+In `MovingShiOpen`, the shifted solution already supplies the solution proof,
+the closed slab and positive-time regularity, a global level-zero curvature
+bound, anchor completeness, and slabwise metric equivalence.  It should adapt
+these facts to the producer and then call `estimate_of_cutoff`.
+
+### Existing relevant APIs
+
+- `BernsteinTower.estimate_of_cutoff`, `GfunCut_parabolic_le`, all graded
+  cutoff-power/product/cross algebra, and `strict_barrier_cpt` are checked.
+- `towerNorm_grad_le` supplies the exact Kato estimate.
+- `Geometry/Comparison/HopfRinowProper.lean` supplies properness and compact
+  closed balls for a complete fixed Riemannian metric.
+- `Geometry/Metric/DistanceTent.lean` supplies `riemDistTent`, values in
+  `[0,1]`, an exact inner plateau, controlled support, and a scale-sharp
+  Lipschitz estimate `4/r`.
+- `Analysis/Calculus/CompactCutoff.lean` supplies `exists_mfd_bump`, a smooth
+  compactly supported plateau subordinate to a compact-in-open pair.
+- `MovingShiOpen.lean` already proves private metric-PDE and slabwise metric
+  equivalence facts from a curvature bound.
+- `ricci_quad_sol` converts the curvature bound into a two-sided quadratic
+  Ricci bound.
+- Intrinsic gradient/Laplacian and parabolic product/sum/power APIs exist.
+
+### Missing APIs found by repository audit
+
+No checked native theorem currently supplies:
+
+1. a smooth proper exhaustion with quantitative global gradient and
+   Hessian/Laplacian bounds;
+2. a smooth spacetime exhaustion with `|grad chi_n|^2 <= err_n chi_n` and
+   `(partial_t - Delta_g(t)) chi_n <= err_n`, `err_n -> 0`;
+3. a global or barrier-form distance Laplacian comparison theorem;
+4. a time-derivative estimate for `d_g(t)(O,x)` under Ricci flow;
+5. a Calabi cut-locus support construction for evolving distance;
+6. a barrier/viscosity version of `strict_barrier_cpt` using a smooth local
+   support only at the selected bad minimum;
+7. a quantitative smoothing theorem preserving range, compact support,
+   exhaustion, gradient control, and the one-sided parabolic inequality;
+8. a local Shi theorem with constants independent of injectivity radius and
+   noncollapse.
+
+`riemDistTent` is Lipschitz but not smooth.  `exists_mfd_bump` is smooth but
+has no quantitative derivative bounds.  Properness gives compact supports but
+no differential estimates.  A fixed-anchor bump estimate appears circular:
+controlling `Delta_g(t)` through connection differences risks using precisely
+the curvature-derivative estimates that Shi is meant to prove.
+
+## Architecture decision requested
+
+Choose the smallest mathematically honest route, or propose a better fourth
+route.
+
+### Route A: smooth spacetime exhaustion
+
+Prove a genuine smooth exhaustion for a complete bounded-curvature Ricci flow,
+then define `chi_n` through a one-dimensional profile and keep
+`ShiCutoffData` unchanged.
+
+If choosing A, state the precise theorem producing a smooth proper `rho(t,x)`
+with estimates strong enough to make both cutoff errors tend to zero.  Explain
+why bounded curvature plus completeness suffices without injectivity radius or
+noncollapse, and how the proof avoids circular use of Shi derivatives.
+
+### Route B: Calabi/barrier consumer
+
+Use a distance-based cutoff and Calabi's trick at the selected spacetime
+minimum.  Replace or supplement `estimate_of_cutoff` with a barrier-localized
+consumer only if the smooth record is genuinely too strong.
+
+If choosing B, specify the weakest barrier-cutoff predicate and show exactly
+how the checked graded recurrence is reused.  Determine whether a profile like
+`eta (exp (A*t) * d_g(t)(O,x) / R)` has the correct sign for
+`P = partial_t - Delta`, which distance inequalities are required, and how the
+cut locus is handled without falsely asserting global smoothness.
+
+### Route C: local Shi estimate
+
+Bypass `ShiCutoffData`, prove a local curvature-derivative estimate on
+parabolic balls, and exhaust the complete manifold.
+
+If choosing C, explain how the constants avoid injectivity-radius, harmonic-
+radius, or noncollapse dependence, and whether this route actually avoids the
+same distance-Laplacian/Calabi infrastructure.
+
+## Constraints
+
+- arbitrary finite dimension;
+- no `CompactSpace M`;
+- no injectivity-radius, volume noncollapse, connectedness, or higher initial
+  derivative assumptions;
+- only one complete anchor slice and one global curvature bound on the larger
+  left-buffered slab;
+- no new HCG input field;
+- do not preserve the unsupported `estimate_complete` as a trusted theorem;
+- do not hide the analysis in a new assumption or polished wrapper;
+- generic metric/comparison facts stay below Ricci flow;
+- the solution cutoff/local-Shi producer belongs under `Evolution/`;
+- `MovingShiOpen` should only assemble these producers;
+- state explicitly if `shiCutoff_of_sol` is too strong or false as written.
+
+## Required answer
+
+Give a decisive architecture verdict and then the next five Lean-facing
+declarations in dependency order.  For each declaration give:
+
+- exact theorem/definition signature;
+- canonical file/module and import direction;
+- minimal hypotheses;
+- mathematical proof route;
+- which checked theorem it consumes;
+- whether it is routine Lean work, a missing API theorem, or substantial new
+  analysis.
+
+Also give:
+
+1. the exact final replacement call inside `movingShi_of_bound`;
+2. which current declarations become obsolete or compatibility-only;
+3. whether `ShiCutoffData` should remain unchanged;
+4. the first theorem to implement immediately;
+5. an honest feasibility estimate for Routes A, B, and C, including the largest
+   expected formalization obstacle.
+
+Do not answer merely "use standard Shi cutoffs".  The answer must identify the
+actual distance, Laplacian, time-variation, cut-locus, smoothing, or local-
+estimate theorems that need to be formalized.

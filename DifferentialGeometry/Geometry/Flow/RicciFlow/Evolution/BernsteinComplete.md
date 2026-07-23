@@ -40,3 +40,136 @@ not an HCG input gap.
 - dedicated complete-Bernstein machinery: roughly 30--35%;
 - end-to-end complete arbitrary-dimensional Shi producer: theorem-level 0%;
 - unconditional `compactnessSol`: theorem-level 0%.
+
+## 2026-07-22 localization algebra
+
+`ShiCutoffData` now records one compact spatial support for each cutoff over
+the whole time slab.  Its parabolic field has the sign required by
+`P = ∂ₜ - Δ`: the localized product identity contains `G * Pχ`, so the
+consumer needs `Pχ ≤ err`, recorded as `parabolic_le`.  The former lower bound
+`-err ≤ Pχ` had the wrong direction for an upper Bernstein estimate and had
+no consumers.
+
+The checked `ShiCutoffData.cross_le` combines the cutoff gradient bound,
+`TowerNormGradUpTo`, metric Cauchy--Schwarz, and scalar Young inequality to
+prove
+
+`-2 <∇χ,∇w_k> ≤ χ w_(k+1) + 4 err w_k`.
+
+The direct projections `space_diff` and `grad_diff` expose the spatial
+regularity already contained in `space_smooth` for the parabolic product
+rule.  Focused verification passed; the remaining warning is the pre-existing
+legacy `estimate_complete` proof frontier.
+
+## 2026-07-22 graded localization correction
+
+The tempting common-factor polynomial `chi * Gfun` does not close.  The
+levelwise cross estimate produces the full weighted next-level sum, whereas
+`Gfun_dissipative` retains only the top term; the difference has no sign.  Even
+retaining the whole sum would leave an uncontrolled `err * Gfun` leakage on a
+noncompact manifold.
+
+The canonical replacement is `GfunCut`, with level `i` weighted by
+`chi^(i+1)`.  `GfunCut_zero` and `GfunCut_one` record compact support and exact
+agreement on the exhausted region; `GfunCut_nonneg` records its sign on the
+controlled slab.  This graded weighting lets each cutoff
+error be charged to the previous tower coefficient; only the level-zero error
+remains, where `w 0 <= K^2` controls it.
+
+Two routine API seams precede the localized induction: natural-power gradient
+and parabolic formulas, and the compact-support weak maximum principle with a
+nonnegative (rather than identically zero) exterior barrier.  The latter is
+now supplied by `strict_barrier_cpt`.  The remaining graded algebra is
+substantial but local; the genuinely independent analytic blocker after it is
+the solution producer for `ShiCutoffData`.
+
+Accounting remains honest: the corrected complete-Bernstein theorem is 0%;
+its dedicated localization machinery is about 45%.  The trusted complete Shi
+producer and unconditional HCG endpoint remain theorem-level 0%.
+
+## 2026-07-22 graded cutoff powers
+
+The two natural-power estimates required by the graded recurrence are now
+checked:
+
+- `ShiCutoffData.pow_parabolic_le` proves
+  `P(chi^(p+1)) <= (p+1) * err * chi^p` without assuming `chi > 0`;
+- `ShiCutoffData.pow_cross_le` spends half of the next tower level and leaves
+  `8 * (p+1)^2 * err * chi^p * w_k`.
+
+The first uses the canonical zero-safe `gradientFun_pow` theorem and an
+induction through `parabolic_mul`.  The second uses metric Cauchy--Schwarz and
+Young's inequality directly, so the exact coefficient needed by the finite
+recurrence remains visible.  `GfunCut_off` and `GfunCut_cont` now also provide
+the compact exterior and joint-continuity facts needed by the weak maximum
+principle.  Focused verification passed; the only remaining warning is the
+deliberately visible legacy `estimate_complete` `sorry`.
+
+These bricks do not prove the corrected complete-Bernstein theorem, which is
+still theorem-level 0%.  Its dedicated localization machinery is now about
+55%; the next local target is the finite-sum `GfunCut` parabolic recurrence.
+The independent solution-produced quantitative cutoff family remains the
+later genuine analytic blocker.
+
+## 2026-07-22 graded finite recurrence
+
+The localized finite-tower algebra is now checked.  The private telescope
+absorbs every positive-level cutoff error into the previous retained
+next-level term under
+
+`2 * cut.err n * B.T * cutErrCoeff m <= 1`.
+
+The public theorem `GfunCut_parabolic_le` combines that telescope with the
+per-level parabolic product rule, the retained-good and top reaction estimates,
+and finite-sum linearity.  Its conclusion is
+
+`P(GfunCut) <= textbookForce * K^3
+  + 9 * cut.err n * Gcoef m 0 * K^2`.
+
+The coefficient `9` is `cutErrCoeff 0`; the remaining base error is bounded by
+the existing curvature hypothesis `w 0 <= K^2`.  Time, spatial, and gradient
+regularity for the finite summands are assembled locally from `BernsteinTower`,
+`ShiCutoffData`, and `ScalarWeak.parabolic_sum`; no parallel public regularity
+API was introduced.  Focused verification passed.  The only warning is the
+pre-existing legacy `estimate_complete` `sorry`.
+
+Honest accounting:
+
+- `GfunCut_parabolic_le`: theorem-level 100%;
+- corrected complete-noncompact estimate: theorem-level 0% (the public
+  replacement capstone is not yet stated and proved);
+- dedicated complete-Bernstein localization machinery: roughly 70%;
+- generated `ShiCutoffData` for the solution: theorem-level 0% and still the
+  independent analytic producer frontier;
+- end-to-end complete arbitrary-dimensional Shi and unconditional
+  `compactnessSol`: theorem-level 0%.
+
+## 2026-07-22 cutoff capstone
+
+The canonical public consumer `BernsteinTower.estimate_of_cutoff` is now
+checked.  It proves the full all-order Bernstein bound on a noncompact
+manifold from one `ShiCutoffData` family and `TowerNormGradOn`, with no
+compactness or growth assumption on the tower fields.
+
+The proof keeps the cutoff index internal.  Strong induction supplies the
+lower tower levels; for every sufficiently small cutoff error it applies
+`strict_barrier_cpt` to the graded polynomial on the cutoff's uniform compact
+support.  At the requested spacetime point, `exhausts` identifies the graded
+polynomial with the ordinary Bernstein polynomial.  Finally `err_tendsto`
+removes the remaining level-zero error, and the existing textbook constant
+recurrence gives exactly
+
+`t^m * w m t x <= (towerConst c alpha m)^2 * K^2`.
+
+Focused verification passed.  The only warning is the deliberately retained
+legacy `estimate_complete` `sorry`; the new capstone itself is warning-free.
+
+Honest accounting after this brick:
+
+- `BernsteinTower.estimate_of_cutoff`: theorem-level 100%;
+- corrected complete-noncompact Bernstein consumer: theorem-level 100%;
+- dedicated localization machinery and capstone: roughly 90%;
+- solution-generated quantitative `ShiCutoffData`: theorem-level 0%, now the
+  single independent analytic blocker for the complete Shi route;
+- end-to-end complete arbitrary-dimensional Shi: theorem-level 0%;
+- unconditional `compactnessSol`: theorem-level 0%.

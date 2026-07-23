@@ -396,6 +396,42 @@ theorem gradientFun_mul
           h x • gradientFun (I := I) g f x) v := by
           simp [metricFlatLinear_apply, mul_comm]
 
+/-- Gradient chain rule for positive natural powers, without a nonvanishing
+assumption on the function. -/
+theorem gradientFun_pow
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M} (n : Nat)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    gradientFun (I := I) g (fun y : M => f y ^ (n + 1)) x =
+      (((n + 1 : Nat) : Real) * f x ^ n) •
+        gradientFun (I := I) g f x := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      have hpow :
+          MDifferentiableAt I 𝓘(Real, Real)
+            (fun y : M => f y ^ (n + 1)) x :=
+        hf.pow (n + 1)
+      calc
+        gradientFun (I := I) g
+            (fun y : M => f y ^ (Nat.succ n + 1)) x =
+            gradientFun (I := I) g
+              (fun y : M => f y ^ (n + 1) * f y) x := by
+                apply congrArg (fun q : M -> Real => gradientFun (I := I) g q x)
+                funext y
+                rw [show Nat.succ n + 1 = (n + 1) + 1 by omega, pow_succ]
+        _ = f x ^ (n + 1) • gradientFun (I := I) g f x +
+              f x • gradientFun (I := I) g
+                (fun y : M => f y ^ (n + 1)) x :=
+              gradientFun_mul (I := I) g hpow hf
+        _ = (((Nat.succ n + 1 : Nat) : Real) * f x ^ Nat.succ n) •
+              gradientFun (I := I) g f x := by
+              rw [ih, smul_smul, ← add_smul]
+              congr 1
+              push_cast
+              rw [show f x ^ (n + 1) = f x ^ n * f x by rw [pow_succ]]
+              ring
+
 /-- Directional derivative chain rule for real powers, valid away from zero. -/
 theorem extDerivFun_rpow
     {f : M -> Real} {x : M} (p : Real) (v : TangentSpace I x)

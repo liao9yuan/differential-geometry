@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAssembly
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -95,6 +96,53 @@ structure SrcCovLipData
                   (srcMetric (I := I) Φ hsrc htgt k t)
                   (refRes (I := I) Φ R hsrc k) y ≤ Lp * |s - t|
 
+/-- Joint order-zero metric and Ricci-evolution bounds in a fixed reference
+norm.  Both constants are explicit, so the result can be applied uniformly on
+varying source manifolds without choosing a compact spatial subcover. -/
+theorem covRic0_le
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M]
+    (gSeq : Nat → Real → SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    {i : Nat} {t B K : Real}
+    (hB : 1 ≤ B)
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gRef (gSeq i t) B)
+    (x : M)
+    (hShi :
+      Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x 2
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)) ≤ K) :
+    metricCovDerivNorm (I := I) 0 (gSeq i t) gRef x ≤
+        B * Real.sqrt (Module.finrank Real E : Real) ∧
+      Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) gRef x 2
+            ((-2 : Real) • nablaRicReal (I := I) gSeq gRef 0 i t x)) ≤
+        2 * (Real.sqrt (B ^ 2) * K) := by
+  have hsymm := metricUniformEquivalentOn_symm (I := I) hEq
+  constructor
+  · exact covNorm0_le (I := I) (gSeq i t) gRef x hB
+      (fun v => hsymm.2 x (Set.mem_univ x) v)
+  · rw [sqrt_normSq0S_smul]
+    have habs : |(-2 : Real)| = 2 := by norm_num
+    rw [habs]
+    have hcomp := Tensor0SBundle.sqrt_normSq0S_le_of_metric_equiv
+      (I := I) (g := gSeq i t) (h := gRef) x 2 hB
+      (fun v => hsymm.2 x (Set.mem_univ x) v)
+      (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)
+    have hnabla :
+        Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (0 + 2)
+              (nablaRicReal (I := I) gSeq gRef 0 i t x)) ≤
+          Real.sqrt (B ^ 2) *
+            Real.sqrt
+              (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x 2
+                (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)) := by
+      rw [nablaRicReal_normSq]
+      simpa using hcomp
+    exact le_trans (mul_le_mul_of_nonneg_left hnabla (by norm_num))
+      (mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hShi (Real.sqrt_nonneg _)) (by norm_num))
+
 /-- Source-flow covariant and time-Lipschitz bounds from uniform metric
 equivalence, moving Shi estimates, and one uniform initial covariant envelope.
 
@@ -185,6 +233,85 @@ theorem srcCovLip_of_soln
   letI : T2Space P.M := P.t2
   letI : IsManifold I ∞ P.M := P.smooth
   letI : SigmaCompactSpace P.M := P.sigmaCompact
+  have hcore0 : ∃ C0 L0 : ℝ, 0 ≤ C0 ∧ 0 ≤ L0 ∧
+      (∀ k : Nat,
+        letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+        letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+        letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+        letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+        letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+        ∀ t : ℝ, t ∈ Set.Icc β ψ →
+          ∀ y : SourceDomain (I := I) Φ k,
+            metricCovDerivNorm (I := I) 0
+                (srcMetric (I := I) Φ hsrc htgt k t)
+                (refRes (I := I) Φ R hsrc k) y ≤ C0) ∧
+      (∀ k : Nat,
+        letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+        letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+        letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+        letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+        letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+        ∀ t : ℝ, t ∈ Set.Icc β ψ →
+          ∀ y : SourceDomain (I := I) Φ k,
+            Real.sqrt
+                (Tensor0SBundle.normSq0S (I := I)
+                  (refRes (I := I) Φ R hsrc k) y 2
+                  ((-2 : ℝ) •
+                    nablaRicReal (I := I)
+                      (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+                      (refRes (I := I) Φ R hsrc k) 0 0 t y)) ≤ L0) := by
+    obtain ⟨K0, hK0, hShi0⟩ := hShi 0
+    refine ⟨Bmax * Real.sqrt (Module.finrank ℝ E : ℝ),
+      2 * (Real.sqrt (Bmax ^ 2) * K0), ?_, ?_, ?_, ?_⟩
+    · exact mul_nonneg (le_trans zero_le_one hBmax) (Real.sqrt_nonneg _)
+    · exact mul_nonneg (by norm_num)
+        (mul_nonneg (Real.sqrt_nonneg _) hK0)
+    · intro k
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+        sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+        sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+        sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      intro t ht y
+      exact
+        (covRic0_le (I := I)
+          (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+          (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
+          (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
+          (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).1
+    · intro k
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+        sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+        sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+        sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      intro t ht y
+      exact
+        (covRic0_le (I := I)
+          (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+          (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
+          (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
+          (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
   /- The genuine analytic frontier is the constants-first invariant induction.
   At each order it controls both the moving metric tower and the evolution
   tower in the fixed reference norm.  Keeping the two conclusions together is
@@ -227,7 +354,15 @@ theorem srcCovLip_of_soln
                     nablaRicReal (I := I)
                       (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
                       (refRes (I := I) Φ R hsrc k) q 0 t y)) ≤ Lq) := by
-    sorry
+    intro q
+    by_cases hq : q = 0
+    · subst q
+      exact hcore0
+    · have hq_pos : 1 ≤ q := Nat.one_le_iff_ne_zero.mpr hq
+      /- For positive order, the existing component proof still chooses its
+      Claim-1/Claim-2 constants after the local good frame.  The remaining
+      proof must expose those numeric witnesses before the source index. -/
+      sorry
   refine
     { cov := ?_
       lip := ?_ }

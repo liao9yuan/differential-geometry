@@ -16,9 +16,10 @@ The theorem `srcCovLip_of_soln` states the honest producer from a uniform
 source-metric equivalence, uniform moving Shi estimates, and one uniform
 initial covariant envelope.
 
-The module imports only the source-flow/extension foundation in
-`ConvFieldAssembly`; it does not depend on the older consumer-side producer
-collection in `ConvFieldInputs`.
+The module imports the source-flow/extension foundation in
+`ConvFieldAssembly` and reuses the existing explicit order-zero metric bound
+`covNorm0_le` from `ConvFieldInputs`.  No duplicate tensor-norm proof is kept
+locally.
 
 ## Checked assembly and exact frontier
 
@@ -33,18 +34,31 @@ steps:
 - a finite sum over `Finset.range (p + 1)` gives one nonnegative constant for
   every order `q <= p`.
 
-The sole remaining `sorry` is therefore exactly the constants-first invariant
-induction which, for each `q`, chooses `Cq` and `Lq` before `k` and proves on
-every whole source domain both
+The order-zero case is now checked separately.  `covRic0_le` combines
+`covNorm0_le`, metric norm comparison, `nablaRicReal_normSq`, and the order-zero
+moving Shi bound into explicit constants independent of the source index.  The
+main proof consumes this helper in its `q = 0` branch.
+
+The sole remaining `sorry` is therefore exactly the positive-order
+constants-first invariant induction which, for each `q >= 1`, chooses `Cq` and
+`Lq` before `k` and proves on every whole source domain both
 
 1. the `gRef`-covariant bound for `nabla^q g(t)`; and
 2. the `gRef`-norm bound for the evolution tensor `-2 nabla^q Ric(g(t))`.
 
 This cannot be obtained by invoking the existing per-source compact theorem
 after fixing `k`, because that route chooses the constants in the wrong order.
-The intended proof reuses the invariant algebra behind
-`covOrderBound_of_soln`, but removes its finite spatial-subcover dependence and
-runs the induction uniformly on the varying whole source domains.
+The existing `covOrderBound_of_soln` route cannot be reused directly: its
+`ric_tower_const` chooses local Claim-1/Claim-2 witnesses after selecting a
+good frame and then uses a finite spatial subcover.  The positive-order route
+must instead expose those numeric witnesses before the frame/domain arguments
+and apply the resulting per-point estimate with one common constant.
+
+The feasibility choice and requested declaration-level review are recorded in
+`SOURCE_COVLIP_CONSULT.md`.  The next implementation gate is a constants-first
+Claim-1 declaration whose witness is independent not only of the local frame
+but also of the manifold type; no positive-order consumer edit should precede
+that gate.
 
 No endpoint assumption or branch-specific field has been added.  Downstream,
 `SrcCovLipData.cov` feeds the grow-local `covTail_of_bounds`, while
@@ -54,6 +68,7 @@ No endpoint assumption or branch-specific field has been added.  Downstream,
 
 Focused verification passed with the one intentional analytic-frontier
 warning.  The target theorem remains theorem-level 0% until that explicit
-joint estimate is proved; its Lean-facing assembly after the estimate is 100%,
-and the dedicated file machinery is about 45%.  The unconditional
+positive-order joint estimate is proved.  Its order-zero core and Lean-facing
+assembly after the estimate are 100%; the dedicated file machinery is about
+50%.  The unconditional
 `compactnessSol` endpoint remains theorem-level 0%.

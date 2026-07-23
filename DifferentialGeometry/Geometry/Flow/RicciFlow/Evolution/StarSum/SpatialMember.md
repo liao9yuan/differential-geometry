@@ -381,3 +381,24 @@ verification is about 99% pending the downstream Hamilton replay, and the merge
 commit remains 0% until final verification and diff review.  No completion
 percentage of the Hamilton positive-Ricci endpoint or wider HCG compactness
 theorem changes here.
+
+## 2026-07-22 canonical commutator field
+
+The former existential proof now exposes its actual witness as
+`commStarField S t k`.  The field is definitionally the existing
+`(-1) • (TA + TB + TC)` expression and depends on neither `IsSolutionOn`, a
+component index type, a point, nor a basis.  Its checked projections are:
+
+- `commStarField_cost`, the exact `commStarCost` constructor-tree bound;
+- `commStarField_spec`, the orthonormal-basis component identity.
+
+`spatialCommStarSum` retains its original public statement as a compatibility
+wrapper around this fixed field.  This removes the witness-choice ambiguity for
+the successor residual recursion without changing any sign, routing, cost, or
+component equation.
+
+Focused verification passed with no remaining diagnostics.  This canonical
+field extraction and P2 remain complete (100%).  The arbitrary-index successor
+brick is a separate completed consumer; the dedicated direct-tower machinery is
+about 94%, while the final `residualStarCosted` theorem remains unstated/unproved
+(0%) and the unconditional compactness endpoint remains 0%.

@@ -13,8 +13,9 @@ already-produced fixed-base swap and time derivative feed
 `fixedBaseOnRegSmooth` then produce the level-`k+1` swap.
 
 The only theorem-facing inputs are the genuine level-zero curvature time
-derivative and Christoffel time derivative. The proof is sorry-free; focused
-verification and the targeted module build passed.
+derivative and Christoffel time derivative. The former `[CompactSpace M]`
+binder on `frameTowerSwap` was artificial and has been removed without changing
+the rest of the statement or proof.
 
 This closes the all-level time/space swap machinery. The next frontier is the
 solution-facing residual assembly.
@@ -22,6 +23,28 @@ solution-facing residual assembly.
 `tailTowerData` now supplies that positive-tail adapter directly from
 `IsSolutionOn`: it chooses the actual level-zero curvature derivative, uses the
 Christoffel evolution RHS, proves the orthonormal-frame book identity, and
-packages `frameTowerSwap`. Focused verification and the targeted module build
-passed. Together with `rm04Base_of_sol`, it discharges every standing input of
-`resStarBoundLF`.
+packages `frameTowerSwap`. Its former `[CompactSpace M]` binder was likewise
+artificial and has been removed. Together with `rm04Base_of_sol`, it discharges
+every standing input of `resStarBoundLF`.
+
+The source audit found no deeper compactness-dependent API. After the refreshed
+`FrameTowerRegularity` artifact became available, this file passed its focused
+check without diagnostics.
+
+## General-interval germ adapter
+
+`towerDataAt` now removes the positive-tail shape from downstream callers. For
+an arbitrary `SolutionOn D`, a regular time `t`, and a smooth orthonormal local
+frame, it chooses a compact regular window and an internal positive tail, calls
+`tailTowerData`, and transports ordinary derivative germs back to the original
+solution and `D.carrier`.
+
+Its output is deliberately the raw component API consumed by the residual
+recursion: `frameComp0S`, `christoffelSymbolInFrame`, and `iteratedRmComp`.
+There is no import of `TimeRecursion`, no new regularity hypothesis, and no
+parallel tower definition. The theorem passed its focused check; no targeted
+refresh was run in this lane.
+
+Theorem accounting: `towerDataAt` is complete in source (100%). It is an
+adapter for the residual capstone, not the capstone itself; the completion of
+`rmResidual_cost` must continue to be accounted for separately.

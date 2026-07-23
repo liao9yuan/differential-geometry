@@ -17,3 +17,56 @@ time-reversed conjugate heat equation.  It does not construct a heat solution.
 Perelman no-local-collapsing remains 0%; its dedicated analytic machinery is
 about 15%, while the whole HCG machinery remains about 45% and its endpoint
 theorems remain 0%.
+
+## 2026-07-22: parabolic product rule
+
+- Added `parabolic_mul` for the drifted operator
+  `partial_t - Delta - <X, grad>`.  It reuses the realized heat product rule
+  and the one-variable `derivWithin` product rule.
+- The conclusion retains the negative gradient cross term with the sign needed
+  by cutoff localization.
+- Focused verification passed without new warnings.
+
+This closes only the generic calculus seam used by localized Bernstein
+arguments.  It does not supply the compactly supported parabolic cutoffs or
+the localized maximum argument.  The corrected complete-Bernstein theorem is
+still theorem-level 0%; its dedicated localization machinery is about
+35--40%.  The unconditional HCG compactness theorem remains theorem-level 0%,
+with whole-project support machinery about 60%.
+
+## 2026-07-22: compact-support maximum principle
+
+- Added `strict_barrier_cpt`, the positive-time strict-barrier weak maximum
+  principle when the possible negative region is contained in one fixed
+  compact spatial set across the whole closed time slab.
+- The proof minimizes only on `Set.Icc 0 T ×ˢ K`.  At a spatial point outside
+  `K`, the exterior hypothesis makes the function nonnegative, so a negative
+  compact minimizer is still a genuine global spatial minimum.
+- The theorem removes `[CompactSpace M]`; it does not replace it with a
+  slicewise compactness hypothesis.  The same compact `K` must contain every
+  negative point at every time, which is the form required by the corrected
+  affine-barrier cutoff architecture.
+- Focused verification passed without warnings or new `sorry`s.
+
+This closes the maximum-principle consumer for a supplied localization whose
+negative region is uniformly compact.  It does not construct the quantitative complete-flow
+cutoff family.  The complete noncompact Bernstein theorem itself remains 0%;
+its dedicated localization machinery is now about 40--45%.  The public trusted
+complete Shi theorem and unconditional HCG endpoint remain theorem-level 0%.
+
+## 2026-07-22: additive and finite-sum parabolic rules
+
+- Added `parabolic_add` and `parabolic_smul` for addition and multiplication by
+  a fixed real scalar.
+- Added `parabolic_sum`, which commutes the drifted parabolic operator through
+  a finite family under explicit per-summand time, spatial, and gradient-section
+  regularity.
+- The finite-sum proof derives the regularity of the summed gradient section;
+  it does not hide that obligation in a Bernstein-specific assumption.
+- Focused verification passed without local warnings.
+
+This finite-sum calculus brick is complete (100%) and is ready for the graded
+cutoff Bernstein sum with its fixed coefficients.  The complete noncompact
+Bernstein theorem itself remains theorem-level 0%; its dedicated localization
+machinery is about 45--50%.  The unconditional HCG endpoint remains
+theorem-level 0%, with whole-project support machinery about 60%.

@@ -543,7 +543,7 @@ noncomputable def shiOpenConst
     (d : Nat) (C alpha beta psi : Real) (N : Nat) : Real :=
   let K := max 1 C
   let c := max 0
-    (∑ k ∈ Finset.range (N + 1), 2 * (d : Real) ^ (6 + k))
+    (∑ k ∈ Finset.range (N + 1), rmTowerCost d k)
   Real.sqrt
     (∑ k ∈ Finset.range (N + 1),
       (d : Real) ^ ((2 + k) + 2) *
@@ -656,7 +656,7 @@ theorem movingShi_of_bound
     simpa only [S0, D0, DShift] using
       (isSoln_tailRestrict (I := I) hSShift (sub_neg.mpr halphaT0) hZeroOmega)
   let d : Nat := Module.finrank Real E
-  let levelC : Nat → Real := fun k ↦ 2 * (d : Real) ^ (6 + k)
+  let levelC : Nat → Real := fun k ↦ rmTowerCost d k
   have hHeat (k : Nat) :
       TowerHeatBoundOn (D := D0)
         (nablaKRm04NormSqIntrinsic (I := I) S0)
@@ -687,7 +687,8 @@ theorem movingShi_of_bound
       omega
     have hsingle : levelC k ≤ ∑ j ∈ levels, levelC j :=
       Finset.single_le_sum (f := levelC)
-        (fun j _ ↦ by dsimp only [levelC]; positivity) hkMem
+        (fun j _ ↦ by
+          simpa only [levelC] using rmTowerCost_nonneg d j) hkMem
     exact hsingle.trans (le_max_right _ _)
   let A : Real := (d : Real) ^ 2 * Real.sqrt C
   have hA : 0 ≤ A := by

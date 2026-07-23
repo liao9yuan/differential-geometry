@@ -39,7 +39,11 @@ their nonnegativity theorems, and `TowerHeatBoundOn.mono_cost` are implemented
 and focused-green.  The level-zero field has also been separated from the
 three-dimensional curvature identity: `e0Field_cost_any` proves its exact
 arbitrary-index cost, `rmBaseReact` names the eight-term quadratic expression,
-and `e0Field_comp_any` proves its component realization.
+and `e0Field_comp_any` proves its component realization.  The solution-facing
+join is now exact-current as `rmResidual_zero`: it chooses the global
+`e0Field` witness before the point and basis, proves the exact level-zero cost,
+and obtains the component heat identity directly from
+`rm04Base_of_solution_any`.
 
 The first genuine theorem frontier is now `residualStarCosted`.  It must
 simultaneously provide:
@@ -50,20 +54,15 @@ simultaneously provide:
    `partial_t (nabla^k Rm) = roughLap (nabla^k Rm) + T` in every orthonormal
    basis at the point.
 
-Live dependency audit adds one important qualification.  The generic theorem
-`iteratedRmComp_hasDerivWithinAt` is conditional on the level-zero `partial_t
-Rm04` input.  The tree does contain the arbitrary-dimensional variation and
-lowering chain through `rm13Deriv_of_solution` and
-`realizedRmBase_timeDeriv`, plus the positive-tail time/swap regularity in
-`tailTowerData`.  What is not yet proved is the level-zero conversion of that
-expanded `nabla^2 Ric` derivative into `roughLap Rm04 + rmBaseReact`.  The
-costed star realization of `rmBaseReact` is checked; the missing content is the
-actual arbitrary-dimensional Hamilton curvature identity.  The generic
-Uhlenbeck theorem still consumes this pre-Uhlenbeck evolution as an input, and
-the existing solution producer `rm04Base_of_sol` is dimension three.  This is
-therefore the first proof brick inside `residualStarCosted`; the all-order
-derivative theorem cannot be cited as if it already supplied it.  The exact
-consultation target is recorded in [`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md).
+The level-zero Hamilton flow identity is now checked and exact-current as
+`rm04Base_of_solution_any`.  It combines `rm04Var_of_sol` with the static
+`hamiltonRm04Id`, transports the coordinate formula to an arbitrary fixed
+finite orthonormal basis, and proves
+`partial_t Rm04 = roughLap Rm04 + hamiltonRmReact` directly from
+`IsSolutionOn`.  The earlier consultation in
+[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is therefore resolved.  The first
+remaining proof brick inside `residualStarCosted` is now the arbitrary-index
+all-order successor construction; the costed level-zero connection is closed.
 
 The cost must be the explicit recursion followed by the concrete residual
 construction, not `Classical.choose` over an existence statement.  Define the
@@ -115,7 +114,7 @@ principle.  Moreover `BernsteinTower` does not record the first-order Kato
 estimate needed to absorb cutoff-gradient terms.
 
 Keep the closed theorem `BernsteinTower.estimate` abstract.  The conditional
-noncompact theorem must instead be named `estimate_complete_of_cutoff` and take
+noncompact theorem is `BernsteinTower.estimate_of_cutoff` and takes
 explicit quantitative parabolic cutoff/exhaustion data together with the Kato
 input actually used by the localized induction.  The cutoff package must
 record compact support, exhaustion, range, gradient control, parabolic-operator
@@ -290,10 +289,10 @@ The analytic and provenance lanes run in parallel:
    `residualStarCosted` theorem;
 2. assemble direct `towerHeatSol`, migrate `towerHeatSol_any` and the HCG level
    cost, then remove `exists_rmTowerSol` from the trusted route;
-3. define the internal parabolic cutoff/exhaustion package and prove the
-   solution-specific cutoff and Kato producers;
-4. prove `estimate_complete_of_cutoff`, then the solution-specific complete
-   Bernstein theorem and revalidate `movingShi_complete` /
+3. use the checked internal parabolic cutoff/exhaustion package and Kato
+   producer, and prove the remaining solution-specific cutoff producer;
+4. use the checked `BernsteinTower.estimate_of_cutoff`, then prove the
+   solution-specific complete Bernstein theorem and revalidate `movingShi_complete` /
    `CurvBoundInput.movingShi_open`;
 5. keep the already-complete `StepDCanonData`, `compactness_canon`, and
    `metricCanon` provenance lane unchanged;
@@ -308,21 +307,30 @@ The analytic and provenance lanes run in parallel:
 - grow-local covariant-tail migration: 100%.  The ten-module chain is
   focused-green and exact-refreshed; `hchi` and the whole-source bump-collar
   estimate have been removed from the API and every caller.
-- arbitrary-dimensional direct `residualStarCosted` / `towerHeatSol`: theorem
-  completion 0%.  The explicit costs, their monotonicity/nonnegativity API, and
-  the arbitrary-index level-zero cost/component realization are focused-green.
-  The conditional all-order component derivative, generic variation/lowering
-  chain, positive-tail swap regularity, quantitative star algebra, reaction
-  contraction, and direct scalar heat assembly also exist.  The missing
-  arbitrary-dimensional Hamilton level-zero identity
-  `partial_t Rm04 = roughLap Rm04 + rmBaseReact` is substantive; dedicated
-  machinery is about 60-65%.  The live `Fin 3` direct theorem is not the
-  arbitrary-dimensional producer.
-- complete-noncompact Bernstein, corrected architecture: theorem completion
-  0%.  The closed induction/algebra is reusable, but cutoff production,
-  barrier/localization, Kato absorption, and the exhaustion limit are missing;
-  dedicated machinery is about 30-35%.  The current weak-signature
-  `estimate_complete` is not counted as a valid theorem frontier.
+- arbitrary-dimensional direct `rmResidual_cost` / `towerHeatSol_raw`: theorem
+  completion remains 0% verified.  The explicit costs, their
+  monotonicity/nonnegativity API, and the arbitrary-index level-zero
+  cost/component realization are exact-current.  The fixed global successor
+  `resStarNext`, its cost/specification theorems, the recursive residual field,
+  the one-global-witness capstone `rmResidual_cost`, and the basis-native scalar
+  heat assembly `towerHeatSol_raw` are now assembled in source without
+  `sorry`; `towerHeatSol_any` is only the positive-tail wrapper and the HCG
+  level cost has been migrated to `rmTowerCost`.  The static
+  arbitrary-dimensional identity is exact-current as `hamiltonRm04Id`, and
+  `rm04Base_of_solution_any` closes the fixed-basis flow-level producer directly
+  from `IsSolutionOn`; `e0Residual` is the exact costed base residual.  The base
+  theorems are 100%; dedicated direct-tower machinery is about 98%.  Final
+  focused/exact verification is still pending the active upstream artifact
+  refresh and ordered narrow chain, so none of the newly assembled theorem
+  bodies is counted as checked yet.
+- complete-noncompact Bernstein, corrected consumer: 100% checked.
+  `GfunCut_parabolic_le` closes the graded finite recurrence and
+  `BernsteinTower.estimate_of_cutoff` closes the compact-WMP/exhaustion/error-limit
+  capstone; both are exact-current.  The localization machinery plus consumer
+  capstone is about 90%.  The remaining independent analytic theorem is the
+  solution-generated `ShiCutoffData` producer, still theorem-level 0%; see
+  `P4_CUTOFF_CONSULT.md`.  The current weak-signature `estimate_complete` is
+  legacy and is not counted as a valid theorem frontier.
 - `movingShi_complete` and `CurvBoundInput.movingShi_open`: the wrappers and a
   full source proof of `movingShi_of_bound` are assembled with one explicit
   constant chosen before the sequence member.  The HCG-facing assembly is now

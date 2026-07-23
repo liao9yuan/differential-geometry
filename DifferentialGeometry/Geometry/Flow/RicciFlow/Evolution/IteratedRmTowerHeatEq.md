@@ -30,8 +30,10 @@ It uses the canonical `nablaKNormDu`, `nablaKRm04Field_realizes`, and the new
 general covariant-tensor Kato theorem.  Focused verification passed without a
 new assumption or `sorry`.
 
-The Kato producer is complete (100%).  The corrected complete-noncompact
-Bernstein estimate remains theorem-level 0%; its dedicated localization
-machinery is roughly 30--35%, with quantitative parabolic cutoffs and a
-dissipative localized induction still missing.  The end-to-end complete
-arbitrary-dimensional Shi producer therefore remains theorem-level 0%.
+The Kato producer is complete (100%), focused-green, and exact-current.
+The corrected generic complete-noncompact consumer
+`BernsteinTower.estimate_of_cutoff` is now exact-current (100%), and its
+localization machinery plus capstone is about 90%.  The independent theorem
+that constructs `ShiCutoffData` from a complete bounded-curvature solution
+remains 0%; consequently the end-to-end complete arbitrary-dimensional Shi
+producer also remains theorem-level 0%.

@@ -1,25 +1,41 @@
 # SolutionResidual
 
-## 2026-07-14 uniform-cost strengthening
-
-The source statement now exposes `C = resStarCost k`, rather than only an
-arbitrary pointwise existential constant. The proof remains the same direct
-specialization of `resStarBoundLF`. The strengthened `resStarSol` theorem is
-focused-check green and exported by a targeted build, so the theorem and its
-dedicated machinery are both **100% complete**.
-
 ## Purpose
 
-Discharge the time-regularity standing inputs of `resStarBoundLF` directly
-from a dimension-three Ricci-flow solution on a strictly positive-time tail.
+Produce the arbitrary-dimensional, globally fixed residual field in the
+commuted curvature equation directly from `IsSolutionOn`.
 
-## Route
+## 2026-07-22 canonical all-order producer
 
-`resStarSol` combines `tailTowerData` with `rm04Base_of_sol`. The former
-constructs the real level-zero derivative fields, the Christoffel book
-identity, and all fixed-base tower swaps. The latter supplies the explicit
-dimension-three curvature evolution at the target orthonormal frame.
+`rmResidualField S t k` is defined recursively before any point or frame is
+chosen: level zero is `e0Field`, and the successor is the canonical
+`resStarNext` built from the covariant derivative, fixed spatial commutator,
+and fixed Christoffel-time correction fields.
 
-Focused verification and the targeted module build both pass. The theorem is
-sorry-free; the remaining `bbsAllMBounds` work starts after this solution-level
-residual producer, at the pointwise norm heat equation and Bernstein assembly.
+`rmResidualField_cost` gives the exact constructor-tree certificate
+
+```text
+StarSum2Cost Idx S t k (rmResidualField S t k)
+  (rmResidualCost (card Idx) k).
+```
+
+The private supplied-frame induction `rmResidual_local` proves the component
+heat identity on one smooth orthonormal patch.  Public `rmResidual_cost` then
+chooses the single residual field first and only afterward chooses, for every
+point, a canonical smooth orthonormal frame and its pointwise basis.  Thus the
+public quantifier order is the required
+
+```text
+exists T, cost T and forall x, exists basis, derivative identity.
+```
+
+The legacy dimension-three `resStarSol` remains as a compatibility endpoint;
+the new direct tower does not depend on it.
+
+Source assembly contains no `sorry`, `admit`, or new axiom.  Focused
+verification is pending the active upstream artifact refresh followed by the
+ordered `SpatialMember -> TimeRecursion -> TowerSwapRegularity` refresh.  Until
+that passes, `rmResidual_cost` is theorem-level **0% verified**; its dedicated
+producer machinery is about **98%** complete.  The direct `towerHeatSol_any`
+and complete Shi theorem remain theorem-level **0%** at this verification
+point.

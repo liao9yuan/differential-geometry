@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualLedger
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
 
 set_option autoImplicit false
 
@@ -16,45 +18,6 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped Manifold ContDiff BigOperators
-
-/-- Cost of the Christoffel-time correction at level `k` in dimension `d`. -/
-def rmGammaCost (d k : ℕ) : Real :=
-  (d : Real) ^ 2 * (12 + 3 * k)
-
-/-- The generic spatial-commutator cost is nonnegative. -/
-theorem commStarCost_nonneg (d k : ℕ) :
-    0 ≤ commStarCost d k := by
-  unfold commStarCost
-  positivity
-
-/-- The Christoffel-time correction cost is nonnegative. -/
-theorem rmGammaCost_nonneg (d k : ℕ) :
-    0 ≤ rmGammaCost d k := by
-  unfold rmGammaCost
-  positivity
-
-/-- Explicit constructor-tree cost of the curvature heat residual.
-
-The base has twelve double-trace quadratic terms.  A successor combines the
-two differentiated daughters, the spatial commutator, and the Christoffel-time
-correction. -/
-def rmResidualCost (d : ℕ) : ℕ -> Real
-  | 0 => 12 * (d : Real) ^ 2
-  | k + 1 =>
-      2 * rmResidualCost d k + commStarCost d k + rmGammaCost d k
-
-/-- The curvature-residual constructor cost is nonnegative. -/
-theorem rmResidualCost_nonneg (d k : ℕ) :
-    0 ≤ rmResidualCost d k := by
-  induction k with
-  | zero =>
-      simp only [rmResidualCost]
-      positivity
-  | succ k ih =>
-      simp only [rmResidualCost]
-      have hcomm := commStarCost_nonneg d k
-      have hgamma := rmGammaCost_nonneg d k
-      positivity
 
 /-- Direct reaction coefficient obtained from the whole residual estimate. -/
 def rmTowerCost (d k : ℕ) : Real :=
@@ -98,26 +61,11 @@ theorem e0Field_cost_any {Idx : Type*} [Fintype Idx]
   norm_num
   ring
 
-/-- The arbitrary-dimensional level-zero quadratic curvature reaction encoded
-by the eight generators of `e0Field`. -/
+/-- Compatibility alias for the canonical Hamilton reaction encoded by the
+eight generators of `e0Field`. -/
 def rmBaseReact {Idx : Type*} [Fintype Idx]
     (R : (Fin 4 -> Idx) -> Real) (m : Fin 4 -> Idx) : Real :=
-  -2 * (∑ e : Idx, ∑ f : Idx,
-      R ![m 0, e, m 1, f] * R ![m 2, e, m 3, f])
-    + 2 * (∑ e : Idx, ∑ f : Idx,
-      R ![m 0, e, m 1, f] * R ![m 3, e, m 2, f])
-    + -2 * (∑ e : Idx, ∑ f : Idx,
-      R ![m 0, e, m 2, f] * R ![m 1, e, m 3, f])
-    + 2 * (∑ e : Idx, ∑ f : Idx,
-      R ![m 0, e, m 3, f] * R ![m 1, e, m 2, f])
-    + (∑ e : Idx, ∑ f : Idx,
-      R ![m 0, e, f, e] * R ![f, m 1, m 2, m 3])
-    + (∑ e : Idx, ∑ f : Idx,
-      R ![m 1, e, f, e] * R ![m 0, f, m 2, m 3])
-    + (∑ e : Idx, ∑ f : Idx,
-      R ![m 2, e, f, e] * R ![m 0, m 1, f, m 3])
-    + (∑ e : Idx, ∑ f : Idx,
-      R ![m 3, e, f, e] * R ![m 0, m 1, m 2, f])
+  DifferentialGeometry.Integral.Connection.hamiltonRmReact R m
 
 set_option backward.isDefEq.respectTransparency false in
 /-- In every finite orthonormal frame, `e0Field` realizes the explicit

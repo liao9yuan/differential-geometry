@@ -43,35 +43,41 @@ of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 ## Current status (2026-07-22)
 
 The P4 analytic ruling has been corrected after a theorem-shape review.  The
-solution curvature tower must be produced directly as a costed
-`TowerHeatBoundOn`: the old fixed-`card^2`, per-`j` `IteratedRmTowerOn.starBound`
-is not implied by the concrete `StarSum2Cost` factorization.  The next genuine
-theorem is therefore arbitrary-dimensional `residualStarCosted`, followed by
-direct `towerHeatSol` and migration of `towerHeatSol_any` to the explicit
-`rmTowerCost d k`.  The sorry-backed `exists_rmTowerSol` is legacy and must
-leave the trusted route.
+solution curvature tower is produced directly as a costed `TowerHeatBoundOn`:
+the old fixed-`card^2`, per-`j` `IteratedRmTowerOn.starBound` is not implied by
+the concrete `StarSum2Cost` factorization.  The arbitrary-index successor and
+solution capstone are now assembled in source as `resStarNext_spec` and
+`rmResidual_cost`; the direct pointwise consumer is `towerHeatSol_raw`, and
+`towerHeatSol_any` is only its positive-tail wrapper.  The HCG level cost and
+explicit Shi envelope now use `rmTowerCost d k`.  The sorry-backed
+`exists_rmTowerSol` has been removed rather than retained as a compatibility
+theorem.  Final focused/exact verification is pending the active upstream
+artifact refresh and ordered narrow chain, so these new theorem bodies are not
+yet counted as verified.
 
-The live dependency audit refines the first brick.  Arbitrary-dimensional
-`realizedRmBase_timeDeriv` already differentiates the lowered curvature through
-the `Rm13` variation, and `tailTowerData` supplies positive-tail time/swap
-regularity.  However `iteratedRmComp_hasDerivWithinAt` still consumes that base
-derivative conditionally.  The first missing proof is the level-zero identity
-turning the expanded `nabla^2 Ric` RHS into `roughLap Rm04` plus a costed
-quadratic `StarSum2` residual; only then can the explicit cost recursion be
-lifted to all orders.
+The level-zero flow equation is now checked and exact-current.
+`rm04Base_of_solution_any` combines the canonical coordinate variation with
+the static Hamilton identity and proves, in every finite orthonormal basis,
+`partial_t Rm04 = roughLap Rm04 + hamiltonRmReact` directly from
+`IsSolutionOn`.  It uses no dimension-three identity, tail regularity package,
+or extra solution assumption.  The costed level-zero join is exact-current as
+`e0Residual` (with `rmResidual_zero` retained as the existential compatibility
+wrapper): it identifies the canonical reaction with `e0Field`, chooses one
+global witness before the point and basis, and records the exact
+`rmResidualCost` base value.
 
-The bookkeeping part of that brick is now checked.  `rmResidualCost`,
+The bookkeeping part is also checked.  `rmResidualCost`,
 `rmTowerCost`, their nonnegativity API, `TowerHeatBoundOn.mono_cost`,
-`e0Field_cost_any`, and `e0Field_comp_any` are focused-green, and
-`rmBaseReact` records the exact eight-term level-zero reaction expression.  The
-remaining content is not another cost estimate: it is the
-arbitrary-dimensional Hamilton identity
-`partial_t Rm04 = roughLap Rm04 + rmBaseReact`.  The generic Uhlenbeck theorem
-still takes this pre-Uhlenbeck evolution as an input, while `rm04Base_of_sol`
-proves only the dimension-three route.  See
-[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) for the exact API consultation.  The
-current `Fin 3` successor recursion should be generalized only after this base
-identity is settled.
+`e0Field_cost_any`, and `e0Field_comp_any` are focused-green, while
+`rmBaseReact` records the eight-term level-zero reaction, and
+`e0Residual` closes their solution-facing base assembly.  The supporting
+`hamiltonRm04Id` and `rm04Var_of_sol` theorems are exact-current, and their
+fixed-basis solution combination is `rm04Base_of_solution_any`.  The historical
+[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is now resolved.  Source assembly of
+the arbitrary-index recursive residual and direct tower is complete and
+sorry-free; verification is the only current A-line gate.  Until the narrow
+chain passes, `rmResidual_cost` and `towerHeatSol_raw` remain theorem-level 0%
+verified, while their dedicated direct-tower machinery is about 98%.
 
 The complete-noncompact Bernstein signature is also corrected.  Anchor
 completeness, metric equivalence, and a Ricci lower bound do not by themselves
@@ -79,8 +85,8 @@ produce a parabolic cutoff or an unrestricted scalar maximum principle.  The
 internal route now requires an explicit quantitative cutoff/exhaustion package
 and the actual curvature-tower Kato estimate; both are solution-specific
 producers, not new HCG assumptions.  The conditional abstract theorem is
-`estimate_complete_of_cutoff`; the no-extra-input theorem is proved only in the
-Ricci-flow solution layer.
+`BernsteinTower.estimate_of_cutoff`; the no-extra-input theorem must be proved
+in the Ricci-flow solution layer and is not yet part of the trusted route.
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -148,9 +154,14 @@ chart-local curvature/tower/norm regularity chain was weakened honestly to the
 complete-noncompact setting, and the anchor-norm statement mismatch was
 repaired.  Their trusted lower work remains split visibly between two corrected
 theorem frontiers: arbitrary-dimensional costed residual/direct tower heat, and
-the solution-specific cutoff/Kato localized Bernstein estimate.  Both theorem
-frontiers are 0%; their dedicated machinery is about 60-65% and 30-35%,
-respectively.  Green wrappers are not counted as analytic completion.
+the solution-specific cutoff producer.  The generic localized consumer is now
+closed: `GfunCut_parabolic_le` and
+`BernsteinTower.estimate_of_cutoff` are exact-current, so the Bernstein
+localization/consumer machinery is about 90%.  The solution-generated
+`ShiCutoffData` theorem remains 0% and is the single independent Bernstein
+analysis blocker; see [`P4_CUTOFF_CONSULT.md`](P4_CUTOFF_CONSULT.md).  The
+direct-tower theorem also remains 0%, with dedicated machinery about 80-85%.
+Green wrappers are not counted as analytic completion.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` is focused-green and records constants before `k`; its producer
@@ -176,7 +187,7 @@ and regular are definitionally the same.  Hamilton endpoint extension is a
 different later producer and is not part of the MSM135 3.10 denominator.
 
 Accounting: unconditional Theorem 3.10 remains theorem-level 0%.
-The dedicated P4 machinery is approximately 97%, and whole-HCG machinery
+The dedicated P4 consumer/assembly machinery is approximately 97%, and whole-HCG machinery
 remains approximately 60%.
 
 ## Inventory — DONE, verified, reuse (do not rebuild)
@@ -749,12 +760,13 @@ the stated one); same-name `.md` updated with route + gotchas; this plan's Statu
 The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` is now
 stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE,
 scalar, joint chart-Gram smoothness, open endgame, and raw-input capstone are
-checked, so the dedicated P4 machinery is conservatively about 97%.  The
+checked, so the dedicated P4 consumer/assembly machinery is conservatively
+about 97%.  The
 common subsequence, compatible limit family, upgrade record, and all-time
 limit completeness are now checked from the existing raw fixed-window
 hypotheses.  The remaining genuine work is to produce those hypotheses
-uniformly on every canonical window and retain the canonical time-zero
-convergence provenance through Step D.  The checked `ConvOut.gramSmooth`,
+uniformly on every canonical window.  Canonical time-zero convergence
+provenance through Step D is already checked.  The checked `ConvOut.gramSmooth`,
 `OpenConvOut.smoothMetric_of_conv`, and `open_upgrade_of_raw` close the
 fixed-window-to-open consumer path. Hamilton's
 nonregular endpoint extension is tracked separately and is

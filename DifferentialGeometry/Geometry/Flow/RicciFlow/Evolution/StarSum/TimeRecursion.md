@@ -1,5 +1,28 @@
 # `TimeRecursion` -- Brick 4 Phase P3 downstream plan
 
+## 2026-07-22 fixed arbitrary-index successor
+
+The arbitrary-index successor no longer chooses its spatial or gamma fields
+after a frame is supplied.  `resStarNext` is the fixed global field
+
+```text
+nabla Tk - commStarField - gammaStarField,
+```
+
+and `resStarNext_cost` gives its exact `rmResidualCost` certificate.
+`resStarNext_spec` proves that this already chosen field realizes the next
+component heat equation on every supplied orthonormal local-frame patch.  The
+old `resStarSucc` statement remains as a compatibility wrapper whose witness is
+definitionally `resStarNext`.
+
+The source is sorry-free.  Its previous focused check passed before the final
+`commStarField` substitution; final focused verification is pending the active
+upstream artifact refresh and the narrow `SpatialMember` refresh.  Therefore
+the fixed successor theorem is currently **0% final-verified**, while its
+dedicated source machinery is about **99%** complete.  `rmResidual_cost` and
+the direct tower remain separately unverified until the downstream chain is
+checked.
+
 ## 2026-07-14 uniform recursive residual cost
 
 Added `gammaStarCost` and `resStarCost`, and strengthened `gammaStarU` and
@@ -1528,4 +1551,41 @@ branch-alignment verification is about 99% pending the downstream Hamilton
 replay, and the merge commit remains 0% until final verification and diff
 review.  This repair does not change the completion percentage of the Hamilton
 positive-Ricci endpoint or wider HCG compactness theorem.
+
+## 2026-07-22 arbitrary-index successor
+
+The conditional time-recursion successor is now checked for an arbitrary finite frame index type.
+
+- `lfBase` and `lfChr` are generic in `Idx` (the old `Fin 3` callers infer the same instances).
+- `gammaStarU` is generic and records the exact cost
+  `rmGammaCost (Fintype.card Idx) k = card(Idx)^2 * (12 + 3*k)`.
+- Public `resStarSucc` consumes a level-`k` residual witness with cost
+  `rmResidualCost (Fintype.card Idx) k` and constructs the level-`k+1` witness with the exact
+  successor cost.  Its proof is the existing Shi single-step assembly; no compactness, global
+  frame, or dimension-three identity is used.
+- The old `resStarLFU` theorem remains the dimension-three compatibility endpoint.  Its successor
+  branch now calls `resStarSucc`; the existing `gammaStarCost` and `resStarCost` declarations are
+  retained and locally identified with the generic ledger at cardinality three.
+
+Focused verification passed with no diagnostics.  `resStarSucc` itself is complete (100%).  A
+public arbitrary-index all-`k` solution capstone is still not stated (0%); its dedicated recursion
+machinery is about 70% complete because the exact ledger and successor are checked, while the
+generic base/canonical local-frame discharge remains to be assembled.  `towerHeatSol` and the
+unconditional HCG compactness theorem remain unstated/unproved here (0%); this change supplies one
+producer brick and does not by itself complete either endpoint.
+
+## 2026-07-22 canonical gamma witness
+
+The Christoffel-time correction now has a fixed global field
+`gammaStarField S t k`.  `gammaStarField_cost` certifies its exact
+`rmGammaCost (card Idx) k`, while the local-frame theorem `gammaStarU` only
+proves that this already chosen field has the required component formula on an
+orthonormal frame patch.  This removes the former point/patch-dependent
+existential choice from the recursive witness construction.
+
+Focused verification passed.  The fixed gamma producer is complete (100%).
+The canonical fixed successor is still being assembled with the corresponding
+fixed spatial-commutator field, so `rmResidual_cost` remains unstated (0%);
+dedicated direct-tower machinery is about 94%.  The direct `towerHeatSol` and
+unconditional HCG compactness endpoint remain theorem-level 0%.
 

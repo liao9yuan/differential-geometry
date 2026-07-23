@@ -72,3 +72,21 @@ Accounting: both named producer theorems are complete (100%).  The downstream
 `potential_pde` theorem is separately complete in `PotentialEvolution.lean`;
 these producer proofs are not double-counted as completion of that consumer or
 of the still-open W-monotonicity and noncollapsing endpoints.
+
+## 2026-07-22
+
+Added `gradientFun_pow`, the natural-power gradient rule in the successor form
+
+`grad (f ^ (n + 1)) = ((n + 1 : Real) * f ^ n) * grad f`.
+
+The successor form is the canonical one for graded cutoff powers: it is valid
+when `f x = 0`, needs only pointwise manifold differentiability of `f`, and
+avoids the artificial `n - 1` boundary at exponent zero.  The proof is an
+induction using the existing `gradientFun_mul`, so it introduces neither a
+second power API nor a positivity assumption.
+
+Verification status: focused Lean check passed with no local diagnostics.  No
+targeted module refresh was run in this lane.  The named API lemma is complete
+(100%); the complete noncompact Bernstein theorem remains separately unstated
+or unproved at its final endpoint, and this lemma closes only its graded-cutoff
+natural-power gradient seam.
