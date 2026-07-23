@@ -95,10 +95,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -231,6 +227,107 @@ private lemma rawTensorConnLapIter_norm_eq_toL2
   (SmoothCcTensor.norm_toL2 (I := I) (M := M)
     (rawTensorConnLapIter (I := I) g 0 2 i U)).symm
 
+theorem exists_nonnegative_gardingBootstrapCoeff
+    (a c : ℝ) (ha : 0 ≤ a) (hc : 0 ≤ c) :
+    ∃ B : ℕ → ℝ, (∀ p, 0 ≤ B p) ∧ B 0 = 1 ∧ B 1 = 1 ∧
+      ∀ m, a * (B m + c * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤ B (m + 2) := by
+  let K : ℝ := a * (2 + c)
+  have hK : 0 ≤ K := mul_nonneg ha (by linarith)
+  let Bpair : ℕ → ℝ × ℝ := fun n => Nat.rec (motive := fun _ => ℝ × ℝ)
+    (1, 1)
+    (fun n prev =>
+      let s := prev.2
+      let b : ℝ := if n = 0 then 1 else K * s + 1
+      (b, s + b))
+    n
+  let B : ℕ → ℝ := fun n => (Bpair n).1
+  have hBfst_succ : ∀ n, (Bpair (n + 1)).1 =
+      (if n = 0 then 1 else K * (Bpair n).2 + 1) := fun _ => rfl
+  have hBsnd_succ : ∀ n, (Bpair (n + 1)).2 =
+      (Bpair n).2 + (Bpair (n + 1)).1 := fun _ => rfl
+  have hBsnd_zero : (Bpair 0).2 = 1 := rfl
+  have hB_fst : ∀ n, B n = (Bpair n).1 := fun _ => rfl
+  have hB0 : B 0 = 1 := rfl
+  have hB1 : B 1 = 1 := rfl
+  have hBpair_sum : ∀ n, (Bpair n).2 = ∑ i ∈ Finset.range (n + 1), B i := by
+    intro n
+    induction n with
+    | zero => rw [hBsnd_zero, Finset.sum_range_one, hB0]
+    | succ m ihm =>
+        rw [Finset.sum_range_succ, ← ihm, hBsnd_succ m, hB_fst (m + 1)]
+  have hBsucc : ∀ n, B (n + 2) = K * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
+    intro n
+    rw [show B (n + 2) = (Bpair (n + 2)).1 from rfl, hBfst_succ (n + 1)]
+    simp only [Nat.succ_ne_zero, if_false]
+    rw [hBpair_sum (n + 1)]
+  have hB_nonneg : ∀ p, 0 ≤ B p := by
+    intro p
+    induction p using Nat.strong_induction_on with
+    | _ n ih =>
+      match n with
+      | 0 => rw [hB0]; norm_num
+      | 1 => rw [hB1]; norm_num
+      | m + 2 =>
+          rw [hBsucc m]
+          exact add_nonneg (mul_nonneg hK
+            (Finset.sum_nonneg (fun i hi => ih i (Finset.mem_range.mp hi)))) zero_le_one
+  refine ⟨B, hB_nonneg, hB0, hB1, fun m => ?_⟩
+  rw [hBsucc m]
+  have hBm_le : B m ≤ ∑ i ∈ Finset.range (m + 2), B i := by
+    apply Finset.single_le_sum (f := B) (fun i _ => hB_nonneg i)
+    rw [Finset.mem_range]
+    omega
+  have hsum : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
+    Finset.sum_nonneg (fun i _ => hB_nonneg i)
+  have hinner : B m + c * (∑ i ∈ Finset.range (m + 2), B i) + B m ≤
+      (2 + c) * (∑ i ∈ Finset.range (m + 2), B i) := by
+    nlinarith
+  calc
+    a * (B m + c * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1
+        ≤ a * ((2 + c) * (∑ i ∈ Finset.range (m + 2), B i)) + 1 :=
+          add_le_add (mul_le_mul_of_nonneg_left hinner ha) le_rfl
+    _ = K * (∑ i ∈ Finset.range (m + 2), B i) + 1 := by
+      rw [show K = a * (2 + c) from rfl]
+      ring
+
+private lemma sqrt_mul_le_add_of_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    Real.sqrt (a * b) ≤ b + a := by
+  rw [← Real.sqrt_sq (add_nonneg hb ha)]
+  exact Real.sqrt_le_sqrt (by nlinarith [sq_nonneg (a - b)])
+
+private lemma gradOrder_zero_l2Norm_le
+    (g : SmoothRiemannianMetric I M) (U : SmoothCcTensor g 0 2) :
+    ‖iteratedCovGrad g 0 2 0 U‖ ≤
+      ∑ i ∈ Finset.range ((0 + 1) / 2 + 1),
+        ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ := by
+  rw [iteratedCovGrad_zero]
+  norm_num [rawTensorConnLapIter_zero]
+
+private lemma gradOrder_one_l2Norm_le
+    (g : SmoothRiemannianMetric I M)
+    (hgrad1 : Order1ControlFamily (I := I) (M := M) g)
+    (U : SmoothCcTensor g 0 2) :
+    ‖iteratedCovGrad g 0 2 1 U‖ ≤
+      ∑ i ∈ Finset.range ((1 + 1) / 2 + 1),
+        ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ := by
+  rw [show iteratedCovGrad g 0 2 1 U = covGrad (I := I) (M := M) g 0 2 U by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]]
+  rw [show ∑ i ∈ Finset.range ((1 + 1) / 2 + 1),
+      ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ =
+        ‖U‖ + ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ by
+    have htwo : (1 + 1) / 2 + 1 = 2 := by norm_num
+    rw [htwo, Finset.sum_range_succ, Finset.sum_range_one,
+      rawTensorConnLapIter_zero, rawTensorConnLapIter_one]]
+  set a : ℝ := ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖
+  set b : ℝ := ‖U‖
+  have ha : 0 ≤ a := norm_nonneg _
+  have hb : 0 ≤ b := norm_nonneg _
+  have hgrad : 0 ≤ ‖covGrad (I := I) (M := M) g 0 2 U‖ := norm_nonneg _
+  have hsqrt : ‖covGrad (I := I) (M := M) g 0 2 U‖ ≤ Real.sqrt (a * b) := by
+    rw [← Real.sqrt_sq hgrad]
+    exact Real.sqrt_le_sqrt (hgrad1 2 U)
+  exact hsqrt.trans (sqrt_mul_le_add_of_nonneg ha hb)
+
 
 
 
@@ -256,112 +353,22 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
   obtain ⟨hCc, hcommU⟩ := hcomm
   set sg : ℝ := Real.sqrt Cg with hsg_def
   have hsg_nn : 0 ≤ sg := Real.sqrt_nonneg _
-  set K : ℝ := sg * (2 + Cc) with hK_def
-  have hK_nn : 0 ≤ K := mul_nonneg hsg_nn (by linarith [hCc])
-  let Bpair : ℕ → ℝ × ℝ := fun n => Nat.rec (motive := fun _ => ℝ × ℝ)
-    (1, 1)
-    (fun n prev =>
-      let s := prev.2
-      let b : ℝ := if n = 0 then 1 else K * s + 1
-      (b, s + b))
-    n
-  let B : ℕ → ℝ := fun n => (Bpair n).1
-  have hBfst_succ : ∀ n, (Bpair (n + 1)).1 =
-      (if n = 0 then 1 else K * (Bpair n).2 + 1) := fun _ => rfl
-  have hBsnd_succ : ∀ n, (Bpair (n + 1)).2 =
-      (Bpair n).2 + (Bpair (n + 1)).1 := fun _ => rfl
-  have hBsnd_zero : (Bpair 0).2 = 1 := rfl
-  have hB0 : B 0 = 1 := rfl
-  have hB1 : B 1 = 1 := rfl
-  have hB_fst : ∀ n, B n = (Bpair n).1 := fun _ => rfl
-  have hBpair_sum : ∀ n, (Bpair n).2 = ∑ i ∈ Finset.range (n + 1), B i := by
-    intro n
-    induction n with
-    | zero => rw [hBsnd_zero, Finset.sum_range_one, hB0]
-    | succ m ihm =>
-        rw [Finset.sum_range_succ, ← ihm, hBsnd_succ m, hB_fst (m + 1)]
-  have hBsucc_pos : ∀ n, B (n + 2) = K * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
-    intro n
-    rw [hB_fst (n + 2), hBfst_succ (n + 1)]
-    simp only [Nat.succ_ne_zero, if_false]
-    rw [hBpair_sum (n + 1)]
-  have hB_nn : ∀ p, 0 ≤ B p := by
-    intro p
-    induction p using Nat.strong_induction_on with
-    | _ n ih =>
-      match n with
-      | 0 => rw [hB0]; norm_num
-      | 1 => rw [hB1]; norm_num
-      | (m + 2) =>
-          rw [hBsucc_pos m]
-          have h2 : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
-            Finset.sum_nonneg (fun i hi => ih i (by
-              have := Finset.mem_range.mp hi; omega))
-          have : 0 ≤ K * (∑ i ∈ Finset.range (m + 2), B i) := mul_nonneg hK_nn h2
-          linarith
-  have hBstep : ∀ m, sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤
-      B (m + 2) := by
-    intro m
-    rw [hBsucc_pos m]
-    have hBm_le : B m ≤ ∑ i ∈ Finset.range (m + 2), B i := by
-      apply Finset.single_le_sum (f := B) (fun i _ => hB_nn i)
-      rw [Finset.mem_range]; omega
-    have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
-      Finset.sum_nonneg (fun i _ => hB_nn i)
-    have hkey : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
-        K * (∑ i ∈ Finset.range (m + 2), B i) := by
-      rw [hK_def]
-      have h1 : B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m ≤
-          (2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i) := by nlinarith [hBm_le, hCc, hsum_nn]
-      calc sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m)
-          ≤ sg * ((2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i)) :=
-            mul_le_mul_of_nonneg_left h1 hsg_nn
-        _ = sg * (2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i) := by ring
-    linarith
+  obtain ⟨B, hB_nn, hB0, hB1, hBstep⟩ :=
+    exists_nonnegative_gardingBootstrapCoeff sg Cc hsg_nn hCc
   refine ⟨B, hB_nn, ?_⟩
   intro p
   induction p using Nat.strong_induction_on with
   | _ n ih =>
-    match n with
-    | 0 =>
-        intro U
-        rw [iteratedCovGrad_zero]
-        rw [hB0]
-        have hsum : ∑ i ∈ Finset.range ((0 + 1) / 2 + 1),
-            ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ = ‖U‖ := by
-          norm_num [rawTensorConnLapIter_zero]
-        rw [hsum]; ring_nf; exact le_refl _
-    | 1 =>
-        intro U
-        rw [hB1]
-        have hord1 : ‖covGrad (I := I) (M := M) g 0 2 U‖ ^ 2 ≤
-            ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ * ‖U‖ := hgrad1 2 U
-        have hgrad_eq :
-            iteratedCovGrad g 0 2 1 U = covGrad (I := I) (M := M) g 0 2 U := by
-          rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
-        rw [hgrad_eq]
-        have hsum : ∑ i ∈ Finset.range ((1 + 1) / 2 + 1),
-              ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ =
-            ‖U‖ + ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ := by
-          have : (1 + 1) / 2 + 1 = 2 := by norm_num
-          rw [this]
-          rw [Finset.sum_range_succ, Finset.sum_range_one]
-          rw [rawTensorConnLapIter_zero, rawTensorConnLapIter_one]
-        rw [hsum, one_mul]
-        set a : ℝ := ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ with ha_def
-        set b : ℝ := ‖U‖ with hb_def
-        have ha_nn : 0 ≤ a := norm_nonneg _
-        have hb_nn : 0 ≤ b := norm_nonneg _
-        have hgrad_nn : 0 ≤ ‖covGrad (I := I) (M := M) g 0 2 U‖ := norm_nonneg _
-        have hsqrt : ‖covGrad (I := I) (M := M) g 0 2 U‖ ≤ Real.sqrt (a * b) := by
-          rw [← Real.sqrt_sq hgrad_nn]
-          exact Real.sqrt_le_sqrt hord1
-        have hamgm : Real.sqrt (a * b) ≤ b + a := by
-          rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ b + a)]
-          apply Real.sqrt_le_sqrt
-          nlinarith [sq_nonneg (a - b), ha_nn, hb_nn]
-        linarith [hsqrt, hamgm]
-    | (m + 2) =>
+      match n with
+      | 0 =>
+          intro U
+          rw [hB0, one_mul]
+          exact gradOrder_zero_l2Norm_le g U
+      | 1 =>
+          intro U
+          rw [hB1, one_mul]
+          exact gradOrder_one_l2Norm_le g hgrad1 U
+      | (m + 2) =>
         intro U
         set S : SmoothCcTensor g 0 (2 + m) := iteratedCovGrad g 0 2 m U with hS_def
         have hgrad2_eq :
@@ -520,8 +527,13 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := hnLapS_le
               _ ≤ B m * Sfull + Cc * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
                   have hc := mul_le_mul_of_nonneg_left hSlow_le hCc
-                  linarith [hc]
-          nlinarith [h1, hnS_le, hSfull_nn]
+                  exact add_le_add le_rfl hc
+          calc
+            nLapS + nS ≤
+                (B m * Sfull + Cc * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull)) +
+                  B m * Sfull := add_le_add h1 hnS_le
+            _ = (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull := by
+              ring
         have hfinal : nHess ≤ B (m + 2) * Sfull := by
           have hstep := hBstep m
           calc nHess ≤ sg * (nLapS + nS) := hgard_fp
@@ -530,7 +542,8 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             _ = (sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m)) * Sfull := by ring
             _ ≤ B (m + 2) * Sfull := by
                 have hle : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
-                    B (m + 2) := by linarith [hstep]
+                    B (m + 2) :=
+                  (le_add_of_nonneg_right zero_le_one).trans hstep
                 exact mul_le_mul_of_nonneg_right hle hSfull_nn
         have hLHS : ‖iteratedCovGrad g 0 2 (m + 2) U‖ = nHess := by
           rw [hgrad2_eq, hnHess_def]
