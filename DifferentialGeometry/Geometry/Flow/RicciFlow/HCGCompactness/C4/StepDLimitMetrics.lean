@@ -3142,7 +3142,6 @@ theorem tailFlatSup_lt
               ((g (j₀ + n)).restrictOpen (I := I) U) (gInf n) (gInf n) q x
     _ ≤ ε / 2 := hbig
 
-set_option maxHeartbeats 800000 in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
 

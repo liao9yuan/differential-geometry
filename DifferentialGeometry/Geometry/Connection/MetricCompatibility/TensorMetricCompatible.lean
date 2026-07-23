@@ -9,8 +9,6 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -541,8 +539,6 @@ lemma tensorMetricCompatDiff_apply
             (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) T x v)) := by
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 open Tensor0SNabla HomConnection in
 
 omit [CompleteSpace E] in

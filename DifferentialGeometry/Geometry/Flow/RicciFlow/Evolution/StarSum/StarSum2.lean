@@ -381,7 +381,6 @@ theorem stNabla_smul
 
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -472,7 +471,6 @@ theorem stNablaMtIter
       exact ⟨_, h2⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -740,7 +738,6 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       split_ifs <;> simp
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -815,7 +812,6 @@ theorem StarSum2Cost.bound
       exact le_trans htop (mul_le_mul_of_nonneg_left hsingle (by positivity))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1428,7 +1424,6 @@ theorem drStar4
 end TermIdentities
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -1489,7 +1484,6 @@ end ComponentIdentity
 
 open DifferentialGeometry.Dim3Reaction in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 

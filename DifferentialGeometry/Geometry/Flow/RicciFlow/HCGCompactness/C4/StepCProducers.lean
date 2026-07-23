@@ -50,6 +50,22 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
+noncomputable local instance stepCProducersModelDualNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance stepCProducersModelDualNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance stepCProducersModelBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance stepCProducersModelBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
 
 
 
@@ -1010,10 +1026,6 @@ theorem activeFill_totalPts_of_ne
       exact (h hexists).elim
   refine ⟨target, htarget, ?_⟩
   simp [centerAverage.activeFill, hne, totalPts, hlookup]
-
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 100000 in
-
 
 
 theorem MetricCompactnessInputs.exists_atom_supp_fin
@@ -2049,9 +2061,6 @@ theorem HasSuppConvData.subseq
     simpa only [NetLimitData.subseq_phi, Function.comp_apply,
       seqCenterD_subseq] using hsmooth alpha target (ψ k)
 
-set_option maxHeartbeats 800000 in
-
-
 
 theorem MetricCompactnessInputs.exists_supp_pts_fin
     (inp : MetricCompactnessInputs (I := I) X)
@@ -2551,9 +2560,6 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
       obtain ⟨target, hslot, _hmem⟩ := hsupp alpha (chi alpha x) hx.2 gamma hne
       exact htarget ⟨target, hslot⟩
 
-set_option maxHeartbeats 800000 in
-
-
 
 
 
@@ -2715,9 +2721,6 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (fun gamma v hv =>
       hV'sub gamma (binfMemClosed (hB gamma) (hKU gamma hv) (hV'closed gamma)
         (Filter.Eventually.of_forall (hKV0 gamma v hv))))
-
-set_option maxHeartbeats 800000 in
-
 
 
 
