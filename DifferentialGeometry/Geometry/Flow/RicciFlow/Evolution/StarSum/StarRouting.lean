@@ -121,8 +121,6 @@ theorem wRoute_val {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
 
 
 
-set_option maxHeartbeats 1000000 in
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -257,8 +255,6 @@ theorem sigmaCurv0_nat_val (k : ℕ) (p : Fin (4 + 0)) :
   simp only [sigmaCurv0, Equiv.ofBijective_apply, tf0, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option maxHeartbeats 1000000 in
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -390,8 +386,6 @@ theorem sigmaDiffA_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   have hqlt := q.isLt
   simp only [sigmaDiffA, Equiv.ofBijective_apply, tfDiffA, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
-
-set_option maxHeartbeats 1000000 in
 
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
@@ -543,8 +537,6 @@ theorem sigmaDiffB_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + (k + 1))) :
   have hqlt := q.isLt
   simp only [sigmaDiffB, Equiv.ofBijective_apply, tfDiffB, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
-
-set_option maxHeartbeats 1000000 in
 
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
@@ -715,8 +707,6 @@ theorem sigmaRic1_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaRic1, Equiv.ofBijective_apply, tfRic1, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option maxHeartbeats 1000000 in
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -855,8 +845,6 @@ theorem sigmaRic2_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaRic2, Equiv.ofBijective_apply, tfRic2, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option maxHeartbeats 1000000 in
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -994,8 +982,6 @@ theorem sigmaRic3_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   have hqlt := q.isLt
   simp only [sigmaRic3, Equiv.ofBijective_apply, tfRic3, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
-
-set_option maxHeartbeats 1000000 in
 
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in

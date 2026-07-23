@@ -9,9 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
 
@@ -1176,7 +1173,6 @@ private def sigmaQ2 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma qCommFoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -1369,7 +1365,6 @@ private lemma qCommFoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
   rw [hT1, hT2]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma ricciArmOrder0AACommCoeffField_eq_refold (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
@@ -1786,12 +1781,9 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0AACommCoeffFieldInputSymm_boundedFact
 end NormedAACommInputSymmetrization
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3200000
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-
-set_option maxHeartbeats 3200000 in
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem refoldKernelContractionMonomialField_eq_mvPairTraceRefold
@@ -2011,6 +2003,17 @@ private theorem exists_rfns_icg_refoldKernelContractionMonomialField_window
   rw [← Finset.sum_mul]
   exact le_of_eq (by ring)
 
+private lemma quarter_four_term_bound
+    {z z123 z12 z1 z2 z3 z4 c1 c2 c3 c4 w : ℝ}
+    (h1 : z1 ≤ c1 * w) (h2 : z2 ≤ c2 * w)
+    (h3 : z3 ≤ c3 * w) (h4 : z4 ≤ c4 * w)
+    (hs1 : z ≤ 2 * z123 + 2 * z4)
+    (hs2 : z123 ≤ 2 * z12 + 2 * z3)
+    (hs3 : z12 ≤ 2 * z1 + 2 * z2)
+    (hw : 0 ≤ w) (hc4 : 0 ≤ c4) :
+    (1 / 4 : ℝ) * z ≤ (2 * c1 + 2 * c2 + c3 + c4) * w := by
+  nlinarith
+
 private theorem exists_rfns_icg_refoldKernelContractionField_window
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -2102,8 +2105,7 @@ private theorem exists_rfns_icg_refoldKernelContractionField_window
     ((iteratedCovGrad (I := I) g₀ 2 2 i m2).toSection x)
   have hgrid_nn : 0 ≤ Combinatorics.boundedFactorGridWindow b (i + 2) (i + 3) :=
     Combinatorics.boundedFactorGridWindow_nonneg b hb_nn _ _
-  nlinarith [h1, h2, h3, h4, hs1, hs2, hs3, hgrid_nn, hC1_nn i, hC2_nn i, hC3_nn i,
-    hC4_nn i]
+  exact quarter_four_term_bound h1 h2 h3 h4 hs1 hs2 hs3 hgrid_nn (hC4_nn i)
 
 
 theorem rfns_iteratedCovGrad_refoldKernelContractionFieldInputSymm_boundedFactorGridWindow_le
@@ -3365,8 +3367,6 @@ private lemma k4a_sum_reorg {d m : ℕ} (A B : Fin d → ℝ) (C D : Fin m → F
         ring
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option maxHeartbeats 6400000 in
-
 theorem riemannianFiberNormSq_compRS_mvPairTraceOp_leibnizCorner_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

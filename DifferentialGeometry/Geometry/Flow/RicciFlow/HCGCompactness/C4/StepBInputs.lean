@@ -62,6 +62,24 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
+private local instance : NormedAddCommGroup (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
 
 
 
@@ -285,13 +303,6 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
   dsimp only [tangentMapWithin]
   rw [hmf]
 
-set_option synthInstance.maxHeartbeats 800000 in
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_of_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {S : Set E}
@@ -351,13 +362,6 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   intro w
   rw [← contMDiffOn_iff_contDiffOn]
   exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
-
-set_option synthInstance.maxHeartbeats 800000 in
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn
@@ -557,10 +561,6 @@ end NormalCoordMetricEquivOn
 
 
 
-set_option synthInstance.maxHeartbeats 800000 in
-
-
-
 def NormalCoordMetricDerivBound
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (U : Set E) (p : Nat) (C : Real) : Prop :=
@@ -633,9 +633,6 @@ theorem half_le_gpConst
   simpa only [normalMetric_zero (I := I) (X.obj k) x] using
     (h.metric_equiv k x 0 h0 v).1
 
-
-
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -745,7 +742,6 @@ theorem koszulVec_pair_le
           ‖z - y‖ * ‖v‖ * ‖w‖ := by
       ring
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
@@ -753,14 +749,6 @@ private theorem fderiv_eval3
     (d u v w : E) :
     fderiv Real (fun p ↦ fderiv Real G p u v w) q d =
       fderiv Real (fderiv Real G) q d u v w := by
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   have hu : HasFDerivAt (fun _ : E ↦ u) 0 q :=
     hasFDerivAt_const (𝕜 := Real) (x := q) u
   have hv : HasFDerivAt (fun _ : E ↦ v) 0 q :=
@@ -772,11 +760,6 @@ private theorem fderiv_eval3
   have hthird := hsecond.clm_apply hw
   have happ := DFunLike.congr_fun hthird.fderiv d
   simpa using happ
-
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
-
-
 
 theorem koszulVec_lip_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -806,14 +789,6 @@ theorem koszulVec_lip_on
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   let G := normalCoordMetric (I := I) (X.obj k) x
   let U := Metric.ball (0 : E) r
   have hsm : ContDiffOn Real (⊤ : ℕ∞) G U :=

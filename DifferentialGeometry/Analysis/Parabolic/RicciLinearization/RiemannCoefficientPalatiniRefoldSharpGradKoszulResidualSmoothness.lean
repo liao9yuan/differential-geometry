@@ -24,8 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -286,7 +284,6 @@ def bdSGKTau4 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (P S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -405,7 +402,6 @@ def sharpGradKoszulWeightedTerm (g₀ g₁ : SmoothRiemannianMetric I M) (σ : E
         (koszulCovecCc (I := I) g₀ P)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -619,7 +615,6 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -762,7 +757,6 @@ private lemma bdKRaw_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -855,7 +849,6 @@ private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (fun i => w (armPairTraceSlotPerm6 i))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :

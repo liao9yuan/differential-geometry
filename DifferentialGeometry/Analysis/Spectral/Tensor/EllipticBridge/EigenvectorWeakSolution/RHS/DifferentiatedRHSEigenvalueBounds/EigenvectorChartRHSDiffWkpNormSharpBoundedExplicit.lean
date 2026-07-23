@@ -3,9 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
   RealInnerProductSpace InnerProductSpace
@@ -93,8 +90,6 @@ private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 omit [CompleteSpace E] in
@@ -805,8 +800,6 @@ private lemma sharpDiffExplicit_iter_memWkp
   exact (eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (I := I) (M := M) g r s i α P₀ j K h_chart_cpt idx).1
 
-set_option maxHeartbeats 8000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 omit [CompleteSpace E] in
@@ -1221,7 +1214,6 @@ private lemma sharpDiffExplicit_diff_memWkp
   eigenvectorChartRHSDiff_memWkp (I := I) (M := M) g r s i α P₀
     m K' l (fun β Q => H.h_pou_resolv i (m + 1 + K') β Q hN)
 
-set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 omit [CompleteSpace E] in
