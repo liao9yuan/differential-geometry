@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter MeasureTheory
 open scoped Manifold Topology Bundle ContDiff BigOperators ENNReal NNReal

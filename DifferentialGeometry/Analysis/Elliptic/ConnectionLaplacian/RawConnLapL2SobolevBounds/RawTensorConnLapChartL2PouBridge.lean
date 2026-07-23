@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Completene
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open MeasureTheory

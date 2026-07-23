@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -56,6 +54,52 @@ private lemma euclidPartial_sq_le_fderiv_sq
       |euclidPartial (E := E) m f y| ^ 2 := (sq_abs _).symm
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+
+private lemma univ_sum_sq_le_card_mul_sum_sq
+    {ι : Type*} [Fintype ι] (f : ι → ℝ) :
+    (∑ i, f i) ^ 2 ≤ (Fintype.card ι : ℝ) * ∑ i, f i ^ 2 := by
+  classical
+  simpa using
+    (sq_sum_le_card_mul_sum_sq
+      (s := (Finset.univ : Finset ι)) (f := f))
+
+private lemma univ_sum_abs_sq_le_card_mul_sum_sq
+    {ι : Type*} [Fintype ι] (f : ι → ℝ) :
+    (∑ i, |f i|) ^ 2 ≤ (Fintype.card ι : ℝ) * ∑ i, f i ^ 2 := by
+  simpa only [sq_abs] using
+    (univ_sum_sq_le_card_mul_sum_sq (fun i => |f i|))
+
+private lemma double_univ_sum_sq_le_cards_mul_sum_sq
+    {ι κ : Type*} [Fintype ι] [Fintype κ] (f : ι → κ → ℝ) :
+    (∑ i, ∑ j, f i j) ^ 2 ≤
+      (Fintype.card ι : ℝ) * (Fintype.card κ : ℝ) *
+        ∑ i, ∑ j, f i j ^ 2 := by
+  classical
+  have hsum : (∑ i, ∑ j, f i j) = ∑ p : ι × κ, f p.1 p.2 := by
+    rw [← Finset.sum_product']
+    rfl
+  have hsq : (∑ i, ∑ j, f i j ^ 2) = ∑ p : ι × κ, f p.1 p.2 ^ 2 := by
+    rw [← Finset.sum_product']
+    rfl
+  rw [hsum, hsq]
+  simpa [Fintype.card_prod] using
+    (univ_sum_sq_le_card_mul_sum_sq (fun p : ι × κ => f p.1 p.2))
+
+private lemma double_univ_sum_abs_sq_le_cards_mul_sum_sq
+    {ι κ : Type*} [Fintype ι] [Fintype κ] (f : ι → κ → ℝ) :
+    (∑ i, ∑ j, |f i j|) ^ 2 ≤
+      (Fintype.card ι : ℝ) * (Fintype.card κ : ℝ) *
+        ∑ i, ∑ j, f i j ^ 2 := by
+  classical
+  have hsum : (∑ i, ∑ j, |f i j|) = ∑ p : ι × κ, |f p.1 p.2| := by
+    rw [← Finset.sum_product']
+    rfl
+  have hsq : (∑ i, ∑ j, f i j ^ 2) = ∑ p : ι × κ, f p.1 p.2 ^ 2 := by
+    rw [← Finset.sum_product']
+    rfl
+  rw [hsum, hsq]
+  simpa [Fintype.card_prod] using
+    (univ_sum_abs_sq_le_card_mul_sum_sq (fun p : ι × κ => f p.1 p.2))
 
 theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -173,7 +217,18 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
   refine ⟨3 * ((n : ℝ) ^ 4 * B2 ^ 2 +
       (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 +
       (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2),
-    by positivity, ?_⟩
+    mul_nonneg (by norm_num)
+      (add_nonneg
+        (add_nonneg
+          (mul_nonneg (pow_nonneg (Nat.cast_nonneg n) 4) (sq_nonneg B2))
+          (mul_nonneg
+            (mul_nonneg
+              (mul_nonneg (Nat.cast_nonneg cardI) (Nat.cast_nonneg cardJ))
+              (sq_nonneg (n : ℝ)))
+            (sq_nonneg B1)))
+        (mul_nonneg
+          (mul_nonneg (Nat.cast_nonneg cardI) (Nat.cast_nonneg cardJ))
+          (sq_nonneg B0))), ?_⟩
   intro T₀ b hb_inter
   have hidentity := hformula T₀ hb_inter
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
@@ -505,7 +560,8 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     rw [h_eq_LHS]
     exact h_le_inner.trans h_le_outer
   have h_Block2_via_S : Block2 ^ 2 ≤ (n : ℝ) ^ 4 * B2 ^ 2 * S_iter := by
-    have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 := by positivity
+    have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 :=
+      mul_nonneg (pow_nonneg (Nat.cast_nonneg n) 4) (sq_nonneg B2)
     exact h_Block2_sq.trans
       (mul_le_mul_of_nonneg_left h_iter_dom_f_ij h_nn)
   have h_Block1_via_S : Block1 ^ 2 ≤
@@ -521,38 +577,9 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       exact pow_le_pow_left₀ (abs_nonneg _) h_Block1_abs 2
     have h_cs : (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') ^ 2 ≤
         ((cardI : ℝ) * (cardJ : ℝ)) * S_fd := by
-      have h_card :
-          ((Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ)
-            = (cardI : ℝ) * (cardJ : ℝ) := by
-        simp [cardI, cardJ, Fintype.card_prod]
-      have h_prod_sum_a :
-          (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') =
-          ∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), N_fd p.1 p.2 := by
-        rw [← Finset.sum_product']; rfl
-      have h_prod_sum_b : S_fd =
-          ∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), N_fd p.1 p.2 ^ 2 := by
-        simp only [hS_fd_def]
-        rw [← Finset.sum_product']; rfl
-      rw [h_prod_sum_a, h_prod_sum_b]
-      have h_cs_simple :
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) * N_fd p.1 p.2) ^ 2 ≤
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) ^ 2) *
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), N_fd p.1 p.2 ^ 2) :=
-        Finset.sum_mul_sq_le_sq_mul_sq
-          (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))))
-          (fun _ => (1 : ℝ)) (fun p => N_fd p.1 p.2)
-      have h_lhs_eq2 :
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) * N_fd p.1 p.2) =
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), N_fd p.1 p.2) := by
-        refine Finset.sum_congr rfl (fun p _ => ?_); ring
-      have h_const_eq :
-          (∑ _p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) ^ 2) =
-          (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))).card := by
-        rw [Finset.sum_const]; simp
-      rw [h_lhs_eq2] at h_cs_simple
-      rw [h_const_eq] at h_cs_simple
-      rw [h_card] at h_cs_simple
-      exact h_cs_simple
+      rw [hS_fd_def]
+      simpa only [cardI, cardJ] using
+        (double_univ_sum_sq_le_cards_mul_sum_sq N_fd)
     have h_expand : (B1 * ((n : ℝ) *
         ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J')) ^ 2 =
         B1 ^ 2 * (n : ℝ) ^ 2 *
@@ -565,7 +592,8 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') ^ 2 := h_expand
       _ ≤ B1 ^ 2 * (n : ℝ) ^ 2 *
             ((cardI : ℝ) * (cardJ : ℝ) * S_fd) := by
-            have h_nn : 0 ≤ B1 ^ 2 * (n : ℝ) ^ 2 := by positivity
+            have h_nn : 0 ≤ B1 ^ 2 * (n : ℝ) ^ 2 :=
+              mul_nonneg (sq_nonneg B1) (sq_nonneg (n : ℝ))
             exact mul_le_mul_of_nonneg_left h_cs h_nn
       _ = (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 * S_fd := by ring
   have h_Block0_via_S : Block0 ^ 2 ≤
@@ -577,43 +605,9 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     have h_cs :
         (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), |R0 I' J'|) ^ 2 ≤
         ((cardI : ℝ) * (cardJ : ℝ)) * S_raw := by
-      have h_card :
-          ((Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ)
-            = (cardI : ℝ) * (cardJ : ℝ) := by
-        simp [cardI, cardJ, Fintype.card_prod]
-      have h_prod_sum_a :
-          (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), |R0 I' J'|) =
-          ∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), |R0 p.1 p.2| := by
-        rw [← Finset.sum_product']; rfl
-      have h_prod_sum_b : S_raw =
-          ∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), R0 p.1 p.2 ^ 2 := by
-        simp only [hS_raw_def]
-        rw [← Finset.sum_product']; rfl
-      rw [h_prod_sum_a, h_prod_sum_b]
-      have h_cs_simple :
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) * |R0 p.1 p.2|) ^ 2 ≤
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) ^ 2) *
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), |R0 p.1 p.2| ^ 2) :=
-        Finset.sum_mul_sq_le_sq_mul_sq
-          (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))))
-          (fun _ => (1 : ℝ)) (fun p => |R0 p.1 p.2|)
-      have h_lhs_eq2 :
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) * |R0 p.1 p.2|) =
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), |R0 p.1 p.2|) := by
-        refine Finset.sum_congr rfl (fun p _ => ?_); ring
-      have h_const_eq :
-          (∑ _p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), (1 : ℝ) ^ 2) =
-          (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))).card := by
-        rw [Finset.sum_const]; simp
-      have h_sq_abs :
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), |R0 p.1 p.2| ^ 2) =
-          (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)), R0 p.1 p.2 ^ 2) := by
-        refine Finset.sum_congr rfl (fun p _ => ?_); rw [sq_abs]
-      rw [h_lhs_eq2] at h_cs_simple
-      rw [h_const_eq] at h_cs_simple
-      rw [h_sq_abs] at h_cs_simple
-      rw [h_card] at h_cs_simple
-      exact h_cs_simple
+      rw [hS_raw_def]
+      simpa only [cardI, cardJ] using
+        (double_univ_sum_abs_sq_le_cards_mul_sum_sq R0)
     have h_expand : (B0 * (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E),
         |R0 I' J'|)) ^ 2 =
         B0 ^ 2 *
@@ -637,18 +631,26 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
   have h_S_raw_le_BigSum : S_raw ≤ BigSum := by
     rw [hBigSum_eq]; linarith [hS_iter_nn, hS_fd_nn]
   have h_Block2_BigSum : Block2 ^ 2 ≤ (n : ℝ) ^ 4 * B2 ^ 2 * BigSum := by
-    have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 := by positivity
+    have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 :=
+      mul_nonneg (pow_nonneg (Nat.cast_nonneg n) 4) (sq_nonneg B2)
     exact h_Block2_via_S.trans
       (mul_le_mul_of_nonneg_left h_S_iter_le_BigSum h_nn)
   have h_Block1_BigSum : Block1 ^ 2 ≤
       (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 * BigSum := by
     have h_nn : 0 ≤ (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 := by
-      positivity
+      exact mul_nonneg
+        (mul_nonneg
+          (mul_nonneg (Nat.cast_nonneg cardI) (Nat.cast_nonneg cardJ))
+          (sq_nonneg (n : ℝ)))
+        (sq_nonneg B1)
     exact h_Block1_via_S.trans
       (mul_le_mul_of_nonneg_left h_S_fd_le_BigSum h_nn)
   have h_Block0_BigSum : Block0 ^ 2 ≤
       (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 * BigSum := by
-    have h_nn : 0 ≤ (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 := by positivity
+    have h_nn : 0 ≤ (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 :=
+      mul_nonneg
+        (mul_nonneg (Nat.cast_nonneg cardI) (Nat.cast_nonneg cardJ))
+        (sq_nonneg B0)
     exact h_Block0_via_S.trans
       (mul_le_mul_of_nonneg_left h_S_raw_le_BigSum h_nn)
   have h_sum_blocks : Block2 ^ 2 + Block1 ^ 2 + Block0 ^ 2 ≤
