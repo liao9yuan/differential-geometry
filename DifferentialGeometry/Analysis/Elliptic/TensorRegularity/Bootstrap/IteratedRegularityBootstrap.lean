@@ -2,9 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold Set Filter MeasureTheory Topology Function
 open scoped Manifold Topology ContDiff BigOperators Matrix InnerProductSpace
   RealInnerProductSpace ENNReal NNReal
@@ -744,8 +741,6 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 local notation "dimE" => Module.finrank ℝ E
 
-set_option maxHeartbeats 1600000 in
-
 private theorem tensorComponent_aPriori_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -921,8 +916,6 @@ private theorem tensorComponent_aPriori_succ
           (((dimE : ℝ) ^ m) * Cw * (Cs + 1) + N.toReal) * DR := by
         rw [← add_mul,
           ← ENNReal.ofReal_add (by positivity) hN_toReal_nn]
-
-set_option maxHeartbeats 1600000 in
 
 theorem tensorComponent_aPriori_succ_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

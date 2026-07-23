@@ -8,9 +8,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 4000000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -809,8 +806,6 @@ private lemma diagonalGrid_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : 
         exact mul_le_mul_of_nonneg_left hB hn
     _ = (n + 1) * D := by ring
 
-set_option maxHeartbeats 6400000 in
-
 omit [CompleteSpace E] in
 theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (g : SmoothRiemannianMetric I M) :
     ∀ (j a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g 0 a) (x : M),
@@ -1026,8 +1021,6 @@ private lemma fiberNormSqComponent_zero_eq_toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from S)
           (coframeS (I := I) (M := M) g x 0 e K))
         (fun k => (show E from e (J k))) := rfl
-
-set_option maxHeartbeats 6400000 in
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem riemannianFiberNormSq_comp_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)

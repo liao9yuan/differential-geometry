@@ -102,9 +102,6 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
     wkpNorm_mono_order (d := Module.finrank ℝ E) h_order_le _ _
   exact h_partial.trans (h_mono.trans h_chart_cpt)
 
-set_option maxHeartbeats 8000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -302,9 +299,6 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
         congr 2
         rw [pow_succ, mul_comm ((i.fst.val)⁻¹ ^ eAggr) (i.fst.val)⁻¹]
         ring
-
-set_option maxHeartbeats 8000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt

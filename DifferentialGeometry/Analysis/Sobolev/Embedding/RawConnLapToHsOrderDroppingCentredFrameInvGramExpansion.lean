@@ -58,8 +58,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 section CentredFrameCoordExpansion
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -879,8 +877,6 @@ end CentredFrameCoordExpansion
 section B4Bridge
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
