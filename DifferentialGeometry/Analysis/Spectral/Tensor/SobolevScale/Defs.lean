@@ -4,7 +4,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 noncomputable section
 
 set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -193,7 +192,13 @@ omit [NeZero (Module.finrank ℝ E)] in
   cases S; cases T; cases h; rfl
 
 instance : Zero (tensorHs (I := I) (M := M) g r s σ) where
-  zero := ⟨fun _ => 0, by simp⟩
+  zero := ⟨fun _ => 0, by
+    have h : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        tensorSobolevWeight (I := I) (M := M) i σ * (0 : ℝ) ^ 2) = fun _ => (0 : ℝ) := by
+      funext i
+      rw [pow_two, mul_zero, mul_zero]
+    rw [h]
+    exact summable_zero⟩
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

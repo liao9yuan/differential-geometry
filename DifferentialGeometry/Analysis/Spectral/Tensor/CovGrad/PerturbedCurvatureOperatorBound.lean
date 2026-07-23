@@ -12,8 +12,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -36,6 +34,32 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private local instance tensorRSModelAdd_local (r s : ℕ) :
+    Add (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.addCommGroup.toAddCommMonoid.toAddCommSemigroup.toAddCommMagma.toAdd
+
+private local instance tensorRSModelSub_local (r s : ℕ) :
+    Sub (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.sub
+
+private local instance tensorRSModelNeg_local (r s : ℕ) :
+    Neg (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.neg
+
+private local instance tensorRSModelZero_local (r s : ℕ) :
+    Zero (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.zero
+
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 

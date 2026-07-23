@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 noncomputable section
 
 set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
@@ -226,8 +225,6 @@ theorem duhamel_endpoint_value_summable_sq
   tensorHs.coeff_summable_sq_of_nonneg (I := I) (M := M) (by linarith : 0 ≤ c + 1)
     (duhamelValueHs (I := I) (M := M) c ht φ hφ hmass)
 
-set_option maxHeartbeats 800000 in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -254,7 +251,7 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) ^ 2) :=
     duhamel_endpoint_value_summable_sq (I := I) (M := M) (c := 0) le_rfl ht φ hφ
-      (by simpa using hsmooth 0 le_rfl)
+      (hsmooth 0 le_rfl)
   have hmemℓp : Memℓp (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) 2 := by
     apply memℓp_gen

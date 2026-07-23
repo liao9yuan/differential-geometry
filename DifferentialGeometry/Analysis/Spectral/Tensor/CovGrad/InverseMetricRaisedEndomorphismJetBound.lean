@@ -10,9 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -73,9 +70,8 @@ private lemma rfns_neg_fib (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (-v),
     riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x v]
   rw [TensorRSSpace.toModel_neg]
-  rw [show (-(TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s)
-        (x := x) v)) = ((-1 : ℝ) • TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
-        (r := r) (s := s) (x := x) v) from by rw [neg_one_smul]]
+  rw [← neg_one_smul ℝ (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r)
+        (s := s) (x := x) v)]
   rw [tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 

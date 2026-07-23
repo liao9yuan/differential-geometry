@@ -7,9 +7,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Interval
 
@@ -119,9 +116,11 @@ private theorem contDiffAt_param_aux :
       exact ae_of_all _ (fun t ht y' hy' => hy'.1 t ht)
     · rw [ae_restrict_iff' measurableSet_uIoc]
       refine ae_of_all _ (fun t ht y' hy' => ?_)
+      have hmem : ((y', t) : H × ℝ) ∈ U ×ˢ S := ⟨hsU hy', hIcc t ht⟩
+      have hgAt : ContDiffAt ℝ ∞ G ((y', t) : H × ℝ) :=
+        hG.contDiffAt (hopen.mem_nhds hmem)
       have hslice : ContDiffAt ℝ ∞ (fun z => G (z, t)) y' :=
-        (hG.contDiffAt (hopen.mem_nhds ⟨hsU hy', hIcc t ht⟩)).comp _
-          (by fun_prop : ContDiffAt ℝ ∞ (fun z : H => (z, t)) y')
+        hgAt.comp₂ contDiffAt_id contDiffAt_const
       exact (hslice.differentiableAt (by simp)).hasFDerivAt
 
 private theorem contDiffAt_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]

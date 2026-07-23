@@ -27,8 +27,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -54,6 +52,26 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSModelAdd_local (r s : ℕ) :
+    Add (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.addCommGroup.toAddCommMonoid.toAddCommSemigroup.toAddCommMagma.toAdd
+
+private local instance tensorRSModelSub_local (r s : ℕ) :
+    Sub (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.sub
+
+private local instance tensorRSModelNeg_local (r s : ℕ) :
+    Neg (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.neg
+
+private local instance tensorRSModelZero_local (r s : ℕ) :
+    Zero (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.zero
+
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
 
 omit [BoundarylessManifold I M] in
 theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm

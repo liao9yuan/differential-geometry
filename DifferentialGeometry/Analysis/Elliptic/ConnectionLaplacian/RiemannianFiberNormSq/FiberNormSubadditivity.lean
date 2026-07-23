@@ -3,9 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
@@ -49,6 +46,10 @@ lemma riemannianFiberNormSq_add_expand
   rw [hsymm]
   ring
 
+private lemma real_add_two_mul_le_of_sq_le {A B C : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hCS : C ^ 2 ≤ A * B) : A + 2 * C + B ≤ 2 * A + 2 * B := by
+  nlinarith [hCS, hA, hB, sq_nonneg (A - B), sq_nonneg (C - A), sq_nonneg (C - B)]
+
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_add_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -76,7 +77,7 @@ theorem riemannianFiberNormSq_add_le
   have hCS : C ^ 2 ≤ A * B := by
     rw [haa, hbb]
     exact tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x am bm
-  nlinarith [hCS, hA_nn, hB_nn, sq_nonneg (A - B), sq_nonneg (C - A), sq_nonneg (C - B)]
+  exact real_add_two_mul_le_of_sq_le hA_nn hB_nn hCS
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_sub_le
@@ -91,9 +92,8 @@ theorem riemannianFiberNormSq_sub_le
     rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (-b),
       riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x b]
     rw [TensorRSSpace.toModel_neg]
-    rw [show (-(TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s)
-          (x := x) b)) = ((-1 : ℝ) • TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
-          (r := r) (s := s) (x := x) b) from by rw [neg_one_smul]]
+    rw [← neg_one_smul ℝ (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r)
+          (s := s) (x := x) b)]
     rw [tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
     ring
   rw [sub_eq_add_neg]
