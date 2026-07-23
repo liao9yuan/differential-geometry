@@ -40,6 +40,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLiePathValueDerivative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Field
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0JointSmooth
+import DifferentialGeometry.Tensor.Multilinear.CurriedProducts
 
 
 noncomputable section
@@ -74,9 +75,17 @@ private local instance instNormedAddCommGroupCLM1 :
     NormedAddCommGroup (E →L[ℝ] ℝ) :=
   ContinuousLinearMap.toNormedAddCommGroup
 
+private local instance instNormedSpaceCLM1 :
+    NormedSpace ℝ (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
 private local instance instNormedAddCommGroupCLM2 :
     NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
   ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance instNormedSpaceCLM2 :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
 
 section
 
@@ -881,12 +890,6 @@ private lemma lieArm_arm2_value_eq_principal_add_tail
     hδ_lt hδ hδ'_lt hδ' x i j l k₁]
   ring
 
-private def lieArm_slot34Eval (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
-    (u w : E) : E →L[ℝ] E →L[ℝ] ℝ :=
-  (ContinuousLinearMap.compL ℝ E (E →L[ℝ] E →L[ℝ] ℝ) ℝ
-    ((ContinuousLinearMap.apply ℝ ℝ w).comp
-      (ContinuousLinearMap.apply ℝ (E →L[ℝ] ℝ) u))).comp F
-
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_cometric_doubleTrace_eq_invGram
@@ -965,7 +968,8 @@ private lemma lieArm_cometric_doubleTrace_eq_invGram
             ((Module.finBasis ℝ E).cDualBasis l)))
         ((Module.finBasis ℝ E) l) (chartModelBasis E p) (chartModelBasis E k₁)) =
     ∑ l : Fin (Module.finrank ℝ E),
-      lieArm_slot34Eval (E := E) F (chartModelBasis E p) (chartModelBasis E k₁)
+      ContinuousLinearMap.evalCurriedFourLastTwo F
+        (chartModelBasis E p) (chartModelBasis E k₁)
         (cometricLmodel (I := I) g₁ x
           (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis l)))
@@ -984,72 +988,6 @@ private lemma lieArm_unitModel3SlotBilin_apply
     (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) (c v : E) :
     unitModel3SlotBilin (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
-
-private def lieArm_F4mul (A B : E →L[ℝ] E →L[ℝ] ℝ) :
-    E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun c => LinearMap.toContinuousLinearMap
-        { toFun := fun v => LinearMap.toContinuousLinearMap
-            { toFun := fun c' => LinearMap.toContinuousLinearMap
-                { toFun := fun v' => A c c' * B v v'
-                  map_add' := fun v₁ v₂ => by
-                    simp [map_add,
-                      mul_add]
-                  map_smul' := fun r v' => by
-                    simp [map_smul,
-                      smul_eq_mul]
-                    ring }
-              map_add' := fun c₁ c₂ => by
-                ext v'
-                simp [LinearMap.toContinuousLinearMap, map_add,
-                  ContinuousLinearMap.add_apply, add_mul]
-              map_smul' := fun r c' => by
-                ext v'
-                simp [LinearMap.toContinuousLinearMap, map_smul,
-                  ContinuousLinearMap.smul_apply, smul_eq_mul]
-                ring }
-          map_add' := fun v₁ v₂ => by
-            ext c' v'
-            simp [LinearMap.toContinuousLinearMap, map_add,
-              ContinuousLinearMap.add_apply, mul_add]
-          map_smul' := fun r v => by
-            ext c' v'
-            simp [LinearMap.toContinuousLinearMap, map_smul,
-              ContinuousLinearMap.smul_apply, smul_eq_mul]
-            ring }
-      map_add' := fun c₁ c₂ => by
-        ext v c' v'
-        simp [LinearMap.toContinuousLinearMap, map_add,
-          ContinuousLinearMap.add_apply, add_mul]
-      map_smul' := fun r c => by
-        ext v c' v'
-        simp [LinearMap.toContinuousLinearMap, map_smul,
-          ContinuousLinearMap.smul_apply, smul_eq_mul]
-        ring }
-
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma lieArm_F4mul_apply (A B : E →L[ℝ] E →L[ℝ] ℝ) (c v c' v' : E) :
-    lieArm_F4mul (E := E) A B c v c' v' = A c c' * B v v' := rfl
-
-private def lieArm_fix3 (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e : E) :
-    E →L[ℝ] E →L[ℝ] ℝ :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun c => LinearMap.toContinuousLinearMap
-        { toFun := fun v => f c v e
-          map_add' := fun v₁ v₂ => by
-            simp [map_add, ContinuousLinearMap.add_apply]
-          map_smul' := fun r v => by
-            simp [map_smul, ContinuousLinearMap.smul_apply] }
-      map_add' := fun c₁ c₂ => by
-        ext v
-        change f (c₁ + c₂) v e = f c₁ v e + f c₂ v e
-        rw [f.map_add]
-        rfl
-      map_smul' := fun r c => by
-        ext v
-        change f (r • c) v e = r • f c v e
-        rw [f.map_smul]
-        rfl }
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1076,7 +1014,8 @@ private lemma lieArm_doubleTrace_slotBilin
                 B (chartModelBasis E l₁) (chartModelBasis E k₁))) := by
   classical
   have hbrick := lieArm_cometric_doubleTrace_eq_invGram (I := I) g₁ x
-    (lieArm_F4mul (E := E) (unitModel3SlotBilin (E := E) W3 i₁ i₂ h12 base) B)
+    (ContinuousLinearMap.curriedBilinearMul
+      (unitModel3SlotBilin (E := E) W3 i₁ i₂ h12 base) B)
   rw [show (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
       unitModel3SlotBilin (E := E) W3 i₁ i₂ h12 base
           (cometricLmodel (I := I) g₁ x
@@ -1087,7 +1026,8 @@ private lemma lieArm_doubleTrace_slotBilin
               ((Module.finBasis ℝ E).cDualBasis k))) *
         B ((Module.finBasis ℝ E) l) ((Module.finBasis ℝ E) k)) =
     ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
-      lieArm_F4mul (E := E) (unitModel3SlotBilin (E := E) W3 i₁ i₂ h12 base) B
+      ContinuousLinearMap.curriedBilinearMul
+        (unitModel3SlotBilin (E := E) W3 i₁ i₂ h12 base) B
         (cometricLmodel (I := I) g₁ x
           (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis l)))
@@ -1100,8 +1040,8 @@ private lemma lieArm_doubleTrace_slotBilin
   · rw [hbrick]
     refine Finset.sum_congr rfl (fun k₁ _ => Finset.sum_congr rfl (fun p _ =>
       Finset.sum_congr rfl (fun l₁ _ => Finset.sum_congr rfl (fun m _ => ?_))))
-    rw [lieArm_F4mul_apply]
-  · rw [lieArm_F4mul_apply]
+    rw [ContinuousLinearMap.curriedBilinearMul_apply]
+  · rw [ContinuousLinearMap.curriedBilinearMul_apply]
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_slot12_pack
@@ -1265,7 +1205,8 @@ private lemma lieArm_arm1_group_traced
                 (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (chartModelBasis E l₁)
                   (chartModelBasis E k₁)) v1))) := by
     have h := lieArm_doubleTrace_slotBilin (I := I) g₁ x W3 1 2 (by decide)
-      ![v0, 0, 0] (lieArm_fix3 (E := E) (metricConnDiffLoweredTrilin (I := I) g₁ g₁ g_bg x) v1)
+      ![v0, 0, 0] (ContinuousLinearMap.evalCurriedThreeLast
+        (metricConnDiffLoweredTrilin (I := I) g₁ g₁ g_bg x) v1)
     refine Eq.trans ?_ (Eq.trans h ?_)
     · refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
       rw [lieArm_slot12_pack]

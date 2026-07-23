@@ -2545,6 +2545,7 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Tensor.Multilinear.Comp
+import DifferentialGeometry.Tensor.Multilinear.CurriedProducts
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 import DifferentialGeometry.Tensor.Multilinear.Dual
