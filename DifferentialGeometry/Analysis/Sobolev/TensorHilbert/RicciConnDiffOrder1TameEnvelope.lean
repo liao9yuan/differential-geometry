@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulT
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
@@ -229,6 +227,15 @@ private lemma fourTrace_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
     tensorInnerPointwise_smul_right]
   ring
+
+private lemma fourTrace_le_mul_one_add {a w : ℝ} (ha : 0 ≤ a) (hw : 0 ≤ w) :
+    a ≤ a * (1 + w) := by
+  nlinarith [mul_nonneg ha hw]
+
+private lemma fourTrace_sq_add_tame {u v A D T : ℝ}
+    (hu2 : u ^ 2 ≤ A * T) (hv2 : v ^ 2 ≤ D * T) :
+    (u + v) ^ 2 ≤ (2 * A + 2 * D) * T := by
+  nlinarith [sq_nonneg (u - v)]
 
 
 theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
@@ -549,14 +556,13 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
           aL l * (1 + ∑ j ∈ Finset.range (l + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
         have h1 : aL l = ‖iteratedCovGrad (I := I) g₀ 4 2 l Φ‖ ^ 2 := by simp only [haL_def]
-        nlinarith [haL_nn l, hwin1_nn l]
+        rw [← h1]
+        exact fourTrace_le_mul_one_add (haL_nn l) (hwin1_nn l)
       have hsq := pow_le_pow_left₀ (norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 l Φ +
           iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)))
         (norm_add_le (iteratedCovGrad (I := I) g₀ 4 2 l Φ)
           (iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W))) 2
-      nlinarith [hsq, hstep3 l, haLl,
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 l Φ‖ -
-          ‖iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)‖)]
+      exact hsq.trans (fourTrace_sq_add_tame haLl (hstep3 l))
     refine ⟨?_, ?_⟩
     · intro x
       rw [Real.sq_sqrt h22nn]

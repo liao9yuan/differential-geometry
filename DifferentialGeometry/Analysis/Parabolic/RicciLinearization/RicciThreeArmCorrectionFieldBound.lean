@@ -15,8 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -42,6 +40,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 def gInvDiffQuadResidualFieldRealizedFam (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -108,8 +113,10 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
       {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
       (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
-      letI : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+      letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (show TensorRSSpace 2 2 I x from
             TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x)) ≤
@@ -118,6 +125,8 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
   classical
   letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
   obtain ⟨C₀, hC₀0, hpw⟩ :=
     connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   refine ⟨((Module.finrank ℝ E : ℝ) ^ 4 * C₀ ^ 2) ^ 2, by positivity, ?_⟩
@@ -280,6 +289,8 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
   letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
   set m : ℝ := max δ₀ 0 with hm_def
   have hm0 : 0 ≤ m := le_max_right _ _
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
@@ -321,13 +332,19 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
         Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ≤ Csob * R := by
     have hCsob_sum := hCsob T T' hR hTball hT'ball s ⟨hs0, hs1⟩ x
     have hterms : ∀ k ∈ Finset.range 3, 0 ≤
-        (letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+        (letI instTensK : Bundle.RiemannianBundle
+            (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
           Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+        letI : ∀ b : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+          fun b => tensorRSRiemannianNormedAddCommGroup (I := I) 0 (2 + k) (h := instTensK) b
         ‖(iteratedCovGrad (I := I) g₀ 0 2 k
             (convexPerturbation (I := I) g₀ T T' s)).toSection x‖) := by
       intro k _
-      letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+      letI instTensK : Bundle.RiemannianBundle
+          (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+      letI : ∀ b : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+        fun b => tensorRSRiemannianNormedAddCommGroup (I := I) 0 (2 + k) (h := instTensK) b
       exact norm_nonneg _
     exact le_trans (Finset.single_le_sum hterms
       (show (1 : ℕ) ∈ Finset.range 3 from Finset.mem_range.mpr (by norm_num))) hCsob_sum
