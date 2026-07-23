@@ -43,8 +43,6 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-set_option maxHeartbeats 1600000 in
-
 private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     (g : SmoothRiemannianMetric I M) (r m : ℕ)
     (w : Integral.L2.SmoothCcTensor g r m) (x : M) :
@@ -178,8 +176,6 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
           (Fin.cons i (Fin.cons b J))) ^ 2)
     (fun b _ => Finset.sum_nonneg (fun J _ => sq_nonneg _)) (Finset.mem_univ i)
 
-set_option maxHeartbeats 1600000 in
-
 theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
     (g : SmoothRiemannianMetric I M) (r m : ℕ)
     (w : Integral.L2.SmoothCcTensor g r m) (x : M) :
@@ -307,8 +303,6 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         exact mul_le_mul_of_nonneg_right hsqrt_bound (Real.sqrt_nonneg _)
     _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt aw * Real.sqrt cw := by ring
 
-set_option maxHeartbeats 1600000 in
-
 omit [CompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
@@ -377,8 +371,6 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
         (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))]
   rw [hbridge]
   ring
-
-set_option maxHeartbeats 1600000 in
 
 theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
@@ -452,8 +444,6 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
         rw [Finset.mul_sum, Finset.sum_mul]
     _ = 4 * rQ * riemannianFiberNormSq (I := I) (M := M) g r (p + 1) x
           ((covGrad (I := I) (M := M) g r p Q).toSection x) := by rw [hframe]; ring
-
-set_option maxHeartbeats 1600000 in
 
 omit [BoundarylessManifold I M] in
 theorem prependCovGradSlot_fiberNormSq_frame_sum_rs

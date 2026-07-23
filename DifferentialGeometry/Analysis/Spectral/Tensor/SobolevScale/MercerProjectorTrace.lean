@@ -39,6 +39,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 def mercerHalfOrder : ℕ := Module.finrank ℝ E / 2 + 1
 
 def mercerSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
@@ -78,8 +84,6 @@ private lemma finiteEigenCombo_toSection_apply (g : SmoothRiemannianMetric I M)
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [DifferentialGeometry.PDE.RicciFlow.smoothCcTensor_toSection_smul_apply]
 
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -151,8 +155,6 @@ private lemma eigenProjector_frame_component_sq_le (g : SmoothRiemannianMetric I
         nlinarith [hN_le, hN_nn]
     _ = D ^ 2 * ‖v‖ ^ 2 := by rw [mul_pow]
 
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 

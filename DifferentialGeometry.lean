@@ -1204,7 +1204,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQua
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricChartRepr
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantBilinearLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz

@@ -12,8 +12,6 @@ noncomputable section
 
 set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 6400000
-set_option synthInstance.maxHeartbeats 1600000
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
@@ -169,8 +167,6 @@ private lemma lieArm_connDiff_chartBasis_center (gA gB : SmoothRiemannianMetric 
     j k]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_chartGramMatrix_symm (g : SmoothRiemannianMetric I M) (x : M) (a b : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x a b
@@ -1623,8 +1619,6 @@ private lemma lieCorr0_pd_vfcomp_center (gA gB : SmoothRiemannianMetric I M) (x 
 section LieCorr0MasterValue
 set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3200000
-set_option synthInstance.maxHeartbeats 1600000
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix partialDeriv chartChristoffel chartGramOnE chartInvGramOnE chartRiemannTensor chartChristoffel_symm chartGramOnE_symm chartInvGramOnE_symm partialDeriv_chartInvGramOnE_eq extChartAt_target_subset_interior_of_boundaryless)

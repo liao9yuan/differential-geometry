@@ -45,6 +45,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
@@ -141,8 +148,6 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR
   rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
   rw [mul_comm]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [BoundarylessManifold I M] in
@@ -262,7 +267,6 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
         mul_le_mul_of_nonneg_left hpeel_y' hCnorm_nn
     _ = Cnorm * (Cpeel * (Czmax * Cemb)) * N := by ring
 
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
 lemma exists_rawCompOnE_eigen_jet_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (α : M)
