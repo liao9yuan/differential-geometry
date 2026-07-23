@@ -22,6 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
@@ -43,7 +44,7 @@ theorem gal_span
     {a b : Real} (hab : Set.Icc a b ⊆ D.regular) :
     ∃ ρ : Real, 0 < ρ ∧ ρ ≤ 1 ∧
       ∀ (T : D.RegularTime), (T : Real) ∈ Set.Icc a b →
-        ∀ h : Real, ∀ hh : 0 < h, h ≤ ρ → a ≤ (T : Real) - h →
+        ∀ h : Real, ∀ _hh : 0 < h, h ≤ ρ → a ≤ (T : Real) - h →
           (∀ s ∈ Set.Icc (0 : Real) h, (T : Real) - s ∈ D.regular) ∧
           ∀ u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0,
             ∃ V : Nat → Real →
@@ -130,8 +131,9 @@ theorem gallim_span
   intro T hT h hh hhρ hleft u0
   have hhg : h ≤ ρg := hhρ.trans (min_le_left ρg ρa)
   have hha : h ≤ ρa := hhρ.trans (min_le_right ρg ρa)
-  obtain ⟨_hregG, V, phi, ulim, hlim⟩ :=
-    hgal T hT h hh hhg hleft u0
+  obtain ⟨_hregG, hsub⟩ :=
+    hgal T hT h hh hhg hleft
+  obtain ⟨V, phi, ulim, hlim⟩ := hsub u0
   obtain ⟨hreg, _hcont, _C2, _hbound, hcore⟩ :=
     hA20 T hT h hh hha hleft
   refine ⟨V, phi, ulim, hlim, ?_⟩

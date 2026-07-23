@@ -17,11 +17,15 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators Interval
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
+open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

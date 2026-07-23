@@ -298,6 +298,30 @@ theorem laplacianAt_mul_of_scalarRegular
     ((hf x).smul_section (hgradh x))
     ((hh x).smul_section (hgradf x))
 
+/-- The drifted heat operator satisfies the scalar chain rule. -/
+theorem heatDrift_comp
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {φ : Real -> Real} {f : M -> Real} {x : M}
+    (hφ : Differentiable Real φ)
+    (hφ' : DifferentiableAt Real (deriv φ) (f x))
+    (hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x) :
+    heatOperatorWithDrift (I := I) G t X
+        (fun y : M => φ (f y)) x =
+      deriv φ (f x) * heatOperatorWithDrift (I := I) G t X f x +
+        deriv (deriv φ) (f x) *
+          (G.metric t).inner x
+            (gradientAt (I := I) G t f x)
+            (gradientAt (I := I) G t f x) := by
+  unfold heatOperatorWithDrift laplacianAt driftTerm gradientAt
+  rw [laplacian_comp (I := I) (G.connection t) (G.metric t)
+    hφ hφ' hf hgrad]
+  rw [gradientFun_comp (I := I) (G.metric t) (hφ (f x)) (hf x)]
+  simp only [map_smul, smul_eq_mul]
+  ring
+
 /-- The drifted heat operator satisfies the scalar product rule. -/
 theorem heatDrift_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)

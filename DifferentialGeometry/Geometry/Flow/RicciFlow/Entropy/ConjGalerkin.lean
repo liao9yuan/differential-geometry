@@ -316,9 +316,8 @@ theorem galPert_fin_of
                 (I := I) (M := M) q 0 0
                 (conjCoeff (I := I) (M := M) S
                   ((T : Real) - s)) U)) i := by
-  dsimp only
+  dsimp
   intro F c i
-  dsimp only
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   let hc := tensorResolventL2_isCompactOperator
     (I := I) (M := M) q 0 0
@@ -693,8 +692,12 @@ theorem gal_time_mono
   refine { pos := htau, le_one := hle.trans hG.le_one, exists_sol := ?_ }
   intro u0 F
   obtain ⟨V, hV⟩ := hG.exists_sol u0 F
-  refine ⟨V, { cont := ?_, deriv := ?_, init := hV.init,
-    support := hV.support }⟩
+  refine ⟨V, ?_⟩
+  refine
+    { cont := ?_
+      deriv := ?_
+      init := hV.init
+      support := hV.support }
   · intro i hi
     exact (hV.cont i hi).mono (fun _ ht => ⟨ht.1, ht.2.trans hle⟩)
   · intro t ht i hi

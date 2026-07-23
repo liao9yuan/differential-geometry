@@ -20,3 +20,9 @@ theorem-level **0%** with approximately **95%** dedicated source until the file
 check passes.  Exact W comparison, finite Good-set propagation,
 `NoLocalCollapsing`, and `ham3_noncollapse` remain separate theorem-level
 frontiers at **0%**.
+
+## 2026-07-23 post-merge check
+
+The file now opens the exact namespaces needed for quasi-linear, metric
+realization, divergence, and tensor scalar notation.  Focused verification and
+the module artifact refresh both passed.

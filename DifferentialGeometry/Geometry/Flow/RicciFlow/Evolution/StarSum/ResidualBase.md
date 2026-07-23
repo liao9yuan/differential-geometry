@@ -16,15 +16,14 @@ realization.
   `rmResidualCost (Fintype.card Idx) 0`.
 - The proof consumes `rm04Base_of_solution_any`, `e0Field_cost_any`, and
   `e0Field_comp_any`; it introduces no new geometric or regularity assumption.
-- Focused verification of the fixed-witness API is GREEN with no diagnostics.
-  The earlier existential API was exact-current; the next narrow downstream
-  refresh is the authoritative exact check for this source change.
+- Focused verification of the fixed-witness API is GREEN with no diagnostics;
+  the exact target is current (`3802/3802`).
 - Its axiom audit is the standard `[propext, Classical.choice, Quot.sound]`.
 
 ## Remaining frontier
 
-The arbitrary-index successor is now focused-green.  The remaining assembly
-work is to make its commutator and Christoffel-correction witnesses explicit
-global fields and recurse on that fixed output.  The level-zero producer is
-100%; `rmResidual_cost` remains theorem-level 0% until that fixed-witness
-induction is assembled.  Dedicated direct-tower machinery is about 94%.
+The arbitrary-index fixed successor, global recursive residual capstone, and
+direct scalar tower are now exact-current.  The level-zero producer is 100%,
+`rmResidual_cost` is 100%, and `towerHeatSol_raw` is 100%.  The next independent
+complete-Shi frontier is the concrete solution-produced `ShiCutoffData`, not a
+further residual-field assumption.

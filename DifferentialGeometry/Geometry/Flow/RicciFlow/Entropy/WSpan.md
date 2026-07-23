@@ -22,3 +22,9 @@ remain theorem-level **0%** with approximately **85%** dedicated source until
 checked.  They close the positive-time W lower route once verified.  A uniform
 early-time geometric noncollapse producer is still required before the
 all-carrier `NoLocalCollapsing` endpoint can be proved.
+
+## 2026-07-23 post-merge check
+
+The finite Good predicate now uses explicit `theta` and `v` binders at the call
+sites, and the file opens the L2 namespace needed by the imported W machinery.
+Focused verification and the module artifact refresh both passed.

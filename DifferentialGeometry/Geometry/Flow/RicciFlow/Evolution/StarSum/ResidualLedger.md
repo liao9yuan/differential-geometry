@@ -9,10 +9,8 @@ below `TimeRecursion` avoids an import cycle while preserving the public names
 
 ## Status
 
-The module passes focused verification.  Its generated artifact is newer than
-the source; the original targeted wrapper timed out after spawning Lean, so the
-downstream exact refresh remains the authoritative end-to-end check.
-
-The ledger itself is 100% checked infrastructure.  It does not prove
-`residualStarCosted`, which remains theorem-level 0% until the generic successor
-and solution-only capstone are assembled.
+The module is focused-green and exact-current through the verified downstream
+`TimeRecursion` refresh.  The ledger itself is 100% checked infrastructure.
+The successor and solution-only capstone are now exact-current as
+`resStarNext_spec` and `rmResidual_cost`; the direct scalar tower is exact-current
+as `towerHeatSol_raw`.

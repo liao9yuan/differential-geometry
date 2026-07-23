@@ -35,18 +35,19 @@ consumer APIs, but `exists_rmTowerSol` must not remain on the trusted solution
 route.
 
 The explicit structural costs `rmResidualCost d k` and `rmTowerCost d k`,
-their nonnegativity theorems, and `TowerHeatBoundOn.mono_cost` are implemented
-and focused-green.  The level-zero field has also been separated from the
+their nonnegativity theorems, and `TowerHeatBoundOn.mono_cost` are exact-current.
+The level-zero field has also been separated from the
 three-dimensional curvature identity: `e0Field_cost_any` proves its exact
 arbitrary-index cost, `rmBaseReact` names the eight-term quadratic expression,
 and `e0Field_comp_any` proves its component realization.  The solution-facing
-join is now exact-current as `rmResidual_zero`: it chooses the global
+join is now exact-current as `e0Residual` (`rmResidual_zero` is the existential
+compatibility wrapper): it chooses the global
 `e0Field` witness before the point and basis, proves the exact level-zero cost,
 and obtains the component heat identity directly from
 `rm04Base_of_solution_any`.
 
-The first genuine theorem frontier is now `residualStarCosted`.  It must
-simultaneously provide:
+The direct residual capstone is exact-current as `rmResidual_cost`.  It
+simultaneously provides:
 
 1. one `(4 + k)`-covariant tensor field `T` with
    `StarSum2Cost (Fin d) S t k T (rmResidualCost d k)`; and
@@ -60,9 +61,11 @@ The level-zero Hamilton flow identity is now checked and exact-current as
 finite orthonormal basis, and proves
 `partial_t Rm04 = roughLap Rm04 + hamiltonRmReact` directly from
 `IsSolutionOn`.  The earlier consultation in
-[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is therefore resolved.  The first
-remaining proof brick inside `residualStarCosted` is now the arbitrary-index
-all-order successor construction; the costed level-zero connection is closed.
+[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is therefore resolved.  The fixed
+global successor is `resStarNext`; `resStarNext_spec` proves its all-order
+component identity, and `rmResidualField` recursively fixes one global
+residual before any point or basis.  The complete residual chain is focused-
+and exact-green.
 
 The cost must be the explicit recursion followed by the concrete residual
 construction, not `Classical.choose` over an existence statement.  Define the
@@ -74,7 +77,7 @@ noncomputable def rmTowerCost (d k : Nat) : Real :=
     (((4 + k : Nat) : Real) * (d : Real) ^ 2 + rmResidualCost d k)
 ```
 
-Then assemble `towerHeatSol` pointwise using `nablaKNormHeatAt`,
+The exact-current `towerHeatSol_raw` is assembled pointwise using `nablaKNormHeatAt`,
 `StarSum2Cost.bound`, and `nablaKReactionAt_le`.  This requires neither a
 global frame nor a per-`j` residual field.  Also provide
 `TowerHeatBoundOn.mono_cost`; any recovery of the old literal
@@ -286,7 +289,7 @@ exact canonical `hcp` shape.  There is no corresponding theorem for arbitrary
 The analytic and provenance lanes run in parallel:
 
 1. add the direct cost API and prove the arbitrary-dimensional
-   `residualStarCosted` theorem;
+   `rmResidual_cost` theorem;
 2. assemble direct `towerHeatSol`, migrate `towerHeatSol_any` and the HCG level
    cost, then remove `exists_rmTowerSol` from the trusted route;
 3. use the checked internal parabolic cutoff/exhaustion package and Kato
@@ -308,7 +311,7 @@ The analytic and provenance lanes run in parallel:
   focused-green and exact-refreshed; `hchi` and the whole-source bump-collar
   estimate have been removed from the API and every caller.
 - arbitrary-dimensional direct `rmResidual_cost` / `towerHeatSol_raw`: theorem
-  completion remains 0% verified.  The explicit costs, their
+  completion 100% checked.  The explicit costs, their
   monotonicity/nonnegativity API, and the arbitrary-index level-zero
   cost/component realization are exact-current.  The fixed global successor
   `resStarNext`, its cost/specification theorems, the recursive residual field,
@@ -319,10 +322,9 @@ The analytic and provenance lanes run in parallel:
   arbitrary-dimensional identity is exact-current as `hamiltonRm04Id`, and
   `rm04Base_of_solution_any` closes the fixed-basis flow-level producer directly
   from `IsSolutionOn`; `e0Residual` is the exact costed base residual.  The base
-  theorems are 100%; dedicated direct-tower machinery is about 98%.  Final
-  focused/exact verification is still pending the active upstream artifact
-  refresh and ordered narrow chain, so none of the newly assembled theorem
-  bodies is counted as checked yet.
+  theorems are 100%; dedicated direct-tower machinery is 100%.  The ordered
+  chain is focused- and exact-green through `MovingShiOpen`; no per-summand
+  `IteratedRmTowerOn` assumption or `exists_rmTowerSol` wrapper remains.
 - complete-noncompact Bernstein, corrected consumer: 100% checked.
   `GfunCut_parabolic_le` closes the graded finite recurrence and
   `BernsteinTower.estimate_of_cutoff` closes the compact-WMP/exhaustion/error-limit
@@ -336,7 +338,8 @@ The analytic and provenance lanes run in parallel:
   constant chosen before the sequence member.  The HCG-facing assembly is now
   focused- and exact-green, including the noncompact tower-norm regularity and
   anchor-norm repairs.  These remain wrappers only: their trusted analytic
-  foundation is 0% until both corrected producer chains above are closed.
+  foundation is 0% until the remaining solution-produced cutoff theorem is
+  closed and the legacy `estimate_complete` call is replaced.
 - `StepDCanonData` / `compactness_canon`: 100% checked.  The sidecar,
   subsequence transport, public projection, whole-source canonical bounds, and
   flow-side `canon_cp` / `canon_rel` / `canon_init` adapters are focused- and

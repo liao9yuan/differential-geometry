@@ -18,6 +18,7 @@ noncomputable section
 
 open Bundle Filter MeasureTheory Set Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open scoped Manifold ContDiff Topology
@@ -84,8 +85,8 @@ theorem w_span_uniform
   have hdelta_r : delta < r := by
     simpa only [delta] using half_lt_self hr
   let Good : Real → Prop := fun t =>
-    ∀ {theta : Real}, 0 < theta → theta + (t - a) < tauMax →
-      ∀ {v : M → Real}, ContMDiff I 𝓘(Real) ∞ v →
+    ∀ theta : Real, 0 < theta → theta + (t - a) < tauMax →
+      ∀ v : M → Real, ContMDiff I 𝓘(Real) ∞ v →
         (∀ x : M, 0 < v x) →
         (∫ x, v x ∂(riemannianVolumeMeasure (I := I) (M := M)
           (S.family.metric t))) = 1 →
@@ -106,7 +107,7 @@ theorem w_span_uniform
     intro theta htheta hbudget v hv hpos hmass
     by_cases hstEq : s = t
     · subst t
-      exact hgood htheta hbudget hv hpos hmass
+      exact hgood theta htheta hbudget v hv hpos hmass
     have hqpos : 0 < t - s := sub_pos.mpr (lt_of_le_of_ne hst hstEq)
     let T : D.RegularTime :=
       ⟨t, hreg ⟨ha₀a.le.trans ht.1, ht.2⟩⟩
@@ -181,7 +182,7 @@ theorem w_span_uniform
       rw [hqeq]
       linarith
     have hlower : L ≤ flowW (I := I) (M := M) S s (theta + q) (u q) :=
-      hgood hthetaq hbudgetq hsmoothq hposq hmassq
+      hgood (theta + q) hthetaq hbudgetq (u q) hsmoothq hposq hmassq
     have hW := gallim_w_lt (I := I) (M := M)
       hS hDim hr hlim hpot href htheta hposPath q hqIco
     have hWflow :
@@ -228,7 +229,7 @@ theorem w_span_uniform
     linarith
   intro t ht theta htheta hbudget v hv hpos hmass
   have hgood := hgrid N t ht (ht.2.trans hcover)
-  exact hgood htheta hbudget hv hpos hmass
+  exact hgood theta htheta hbudget v hv hpos hmass
 
 /-- On one compact positive regular slab, a single constant bounds W below for
 every smooth positive unit density whose scale stays below a fixed budget. -/

@@ -51,9 +51,9 @@ solution capstone are now assembled in source as `resStarNext_spec` and
 `towerHeatSol_any` is only its positive-tail wrapper.  The HCG level cost and
 explicit Shi envelope now use `rmTowerCost d k`.  The sorry-backed
 `exists_rmTowerSol` has been removed rather than retained as a compatibility
-theorem.  Final focused/exact verification is pending the active upstream
-artifact refresh and ordered narrow chain, so these new theorem bodies are not
-yet counted as verified.
+theorem.  The complete ordered chain is now focused- and exact-green:
+`resStarNext_spec`, `rmResidual_cost`, `towerHeatSol_raw`, `towerHeatSol_any`,
+and the `MovingShiOpen` cost migration are all exact-current.
 
 The level-zero flow equation is now checked and exact-current.
 `rm04Base_of_solution_any` combines the canonical coordinate variation with
@@ -73,20 +73,21 @@ The bookkeeping part is also checked.  `rmResidualCost`,
 `e0Residual` closes their solution-facing base assembly.  The supporting
 `hamiltonRm04Id` and `rm04Var_of_sol` theorems are exact-current, and their
 fixed-basis solution combination is `rm04Base_of_solution_any`.  The historical
-[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is now resolved.  Source assembly of
-the arbitrary-index recursive residual and direct tower is complete and
-sorry-free; verification is the only current A-line gate.  Until the narrow
-chain passes, `rmResidual_cost` and `towerHeatSol_raw` remain theorem-level 0%
-verified, while their dedicated direct-tower machinery is about 98%.
+[`P4_BASE_CONSULT.md`](P4_BASE_CONSULT.md) is now resolved.  The
+arbitrary-index recursive residual and direct tower are sorry-free,
+focused-green, and exact-current.  `rmResidual_cost`, `towerHeatSol_raw`, and
+`towerHeatSol_any` are theorem-level 100% checked, and their dedicated
+direct-tower machinery is 100%.
 
 The complete-noncompact Bernstein signature is also corrected.  Anchor
 completeness, metric equivalence, and a Ricci lower bound do not by themselves
 produce a parabolic cutoff or an unrestricted scalar maximum principle.  The
 internal route now requires an explicit quantitative cutoff/exhaustion package
 and the actual curvature-tower Kato estimate; both are solution-specific
-producers, not new HCG assumptions.  The conditional abstract theorem is
-`BernsteinTower.estimate_of_cutoff`; the no-extra-input theorem must be proved
-in the Ricci-flow solution layer and is not yet part of the trusted route.
+producers, not new HCG assumptions.  The canonical fixed-order abstract theorem
+is `BernsteinTower.estimate_cutoff_at`; `estimate_of_cutoff` remains its
+all-order compatibility wrapper.  The no-extra-input theorem must be proved in
+the Ricci-flow solution layer and is not yet part of the trusted route.
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -152,20 +153,39 @@ do not uniformize memberwise existentials.
 `CurvBoundInput.movingShi_open` are now focused- and exact-green.  The
 chart-local curvature/tower/norm regularity chain was weakened honestly to the
 complete-noncompact setting, and the anchor-norm statement mismatch was
-repaired.  Their trusted lower work remains split visibly between two corrected
-theorem frontiers: arbitrary-dimensional costed residual/direct tower heat, and
-the solution-specific cutoff producer.  The generic localized consumer is now
-closed: `GfunCut_parabolic_le` and
-`BernsteinTower.estimate_of_cutoff` are exact-current, so the Bernstein
-localization/consumer machinery is about 90%.  The solution-generated
-`ShiCutoffData` theorem remains 0% and is the single independent Bernstein
-analysis blocker; see [`P4_CUTOFF_CONSULT.md`](P4_CUTOFF_CONSULT.md).  The
-direct-tower theorem also remains 0%, with dedicated machinery about 80-85%.
-Green wrappers are not counted as analytic completion.
+repaired.  Their trusted lower work is now split visibly between one closed
+producer and one genuine analytic frontier.  The arbitrary-dimensional costed
+residual and direct tower (`rmResidual_cost`, `towerHeatSol_raw`, and
+`towerHeatSol_any`) are focused- and exact-green.  The generic localized
+consumer is also closed: `GfunCut_parabolic_le` and
+`BernsteinTower.estimate_cutoff_at` are exact-current; the old
+`estimate_of_cutoff` is its all-order compatibility wrapper.  The HCG
+`complete_of_cutoff` adapter is also focused- and exact-green, retaining the
+genuine tower through `m + 1`.
+
+Route-neutral cutoff plumbing is now checked as well.  `CutoffProfile` supplies
+a smooth one-dimensional plateau with the required derivative bounds;
+`laplacian_comp`, `heatDrift_comp`, and `parabolic_comp` supply the spatial and
+spacetime scalar chain rules; and `edistOf_le_of_quad` /
+`le_edistOf_of_quad` turn pointwise metric comparison into distance comparison.
+These results do not produce a cutoff.  A live route audit found that a
+fixed-anchor smooth bump is circular without a genuinely controlled parabolic
+exhaustion, while a distance cutoff requires a new Calabi/barrier consumer and
+cut-locus/time-distance comparison stack.  A local-Shi detour does not avoid
+that same analysis.  The architecture choice is recorded in
+[`P4_CUTOFF_CONSULT.md`](P4_CUTOFF_CONSULT.md).
+
+Accordingly, the solution-generated `ShiCutoffData` theorem remains
+theorem-level 0% and is the single independent complete-Bernstein blocker.
+Green wrappers and route-neutral helpers are not counted as that analytic
+producer.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
-`SrcCovLipData` is focused-green and records constants before `k`; its producer
-`srcCovLip_of_soln` retains one honest analytic `sorry`.  The grow-only
+`SrcCovLipData` records constants before `k`, and `srcCovLip_of_soln` is
+focused- and exact-green.  Its positive-order strong induction consumes the
+explicit fixed witnesses from `AkMFold`/`RicBoundClaims`,
+`covOrderBound_stage_on`, and `ric_bound_field_on`; there is no compact
+subcover, per-member witness, or new assumption.  The grow-only
 `hcovTail` migration is now complete across the ten-module open-convergence
 chain: `hchi` and the artificial whole-source bump-collar estimate are gone,
 and the focused checks plus exact refreshes are green.  The concrete
@@ -186,9 +206,13 @@ The book theorem is the separate open-interval specialization, where carrier
 and regular are definitionally the same.  Hamilton endpoint extension is a
 different later producer and is not part of the MSM135 3.10 denominator.
 
+`ConvFieldCanon.open_upgrade_canon` is also focused- and exact-green, so the
+canonical provenance sidecar, varying-source bounds, and final open-field
+consumer now meet in one checked assembly.
+
 Accounting: unconditional Theorem 3.10 remains theorem-level 0%.
-The dedicated P4 consumer/assembly machinery is approximately 97%, and whole-HCG machinery
-remains approximately 60%.
+The dedicated P4 consumer/assembly machinery is approximately 98%, and
+whole-HCG machinery remains approximately 60%.
 
 ## Inventory — DONE, verified, reuse (do not rebuild)
 
@@ -761,7 +785,7 @@ The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` is now
 stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE,
 scalar, joint chart-Gram smoothness, open endgame, and raw-input capstone are
 checked, so the dedicated P4 consumer/assembly machinery is conservatively
-about 97%.  The
+about 98%.  The
 common subsequence, compatible limit family, upgrade record, and all-time
 limit completeness are now checked from the existing raw fixed-window
 hypotheses.  The remaining genuine work is to produce those hypotheses

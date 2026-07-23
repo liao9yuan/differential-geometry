@@ -32,3 +32,8 @@ below the Perelman layer.
 
 Focused verification is pending the upstream `SmallBall` source check and
 artifact refresh; no local Lean diagnostic has been observed yet.
+
+## 2026-07-23 post-merge check
+
+`FlowBallW` now imports `SmallBall` directly for `edist_vol_pos`.  Focused
+verification and the module artifact refresh both passed.

@@ -31,3 +31,9 @@ verification passes; its dedicated source and machinery are approximately
 induction, `NoLocalCollapsing`, and `ham3_noncollapse` remain theorem-level 0%.
 Broader noncollapsing machinery is approximately 97%, and whole HCG machinery
 approximately 60%.
+
+## 2026-07-23 post-merge check
+
+The local model typo in the `hζ` differentiability statement was corrected to
+`𝓘(Real, Real)`.  Focused verification and the module artifact refresh both
+passed.

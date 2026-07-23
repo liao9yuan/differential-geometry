@@ -90,3 +90,28 @@ targeted module refresh was run in this lane.  The named API lemma is complete
 (100%); the complete noncompact Bernstein theorem remains separately unstated
 or unproved at its final endpoint, and this lemma closes only its graded-cutoff
 natural-power gradient seam.
+
+## 2026-07-23
+
+Added the general scalar chain rules:
+
+- `gradientFun_comp` identifies the gradient of `φ ∘ f` with
+  `φ'(f) • gradientFun g f`;
+- `laplacian_comp` proves
+  `Δ(φ ∘ f) = φ'(f) Δf + φ''(f) |∇f|²`.
+
+These are lower, route-neutral operator identities.  In particular, they are
+shared by a future smooth parabolic-exhaustion cutoff and by a possible
+Calabi-barrier distance cutoff.  They do not assert that either geometric
+cutoff exists.
+
+The proofs reuse the canonical manifold derivative and divergence product
+rules.  The scalar tangent-fiber normalization in `gradientFun_comp` goes
+through `NormedSpace.fromTangentSpace`, avoiding an invalid ring instance on a
+real-model tangent fiber.
+
+Verification status: focused Lean check passed with no diagnostics.  Both
+named operator theorems are complete (100%).  The solution-generated
+`ShiCutoffData` theorem and the corrected complete-noncompact Shi theorem remain
+separately at theorem-level 0%; their missing input is geometric/analytic, not
+this scalar calculus.

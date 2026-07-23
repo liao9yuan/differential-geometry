@@ -70,3 +70,20 @@ cutoff Bernstein sum with its fixed coefficients.  The complete noncompact
 Bernstein theorem itself remains theorem-level 0%; its dedicated localization
 machinery is about 45--50%.  The unconditional HCG endpoint remains
 theorem-level 0%, with whole-project support machinery about 60%.
+
+## 2026-07-23: parabolic chain rule
+
+Added `parabolic_comp` for `P = ∂t - Δ - <X, ∇·>`:
+
+`P (φ ∘ u) = φ'(u) P u - φ''(u) |∇u|²`.
+
+The time term uses Mathlib's `derivWithin_comp`; this already handles a
+non-unique closed time domain, so no artificial `UniqueDiffWithinAt` hypothesis
+is required.  The spatial term is the checked `heatDrift_comp`.
+
+Focused verification passed with no diagnostics.  The named theorem is complete
+(100%).  Together with the lower scalar cutoff profile it closes the
+route-neutral composition calculus, but it does not construct a smooth
+parabolic exhaustion or a Calabi barrier.  Consequently the solution-generated
+`ShiCutoffData` and corrected complete-noncompact Shi theorem remain
+theorem-level 0%.

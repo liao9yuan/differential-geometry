@@ -29,18 +29,19 @@ Weyl-flatness or `Fin 3`.
 ## Status
 
 The definitions, nonnegativity/specialization lemmas, and arbitrary-index
-level-zero cost/component lemmas pass focused verification; the exact targeted
-refresh is GREEN (`3798/3798`).  The
-arbitrary-dimensional `residualStarCosted` and `towerHeatSol` theorems remain
-theorem-level 0%.
+level-zero cost/component lemmas pass focused verification; the current exact
+target is GREEN (`3799/3799`).  The arbitrary-dimensional global residual and
+direct scalar tower are now exact-current as `rmResidual_cost` and
+`towerHeatSol_raw`, using the explicit `rmTowerCost` coefficient.
 
 The arbitrary-dimensional Hamilton identity and its fixed-basis solution
 producer are now exact-current as `hamiltonRm04Id` and
-`rm04Base_of_solution_any`.  The solution-facing level-zero join is now
-exact-current as `rmResidual_zero` in `ResidualBase.lean`.  The next theorem is
-the arbitrary-index successor; the existing successor residual construction
-is still specialized to `Fin 3`.
+`rm04Base_of_solution_any`.  The solution-facing level-zero join is
+exact-current as `e0Residual` in `ResidualBase.lean`, with `rmResidual_zero`
+retained as the existential compatibility wrapper.  The arbitrary-index fixed
+successor and recursive capstone are exact-current as `resStarNext_spec` and
+`rmResidual_cost`.
 
-The ledger and level-zero algebra brick is 100%.  Dedicated direct-tower
-machinery is about 92%, while `residualStarCosted`, direct `towerHeatSol`, and
-the whole P4 analytic producer remain theorem-level 0%.
+The ledger, level-zero algebra, global residual, and direct-tower machinery are
+100% checked.  The whole complete-Shi producer remains theorem-level 0% only
+at the independent solution-produced `ShiCutoffData` frontier.

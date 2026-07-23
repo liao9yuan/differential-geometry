@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautUniform
 
 /-!
@@ -15,13 +16,16 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
+  RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -571,9 +575,10 @@ theorem cc_a2_span
     finite_lap_unif (I := I) (M := M) q gm A n Clap hClap_nn hlap''
   refine ⟨Cmid, hCmid_nn, ?_⟩
   intro s hs F v hv hsub
-  have hcoeff : ∀ i ∈ hv.toFinset, i ∉ F → v.coeff i = 0 := by
-    intro i hi hiF
-    exact False.elim (hiF (hsub hi))
+  have hcoeff : ∀ i, i ∉ hv.toFinset → v.coeff i = 0 := by
+    intro i hi
+    by_contra hne
+    exact hi (hv.mem_toFinset.mpr (Function.mem_support.mpr hne))
   have hlhs :
       (∑ i ∈ hv.toFinset,
           tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
@@ -593,7 +598,7 @@ theorem cc_a2_span
                     (tensorHsSmoothRepr (I := I) (M := M) v hv))) i) := by
     apply Finset.sum_subset hsub
     intro i hi hiF
-    rw [hcoeff i hi hiF, zero_mul, mul_zero]
+    rw [hcoeff i hiF, zero_mul, mul_zero]
   have hhi :
       (∑ i ∈ hv.toFinset,
           tensorSobolevWeight (I := I) (M := M) i ((n + 1 : ℕ) : ℝ) *
@@ -603,7 +608,7 @@ theorem cc_a2_span
             (v.coeff i) ^ 2 := by
     apply Finset.sum_subset hsub
     intro i hi hiF
-    norm_num [hcoeff i hi hiF]
+    norm_num [hcoeff i hiF]
   have hlo :
       (∑ i ∈ hv.toFinset,
           tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
@@ -613,7 +618,7 @@ theorem cc_a2_span
             (v.coeff i) ^ 2 := by
     apply Finset.sum_subset hsub
     intro i hi hiF
-    norm_num [hcoeff i hi hiF]
+    norm_num [hcoeff i hiF]
   have hmain := hcore s (by simpa only [A] using hs) v hv
   rw [hlhs, hhi, hlo] at hmain
   simpa only [q, gm, A] using hmain

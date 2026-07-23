@@ -87,14 +87,15 @@ theorem metricEquiv_open
     have hbeta0 : beta ≤ 0 := hzeroWindow.1
     have hzeroPsi : 0 ≤ psi := hzeroWindow.2
     by_cases ht0 : t ≤ 0
-    · rw [abs_of_nonpos ht0, abs_of_nonpos hbeta0, abs_of_nonneg hzeroPsi]
-      dsimp only [timeRadius]
+    · dsimp only [timeRadius]
+      rw [abs_of_nonpos ht0, abs_of_nonpos hbeta0, abs_of_nonneg hzeroPsi]
       have hneg : -t ≤ -beta := neg_le_neg ht.1
       linarith
     · have hzeroT : 0 ≤ t := le_of_not_ge ht0
-      rw [abs_of_nonneg hzeroT, abs_of_nonpos hbeta0, abs_of_nonneg hzeroPsi]
       dsimp only [timeRadius]
+      rw [abs_of_nonneg hzeroT, abs_of_nonpos hbeta0, abs_of_nonneg hzeroPsi]
       have hnegBeta : 0 ≤ -beta := neg_nonneg.mpr hbeta0
+      have htPsi : t ≤ psi := ht.2
       linarith
   have hB : ∀ t : Real, t ∈ Set.Icc beta psi →
       metricEquivalenceFactor 1 A t 0 ≤ Bmax := by

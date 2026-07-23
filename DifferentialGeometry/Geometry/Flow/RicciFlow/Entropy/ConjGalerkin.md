@@ -125,3 +125,10 @@ spectral `.olean` files while the already-running narrow export is rebuilding
 that dependency chain.  Until the file itself elaborates, the four new
 theorems remain theorem-level **0%** despite their dedicated source machinery
 being approximately **98%**.
+
+## 2026-07-23 post-merge check
+
+The finite-Galerkin perturbation helper now uses ordinary `dsimp` where the
+post-merge elaborator needs to expose binders, and the monotonicity witness is
+constructed with an explicit nested record literal.  Focused verification and
+the module artifact refresh both passed.

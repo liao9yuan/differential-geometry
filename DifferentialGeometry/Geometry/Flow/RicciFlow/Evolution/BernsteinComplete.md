@@ -1,5 +1,8 @@
 # BernsteinComplete
 
+The July 22 sections below are chronological checkpoints and are superseded by
+the July 23 fixed-order capstone and accounting at the end of this note.
+
 ## 2026-07-22 architecture correction
 
 `BernsteinTower.estimate_complete` must not be proved under its current
@@ -144,15 +147,17 @@ Honest accounting:
 - end-to-end complete arbitrary-dimensional Shi and unconditional
   `compactnessSol`: theorem-level 0%.
 
-## 2026-07-22 cutoff capstone
+## 2026-07-23 fixed-order cutoff capstone
 
-The canonical public consumer `BernsteinTower.estimate_of_cutoff` is now
-checked.  It proves the full all-order Bernstein bound on a noncompact
-manifold from one `ShiCutoffData` family and `TowerNormGradOn`, with no
-compactness or growth assumption on the tower fields.
+The canonical public consumer is now
+`BernsteinTower.estimate_cutoff_at`.  At a requested order `m`, it uses only
+`TowerNormGradUpTo B m`; the previous all-order
+`BernsteinTower.estimate_of_cutoff` remains as a compatibility wrapper obtained
+from `hgrad.upTo m`.  No proof body or constant recurrence is duplicated.
 
 The proof keeps the cutoff index internal.  Strong induction supplies the
-lower tower levels; for every sufficiently small cutoff error it applies
+lower tower levels together with the corresponding restriction of the finite
+Kato prefix.  For every sufficiently small cutoff error it applies
 `strict_barrier_cpt` to the graded polynomial on the cutoff's uniform compact
 support.  At the requested spacetime point, `exhausts` identifies the graded
 polynomial with the ordinary Bernstein polynomial.  Finally `err_tendsto`
@@ -161,14 +166,16 @@ recurrence gives exactly
 
 `t^m * w m t x <= (towerConst c alpha m)^2 * K^2`.
 
-Focused verification passed.  The only warning is the deliberately retained
-legacy `estimate_complete` `sorry`; the new capstone itself is warning-free.
+Focused verification and the exact target refresh are GREEN (`3738/3738`).
+The only warning is the deliberately retained legacy `estimate_complete`
+`sorry`; the fixed-order capstone and compatibility wrapper are sorry-free.
 
 Honest accounting after this brick:
 
+- `BernsteinTower.estimate_cutoff_at`: theorem-level 100%, focused/exact-current;
 - `BernsteinTower.estimate_of_cutoff`: theorem-level 100%;
 - corrected complete-noncompact Bernstein consumer: theorem-level 100%;
-- dedicated localization machinery and capstone: roughly 90%;
+- dedicated localization machinery and capstone: 100%;
 - solution-generated quantitative `ShiCutoffData`: theorem-level 0%, now the
   single independent analytic blocker for the complete Shi route;
 - end-to-end complete arbitrary-dimensional Shi: theorem-level 0%;

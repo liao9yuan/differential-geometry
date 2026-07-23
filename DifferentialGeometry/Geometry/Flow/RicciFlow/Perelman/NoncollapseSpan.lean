@@ -66,7 +66,7 @@ theorem noncollapse_span
   obtain ⟨B', w, _hnest, hB'radius, _hB'curv, _hnorm,
       hw, hwpos, hwmass, hwupper⟩ :=
     exists_sel_w_bound (I := I) (M := M) B hB
-      (hδ := by norm_num : (0 : Real) < 1)
+      (δ := 1) (hδ := by norm_num)
   have hB'rho : B'.radius ≤ rho := hB'radius.trans hBrho
   have hB'sq : B'.radius ^ 2 ≤ rho ^ 2 :=
     (sq_le_sq₀ B'.radius_pos.le hrho.le).2 hB'rho
@@ -95,7 +95,7 @@ theorem noncollapse_span
           Real.log (B.volume.toReal /
             B.radius ^ Module.finrank Real E) + 1 := by
     simpa only [flowW, SolutionOn.family_metric, SolutionOn.scalar,
-      SolutionFamily.scalar] using hwupper
+      SolutionFamily.scalar, SolutionOn.scalar_eq_metricTrace] using hwupper
   have hlog :
       L - collapseWConst (Module.finrank Real E) - 1 ≤
         Real.log (B.volume.toReal / B.radius ^ Module.finrank Real E) := by
@@ -115,7 +115,7 @@ theorem noncollapse_span
     exact Real.exp_le_exp.mpr hlog
   have hkappa_real :
       kappa * B.radius ^ Module.finrank Real E ≤ B.volume.toReal :=
-    (le_div_iff₀ (pow_pos B.radius_pos _)).2 hkappa_ratio
+    (le_div_iff₀ (pow_pos B.radius_pos _)).1 hkappa_ratio
   calc
     ENNReal.ofReal kappa *
           ENNReal.ofReal B.radius ^ Module.finrank Real E =

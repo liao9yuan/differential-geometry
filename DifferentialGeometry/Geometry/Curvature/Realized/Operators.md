@@ -28,3 +28,18 @@ This additive API brick is complete (100%).  It is only calculus
 infrastructure: the corrected complete-Bernstein theorem remains theorem-level
 0%, its dedicated localization machinery is about 45--50%, and the
 unconditional HCG endpoint remains theorem-level 0%.
+
+## 2026-07-23: drifted chain rule
+
+Added `heatDrift_comp`:
+
+`H_X (φ ∘ f) = φ'(f) H_X f + φ''(f) |∇f|²`.
+
+The theorem is a thin family-facing assembly of the canonical
+`laplacian_comp` and `gradientFun_comp` rules.  It needs no regularity
+hypothesis on the drift field and introduces no parallel composition API below
+this layer.
+
+Focused verification passed with no diagnostics.  The theorem is complete
+(100%); it supplies route-neutral scalar calculus and does not produce the
+geometric cutoff required by `ShiCutoffData`.

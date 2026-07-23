@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffSpan
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautCompat
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTime
 
 /-!
@@ -80,8 +81,8 @@ theorem lapHs_norm_on
   have hC₂ : 0 ≤ C₂ := mul_nonneg hA₂ (Real.sqrt_nonneg _)
   have hC₁ : 0 ≤ C₁ := mul_nonneg hA₁ (Real.sqrt_nonneg _)
   have hC : 0 ≤ C := by
-    exact add_nonneg (mul_nonneg hC₂ (norm_nonneg _))
-      (mul_nonneg hC₁ (norm_nonneg _))
+    exact add_nonneg (mul_nonneg hC₂ (norm_nonneg D₂))
+      (mul_nonneg hC₁ (norm_nonneg D₁))
   refine ⟨C, hC, ?_⟩
   intro s hs
   have hsK : s ∈ K := by simpa only [K] using hs
@@ -105,9 +106,9 @@ theorem lapHs_norm_on
     _ ≤ (C₂ * ‖D₂‖) + (C₁ * ‖D₁‖) := by
       apply add_le_add
       · exact ((appHs q 2 0 m (Φ₂ s)).opNorm_comp_le D₂).trans
-          (mul_le_mul_of_nonneg_right h₂ (norm_nonneg _))
+          (mul_le_mul_of_nonneg_right h₂ (norm_nonneg D₂))
       · exact ((appHs q 1 0 m (Φ₁ s)).opNorm_comp_le D₁).trans
-          (mul_le_mul_of_nonneg_right h₁ (norm_nonneg _))
+          (mul_le_mul_of_nonneg_right h₁ (norm_nonneg D₁))
     _ = C := rfl
 
 /-- If the genuine `H² → H⁰` perturbation agrees with the invariant finite

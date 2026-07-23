@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 
 set_option autoImplicit false
 
@@ -33,6 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Every positive-radius explicit-metric ball has positive finite real volume

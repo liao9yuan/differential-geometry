@@ -31,3 +31,10 @@ These two declarations also contain no local `sorry`, but remain theorem-level
 **0%** pending focused verification; their dedicated source is approximately
 **95%**.  The next analytic frontier is exact-interval W comparison, followed
 by finite Good-set propagation on the positive compact slab.
+
+## 2026-07-23 post-merge check
+
+The span assembly now opens the measure namespace, splits the current `hgal`
+interface into its regularity and subsequence components, and marks the
+caller-supplied positive time step binder unused.  Focused verification and the
+module artifact refresh both passed.

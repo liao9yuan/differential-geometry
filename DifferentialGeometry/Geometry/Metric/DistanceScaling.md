@@ -40,3 +40,19 @@ parallel distance API; it is a small reusable input for downstream metric
 comparison arguments.  It does not by itself change the theorem-level status
 of the HCG compactness endpoints, which remain 0%.
 
+## Quadratic comparison — 2026-07-23
+
+`edistOf_le_of_quad` and `le_edistOf_of_quad` are focused-green and
+sorry-free.  They convert pointwise upper or lower quadratic-form comparison
+with factor `c > 0` into the corresponding `sqrt c` comparison of
+`riemannianEDistOf`.  Both are short consequences of `edistOf_mono` and
+`edistOf_scale`; no second distance construction or completeness hypothesis is
+introduced.
+
+This closes the reusable metric-to-distance comparison plumbing (100%).  It is
+only supporting infrastructure for the complete-noncompact Shi route:
+solution-generated `ShiCutoffData` remains theorem-level 0%, the correct
+complete-noncompact Shi theorem remains 0%, its dedicated P4 consumer
+machinery remains about 97%, and the whole HCG support machinery remains about
+60%.
+

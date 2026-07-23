@@ -28,3 +28,12 @@ verified theorem level until its focused check passes.  Its dedicated proof
 assembly is about 95%.  `NoLocalCollapsing` and `ham3_noncollapse` remain 0%;
 the broader entropy/noncollapse machinery is about 97%, and the whole HCG
 compactness project remains about 60%.
+
+## 2026-07-23 post-merge check
+
+`noncollapse_span` now supplies the explicit unit `δ`, rewrites the scalar
+curvature trace with `SolutionOn.scalar_eq_metricTrace`, and uses the correct
+division-inequality direction in the final denominator move.  Focused
+verification and the module artifact refresh both passed.  This closes the
+positive regular-slab span theorem, but the global endpoint still needs the
+initial-time entrance/noncollapse producer.

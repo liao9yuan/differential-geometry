@@ -21,44 +21,26 @@ The module imports the source-flow/extension foundation in
 `covNorm0_le` from `ConvFieldInputs`.  No duplicate tensor-norm proof is kept
 locally.
 
-## Checked assembly and exact frontier
+## Constants-first proof
 
-The outer `srcCovLip_of_soln` assembly is now checked.  Its proof exposes one
-local joint invariant-estimate frontier and then completes all downstream
-steps:
+`srcCovLip_of_soln` is now sorry-free and focused-green. Its order-zero branch
+uses `covRic0_le`. At positive order, strong induction performs the following
+steps before fixing the varying source index:
 
-- the covariant half of the joint estimate fills `SrcCovLipData.cov`;
-- the Ricci-evolution half is combined with the checked pulled-back
-  `sourceFlow` equation and `hevComp_of_solutions`;
-- `timeLipschitz_of_hasDerivAt` gives the estimate at each fixed order;
-- a finite sum over `Finset.range (p + 1)` gives one nonnegative constant for
-  every order `q <= p`.
+- select all lower-order constants from the induction hypothesis;
+- form one numeric `RicTowerCoeffs` package;
+- define the explicit Gronwall output `Cq`;
+- define `Lq = 2 * (slope * Cq + offset)`.
 
-The order-zero case is now checked separately.  `covRic0_le` combines
-`covNorm0_le`, metric norm comparison, `nablaRicReal_normSq`, and the order-zero
-moving Shi bound into explicit constants independent of the source index.  The
-main proof consumes this helper in its `q = 0` branch.
+For each source type, `hevComp_of_solutions` supplies the realized flow
+evolution, `covOrderBound_stage_on` proves the whole-source order-`q` metric
+bound, and `ric_bound_field_on` proves the corresponding
+`-2 * nabla^q Ric` bound. Thus no compact finite subcover, per-source constant,
+or wrapper hypothesis is used.
 
-The sole remaining `sorry` is therefore exactly the positive-order
-constants-first invariant induction which, for each `q >= 1`, chooses `Cq` and
-`Lq` before `k` and proves on every whole source domain both
-
-1. the `gRef`-covariant bound for `nabla^q g(t)`; and
-2. the `gRef`-norm bound for the evolution tensor `-2 nabla^q Ric(g(t))`.
-
-This cannot be obtained by invoking the existing per-source compact theorem
-after fixing `k`, because that route chooses the constants in the wrong order.
-The existing `covOrderBound_of_soln` route cannot be reused directly: its
-`ric_tower_const` chooses local Claim-1/Claim-2 witnesses after selecting a
-good frame and then uses a finite spatial subcover.  The positive-order route
-must instead expose those numeric witnesses before the frame/domain arguments
-and apply the resulting per-point estimate with one common constant.
-
-The feasibility choice and requested declaration-level review are recorded in
-`SOURCE_COVLIP_CONSULT.md`.  The next implementation gate is a constants-first
-Claim-1 declaration whose witness is independent not only of the local frame
-but also of the manifold type; no positive-order consumer edit should precede
-that gate.
+The Ricci-evolution half then feeds `timeLipschitz_of_hasDerivAt`; a finite sum
+over `Finset.range (p + 1)` gives one nonnegative Lipschitz constant for every
+order `q <= p`.
 
 No endpoint assumption or branch-specific field has been added.  Downstream,
 `SrcCovLipData.cov` feeds the grow-local `covTail_of_bounds`, while
@@ -66,9 +48,10 @@ No endpoint assumption or branch-specific field has been added.  Downstream,
 
 ## Verification and accounting
 
-Focused verification passed with the one intentional analytic-frontier
-warning.  The target theorem remains theorem-level 0% until that explicit
-positive-order joint estimate is proved.  Its order-zero core and Lean-facing
-assembly after the estimate are 100%; the dedicated file machinery is about
-50%.  The unconditional
-`compactnessSol` endpoint remains theorem-level 0%.
+Focused verification is GREEN with zero diagnostics and no
+`sorry`/`admit`/`axiom`; the exact artifact refresh is GREEN (`4067/4067`).
+The theorem proof and its dedicated constants-first machinery are 100%.
+This closes the independent `SourceCovLip` producer, not the separate
+solution-generated `ShiCutoffData` frontier. The whole HCG supporting
+machinery remains about 60%, and unconditional `compactnessSol` remains
+theorem-level 0%.

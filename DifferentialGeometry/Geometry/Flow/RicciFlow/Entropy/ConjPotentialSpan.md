@@ -28,3 +28,9 @@ coefficient uniformly on a compact regular-time slab by applying compactness to
 the already proved joint scalar continuity.  This is the coefficient bound
 needed by exact-interval positivity; it adds no PDE or convergence assumption.
 It remains theorem-level **0%** pending the same focused verification.
+
+## 2026-07-23 post-merge check
+
+The span file now uses the fully qualified `RealTimeInterval` namespace where
+needed and omits unused inherited section variables around `conjCoeff_span`.
+Focused verification and the module artifact refresh both passed.

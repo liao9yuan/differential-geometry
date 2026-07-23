@@ -21,3 +21,9 @@ export refresh, so the theorem remains theorem-level **0%** with approximately
 **90%** dedicated source until checked.  Finite Good-set propagation,
 `NoLocalCollapsing`, and `ham3_noncollapse` remain theorem-level frontiers at
 **0%**.
+
+## 2026-07-23 post-merge check
+
+The W comparison span now opens the tensor heat equation and L2 namespaces and
+uses the correct right-addition monotonicity direction in the final inequalities.
+Focused verification and the module artifact refresh both passed.

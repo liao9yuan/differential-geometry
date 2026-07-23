@@ -29,3 +29,9 @@ The exact Galerkin-limit assembly `gallim_on` remains a separate theorem-level
 `ham3_noncollapse` remain theorem-level **0%**; broader entropy/noncollapsing
 machinery remains approximately **97%**, and whole HCG machinery approximately
 **60%**.
+
+## 2026-07-23 post-merge check
+
+The exact nonautonomous scalar module now imports the Hs source directly and
+uses explicit `norm_nonneg` targets for the first- and second-order coefficient
+differences.  Focused verification and the module artifact refresh both passed.

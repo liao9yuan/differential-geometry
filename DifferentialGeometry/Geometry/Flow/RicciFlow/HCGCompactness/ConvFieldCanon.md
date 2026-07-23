@@ -50,27 +50,23 @@ claim about arbitrary `MetricCompactnessConclusion` was added.
 
 ## Current verification state
 
-The source draft contains no new `sorry`, `admit`, or `axiom`.  Focused checking
-is intentionally paused while the H6 framed-normal-coordinate migration owns
-the downstream refresh window.  The current `StepDAssembly.olean` predates its
-new `domain_eq` field, so checking now would produce a known stale-interface
-failure rather than useful proof diagnostics.
-
-The first local obligation to verify after refresh is the definitional equality
+`open_upgrade_canon` is focused GREEN with zero `sorry`, `admit`, or `axiom`
+in this module.  The definitional equality
 
 ```text
 tgtRefSrc gRefT hsrc htgt k = srcMetric hsrc htgt k 0
 ```
 
-used to convert `canon_rel` into the reference relation consumed by
-`srcEquivOn`.  Both sides are the same target-time-zero restriction and
-source-target pullback, so this is expected to be `rfl`.  The next likely work
-is only `simpa` normalization across the metric-to-flow field copy.
+is checked by reflexivity once the target-manifold instances are materialized
+in the local proof.  The only source repair was to repeat the canonical
+topology/chart/manifold/compactness instances inside dependent lambda and proof
+bodies; no metric assumption or compatibility wrapper was added.
 
-`open_upgrade_canon` is theorem-level 0% until focused verification is green;
-its dedicated assembly is approximately 85%.  Its four genuine upstream
-frontiers remain visible and independent: the arbitrary-dimensional curvature
-tower, the complete-noncompact Bernstein/Shi theorem, the constants-first
-varying-source induction, and the concrete Step-D canonical-bounds proof.
-The unconditional `compactnessSol` endpoint remains 0%; dedicated P4 support
-machinery remains roughly 97%, and whole-HCG support machinery roughly 60%.
+The theorem and its dedicated consumer assembly are now focused and exact
+GREEN (`9720/9720`), with a current module artifact.  This does not prove the
+unconditional `compactnessSol` endpoint:
+`open_upgrade_canon` consumes a concrete `StepDCanonData`, and its Shi input
+still comes through the independent complete-noncompact analytic lane.  The
+unconditional endpoint therefore remains 0%; dedicated P4 support machinery
+is approximately 98%, while whole-HCG supporting machinery remains roughly
+60%.

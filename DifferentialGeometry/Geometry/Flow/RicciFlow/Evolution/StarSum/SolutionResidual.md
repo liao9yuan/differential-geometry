@@ -33,9 +33,8 @@ The legacy dimension-three `resStarSol` remains as a compatibility endpoint;
 the new direct tower does not depend on it.
 
 Source assembly contains no `sorry`, `admit`, or new axiom.  Focused
-verification is pending the active upstream artifact refresh followed by the
-ordered `SpatialMember -> TimeRecursion -> TowerSwapRegularity` refresh.  Until
-that passes, `rmResidual_cost` is theorem-level **0% verified**; its dedicated
-producer machinery is about **98%** complete.  The direct `towerHeatSol_any`
-and complete Shi theorem remain theorem-level **0%** at this verification
-point.
+verification is GREEN with no local warning, and the exact target is current
+(`9564/9564`).  Thus `rmResidual_cost` is theorem-level **100% checked** and its
+dedicated producer machinery is **100%**.  The direct tower is also exact-current;
+the complete noncompact Shi theorem remains theorem-level **0%** until the
+independent solution-produced `ShiCutoffData` frontier is closed.

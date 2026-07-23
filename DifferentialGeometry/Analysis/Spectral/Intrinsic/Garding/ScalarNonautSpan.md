@@ -98,3 +98,10 @@ verification of this module is pending their sequential exported-object
 refresh.  Until that check passes, these new span theorems remain theorem-level
 0% with approximately 99% dedicated source and machinery.  The next theorem is
 `scalar_crit_span`, followed by the target-length Galerkin assembly.
+
+## 2026-07-23 post-merge check
+
+The span module now imports the cometric double-trace field API directly, opens
+the needed parabolic/intrinsic namespaces, and proves the finite spectral
+support sum extension using `hv.toFinset`.  Focused verification and the module
+artifact refresh both passed.

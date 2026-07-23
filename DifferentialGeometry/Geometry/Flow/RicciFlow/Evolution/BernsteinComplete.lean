@@ -1483,22 +1483,25 @@ private theorem GfunCut_space_diff
 namespace BernsteinTower
 
 omit [NeZero (Module.finrank Real E)] in
-/-- **Complete-noncompact Bernstein estimate from quantitative cutoffs.**
+/-- **Fixed-order complete-noncompact Bernstein estimate from quantitative cutoffs.**
 
 The cutoff family localizes the graded Bernstein polynomial to one compact
-spatial set, while `TowerNormGradOn` absorbs the cutoff-gradient terms.  The
-cutoff index is internal: exhaustion recovers the ordinary polynomial at the
-requested point and `err n → 0` removes the remaining level-zero error. -/
-theorem estimate_of_cutoff
+spatial set, while `TowerNormGradUpTo` through the requested order absorbs the
+cutoff-gradient terms.  The cutoff index is internal: exhaustion recovers the
+ordinary polynomial at the requested point and `err n → 0` removes the
+remaining level-zero error. -/
+theorem estimate_cutoff_at
     {G : RealizedMetricFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
     (cut : ShiCutoffData (I := I) G B.T)
-    (hgrad : TowerNormGradOn (I := I) B) :
-    ∀ m : Nat, ∀ t : Real, t ∈ Set.Icc 0 B.T → 0 < t → ∀ x : M,
+    (m : Nat)
+    (hgrad : TowerNormGradUpTo (I := I) B m) :
+    ∀ t : Real, t ∈ Set.Icc 0 B.T → 0 < t → ∀ x : M,
       t ^ m * B.w m t x ≤ (towerConst B.c B.α m) ^ 2 * B.K ^ 2 := by
-  intro m
+  revert hgrad
   induction m using Nat.strong_induction_on with
   | h m IH =>
+    intro hgrad
     rcases Nat.eq_zero_or_pos m with hm0 | hmpos
     · subst hm0
       intro t ht _ x
@@ -1770,8 +1773,13 @@ theorem estimate_of_cutoff
                 huniq (hFtime s hs hspos y)
                 (fun z ↦ hFspace s hs hspos z) (hFgrad s hs hspos y)
           have hsub := GfunCut_parabolic_le (I := I) B cut hmpos
-            (hgrad.upTo m) hs hspos y
-            (fun j hj ↦ IH j hj s hs hspos y) hsmall
+            hgrad hs hspos y
+            (fun j hj ↦ by
+              have hgrad_j : TowerNormGradUpTo (I := I) B j := by
+                intro k hk
+                exact hgrad k (hk.trans (Nat.le_of_lt hj))
+              exact IH j hj hgrad_j s hs hspos y)
+            hsmall
           have hsub' : parabolicOperatorWithDrift (I := I) G B.T
               (fun _ z ↦ (0 : TangentSpace I z)) F s y ≤ bBar n := by
             simpa only [F, bBar, bCore, bErr] using hsub
@@ -1842,6 +1850,18 @@ theorem estimate_of_cutoff
         nlinarith [htK, mul_nonneg hcoeff0 hKsq0]
       rw [towerConst_sq B.hc B.hα]
       exact hlimit.trans hfinal
+
+omit [NeZero (Module.finrank Real E)] in
+/-- All-order compatibility wrapper for `estimate_cutoff_at`. -/
+theorem estimate_of_cutoff
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    (cut : ShiCutoffData (I := I) G B.T)
+    (hgrad : TowerNormGradOn (I := I) B) :
+    ∀ m : Nat, ∀ t : Real, t ∈ Set.Icc 0 B.T → 0 < t → ∀ x : M,
+      t ^ m * B.w m t x ≤ (towerConst B.c B.α m) ^ 2 * B.K ^ 2 := by
+  intro m
+  exact estimate_cutoff_at (I := I) B cut m (hgrad.upTo m)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

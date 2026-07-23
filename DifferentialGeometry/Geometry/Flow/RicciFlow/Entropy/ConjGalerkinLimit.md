@@ -98,3 +98,9 @@ contains no local `sorry`; focused verification is pending the active upstream
 spectral object refresh.  Therefore `gal_subseq_on` remains theorem-level
 **0%**, with approximately **98%** dedicated source machinery, until its own
 file check passes.
+
+## 2026-07-23 post-merge check
+
+The limit wrapper now uses ordinary `dsimp` at the two let-binder exposure
+points before applying `gal_subseq_on`.  Focused verification and the module
+artifact refresh both passed.

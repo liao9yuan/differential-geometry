@@ -414,7 +414,7 @@ theorem scalar_gal_subseq
   dsimp only
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have hgal := scalar_gal_bound (I := I) (M := M) S hS T
-  dsimp only at hgal
+  dsimp at hgal
   obtain ⟨tauE, htauE, htauE_one, hsolve⟩ := hgal
   obtain ⟨tau2, htau2, _htau2_one, hcont2, _hmeas2, _hbound2,
       _hboundAE2⟩ :=
@@ -452,7 +452,8 @@ theorem scalar_gal_subseq
     simpa only [scalarGalPert, q, Inc] using (hcont2.mono hIcc2).add hPot
   refine ⟨tau, htau, htau_one, ?_⟩
   apply gal_subseq_on (I := I) (M := M) S T htau
-  · intro u0 Fs
+  · dsimp
+    intro u0 Fs
     obtain ⟨V, hcont, hderiv, hinit, hsupp, henergy⟩ := hsolve u0 Fs
     refine ⟨V, ?_, ?_, hinit, hsupp, ?_⟩
     · intro N i hi

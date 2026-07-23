@@ -294,7 +294,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem complete_of_heat
+private theorem exists_trunc_tower
     {D : RealTimeInterval}
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
@@ -318,59 +318,51 @@ private theorem complete_of_heat
     (hw_grad : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
       MDifferentiableAt I (I.prod 𝓘(Real, E))
         (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
-    (m : Nat) (c : Real) (hc : 0 ≤ c)
-    (hlevelC : ∀ k : Nat, k ≤ m → levelC k ≤ c)
-    (Ceq Kric : Real) (hCeq : 1 ≤ Ceq) (hKric : 0 ≤ Kric)
-    (hequiv : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
-      ∀ v : TangentSpace I x,
-        Ceq⁻¹ * ‖v‖ ^ 2 ≤ (G.metric t).inner x v v ∧
-          (G.metric t).inner x v v ≤ Ceq * ‖v‖ ^ 2)
-    (hric : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
-      ∀ v : TangentSpace I x,
-        -Kric * (G.metric t).inner x v v ≤
-          ricciTensor (I := I) (G.metric t) x v v)
-    {t : Real} (htmem : t ∈ Set.Icc 0 T) (htpos : 0 < t) (x : M) :
-    w m t x ≤ (towerConst c aScale m) ^ 2 * K ^ 2 / t ^ m := by
+    (top : Nat) (c : Real) (hc : 0 ≤ c)
+    (hlevelC : ∀ k : Nat, k ≤ top → levelC k ≤ c) :
+    ∃ B : BernsteinTower (I := I) G,
+      B.c = c ∧ B.K = K ∧ B.α = aScale ∧ B.T = T ∧
+        ∀ k : Nat, k ≤ top → ∀ s : Real, ∀ y : M, B.w k s y = w k s y := by
   classical
   let w' : Nat → Real → M → Real := fun k ↦
-    if k ≤ m then w k else fun _ _ ↦ 0
+    if k ≤ top then w k else fun _ _ ↦ 0
   let wLap' : Nat → Real → M → Real := fun k ↦
-    if k ≤ m then wLap k else fun _ _ ↦ 0
-  have hw'_le : ∀ k : Nat, k ≤ m → w' k = w k := by
+    if k ≤ top then wLap k else fun _ _ ↦ 0
+  have hw'_le : ∀ k : Nat, k ≤ top → w' k = w k := by
     intro k hk
     simp only [w', if_pos hk]
-  have hw'_gt : ∀ k : Nat, ¬ k ≤ m → w' k = fun _ _ ↦ 0 := by
+  have hw'_gt : ∀ k : Nat, ¬ k ≤ top → w' k = fun _ _ ↦ 0 := by
     intro k hk
     simp only [w', if_neg hk]
-  have hwLap'_le : ∀ k : Nat, k ≤ m → wLap' k = wLap k := by
+  have hwLap'_le : ∀ k : Nat, k ≤ top → wLap' k = wLap k := by
     intro k hk
     simp only [wLap', if_pos hk]
-  have hwLap'_gt : ∀ k : Nat, ¬ k ≤ m → wLap' k = fun _ _ ↦ 0 := by
+  have hwLap'_gt : ∀ k : Nat, ¬ k ≤ top → wLap' k = fun _ _ ↦ 0 := by
     intro k hk
     simp only [wLap', if_neg hk]
-  have hw'_val_le : ∀ k : Nat, k ≤ m → ∀ s : Real, ∀ y : M,
+  have hw'_val_le : ∀ k : Nat, k ≤ top → ∀ s : Real, ∀ y : M,
       w' k s y = w k s y := by
     intro k hk s y
     rw [hw'_le k hk]
-  have hw'_val_gt : ∀ k : Nat, ¬ k ≤ m → ∀ s : Real, ∀ y : M,
+  have hw'_val_gt : ∀ k : Nat, ¬ k ≤ top → ∀ s : Real, ∀ y : M,
       w' k s y = 0 := by
     intro k hk s y
     rw [hw'_gt k hk]
-  have hwLap'_val_le : ∀ k : Nat, k ≤ m → ∀ s : Real, ∀ y : M,
+  have hwLap'_val_le : ∀ k : Nat, k ≤ top → ∀ s : Real, ∀ y : M,
       wLap' k s y = wLap k s y := by
     intro k hk s y
     rw [hwLap'_le k hk]
-  have hwLap'_val_gt : ∀ k : Nat, ¬ k ≤ m → ∀ s : Real, ∀ y : M,
+  have hwLap'_val_gt : ∀ k : Nat, ¬ k ≤ top → ∀ s : Real, ∀ y : M,
       wLap' k s y = 0 := by
     intro k hk s y
     rw [hwLap'_gt k hk]
   have hw'_nonneg : ∀ k : Nat, ∀ s : Real, ∀ y : M, 0 ≤ w' k s y := by
     intro k s y
-    by_cases hk : k ≤ m
+    by_cases hk : k ≤ top
     · rw [hw'_val_le k hk]
       exact hw_nonneg k s y
     · rw [hw'_val_gt k hk]
-  have hreact_eq : ∀ k : Nat, k ≤ m → ∀ s : Real, ∀ y : M,
+  have hreact_eq : ∀ k : Nat, k ≤ top → ∀ s : Real, ∀ y : M,
       towerReactionSum (M := M) w' c k s y =
         towerReactionSum (M := M) w c k s y := by
     intro k hk s y
@@ -419,13 +411,13 @@ private theorem complete_of_heat
         exact hw'_nonneg k s y
       hw0_bound := by
         intro s hs y
-        rw [hw'_val_le 0 (Nat.zero_le m)]
+        rw [hw'_val_le 0 (Nat.zero_le top)]
         exact hw0_bound s hs y
       hTK := hTK
       hheat := by
         intro k tau y
-        rcases lt_trichotomy k m with hlt | heq | hgt
-        · have hk : k ≤ m := hlt.le
+        rcases lt_trichotomy k top with hlt | heq | hgt
+        · have hk : k ≤ top := hlt.le
           obtain ⟨d, hd, hle⟩ := hheat k tau y
           refine ⟨d, ?_, ?_⟩
           · simpa only [hw'_val_le k hk] using hd
@@ -433,7 +425,7 @@ private theorem complete_of_heat
               hreact_eq k hk]
             have hmono := hreact_mono (hlevelC k hk) k (tau : Real) y
             linarith
-        · subst m
+        · subst top
           obtain ⟨d, hd, hle⟩ := hheat k tau y
           refine ⟨d, ?_, ?_⟩
           · simpa only [hw'_val_le k le_rfl] using hd
@@ -442,7 +434,7 @@ private theorem complete_of_heat
             have hmono := hreact_mono (hlevelC k le_rfl) k (tau : Real) y
             have hnn := hw_nonneg (k + 1) (tau : Real) y
             nlinarith
-        · have hk : ¬ k ≤ m := by omega
+        · have hk : ¬ k ≤ top := by omega
           refine ⟨0, ?_, ?_⟩
           · have hfun : (fun s : Real ↦ w' k s y) = fun _ ↦ 0 := by
               funext s
@@ -461,7 +453,7 @@ private theorem complete_of_heat
             norm_num
       hLap := by
         intro k s hs hspos y
-        by_cases hk : k ≤ m
+        by_cases hk : k ≤ top
         · have hfun : w' k s = w k s := by
             funext z
             rw [hw'_val_le k hk]
@@ -476,7 +468,7 @@ private theorem complete_of_heat
           exact laplacian_const (I := I) (G.connection s) (G.metric s) 0 y
       hw_cont := by
         intro k
-        by_cases hk : k ≤ m
+        by_cases hk : k ≤ top
         · have hfun : (fun p : Real × M ↦ w' k p.1 p.2) =
               fun p : Real × M ↦ w k p.1 p.2 := by
             funext p
@@ -491,7 +483,7 @@ private theorem complete_of_heat
           exact continuousOn_const
       hw_space := by
         intro k s hs hspos y
-        by_cases hk : k ≤ m
+        by_cases hk : k ≤ top
         · have hfun : w' k s = w k s := by
             funext z
             rw [hw'_val_le k hk]
@@ -504,7 +496,7 @@ private theorem complete_of_heat
           exact mdifferentiableAt_const
       hw_grad := by
         intro k s hs hspos y
-        by_cases hk : k ≤ m
+        by_cases hk : k ≤ top
         · have hfun : w' k s = w k s := by
             funext z
             rw [hw'_val_le k hk]
@@ -520,15 +512,142 @@ private theorem complete_of_heat
           filter_upwards with z
           exact congrArg (fun v ↦ (⟨z, v⟩ : TotalSpace E (TangentSpace I)))
             (gradientFun_const (I := I) (G.metric s) 0 z) }
-  have hkey := BernsteinTower.estimate_complete B Ceq Kric hCeq hKric hequiv hric
-    m t htmem htpos x
+  refine ⟨B, rfl, rfl, rfl, rfl, ?_⟩
+  intro k hk s y
+  simpa only [B] using hw'_val_le k hk s y
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Legacy fixed-order adapter to the unsupported global complete estimate. -/
+private theorem complete_of_heat
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {w wLap : Nat → Real → M → Real}
+    (levelC : Nat → Real)
+    (K aScale T : Real)
+    (hT : 0 < T) (hK : 0 < K) (haScale : 0 ≤ aScale)
+    (hslab : Set.Icc 0 T ⊆ D.carrier)
+    (hregular : ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → t ∈ D.regular)
+    (hw_nonneg : ∀ k : Nat, ∀ t : Real, ∀ x : M, 0 ≤ w k t x)
+    (hw0_bound : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      w 0 t x ≤ K ^ 2)
+    (hTK : T ≤ aScale / K)
+    (hheat : ∀ k : Nat, TowerHeatBoundOn (D := D) w wLap (levelC k) k)
+    (hLap : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      heatOperatorWithDrift (I := I) G t
+        (fun _y : M ↦ (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
+    (hw_cont : ∀ k : Nat, ContinuousOn (fun p : Real × M ↦ w k p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hw_space : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ y : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
+    (hw_grad : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
+    (m : Nat) (c : Real) (hc : 0 ≤ c)
+    (hlevelC : ∀ k : Nat, k ≤ m → levelC k ≤ c)
+    (Ceq Kric : Real) (hCeq : 1 ≤ Ceq) (hKric : 0 ≤ Kric)
+    (hequiv : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      ∀ v : TangentSpace I x,
+        Ceq⁻¹ * ‖v‖ ^ 2 ≤ (G.metric t).inner x v v ∧
+          (G.metric t).inner x v v ≤ Ceq * ‖v‖ ^ 2)
+    (hric : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      ∀ v : TangentSpace I x,
+        -Kric * (G.metric t).inner x v v ≤
+          ricciTensor (I := I) (G.metric t) x v v)
+    {t : Real} (htmem : t ∈ Set.Icc 0 T) (htpos : 0 < t) (x : M) :
+    w m t x ≤ (towerConst c aScale m) ^ 2 * K ^ 2 / t ^ m := by
+  obtain ⟨B, hBc, hBK, hBα, hBT, hwB⟩ :=
+    exists_trunc_tower (I := I) G levelC K aScale T hT hK haScale hslab
+      hregular hw_nonneg hw0_bound hTK hheat hLap hw_cont hw_space hw_grad
+      m c hc hlevelC
+  have htmemB : t ∈ Set.Icc 0 B.T := by
+    simpa only [hBT] using htmem
+  have hequivB : ∀ s : Real, s ∈ Set.Icc 0 B.T → ∀ y : M,
+      ∀ v : TangentSpace I y,
+        Ceq⁻¹ * ‖v‖ ^ 2 ≤ (G.metric s).inner y v v ∧
+          (G.metric s).inner y v v ≤ Ceq * ‖v‖ ^ 2 := by
+    simpa only [hBT] using hequiv
+  have hricB : ∀ s : Real, s ∈ Set.Icc 0 B.T → ∀ y : M,
+      ∀ v : TangentSpace I y,
+        -Kric * (G.metric s).inner y v v ≤
+          ricciTensor (I := I) (G.metric s) y v v := by
+    simpa only [hBT] using hric
+  have hkey := BernsteinTower.estimate_complete B Ceq Kric hCeq hKric
+    hequivB hricB m t htmemB htpos x
   have hdiv : B.w m t x ≤
       (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by
     rw [le_div_iff₀ (pow_pos htpos m)]
-    nlinarith
-  simp only [B] at hdiv
-  rw [hw'_val_le m le_rfl t x] at hdiv
-  exact hdiv
+    simpa only [mul_comm] using hkey
+  rw [hwB m le_rfl t x] at hdiv
+  simpa only [hBc, hBK, hBα] using hdiv
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Fixed-order complete Bernstein adapter from a generated cutoff family and
+Kato control through the requested order. -/
+private theorem complete_of_cutoff
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {w wLap : Nat → Real → M → Real}
+    (levelC : Nat → Real)
+    (K aScale T : Real)
+    (hT : 0 < T) (hK : 0 < K) (haScale : 0 ≤ aScale)
+    (hslab : Set.Icc 0 T ⊆ D.carrier)
+    (hregular : ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → t ∈ D.regular)
+    (hw_nonneg : ∀ k : Nat, ∀ t : Real, ∀ x : M, 0 ≤ w k t x)
+    (hw0_bound : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      w 0 t x ≤ K ^ 2)
+    (hTK : T ≤ aScale / K)
+    (hheat : ∀ k : Nat, TowerHeatBoundOn (D := D) w wLap (levelC k) k)
+    (hLap : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      heatOperatorWithDrift (I := I) G t
+        (fun _y : M ↦ (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
+    (hw_cont : ∀ k : Nat, ContinuousOn (fun p : Real × M ↦ w k p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hw_space : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ y : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
+    (hw_grad : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
+    (cut : ShiCutoffData (I := I) G T)
+    (m : Nat) (c : Real) (hc : 0 ≤ c)
+    (hlevelC : ∀ k : Nat, k ≤ m + 1 → levelC k ≤ c)
+    (hKato : ∀ k : Nat, k ≤ m → ∀ s : Real, s ∈ Set.Icc 0 T → 0 < s → ∀ y : M,
+      (G.metric s).inner y
+          (gradientFun (I := I) (G.metric s) (w k s) y)
+          (gradientFun (I := I) (G.metric s) (w k s) y) ≤
+        4 * w k s y * w (k + 1) s y)
+    {t : Real} (htmem : t ∈ Set.Icc 0 T) (htpos : 0 < t) (x : M) :
+    w m t x ≤ (towerConst c aScale m) ^ 2 * K ^ 2 / t ^ m := by
+  obtain ⟨B, hBc, hBK, hBα, hBT, hwB⟩ :=
+    exists_trunc_tower (I := I) G levelC K aScale T hT hK haScale hslab
+      hregular hw_nonneg hw0_bound hTK hheat hLap hw_cont hw_space hw_grad
+      (m + 1) c hc hlevelC
+  have cutB : ShiCutoffData (I := I) G B.T := by
+    simpa only [hBT] using cut
+  have hgradB : TowerNormGradUpTo (I := I) B m := by
+    intro k hk s hs hspos y
+    have hsT : s ∈ Set.Icc 0 T := by
+      simpa only [hBT] using hs
+    have hkTop : k ≤ m + 1 := by omega
+    have hk1Top : k + 1 ≤ m + 1 := by omega
+    have hwk : B.w k s = w k s := by
+      funext z
+      exact hwB k hkTop s z
+    have hwk1 : B.w (k + 1) s = w (k + 1) s := by
+      funext z
+      exact hwB (k + 1) hk1Top s z
+    simpa only [hwk, hwk1] using hKato k hk s hsT hspos y
+  have htmemB : t ∈ Set.Icc 0 B.T := by
+    simpa only [hBT] using htmem
+  have hkey := BernsteinTower.estimate_cutoff_at B cutB m hgradB
+    t htmemB htpos x
+  have hdiv : B.w m t x ≤
+      (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by
+    rw [le_div_iff₀ (pow_pos htpos m)]
+    simpa only [mul_comm] using hkey
+  rw [hwB m (by omega) t x] at hdiv
+  simpa only [hBc, hBK, hBα] using hdiv
 
 end CompleteTruncation
 

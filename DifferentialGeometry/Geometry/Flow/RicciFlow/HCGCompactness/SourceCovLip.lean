@@ -157,7 +157,7 @@ theorem srcCovLip_of_soln
       SmoothRiemannianMetric I P.M)
     (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     {β ψ t₀ : ℝ}
-    (hβψ : β ≤ ψ)
+    (_hβψ : β ≤ ψ)
     (ht₀ : t₀ ∈ Set.Icc β ψ)
     (hwin : Set.Icc β ψ ⊆ X.D.regular)
     (Bmax : ℝ) (hBmax : 1 ≤ Bmax)
@@ -312,11 +312,9 @@ theorem srcCovLip_of_soln
           (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
           (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
           (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
-  /- The genuine analytic frontier is the constants-first invariant induction.
-  At each order it controls both the moving metric tower and the evolution
-  tower in the fixed reference norm.  Keeping the two conclusions together is
-  essential: the latter is the derivative bound used by the time mean-value
-  argument below. -/
+  /- Strong induction chooses every numeric coefficient before the varying
+  source type. At positive order, `covOrderBound_stage_on` supplies the metric
+  tower bound and `ric_bound_field_on` supplies the evolution-tensor bound. -/
   have hcore : ∀ q : Nat, ∃ Cq Lq : ℝ, 0 ≤ Cq ∧ 0 ≤ Lq ∧
       (∀ k : Nat,
         letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
@@ -355,14 +353,198 @@ theorem srcCovLip_of_soln
                       (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
                       (refRes (I := I) Φ R hsrc k) q 0 t y)) ≤ Lq) := by
     intro q
-    by_cases hq : q = 0
-    · subst q
-      exact hcore0
-    · have hq_pos : 1 ≤ q := Nat.one_le_iff_ne_zero.mpr hq
-      /- For positive order, the existing component proof still chooses its
-      Claim-1/Claim-2 constants after the local good frame.  The remaining
-      proof must expose those numeric witnesses before the source index. -/
-      sorry
+    induction q using Nat.strong_induction_on with
+    | _ q ih =>
+      by_cases hq : q = 0
+      · subst q
+        exact hcore0
+      · have hq_pos : 1 ≤ q := Nat.one_le_iff_ne_zero.mpr hq
+        have hprev := fun r : {r : Nat // r < q} => ih r.1 r.2
+        choose Cprev _Lprev _hCprev _hLprev hcovPrev _hricPrev using hprev
+        let Cg : Nat → ℝ := fun r =>
+          if hr : r < q then Cprev ⟨r, hr⟩ else 0
+        obtain ⟨Kq, hKq0, hShiQ⟩ := hShi q
+        obtain ⟨initC, hinitC0, hinitQ⟩ := hinit q
+        let coeff :=
+          ricTowerCoeffs (Module.finrank ℝ E) q Bmax Cg Kq
+        let Cq :=
+          metricCovOrderEvolutionConstant coeff.slope coeff.offset
+            (ψ - β) initC
+        let Lq := 2 * (coeff.slope * Cq + coeff.offset)
+        have hcoeff : 0 ≤ coeff.slope ∧ 0 ≤ coeff.offset := by
+          dsimp only [coeff]
+          exact ricCoeffs_nonneg (Module.finrank ℝ E) q Bmax Cg Kq
+            hBmax hKq0
+        have hCq0 : 0 ≤ Cq := by
+          dsimp only [Cq, metricCovOrderEvolutionConstant]
+          exact Real.sqrt_nonneg _
+        have hLq0 : 0 ≤ Lq := by
+          dsimp only [Lq]
+          exact mul_nonneg (by norm_num)
+            (add_nonneg (mul_nonneg hcoeff.1 hCq0) hcoeff.2)
+        have htime : ∀ t ∈ Set.Icc β ψ, |t - t₀| ≤ ψ - β := by
+          intro t ht
+          rw [abs_le]
+          constructor <;> nlinarith [ht.1, ht.2, ht₀.1, ht₀.2]
+        have hcovAll :
+            ∀ k : Nat,
+              letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+                sourceDomTop (I := I) Φ k
+              letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+                sourceDomCharted (I := I) Φ k
+              letI : T2Space (SourceDomain (I := I) Φ k) :=
+                sourceDomT2 (I := I) Φ k
+              letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+                sourceDomSmooth (I := I) Φ k
+              letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+                sourceDomSigmaOf (I := I) Φ k (hsrc k)
+              ∀ t : ℝ, t ∈ Set.Icc β ψ →
+                ∀ y : SourceDomain (I := I) Φ k,
+                  metricCovDerivNorm (I := I) q
+                      (srcMetric (I := I) Φ hsrc htgt k t)
+                      (refRes (I := I) Φ R hsrc k) y ≤ Cq := by
+          intro k
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+            IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+              (n := (∞ : WithTop ℕ∞)) (by decide)
+          letI : IsManifold I 2 (SourceDomain (I := I) Φ k) :=
+            IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+              (n := (∞ : WithTop ℕ∞)) (by decide)
+          letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+              (SourceDomain (I := I) Φ k) := by
+            change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+            infer_instance
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          have hDreg : ∀ {r : ℝ}, r ∈ X.D.regular →
+              X.D.regular ∈ nhds r :=
+            fun {r} hr => X.D.regular_isOpen.mem_nhds hr
+          have hev := hevComp_of_solutions (I := I)
+            (K := (Set.univ : Set (SourceDomain (I := I) Φ k)))
+            (β := β) (ψ := ψ)
+            (gSeq := fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+            (gRef := refRes (I := I) Φ R hsrc k) (N := q)
+            (fun _ ↦ X.D)
+            (fun _ ↦ sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+            (fun _ ↦ isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+            (fun _ _ ↦ rfl)
+            (fun _ ↦ hwin)
+            (fun _ p' hp V x₀ ↦
+              solnTowerSwap_reg (I := I) (refRes (I := I) Φ R hsrc k)
+                (sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+                (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+                q hDreg p' hp V x₀)
+          have hstage := covOrderBound_stage_on (I := I)
+            (U := (Set.univ : Set (SourceDomain (I := I) Φ k)))
+            (β := β) (ψ := ψ) (t0 := t₀)
+            (gSeq := fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+            (gRef := refRes (I := I) Φ R hsrc k)
+            isOpen_univ q hq_pos Bmax hBmax
+            (fun _ t ht ↦ hequiv k t ht) Cg
+            (fun r _hr1 hrq _ t ht y _hy => by
+              simpa only [Cg, dif_pos hrq] using
+                hcovPrev ⟨r, hrq⟩ k t ht y)
+            Kq hKq0 (hShiQ k) ht₀
+            (fun i y _hy t ht v => hev i y (Set.mem_univ y) t ht v)
+            initC hinitC0 (fun _ y _hy => hinitQ k y)
+            (ψ - β) htime
+          intro t ht y
+          simpa only [Cq, coeff] using
+            hstage 0 t ht y (Set.mem_univ y)
+        have hricAll :
+            ∀ k : Nat,
+              letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+                sourceDomTop (I := I) Φ k
+              letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+                sourceDomCharted (I := I) Φ k
+              letI : T2Space (SourceDomain (I := I) Φ k) :=
+                sourceDomT2 (I := I) Φ k
+              letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+                sourceDomSmooth (I := I) Φ k
+              letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+                sourceDomSigmaOf (I := I) Φ k (hsrc k)
+              ∀ t : ℝ, t ∈ Set.Icc β ψ →
+                ∀ y : SourceDomain (I := I) Φ k,
+                  Real.sqrt
+                      (Tensor0SBundle.normSq0S (I := I)
+                        (refRes (I := I) Φ R hsrc k) y (q + 2)
+                        ((-2 : ℝ) •
+                          nablaRicReal (I := I)
+                            (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+                            (refRes (I := I) Φ R hsrc k) q 0 t y)) ≤ Lq := by
+          intro k
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+            IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+              (n := (∞ : WithTop ℕ∞)) (by decide)
+          letI : IsManifold I 2 (SourceDomain (I := I) Φ k) :=
+            IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+              (n := (∞ : WithTop ℕ∞)) (by decide)
+          letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+              (SourceDomain (I := I) Φ k) := by
+            change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+            infer_instance
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          intro t ht y
+          rw [sqrt_normSq0S_smul]
+          have hfield :
+              Real.sqrt
+                  (Tensor0SBundle.normSq0S (I := I)
+                    (refRes (I := I) Φ R hsrc k) y (q + 2)
+                    (nablaRicReal (I := I)
+                      (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+                      (refRes (I := I) Φ R hsrc k) q 0 t y)) ≤
+                coeff.slope *
+                    metricCovDerivNorm (I := I) q
+                      (srcMetric (I := I) Φ hsrc htgt k t)
+                      (refRes (I := I) Φ R hsrc k) y +
+                  coeff.offset := by
+            simpa only [coeff] using
+              ric_bound_field_on (I := I)
+                (U := (Set.univ : Set (SourceDomain (I := I) Φ k)))
+                (β := β) (ψ := ψ)
+                (gSeq := fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+                (gRef := refRes (I := I) Φ R hsrc k)
+                isOpen_univ q hq_pos Bmax hBmax
+                (fun _ t' ht' ↦ hequiv k t' ht') Cg
+                (fun r _hr1 hrq _ t' ht' y' _hy' => by
+                  simpa only [Cg, dif_pos hrq] using
+                    hcovPrev ⟨r, hrq⟩ k t' ht' y')
+                Kq hKq0 (hShiQ k) 0 t ht y (Set.mem_univ y)
+          have hbase :
+              Real.sqrt
+                  (Tensor0SBundle.normSq0S (I := I)
+                    (refRes (I := I) Φ R hsrc k) y (q + 2)
+                    (nablaRicReal (I := I)
+                      (fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
+                      (refRes (I := I) Φ R hsrc k) q 0 t y)) ≤
+                coeff.slope * Cq + coeff.offset :=
+            hfield.trans <|
+              by
+                simpa only [add_comm] using
+                  add_le_add_right
+                    (mul_le_mul_of_nonneg_left (hcovAll k t ht y) hcoeff.1)
+                    coeff.offset
+          rw [show |(-2 : ℝ)| = 2 by norm_num]
+          dsimp only [Lq]
+          exact mul_le_mul_of_nonneg_left hbase (by norm_num)
+        exact ⟨Cq, Lq, hCq0, hLq0, hcovAll, hricAll⟩
   refine
     { cov := ?_
       lip := ?_ }

@@ -23,14 +23,11 @@ proof was a `sorry`; it is not retained as a compatibility theorem or trusted
 intermediate.
 
 Source assembly is complete and contains no `sorry`, `admit`, or new axiom.
-Focused verification is pending the currently active upstream
-`FrameTowerRegularity` artifact refresh and the ordered refresh of the new
-residual chain.  Until that verification passes, `towerHeatSol_raw` and
-`towerHeatSol_any` are
-theorem-level **0% verified** even though their dedicated direct-tower machinery
-is about **98%** complete.
+Focused verification is GREEN and the exact target is current (`9571/9571`).
+`towerHeatSol_raw` and `towerHeatSol_any` are therefore theorem-level
+**100% checked**, and their dedicated direct-tower machinery is **100%**.
 
-The complete-noncompact Shi theorem remains theorem-level **0%** until both
-this tower theorem is checked and the independent solution-produced
-`ShiCutoffData` frontier is closed.  Unconditional HCG Theorem 3.10 remains
+The complete-noncompact Shi theorem remains theorem-level **0%** until the
+independent solution-produced `ShiCutoffData` frontier is closed and consumed.
+Unconditional HCG Theorem 3.10 remains
 theorem-level **0%**; its dedicated consumer machinery is about **97%**.

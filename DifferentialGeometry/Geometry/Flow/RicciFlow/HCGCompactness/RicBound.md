@@ -1,5 +1,28 @@
 # RicBound.lean — THE `ric_bound` endpoint (MSM135 Lemma 3.11, Step 4 (A_N))
 
+## Route A explicit witnesses (2026-07-22)
+
+The constants-first noncompact producer layer is source focused-green and
+sorry-free:
+
+- `RicTowerCoeffs` packages the explicit affine slope and offset.
+- `perDomain_bound` consumes the fixed numeric Claim 1/Claim 2/descent
+  witnesses.
+- `ric_tower_on` chooses a good frame pointwise; no compact finite subcover is
+  used to choose its constants.
+- `ric_bound_field_on` and `covOrderBound_stage_on` export the sequence/window
+  forms needed by `SourceCovLip`.
+
+The old compact `ric_bound` route is retained as compatibility API. The new
+declarations are focused-green and exact-current. Their consumer
+`SourceCovLip.srcCovLip_of_soln` is now sorry-free, focused-green, and
+exact-green (`4067/4067`).
+
+Progress accounting: the explicit RicBound producer and the dedicated
+constants-first `srcCovLip_of_soln` machinery are both 100%. This does not
+close the independent solution-generated `ShiCutoffData` frontier. The whole
+HCG compactness project remains about 60% complete.
+
 ## ✅✅ PROVED SORRY-FREE (2026-06-11, commit c35998f4; targeted build green, 3850 jobs)
 
 `theorem ric_bound` is fully discharged.  STATEMENT CHANGES vs the original

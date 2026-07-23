@@ -31,3 +31,10 @@ machinery; `FlowBallW` now reuses it instead of carrying a private copy.
 Focused verification is pending.  The source check did not emit a Lean
 diagnostic during the bounded check window while another long upstream build
 was active.
+
+## 2026-07-23 post-merge check
+
+`SmallBall` now imports the Riemannian distance continuity API directly, uses
+the current fully qualified continuity theorem name, and omits unused inherited
+metric section variables around `edist_vol_pos`.  Focused verification and the
+module artifact refresh both passed.

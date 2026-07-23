@@ -48,7 +48,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessEndpoint.lean` | **100% checked.**  `MetricCompactBase.exists_b1_raw` produces all 5/5 fields, `compactness_of_b1` performs Step-D assembly, and `MetricCompactnessConclusion.ofSeqSubseq` transports the nested subsequence conclusion back to the original sequence.  Focused check and exact targeted refresh are green. |
 | Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | 0%; the conditional endpoint is available, but the native CGT, Bishop–Gromov/uniform-packing, [H6], and connectedness producers needed to instantiate it remain external to this Chapter 4 assembly. |
 | Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer of the now-complete conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not produce that P4 input or prove unconditional Thm 3.10 |
-| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. `open_upgrade_of_raw` checks the complete consumer path, and the concrete Step-D canonical provenance lane is closed. The HCG-facing complete-Shi assembly is exact-green. Its trusted foundation has the exact arbitrary-dimensional fixed-basis Hamilton flow identity, exact costed level-zero residual, and exact cutoff-based complete-Bernstein consumer. The arbitrary-index successor, global residual capstone, and direct tower are assembled sorry-free in source but remain 0% verified until their ordered narrow chain is green; the solution-generated `ShiCutoffData` and constants-first `srcCovLip_of_soln` remain unproved. |
+| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. `open_upgrade_of_raw` checks the complete consumer path, the concrete Step-D canonical provenance lane is closed, `srcCovLip_of_soln` is focused/exact-green, and `open_upgrade_canon` is focused/exact-green. The HCG-facing complete-Shi assembly is exact-green. Its trusted foundation now includes the exact arbitrary-dimensional fixed-basis Hamilton identity, fixed global residual recursion, direct curvature tower, and cutoff-based generic Bernstein consumer. The sole remaining independent P4 producer is solution-generated `ShiCutoffData`; `MovingShiOpen` still consumes the legacy sorry-backed `estimate_complete` until that cutoff producer is available. |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
 
 ## 3. Live lanes and their entry documents
@@ -58,7 +58,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Ch4 Step B/C (selected B1 producer route) | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCStageComparison.md` + `C4/StepCStageDiagonal.md` + `C4/StepCStageInjectivity.md` + `C4/StepCStageMaster.md` + `C4/StepB1MetricLocal.md` + `C4/StepB1MetricIntrinsic.md` + `C4/StepB1MetricCarrier.md` + `C4/StepB1RawProducer.md` | **100% checked for the selected canonical framed producer route.**  The support capstone, full stage-master DAG, forward intrinsic tail, exact-`Function.invFunOn` reverse tail, two-carrier capstone, and `MetricCompactBase.exists_b1_raw` are focused/exact-green; the unchanged `StepB1RawInput` closes 5/5 fields for one global finite-stage map.  The separately named textbook B1 theorem remains unstated at 0%, and the historical full Step-C arbitrary recurrence remains separate/incomplete. |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` + `C4/MetricCompactnessEndpoint.md` | **100% checked for the concrete conditional route.** `compactness_canon` now proves its canonical whole-source metric-equivalence and all-order covariant bounds by joining the `D.close` tail with compact finite-head collars, then transports them through the canonical pullback and nested subsequence. `StepDAssembly` and `MetricCompactnessEndpoint` are focused- and exact-green on the live framed import chain; no `HasCanonBounds` frontier remains. |
 | Native [H6] normal-coordinate producer | `C4/B0NormalCoordBounds.md` + `C4/H6NormalCoord.md` | per-center `g_x`-orthonormal normalizer, framed exponential chart/inverse/differential, exact radial-ball correspondence, pullback metric, and framed radial-Jacobi bridge are checked. `StepBInputs.lean` now also focused-checks with canonical framed transition and metric semantics. The active API repair is ordered as radius profile, proper-ball/item-3, transition/overlap, metric-extension/branch stack, then Step-C/B1 readout; it adds no geometric hypothesis. |
-| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `ConvFieldOpenAssembly.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `movingShi_of_bound`, `movingShi_complete`, and `CurvBoundInput.movingShi_open` are green wrappers, not trusted analytic producers. `rm04Base_of_solution_any` and `e0Residual` are exact-current. The arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, and direct tower `towerHeatSol_raw` are assembled sorry-free in source, with HCG costs migrated to `rmTowerCost`; they remain theorem-level 0% verified until the active artifact refresh and ordered narrow chain pass. Independently, `GfunCut_parabolic_le` and `BernsteinTower.estimate_of_cutoff` are exact-current, closing the generic complete-Bernstein consumer; the solution-produced `ShiCutoffData` theorem remains genuine analysis and is the subject of the cutoff consultation. `srcCovLip_of_soln` is also unproved. Thm 3.10 stays 0%; dedicated P4 consumer machinery is about 97%. |
+| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `ConvFieldCanon.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `rm04Base_of_solution_any`, `e0Residual`, the arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, direct tower `towerHeatSol_raw`, and HCG `rmTowerCost` migration are all focused- and exact-green. The constants-first `srcCovLip_of_soln` producer and final `open_upgrade_canon` assembly are also focused- and exact-green. Independently, `GfunCut_parabolic_le` and the fixed-order `BernsteinTower.estimate_cutoff_at` are exact-current; `estimate_of_cutoff` remains the all-order compatibility wrapper. The remaining complete-Shi theorem is the solution-produced `ShiCutoffData`; `MovingShiOpen` must then switch its public route from the legacy `estimate_complete` call to the checked cutoff adapter. Thm 3.10 stays 0%; dedicated P4 consumer machinery is about 98%. |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
 | Space-form / quotient curvature | memory note `spaceform-hardroute-build` + same-name `.md`s | parallel, unrelated to 3.9/3.10 |
 
@@ -441,7 +441,7 @@ its docstring BEFORE consumers are built against it.
   must be retained because the abstract convergence package leaves its
   reference metric unpinned. The
   Hamilton nonregular-endpoint route remains a separate stronger consumer.
-  Dedicated P4 consumer/assembly machinery is about 97%; unconditional
+  Dedicated P4 consumer/assembly machinery is about 98%; unconditional
   Theorem 3.10 remains 0%.
   **2026-07-09 noncollapse repair:**
   the canonical Perelman layer
@@ -653,18 +653,15 @@ its docstring BEFORE consumers are built against it.
   conditional root producer, D5 metric exhaustion, and flat nested-open
   convergence are no longer on this list.
 
-## 7. Real sorries in this tree (audited 2026-07-22)
+## 7. Real sorries in this tree (audited 2026-07-23)
 
 `MetricCompactness.lean` (unconditional metric endpoint) ·
 `HamiltonCompactness.lean` (`compactnessSol`, unconditional solution endpoint) ·
 `NoncollapseInjectivity.lean` (`flowInj_of_vol`, the separately declared CGT
-frontier) · `Evolution/IteratedRmTowerSolution.lean`
-(`exists_rmTowerSol`, legacy insufficient direct-tower interface) ·
-`Evolution/BernsteinComplete.lean` (`estimate_complete`, legacy insufficient
-complete-Bernstein interface) · `SourceCovLip.lean`
-(`srcCovLip_of_soln`, constants-first source producer).  The legacy lower
-statements remain visible only while their callers migrate to the corrected
-producers; a green wrapper does not discharge their mathematics.
+frontier) · `Evolution/BernsteinComplete.lean` (`estimate_complete`, legacy insufficient
+complete-Bernstein interface).  The legacy `estimate_complete` statement
+remains visible while its caller awaits the solution-produced cutoff; a green
+wrapper does not discharge that mathematics.
 `FlowLimitRegularity.lean` has no remaining proof `sorry`; in particular,
 `ConvOut.gramSmooth` is checked.  Neither
 `C4/MetricCompactnessInputs.lean` nor `C4/StepB1RawProducer.lean` is in the live

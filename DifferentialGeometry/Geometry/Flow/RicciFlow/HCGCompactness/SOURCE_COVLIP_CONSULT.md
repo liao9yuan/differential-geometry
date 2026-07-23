@@ -1,5 +1,30 @@
 # GPT Pro consultation: constants-first whole-source covariant bounds
 
+## Implementation status (2026-07-22)
+
+The consultation selected **Route A: explicit numeric witnesses**.  The hypotheses were
+confirmed mathematically sufficient; the defect is witness quantifier placement, not missing
+geometry.  The route is now active and must resume from this checklist:
+
+- [x] Gate 0: `SourceCovLip.covRic0_le` and the `q = 0` branch are focused-green.
+- [x] Gate 1: `AkMFold.claim1Const`, nonnegativity, `claim1_abstract_bound`, and
+  `claim1_bound` are focused+exact green; legacy APIs are wrappers.
+- [x] Gate 2: `RicBoundClaims.claim1_LC_bound`, `claim2Const/spec`,
+  `claim2_component_bound`, `mixedDescentConst`, `mixed_descent_bound`, `aNConst`, and
+  `aN_component_bound` are focused+exact green.
+- [x] Gate 3: `RicTowerCoeffs`, fixed `perDomain_bound`, and pointwise
+  `ric_tower_on` are focused-green and exact-current.
+- [x] Gate 4: the sequence/window `ric_bound_field_on` wrapper and
+  `covOrderBound_stage_on` are focused-green and exact-current.
+- [x] Gate 5: the positive-order `SourceCovLip.hcore` strong induction is
+  sorry-free, focused-green, and exact-green (`4067/4067`).
+
+Do not restart the route audit or revive the compact finite-subcover witness
+assembly. The Route A theorem proof and its dedicated explicit-witness
+machinery are 100% and exact-current. The separate
+solution-generated `ShiCutoffData` frontier is unchanged. The whole HCG
+compactness project remains about 60% complete.
+
 ## Repository context
 
 - Repository: `https://github.com/liao9yuan/differential-geometry`

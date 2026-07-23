@@ -31,7 +31,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 /-- On any prescribed compact reflected regular-time interval, the
 conjugate-heat potential operator is continuous and has one finite norm bound. -/
 theorem conjA1_on
-    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     {h : Real}
     (hreg : ∀ s ∈ Set.Icc (0 : Real) h, (T : Real) - s ∈ D.regular) :
@@ -59,10 +60,13 @@ theorem conjA1_on
   change ‖conjA1 (I := I) (M := M) S T s‖ ≤ max C 0
   exact (hC ⟨s, hs, rfl⟩).trans (le_max_left _ _)
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- On a compact regular-time slab, the conjugate-heat scalar coefficient has
 one pointwise bound uniform in time and space. -/
 theorem conjCoeff_span
-    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     {a b : Real} (hab : Set.Icc a b ⊆ D.regular) :
     ∃ C : Real, 0 ≤ C ∧

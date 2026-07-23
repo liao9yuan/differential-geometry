@@ -94,7 +94,7 @@ theorem scalar_crit_span
   have hKR : K ⊆ R := by
     intro s hs
     simpa only [K, R] using hreg s hs
-  have hζ : ContMDiffOn (I.prod 𝓸(Real, Real)) 𝓸(Real, Real) ∞
+  have hζ : ContMDiffOn (I.prod 𝓘(Real, Real)) 𝓘(Real, Real) ∞
       (fun p : M × Real ↦ (ζ p.2 : M → Real) p.1)
       ((Set.univ : Set M) ×ˢ R) := by
     simpa only [ζ, R, conjCoeffRev] using conjCoeff_rev (I := I) S hS T

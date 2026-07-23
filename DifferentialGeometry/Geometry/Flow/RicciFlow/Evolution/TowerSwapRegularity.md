@@ -42,9 +42,9 @@ solution and `D.carrier`.
 Its output is deliberately the raw component API consumed by the residual
 recursion: `frameComp0S`, `christoffelSymbolInFrame`, and `iteratedRmComp`.
 There is no import of `TimeRecursion`, no new regularity hypothesis, and no
-parallel tower definition. The theorem passed its focused check; no targeted
-refresh was run in this lane.
+parallel tower definition. The theorem passed its focused check without
+diagnostics and is exact-current through the dedicated target (`9516/9516`).
 
-Theorem accounting: `towerDataAt` is complete in source (100%). It is an
-adapter for the residual capstone, not the capstone itself; the completion of
-`rmResidual_cost` must continue to be accounted for separately.
+Theorem accounting: `towerDataAt` is 100% checked. It is an adapter for the
+residual capstone; `rmResidual_cost` and `towerHeatSol_raw` are now separately
+100% checked as well.

@@ -1,5 +1,14 @@
 # `SpatialMember` — Brick 4 Phase P2 (spatial commutator is a star sum)
 
+## 2026-07-22 fixed global commutator field
+
+`commStarField S t k` is now selected before any point, basis, or local frame.
+`commStarField_cost` gives its exact certificate and `commStarField_spec`
+realizes the spatial commutator in every supplied orthonormal basis.  The old
+`spatialCommStarSum` remains a compatibility wrapper.  Focused verification is
+GREEN and the exact target is current (`3784/3784`); this is the fixed witness
+consumed by `resStarNext`.
+
 ## 2026-07-14 exact spatial-commutator cost
 
 Added `commStarCost` and strengthened `spatialCommStarSum` to return a

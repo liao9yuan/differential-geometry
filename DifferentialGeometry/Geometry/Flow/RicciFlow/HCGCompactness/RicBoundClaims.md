@@ -3,7 +3,7 @@
 ## ✅ R1 + R2 GREEN (2026-06-10, first check pass, sorry-free)
 
 MSM135 Ch. 3, Lemma 3.11, Step 3 — both bookkeeping claims, in frame-component
-tower form, consuming `AkMFold.lean` (parallel track, unmodified) and
+tower form, consuming `AkMFold.lean` and
 `Lemma45Engine.lean`.
 
 **Orientation convention (load-bearing):** `chrG` = the MOVING metric's LC frame
@@ -13,6 +13,31 @@ reference connection (`∇`; the outer towers).  With this assignment
 `mixed_oneStep_rev`/`claim2_component` consume — NO sign-flip glue anywhere.
 (`hkoszul_of_leviCivita (g := moving, gRef := fixed)` is already in this
 orientation.)
+
+## Fixed numeric witnesses — focused and exact GREEN (2026-07-22)
+
+The constants-first route now passes through this file without selecting any
+geometry-dependent witness:
+
+- `claim1_LC_bound` specializes the exact `AkMFold.claim1_bound` witness to
+  `claim1Const C0 (3 / 2) K m`; `claim1_LC` is its compatibility wrapper.
+- `claim2Const` selects from the pure numeric `claim2Double` theorem after normalizing
+  `A` and `K`; `claim2Const_spec` is the fixed-witness theorem, and
+  `claim2_component_bound` is its geometric consumer.
+- `mixedDescentConst` is the explicit witness already present in the descent proof;
+  `mixed_descent_bound` is the fixed theorem.
+- `aNConst` packages the component slope and offset; `aN_component_bound` composes
+  only the fixed Claim-2 and descent theorems.  All old existential declarations remain
+  compatibility corollaries in the fixed-theorem-to-wrapper direction.
+
+The source is focused-green and the exact artifact is current, with no local
+warning, `sorry`, `admit`, or new assumption. Together with `AkMFold`, this
+closes the lower numeric layer, about 30% of the dedicated explicit-witness
+producer chain. The pointwise and sequence-level `RicBound` declarations and
+`SourceCovLip.srcCovLip_of_soln` are now sorry-free, focused-green, and
+exact-current; the full dedicated Route A producer chain is 100%. This does not
+close the independent solution-generated `ShiCutoffData` frontier. The whole
+HCG compactness project remains about 60%.
 
 ## Contents
 

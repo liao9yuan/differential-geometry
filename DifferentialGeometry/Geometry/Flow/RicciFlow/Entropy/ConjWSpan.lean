@@ -16,7 +16,9 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open Bundle Filter MeasureTheory Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open scoped Manifold ContDiff Topology
@@ -219,10 +221,10 @@ theorem gallim_w_lt
         w_rev_antitone (I := I) S hS ((T : Real) + a)
           uShift hheatShift hposShift (add_pos ha hr.1) hDr hD
     have hleft : a + r ∈ Set.Icc (a + r) (a + s) :=
-      ⟨le_rfl, add_le_add_left hrs a⟩
+      ⟨le_rfl, add_le_add_right hrs a⟩
     have hright : a + s ∈ Set.Icc (a + r) (a + s) :=
-      ⟨add_le_add_left hrs a, le_rfl⟩
-    have hle := hmono hleft hright (add_le_add_left hrs a)
+      ⟨add_le_add_right hrs a, le_rfl⟩
+    have hle := hmono hleft hright (add_le_add_right hrs a)
     rw [hWShift s, hWShift r] at hle
     exact hle
   intro q hq

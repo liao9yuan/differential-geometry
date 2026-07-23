@@ -7,7 +7,9 @@ SIGN CONVENTION (2026-06-10, authoritative for the wiring phase, see
 (the flipped orientation) — `claim1` is sign-agnostic (free coefficients), but
 new geometric lemmas must use the `∇_k − ∇_ref` orientation.
 
-Spec/route: `RicBoundProof.md` (PROGRESS 9–10).  Status: **all content sorry-free, in oleans.**
+Spec/route: `RicBoundProof.md` (PROGRESS 9–10).  Status: **all content sorry-free**.
+The legacy API is exact-current; the fixed-witness additions below are focused-green and
+have not yet received a coordinated artifact refresh.
 
 ## Contents
 
@@ -28,6 +30,27 @@ Spec/route: `RicBoundProof.md` (PROGRESS 9–10).  Status: **all content sorry-f
    Analytic input: `contMDiffAt_extDerivFun_apply` from
    `Geometry/Connection/Realization/SmoothSectionsLocal.lean` (NEW; see that file — bump
    localization of the scalar only, vector field stays local via `contMDiffOn_dual_apply`).
+
+## Fixed numeric witness — focused GREEN (2026-07-22)
+
+The constants-first producer route now starts here:
+
+- `claim1Const C0 KR K m` is a strong-recursive numeric witness depending only on the four
+  displayed inputs; its unfolding equation contains the lower-order finite sum explicitly.
+- `claim1Const_nonneg` proves the witness is nonnegative.
+- `claim1_abstract_bound` is the fixed-witness form of the abstract induction.
+- `claim1_bound` is the fixed-witness Koszul-discharge form.
+- The old `claim1_abstract` and `claim1` declarations are compatibility corollaries of the
+  fixed theorems.  No witness is selected from a geometric existential theorem.
+
+Verification is focused-green with no `sorry`, `admit`, or new assumption.  This closes the
+first constants-first gate completely.  It is about 10% of the dedicated explicit-witness
+producer chain leading to `ric_bound_field_on`; that producer theorem is not yet stated
+(0%), `srcCovLip_of_soln` remains unproved (0%), and the whole HCG compactness project remains
+about 60% by the project-wide denominator.
+
+Next target: `RicBoundClaims.lean`, first `claim1_LC_bound`, then the normalized pure selector
+`claim2Const` and `claim2_component_bound`.
 
 ## Lessons / gotchas
 

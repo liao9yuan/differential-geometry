@@ -15,13 +15,10 @@ component heat equation on every supplied orthonormal local-frame patch.  The
 old `resStarSucc` statement remains as a compatibility wrapper whose witness is
 definitionally `resStarNext`.
 
-The source is sorry-free.  Its previous focused check passed before the final
-`commStarField` substitution; final focused verification is pending the active
-upstream artifact refresh and the narrow `SpatialMember` refresh.  Therefore
-the fixed successor theorem is currently **0% final-verified**, while its
-dedicated source machinery is about **99%** complete.  `rmResidual_cost` and
-the direct tower remain separately unverified until the downstream chain is
-checked.
+The source is sorry-free.  Focused verification is GREEN with no local warning,
+and the exact target is current (`3796/3796`).  The fixed successor theorem is
+therefore **100% checked**.  Its downstream capstones `rmResidual_cost` and
+`towerHeatSol_raw` are likewise focused- and exact-green.
 
 ## 2026-07-14 uniform recursive residual cost
 

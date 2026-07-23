@@ -87,7 +87,18 @@ theorem open_upgrade_canon
       letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).smooth
       SmoothRiemannianMetric I (X.term (mc.subseq k)).M :=
-    fun k => (X.term (mc.subseq k)).S.family.metric 0
+    fun k =>
+      letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).topology
+      letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).charted
+      letI : T2Space (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).t2
+      letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).smooth
+      letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).sigmaCompact
+      (X.term (mc.subseq k)).S.family.metric 0
 
   have hcanonRel := StepDCanonData.canon_rel (I := I) canon hsrc htgt
   dsimp only at hcanonRel
@@ -95,6 +106,16 @@ theorem open_upgrade_canon
   have hsrcZero (k : Nat) :
       tgtRefSrc (I := I) Phi gRefT hsrc htgt k =
         srcMetric (I := I) Phi hsrc htgt k 0 := by
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : T2Space (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).t2
+    letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).smooth
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
     rfl
   have hrel : ∀ k : Nat,
       letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
@@ -159,6 +180,16 @@ theorem open_upgrade_canon
         (beta n) (psi n) (gRefT k)
         (fun _ t => (X.term (mc.subseq k)).S.family.metric t) (B n) := by
     intro k
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : T2Space (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).t2
+    letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).smooth
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
     have hall := (hwindowData n).2.2.2 (mc.subseq k)
     have hrestricted := metricUniformEquivalentOnWindow_mono (I := I)
       (Set.subset_univ (Phi.target k)) hall
@@ -235,6 +266,16 @@ theorem open_upgrade_canon
           (refRes (I := I) Phi mc.limit.metric hsrc k)
           (srcMetric (I := I) Phi hsrc htgt k t) (Crel * Bmax n) := by
     intro k t ht
+    letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+      sourceDomTop (I := I) Phi k
+    letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+      sourceDomCharted (I := I) Phi k
+    letI : T2Space (SourceDomain (I := I) Phi k) :=
+      sourceDomT2 (I := I) Phi k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+      sourceDomSmooth (I := I) Phi k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Phi k) :=
+      sourceDomSigmaOf (I := I) Phi k (hsrc k)
     have hEq := srcEquivOn (I := I) Phi mc.limit.metric hsrc htgt
       (beta n) (psi n) gRefT (B n) Crel (hequivT n) hrel k t ht
     exact metricUniformEquivalentOn_of_le (I := I) hEq
