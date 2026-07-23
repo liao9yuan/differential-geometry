@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvalua
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -27,6 +25,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 noncomputable def contractCcTensor (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g (1 + r) (s + 1) → SmoothCcTensor g r s :=
@@ -153,11 +158,10 @@ theorem riemannianFiberNormSq_tensorRS_clm_apply_le
   refine ⟨‖φg‖ ^ 2, sq_nonneg _, fun v => ?_⟩
   rw [riemannianFiberNormSq_eq_bundle_norm_sq_gen (I := I) (M := M) g r₂ s₂ x (φ v),
       riemannianFiberNormSq_eq_bundle_norm_sq_gen (I := I) (M := M) g r₁ s₁ x v, ← hφg_apply v]
-  calc ‖φg v‖ ^ 2 ≤ (‖φg‖ * ‖v‖) ^ 2 := by
-          apply sq_le_sq'
-          · nlinarith [φg.le_opNorm v, norm_nonneg (φg v), norm_nonneg v, norm_nonneg φg]
-          · exact φg.le_opNorm v
-    _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
+  calc
+    ‖φg v‖ ^ 2 ≤ (‖φg‖ * ‖v‖) ^ 2 :=
+      pow_le_pow_left₀ (norm_nonneg _) (φg.le_opNorm v) 2
+    _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by rw [mul_pow]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in

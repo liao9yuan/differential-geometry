@@ -14,9 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponent
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Topology Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
   RealInnerProductSpace InnerProductSpace
@@ -46,6 +43,13 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -871,7 +875,8 @@ private lemma tensorChartComponentRaw_chartLimitSection_eq_zero_off_source
   have hsec : (chartLimitSection (I := I) (M := M) g r s F hF_cauchy α).toSection x = 0 :=
     chartLimitSection_toSection_eq_zero_off_source (I := I) (M := M) g r s F hF_cauchy α hx
   rw [tensorChartComponentRaw_def, tensorTrivProj, hsec,
-    ContinuousLinearMap.map_zero, map_zero]
+    ContinuousLinearMap.map_zero]
+  exact map_zero (tensorChartComponentProjection (E := E) r s P.1 P.2)
 
 open Classical in
 

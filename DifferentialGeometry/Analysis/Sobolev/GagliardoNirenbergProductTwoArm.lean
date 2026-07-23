@@ -3,9 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -836,8 +833,11 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
     rw [hCbig]; nlinarith [mul_nonneg hCS_nn hCT_nn]
   have hCbig_nn : (0 : ℝ) ≤ Cbig := le_trans zero_le_one hCbig1
   have hkC1 : (1 : ℝ) ≤ (k : ℝ) * Cbig + 1 := by
-    have : (0 : ℝ) ≤ (k : ℝ) * Cbig := by positivity
-    linarith
+    calc
+      (1 : ℝ) = 0 + 1 := by ring
+      _ ≤ (k : ℝ) * Cbig + 1 :=
+        by simpa [add_comm] using
+          add_le_add_right (mul_nonneg (Nat.cast_nonneg k) hCbig_nn) 1
   refine ⟨(k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1, by positivity, ?_⟩
   intro S T ΛS ΛT hΛS hΛT hSsup hTsup t ht0 ht1
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
@@ -888,11 +888,8 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
   set tt : ℝ := t / ((k : ℝ) * Cbig + 1) with htt
   have htt0 : 0 < tt := by rw [htt]; positivity
   have htt1 : tt ≤ 1 := by
-    rw [htt, div_le_one (by linarith)]
-    linarith
-  have htt_le_t : tt ≤ t := by
-    rw [htt, div_le_iff₀ (by linarith)]
-    nlinarith [ht0.le]
+    rw [htt, div_le_one (lt_of_lt_of_le zero_lt_one hkC1)]
+    exact ht1.trans hkC1
 
   have hcell : ∀ i, i < k →
       ∫ x, Sj i x * Tj (k - i) x ∂μ ≤
@@ -915,10 +912,22 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         rw [hNTdef, Nat.sub_zero]
       rw [hNT0] at hbound
       have harm : ΛS ^ 2 * NT ^ 2 ≤ Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
-        have h1 : (1 : ℝ) ≤ Cbig * (1 / tt) ^ k := by nlinarith
-        nlinarith [mul_nonneg (sq_nonneg ΛS) (sq_nonneg NT)]
+        have h1 : (1 : ℝ) ≤ Cbig * (1 / tt) ^ k := by
+          calc
+            (1 : ℝ) = 1 * 1 := by ring
+            _ ≤ Cbig * (1 / tt) ^ k :=
+              mul_le_mul hCbig1 h1ttk zero_le_one hCbig_nn
+        simpa only [one_mul] using
+          mul_le_mul_of_nonneg_right h1
+            (mul_nonneg (sq_nonneg ΛS) (sq_nonneg NT))
       have htop_nn : 0 ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) := by positivity
-      linarith [hbound, harm]
+      calc
+        ∫ x, Sj 0 x * Tj (k - 0) x ∂μ
+            ≤ ΛS ^ 2 * NT ^ 2 := hbound
+        _ ≤ Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := harm
+        _ ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) +
+            Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) :=
+          le_add_of_nonneg_left htop_nn
     · have hl_pos : 0 < k - i := by omega
       set l : ℕ := k - i with hl
       have hil : i + l = k := by omega
@@ -938,10 +947,10 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         have hwiwl : wi / wl = (i : ℝ) / l := by
           rw [hwi, hwl]
           field_simp
-        rw [hwiwl, div_le_iff₀ hl_posR]
+        rw [hwiwl]
         have h1l : (1 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl_pos
         have hik' : (i : ℝ) ≤ (k : ℝ) := le_of_lt (by exact_mod_cast hik)
-        nlinarith
+        exact (div_le_self (Nat.cast_nonneg i) h1l).trans hik'
       set p : ℝ := (k : ℝ) / i with hp
       set q : ℝ := (k : ℝ) / l with hq
       have hp_one : 1 < p := by rw [hp, lt_div_iff₀ hi_posR, one_mul]; exact_mod_cast hmi
@@ -991,14 +1000,16 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         (by rw [hNSdef]; exact norm_nonneg _) (by rw [hNTdef]; exact norm_nonneg _)
         hIφp_nn hIψq_nn htt0 htt1 hSe hTe
       have hCSCT_le : CS * CT ≤ Cbig := by rw [hCbig]; linarith
+      have hscaled_nn :
+          0 ≤ tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+        positivity
       calc ∫ x, Sj i x * Tj l x ∂μ
           ≤ Iφp ^ wi * Iψq ^ wl := hHolder
         _ ≤ CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := hys
         _ ≤ Cbig * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := by
-            refine mul_le_mul_of_nonneg_right hCSCT_le ?_
-            positivity
+            exact mul_le_mul_of_nonneg_right hCSCT_le hscaled_nn
         _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
-            ring
+            rw [mul_add, mul_assoc, mul_assoc]
 
   refine ⟨?_, ?_⟩
   · have hcont : Continuous (fun x => ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x) := by
@@ -1020,9 +1031,13 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
       rw [htt]
       rw [show (k : ℝ) * (Cbig * (t / ((k : ℝ) * Cbig + 1)))
           = ((k : ℝ) * Cbig * t) / ((k : ℝ) * Cbig + 1) from by ring]
+      have hcoeff_nn : 0 ≤ (k : ℝ) * Cbig :=
+        mul_nonneg (Nat.cast_nonneg k) hCbig_nn
       rw [div_le_iff₀ (by linarith : (0 : ℝ) < (k : ℝ) * Cbig + 1)]
-      nlinarith [ht0.le,
-        mul_nonneg (mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn) ht0.le]
+      calc
+        (k : ℝ) * Cbig * t ≤ ((k : ℝ) * Cbig + 1) * t :=
+          mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one) ht0.le
+        _ = t * ((k : ℝ) * Cbig + 1) := by ring
     have hinv_tt : (1 / tt) ^ k = ((k : ℝ) * Cbig + 1) ^ k * (1 / t) ^ k := by
       rw [htt, one_div_div,
         show ((k : ℝ) * Cbig + 1) / t = ((k : ℝ) * Cbig + 1) * (1 / t) from by ring,
@@ -1031,8 +1046,12 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
       rw [hinv_tt]
       have h1tk : (0 : ℝ) ≤ (1 / t) ^ k := by positivity
-      have hbase : (0 : ℝ) ≤ ((k : ℝ) * Cbig + 1) ^ k := by positivity
-      nlinarith [mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn]
+      have hcoeff :
+          (k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k ≤
+            (k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1 :=
+        le_add_of_nonneg_right zero_le_one
+      convert mul_le_mul_of_nonneg_right hcoeff h1tk using 1
+      all_goals ring
     have hXnn : (0 : ℝ) ≤ ΛT ^ 2 * NS ^ 2 := by positivity
     have hYnn : (0 : ℝ) ≤ ΛS ^ 2 * NT ^ 2 := by positivity
     have hYsum : ΛS ^ 2 * NT ^ 2 ≤ ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),

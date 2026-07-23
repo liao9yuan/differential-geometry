@@ -12,8 +12,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 800000
 
 
 
@@ -1432,24 +1430,58 @@ theorem chartRicci_sub_le
   set nR : Real := (Module.finrank Real E : Real) with hnR
   have hnR0 : 0 ≤ nR := Nat.cast_nonneg _
   set Q : Real := CJ * (3 * B) with hQdef
-  have hQ0 : 0 ≤ Q := by positivity
+  have hQ0 : 0 ≤ Q := by
+    rw [hQdef]
+    exact mul_nonneg hCJ0.le (mul_nonneg (by norm_num) hB)
   set P : Real := 3 * Q with hPdef
-  have hP0 : 0 ≤ P := by positivity
+  have hP0 : 0 ≤ P := by
+    rw [hPdef]
+    exact mul_nonneg (by norm_num) hQ0
   set Cinv : Real := nR ^ 2 * Mb ^ 2 with hCinvdef
-  have hCinv0 : 0 ≤ Cinv := by positivity
+  have hCinv0 : 0 ≤ Cinv := by
+    rw [hCinvdef]
+    exact mul_nonneg (sq_nonneg nR) (sq_nonneg Mb)
   set D : Real := nR ^ 2 * (Mb ^ 2 * Q) with hDdef
-  have hD0 : 0 ≤ D := by positivity
+  have hD0 : 0 ≤ D := by
+    rw [hDdef]
+    exact mul_nonneg (sq_nonneg nR) (mul_nonneg (sq_nonneg Mb) hQ0)
   set R : Real := 3 * Q with hRdef
-  have hR0 : 0 ≤ R := by positivity
+  have hR0 : 0 ≤ R := by
+    rw [hRdef]
+    exact mul_nonneg (by norm_num) hQ0
   set Mg : Real := (1 / 2) * nR * (Mb * P) with hMgdef
-  have hMg0 : 0 ≤ Mg := by positivity
+  have hMg0 : 0 ≤ Mg := by
+    rw [hMgdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0) (mul_nonneg hMb0 hP0)
   set Cd : Real := nR ^ 2 * (2 * Cinv * Mb * Q + Mb ^ 2) with hCddef
-  have hCd0 : 0 ≤ Cd := by positivity
+  have hCd0 : 0 ≤ Cd := by
+    rw [hCddef]
+    exact mul_nonneg (sq_nonneg nR)
+      (add_nonneg
+        (mul_nonneg
+          (mul_nonneg (mul_nonneg (by norm_num) hCinv0) hMb0) hQ0)
+        (sq_nonneg Mb))
   set Clip : Real := (1 / 2) * nR * (Cinv * P + 3 * Mb) with hClipdef
-  have hClip0 : 0 ≤ Clip := by positivity
+  have hClip0 : 0 ≤ Clip := by
+    rw [hClipdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0)
+      (add_nonneg (mul_nonneg hCinv0 hP0) (mul_nonneg (by norm_num) hMb0))
   set Cdiff : Real := (1 / 2) * nR * (Cd * P + 3 * D + Cinv * R + 3 * Mb) with hCdiffdef
-  have hCdiff0 : 0 ≤ Cdiff := by positivity
-  refine ⟨2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1, by positivity,
+  have hCdiff0 : 0 ≤ Cdiff := by
+    rw [hCdiffdef]
+    exact mul_nonneg (mul_nonneg (by norm_num) hnR0)
+      (add_nonneg
+        (add_nonneg
+          (add_nonneg (mul_nonneg hCd0 hP0) (mul_nonneg (by norm_num) hD0))
+          (mul_nonneg hCinv0 hR0))
+        (mul_nonneg (by norm_num) hMb0))
+  have hSecondCoeff0 : 0 ≤ 2 * nR * Cdiff :=
+    mul_nonneg (mul_nonneg (by norm_num) hnR0) hCdiff0
+  have hFirstCoeff0 : 0 ≤ 4 * nR ^ 2 * Clip * Mg :=
+    mul_nonneg
+      (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg nR)) hClip0) hMg0
+  refine ⟨2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1,
+    add_pos_of_nonneg_of_pos (add_nonneg hSecondCoeff0 hFirstCoeff0) zero_lt_one,
     fun u u' hlowu hlowu' hcovu hcovu' i k => ?_⟩
 
   have hcS : ∀ (w : SmoothRiemannianMetric I M),
@@ -1698,7 +1730,7 @@ theorem chartRicci_sub_le
       4 * nR ^ 2 * Clip * Mg * jet2 := by
     refine h1st.trans ?_
     rw [hnR]
-    exact mul_le_mul_of_nonneg_left hjet1le (by positivity)
+    exact mul_le_mul_of_nonneg_left hjet1le hFirstCoeff0
   have h2nd' : |chartRicciSecondOrderTerm (I := I) u x i k (extChartAt I x x)
       - chartRicciSecondOrderTerm (I := I) u' x i k (extChartAt I x x)| ≤
       2 * nR * Cdiff * jet2 := by
@@ -1709,7 +1741,9 @@ theorem chartRicci_sub_le
       + |chartRicciFirstOrderTerm (I := I) u x i k (extChartAt I x x)
           - chartRicciFirstOrderTerm (I := I) u' x i k (extChartAt I x x)|
       ≤ 2 * nR * Cdiff * jet2 + 4 * nR ^ 2 * Clip * Mg * jet2 := add_le_add h2nd' h1st'
-    _ ≤ (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1) * jet2 := by nlinarith
+    _ = (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg) * jet2 := by ring
+    _ ≤ (2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1) * jet2 :=
+      mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one) hjet2nn
 
 end RicciAssembly
 
