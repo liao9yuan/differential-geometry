@@ -21,9 +21,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionItera
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
@@ -475,7 +472,6 @@ private lemma jet_fibreNormSq_sup_le_sharp (g₀ : SmoothRiemannianMetric I M) (
   choose Cemb hCemb_nn hCemb using hstep
   exact ⟨Cemb, hCemb_nn, fun Ψ l x => hCemb l Ψ x⟩
 
-set_option maxHeartbeats 3200000 in
 private lemma master_appCc_jet_le_sharp
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -862,6 +858,12 @@ private lemma coeff_jet_linear_of_sq (g₀ : SmoothRiemannianMetric I M)
           Real.sqrt (Kc i) ^ 2 * ((1 + c) * (1 + y)) ^ 2 by ring,
           Real.sq_sqrt (hKc_nn i)]
 
+private lemma sum_sq_le_add_sq {a b x y : ℝ}
+    (ha : a ^ 2 ≤ x ^ 2) (hb : b ^ 2 ≤ y ^ 2)
+    (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    a ^ 2 + b ^ 2 ≤ (x + y) ^ 2 := by
+  nlinarith [mul_nonneg hx hy]
+
 theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀)
@@ -970,9 +972,6 @@ theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
         mul_le_mul_of_nonneg_left h2jet hBgrad_nn
     _ = Bgrad * (1 + Cj0) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by
         ring
-
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 800000 in
 
 theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1326,8 +1325,6 @@ theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
     _ = (CE2 j + CE3 j + CE4 j + CE56 j + CE56 j) *
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by ring
 
-set_option maxHeartbeats 1600000 in
-
 theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -1505,12 +1502,14 @@ theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
     have hfinal : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ)
         (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
           (iteratedCovGrad (I := I) g₀ 0 2 2 S))‖ ≤ εC * P + (α + β) * Q := by
+      have hsplit : εC * P + (α + β) * Q = α * Q + (εC * P + β * Q) := by
+        ring
       refine le_of_sq_le_sq ?_
         (add_nonneg (mul_nonneg hεC_nn hP_nn) (mul_nonneg (add_nonneg hα_nn hβ_nn) hQ_nn))
       rw [ha2]
-      nlinarith [ha_sq, hb_sq,
-        mul_nonneg (mul_nonneg (mul_nonneg hεC_nn hα_nn) hP_nn) hQ_nn,
-        mul_nonneg (mul_nonneg hα_nn hβ_nn) (mul_nonneg hQ_nn hQ_nn)]
+      rw [hsplit]
+      exact sum_sq_le_add_sq ha_sq hb_sq (mul_nonneg hα_nn hQ_nn)
+        (add_nonneg (mul_nonneg hεC_nn hP_nn) (mul_nonneg hβ_nn hQ_nn))
     calc ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ)
           (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
             (iteratedCovGrad (I := I) g₀ 0 2 2 S))‖
