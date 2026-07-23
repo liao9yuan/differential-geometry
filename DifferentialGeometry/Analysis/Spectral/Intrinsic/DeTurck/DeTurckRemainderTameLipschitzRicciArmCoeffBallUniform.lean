@@ -63,6 +63,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance tensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_sub_local (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S S' : SmoothCcTensor g 0 s) (x : M) :
@@ -148,8 +156,6 @@ private lemma unitModel_smul_tame (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     rw [hsec]; rfl]
   rw [Tensor0SSpace.toModel_smul]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma appCc_smul_left_tame (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -182,8 +188,6 @@ lemma unitModel_add2_apply_tame (g₀ : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g₀ 2 S x v + unitModel (I := I) (M := M) g₀ 2 S' x v := by
   rw [unitModel_add_local, ContinuousMultilinearMap.add_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma threeArm_unitModel_appCc_intervalIntegrable_tame
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -209,11 +213,11 @@ lemma threeArm_unitModel_appCc_intervalIntegrable_tame
   have hcontApp : ContinuousOn (fun s : ℝ =>
       ((Tensor0SBundle.TensorRSSpace.toModel ((Φ s).toSection x))
         (Tensor0SSpace.toModel u)) v) (realizedSmallSet (δ := δ) (δ' := δ')) := by
-    have hstep : ContinuousOn (fun s : ℝ =>
-        (Tensor0SBundle.TensorRSSpace.toModel ((Φ s).toSection x)) (Tensor0SSpace.toModel u))
-        (realizedSmallSet (δ := δ) (δ' := δ')) :=
-      (ContinuousLinearMap.apply ℝ (Tensor0SModel 2 ℝ E)
-        (Tensor0SSpace.toModel u)).continuous.comp_continuousOn (hcont x)
+    have hstep : ContinuousOn
+        ((fun w : TensorRSModel r 2 ℝ E => w (Tensor0SSpace.toModel u)) ∘
+          (fun s : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Φ s).toSection x)))
+        (realizedSmallSet (δ := δ) (δ' := δ')) := by
+      exact (hcont x).clm_apply continuousOn_const
     exact (ContinuousMultilinearMap.apply ℝ (fun _ : Fin 2 => E) ℝ v).continuous.comp_continuousOn
       hstep
   have hcontFinal : ContinuousOn (fun s : ℝ =>
@@ -263,8 +267,26 @@ private theorem linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform
   DifferentialGeometry.Integral.Connection.linearizedRicciArm0BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
     (I := I) (M := M) g₀ a ha_super hR hδ₀
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+private lemma sq_le_two_of_sq_le_add_sq
+    {z x y k : ℝ} (hadd : z ^ 2 ≤ (x + y) ^ 2) (hx : x ^ 2 ≤ k) :
+    z ^ 2 ≤ 2 * k + 2 * y ^ 2 := by
+  nlinarith [sq_nonneg (x - y)]
+
+private lemma sq_le_weighted_three_of_sq_le
+    {z x y w : ℝ} (hadd : z ^ 2 ≤ (x + (3 / 2 : ℝ) * y + w) ^ 2) :
+    z ^ 2 ≤ 3 * x ^ 2 + 27 / 4 * y ^ 2 + 3 * w ^ 2 := by
+  nlinarith [sq_nonneg (x - (3 / 2 : ℝ) * y), sq_nonneg (x - w),
+    sq_nonneg ((3 / 2 : ℝ) * y - w)]
+
+private lemma combine_three_component_bounds
+    {total z r c zBound rBound₁ rBound₂ cBound₁ cBound₂ : ℝ}
+    (htotal : total ≤ 3 * z + 27 / 4 * r + 3 * c)
+    (hz : z ≤ zBound) (hr : r ≤ 2 * rBound₁ + 2 * rBound₂)
+    (hc : c ≤ 2 * cBound₁ + 2 * cBound₂) :
+    total ≤ 3 * zBound + 27 / 2 * (rBound₁ + rBound₂) +
+      6 * (cBound₁ + cBound₂) := by
+  linarith
+
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
@@ -450,9 +472,7 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
     have hRm_sq : ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ ^ 2 ≤
         2 * KR i + 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rm0‖ ^ 2 := by
       have hx := pow_le_pow_left₀ (norm_nonneg _) hRm_norm 2
-      nlinarith [hRmDiff, hx,
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Rmf - Rm0)‖ -
-          ‖iteratedCovGrad (I := I) g₀ 2 2 i Rm0‖)]
+      exact sq_le_two_of_sq_le_add_sq hx hRmDiff
     have hCv_split : iteratedCovGrad (I := I) g₀ 2 2 i Cvf =
         iteratedCovGrad (I := I) g₀ 2 2 i (Cvf - Cv0) +
           iteratedCovGrad (I := I) g₀ 2 2 i Cv0 := by
@@ -466,9 +486,7 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
     have hCv_sq : ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ ^ 2 ≤
         2 * KC i + 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Cv0‖ ^ 2 := by
       have hx := pow_le_pow_left₀ (norm_nonneg _) hCv_norm 2
-      nlinarith [hCvDiff, hx,
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cvf - Cv0)‖ -
-          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cv0‖)]
+      exact sq_le_two_of_sq_le_add_sq hx hCvDiff
     have hsm : iteratedCovGrad (I := I) g₀ 2 2 i ((3 / 2 : ℝ) • Rmf) =
         (3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf :=
       hicg_smul 2 2 i (3 / 2 : ℝ) Rmf
@@ -501,14 +519,8 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
         3 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ ^ 2 +
           27 / 4 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ ^ 2 +
           3 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ ^ 2 := by
-      nlinarith [hx2,
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ -
-          (3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖),
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ -
-          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖),
-        sq_nonneg ((3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ -
-          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖)]
-    linarith [hxsq, hZraw, hRm_sq, hCv_sq]
+      exact sq_le_weighted_three_of_sq_le hx2
+    exact combine_three_component_bounds hxsq hZraw hRm_sq hCv_sq
 
 private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

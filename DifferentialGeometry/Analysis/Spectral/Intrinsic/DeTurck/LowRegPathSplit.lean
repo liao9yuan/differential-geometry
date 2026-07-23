@@ -41,8 +41,6 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem phi_dev_joint
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -154,11 +152,6 @@ private theorem convex_hs_bound
       add_le_add (mul_le_mul_of_nonneg_left hT' h1ms)
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
-
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-
-
 
 theorem phi_dev_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -465,11 +458,6 @@ theorem phi_dev_h2
     rw [htarget]
     exact hraw.trans (mul_le_mul_of_nonneg_right
       (by dsimp [K]; linarith [hKpt]) (sq_nonneg _))
-
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-
-
 
 theorem top_path_dev_h2
     (hDim : Module.finrank ℝ E = 3)
