@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -192,7 +190,10 @@ private lemma tensorTrivProj_add_section
       S₁.toSection ((extChartAt I α).symm y) +
         S₂.toSection ((extChartAt I α).symm y) from
     by rw [SmoothCcTensor.toSection_add]; rfl]
-  exact map_add _ _ _
+  exact ContinuousLinearMap.map_add
+    ((trivializationAt (TensorRSModel r s ℝ E)
+      (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ
+        ((extChartAt I α).symm y)) _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_smul_section
@@ -212,7 +213,10 @@ private lemma tensorTrivProj_smul_section
   rw [show (c • S).toSection ((extChartAt I α).symm y) =
       c • S.toSection ((extChartAt I α).symm y) from
     by rw [SmoothCcTensor.toSection_smul]; rfl]
-  exact map_smul _ _ _
+  exact ContinuousLinearMap.map_smul
+    ((trivializationAt (TensorRSModel r s ℝ E)
+      (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ
+        ((extChartAt I α).symm y)) _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChristoffelCorrection_add
