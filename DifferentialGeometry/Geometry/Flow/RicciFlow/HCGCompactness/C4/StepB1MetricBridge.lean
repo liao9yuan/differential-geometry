@@ -85,7 +85,6 @@ theorem MapCInfConvOnCompacts.pullbackAlong
       (m := (∞ : WithTop ℕ∞)) (by simp)).contDiffWithinAt
   exact hBA.pullbackForm hU hDA hBAc hBAinfC hDAc hDAinfC
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 theorem pullback_sub_norm
@@ -106,8 +105,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 

@@ -862,7 +862,6 @@ theorem chiRes_smooth (bf : BumpFamily (I := I) Φ) (k : Nat) :
   exact (bf.chi_smooth k).comp
     (contMDiff_subtype_val (I := I) (U := sourceOpen (I := I) Φ k))
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -958,7 +957,6 @@ private theorem extEquivOn
     · calc R.inner z v v = 1 * R.inner z v v := (one_mul _).symm
         _ <= (Crel * B t) * R.inner z v v := mul_le_mul_of_nonneg_right hC1 hRnn
 
-set_option maxHeartbeats 1600000 in
 
 
 
@@ -1338,7 +1336,6 @@ theorem covTail_of_bounds
 
 
 
-set_option maxHeartbeats 1600000 in
 
 
 

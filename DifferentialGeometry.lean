@@ -2540,6 +2540,7 @@ import DifferentialGeometry.Tensor.Exterior.Defs
 import DifferentialGeometry.Tensor.Exterior.Rough
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.DualFiber
+import DifferentialGeometry.Tensor.Mixed.DualMultilinearTransition
 import DifferentialGeometry.Tensor.Mixed.Fiber
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.Mixed.Naturality

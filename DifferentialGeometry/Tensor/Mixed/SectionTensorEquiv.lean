@@ -4,6 +4,7 @@
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 import DifferentialGeometry.Tensor.Mixed.Naturality
+import DifferentialGeometry.Tensor.Mixed.DualMultilinearTransition
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
 
@@ -169,7 +170,206 @@ noncomputable def Bundle.continuousMultilinearMap.modelTensorToMixedCLM
     (LinearEquiv.refl 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜))
   (e1.trans e2).symm.toContinuousLinearMap
 
-set_option maxHeartbeats 800000 in
+omit [CompleteSpace 𝕜] in
+private theorem multilinearTrivTransition {s : ℕ} (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (Φ : F ≃L[𝕜] F)
+    (hΦ : Φ =
+      ((trivializationAt F E x).continuousLinearEquivAt 𝕜 x
+        (mem_baseSet_trivializationAt F E x)).symm.trans
+        ((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx)) :
+    (((trivializationAt
+            (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+            (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
+            x₀).continuousLinearMapAt 𝕜 x).toLinearMap ∘ₗ
+        (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+          (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv.toLinearMap) =
+      (ContinuousMultilinearMap.compContinuousLinearMapL
+        (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
+        (fun _ => Φ.symm.toContinuousLinearMap)).toLinearMap := by
+  apply LinearMap.ext
+  intro M
+  simp only [LinearMap.coe_comp, Function.comp_apply]
+  have hx_ms : x ∈ (trivializationAt
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).baseSet := hx
+  set T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
+    (ContinuousMultilinearMap.compContinuousLinearMapL
+      (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
+      (fun _ => Φ.symm.toContinuousLinearMap)) M with hT_def
+  have key : (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+      (𝕜 := 𝕜) (F := F) (E := E) s x).symm M =
+      (trivializationAt
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+        (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).symmL 𝕜 x T := by
+    apply ContinuousMultilinearMap.ext
+    intro v
+    rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap x₀ x hx]
+    simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+    change M (fun i => (trivializationAt F E x).continuousLinearMapAt 𝕜 x (v i)) =
+      T (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
+    rw [hT_def]
+    change M (fun i => (trivializationAt F E x).continuousLinearMapAt 𝕜 x (v i)) =
+      ((ContinuousMultilinearMap.compContinuousLinearMapL
+        (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) M)
+        (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
+    rw [ContinuousMultilinearMap.compContinuousLinearMapL_apply,
+      ContinuousMultilinearMap.compContinuousLinearMap_apply]
+    congr 1
+    funext i
+    rw [hΦ]
+    simp only [ContinuousLinearEquiv.symm_trans_apply,
+      ContinuousLinearEquiv.symm_symm, ContinuousLinearEquiv.coe_coe,
+      Trivialization.coe_continuousLinearEquivAt_eq _
+        (mem_baseSet_trivializationAt F E x)]
+    congr 1
+    rw [← Trivialization.coe_continuousLinearEquivAt_eq _ hx]
+    exact (((trivializationAt F E x₀).continuousLinearEquivAt
+      𝕜 x hx).symm_apply_apply (v i)).symm
+  change (trivializationAt
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
+      x₀).continuousLinearMapAt 𝕜 x
+      ((Bundle.continuousMultilinearMap.continuousLinearEquivAt
+        (𝕜 := 𝕜) (F := F) (E := E) s x).symm M) =
+    (ContinuousMultilinearMap.compContinuousLinearMapL
+      (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
+      (fun _ => Φ.symm.toContinuousLinearMap)) M
+  rw [key]
+  exact (trivializationAt
+    (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+    (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
+    x₀).continuousLinearMapAt_symmL hx_ms T
+
+private theorem dualTensorTrivializationAt_eq {r s : ℕ} (x₀ : B) :
+    (trivializationAt
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
+        ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+      (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+        (Bundle.dual 𝕜 E) x ⊗[𝕜]
+        Bundle.continuousMultilinearMap 𝕜 s F E x) x₀) =
+      ((trivializationAt
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
+        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+          (Bundle.dual 𝕜 E) x) x₀).tensorProduct
+        (𝕜 := 𝕜)
+        (trivializationAt
+          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀)) :=
+  Bundle.TensorProduct.tensorProduct_trivializationAt x₀
+
+private theorem dualTensorTrivApply {r s : ℕ} (x₀ x : B)
+    (T : Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+        (Bundle.dual 𝕜 E) x ⊗[𝕜]
+      Bundle.continuousMultilinearMap 𝕜 s F E x) :
+    (trivializationAt
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
+          ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+          (Bundle.dual 𝕜 E) x ⊗[𝕜]
+          Bundle.continuousMultilinearMap 𝕜 s F E x) x₀
+        ⟨x, T⟩).2 =
+      TensorProduct.map
+        ((trivializationAt
+          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
+          (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+            (Bundle.dual 𝕜 E) x) x₀).continuousLinearMapAt 𝕜 x).toLinearMap
+        ((trivializationAt
+          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
+          x₀).continuousLinearMapAt 𝕜 x).toLinearMap
+        T := by
+  rw [dualTensorTrivializationAt_eq]
+  rw [Trivialization.tensorProduct_apply]
+
+private theorem dualTensorMultilinearTrivTransition {r s : ℕ} (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (Φ : F ≃L[𝕜] F)
+    (hΦ : Φ =
+      ((trivializationAt F E x).continuousLinearEquivAt 𝕜 x
+        (mem_baseSet_trivializationAt F E x)).symm.trans
+        ((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx))
+    (u : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
+      ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
+    (trivializationAt
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
+          ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+          (Bundle.dual 𝕜 E) x ⊗[𝕜]
+          Bundle.continuousMultilinearMap 𝕜 s F E x) x₀
+        ⟨x, (Bundle.continuousMultilinearMap.dualTensorMultilinearUntrivializeAt
+          (𝕜 := 𝕜) (F := F) (E := E) r s x) u⟩).2 =
+      TensorProduct.map
+        (ContinuousMultilinearMap.compContinuousLinearMapL
+          (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜)
+          (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)
+          (fun _ => (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip
+            Φ.toContinuousLinearMap)).toLinearMap
+        (ContinuousMultilinearMap.compContinuousLinearMapL
+          (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
+          (fun _ => Φ.symm.toContinuousLinearMap)).toLinearMap
+        u := by
+  rw [dualTensorTrivApply]
+  rw [show
+      (Bundle.continuousMultilinearMap.dualTensorMultilinearUntrivializeAt
+        (𝕜 := 𝕜) (F := F) (E := E) r s x) u =
+        TensorProduct.map
+          (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+            (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E)
+            r x).symm.toLinearEquiv.toLinearMap
+          (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+            (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv.toLinearMap
+          u from rfl]
+  simp only [TensorProduct.map_map]
+  have h_r := dualMultilinearTrivTransition (r := r) x₀ x hx Φ hΦ
+  have h_s := multilinearTrivTransition (s := s) x₀ x hx Φ hΦ
+  rw [h_r, h_s]
+
+private theorem mixedToTensorTrivTransition {r s : ℕ} (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (T : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
+      Bundle.continuousMultilinearMap 𝕜 s F E x)
+    (Φ : F ≃L[𝕜] F)
+    (hΦ : Φ =
+      ((trivializationAt F E x).continuousLinearEquivAt 𝕜 x
+        (mem_baseSet_trivializationAt F E x)).symm.trans
+        ((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx)) :
+    (trivializationAt
+        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
+         ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜)
+          (Bundle.dual 𝕜 E) x ⊗[𝕜]
+          Bundle.continuousMultilinearMap 𝕜 s F E x) x₀
+        ⟨x, (Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
+          (𝕜 := 𝕜) (F := F) (E := E) r s x) T⟩).2 =
+      TensorProduct.map
+        (ContinuousMultilinearMap.compContinuousLinearMapL
+          (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜)
+          (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)
+          (fun _ => (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip
+            Φ.toContinuousLinearMap)).toLinearMap
+        (ContinuousMultilinearMap.compContinuousLinearMapL
+          (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
+          (fun _ => Φ.symm.toContinuousLinearMap)).toLinearMap
+        ((ContinuousMultilinearMap.multilinearHomEquivDualMultilinearTensor
+          𝕜 F r s)
+          ((Bundle.continuousMultilinearMap.mixedContinuousLinearEquivAt
+            (𝕜 := 𝕜) (F := F) (E := E) r s x) T)) := by
+  set u := (ContinuousMultilinearMap.multilinearHomEquivDualMultilinearTensor
+    𝕜 F r s)
+    ((Bundle.continuousMultilinearMap.mixedContinuousLinearEquivAt
+      (𝕜 := 𝕜) (F := F) (E := E) r s x) T) with hu_def
+  have hf_eq :
+      (Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
+        (𝕜 := 𝕜) (F := F) (E := E) r s x) T =
+        (Bundle.continuousMultilinearMap.dualTensorMultilinearUntrivializeAt
+          (𝕜 := 𝕜) (F := F) (E := E) r s x) u := by
+    unfold Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
+    simp only [LinearEquiv.trans_apply, hu_def,
+      ContinuousLinearEquiv.coe_toLinearEquiv]
+  rw [hf_eq]
+  exact dualTensorMultilinearTrivTransition x₀ x hx Φ hΦ u
+
 
 theorem mixedToTensor_triv_eq_bundle {r s : ℕ} (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
@@ -195,240 +395,7 @@ theorem mixedToTensor_triv_eq_bundle {r s : ℕ} (x₀ x : B)
       (mem_baseSet_trivializationAt F E x)).symm.trans
       ((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx) with hΦ_def
 
-  have hLHS : (trivializationAt
-        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
-         ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x ⊗[𝕜]
-                  Bundle.continuousMultilinearMap 𝕜 s F E x) x₀
-        ⟨x, (Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
-              (𝕜 := 𝕜) (F := F) (E := E) r s x) T⟩).2 =
-      TensorProduct.map
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜) (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)
-          (fun _ => (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip Φ.toContinuousLinearMap)).toLinearMap
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
-          (fun _ => Φ.symm.toContinuousLinearMap)).toLinearMap
-        ((ContinuousMultilinearMap.multilinearHomEquivDualMultilinearTensor 𝕜 F r s)
-          ((Bundle.continuousMultilinearMap.mixedContinuousLinearEquivAt
-              (𝕜 := 𝕜) (F := F) (E := E) r s x) T)) := by
-
-    set u := (ContinuousMultilinearMap.multilinearHomEquivDualMultilinearTensor 𝕜 F r s)
-      ((Bundle.continuousMultilinearMap.mixedContinuousLinearEquivAt
-        (𝕜 := 𝕜) (F := F) (E := E) r s x) T) with hu_def
-
-    have hf_eq : (Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
-        (𝕜 := 𝕜) (F := F) (E := E) r s x) T =
-        (Bundle.continuousMultilinearMap.dualTensorMultilinearUntrivializeAt
-          (𝕜 := 𝕜) (F := F) (E := E) r s x) u := by
-      unfold Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
-      simp only [LinearEquiv.trans_apply, hu_def,
-        ContinuousLinearEquiv.coe_toLinearEquiv]
-    rw [hf_eq]
-
-    rw [show (Bundle.continuousMultilinearMap.dualTensorMultilinearUntrivializeAt
-          (𝕜 := 𝕜) (F := F) (E := E) r s x) u =
-        TensorProduct.map
-          (Bundle.continuousMultilinearMap.continuousLinearEquivAt (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜)
-            (E := Bundle.dual 𝕜 E) r x).symm.toLinearEquiv.toLinearMap
-          (Bundle.continuousMultilinearMap.continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv.toLinearMap
-          u from rfl]
-
-    rw [show (trivializationAt
-        (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 ⊗[𝕜]
-         ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-        (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x ⊗[𝕜]
-                  Bundle.continuousMultilinearMap 𝕜 s F E x) x₀) =
-        ((trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) x₀).tensorProduct
-          (𝕜 := 𝕜)
-          (trivializationAt
-            (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-            (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀)) from
-      Bundle.TensorProduct.tensorProduct_trivializationAt x₀]
-    rw [Trivialization.tensorProduct_apply]
-
-    simp only [TensorProduct.map_map]
-
-    have h_r : (((trivializationAt
-            (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-            (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x)
-            x₀).continuousLinearMapAt 𝕜 x).toLinearMap ∘ₗ
-          (Bundle.continuousMultilinearMap.continuousLinearEquivAt
-            (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x).symm.toLinearEquiv.toLinearMap) =
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜) (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)
-          (fun _ => (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip Φ.toContinuousLinearMap)).toLinearMap := by
-      apply LinearMap.ext; intro M
-      simp only [LinearMap.coe_comp, Function.comp_apply]
-
-      have hx_dmr : x ∈ (trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) x₀).baseSet := by
-
-        have : x ∈ (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).baseSet := by
-          change x ∈ (trivializationAt F E x₀).baseSet ∩ Set.univ
-          exact ⟨hx, trivial⟩
-        exact this
-      apply ContinuousMultilinearMap.ext; intro w
-
-      set T : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜 :=
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜) (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)
-          (fun _ => (ContinuousLinearMap.compL 𝕜 F F 𝕜).flip Φ.toContinuousLinearMap)) M with hT_def
-
-      have key : (Bundle.continuousMultilinearMap.continuousLinearEquivAt
-          (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x).symm M =
-          (trivializationAt
-            (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-            (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x)
-            x₀).symmL 𝕜 x T := by
-        apply ContinuousMultilinearMap.ext; intro v
-
-        have hx_dual : x ∈ (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).baseSet := by
-          change x ∈ (trivializationAt F E x₀).baseSet ∩ Set.univ
-          exact ⟨hx, trivial⟩
-
-        rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
-          (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) x₀ x hx_dual]
-        simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
-        change M (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).continuousLinearMapAt 𝕜 x (v i)) =
-          T (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).continuousLinearMapAt 𝕜 x (v i))
-        rw [hT_def]
-        rw [ContinuousMultilinearMap.compContinuousLinearMapL_apply,
-            ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
-        congr 1
-        funext i
-
-        apply ContinuousLinearMap.ext
-        intro a
-
-        simp only [ContinuousLinearMap.flip_apply, ContinuousLinearMap.compL_apply]
-
-        have hxx : x ∈ (trivializationAt F E x).baseSet := mem_baseSet_trivializationAt F E x
-
-        have hxx_dual : x ∈ (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).baseSet :=
-          mem_baseSet_trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x
-        have hLHS : (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).continuousLinearMapAt 𝕜 x
-            (v i) a = (v i) (((trivializationAt F E x).continuousLinearEquivAt 𝕜 x hxx).symm a) := by
-          have := Bundle.continuousMultilinearMap.dualBundle_triv_symmL_eq_comp
-            (𝕜 := 𝕜) (F := F) (E := E) x x hxx
-            ((trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).continuousLinearMapAt 𝕜 x (v i))
-            (((trivializationAt F E x).continuousLinearEquivAt 𝕜 x hxx).symm a)
-
-          rw [Trivialization.symmL_continuousLinearMapAt _ hxx_dual] at this
-
-          have h_symm_eq : ((trivializationAt F E x).continuousLinearEquivAt 𝕜 x hxx).symm a
-              = (trivializationAt F E x).symmL 𝕜 x a := rfl
-          rw [h_symm_eq, Trivialization.continuousLinearMapAt_symmL _ hxx] at this
-          exact this.symm
-        have hx_dual_x₀ : x ∈ (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).baseSet :=
-          hx_dual
-        have hRHS : (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).continuousLinearMapAt 𝕜 x
-            (v i) (Φ a) = (v i)
-              (((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx).symm (Φ a)) := by
-          have := Bundle.continuousMultilinearMap.dualBundle_triv_symmL_eq_comp
-            (𝕜 := 𝕜) (F := F) (E := E) x₀ x hx
-            ((trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).continuousLinearMapAt 𝕜 x (v i))
-            (((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx).symm (Φ a))
-          rw [Trivialization.symmL_continuousLinearMapAt _ hx_dual_x₀] at this
-          have h_symm_eq : ((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx).symm (Φ a)
-              = (trivializationAt F E x₀).symmL 𝕜 x (Φ a) := rfl
-          rw [h_symm_eq, Trivialization.continuousLinearMapAt_symmL _ hx] at this
-          exact this.symm
-        rw [hLHS]
-        change _ = (((trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x₀).continuousLinearMapAt 𝕜 x
-            (v i)) (Φ a))
-        rw [hRHS]
-        congr 1
-
-        rw [hΦ_def]
-        simp only [ContinuousLinearEquiv.trans_apply,
-          ContinuousLinearEquiv.symm_apply_apply]
-
-      change ((trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) x₀).continuousLinearMapAt 𝕜 x
-          ((Bundle.continuousMultilinearMap.continuousLinearEquivAt
-            (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x).symm M)) w = _
-      rw [key]
-      exact DFunLike.congr_fun
-        ((trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) x₀).continuousLinearMapAt_symmL hx_dmr T) w
-    have h_s : (((trivializationAt
-            (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-            (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x)
-            x₀).continuousLinearMapAt 𝕜 x).toLinearMap ∘ₗ
-          (Bundle.continuousMultilinearMap.continuousLinearEquivAt
-            (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv.toLinearMap) =
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
-          (fun _ => Φ.symm.toContinuousLinearMap)).toLinearMap := by
-      apply LinearMap.ext; intro M
-      simp only [LinearMap.coe_comp, Function.comp_apply]
-
-      have hx_ms : x ∈ (trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).baseSet := hx
-
-      apply ContinuousMultilinearMap.ext; intro w
-
-      set T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
-        (ContinuousMultilinearMap.compContinuousLinearMapL
-          (𝕜 := 𝕜) (E := fun _ : Fin s => F) (E₁ := fun _ : Fin s => F) (F := 𝕜)
-          (fun _ => Φ.symm.toContinuousLinearMap)) M with hT_def
-
-      have key : (Bundle.continuousMultilinearMap.continuousLinearEquivAt
-          (𝕜 := 𝕜) (F := F) (E := E) s x).symm M =
-          (trivializationAt
-            (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-            (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).symmL 𝕜 x T := by
-
-        apply ContinuousMultilinearMap.ext; intro v
-
-        rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap x₀ x hx]
-
-        simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
-        change M (fun i => (trivializationAt F E x).continuousLinearMapAt 𝕜 x (v i)) =
-          T (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
-
-        rw [hT_def]
-        change M (fun i => (trivializationAt F E x).continuousLinearMapAt 𝕜 x (v i)) =
-          ((ContinuousMultilinearMap.compContinuousLinearMapL
-            (fun _ : Fin s => Φ.symm.toContinuousLinearMap)) M)
-            (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
-        rw [ContinuousMultilinearMap.compContinuousLinearMapL_apply,
-            ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
-        congr 1
-        funext i
-
-        rw [hΦ_def]
-        simp only [ContinuousLinearEquiv.symm_trans_apply,
-          ContinuousLinearEquiv.symm_symm,
-          ContinuousLinearEquiv.coe_coe,
-          Trivialization.coe_continuousLinearEquivAt_eq _ (mem_baseSet_trivializationAt F E x)]
-
-        congr 1
-        rw [← Trivialization.coe_continuousLinearEquivAt_eq _ hx]
-        exact (((trivializationAt F E x₀).continuousLinearEquivAt 𝕜 x hx).symm_apply_apply (v i)).symm
-
-      change ((trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).continuousLinearMapAt 𝕜 x
-          ((Bundle.continuousMultilinearMap.continuousLinearEquivAt
-            (𝕜 := 𝕜) (F := F) (E := E) s x).symm M)) w = _
-      rw [key]
-      exact DFunLike.congr_fun
-        ((trivializationAt
-          (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
-          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).continuousLinearMapAt_symmL hx_ms T) w
-    rw [h_r, h_s]
+  have hLHS := mixedToTensorTrivTransition x₀ x hx T Φ hΦ_def
 
   have hx_ms : x ∈ (trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x) x₀).baseSet := hx
@@ -564,7 +531,6 @@ theorem tensorToMixed_triv_eq_bundle {r s : ℕ} (x₀ x : B)
 
   exact (LinearEquiv.symm_apply_apply _ _).symm
 
-set_option maxHeartbeats 400000 in
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
@@ -618,7 +584,6 @@ theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
     ] with p hp
     exact mixedToTensor_triv_eq_bundle p₀.proj p.proj hp p.snd
 
-set_option maxHeartbeats 400000 in
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_symm_smooth {r s : ℕ} :
