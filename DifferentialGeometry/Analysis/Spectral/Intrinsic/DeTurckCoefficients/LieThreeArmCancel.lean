@@ -59,8 +59,6 @@ private theorem unitModel_add_local
     rfl]
   rw [Tensor0SSpace.toModel_add]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 
 theorem lieSlope_eq_arms

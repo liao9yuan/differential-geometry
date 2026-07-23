@@ -264,7 +264,6 @@ theorem metricVariationEquation_pullback
   exact hS.equation t (Φ x)
     (mfderiv I I (Φ : M → N) x X) (mfderiv I I (Φ : M → N) x Y)
 
-set_option maxHeartbeats 1000000 in
 
 
 omit [I.Boundaryless] in
@@ -358,7 +357,6 @@ theorem metricRicci_pullback_eval
       funext i; fin_cases i <;> rfl] at hRHS
   rw [hLHS, hpb, ← hRHS]
 
-set_option maxHeartbeats 1000000 in
 
 
 

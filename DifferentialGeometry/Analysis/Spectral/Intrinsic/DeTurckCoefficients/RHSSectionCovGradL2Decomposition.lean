@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology
 open scoped ENNReal NNReal BigOperators Manifold ContDiff

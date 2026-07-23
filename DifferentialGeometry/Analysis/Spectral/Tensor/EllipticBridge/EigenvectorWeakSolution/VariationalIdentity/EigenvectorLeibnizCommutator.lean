@@ -357,7 +357,6 @@ private lemma integrable_triple
   rw [h_reassoc] at full_int
   exact full_int.restrict
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_diff_variational_identity

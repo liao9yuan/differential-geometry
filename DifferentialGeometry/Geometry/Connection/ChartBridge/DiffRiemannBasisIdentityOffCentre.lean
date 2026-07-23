@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedR
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators

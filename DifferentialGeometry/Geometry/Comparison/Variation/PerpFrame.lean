@@ -93,7 +93,6 @@ private lemma bGramSchmidt_self_norm
     rw [mul_inv]; ring]
   rw [hs_sq]; exact inv_mul_cancel₀ (ne_of_gt hpos)
 
-set_option maxHeartbeats 4000000 in
 
 private theorem bGramSchmidt_orth_strong_aux
     (B : F →L[ℝ] F →L[ℝ] ℝ)

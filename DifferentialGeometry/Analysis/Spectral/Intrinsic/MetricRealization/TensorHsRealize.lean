@@ -11,8 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorF
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle ContinuousLinearMap
 open scoped Manifold Topology ContDiff BigOperators
@@ -35,6 +33,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 def ccTensorMultilinear (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :

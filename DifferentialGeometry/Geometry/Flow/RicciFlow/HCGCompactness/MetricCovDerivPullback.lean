@@ -875,7 +875,6 @@ theorem metricCInf_pullback
   rw [metricDerivNormSupOn_pullback_image (I := I)]
   exact hk₀ k hk
 
-set_option maxHeartbeats 400000 in
 
 
 

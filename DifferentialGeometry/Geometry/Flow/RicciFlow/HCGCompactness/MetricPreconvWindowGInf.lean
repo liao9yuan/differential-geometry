@@ -39,7 +39,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-set_option maxHeartbeats 800000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -113,7 +112,6 @@ theorem metricPreconvFull
       hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
         (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-set_option maxHeartbeats 800000 in
 
 
 

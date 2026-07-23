@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRe
 
 noncomputable section
 
-set_option maxHeartbeats 2400000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Set Function MeasureTheory Bundle
 open scoped Topology Manifold BigOperators ContDiff

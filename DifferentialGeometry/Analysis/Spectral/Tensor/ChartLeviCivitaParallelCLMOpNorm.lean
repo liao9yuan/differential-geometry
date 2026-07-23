@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Finset
 open scoped Manifold Topology ContDiff ENNReal BigOperators

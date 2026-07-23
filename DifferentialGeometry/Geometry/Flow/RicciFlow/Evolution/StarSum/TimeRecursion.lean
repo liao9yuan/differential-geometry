@@ -289,7 +289,6 @@ private theorem traceOrthoEq
     (metricInverseInBasis_identity_of_orthonormal (I := I) g basis horth) T tail
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 def gammaStarCost (k : ℕ) : Real :=
@@ -501,7 +500,6 @@ private theorem frameExtGerm {Idx : Type*} {r : ℕ}
   exact extDerivFun_eventuallyEq_congr (I := I) (frame d y) (hfield.mono fun z hz => congrFun hz m)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphis
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 4000000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix

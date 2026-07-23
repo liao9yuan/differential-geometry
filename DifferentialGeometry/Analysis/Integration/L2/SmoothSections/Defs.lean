@@ -8,8 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
 
 open Manifold Set Filter Bundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix

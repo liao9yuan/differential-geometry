@@ -45,8 +45,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 noncomputable section
 
 set_option linter.style.setOption false
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 3
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter

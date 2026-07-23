@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace InnerProductSpace

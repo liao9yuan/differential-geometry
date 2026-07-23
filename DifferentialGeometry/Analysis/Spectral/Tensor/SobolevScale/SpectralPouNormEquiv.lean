@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Spectral
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators

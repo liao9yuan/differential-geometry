@@ -1182,7 +1182,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
   rw [h_eLpFn_eq] at h_eLp_tendsto
   exact h_eLp_tendsto
 
-set_option maxHeartbeats 1000000 in
 
 theorem rellich_kondrachov_chart_seq
     {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

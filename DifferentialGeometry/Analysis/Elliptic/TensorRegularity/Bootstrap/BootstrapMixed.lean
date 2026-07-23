@@ -222,7 +222,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-set_option maxHeartbeats 1600000 in
 
 theorem perturbedSource_memWkp_of_source_memWkp
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ)

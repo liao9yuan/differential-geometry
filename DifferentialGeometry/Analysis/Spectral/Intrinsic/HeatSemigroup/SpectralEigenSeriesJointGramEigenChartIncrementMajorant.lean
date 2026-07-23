@@ -186,7 +186,6 @@ private lemma eigenSpatialFactor_contDiffOn
       (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'])
   exact contDiffOn_const.mul hadd
 
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
 private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -277,7 +276,6 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
     refine mul_le_mul_of_nonneg_right (hCmax_ge m' hm') ?_
     exact pow_nonneg (by have := tensor_lambda_nonneg (I := I) (M := M) i; linarith) _
 
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
 theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)

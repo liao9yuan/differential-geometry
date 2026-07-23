@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -116,14 +114,14 @@ private lemma tensorChartComponentRaw_comp_euclid_zero_section
         have hsec : (0 : SmoothCcTensor g r s).toSection
             ((extChartAt I α).symm x) = 0 := by rfl
         rw [hsec]
-        exact map_zero _
+        exact ContinuousLinearMap.map_zero _
       unfold tensorChartComponentRaw
       change tensorChartComponentProjection (E := E) r s Idx Jdx
           (tensorTrivProj (I := I) (M := M) g r s
             (0 : SmoothCcTensor g r s) α ((extChartAt I α).symm x)) = 0
       unfold tensorTrivProj
       rw [h0]
-      exact map_zero _
+      exact ContinuousLinearMap.map_zero _
     have := congrFun hraw_comp ((toEuclidean (E := E)).symm y)
     exact this
   exact hM

@@ -5,8 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative

@@ -1443,7 +1443,6 @@ def Tensor02NormSecondProductInBasis
       (tensor02RoughInnerCoord (I := I) basis gInv A roughA +
         tensor02NablaNormCoord (I := I) basis gInv nablaA)
 
-set_option maxHeartbeats 800000 in
 
 omit [FiniteDimensional ℝ E] in
 theorem Tensor02NormSecondProductInBasis.of_hessian_product

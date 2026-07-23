@@ -177,7 +177,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
@@ -838,7 +837,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     _ = ENNReal.ofReal (K_prom * C') * RHS_inner := by
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_prom_pos.le]
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform

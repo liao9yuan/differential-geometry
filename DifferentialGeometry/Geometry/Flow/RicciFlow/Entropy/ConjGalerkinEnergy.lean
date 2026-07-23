@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalTame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkin
 
 set_option autoImplicit false
-set_option maxHeartbeats 6400000
 
 
 

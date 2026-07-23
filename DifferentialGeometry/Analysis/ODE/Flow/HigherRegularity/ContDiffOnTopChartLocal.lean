@@ -367,7 +367,6 @@ private theorem exists_orbit_tube_local
   rw [h2, dist_eq_norm]
   exact hz
 
-set_option maxHeartbeats 1200000 in
 
 
 
@@ -930,7 +929,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     apply mul_le_mul_of_nonneg_right (le_of_lt hε_target_le_one) hh_nn
   exact le_trans h_final_bd h_bound_le
 
-set_option maxHeartbeats 1600000 in
 
 
 

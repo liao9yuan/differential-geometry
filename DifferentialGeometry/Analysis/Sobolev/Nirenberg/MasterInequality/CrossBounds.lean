@@ -1219,7 +1219,6 @@ theorem coeff_diffQuot_cutoff_deriv_cross_bound
     rw [← h_C_eq]
   exact h_total_bound
 
-set_option maxHeartbeats 800000 in
 
 omit [NeZero d] in
 private theorem nirenbergTestFunction_sq_integral_le

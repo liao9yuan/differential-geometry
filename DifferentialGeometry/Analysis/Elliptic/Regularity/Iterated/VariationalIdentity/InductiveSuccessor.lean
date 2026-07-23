@@ -637,7 +637,6 @@ private lemma integrable_triple_helper
   rw [h_reassoc] at full_int
   exact full_int.restrict
 
-set_option maxHeartbeats 4000000 in
 
 noncomputable def iteratedDiffChartBilinearData_step
     (g : SmoothRiemannianMetric I M) (α : M)

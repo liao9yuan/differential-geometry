@@ -193,7 +193,6 @@ private theorem h2_grid_two
             _ = (Real.sqrt K) ^ 2 * N ^ 2 := by rw [Real.sq_sqrt hK]
             _ = (Real.sqrt K * N) ^ 2 := by ring
 
-set_option maxHeartbeats 1600000 in
 
 
 

@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 4000000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators

@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function NormedSpace
 open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators

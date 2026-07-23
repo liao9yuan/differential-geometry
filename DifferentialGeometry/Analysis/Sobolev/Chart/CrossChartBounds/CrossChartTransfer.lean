@@ -145,7 +145,6 @@ lemma pouCoeffPushed_contDiffOn
     (contMDiffOn_iff_contDiffOn).mp h_comp
   exact h_contDiffOn.congr hEqOn
 
-set_option maxHeartbeats 1600000 in
 
 theorem crossChart_transfer_bound
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]

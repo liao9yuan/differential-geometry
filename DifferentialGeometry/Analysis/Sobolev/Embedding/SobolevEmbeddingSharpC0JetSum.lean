@@ -5,8 +5,6 @@ import Mathlib.Algebra.Order.Chebyshev
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators

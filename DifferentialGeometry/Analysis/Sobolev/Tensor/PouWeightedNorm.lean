@@ -5,8 +5,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -92,13 +90,13 @@ private lemma tensorChartComponentRaw_zero_section
           ((0 : SmoothCcTensor g r s).toSection x) = 0 := by
     have hsec : (0 : SmoothCcTensor g r s).toSection x = 0 := by rfl
     rw [hsec]
-    exact map_zero _
+    exact ContinuousLinearMap.map_zero _
   change tensorChartComponentProjection (E := E) r s Idx Jdx
       (tensorTrivProj (I := I) (M := M) g r s
         (0 : SmoothCcTensor g r s) α x) = 0
   unfold tensorTrivProj
   rw [h0]
-  exact map_zero _
+  exact ContinuousLinearMap.map_zero _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_comp_zero_section

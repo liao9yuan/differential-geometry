@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -82,8 +80,8 @@ theorem wkpNormChartRaw_zero_section
         (0 : SmoothCcTensor g r s) α x = 0 := by
       unfold tensorTrivProj
       have hsec : (0 : SmoothCcTensor g r s).toSection x = 0 := rfl
-      rw [hsec, map_zero]
-    rw [hzero, map_zero]
+      rw [hsec, ContinuousLinearMap.map_zero]
+    rw [hzero, ContinuousLinearMap.map_zero]
   rw [hraw_zero]
   have hpush_zero :
       chartPushedRaw (I := I) (M := M) α (fun _ : M => (0 : ℝ)) =

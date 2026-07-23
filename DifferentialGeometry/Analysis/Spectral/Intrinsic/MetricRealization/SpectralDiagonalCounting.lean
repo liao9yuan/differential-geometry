@@ -60,7 +60,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 noncomputable section
 
 set_option linter.style.setOption false
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators

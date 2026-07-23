@@ -81,8 +81,6 @@ private lemma eigenvalue_pos
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform

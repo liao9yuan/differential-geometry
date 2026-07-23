@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle

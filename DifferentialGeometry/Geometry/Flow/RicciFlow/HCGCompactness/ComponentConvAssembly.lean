@@ -813,7 +813,6 @@ theorem exists_patch_refs
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
 
-set_option maxHeartbeats 800000 in
 
 
 
@@ -878,7 +877,6 @@ theorem metricPreconvInf (hne : Nonempty M)
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-set_option maxHeartbeats 800000 in
 
 theorem metricCInf_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)

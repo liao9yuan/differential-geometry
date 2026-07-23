@@ -28,7 +28,6 @@ open scoped Manifold ContDiff
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional Real E] in
 private theorem fderiv_eval2
     {B : E → E →L[Real] E →L[Real] Real} {z : E}

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -219,7 +217,7 @@ private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
   have hrecover : e.symmL ℝ x (e.continuousLinearMapAt ℝ x (S.toSection x)) =
       S.toSection x :=
     Bundle.Trivialization.symmL_continuousLinearMapAt e hx_base (S.toSection x)
-  rw [hproj, map_zero] at hrecover
+  rw [hproj, ContinuousLinearMap.map_zero] at hrecover
   exact hrecover.symm
 
 omit [NeZero (Module.finrank ℝ E)] in

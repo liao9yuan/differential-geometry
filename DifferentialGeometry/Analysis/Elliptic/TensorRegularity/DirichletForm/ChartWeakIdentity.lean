@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix

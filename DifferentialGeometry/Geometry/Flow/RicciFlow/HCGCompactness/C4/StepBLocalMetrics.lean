@@ -96,7 +96,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 
@@ -129,7 +128,6 @@ theorem exists_metricLimit_normalCoord
       ⟨input.metricC r, fun k z hz => input.metric_deriv k r (c k) z (hdom k (hKU hz))⟩)
     (fun k z hz v => input.metric_equiv k (c k) z (hdom k hz) v)
 
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 theorem exists_metric_lim_pi

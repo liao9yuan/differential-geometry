@@ -132,7 +132,6 @@ section MainTheorem
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-set_option maxHeartbeats 1200000 in
 
 theorem hasFDerivAt_flow_at_initial_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)

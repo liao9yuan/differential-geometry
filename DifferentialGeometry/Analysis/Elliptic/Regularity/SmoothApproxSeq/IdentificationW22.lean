@@ -284,7 +284,6 @@ private theorem eLpNorm_diff_smoothApproxSeqWkpThree_tendsto_zero
   rw [h_ε_eq]
   exact ENNReal.ofReal_le_ofReal h_final_real
 
-set_option maxHeartbeats 1600000 in
 private theorem smoothToLp_smoothApproxSeqWkpThree_tendsto
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -361,7 +360,6 @@ private theorem smoothToLp_smoothApproxSeqWkpThree_tendsto
     exact this
   linarith
 
-set_option maxHeartbeats 800000 in
 private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpThree
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}

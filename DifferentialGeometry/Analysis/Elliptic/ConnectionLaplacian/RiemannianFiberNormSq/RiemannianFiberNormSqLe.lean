@@ -7,8 +7,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1000000
-set_option maxHeartbeats 1000000
 
 open Bundle Set IsManifold ContinuousLinearMap Function
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix

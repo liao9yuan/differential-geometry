@@ -217,7 +217,6 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
         perAlphaPCConstant_nonneg (I := I) (M := M) g r s β Q) hα
   exact h_inner_le.trans h_outer_le
 
-set_option maxHeartbeats 800000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 omit [CompleteSpace E] in

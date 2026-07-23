@@ -344,7 +344,6 @@ section Differentiation
 open DifferentialGeometry.Analysis.ODE.Flow (gronwallBound_zero_le norm_residual_le_of_diffOn
   exists_uniform_partial_fderiv_of_contDiffOn_univ)
 
-set_option maxHeartbeats 1600000 in
 
 theorem forward_flow_hasFDerivAt_initial
     {f : ℝ → E → E} {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {M δ : ℝ}

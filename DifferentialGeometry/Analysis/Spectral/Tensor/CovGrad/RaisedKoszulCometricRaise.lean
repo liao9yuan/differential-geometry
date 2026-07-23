@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantN
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix

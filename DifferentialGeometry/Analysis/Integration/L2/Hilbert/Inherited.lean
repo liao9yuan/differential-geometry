@@ -8,8 +8,6 @@ import Mathlib.Analysis.InnerProductSpace.Completion
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Manifold MeasureTheory Set Filter Bundle Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix

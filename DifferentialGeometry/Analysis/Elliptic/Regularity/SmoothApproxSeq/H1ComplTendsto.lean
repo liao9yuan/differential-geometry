@@ -529,7 +529,6 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
   rw [h_ε_eq]
   exact ENNReal.ofReal_le_ofReal h_final_real
 
-set_option maxHeartbeats 1600000 in
 
 private theorem smoothToLp_smoothApproxSeq_tendsto
     (g : SmoothRiemannianMetric I M)
@@ -636,7 +635,6 @@ lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
   rw [lpFunctionalCLM_apply]
   exact real_inner_comm _ _
 
-set_option maxHeartbeats 800000 in
 
 private lemma inner_smoothToH1Compl_limit_eq_u_h
     (g : SmoothRiemannianMetric I M)

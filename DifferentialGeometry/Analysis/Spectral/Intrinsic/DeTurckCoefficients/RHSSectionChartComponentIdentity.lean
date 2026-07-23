@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorr
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace InnerProductSpace

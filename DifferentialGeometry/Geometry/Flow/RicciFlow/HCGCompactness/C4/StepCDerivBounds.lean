@@ -449,7 +449,6 @@ end AbstractOneBound
 
 section CmBounds
 
-set_option synthInstance.maxHeartbeats 1000000
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal

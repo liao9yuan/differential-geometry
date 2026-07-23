@@ -12,8 +12,6 @@ import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmooth
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2400000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Set Function MeasureTheory intervalIntegral Bundle Tensor0SBundle
 open scoped Topology Manifold BigOperators ContDiff Matrix

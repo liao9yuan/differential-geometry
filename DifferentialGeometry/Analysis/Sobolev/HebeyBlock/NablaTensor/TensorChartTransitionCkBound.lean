@@ -124,7 +124,6 @@ lemma transitionCoeffOnEuclid_contDiffOn
     h_tc.comp h_chart_symm_sub h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-set_option maxHeartbeats 800000 in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact
     (r s k : ℕ) (α β : M)
@@ -228,7 +227,6 @@ theorem tensorChartTransition_Ck_bound_on_compact
       exact Finset.mem_product.mpr ⟨Finset.mem_univ _, Finset.mem_univ _⟩
     exact (hCj_bd j P₀ Q y hy).trans (hC_ge j P₀ Q hmem)
 
-set_option maxHeartbeats 800000 in
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact_manifold

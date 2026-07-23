@@ -16,8 +16,6 @@ import Mathlib.Analysis.Normed.Operator.Bilinear
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -248,7 +246,7 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro Idx _
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul]
   rw [hT]
   have hT_inner : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       T (dualCoordinateProductMultilinearMap (E := E) r Idx) =
@@ -737,7 +735,7 @@ private lemma tensorTrivProj_add
   unfold tensorTrivProj
   rw [show (S₁ + S₂).toSection x = S₁.toSection x + S₂.toSection x from
     by rw [SmoothCcTensor.toSection_add]; rfl]
-  exact map_add _ _ _
+  exact ContinuousLinearMap.map_add _ _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorTrivProj_smul
@@ -748,7 +746,7 @@ private lemma tensorTrivProj_smul
   unfold tensorTrivProj
   rw [show (c • S).toSection x = c • S.toSection x from
     by rw [SmoothCcTensor.toSection_smul]; rfl]
-  exact map_smul _ _ _
+  exact ContinuousLinearMap.map_smul _ _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_add
@@ -761,7 +759,7 @@ theorem tensorChartComponentRaw_add
         tensorChartComponentRaw (I := I) (M := M) g r s S₂ α Idx Jdx x := by
   unfold tensorChartComponentRaw
   rw [tensorTrivProj_add (I := I) (M := M) g r s S₁ S₂ α x]
-  exact map_add _ _ _
+  exact ContinuousLinearMap.map_add _ _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_smul
@@ -773,7 +771,7 @@ theorem tensorChartComponentRaw_smul
       c • tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx x := by
   unfold tensorChartComponentRaw
   rw [tensorTrivProj_smul (I := I) (M := M) g r s c S α x]
-  exact map_smul _ _ _
+  exact ContinuousLinearMap.map_smul _ _ _
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentPou_add

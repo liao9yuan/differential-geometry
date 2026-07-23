@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -81,13 +79,13 @@ private lemma tensorTrivProj_sum
     unfold tensorTrivProj
     rw [show (S₁ + S₂).toSection b = S₁.toSection b + S₂.toSection b from by
       rw [SmoothCcTensor.toSection_add]; rfl]
-    exact map_add _ _ _
+    exact ContinuousLinearMap.map_add _ _ _
   have hzero : tensorTrivProj (I := I) (M := M) g r s
       (0 : SmoothCcTensor g r s) α b = 0 := by
     unfold tensorTrivProj
     rw [show (0 : SmoothCcTensor g r s).toSection b = 0 from by
       rw [SmoothCcTensor.toSection_zero]; rfl]
-    exact map_zero _
+    exact ContinuousLinearMap.map_zero _
   induction t using Finset.induction with
   | empty => rw [Finset.sum_empty, Finset.sum_empty, hzero]
   | insert i A hi ih => rw [Finset.sum_insert hi, Finset.sum_insert hi, hadd, ih]

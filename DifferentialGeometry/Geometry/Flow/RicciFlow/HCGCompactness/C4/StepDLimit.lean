@@ -144,7 +144,6 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
   [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
-set_option maxHeartbeats 800000 in
 
 
 

@@ -1218,7 +1218,6 @@ theorem deTurckSmoothN_symm_embedding_wellDefined (g₀ g_bg : SmoothRiemannianM
     exact hzero
   exact sub_eq_zero.mp hsub
 
-set_option maxHeartbeats 800000 in
 theorem deTurckSobolevNHa2Symm_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ K : ℝ≥0, LipschitzWith K (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a) := by

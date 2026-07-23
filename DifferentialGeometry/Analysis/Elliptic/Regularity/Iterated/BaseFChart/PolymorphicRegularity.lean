@@ -614,7 +614,6 @@ private theorem smoothToLp_smoothApproxSeqWkpM_tendsto
     exact this
   linarith
 
-set_option maxHeartbeats 800000 in
 private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpM
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

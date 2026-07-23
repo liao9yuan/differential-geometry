@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 400000
 
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cha
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -98,7 +96,7 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
   classical
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
-  rw [hx, map_zero, map_zero]
+  rw [hx, ContinuousLinearMap.map_zero, ContinuousLinearMap.map_zero]
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -119,7 +117,7 @@ lemma tensorChartComponentRaw_tsupport_subset
       (a₁ := T.toSection x) (a₂ := 0)
     apply this
     rw [show (tensorRSSpace_continuousLinearEquiv (I := I) r s x) (T.toSection x) =
-        TensorRSSpace.toModel (T.toSection x) from rfl, hmod, map_zero]
+        TensorRSSpace.toModel (T.toSection x) from rfl, hmod, ContinuousLinearEquiv.map_zero]
   exact hx (tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (I := I) (M := M) g r s T α Idx Jdx hsec)
 

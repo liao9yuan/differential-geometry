@@ -737,7 +737,6 @@ lemma eigenRawIncrementMode_contDiffOn_ofOrder
       (by exact_mod_cast le_top)).comp contDiffOn_snd (Set.mapsTo_snd_prod)
   exact htime.mul hspace
 
-set_option maxHeartbeats 1600000 in
 theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -1069,7 +1068,6 @@ lemma exists_pdIter_rawCompOnE_eigen_jet_le_lambda_pow
     _ = Cnorm * C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p := by ring
 
 omit [BoundarylessManifold I M] in
-set_option maxHeartbeats 1600000 in
 theorem eigenTimeSpatialProductMode_iteratedFDerivWithin_summable_majorant_ofOrder
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)

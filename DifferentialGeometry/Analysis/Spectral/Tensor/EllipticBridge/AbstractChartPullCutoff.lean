@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -888,7 +886,7 @@ private lemma cutoffComponentScalar_add
           tensorChartComponentRaw (I := I) (M := M) g r s S₂ α Idx Jdx x := by
     unfold tensorChartComponentRaw tensorTrivProj
     rw [show (S₁ + S₂).toSection x = S₁.toSection x + S₂.toSection x from by
-      rw [SmoothCcTensor.toSection_add]; rfl, map_add, map_add]
+      rw [SmoothCcTensor.toSection_add]; rfl, ContinuousLinearMap.map_add, ContinuousLinearMap.map_add]
   rw [hraw_add]; ring
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
@@ -907,7 +905,7 @@ private lemma cutoffComponentScalar_smul
         c • tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx x := by
     unfold tensorChartComponentRaw tensorTrivProj
     rw [show (c • S).toSection x = c • S.toSection x from by
-      rw [SmoothCcTensor.toSection_smul]; rfl, map_smul, map_smul]
+      rw [SmoothCcTensor.toSection_smul]; rfl, ContinuousLinearMap.map_smul, ContinuousLinearMap.map_smul]
   rw [hraw_smul, smul_eq_mul, smul_eq_mul]; ring
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in

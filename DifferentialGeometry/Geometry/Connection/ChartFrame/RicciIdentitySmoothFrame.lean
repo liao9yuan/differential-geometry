@@ -332,7 +332,6 @@ private lemma g_inner_sum_left
       rw [map_smul]; rfl]
     rw [ih]
 
-set_option maxHeartbeats 4000000 in
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem chartFrameNormFiber_orth_strong_aux
@@ -795,7 +794,6 @@ private lemma chartBasisVec_contMDiffOn_section
   have h := chartBasisVec_contMDiffOn (I := I) α i x hx
   exact h
 
-set_option maxHeartbeats 4000000 in
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem chartFrameNormFiber_contMDiffOn_strong

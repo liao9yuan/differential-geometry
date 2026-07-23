@@ -196,7 +196,6 @@ private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
   rw [dist_eq_norm] at hs_close
   exact hs_close
 
-set_option maxHeartbeats 4000000 in
 
 theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (H1ComplToLp (I := I) (M := M) g) := by

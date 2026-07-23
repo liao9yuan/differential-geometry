@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Char
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Set
 open scoped Manifold Topology ContDiff BigOperators

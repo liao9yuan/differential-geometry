@@ -64,8 +64,6 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -445,7 +443,7 @@ private lemma tensorChartComponentRaw_wSmoothChart_eq_zero_off_source
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) β).continuousLinearMapAt ℝ x
         ((wSmoothChart (I := I) (M := M) g r s w h_all α).toSection x)
-      from rfl, hsec, map_zero, map_zero]
+      from rfl, hsec, ContinuousLinearMap.map_zero, ContinuousLinearMap.map_zero]
 
 
 

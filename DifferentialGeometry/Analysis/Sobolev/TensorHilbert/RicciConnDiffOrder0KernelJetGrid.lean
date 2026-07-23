@@ -5,8 +5,6 @@ set_option linter.flexible false
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory

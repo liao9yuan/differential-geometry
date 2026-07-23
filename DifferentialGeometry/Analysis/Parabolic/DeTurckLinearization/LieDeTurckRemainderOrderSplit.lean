@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamily
 
 
 noncomputable section
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 open Set Function
 open scoped Topology ContDiff Matrix Manifold BigOperators
 namespace DifferentialGeometry
