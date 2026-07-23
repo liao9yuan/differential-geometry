@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -970,7 +968,16 @@ theorem tensorInnerPointwise_slotSubst_sum
           tensor0SToTensorRS (I := I) (M := M) x
             (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) :=
       (TensorRSSpace.toModelL_apply _).symm
-    rw [hL, map_sum]
+    have hmap :
+        (TensorRSSpace.toModelL (I := I) (M := M) 0 s x) (∑ k : Fin s,
+          tensor0SToTensorRS (I := I) (M := M) x
+            (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) =
+        ∑ k : Fin s, (TensorRSSpace.toModelL (I := I) (M := M) 0 s x)
+          (tensor0SToTensorRS (I := I) (M := M) x
+            (tensorSlotSubstCLM (I := I) s x
+              (tangentSlotCLM (I := I) s k T) A)) :=
+      map_sum (TensorRSSpace.toModelL (I := I) (M := M) 0 s x) _ Finset.univ
+    rw [hL, hmap]
     exact Finset.sum_congr rfl (fun k _ => TensorRSSpace.toModelL_apply _)
   rw [hsum]
 

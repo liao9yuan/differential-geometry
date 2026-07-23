@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1200000
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
