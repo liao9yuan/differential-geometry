@@ -43,10 +43,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-set_option maxHeartbeats 1600000 in
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceUTrace
@@ -185,9 +181,6 @@ theorem connTraceUTrace
                     (coordinateFrameAt_mem (I := I) x))
                   (A x) (fun _ : Fin 1 => d)
                   (fun q : Fin 2 => if q = 0 then i else a))) := rfl
-
-set_option maxHeartbeats 1600000 in
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem connTraceATrace
@@ -369,12 +362,15 @@ private theorem connTraceCoeff_one_center
   have hev := connTraceCoeff_one_eventually (I := I) g A x p
   exact hev.eq_of_nhds
 
-set_option maxHeartbeats 1600000 in
-
-
-
-
-
+private theorem symmetric_trace_sum_mul
+    {ι : Type*} [Fintype ι] (Γ : ι → ι → ι → ℝ) (B : ι → ℝ)
+    (hΓ : ∀ d a k, Γ d a k = Γ a d k) :
+    (∑ l, (∑ p, Γ p l p) * B l) =
+      ∑ p, B p * ∑ a, Γ p a a := by
+  refine Finset.sum_congr rfl fun l _ => ?_
+  rw [mul_comm]
+  congr 1
+  exact Finset.sum_congr rfl fun p _ => hΓ p l p
 
 
 omit [CompactSpace M] in
@@ -499,18 +495,17 @@ private theorem connTraceRawDiv_eq_productSum
               christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a) := by
-          refine Finset.sum_congr rfl fun l _ => ?_
-          rw [mul_comm]
-          congr 1
-          refine Finset.sum_congr rfl fun p _ => ?_
-          exact hGamma p l p
-
-set_option maxHeartbeats 1600000 in
-
-
-
-
-
+          exact symmetric_trace_sum_mul
+            (fun p a k =>
+              christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+                (coordinateFrameAt (I := I) x)
+                (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a k)
+            (fun p =>
+              ∑ i : CoordinateIdx (𝕜 := Real) E,
+                ∑ j : CoordinateIdx (𝕜 := Real) E,
+                  gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x)
+            hGamma
 
 
 

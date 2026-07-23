@@ -13,8 +13,6 @@ import Mathlib.Analysis.Normed.Operator.Bilinear
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Finset Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -402,8 +400,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
         C_Jinv * C_χ * (C_J * C_Jinv * ‖(chartModelBasis E) j‖) := by ring
   linarith
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
@@ -445,7 +441,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     norm_basis_le_chartModelBasisVecSup' (E := E) j
   have h_ej_nn : 0 ≤ ‖(chartModelBasis E) j‖ := norm_nonneg _
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := hCJinv_bound b hb
-  have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
   have h_Xb_le : ‖(chartBasisVecFiber (I := I) α j b : TangentSpace I b)‖ ≤
       C_Jinv * C_e := by
     rw [h_X_eq]

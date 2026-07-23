@@ -24,8 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators Matrix Interval
@@ -55,6 +53,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -541,8 +546,6 @@ theorem linearizedRicci_arm1Field_jointSmooth (g₀ : SmoothRiemannianMetric I M
       (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.1
 
-set_option maxHeartbeats 3200000 in
-
 theorem ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
     (g₀ _g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -666,7 +669,6 @@ theorem exists_arm1Base_realizedFam_rfns_ballUniform
   refine hΛarm1 T T' hδ_le hδ hδ'_le hδ' s hs x ?_
   exact hCsob T T' hR hTball hT'ball s hs x
 
-set_option maxHeartbeats 3200000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_arm0_arm1_corrField_rfns_ballUniform
@@ -758,8 +760,6 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
           x)) ≤
         corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ := hb1
     linarith [hbase1', hcorr1, hΛCbase_nn]
-
-set_option maxHeartbeats 3200000 in
 
 theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)

@@ -43,6 +43,30 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+noncomputable local instance secondVariationEndoNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationEndoNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance secondVariationBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance secondVariationTrilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationTrilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
@@ -100,8 +124,26 @@ lemma continuousOn_g_inner_along_curve
   intro t _ht
   rfl
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem riemannOp_along_curve_continuousOn
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
+    {v w z : ∀ t : ℝ, TangentSpace I (γ t)}
+    (hγ : ContinuousOn γ s)
+    (hv : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (v t) : TangentBundle I M)) s)
+    (hw : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (w t) : TangentBundle I M)) s)
+    (hz : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (z t) : TangentBundle I M)) s) :
+    ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E
+        (E := (TangentSpace I : M → Type _)) (γ t)
+        ((DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (v t) (w t) (z t)) : TangentBundle I M)) s :=
+  ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
+    (I := I) g).comp_continuousOn hγ).clm_bundle_apply hv).clm_bundle_apply
+      hw).clm_bundle_apply hz
 
 theorem second_variation_of_arcLength_eq_indexForm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
@@ -797,10 +839,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             ((DifferentialGeometry.Integral.Connection.riemannOp
               (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
               (V t) (γ' t) (γ' t)) : TangentBundle I M)) (Set.Icc 0 L) :=
-        ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
-            (I := I) g).comp_continuousOn
-            (s := Set.Icc (0 : ℝ) L) hγ_C1On.continuousOn).clm_bundle_apply
-            hV_total).clm_bundle_apply hγ'_total).clm_bundle_apply hγ'_total
+        riemannOp_along_curve_continuousOn (I := I) g
+          hγ_C1On.continuousOn hV_total hγ'_total hγ'_total
       have hRcurv_cont : ContinuousOn
           (fun t : ℝ => g.inner (γ t)
             ((DifferentialGeometry.Integral.Connection.riemannOp
@@ -887,9 +927,6 @@ theorem second_variation_of_arcLength_eq_indexForm
   have hmem : Set.Ioo (-δ) δ ∈ nhds (0 : ℝ) := Ioo_mem_nhds (by linarith) hδpos
   exact hg₁_deriv.congr_of_eventuallyEq
     (Filter.eventuallyEq_of_mem hmem (fun s hs => hderiv_eq s hs))
-
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 4000000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem indexFormIntegrand_intervalIntegrable
@@ -978,10 +1015,8 @@ theorem indexFormIntegrand_intervalIntegrable
           (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
           (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))))
       (Set.Icc 0 L) :=
-    ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
-        (I := I) g).comp_continuousOn
-        (s := Set.Icc (0 : ℝ) L) _hγ_C1.continuousOn).clm_bundle_apply
-        he_total).clm_bundle_apply hVW).clm_bundle_apply hVW
+    riemannOp_along_curve_continuousOn (I := I) g
+      _hγ_C1.continuousOn he_total hVW hVW
   have hB : ContinuousOn
       (fun t : ℝ => g.inner (γ t)
         (DifferentialGeometry.Integral.Connection.riemannOp
