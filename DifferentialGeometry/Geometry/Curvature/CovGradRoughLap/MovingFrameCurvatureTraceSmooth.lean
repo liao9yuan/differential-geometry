@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryRecon
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -510,6 +508,19 @@ private noncomputable def pureRValuedBilinAt
     TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace 0 s I y :=
   haveI : T2Space (TangentSpace I y) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I y) := inferInstanceAs (FiniteDimensional ℝ E)
+  letI : TopologicalSpace (TensorRSSpace 0 s I y) :=
+    tensorRSSpace_topologicalSpace 0 s y
+  letI : AddCommGroup (TensorRSSpace 0 s I y) := tensorRSSpace_addCommGroup 0 s y
+  letI : Module ℝ (TensorRSSpace 0 s I y) := tensorRSSpace_module 0 s y
+  letI : ContinuousAdd (TensorRSSpace 0 s I y) := tensorRSSpace_continuousAdd 0 s y
+  letI : ContinuousSMul ℝ (TensorRSSpace 0 s I y) := tensorRSSpace_continuousSMul 0 s y
+  letI : AddCommMonoid (TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    ContinuousLinearMap.addCommMonoid
+  letI : ContinuousAdd (TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    inferInstance
+  letI : AddCommMonoid
+      (TangentSpace I y →L[ℝ] TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    ContinuousLinearMap.addCommMonoid
   LinearMap.toContinuousLinearMap
     { toFun := fun X => (riemannOp (tensorCov (I := I) g 0 s) y X (W y)).comp
         ((tensorCov (I := I) g 0 s).toFun (fun b : M => S.toSection b) y)

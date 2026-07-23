@@ -68,7 +68,6 @@ private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
   congr 1
   exact (Fin.comp_cons e a J).symm
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
@@ -106,7 +105,6 @@ theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
