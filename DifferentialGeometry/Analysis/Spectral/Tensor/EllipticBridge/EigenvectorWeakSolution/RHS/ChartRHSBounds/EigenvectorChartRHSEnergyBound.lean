@@ -184,9 +184,6 @@ private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
   filter_upwards [h_ae_v] with y hy hy_mem
   exact hy hy_mem.1 hy_mem.2
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 800000 in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_tensorL2ChartComponent_le_uniform
@@ -530,8 +527,6 @@ private lemma ofReal_mul_muPow_le_ofReal {C μ : ℝ} (hC : 0 ≤ C)
   · calc C * μ ≤ C * 1 := mul_le_mul_of_nonneg_left hμ_le hC
       _ = C := mul_one C
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 omit [CompleteSpace E] in

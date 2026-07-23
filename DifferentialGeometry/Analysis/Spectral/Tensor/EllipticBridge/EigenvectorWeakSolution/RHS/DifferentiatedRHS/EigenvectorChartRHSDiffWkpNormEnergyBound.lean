@@ -81,9 +81,6 @@ private lemma eigenvalue_le_one
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).2
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1000000 in
-
 omit [CompleteSpace E] in
 private lemma rhsZeroAggregate_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -780,9 +777,6 @@ private lemma diffRHSHead_le_energy_uniform
   rw [← add_mul, ← ENNReal.ofReal_add hQ_nn hCiter_nn]
   congr 2
   ring
-
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 omit [CompleteSpace E] in
 theorem diffRHSAggregate_le_energy_uniform
