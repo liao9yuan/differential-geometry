@@ -155,8 +155,6 @@ private lemma coord_localFiber (x₀ : M) {x : M}
   rw [congrArg Prod.snd h]
   exact inCoordinates_localFiber x₀ hx
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
 omit [FiniteDimensional ℝ E] in
 lemma localFiber_contMDiffOn (x₀ : M) :

@@ -138,7 +138,6 @@ private lemma tensor0SRiemannianInner_diagonal_clm_apply
   rw [tensor0SRiemannianInnerCLM_apply, innerBundleCLM_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 private lemma innerModel_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Bornology.IsBounded

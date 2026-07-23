@@ -26,7 +26,6 @@ import DifferentialGeometry.Geometry.Curvature.Sphere.ConstCurvature
 
 
 
-set_option synthInstance.maxHeartbeats 400000
 
 noncomputable section
 

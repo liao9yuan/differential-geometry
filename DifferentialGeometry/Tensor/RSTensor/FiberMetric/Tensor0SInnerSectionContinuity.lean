@@ -346,7 +346,6 @@ instance tensor0SSpace_vectorBundle (s : ℕ) :
   inferInstanceAs (VectorBundle ℝ (Tensor0SModel s ℝ E)
     (Bundle.continuousMultilinearMap ℝ s E (TangentSpace I)))
 
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   tensor0SSpace_normedAddCommGroup tensor0SSpace_normedSpace in

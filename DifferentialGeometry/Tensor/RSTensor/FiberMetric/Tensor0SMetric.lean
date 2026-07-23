@@ -1124,7 +1124,6 @@ private theorem coordInner0S_succ_summand_eq
   simp [Fin.cons_zero, Fin.cons_succ]
 
 omit [FiniteDimensional ℝ E] in
-set_option maxHeartbeats 800000 in
 private theorem coordInner0S_succ_eq
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)

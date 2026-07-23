@@ -47,7 +47,6 @@ private theorem mdifferentiableAt_metric_inner
   rw [mdifferentiableAt_totalSpace] at htotal
   exact htotal.2
 
-set_option synthInstance.maxHeartbeats 80000 in
 private theorem contMDiff_scaleMetric_inner_section
     (c : Real) (g : SmoothRiemannianMetric I M) :
     ContMDiff I

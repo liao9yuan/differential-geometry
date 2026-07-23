@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
 
 
 

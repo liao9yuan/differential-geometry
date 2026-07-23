@@ -637,7 +637,6 @@ theorem multilinearTensorFiberwiseEquiv_smooth
     ] with p hp
     exact triv_fwdEquiv_eq s q p₀.proj p.proj hp p.snd
 
-set_option maxHeartbeats 400000 in
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearTensorFiberwiseEquiv_symm_smooth
@@ -653,6 +652,10 @@ theorem multilinearTensorFiberwiseEquiv_symm_smooth
           TotalSpace (MLF (s + q))
             (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x))) := by
   letI := _hE
+  letI : NormedAddCommGroup ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Bundle.TensorProduct.instNormedAddCommGroup_tensor
+  letI : NormedSpace 𝕜 ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Bundle.TensorProduct.instNormedSpace_model_tensor
   haveI : ContMDiffVectorBundle n
       ((MLF s) ⊗[𝕜] (MLF q))
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]

@@ -9,8 +9,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap
 open Tensor0SBundle

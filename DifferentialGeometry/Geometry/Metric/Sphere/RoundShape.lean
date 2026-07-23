@@ -248,7 +248,6 @@ theorem mfderiv_mul_innerCoordFun_of_inner_eq_zero
   change φ x • (((innerSL ℝ w).comp (dIncl (n := n) x)) v) = φ x * ⟪w, dIncl (n := n) x v⟫
   rw [ContinuousLinearMap.comp_apply, innerSL_apply_apply, smul_eq_mul]
 
-set_option maxHeartbeats 800000 in
 
 
 
@@ -401,7 +400,6 @@ theorem ambDeriv_section_mdiffAt
   rw [eq_sub_of_add_eq hAfun.symm]
   exact hAd.sub (hφ.smul hcoeM)
 
-set_option maxHeartbeats 800000 in
 
 
 

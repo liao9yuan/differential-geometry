@@ -35,7 +35,6 @@ private noncomputable def to02Tensor_uCLM :
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ :=
   (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) ℝ).symm.toContinuousLinearMap
 
-set_option maxHeartbeats 800000 in
 
 private lemma to02Tensor_trivialization_eq {x₀ x : M}
     (g : RiemannianMetric I n M)
