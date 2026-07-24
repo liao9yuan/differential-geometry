@@ -215,3 +215,37 @@ warnings); direct-`lean` axiom audit = `[propext, Classical.choice, Quot.sound]`
 half + DLb half + combined assembly all built.  Next dispatches (planner's): `lieCorr0Field`
 (`LieCorr0Core.lean:583`, the 2nd C₀ constituent) and the threeArm precursor assembly.  `(N)`
 `ricci_flow_unif_existence` still **0%** (this constituent sits far below (N)).
+
+## 2026-07-24 — `lieCorr0Field` (2nd C₀ constituent) RECON; STOPPED for two planner rulings
+
+Full recon in `Analysis/Spectral/Intrinsic/DeTurckCoefficients/LieCorr0Core.md`
+(§"jetL2 top-separated producer recon").  Headlines:
+
+- **Ktop verdict: POSITIVE, R-FREE Ktop REQUIRED (DLb pattern, NOT Ktop=0).**
+  Settled from the kernel structure: `lieCorr0Field = lc0Insert + lc0VB + lc0AMix + lc0Riem`
+  (`LieCorr0Split.lean:154`); `lc0VB/lc0AMix` are order-1·order-1 quadratics and `lc0Riem` is
+  T-independent g₀-curvature (all Kc); but `lc0Insert` carries `−deTurckLieWEndo g₁ g₀
+  = −∇^{g₁}(deTurckVF g₁ g₀)` = bare ∇²T (order 2).  The "zeroth-order"/"algebraic" name is about the
+  operator VALENCE, not the T-order — the top is real.
+- **Top engine already built — direct DLb reuse at g_bg:=g₀.**  `insert_base` (`LieCorr0Split.lean:103`)
+  ⟹ `lc0Insert g₀ g₁ g₀ = −deTurckLieEndoArmField g₀ g₁ g₀`, and `deTurckLieEndoArmField g₀ g₁ g_bg`
+  ≡ `deTurckLieDLbCoeffField g₀ g₁ g_bg` (both `ofCLM(deTurckLieDLbFib g₁ g_bg)`, defeq).  So
+  `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`, and the DLb field producer at g_bg:=g₀
+  (`DeTurckLieCoeffL2JetBound.lean:432/483`) gives its top-separation verbatim, `Ktop = Ktop_DLb` R-free.
+- **Low (Kc) machinery already built pointwise** in `LieCorr0LowJet.lean` (`vb_refold`:1408,
+  `amix_refold`:1581, `riem_refold`:1628, `trace2_grid`:1810, `insert_diff`:1243) — lift to jetL2 by the
+  same tame-window integrator the siblings use.
+- **BLOCKER 1 (home):** endpoints must live DOWNSTREAM in `TensorHilbert/` (they reference the DLb
+  producer + integrators); `LieCorr0Core.lean` is upstream (no TensorHilbert/CovGrad file imports any
+  `LieCorr0` module).  Proposed: NEW leaf `TensorHilbert/LieCorr0CoeffL2JetBound.lean` (per-constituent
+  pattern) importing `DeTurckLieCoeffL2JetBound` + `LieCorr0Split` + `LieCorr0LowJet`.  Editable set must
+  expand.  (Alt: extend `DeTurckLieCoeffL2JetBound.lean`.)
+- **BLOCKER 2 (assembly shape):** lieCorr0's ∇²T is designed to CANCEL DLb's base arm
+  (`tail_base_split`:171 ⟹ `lieCorr0Field + deTurckLieEndoArmField(base)` is ∇²T-free).  Option A
+  (this dispatch: standalone positive-R-free-Ktop producer, triangle into Psi0 — over-counts ∇²T but
+  R-free, fine for R1τ) vs Option B (cancellation-preserving combined deTurckLie+lieCorr0 ∇²T-free
+  bound).  Planner confirm A vs B before session 2.
+- Session-2 route (Option A): `lc0_decomp` → 5 summands (split `lc0Insert g_bg` = base + diff) →
+  5-way pointwise triangle → top summand via DLb producer @g_bg:=g₀ → 4 Kc summands via LowJet
+  refolds + tame-window integrator → `Ktop = 5·Ktop_DLb` R-free, summed via `jetL2_sum_lowShift a 2 3`.
+  ~1-2 sessions (both top engine and low machinery pre-built).  No Lean written this session.

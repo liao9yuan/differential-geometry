@@ -630,6 +630,44 @@ the Codex-blocked concrete instantiation, mirroring the
   then the Ψ₀/threeArm C₀ assembly, then the smooth-core tame lemma
   (ruling item 2 proper).  (N) still 0%.
 
+## Planner acceptance №19 (2026-07-24) — lieCorr0 recon accepted; TWO RULINGS
+
+- lieCorr0 recon session ACCEPTED (disciplined stop, no Lean written;
+  only the three authorized `.md`s touched).  KTOP VERDICT ACCEPTED:
+  positive R-free Ktop REQUIRED — bare `∇²T` is carried solely by
+  `lc0Insert` via `−deTurckLieWEndo g₁ g₀` (`lc0_decomp`,
+  `LieCorr0Split.lean:154`); the other three summands (`lc0VB`,
+  `lc0AMix`, `lc0Riem`) are order-1·order-1 / algebraic → Kc.  KEY
+  DISCOVERY: `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`
+  (via `insert_base` :103 + the endo-arm defeq), so the just-closed DLb
+  field producer at `g_bg := g₀` supplies lieCorr0's ENTIRE top
+  verbatim: `Ktop = Ktop_DLb`, R-free.  Low machinery pre-built in
+  `LieCorr0LowJet.lean` (refolds :1408/:1581/:1628/:1810, :1243).
+- RULING 1 (canonical home, accepted): endpoints go in a NEW leaf
+  `Analysis/Sobolev/TensorHilbert/LieCorr0CoeffL2JetBound.lean`
+  (imports `DeTurckLieCoeffL2JetBound` + `LieCorr0Split` +
+  `LieCorr0LowJet`; namespace `Integral.Connection`).  `LieCorr0Core.lean`
+  sits upstream of the jetL2 layer — hosting there would cycle imports;
+  re-deriving the DLb engine upstream is forbidden parallel API.
+- RULING 2 (assembly shape): OPTION A — standalone positive-R-free-Ktop
+  producer, triangle into Ψ₀.  Rationale recorded: R1τ requires top
+  R-FREENESS, not top-freeness; the item-2 smooth-core machinery
+  (TameNemytskii two-orientation form) is built to absorb genuine
+  second-order content; the `LieCorr0Split.md` "not small at H3" warning
+  is the low-regularity Koch–Lamm lane's smallness concern and does not
+  bind the high-order R1τ lane; option B would also churn the
+  just-closed deTurckLie constituent against the ratified №8 map.  The
+  committed cancellation lemma `tail_base_split` (:171) remains available
+  as a refinement if the smooth-core assembly ever demands literal
+  `∇²T`-freeness.
+- Session-2 entry plan (executor's, ratified): new leaf; `lc0_decomp` →
+  5 summands (split `lc0Insert g_bg = lc0Insert g₀ g₁ g₀ +
+  (lc0Insert g_bg − lc0Insert g₀)`); 5-way pointwise triangle
+  (generalize `normSq_iCG_deTurckLieCoeff_le` from 2-way); top via DLb
+  producer @`g_bg := g₀`; 4 Kc summands via LowJet refolds through the
+  tame-window integrator; `Ktop = 5·Ktop_DLb` R-free, single Kc; summed
+  windows `a+3`.  Shape = deTurckLie siblings verbatim.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -1178,3 +1216,46 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   `DeTurckLieCoeffL2JetBound.lean` (+.md), `DeTurckLieJetL2Summed.md`, plan.  Not committed (planner
   commits).  **Next (planner's):** `lieCorr0Field` (`LieCorr0Core.lean:583`, the 2nd genuinely-missing
   C₀ constituent) and the threeArm precursor assembly.  `(N)` still **0%**.
+- 2026-07-24 (lieCorr0 recon): **`lieCorr0Field` (2nd genuinely-missing C₀ constituent) RECON DONE;
+  STOPPED for TWO planner rulings — no Lean written.**  Full recon in
+  `Analysis/Spectral/Intrinsic/DeTurckCoefficients/LieCorr0Core.md` §"jetL2 top-separated producer
+  recon"; cross-constituent summary in `TensorHilbert/DeTurckLieJetL2Summed.md`.
+  - **KTOP VERDICT (the mission's decisive call): POSITIVE, R-FREE Ktop REQUIRED — Ktop=0 REJECTED
+    (DLb pattern, NOT traceHess).**  Kernel structure: `lieCorr0Field = lc0Insert + lc0VB + lc0AMix
+    + lc0Riem` (`LieCorr0Split.lean:154`).  `lc0VB`/`lc0AMix` = order-1·order-1 products of
+    `metricConnDiffLoweredFib`/`deTurckVF` (both order-1 ~∇T); `lc0Riem` = T-independent `riemannOp
+    (LeviCivita g₀)` traced against the g₁-cometric (algebraic in T) — all Kc.  But `lc0Insert` =
+    slotInsert of `lieCorr0NEndo`, whose `−deTurckLieWEndo g₁ g₀ = −∇^{g₁}(deTurckVF g₁ g₀)` is bare
+    ∇²T (order-2) — the two `connDiff(deTurckVF)` terms are quadratic (the section derivative cancels
+    in the CONNECTION difference, `connDiff_apply`), so the top is carried solely by `−deTurckLieWEndo`.
+    The "zeroth-order" name is the operator valence, not the T-order.  Lumping the top into R-carrying
+    Kc would poison the Psi0 assembly exactly as RULING 2 argues for DLb.
+  - **Top engine PRE-BUILT (no new engine):** `insert_base` (`LieCorr0Split.lean:103`) +
+    `deTurckLieEndoArmField ≡ deTurckLieDLbCoeffField` (both `ofCLM(deTurckLieDLbFib g₁ g_bg)`, defeq)
+    ⟹ `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`; the just-closed DLb field producer
+    (`DeTurckLieCoeffL2JetBound.lean:432/483`, g_bg free) at g_bg:=g₀ gives the top verbatim,
+    `Ktop = Ktop_DLb` R-free.  Low (Kc) machinery PRE-BUILT pointwise in `LieCorr0LowJet.lean`
+    (`vb_refold`/`amix_refold`/`riem_refold`/`trace2_grid`/`insert_diff`).
+  - **RULING NEEDED 1 (canonical home):** endpoints reference the DLb producer + tame-window
+    integrators (all `TensorHilbert/`); `LieCorr0Core.lean` is upstream (`DeTurckCoefficients/`, no
+    TensorHilbert/CovGrad file imports any `LieCorr0` module) so it CANNOT host them (cycle).  Per the
+    mission STOP rule, report the split: **propose NEW leaf
+    `TensorHilbert/LieCorr0CoeffL2JetBound.lean`** (per-constituent pattern), importing
+    `DeTurckLieCoeffL2JetBound` + `LieCorr0Split` + `LieCorr0LowJet`; extend the editable set.  (Alt:
+    extend `DeTurckLieCoeffL2JetBound.lean`.)
+  - **RULING NEEDED 2 (assembly shape):** lieCorr0's ∇²T is designed to CANCEL DLb's base arm
+    (`tail_base_split`:171 ⟹ `lieCorr0Field + deTurckLieEndoArmField(base)` is ∇²T-free; in Psi0 the DLb
+    `+grad(deTurckVF g₁ g_bg)` and lieCorr0 `−grad(deTurckVF g₁ g₀)` sum to order-1).  Option A (this
+    dispatch: standalone positive-R-free-Ktop producer, triangle into Psi0 — R-free but over-counts ∇²T;
+    fine for R1τ since RULING 2 accepts positive R-free per constituent) vs Option B
+    (cancellation-preserving combined bound; needed only if downstream requires literal ∇²T-freeness,
+    per the `LieCorr0Split.md` H3 warning).  **Confirm A vs B before session 2** — B would change the
+    deliverable.
+  - **Session-2 entry plan (Option A):** new leaf; `lc0_decomp` → 5 summands (split
+    `lc0Insert g_bg = base + diff`) → 5-way pointwise triangle (generalize `normSq_iCG_deTurckLieCoeff
+    _le`) → top summand via DLb producer @g_bg:=g₀ → 4 Kc summands via LowJet refolds + tame-window
+    integrator → `Ktop = 5·Ktop_DLb` R-free, single Kc; summed via `jetL2_sum_lowShift a 2 3`
+    (windows a+3), shape = deTurckLie siblings `:739/799`.  ~1-2 sessions (top engine + low machinery
+    both pre-built; work = jetL2 lift + realizedFam thread + triangle + summed).
+  - **Files touched:** `LieCorr0Core.md`, `DeTurckLieJetL2Summed.md`, this plan.  No `.lean`.  Not
+    committed (planner commits).  `(N)` `ricci_flow_unif_existence` still **0%**.
