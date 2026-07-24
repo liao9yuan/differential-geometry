@@ -113,7 +113,7 @@ theorem timeL2_norm_le_of_ae_three_bound
     have step2 : eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) ≤
         eLpNorm (A • Pf) 2 (timeMeasure T) + eLpNorm (B • Qf) 2 (timeMeasure T) :=
       eLpNorm_add_le hAPm hBQm (by norm_num)
-    exact le_trans step1 (add_le_add_right step2 _)
+    exact le_trans step1 (add_le_add step2 le_rfl)
   have hscaleP : eLpNorm (A • Pf) 2 (timeMeasure T) =
       ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) := by
     rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hA]

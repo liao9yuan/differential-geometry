@@ -470,11 +470,31 @@ the Codex-blocked concrete instantiation, mirroring the
   unchanged otherwise: (N) itself still 0% (its `sorry` untouched); next
   brick = DLa/DLb field-level assembly inside
   `DeTurckLieKernelL2JetBound.lean` (dispatched).
-- NOTE: the №12 item-4 (abstract tame Nemytskii) executor was STOPPED BY
-  THE USER before reporting; that dispatch is cancelled and ruling item 4
-  is back to OPEN (re-dispatch needs a user decision or the next planning
-  pass).  Ruling scoreboard: items 1 ✓, 3 ✓; item 2 in flight (DLa brick);
-  items 4, 5, 6 open.
+- NOTE (superseded same night): the №12 item-4 executor was STOPPED BY THE
+  USER before reporting — but recon found it HAD delivered
+  `Analysis/Parabolic/QuasiLinear/TensorMaximalRegularity/TameNemytskii.lean`
+  (mtime 07-23 21:09, swept unverified into `126aaebda`): the abstract
+  two-orientation tame `timeL2` contraction, exactly the №12 design
+  (three declarations; see `TameNemytskii.md`).  Planner statement-level
+  acceptance PASSED (constant discipline clean: leading coefficient
+  `K(1+Minf)` radius-free; top norms only against the low-scale `Dinf`).
+  User said "item 4 继续" → verification queued (lake build + axiom
+  audit) behind the running DLa executor; result recorded below when it
+  lands.  Also note: the 07-19 Codex lane files in the same directory
+  (`TimeLocalNemytskii`, `TimeTameFixedPoint`, `MovingMass`,
+  `RadialMixedBound`) are UNVERIFIED source-only drafts per their own
+  `.md`s — separate concern, not item 4.
+  Ruling scoreboard: items 1 ✓, 3 ✓; item 2 in flight (DLa brick);
+  item 4 delivered pending verification; items 5, 6 open.
+- ITEM 4 VERIFIED GREEN (2026-07-24): after one mechanical repair
+  (`TameNemytskii.lean:116`, `add_le_add_right` → `add_le_add … le_rfl` on
+  the ENNReal goal), `lake build +...TameNemytskii` succeeded (2500 jobs)
+  and the axiom audit returned exactly `[propext, Classical.choice,
+  Quot.sound]` for all three declarations.  Scoreboard now: items 1 ✓,
+  3 ✓, 4 ✓; item 2 in flight (DLa multi-session brick, session 1 interim:
+  `engineRem_le_dLaGridWin` + `exists_rfns_connDiffSection_topsep_dla`
+  green, `exists_rfns_dLaKernelRaised_topsep` in re-check, field lift
+  drafted); items 5, 6 open.
 
 ## Executor constraints (multi-agent; STRICT)
 
@@ -863,3 +883,26 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   checks ran with mild concurrency as 2–3 Codex `lean.exe` respawned — safe: concurrency risks only
   false failures, not false passes; fresh file ⟹ no stale-olean false-green.)  Full audit in
   `TimeH1Modulus.md`.
+- 2026-07-24: **DLa field bound — kernel top-separation (dispatched "Step 2") BUILT inside
+  `DeTurckLieKernelL2JetBound.lean`; field-level lift (Step 3) designed, not yet built.**  Three new
+  private lemmas added before `end DLaGridBrick`: (1) `engineRem_le_dLaGridWin` (reshape the
+  connDiffSection topSeparated engine remainder into `dLaGridWin` currency); (2)
+  `exists_rfns_connDiffSection_topsep_dla` (connDiffSection top-separated jet in `dLaGridWin`
+  currency, `Ktop = 2·Kt0` R-indep — consumes the committed engine
+  `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`, already in the file's import cone via
+  `CurvatureCoefficientDifferenceJetTower`); (3) `exists_rfns_dLaKernelRaised_topsep` (the 8-summand
+  kernel triangle top-separated twin of `exists_rfns_dLaKernelRaised_tgrid` — `hA1` swapped for (2),
+  `Ktop = 128·(2·Kt0)` R-indep from the 2⁷ triangle doubling; the other 7 summands unchanged in the
+  `dLaGridWin` remainder).  **R-independence linchpin CONFIRMED**: `dLaGridWin b 1 = antidiagonalTupleGrid
+  b 0 = 1`, so both appCcRS frame operators (`pairTraceOpDla`, the perturb `slotInsert(perturbSharp)`)
+  have R-independent order-0 `rfns` ⟹ each field/perturb appCcRS `(i'=0,l=i)` cell carries the top
+  `∇^{i+2}T` with R-independent coefficient.  **KEY finding**: `dLaLoweredPerturbCc =
+  appCcRS(perturb)(dLaLoweredCc)` also carries A1 ⟹ the field needs TWO nested appCcRS `(0,i)`-cell
+  extractions (handled by a generic extractor `rfns_iCG_appCcRS_topsep_of`, drafted).  Full route + piece
+  status in `DeTurckLieKernelL2JetBound.md`; recon corrections in `DeTurckLieJetL2Summed.md`.  Pieces
+  1–2 verified (focused `lake env lean` EXIT=0, only the standard `unusedVariables` lint on hypothesis
+  binders — suppressed with `set_option` matching the file's existing tgrid theorems).  Piece 3 +
+  combined re-check in progress (per-cycle full-file check ≈ 15 min; machine shared with Codex —
+  quiet-window waiter used).  Remaining Step 3 (field assembly ≈ 450 lines: generic extractor + perturb
+  extraction + sym/X glue + two `hfull` re-derivations + integrate + realizedFam sum) is genuinely
+  multi-session as the recon estimated.  (N) `ricci_flow_unif_existence` still **0%**.
