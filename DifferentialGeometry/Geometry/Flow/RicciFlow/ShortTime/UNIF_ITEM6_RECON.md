@@ -470,9 +470,44 @@ sorry-masking).  Home: a new leaf under
 or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lean`
 (S1) can consume it.
 
+**SESSION-3 UPDATE (2a recon — full design note in
+`HCGCompactness/UnifCurvatureJetBound.md`).**  Four findings refine the above:
+- **A (de-risking):** (2a) is an ASSEMBLY of existing jet-envelope
+  curvature-difference machinery, not a missing layer —
+  `exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope`
+  (`Curvature/PerturbedRiemannOpDifferenceBound.lean:88`, the order-0 Riemann
+  difference), `exists_norm_covGrad_connDiffSection_le_of_jetEnvelope`
+  (`Curvature/CovDerivConnDiffQuadraticBound.lean:43`), plus the HCG
+  `CurvDerivBoundOn`↔`MetricCovDerivOrderBoundOn` layer (`AllTimesBounds.lean:3556`).
+  (The session-1/§7.5 "MISSING" call on the curvature difference was WRONG.)
+- **B (scope-changing):** that machinery is `_of_lt_one` / `gFibreOpBound δ₀<1`
+  = SMALL-perturbation.  For `P = g₀−gBase`, `Λ`-comparability forces
+  `|P|_{gBase-op} = Λ−1`, so it applies only to `Λ < 2`.  The full class needs a
+  telescoping chain (`≈Λ` links of the linear path `g_t`, each op-step `<1`) or a
+  large-`δ` re-derivation.
+- **C (corrects §5 HOME):** `MetricCovDerivOrderBoundOn` is DOWNSTREAM of S1's
+  `Analysis` home ⟹ S1 (`UnifBochnerGap.lean`) must take the curvature-jet bound
+  as an ABSTRACT hypothesis; (2a) discharges it downstream in `HCGCompactness`.
+- **D:** envelope currency uses `∇^{g₀}`; `MetricCovDerivOrderBoundOn` uses
+  `∇^{gBase}` — bridged by `∇^{gBase}gBase=0` (`j≥1`) + a connDiff conversion;
+  assets are order-0/1, higher orders `∇^{g₀,a}Riemann` need iteration.
+- **Revised first brick:** **2a-abs** — the abstract curvature-jet interface in
+  `UnifBochnerGap.lean` (landable in `Analysis` now, mandated by Finding C,
+  unblocks S1 independent of the `Λ<2`/telescoping question) — ahead of the
+  downstream 2a-0/2a-tel/2a-hi/2a-pkg.
+
 ---
 
 ## Status
+- 2026-07-24 (session 3, brick 2a recon): (2a) is an ASSEMBLY of existing
+  jet-envelope curvature-difference machinery, NOT a missing layer (Finding A),
+  but the machinery is small-perturbation `Λ<2` only (Finding B) and its home is
+  downstream of S1 (Finding C ⟹ S1 takes curvature abstractly).  Full design
+  note: `HCGCompactness/UnifCurvatureJetBound.md`.  Revised first brick = 2a-abs
+  (abstract interface in `UnifBochnerGap.lean`, landable in Analysis now).
+  Stopped at the recon boundary — Findings B/C are scope-changing (telescoping vs
+  large-δ; abstract-hypothesis interface) and need planner ratification before a
+  build.  No `.lean` written this session.
 - 2026-07-24 (session 2, STAGE 1): audit COMPLETE, verdict CLEAN — no
   type-(iii); all Bochner-recursion constants are curvature-jet (i) or
   dimension (ii); `cc_dirichlet_gap` is a coefficient-one Gårding inequality, not
