@@ -137,6 +137,55 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 6 (2026-07-24, LANE C, Opus) — Discharger 1 LANDED; D2 frontier sharpened
+
+### LANDED — Discharger 1 (`gFibreOpBound` from comparability), verified + axiom-clean
+Three declarations in `UnifCurvatureJetBound.lean`:
+- `clm_offdiag_le_of_diag` (private, REUSABLE): for a symmetric fibre form `D`
+  with `|D u u| ≤ c·gBase(u,u)`, `|D v w| ≤ c·√(gBase(v,v))·√(gBase(w,w))`.
+  Proof = polarization AM bound `½c(gBase(v,v)+gBase(w,w))` + unit-vector
+  rescaling to the GM; degenerate slots via `gBase.pos`.  (Generic op-norm =
+  diagonal-norm fact; kept private in the leaf — could get a public home in a
+  metric/fibre-algebra layer if reused elsewhere.)
+- `metricDiff_diag_le` (private): `|g₀(u,u)−gBase(u,u)| ≤ (Λ−1)·gBase(u,u)` from
+  comparability (`Λ⁻¹+Λ−2 = (Λ−1)²/Λ ≥ 0`).
+- `metricDiff_gFibreOpBound` (public, D1): `gFibreOpBound gBase (ccTensorBilinSymm
+  gBase (metricDifferenceCcTensor gBase g₀)) (Λ−1)` under `hΛ : 1 ≤ Λ` +
+  comparability.  NOTE: `Λ < 2` is NOT needed for D1 itself (the bound `Λ−1`
+  holds for all Λ≥1); the `δ = Λ−1 < 1` gate is a CONSUMER (asset) requirement,
+  added at assembly.  Axiom audit `[propext, Classical.choice, Quot.sound]`;
+  `lake build` 9405 jobs EXIT=0.
+
+### D2 frontier — SHARPENED (the hard bridge; NOT attempted this session)
+Recon of the two covariant-derivative iterations shows they are **NOT obviously
+definitionally parallel** (the coordinator's stop-condition):
+- `iteratedCovGrad gBase 0 2 j T` iterates `covGrad gBase r s`
+  (`SobolevEmbeddingCm.lean:94` → `CovGrad/Defs.lean:253`) on the `SmoothCcTensor`
+  `T = metricCcTensor gBase h`.
+- `metricCovDeriv h gBase j` (`PointedConvergence.lean:80`) iterates
+  `metricCovDerivStep gBase` — which evaluates via `nabla0SFun` /
+  `leviCivitaConnectionOfMetric gBase` (`metricCovDeriv_one_apply_section:105`) —
+  on the `Tensor0SField` `metricTensorField h`.
+So the bridge needs a PROVEN equality (or the norm-`≤` version — consumer only
+needs norms) between `covGrad gBase` and the `nabla0SFun/leviCivitaConnectionOf
+Metric gBase` step, PLUS `metricCcTensor gBase h .toSection ↔ metricTensorField h`.
+Neither is `rfl`-obvious.  Additional missing pieces:
+- `metricCovDeriv gBase gBase j = 0` for j≥1 (metric compatibility) — the existing
+  `metricCovDeriv_zero_restrictOpen_apply` (`MetricDerivNormRestrict.lean:40`) is
+  about restrictOpen, NOT self-zero; the self-zero must be built (iterate the
+  first-order metric-compat `∇^{gBase}gBase = 0`).
+- norm reconciliation `‖·.toSection x‖` ↔ `metricCovDerivNorm`.
+- order-0 `(0,2)`-tensor HS norm of `g₀−gBase` from the op bound `Λ−1`.
+This is a genuine multi-sub-lemma brick, likely its own session, and the
+covGrad↔leviCivita-step alignment is the decisive risk — if it is a real
+convention mismatch (slot order / connection), STOP and report per the
+coordinator.  `B(Λ) = c₀(n)(Λ−1) + 2Λ` shape unchanged (c₀ from the order-0 HS
+factor, still to pin).
+
+### ASSEMBLY (`unifCurvatureSup_singleLink`) — blocked on D2 only
+D1 done; tie done; need D2's envelope, then apply the difference asset (δ₀:=Λ−1,
+needs `hΛ2 : Λ<2`) → `hdiff` → session-4 `unifCurvatureSup_singleLink_of_diff`.
+
 ## Session 5 (2026-07-24, LANE C, Opus) — P-construction recon + TIE API landed
 
 ### KEY RECON FINDING — the P-construction ALREADY EXISTS (reuse, don't rebuild)
@@ -286,6 +335,13 @@ conversion is fully proved.
   higher-order curvature-difference extension the current asset lacks).
 
 ## Status
+- 2026-07-24 (session 6, LANE C): **Discharger 1 LANDED** + verified + axiom-clean
+  (`metricDiff_gFibreOpBound` + reusable `clm_offdiag_le_of_diag` + `metricDiff_diag_le`;
+  `[propext, Classical.choice, Quot.sound]`; `lake build` 9405 jobs EXIT=0).
+  Discharger 2 (envelope) NOT attempted — recon shows the `covGrad ↔
+  leviCivita-step` bridge is not definitionally obvious + missing self-zero/norm
+  pieces; genuine multi-sub-lemma brick (see session-6 block).  Assembly
+  `unifCurvatureSup_singleLink` blocked on D2 only.
 - 2026-07-24 (session 5, LANE C): P-construction recon done — `metricCcTensor` /
   `metricDifferenceCcTensor` ALREADY EXIST (reuse).  TIE API landed + verified +
   axiom-clean: `metricDiff_ccBilin`, `metricDiff_ccBilinSymm`, `metricDiff_tie`

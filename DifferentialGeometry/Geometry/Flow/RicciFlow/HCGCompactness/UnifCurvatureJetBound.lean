@@ -267,6 +267,137 @@ theorem metricDiff_tie (gBase g₀ : SmoothRiemannianMetric I M)
           (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x v w := by
   rw [metricDiff_ccBilinSymm]; ring
 
+/-! ### Discharger 1 — comparability ⟹ `gFibreOpBound` (session 6)
+
+The perturbation `ccTensorBilinSymm gBase P` (`P = metricDifferenceCcTensor
+gBase g₀`), which realizes `g₀ − gBase`, has `gBase`-fibre operator norm at most
+`Λ − 1`.  This supplies the `hδ` hypothesis of the order-0 difference asset (with
+`δ₀ = Λ − 1 < 1`, i.e. the `Λ < 2` regime). -/
+
+set_option linter.unusedSectionVars false in
+/-- **Off-diagonal control from a diagonal bound** (the reusable "operator norm =
+diagonal norm" fact for a symmetric fibre form): a symmetric bilinear form `D`
+on a metric fibre with `|D u u| ≤ c · gBase(u,u)` on the diagonal satisfies
+`|D v w| ≤ c · √(gBase(v,v)) · √(gBase(w,w))`.  Proof: polarization gives the
+arithmetic-mean bound `|D v w| ≤ ½c(gBase(v,v)+gBase(w,w))`; applying it to the
+`gBase`-unit rescalings `v/√(gBase(v,v))`, `w/√(gBase(w,w))` sharpens it to the
+geometric mean.  Degenerate slots (`gBase(·,·)=0 ⟹ ·=0` by positivity) are
+handled separately. -/
+private lemma clm_offdiag_le_of_diag {x : M} (gBase : SmoothRiemannianMetric I M)
+    (D : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (hDsymm : ∀ v w : TangentSpace I x, D v w = D w v)
+    {c : ℝ} (hc : 0 ≤ c)
+    (hdiag : ∀ u : TangentSpace I x, |D u u| ≤ c * gBase.inner x u u) :
+    ∀ v w : TangentSpace I x,
+      |D v w| ≤ c * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) := by
+  have hAM : ∀ v w : TangentSpace I x,
+      |D v w| ≤ c / 2 * (gBase.inner x v v + gBase.inner x w w) := by
+    intro v w
+    have hpol : (4 : ℝ) * D v w = D (v + w) (v + w) - D (v - w) (v - w) := by
+      simp only [map_add, map_sub, ContinuousLinearMap.add_apply,
+        ContinuousLinearMap.sub_apply]
+      rw [hDsymm w v]; ring
+    have hpar : gBase.inner x (v + w) (v + w) + gBase.inner x (v - w) (v - w) =
+        2 * gBase.inner x v v + 2 * gBase.inner x w w := by
+      simp only [map_add, map_sub, ContinuousLinearMap.add_apply,
+        ContinuousLinearMap.sub_apply]
+      ring
+    obtain ⟨hd1lo, hd1hi⟩ := abs_le.mp (hdiag (v + w))
+    obtain ⟨hd2lo, hd2hi⟩ := abs_le.mp (hdiag (v - w))
+    have h4 : (4 : ℝ) * |D v w| ≤ c * (2 * gBase.inner x v v + 2 * gBase.inner x w w) := by
+      have hstep : |(4 : ℝ) * D v w| ≤
+          c * gBase.inner x (v + w) (v + w) + c * gBase.inner x (v - w) (v - w) := by
+        rw [hpol, abs_le]
+        constructor <;> linarith
+      rw [abs_mul, show |(4 : ℝ)| = 4 from by norm_num, ← mul_add, hpar] at hstep
+      exact hstep
+    linarith
+  intro v w
+  rcases eq_or_ne v 0 with rfl | hv
+  · simp only [map_zero, ContinuousLinearMap.zero_apply, abs_zero]
+    exact mul_nonneg (mul_nonneg hc (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+  rcases eq_or_ne w 0 with rfl | hw
+  · simp only [map_zero, abs_zero]
+    exact mul_nonneg (mul_nonneg hc (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+  · have hvv : 0 < gBase.inner x v v := gBase.pos x v hv
+    have hww : 0 < gBase.inner x w w := gBase.pos x w hw
+    have ha0 : 0 < Real.sqrt (gBase.inner x v v) := Real.sqrt_pos.mpr hvv
+    have hb0 : 0 < Real.sqrt (gBase.inner x w w) := Real.sqrt_pos.mpr hww
+    set a := Real.sqrt (gBase.inner x v v) with ha_def
+    set b := Real.sqrt (gBase.inner x w w) with hb_def
+    have hna : gBase.inner x (a⁻¹ • v) (a⁻¹ • v) = 1 := by
+      simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [← Real.sq_sqrt hvv.le, ← ha_def]; field_simp
+    have hnb : gBase.inner x (b⁻¹ • w) (b⁻¹ • w) = 1 := by
+      simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [← Real.sq_sqrt hww.le, ← hb_def]; field_simp
+    have hDscale : D (a⁻¹ • v) (b⁻¹ • w) = a⁻¹ * b⁻¹ * D v w := by
+      simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]; ring
+    have hAMs := hAM (a⁻¹ • v) (b⁻¹ • w)
+    rw [hna, hnb, hDscale, abs_mul, abs_mul,
+      abs_of_pos (by positivity : (0 : ℝ) < a⁻¹),
+      abs_of_pos (by positivity : (0 : ℝ) < b⁻¹)] at hAMs
+    have hAMs' : a⁻¹ * b⁻¹ * |D v w| ≤ c := by
+      have hcc : c / 2 * (1 + 1) = c := by ring
+      rw [hcc] at hAMs; exact hAMs
+    have hid : a * b * (a⁻¹ * b⁻¹) = 1 := by
+      rw [mul_mul_mul_comm, mul_inv_cancel₀ ha0.ne', mul_inv_cancel₀ hb0.ne', one_mul]
+    calc |D v w| = a * b * (a⁻¹ * b⁻¹) * |D v w| := by rw [hid, one_mul]
+      _ = a * b * (a⁻¹ * b⁻¹ * |D v w|) := by ring
+      _ ≤ a * b * c := mul_le_mul_of_nonneg_left hAMs' (by positivity)
+      _ = c * a * b := by ring
+
+set_option linter.unusedSectionVars false in
+/-- The diagonal bound `|g₀(u,u) − gBase(u,u)| ≤ (Λ−1)·gBase(u,u)` from
+`Λ`-comparability (`|Λ⁻¹ − 1| = 1 − Λ⁻¹ ≤ Λ − 1` for `Λ ≥ 1`). -/
+private lemma metricDiff_diag_le (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (x : M) (u : TangentSpace I x) :
+    |g₀.inner x u u - gBase.inner x u u| ≤ (Λ - 1) * gBase.inner x u u := by
+  have hΛ0 : (0 : ℝ) < Λ := lt_of_lt_of_le one_pos hΛ
+  have hb0 : 0 ≤ gBase.inner x u u := metric_inner_self_nonneg (I := I) (M := M) gBase x u
+  obtain ⟨hlo, hhi⟩ := hcomp x u
+  have hLam : (0 : ℝ) ≤ Λ⁻¹ + Λ - 2 := by
+    have hrw : Λ⁻¹ + Λ - 2 = (Λ - 1) ^ 2 / Λ := by field_simp; ring
+    rw [hrw]; positivity
+  rw [abs_le]
+  refine ⟨?_, by linarith⟩
+  have hprod : 0 ≤ (Λ⁻¹ + Λ - 2) * gBase.inner x u u := mul_nonneg hLam hb0
+  nlinarith [hlo, hprod]
+
+/-- **Discharger 1.**  Under `Λ`-comparability, the symmetric perturbation
+`ccTensorBilinSymm gBase (metricDifferenceCcTensor gBase g₀)` realizing
+`g₀ − gBase` has `gBase`-fibre operator norm at most `Λ − 1`. -/
+theorem metricDiff_gFibreOpBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v) :
+    gFibreOpBound (I := I) gBase
+      (ccTensorBilinSymm (I := I) gBase
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)) (Λ - 1) := by
+  intro x v w
+  have hsymm : ∀ p q : TangentSpace I x,
+      ccTensorBilinSymm (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x p q =
+        ccTensorBilinSymm (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x q p :=
+    fun p q => ccTensorBilinSymm_symm (I := I) gBase _ x p q
+  have hdiag : ∀ u : TangentSpace I x,
+      |ccTensorBilinSymm (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x u u| ≤
+        (Λ - 1) * gBase.inner x u u := by
+    intro u
+    rw [metricDiff_ccBilinSymm]
+    exact metricDiff_diag_le (I := I) (M := M) gBase g₀ hΛ hcomp x u
+  exact clm_offdiag_le_of_diag (I := I) (M := M) gBase
+    (ccTensorBilinSymm (I := I) gBase
+      (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x)
+    hsymm (by linarith : (0 : ℝ) ≤ Λ - 1) hdiag v w
+
 end RicciFlow
 end PDE
 end DifferentialGeometry
