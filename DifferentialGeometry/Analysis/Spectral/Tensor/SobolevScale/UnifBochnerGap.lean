@@ -682,6 +682,226 @@ theorem bochner_step_hcurv
   exact ⟨Cbase + Fc 0, add_nonneg hCbase_nn (hFc 0),
     bochner_step_unif (I := I) (M := M) g₀ s k Fc hFc hcurv Cbase hbase⟩
 
+/-- **Reindex of the iterated rough Laplacian under one extra `Δ_∇`:**
+`Δ_∇^i(Δ_∇ S) = Δ_∇^{i+1} S`.  Local inline of the `private`
+`AllOrderGardingConstant.rawTensorConnLapIter_rawTensorConnLapSmooth` (that declaration is not
+importable, being `private`). -/
+private theorem rawIter_lap_reindex
+    (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
+    rawTensorConnLapIter (I := I) g₀ 0 s i (rawTensorConnLapSmooth (I := I) g₀ 0 s S) =
+      rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S := by
+  induction i with
+  | zero => rfl
+  | succ n ih =>
+    rw [rawTensorConnLapIter_succ (I := I) g₀ 0 s n
+        (rawTensorConnLapSmooth (I := I) g₀ 0 s S), ih,
+      rawTensorConnLapIter_succ (I := I) g₀ 0 s (n + 1) S]
+
+omit [CompactSpace M] [I.Boundaryless] in
+/-- The shifted rough-Laplacian jet sum `∑_{i < m} ‖Δ_∇^{i+1} S‖` is dominated by the full jet
+sum `∑_{i < n} ‖Δ_∇^i S‖` whenever `m + 1 ≤ n`.  A curvature-free monotonicity used to fold the
+induction-hypothesis Laplacian budget of `Δ_∇ S` into the target budget of `S`. -/
+private theorem lap_shift_le
+    (g₀ : SmoothRiemannianMetric I M) (s m n : ℕ) (hmn : m + 1 ≤ n)
+    (S : SmoothCcTensor g₀ 0 s) :
+    ∑ i ∈ Finset.range m, ‖rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S‖ ≤
+      ∑ i ∈ Finset.range n, ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
+  have key :
+      (∑ i ∈ Finset.range m, ‖rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S‖) +
+          ‖rawTensorConnLapIter (I := I) g₀ 0 s 0 S‖ =
+        ∑ i ∈ Finset.range (m + 1), ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ :=
+    (Finset.sum_range_succ' (fun i => ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖) m).symm
+  have hmono :
+      ∑ i ∈ Finset.range (m + 1), ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ ≤
+        ∑ i ∈ Finset.range n, ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ :=
+    Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono hmn)
+      (fun _ _ _ => norm_nonneg _)
+  have hnn : 0 ≤ ‖rawTensorConnLapIter (I := I) g₀ 0 s 0 S‖ := norm_nonneg _
+  linarith [key, hmono, hnn]
+
+set_option maxHeartbeats 1600000 in
+/-- **Uniform elliptic jet engine (strong form).**  For every jet-order budget `J` there is a
+single nonnegative constant `C` such that every covariant-gradient iterate up to order `J` is
+controlled by the rough-Laplacian jet up to order `⌈a/2⌉`:
+`‖∇^a S‖ ≤ C · ∑_{i ≤ ⌈a/2⌉} ‖Δ_∇^i S‖` for all `a ≤ J`.  Proved by induction on `J` using the
+class-uniform Bochner step `bochner_step_hcurv` (top order `≥ 2`) and the curvature-free order-1
+Dirichlet-energy estimate `covGrad_l2NormSq_le_rawConnLap_mul_self_gen` (top order `1`); the
+constant chain is `Fc`-explicit (no `Classical.choose` of curvature).  This is the `Fc`-explicit
+sibling of the per-metric strong induction inside
+`exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter`. -/
+private theorem elliptic_engine
+    (g₀ : SmoothRiemannianMetric I M)
+    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
+    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
+        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
+            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
+          Fc p * ∑ a ∈ Finset.range (p + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
+    (s : ℕ) :
+    ∀ J : ℕ, ∃ C : ℝ, 0 ≤ C ∧ ∀ a : ℕ, a ≤ J → ∀ S : SmoothCcTensor g₀ 0 s,
+      ‖iteratedCovGrad (I := I) g₀ 0 s a S‖ ≤
+        C * ∑ i ∈ Finset.range ((a + 1) / 2 + 1),
+          ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
+  intro J
+  induction J with
+  | zero =>
+    refine ⟨1, zero_le_one, fun a ha S => ?_⟩
+    obtain rfl : a = 0 := Nat.le_zero.mp ha
+    rw [iteratedCovGrad_zero, one_mul]
+    exact Finset.single_le_sum (a := 0)
+      (fun i _ => norm_nonneg (rawTensorConnLapIter (I := I) g₀ 0 s i S))
+      (by rw [Finset.mem_range]; omega)
+  | succ J ih =>
+    obtain ⟨CJ, hCJ_nn, hCJ⟩ := ih
+    obtain ⟨Ctop, hCtop_nn, hCtop⟩ :
+        ∃ C : ℝ, 0 ≤ C ∧ ∀ S : SmoothCcTensor g₀ 0 s,
+          ‖iteratedCovGrad (I := I) g₀ 0 s (J + 1) S‖ ≤
+            C * ∑ i ∈ Finset.range ((J + 1 + 1) / 2 + 1),
+              ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
+      rcases J with _ | J'
+      · -- top order `a = 1`: curvature-free order-1 Dirichlet-energy estimate
+        refine ⟨1, zero_le_one, fun S => ?_⟩
+        have hdir :
+            ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤
+              ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ * ‖S‖ := by
+          have h := covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g₀ s S
+          rw [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀
+              (covGrad (I := I) (M := M) g₀ 0 s S),
+            tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀
+              (rawTensorConnLapSmooth (I := I) g₀ 0 s S),
+            tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀ S] at h
+          exact h
+        have hsum :
+            ∑ i ∈ Finset.range ((0 + 1 + 1) / 2 + 1),
+                ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ =
+              ‖S‖ + ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ := by
+          have hidx : (0 + 1 + 1) / 2 + 1 = 2 := by norm_num
+          rw [hidx, Finset.sum_range_succ, Finset.sum_range_one, rawTensorConnLapIter_zero,
+            rawTensorConnLapIter_one]
+        rw [hsum, one_mul]
+        have hsq :
+            ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤
+              (‖S‖ + ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖) ^ 2 := by
+          nlinarith [hdir, norm_nonneg S,
+            norm_nonneg (rawTensorConnLapSmooth (I := I) g₀ 0 s S),
+            mul_nonneg (norm_nonneg S)
+              (norm_nonneg (rawTensorConnLapSmooth (I := I) g₀ 0 s S))]
+        exact le_of_sq_le_sq hsq (add_nonneg (norm_nonneg _) (norm_nonneg _))
+      · -- top order `a = J' + 2 ≥ 2`: the class-uniform Bochner step at `k = J'`
+        obtain ⟨Cb, hCb_nn, hstep⟩ :=
+          bochner_step_hcurv (I := I) (M := M) g₀ Fc hFc hcurv s J'
+        have hpos : (0 : ℝ) ≤ 1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2 := by positivity
+        refine ⟨CJ * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2),
+          mul_nonneg hCJ_nn (Real.sqrt_nonneg _), fun S => ?_⟩
+        set L : ℝ := ∑ i ∈ Finset.range ((J' + 1 + 1 + 1) / 2 + 1),
+          ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ with hL
+        have hL_nn : 0 ≤ L := Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+        have hterm1 :
+            ‖iteratedCovGrad (I := I) g₀ 0 s J'
+                (rawTensorConnLapSmooth (I := I) g₀ 0 s S)‖ ≤ CJ * L := by
+          refine le_trans (hCJ J' (by omega) (rawTensorConnLapSmooth (I := I) g₀ 0 s S)) ?_
+          refine mul_le_mul_of_nonneg_left ?_ hCJ_nn
+          calc ∑ i ∈ Finset.range ((J' + 1) / 2 + 1),
+                  ‖rawTensorConnLapIter (I := I) g₀ 0 s i
+                    (rawTensorConnLapSmooth (I := I) g₀ 0 s S)‖
+              = ∑ i ∈ Finset.range ((J' + 1) / 2 + 1),
+                  ‖rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S‖ :=
+                Finset.sum_congr rfl
+                  (fun i _ => by rw [rawIter_lap_reindex (I := I) (M := M) g₀ s i S])
+            _ ≤ L := by
+                rw [hL]
+                exact lap_shift_le (I := I) (M := M) g₀ s ((J' + 1) / 2 + 1)
+                  ((J' + 1 + 1 + 1) / 2 + 1) (by omega) S
+        have hterm2 :
+            ∑ a' ∈ Finset.range (J' + 2), ‖iteratedCovGrad (I := I) g₀ 0 s a' S‖ ≤
+              ((J' + 2 : ℕ) : ℝ) * (CJ * L) := by
+          have hbound_each : ∀ a' ∈ Finset.range (J' + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 s a' S‖ ≤ CJ * L := by
+            intro a' ha'
+            rw [Finset.mem_range] at ha'
+            refine le_trans (hCJ a' (by omega) S) ?_
+            refine mul_le_mul_of_nonneg_left ?_ hCJ_nn
+            rw [hL]
+            exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
+              (fun i _ _ => norm_nonneg _)
+          calc ∑ a' ∈ Finset.range (J' + 2), ‖iteratedCovGrad (I := I) g₀ 0 s a' S‖
+              ≤ ∑ _a' ∈ Finset.range (J' + 2), (CJ * L) := Finset.sum_le_sum hbound_each
+            _ = ((J' + 2 : ℕ) : ℝ) * (CJ * L) := by
+                rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        have hstepS := hstep S
+        rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2] at hstepS
+        have t1 :
+            ‖iteratedCovGrad (I := I) g₀ 0 s J'
+                (rawTensorConnLapSmooth (I := I) g₀ 0 s S)‖ ^ 2 ≤ (CJ * L) ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) hterm1 2
+        have t2 :
+            (∑ a' ∈ Finset.range (J' + 2), ‖iteratedCovGrad (I := I) g₀ 0 s a' S‖) ^ 2 ≤
+              (((J' + 2 : ℕ) : ℝ) * (CJ * L)) ^ 2 :=
+          pow_le_pow_left₀ (Finset.sum_nonneg (fun _ _ => norm_nonneg _)) hterm2 2
+        have hCbt2 :
+            Cb * (∑ a' ∈ Finset.range (J' + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 s a' S‖) ^ 2 ≤
+              Cb * (((J' + 2 : ℕ) : ℝ) * (CJ * L)) ^ 2 :=
+          mul_le_mul_of_nonneg_left t2 hCb_nn
+        have hstep2 :
+            ‖iteratedCovGrad (I := I) g₀ 0 s (J' + 2) S‖ ^ 2 ≤
+              (CJ * L) ^ 2 + Cb * (((J' + 2 : ℕ) : ℝ) * (CJ * L)) ^ 2 := by
+          linarith [hstepS, t1, hCbt2]
+        have hexpand :
+            (CJ * L) ^ 2 + Cb * (((J' + 2 : ℕ) : ℝ) * (CJ * L)) ^ 2 =
+              CJ ^ 2 * (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L ^ 2 := by ring
+        have e1 :
+            (CJ * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L) ^ 2 =
+              CJ ^ 2 * (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L ^ 2 := by
+          have hs2 : Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) ^ 2 =
+              1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2 := Real.sq_sqrt hpos
+          calc (CJ * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L) ^ 2
+              = CJ ^ 2 * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) ^ 2 * L ^ 2 := by ring
+            _ = CJ ^ 2 * (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L ^ 2 := by rw [hs2]
+        have hfinal :
+            ‖iteratedCovGrad (I := I) g₀ 0 s (J' + 2) S‖ ^ 2 ≤
+              (CJ * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2) * L) ^ 2 := by
+          rw [e1, ← hexpand]; exact hstep2
+        exact le_of_sq_le_sq hfinal
+          (mul_nonneg (mul_nonneg hCJ_nn (Real.sqrt_nonneg _)) hL_nn)
+    refine ⟨max CJ Ctop, le_trans hCJ_nn (le_max_left _ _), fun a ha S => ?_⟩
+    rcases Nat.lt_or_ge a (J + 1) with hlt | hge
+    · refine le_trans (hCJ a (by omega) S) ?_
+      exact mul_le_mul_of_nonneg_right (le_max_left _ _)
+        (Finset.sum_nonneg (fun _ _ => norm_nonneg _))
+    · obtain rfl : a = J + 1 := by omega
+      refine le_trans (hCtop S) ?_
+      exact mul_le_mul_of_nonneg_right (le_max_right _ _)
+        (Finset.sum_nonneg (fun _ _ => norm_nonneg _))
+
+/-- **Class-uniform all-orders elliptic jet bound** (the `Λ`-uniform sibling of
+`exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter`, `AllOrderGardingConstant.lean:918`).  For
+every covariant rank `s` and rough-Laplacian budget `k` there is a single nonnegative constant
+`C`, uniform in `S`, controlling every covariant-gradient iterate up to order `2 * k` by the
+rough-Laplacian jet up to order `k`:
+`‖∇^j S‖ ≤ C · ∑_{i ≤ k} ‖Δ_∇^i S‖` for all `j ≤ 2 * k`.  The constant is `Fc`-explicit
+(threaded through `elliptic_engine`, hence `bochner_step_hcurv`), never a `Classical.choose` of a
+curvature sup — the class-uniform content the per-metric `:918` does not expose. -/
+theorem elliptic_lapSum_unif
+    (g₀ : SmoothRiemannianMetric I M)
+    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
+    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
+        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
+            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
+          Fc p * ∑ a ∈ Finset.range (p + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
+    (s k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (j : ℕ), j ≤ 2 * k → ∀ S : SmoothCcTensor g₀ 0 s,
+      ‖iteratedCovGrad (I := I) g₀ 0 s j S‖ ≤
+        C * ∑ i ∈ Finset.range (k + 1),
+          ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
+  obtain ⟨C, hC_nn, hC⟩ := elliptic_engine (I := I) (M := M) g₀ Fc hFc hcurv s (2 * k)
+  refine ⟨C, hC_nn, fun j hj S => ?_⟩
+  refine le_trans (hC j hj S) ?_
+  refine mul_le_mul_of_nonneg_left ?_ hC_nn
+  exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
+    (fun i _ _ => norm_nonneg _)
+
 end IntrinsicSpectral
 end RicciFlow
 end PDE

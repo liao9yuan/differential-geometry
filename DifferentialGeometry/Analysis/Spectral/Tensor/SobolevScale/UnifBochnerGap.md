@@ -148,7 +148,73 @@ Sobolev-jet constant (as `:1439` does at `:1465`).  Prereq = 2.1.
 ### STEP 2.3 — coefficient-one gap + endpoints
 Mirror `cc_dirichlet_gap:1539` (uses 2.2) → `covsum_hs_unif`; easy → `hs_covsum_unif`.
 
+## STEP 2.1 LANDED (session 8) — `elliptic_lapSum_unif` GREEN; wrappers BLOCKED on private spectral bridges
+
+**`elliptic_lapSum_unif` — GREEN, axiom-clean (public).**  The `Λ`-uniform sibling of
+`exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter` (`AllOrderGardingConstant.lean:918`):
+```
+(g₀) (Fc) (hFc) (hcurv) (s k) :
+  ∃ C ≥ 0, ∀ j ≤ 2*k, ∀ S, ‖∇^j S‖ ≤ C · ∑_{i ∈ range (k+1)} ‖Δ_∇^i S‖
+```
+`Fc`-explicit constant (no `Classical.choose`), same abstract `hcurv`/`Fc` interface as the rest
+of the file.  Built on three private helpers added to this leaf:
+- `rawIter_lap_reindex` — `Δ_∇^i(Δ_∇ S) = Δ_∇^{i+1} S` (inline of the private
+  `AllOrderGardingConstant.rawTensorConnLapIter_rawTensorConnLapSmooth:520`, induction on `i`).
+- `lap_shift_le` — `∑_{i<m}‖Δ_∇^{i+1}S‖ ≤ ∑_{i<n}‖Δ_∇^i S‖` for `m+1≤n` (curvature-free; via
+  `Finset.sum_range_succ'` + range monotonicity).  Needed `omit [CompactSpace M] [I.Boundaryless]`.
+- `elliptic_engine` (strong form) — `∀ J, ∃ C ≥ 0, ∀ a ≤ J, ∀ S,
+  ‖∇^a S‖ ≤ C·∑_{i ∈ range ((a+1)/2+1)} ‖Δ_∇^i S‖`.  **Ordinary** induction on `J` (single `C`
+  covers all `a ≤ J`; NOT strong recursion): `a=0` trivial; top order `a=1` = curvature-free
+  order-1 Dirichlet-energy IBP (`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`, inlined ~8 lines);
+  top order `a=J'+2 ≥ 2` = `bochner_step_hcurv` at `k=J'`, term-1 bounded by IH at `a=J'` applied
+  to `Δ_∇ S` (reindexed + `lap_shift_le`), the gradient-jet sum bounded by IH at each `a'≤J'+1`,
+  then `√` with constant `C_{J+1}=max(C_J, C_J·√(1+Cb·(J'+2)²))`.
+
+**KEY REFINEMENT of the session-7 map:** the map's stated RHS `∑_{i≤j}‖Δ^i S‖` (Laplacian order
+up to `j`) is **too loose for the `jet_even` wrapper**, which needs `‖Δ^i S‖ ≤ ‖Hs^{2i}‖ ≤
+‖Hs^{2k}‖` i.e. `i ≤ k = j/2`.  A loose `i ≤ j` would force `‖Hs^{4k}‖` (wrong Sobolev exponent).
+The engine therefore carries the **tight** per-order budget `(a+1)/2 = ⌈a/2⌉` (order-1 needs
+`Lap_1`, so it is `⌈a/2⌉` not `⌊a/2⌋`), which the ordinary-`J` induction still closes because
+both Bochner terms land in `range(⌈a/2⌉+1)`.  This is not a route gap; it is the correct shape,
+and it collapses to the `:918` `∑_{i≤k}` via `range_mono` (`(j+1)/2+1 ≤ k+1` from `j≤2k`).
+
+**WRAPPERS BLOCKED (not from math — from `private`).**  Both `Hs`-form deliverables the mission
+lists (uniform `hsJet_le`/`covsum_hs_unif` and the easy-direction uniform `mode_le_jet`) require
+curvature-free spectral bridges that are `private` in `IteratedCovGradHsJetBound.lean` and hence
+**not importable** into this leaf (editable set = `UnifBochnerGap.lean` only):
+- Hard (uniform `jet_even`/`jet_odd`): needs `rawIter_even` (`:386`, PRIVATE) —
+  `‖Δ_∇^i S‖ ≤ ‖ccTensorToHs (2i) S‖` — to bridge the `∑‖Δ^i S‖` of `elliptic_lapSum_unif` to
+  `‖Hs^{2k}‖`.  `ccToHs_norm_mono` (`:183`) is already public; `rawIter_even` is the missing one.
+- Easy (uniform `mode_le_jet`): needs `rawIter_tsum` (`:227`), `covIter_tsum` (`:248`),
+  `covIter_odd` (`:315`) — all PRIVATE — the spectral `tsum = ‖Δ^i S‖²`/`‖∇(Δ^i S)‖²` identities.
+  (The curvature side, uniform `exists_iteratedCovGrad_rawConnLapIter_l2Norm_le`, is buildable
+  here by iterating `roughLapComm_unif`; the SPECTRAL side is what is blocked.)
+There is **no public `rawTensorConnLapIter → ccTensorToHs` bridge anywhere in the tree** (grep
+confirmed).  The session-7 map called `rawIter_even` "consumable"; it is not (it is `private`).
+
+**Requested ruling (mirrors the session-6 covDivergence publicize):** drop `private` from
+`rawIter_even`, `rawIter_tsum`, `covIter_tsum`, `covIter_odd` in
+`IteratedCovGradHsJetBound.lean` (four one-token edits; all curvature-free spectral bridges, a
+benign foundational-file change).  With those public, uniform `jet_even`/`jet_odd`/`hsJet_le`
+(hard) and uniform `mode_le_jet` (easy) are near-verbatim copies of `:603/:667/:834/:438` with
+`elliptic_lapSum_unif` swapped for `:918` and `roughLapComm_unif` for the commutator — an
+estimated ~200-line follow-up dispatch once the publicize lands.  Distance to STEP 2.2/2.3
+endpoints (`covsum_hs_unif`/`hs_covsum_unif`) is exactly this wrapper layer + the 2.2 strong
+induction; STEP 2.1's hard mathematical content (the Bochner elliptic recursion) is now DONE.
+
 ## Status
+- 2026-07-24 (session 8): STEP 2.1 CORE LANDED + VERIFIED + AUDITED.  `elliptic_lapSum_unif`
+  (public, `:918`-shape, `Fc`-explicit) + 3 private helpers (`rawIter_lap_reindex`,
+  `lap_shift_le`, `elliptic_engine`).  Authoritative `lake build +…UnifBochnerGap`: "Build
+  completed successfully (9342 jobs)", UnifBochnerGap built 69s, zero errors, zero NEW warnings
+  (lone `unusedSectionVars` on `lap_shift_le` fixed via `omit [CompactSpace M] [I.Boundaryless]`).
+  Axiom audit (direct `lean`, full package `LEAN_PATH`): exactly
+  `[propext, Classical.choice, Quot.sound]`; audit line stripped after green.  The two `Hs`-form
+  wrappers are BLOCKED on four PRIVATE spectral bridges in `IteratedCovGradHsJetBound.lean`
+  (`rawIter_even:386`, `rawIter_tsum:227`, `covIter_tsum:248`, `covIter_odd:315`) — publicize
+  requested (see the STEP 2.1 LANDED section).  Map refinement: engine RHS is TIGHT `⌈a/2⌉`
+  (map's `≤j` was too
+  loose for `jet_even`).  No plan edits; no commit.
 - 2026-07-24 (session 7): STEP-2 route fully MAPPED (no Lean landed — a deep mapping of the
   elliptic chain).  KEY: `bochner_step_hcurv` route sidesteps the deeper
   `curvatureCrossBound` atom `:918` uses; the `j=1` base is curvature-FREE
