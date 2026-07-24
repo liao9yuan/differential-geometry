@@ -1397,3 +1397,51 @@ producer if none closes, and give an exact minimal statement/proof normal form
 for that producer.  Prefer scalar/chart or already-realized metric objects;
 avoid whole varying-fibre tensor equalities.
 ```
+
+## 2026-07-23 post-merge positive-start half-open theorem
+
+`NoncollapseOpen.lean` now proves `noncollapse_after`.  This removes the finite
+upper-endpoint limitation from the positive-time route on a half-open
+`closedOpen 0 omega` flow interval: after any fixed positive start time, one
+gets a uniform noncollapsing constant for all later carrier times below a fixed
+radius.  The proof chooses a finite auxiliary endpoint below `omega` around the
+queried time and calls `w_span_uniform`, whose W lower constant is independent
+of that endpoint.
+
+Focused verification and module artifact refresh passed.  The endpoint
+frontier is now sharper: the final all-carrier `NoLocalCollapsing` assembly
+only needs the genuine initial-boundary producer `early_ball_low`, plus the
+routine min-constant case split with `noncollapse_after`.  `NoLocalCollapsing`
+and `ham3_noncollapse` remain theorem-level 0% until that initial-time volume
+producer is proved.
+
+## 2026-07-23 initial-time frontier isolated
+
+`EarlyBall.lean` now records the remaining initial-time Perelman adapter as
+`early_vol_low`, but the actual `sorry` frontier has been moved lower to
+`Geometry/Comparison/Volume/FamilySmallBall.lean` as
+`VolumeComparison.family_vol_low`.  That lower statement keeps the real
+geometric content visible: short time, every centre, every radius under the
+fixed scale, and the condition `r^2 <= t` coming from the backward parabolic
+cylinder.  It is left as the single `sorry` frontier because the existing APIs
+still do not provide a compact-uniform small-ball volume theorem.
+
+The same file also adds `early_ball_low`, the checked adapter from the raw
+volume bound to flow-ball kappa noncollapsing, and `no_local_open`, the
+all-carrier assembly from `early_ball_low` plus the positive-time theorem
+`noncollapse_after`.  The assembly itself is routine: split at the early-time
+threshold, use `IsRmControlled` only to recover `r^2 <= t` in the early case,
+use `noncollapse_after` in the positive-time case, and take the minimum kappa.
+
+Honest accounting: `family_vol_low` is theorem-level **0%** and remains the
+actual producer blocker.  `early_vol_low`, `early_ball_low`, and
+`no_local_open` are checked relative to that lower frontier.  The endpoint
+`NoLocalCollapsing` source assembly is now approximately **98%** structurally,
+but theorem-level completion remains **0%** until `family_vol_low` is proved
+without `sorry`.  `ham3_noncollapse` therefore remains theorem-level **0%**.
+
+Verification note: `FamilySmallBall` and `EarlyBall` focused checks pass, and
+their module artifact refreshes pass.  The umbrella focused check currently
+stops before these files on a missing unrelated spectral artifact
+`SpectralPointwiseFlowDeriv.olean`; this is a stale-artifact/import-chain issue,
+not a local Perelman proof error.

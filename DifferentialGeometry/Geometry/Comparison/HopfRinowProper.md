@@ -1,5 +1,19 @@
 # HopfRinowProper.lean
 
+## 2026-07-23 — componentwise closed extended balls
+
+- Added `RiemannianMetricComplete.closedEBall_isCompact`.  It proves compactness
+  of a finite-radius `riemannianEDistOf g` closed ball without assuming
+  `ConnectedSpace M`.
+- The proof uses the connectivity-free point-pair Hopf--Rinow endpoint only for
+  points whose distance is already bounded by `ENNReal.ofReal R`, then embeds
+  the ball into the continuous image of a compact tangent closed ball.
+- The tangent radius is `(ENNReal.ofReal R).toReal`, rather than `R`; this also
+  handles negative input radii correctly.
+- Focused and exact verification passed.  This closes the
+  compact-support/properness prerequisite for the Route B-prime distance
+  cutoff, but does not prove the evolving-distance Calabi upper support.
+
 This file packages the intrinsic Hopf--Rinow exponential endpoint into the
 proper metric-space consequences needed by the HCG Step A instantiation.
 

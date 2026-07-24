@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiHigher
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import Mathlib.Geometry.Manifold.Riemannian.Basic
@@ -22,9 +23,9 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Set
+open Bundle Filter Set
 open DifferentialGeometry.Integral.Connection
-open scoped Manifold ContDiff BigOperators Bundle
+open scoped Manifold ContDiff BigOperators Bundle Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -35,78 +36,542 @@ variable [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M
 variable [I.Boundaryless]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 
-/-- Quantitative spacetime cutoffs for a complete-flow Bernstein argument.
-Each cutoff is supported in one spatial compact set for the whole time slab;
-this is stronger than slicewise compact support and is what makes the
-localized spacetime maximum argument compact. -/
-structure ShiCutoffData
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
-    (T : Real) where
-  chi : Nat → Real → M → Real
-  err : Nat → Real
-  support : Nat → Set M
-  err_nonneg : ∀ n, 0 ≤ err n
-  err_tendsto : Filter.Tendsto err Filter.atTop (nhds 0)
-  support_compact : ∀ n, IsCompact (support n)
-  support_zero : ∀ n t, t ∈ Set.Icc 0 T → ∀ x, x ∉ support n → chi n t x = 0
-  range : ∀ n t x, t ∈ Set.Icc 0 T → chi n t x ∈ Set.Icc (0 : Real) 1
-  exhausts : ∀ t x, t ∈ Set.Icc 0 T →
-    ∃ n₀, ∀ n, n₀ ≤ n → chi n t x = 1
-  joint_cont : ∀ n, ContinuousOn
-    (fun p : Real × M => chi n p.1 p.2) (spacetimeSlab (M := M) T)
-  time_diff : ∀ n t, t ∈ Set.Icc 0 T → 0 < t → ∀ x,
-    DifferentiableWithinAt Real (fun s => chi n s x) (Set.Icc 0 T) t
-  space_smooth : ∀ n t, t ∈ Set.Icc 0 T →
-    ContMDiff I 𝓘(Real, Real) ∞ (chi n t)
-  grad_sq_le : ∀ n t, t ∈ Set.Icc 0 T → 0 < t → ∀ x,
-    (G.metric t).inner x
-        (gradientFun (I := I) (G.metric t) (chi n t) x)
-        (gradientFun (I := I) (G.metric t) (chi n t) x) ≤
-      err n * chi n t x
-  parabolic_le : ∀ n t, t ∈ Set.Icc 0 T → 0 < t → ∀ x,
-    parabolicOperatorWithDrift (I := I) G T
-      (fun _ y => (0 : TangentSpace I y)) (chi n) t x ≤ err n
-
-namespace ShiCutoffData
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] [I.Boundaryless]
+  [VectorBundle Real E (TangentSpace I : M → Type _)] in
+/-- Local scalar product rule for the parabolic operator.  Unlike
+`parabolic_mul`, scalar differentiability is required only near the evaluation
+point. -/
+private theorem parabolic_mul_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (u v : Real → M → Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hv_time : DifferentiableWithinAt Real
+      (fun s : Real => v s x) (Set.Icc 0 T) t)
+    (hu_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (v t) y)
+    (hu_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hv_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (v t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => u s y * v s y) t x =
+      u t x * parabolicOperatorWithDrift (I := I) G T X v t x +
+        v t x * parabolicOperatorWithDrift (I := I) G T X u t x -
+          2 * (G.metric t).inner x
+            (gradientAt (I := I) G t (u t) x)
+            (gradientAt (I := I) G t (v t) x) := by
+  have hgrad_eq :
+      (fun y : M =>
+          gradientFun (I := I) (G.metric t) (fun z => u t z * v t z) y) =ᶠ[𝓝 x]
+        (fun y : M =>
+          u t y • gradientFun (I := I) (G.metric t) (v t) y +
+            v t y • gradientFun (I := I) (G.metric t) (u t) y) := by
+    filter_upwards [hu_space, hv_space] with y huy hvy
+    exact gradientFun_mul (I := I) (G.metric t) huy hvy
+  have hsum_grad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        u t y • gradientFun (I := I) (G.metric t) (v t) y +
+          v t y • gradientFun (I := I) (G.metric t) (u t) y) x :=
+    mdifferentiableAt_add_section
+      (hu_space.self_of_nhds.smul_section hv_grad)
+      (hv_space.self_of_nhds.smul_section hu_grad)
+  have hprod_grad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun z => u t z * v t z) y) x :=
+    hsum_grad.congr_of_eventuallyEq (by
+      filter_upwards [hgrad_eq] with y hy
+      exact congrArg (fun a =>
+        (⟨y, a⟩ : TotalSpace E (TangentSpace I : M → Type _))) hy)
+  have hcov :
+      (G.connection t)
+          (fun y : M =>
+            gradientFun (I := I) (G.metric t) (fun z => u t z * v t z) y) x =
+        (G.connection t)
+          (fun y : M =>
+            u t y • gradientFun (I := I) (G.metric t) (v t) y +
+              v t y • gradientFun (I := I) (G.metric t) (u t) y) x :=
+    (G.connection t).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hprod_grad hsum_grad Filter.univ_mem hgrad_eq
+  have hlap :
+      laplacianAt (I := I) G t (fun y : M => u t y * v t y) x =
+        u t x * laplacianAt (I := I) G t (v t) x +
+          v t x * laplacianAt (I := I) G t (u t) x +
+            2 * (G.metric t).inner x
+              (gradientAt (I := I) G t (u t) x)
+              (gradientAt (I := I) G t (v t) x) := by
+    unfold laplacianAt laplacian divergence
+    rw [hcov]
+    rw [show (fun y : M =>
+        u t y • gradientFun (I := I) (G.metric t) (v t) y +
+          v t y • gradientFun (I := I) (G.metric t) (u t) y) =
+        u t • gradientFun (I := I) (G.metric t) (v t) +
+          v t • gradientFun (I := I) (G.metric t) (u t) by
+      rfl]
+    rw [(G.connection t).isCovariantDerivativeOnUniv.add
+      (hu_space.self_of_nhds.smul_section hv_grad)
+      (hv_space.self_of_nhds.smul_section hu_grad)]
+    rw [(G.connection t).isCovariantDerivativeOnUniv.leibniz
+      hv_grad hu_space.self_of_nhds]
+    rw [(G.connection t).isCovariantDerivativeOnUniv.leibniz
+      hu_grad hv_space.self_of_nhds]
+    simp only [ContinuousLinearMap.coe_add, map_add,
+      ContinuousLinearMap.coe_smul]
+    rw [map_smul, map_smul]
+    have htrace_u :
+        LinearMap.trace Real (TangentSpace I x)
+            ((extDerivFun (I := I) (u t) x).toLinearMap.smulRight
+              (gradientFun (I := I) (G.metric t) (v t) x)) =
+          extDerivFun (I := I) (u t) x
+            (gradientFun (I := I) (G.metric t) (v t) x) :=
+      LinearMap.trace_smulRight _ _
+    have htrace_v :
+        LinearMap.trace Real (TangentSpace I x)
+            ((extDerivFun (I := I) (v t) x).toLinearMap.smulRight
+              (gradientFun (I := I) (G.metric t) (u t) x)) =
+          extDerivFun (I := I) (v t) x
+            (gradientFun (I := I) (G.metric t) (u t) x) :=
+      LinearMap.trace_smulRight _ _
+    change
+      u t x • LinearMap.trace Real (TangentSpace I x)
+          (G.connection t (gradientFun (I := I) (G.metric t) (v t)) x).toLinearMap +
+          LinearMap.trace Real (TangentSpace I x)
+            ((extDerivFun (I := I) (u t) x).toLinearMap.smulRight
+              (gradientFun (I := I) (G.metric t) (v t) x)) +
+        (v t x • LinearMap.trace Real (TangentSpace I x)
+            (G.connection t (gradientFun (I := I) (G.metric t) (u t)) x).toLinearMap +
+          LinearMap.trace Real (TangentSpace I x)
+            ((extDerivFun (I := I) (v t) x).toLinearMap.smulRight
+              (gradientFun (I := I) (G.metric t) (u t) x))) = _
+    rw [htrace_u, htrace_v]
+    simp only [gradientAt, extDerivFun]
+    have huv :
+        extDerivFun (I := I) (u t) x
+            (gradientFun (I := I) (G.metric t) (v t) x) =
+          (G.metric t).inner x
+            (gradientFun (I := I) (G.metric t) (u t) x)
+            (gradientFun (I := I) (G.metric t) (v t) x) := by
+      simpa [extDerivFun] using
+        (inner_gradientFun (I := I) (G.metric t) (u t) x
+          (gradientFun (I := I) (G.metric t) (v t) x)).symm
+    have hvu :
+        extDerivFun (I := I) (v t) x
+            (gradientFun (I := I) (G.metric t) (u t) x) =
+          (G.metric t).inner x
+            (gradientFun (I := I) (G.metric t) (v t) x)
+            (gradientFun (I := I) (G.metric t) (u t) x) := by
+      simpa [extDerivFun] using
+        (inner_gradientFun (I := I) (G.metric t) (v t) x
+          (gradientFun (I := I) (G.metric t) (u t) x)).symm
+    rw [huv, hvu]
+    rw [(G.metric t).symm x
+      (gradientFun (I := I) (G.metric t) (v t) x)
+      (gradientFun (I := I) (G.metric t) (u t) x)]
+    simp only [smul_eq_mul]
+    ring
+  have hdrift := driftTerm_mul (I := I) G t (X t)
+    hu_space.self_of_nhds hv_space.self_of_nhds
+  unfold parabolicOperatorWithDrift heatOperatorWithDrift
+  rw [derivWithin_fun_mul hu_time hv_time, hlap, hdrift]
+  ring
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- The uniform spatial support produces a compact spacetime slab for each
-cutoff. -/
-theorem support_slab
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
-    (cut : ShiCutoffData (I := I) G T) (n : Nat) :
-    IsCompact (Set.Icc 0 T ×ˢ cut.support n) :=
-  isCompact_Icc.prod (cut.support_compact n)
+/-- Local additivity of the scalar parabolic operator. -/
+private theorem parabolic_add_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (u v : Real → M → Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hv_time : DifferentiableWithinAt Real
+      (fun s : Real => v s x) (Set.Icc 0 T) t)
+    (hu_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (v t) y)
+    (hu_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hv_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (v t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => u s y + v s y) t x =
+      parabolicOperatorWithDrift (I := I) G T X u t x +
+        parabolicOperatorWithDrift (I := I) G T X v t x := by
+  have hgrad_eq :
+      (fun y : M =>
+          gradientFun (I := I) (G.metric t) (fun z => u t z + v t z) y) =ᶠ[𝓝 x]
+        (fun y : M =>
+          gradientFun (I := I) (G.metric t) (u t) y +
+            gradientFun (I := I) (G.metric t) (v t) y) := by
+    filter_upwards [hu_space, hv_space] with y huy hvy
+    exact gradientFun_add (I := I) (G.metric t) huy hvy
+  have hsum_grad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y +
+          gradientFun (I := I) (G.metric t) (v t) y) x :=
+    mdifferentiableAt_add_section hu_grad hv_grad
+  have hleft_grad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun z => u t z + v t z) y) x :=
+    hsum_grad.congr_of_eventuallyEq (by
+      filter_upwards [hgrad_eq] with y hy
+      exact congrArg (fun a =>
+        (⟨y, a⟩ : TotalSpace E (TangentSpace I : M → Type _))) hy)
+  have hcov :
+      (G.connection t)
+          (fun y : M =>
+            gradientFun (I := I) (G.metric t) (fun z => u t z + v t z) y) x =
+        (G.connection t)
+          (fun y : M =>
+            gradientFun (I := I) (G.metric t) (u t) y +
+              gradientFun (I := I) (G.metric t) (v t) y) x :=
+    (G.connection t).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hleft_grad hsum_grad Filter.univ_mem hgrad_eq
+  have hlap :
+      laplacianAt (I := I) G t (fun y : M => u t y + v t y) x =
+        laplacianAt (I := I) G t (u t) x +
+          laplacianAt (I := I) G t (v t) x := by
+    unfold laplacianAt laplacian divergence
+    rw [hcov]
+    rw [show (fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y +
+          gradientFun (I := I) (G.metric t) (v t) y) =
+        gradientFun (I := I) (G.metric t) (u t) +
+          gradientFun (I := I) (G.metric t) (v t) by rfl]
+    rw [(G.connection t).isCovariantDerivativeOnUniv.add hu_grad hv_grad]
+    exact LinearMap.map_add
+      (LinearMap.trace Real (TangentSpace I x)) _ _
+  have hdrift := driftTerm_add (I := I) G t (X t)
+    hu_space.self_of_nhds hv_space.self_of_nhds
+  unfold parabolicOperatorWithDrift heatOperatorWithDrift
+  rw [derivWithin_fun_add hu_time hv_time, hlap, hdrift]
+  ring
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] [I.Boundaryless] in
+/-- Local regularity of a finite scalar sum and of its spatial gradient. -/
+private theorem sum_reg_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {κ : Type*} (s : Finset κ)
+    (u : κ → Real → M → Real) (T t : Real) (x : M)
+    (htime : ∀ i ∈ s, DifferentiableWithinAt Real
+      (fun a : Real => u i a x) (Set.Icc 0 T) t)
+    (hspace : ∀ i ∈ s, ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (u i t) y)
+    (hgrad : ∀ i ∈ s,
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u i t) y) x) :
+    DifferentiableWithinAt Real
+        (fun a : Real => ∑ i ∈ s, u i a x) (Set.Icc 0 T) t ∧
+      (∀ᶠ y in 𝓝 x, MDifferentiableAt I 𝓘(Real, Real)
+        (fun z : M => ∑ i ∈ s, u i t z) y) ∧
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z : M => ∑ i ∈ s, u i t z) y) x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      refine ⟨?_, ?_, ?_⟩
+      · simpa using
+          (differentiableWithinAt_const (c := (0 : Real))
+            (x := t) (s := Set.Icc 0 T))
+      · exact Filter.Eventually.of_forall fun _ => by
+          simpa using (mdifferentiableAt_const :
+            MDifferentiableAt I 𝓘(Real, Real) (fun _ : M => (0 : Real)) _)
+      · rw [show (T% fun y : M =>
+            gradientFun (I := I) (G.metric t)
+              (fun z : M => ∑ i ∈ (∅ : Finset κ), u i t z) y) =
+            (T% fun y : M => (0 : TangentSpace I y)) by
+          funext y
+          simp only [Finset.sum_empty, gradientFun_const]]
+        exact mdifferentiableAt_zeroSection
+          (𝕜 := Real) (F := E) (E := (TangentSpace I : M → Type _)) (x := x)
+  | @insert a s ha ih =>
+      have ih' := ih
+        (fun i hi => htime i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hspace i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hgrad i (Finset.mem_insert_of_mem hi))
+      have hatime := htime a (Finset.mem_insert_self a s)
+      have haspace := hspace a (Finset.mem_insert_self a s)
+      have hagrad := hgrad a (Finset.mem_insert_self a s)
+      refine ⟨?_, ?_, ?_⟩
+      · rw [show (fun r : Real => ∑ i ∈ insert a s, u i r x) =
+            (fun r : Real => u a r x + ∑ i ∈ s, u i r x) by
+          funext r
+          rw [Finset.sum_insert ha]]
+        exact hatime.add ih'.1
+      · filter_upwards [haspace, ih'.2.1] with y hay hsy
+        rw [show (fun z : M => ∑ i ∈ insert a s, u i t z) =
+            (fun z : M => u a t z + ∑ i ∈ s, u i t z) by
+          funext z
+          rw [Finset.sum_insert ha]]
+        exact hay.add hsy
+      · have hgrad_eq :
+            (fun y : M => gradientFun (I := I) (G.metric t)
+                (fun z : M => ∑ i ∈ insert a s, u i t z) y) =ᶠ[𝓝 x]
+              (fun y : M =>
+                gradientFun (I := I) (G.metric t) (u a t) y +
+                  gradientFun (I := I) (G.metric t)
+                    (fun z : M => ∑ i ∈ s, u i t z) y) := by
+          filter_upwards [haspace, ih'.2.1] with y hay hsy
+          rw [show (fun z : M => ∑ i ∈ insert a s, u i t z) =
+              (fun z : M => u a t z + ∑ i ∈ s, u i t z) by
+            funext z
+            rw [Finset.sum_insert ha]]
+          exact gradientFun_add (I := I) (G.metric t) hay hsy
+        have hsum_grad :
+            MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+              gradientFun (I := I) (G.metric t) (u a t) y +
+                gradientFun (I := I) (G.metric t)
+                  (fun z : M => ∑ i ∈ s, u i t z) y) x :=
+          mdifferentiableAt_add_section hagrad ih'.2.2
+        exact hsum_grad.congr_of_eventuallyEq (by
+          filter_upwards [hgrad_eq] with y hy
+          exact congrArg (fun b =>
+            (⟨y, b⟩ : TotalSpace E (TangentSpace I : M → Type _))) hy)
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] [I.Boundaryless] in
+/-- Local finite-sum rule for the scalar parabolic operator. -/
+private theorem parabolic_sum_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {κ : Type*} (s : Finset κ)
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (u : κ → Real → M → Real) (t : Real) (x : M)
+    (htime : ∀ i ∈ s, DifferentiableWithinAt Real
+      (fun a : Real => u i a x) (Set.Icc 0 T) t)
+    (hspace : ∀ i ∈ s, ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (u i t) y)
+    (hgrad : ∀ i ∈ s,
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u i t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun a y => ∑ i ∈ s, u i a y) t x =
+      ∑ i ∈ s, parabolicOperatorWithDrift (I := I) G T X (u i) t x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simp only [Finset.sum_empty]
+      have hzero_time : DifferentiableWithinAt Real
+          (fun _ : Real => (0 : Real)) (Set.Icc 0 T) t :=
+        differentiableWithinAt_const 0
+      have hzero_space : ∀ᶠ y in 𝓝 x,
+          MDifferentiableAt I 𝓘(Real, Real) (fun _ : M => (0 : Real)) y :=
+        Filter.Eventually.of_forall fun _ => mdifferentiableAt_const
+      have hzero_grad :
+          MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+            gradientFun (I := I) (G.metric t) (fun _ : M => (0 : Real)) y) x := by
+        rw [show (T% fun y : M =>
+            gradientFun (I := I) (G.metric t) (fun _ : M => (0 : Real)) y) =
+            (T% fun y : M => (0 : TangentSpace I y)) by
+          funext y
+          simp only [gradientFun_const]]
+        exact mdifferentiableAt_zeroSection
+          (𝕜 := Real) (F := E) (E := (TangentSpace I : M → Type _)) (x := x)
+      have hadd := parabolic_add_nhds (I := I) T X
+        (fun _ _ => (0 : Real)) (fun _ _ => (0 : Real)) t x
+        hzero_time hzero_time hzero_space hzero_space hzero_grad hzero_grad
+      change parabolicOperatorWithDrift (I := I) G T X
+          (fun _ _ => (0 : Real)) t x = 0
+      have hadd' :
+          parabolicOperatorWithDrift (I := I) G T X
+              (fun _ _ => (0 : Real)) t x =
+            parabolicOperatorWithDrift (I := I) G T X
+                (fun _ _ => (0 : Real)) t x +
+              parabolicOperatorWithDrift (I := I) G T X
+                (fun _ _ => (0 : Real)) t x := by
+        simpa only [zero_add] using hadd
+      linarith
+  | @insert a s ha ih =>
+      have hatime := htime a (Finset.mem_insert_self a s)
+      have haspace := hspace a (Finset.mem_insert_self a s)
+      have hagrad := hgrad a (Finset.mem_insert_self a s)
+      have hsreg := sum_reg_nhds (I := I) (G := G) s u T t x
+        (fun i hi => htime i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hspace i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hgrad i (Finset.mem_insert_of_mem hi))
+      rw [show (fun r y => ∑ i ∈ insert a s, u i r y) =
+          (fun r y => u a r y + ∑ i ∈ s, u i r y) by
+        funext r y
+        rw [Finset.sum_insert ha]]
+      rw [Finset.sum_insert ha]
+      rw [parabolic_add_nhds (I := I) T X (u a)
+        (fun r y => ∑ i ∈ s, u i r y) t x
+        hatime hsreg.1 haspace hsreg.2.1 hagrad hsreg.2.2]
+      rw [ih (fun i hi => htime i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hspace i (Finset.mem_insert_of_mem hi))
+        (fun i hi => hgrad i (Finset.mem_insert_of_mem hi))]
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] [I.Boundaryless] in
+/-- The scalar parabolic operator vanishes on a spacetime constant. -/
+private theorem parabolic_const_zero
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (a t : Real) (x : M)
+    (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun _ _ => a) t x = 0 := by
+  unfold parabolicOperatorWithDrift heatOperatorWithDrift laplacianAt
+    laplacian divergence driftTerm gradientAt
+  rw [(hasDerivWithinAt_const
+    (x := t) (s := Set.Icc 0 T) (c := a)).derivWithin huniq]
+  rw [show gradientFun (I := I) (G.metric t) ((fun _ _ => a) t) =
+      (fun y : M => (0 : TangentSpace I y)) by
+    funext y
+    simp only [gradientFun_const]]
+  rw [show (fun y : M => (0 : TangentSpace I y)) = 0 by rfl]
+  rw [(G.connection t).isCovariantDerivativeOnUniv.zero (x := x)]
+  rw [show (↑(0 : TangentSpace I x →L[Real] TangentSpace I x) :
+      TangentSpace I x →ₗ[Real] TangentSpace I x) = 0 by rfl]
+  rw [map_zero, Pi.zero_apply, map_zero]
+  ring
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- A cutoff is pointwise differentiable in space on every controlled time
-slice. -/
-theorem space_diff
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
-    (cut : ShiCutoffData (I := I) G T) {n : Nat} {t : Real}
-    (ht : t ∈ Set.Icc 0 T) (x : M) :
-    MDifferentiableAt I 𝓘(Real, Real) (cut.chi n t) x :=
-  (cut.space_smooth n t ht).mdifferentiableAt (by simp)
+/-- Local fixed-scalar rule for the scalar parabolic operator. -/
+private theorem parabolic_smul_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (a : Real) (u : Real → M → Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hu_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hu_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x)
+    (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => a * u s y) t x =
+      a * parabolicOperatorWithDrift (I := I) G T X u t x := by
+  have ha_time : DifferentiableWithinAt Real
+      (fun _ : Real => a) (Set.Icc 0 T) t :=
+    differentiableWithinAt_const a
+  have ha_space : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (fun _ : M => a) y :=
+    Filter.Eventually.of_forall fun _ => mdifferentiableAt_const
+  have ha_grad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun _ : M => a) y) x := by
+    rw [show (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun _ : M => a) y) =
+        (T% fun y : M => (0 : TangentSpace I y)) by
+      funext y
+      simp only [gradientFun_const]]
+    exact mdifferentiableAt_zeroSection
+      (𝕜 := Real) (F := E) (E := (TangentSpace I : M → Type _)) (x := x)
+  have hmul := parabolic_mul_nhds (I := I) T X
+    (fun _ _ => a) u t x
+    ha_time hu_time ha_space hu_space ha_grad hu_grad
+  rw [parabolic_const_zero (I := I) T X a t x huniq] at hmul
+  have hzero :
+      gradientAt (I := I) G t (fun _ : M => a) x = 0 := by
+    unfold gradientAt
+    rw [gradientFun_const]
+  rw [hzero] at hmul
+  simpa using hmul
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- The spatial gradient of a cutoff is pointwise differentiable on every
-controlled time slice. -/
-theorem grad_diff
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
-    (cut : ShiCutoffData (I := I) G T) {n : Nat} {t : Real}
-    (ht : t ∈ Set.Icc 0 T) (x : M) :
-    MDifferentiableAt I (I.prod 𝓘(Real, E))
-      (T% fun y : M =>
-        gradientFun (I := I) (G.metric t) (cut.chi n t) y) x :=
-  gradientFun_mdiffAt (I := I) (G.metric t) (cut.space_smooth n t ht) x
-
-end ShiCutoffData
+/-- Local affine-minus-function rule for the scalar parabolic operator. -/
+private theorem parabolic_aff_nhds
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (T : Real) (X : Real → (x : M) → TangentSpace I x)
+    (F : Real → M → Real) (a b t : Real) (x : M)
+    (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
+    (hFtime : DifferentiableWithinAt Real
+      (fun s : Real => F s x) (Set.Icc 0 T) t)
+    (hFspace : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (F t) y)
+    (hFgrad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (F t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => (a + b * s) - F s y) t x =
+      b - parabolicOperatorWithDrift (I := I) G T X F t x := by
+  let A : Real → M → Real := fun s _ => a + b * s
+  have hAtime : DifferentiableWithinAt Real
+      (fun s : Real => A s x) (Set.Icc 0 T) t :=
+    (differentiableWithinAt_const a).add
+      ((differentiableWithinAt_id'
+        (𝕜 := Real) (s := Set.Icc 0 T) (x := t)).const_mul b)
+  have hAspace : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) (A t) y :=
+    Filter.Eventually.of_forall fun _ => mdifferentiableAt_const
+  have hAgrad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (A t) y) x := by
+    rw [show (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (A t) y) =
+        (T% fun y : M => (0 : TangentSpace I y)) by
+      funext y
+      simp only [A, gradientFun_const]]
+    exact mdifferentiableAt_zeroSection
+      (𝕜 := Real) (F := E) (E := (TangentSpace I : M → Type _)) (x := x)
+  have hnegtime : DifferentiableWithinAt Real
+      (fun s : Real => (-1 : Real) * F s x) (Set.Icc 0 T) t :=
+    hFtime.const_mul (-1)
+  have hnegspace : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun z => (-1 : Real) * F t z) y := by
+    filter_upwards [hFspace] with y hy
+    exact hy.const_smul (-1)
+  have hneggrad :
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z => (-1 : Real) * F t z) y) x := by
+    refine (hFgrad.smul_const_section (a := (-1 : Real))).congr_of_eventuallyEq ?_
+    filter_upwards [hFspace] with y hy
+    exact congrArg (fun b =>
+      (⟨y, b⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+      (by
+        simpa only [Pi.smul_apply, smul_eq_mul] using
+          gradientFun_const_smul (I := I) (G.metric t) (-1) hy)
+  have hadd := parabolic_add_nhds (I := I) T X A
+    (fun s y => (-1 : Real) * F s y) t x
+    hAtime hnegtime hAspace hnegspace hAgrad hneggrad
+  have hneg := parabolic_smul_nhds (I := I) T X (-1) F t x
+    hFtime hFspace hFgrad huniq
+  have hA :
+      parabolicOperatorWithDrift (I := I) G T X A t x = b := by
+    unfold parabolicOperatorWithDrift heatOperatorWithDrift laplacianAt
+      laplacian divergence driftTerm gradientAt
+    dsimp only [A]
+    have hda :
+        derivWithin (fun _ : Real => a) (Set.Icc 0 T) t = 0 :=
+      (hasDerivWithinAt_const
+        (x := t) (s := Set.Icc 0 T) (c := a)).derivWithin huniq
+    have hdb :
+        derivWithin (fun s : Real => b * s) (Set.Icc 0 T) t = b := by
+      simpa only [mul_one] using
+        ((hasDerivWithinAt_id t (Set.Icc 0 T)).const_mul b).derivWithin huniq
+    rw [derivWithin_fun_add (differentiableWithinAt_const a)
+      ((differentiableWithinAt_id'
+        (𝕜 := Real) (s := Set.Icc 0 T) (x := t)).const_mul b),
+      hda, hdb]
+    rw [show gradientFun (I := I) (G.metric t) (fun _ : M => a + b * t) =
+        (fun y : M => (0 : TangentSpace I y)) by
+      funext y
+      simp only [gradientFun_const]]
+    rw [show (fun y : M => (0 : TangentSpace I y)) = 0 by rfl]
+    rw [(G.connection t).isCovariantDerivativeOnUniv.zero (x := x)]
+    rw [show (↑(0 : TangentSpace I x →L[Real] TangentSpace I x) :
+        TangentSpace I x →ₗ[Real] TangentSpace I x) = 0 by rfl]
+    rw [map_zero, Pi.zero_apply, map_zero]
+    ring
+  rw [show (fun s y => (a + b * s) - F s y) =
+      (fun s y => A s y + (-1 : Real) * F s y) by
+    funext s y
+    ring]
+  rw [hadd, hA, hneg]
+  ring
 
 /-- Pointwise Kato control for the gradients of a Bernstein tower.  For the
 curvature tower this is supplied by `towerNorm_grad_le`; it is generated from
@@ -425,6 +890,163 @@ theorem cutErr_small
 
 end ShiCutoffData
 
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] [I.Boundaryless] in
+private theorem support_pow_para
+    {G : RealizedMetricFamily (I := I) (M := M) Real} {T eps t : Real}
+    {chi : Real → M → Real} {x : M}
+    (support : ShiCutoffLowerSupportAt (I := I) G T eps chi t x)
+    (ht : t ∈ Set.Icc 0 T) (p : Nat) :
+    parabolicOperatorWithDrift (I := I) G T
+        (fun _ y => (0 : TangentSpace I y))
+        (fun s y => (support.phi s y) ^ (p + 1)) t x ≤
+      (((p + 1 : Nat) : Real) * eps) * (support.phi t x) ^ p := by
+  have hphi0 : 0 ≤ support.phi t x :=
+    (support.lower_nhds.self_of_nhdsWithin
+      (show (t, x) ∈ spacetimeSlab (M := M) T from ⟨ht, Set.mem_univ x⟩)).1
+  induction p with
+  | zero => simpa using support.parabolic_le
+  | succ p ih =>
+      let qpow : Real → M → Real := fun s y => support.phi s y ^ (p + 1)
+      have hqtime := support.time_diff.pow (p + 1)
+      have hqspace : ∀ᶠ y in 𝓝 x,
+          MDifferentiableAt I 𝓘(Real, Real) (qpow t) y := by
+        filter_upwards [support.space_diff_nhds] with y hy
+        exact hy.pow (p + 1)
+      have hqgrad :
+          MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+            gradientFun (I := I) (G.metric t) (qpow t) y) x := by
+        have hrhs :
+            MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+              (((p + 1 : Nat) : Real) * support.phi t y ^ p) •
+                gradientFun (I := I) (G.metric t) (support.phi t) y) x :=
+          (((support.space_diff_nhds.self_of_nhds.pow p).const_smul
+            (((p + 1 : Nat) : Real))).smul_section support.grad_diff)
+        refine hrhs.congr_of_eventuallyEq ?_
+        filter_upwards [support.space_diff_nhds] with y hy
+        exact congrArg (fun b =>
+          (⟨y, b⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+          (gradientFun_pow (I := I) (G.metric t) p hy)
+      have hmul := parabolic_mul_nhds (I := I) T
+        (fun _ y => (0 : TangentSpace I y)) qpow support.phi t x
+        hqtime support.time_diff hqspace support.space_diff_nhds
+        hqgrad support.grad_diff
+      have hgrad := gradientFun_pow (I := I) (G.metric t) p
+        support.space_diff_nhds.self_of_nhds
+      have hinner : 0 ≤ (G.metric t).inner x
+          (gradientAt (I := I) G t (qpow t) x)
+          (gradientAt (I := I) G t (support.phi t) x) := by
+        dsimp only [qpow]
+        simp only [gradientAt_eq, hgrad, map_smul,
+          ContinuousLinearMap.smul_apply, smul_eq_mul]
+        exact mul_nonneg
+          (mul_nonneg (Nat.cast_nonneg _) (pow_nonneg hphi0 p))
+          (DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
+            (I := I) (M := M) (G.metric t) x
+              (gradientFun (I := I) (G.metric t) (support.phi t) x))
+      have hphi_mul := mul_le_mul_of_nonneg_left ih hphi0
+      have hcut_mul := mul_le_mul_of_nonneg_left support.parabolic_le
+        (pow_nonneg hphi0 (p + 1))
+      calc
+        parabolicOperatorWithDrift (I := I) G T
+            (fun _ y => (0 : TangentSpace I y))
+            (fun s y => support.phi s y ^ (Nat.succ p + 1)) t x =
+            parabolicOperatorWithDrift (I := I) G T
+              (fun _ y => (0 : TangentSpace I y))
+              (fun s y => qpow s y * support.phi s y) t x := by
+                congr 1
+        _ ≤ support.phi t x ^ (p + 1) * eps +
+            support.phi t x *
+              ((((p + 1 : Nat) : Real) * eps) * support.phi t x ^ p) := by
+              rw [hmul]
+              linarith
+        _ = (((Nat.succ p + 1 : Nat) : Real) * eps) *
+            support.phi t x ^ Nat.succ p := by
+              simp only [Nat.succ_eq_add_one, Nat.cast_add, Nat.cast_one, pow_succ]
+              ring
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] in
+private theorem support_pow_cross
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    {m k p : Nat} (hgrad : TowerNormGradUpTo (I := I) B m) (hk : k ≤ m)
+    {eps t : Real} {chi : Real → M → Real} {x : M}
+    (support : ShiCutoffLowerSupportAt (I := I) G B.T eps chi t x)
+    (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (heps : 0 ≤ eps) :
+    -2 * (G.metric t).inner x
+        (gradientFun (I := I) (G.metric t)
+          (fun y : M => support.phi t y ^ (p + 1)) x)
+        (gradientFun (I := I) (G.metric t) (B.w k t) x) ≤
+      (1 / 2 : Real) * support.phi t x ^ (p + 1) * B.w (k + 1) t x +
+        8 * (((p + 1 : Nat) : Real) ^ 2) * eps *
+          support.phi t x ^ p * B.w k t x := by
+  let a := gradientFun (I := I) (G.metric t) (support.phi t) x
+  let b := gradientFun (I := I) (G.metric t) (B.w k t) x
+  let c₀ := (G.metric t).inner x a b
+  let c := (G.metric t).inner x
+    (gradientFun (I := I) (G.metric t)
+      (fun y : M => support.phi t y ^ (p + 1)) x) b
+  let r : Real := ((p + 1 : Nat) : Real) * support.phi t x ^ p
+  let q₁ : Real := (1 / 2 : Real) * support.phi t x ^ (p + 1) * B.w (k + 1) t x
+  let q₂ : Real := 8 * (((p + 1 : Nat) : Real) ^ 2) * eps *
+    support.phi t x ^ p * B.w k t x
+  have hphi0 : 0 ≤ support.phi t x :=
+    (support.lower_nhds.self_of_nhdsWithin
+      (show (t, x) ∈ spacetimeSlab (M := M) B.T from ⟨ht, Set.mem_univ x⟩)).1
+  have hsq₀ : c₀ ^ 2 ≤
+      (eps * support.phi t x) * (4 * B.w k t x * B.w (k + 1) t x) := by
+    calc
+      c₀ ^ 2 ≤ (G.metric t).inner x a a * (G.metric t).inner x b b :=
+        DifferentialGeometry.Analysis.Laplacian.metric_inner_cauchy_schwarz_sq
+          (I := I) (M := M) (G.metric t) x a b
+      _ ≤ (eps * support.phi t x) *
+          (4 * B.w k t x * B.w (k + 1) t x) :=
+        mul_le_mul support.grad_sq_le (hgrad k hk t ht htpos x)
+          (DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
+            (I := I) (M := M) (G.metric t) x b)
+          (mul_nonneg heps hphi0)
+  have hc : c = r * c₀ := by
+    dsimp [c, r, c₀, a]
+    rw [gradientFun_pow (I := I) (G.metric t) p
+      support.space_diff_nhds.self_of_nhds]
+    simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  have hsq : c ^ 2 ≤ q₁ * q₂ := by
+    rw [hc]
+    calc
+      (r * c₀) ^ 2 = r ^ 2 * c₀ ^ 2 := by ring
+      _ ≤ r ^ 2 * ((eps * support.phi t x) *
+          (4 * B.w k t x * B.w (k + 1) t x)) :=
+        mul_le_mul_of_nonneg_left hsq₀ (sq_nonneg r)
+      _ = q₁ * q₂ := by
+        dsimp [r, q₁, q₂]
+        rw [pow_succ]
+        ring
+  have hq₁ : 0 ≤ q₁ := by
+    dsimp [q₁]
+    exact mul_nonneg
+      (mul_nonneg (by norm_num) (pow_nonneg hphi0 (p + 1)))
+      (B.hw_nonneg (k + 1) t ht x)
+  have hq₂ : 0 ≤ q₂ := by
+    dsimp [q₂]
+    exact mul_nonneg (mul_nonneg (mul_nonneg (by positivity) heps)
+      (pow_nonneg hphi0 p)) (B.hw_nonneg k t ht x)
+  have hhalf : q₁ * q₂ ≤ ((q₁ + q₂) / 2) ^ 2 := by
+    nlinarith [sq_nonneg (q₁ - q₂)]
+  have habs : |c| ≤ (q₁ + q₂) / 2 :=
+    abs_le_of_sq_le_sq (hsq.trans hhalf) (by positivity)
+  have hneg : -c ≤ (q₁ + q₂) / 2 := (neg_le_abs c).trans habs
+  dsimp [c, q₁, q₂, b] at hneg ⊢
+  linarith
+
+private noncomputable def GfunLocal
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    (q : Real → M → Real) (m : Nat) (t : Real) (x : M) : Real :=
+  ∑ i ∈ Finset.range (m + 1),
+    BernsteinTower.Gcoef (I := I) B m i * t ^ i *
+      (q t x) ^ (i + 1) * B.w i t x
+
 /-- The graded localized Bernstein polynomial.  Level `i` is multiplied by
 `chi^(i+1)`, so every summand has compact support while cutoff errors can be
 absorbed one level lower in the tower recursion. -/
@@ -523,37 +1145,32 @@ omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
 private theorem cutWterms_nonpos
     {G : RealizedMetricFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
-    (cut : ShiCutoffData (I := I) G B.T)
-    {m n : Nat} (hm : 1 ≤ m) {t : Real}
+    {m : Nat} (hm : 1 ≤ m) {t q eps : Real}
     (ht : t ∈ Set.Icc 0 B.T) (x : M)
-    (hsmall : 2 * cut.err n * B.T * cutErrCoeff m ≤ 1) :
-    let q := cut.chi n t x
+    (hq0 : 0 ≤ q) (hq1 : q ≤ 1) (he0 : 0 ≤ eps)
+    (hsmall : 2 * eps * B.T * cutErrCoeff m ≤ 1) :
     let beta := towerBeta B.c B.α (towerConst B.c B.α) m
     let barTop := towerBarTop B.c (towerConst B.c B.α) m
     (∑ k ∈ Finset.Ico 1 m, (
         BernsteinTower.Gcoef (I := I) B m k *
               ((k : Real) * t ^ (k - 1) * q ^ (k + 1) * B.w k t x) +
-            BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+            BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
               t ^ k * q ^ k * B.w k t x -
             (3 / 2 : Real) * beta * towerFactCoeff m (k - 1) *
               t ^ (k - 1) * q ^ k * B.w k t x)) +
       (BernsteinTower.Gcoef (I := I) B m m *
               ((m : Real) * t ^ (m - 1) * q ^ (m + 1) * B.w m t x) +
-            BernsteinTower.Gcoef (I := I) B m m * cutErrCoeff m * cut.err n *
+            BernsteinTower.Gcoef (I := I) B m m * cutErrCoeff m * eps *
               t ^ m * q ^ m * B.w m t x -
             (3 / 2 : Real) * beta * towerFactCoeff m (m - 1) *
               t ^ (m - 1) * q ^ m * B.w m t x +
             barTop * B.K * (t ^ m * q ^ (m + 1) * B.w m t x)) ≤ 0 := by
   classical
   dsimp only
-  set q : Real := cut.chi n t x with hq
   set beta : Real := towerBeta B.c B.α (towerConst B.c B.α) m with hbeta
   set barTop : Real := towerBarTop B.c (towerConst B.c B.α) m with hbarTop
-  have hq0 : 0 ≤ q := by simpa [q] using (cut.range n t x ht).1
-  have hq1 : q ≤ 1 := by simpa [q] using (cut.range n t x ht).2
   have ht0 : 0 ≤ t := ht.1
   have hT0 : 0 ≤ B.T := le_trans ht.1 ht.2
-  have he0 : 0 ≤ cut.err n := cut.err_nonneg n
   have hbeta0 : 0 ≤ beta := by
     simpa [beta] using towerBeta_nonneg B.hc B.hα m
   have hbarTop0 : 0 ≤ barTop := by
@@ -566,25 +1183,25 @@ private theorem cutWterms_nonpos
         mul_le_mul_of_nonneg_right htle (le_of_lt B.hK)
       _ = B.α := div_mul_cancel₀ B.α (ne_of_gt B.hK)
   have herr_le (k : Nat) (hk : k ≤ m) :
-      cut.err n * cutErrCoeff k * t ≤ (1 / 2 : Real) := by
+      eps * cutErrCoeff k * t ≤ (1 / 2 : Real) := by
     have hck : cutErrCoeff k ≤ cutErrCoeff m := cutErrCoeff_mono hk
-    have hprod : 2 * cut.err n * t * cutErrCoeff k ≤
-        2 * cut.err n * B.T * cutErrCoeff m := by
-      have htprod : cut.err n * t ≤ cut.err n * B.T :=
+    have hprod : 2 * eps * t * cutErrCoeff k ≤
+        2 * eps * B.T * cutErrCoeff m := by
+      have htprod : eps * t ≤ eps * B.T :=
         mul_le_mul_of_nonneg_left ht.2 he0
-      have hleft0 : 0 ≤ 2 * cut.err n * t := by positivity
-      have hmid0 : 0 ≤ 2 * cut.err n * B.T := by positivity
+      have hleft0 : 0 ≤ 2 * eps * t := by positivity
+      have hmid0 : 0 ≤ 2 * eps * B.T := by positivity
       calc
-        2 * cut.err n * t * cutErrCoeff k ≤
-            2 * cut.err n * t * cutErrCoeff m :=
+        2 * eps * t * cutErrCoeff k ≤
+            2 * eps * t * cutErrCoeff m :=
           mul_le_mul_of_nonneg_left hck hleft0
-        _ ≤ 2 * cut.err n * B.T * cutErrCoeff m :=
+        _ ≤ 2 * eps * B.T * cutErrCoeff m :=
           mul_le_mul_of_nonneg_right (by linarith) (cutErrCoeff_nonneg m)
     nlinarith [hprod.trans hsmall]
   have hmid : ∀ k ∈ Finset.Ico 1 m,
       BernsteinTower.Gcoef (I := I) B m k *
             ((k : Real) * t ^ (k - 1) * q ^ (k + 1) * B.w k t x) +
-          BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+          BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
             t ^ k * q ^ k * B.w k t x -
           (3 / 2 : Real) * beta * towerFactCoeff m (k - 1) *
             t ^ (k - 1) * q ^ k * B.w k t x ≤ 0 := by
@@ -637,7 +1254,7 @@ private theorem cutWterms_nonpos
         _ ≤ (k : Real) * towerFactCoeff m k :=
           mul_le_mul_of_nonneg_right (by exact_mod_cast hk1) hfact0
     have herr :
-        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
               t ^ k * q ^ k * B.w k t x ≤
           (1 / 2 : Real) * (beta * towerFactCoeff m (k - 1)) *
             (t ^ (k - 1) * q ^ k * B.w k t x) := by
@@ -648,13 +1265,13 @@ private theorem cutWterms_nonpos
             omega
           _ = t * t ^ (k - 1) := pow_succ' t (k - 1)
       rw [htk]
-      have he : cut.err n * cutErrCoeff k * t ≤ (1 / 2 : Real) :=
+      have he : eps * cutErrCoeff k * t ≤ (1 / 2 : Real) :=
         herr_le k hkle
       calc
-        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
               (t * t ^ (k - 1)) * q ^ k * B.w k t x =
             (BernsteinTower.Gcoef (I := I) B m k *
-              (cut.err n * cutErrCoeff k * t)) *
+              (eps * cutErrCoeff k * t)) *
               (t ^ (k - 1) * q ^ k * B.w k t x) := by ring
         _ ≤ (BernsteinTower.Gcoef (I := I) B m k * (1 / 2 : Real)) *
               (t ^ (k - 1) * q ^ k * B.w k t x) := by
@@ -671,7 +1288,7 @@ private theorem cutWterms_nonpos
       (∑ k ∈ Finset.Ico 1 m, (
         BernsteinTower.Gcoef (I := I) B m k *
               ((k : Real) * t ^ (k - 1) * q ^ (k + 1) * B.w k t x) +
-            BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+            BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
               t ^ k * q ^ k * B.w k t x -
             (3 / 2 : Real) * beta * towerFactCoeff m (k - 1) *
               t ^ (k - 1) * q ^ k * B.w k t x)) ≤ 0 :=
@@ -695,7 +1312,7 @@ private theorem cutWterms_nonpos
         (mul_le_mul_of_nonneg_left hqpow (pow_nonneg ht0 (m - 1))) hwm0)
       (Nat.cast_nonneg m)
   have herrTop :
-      cutErrCoeff m * cut.err n * t ^ m * q ^ m * B.w m t x ≤
+      cutErrCoeff m * eps * t ^ m * q ^ m * B.w m t x ≤
         (1 / 2 : Real) * (t ^ (m - 1) * q ^ m * B.w m t x) := by
     have htm : t ^ m = t * t ^ (m - 1) := by
       calc
@@ -704,11 +1321,11 @@ private theorem cutWterms_nonpos
           omega
         _ = t * t ^ (m - 1) := pow_succ' t (m - 1)
     rw [htm]
-    have he : cut.err n * cutErrCoeff m * t ≤ (1 / 2 : Real) :=
+    have he : eps * cutErrCoeff m * t ≤ (1 / 2 : Real) :=
       herr_le m le_rfl
     calc
-      cutErrCoeff m * cut.err n * (t * t ^ (m - 1)) * q ^ m * B.w m t x =
-          (cut.err n * cutErrCoeff m * t) *
+      cutErrCoeff m * eps * (t * t ^ (m - 1)) * q ^ m * B.w m t x =
+          (eps * cutErrCoeff m * t) *
             (t ^ (m - 1) * q ^ m * B.w m t x) := by ring
       _ ≤ (1 / 2 : Real) * (t ^ (m - 1) * q ^ m * B.w m t x) :=
         mul_le_mul_of_nonneg_right he hz0
@@ -744,7 +1361,7 @@ private theorem cutWterms_nonpos
   have htop :
       BernsteinTower.Gcoef (I := I) B m m *
               ((m : Real) * t ^ (m - 1) * q ^ (m + 1) * B.w m t x) +
-            BernsteinTower.Gcoef (I := I) B m m * cutErrCoeff m * cut.err n *
+            BernsteinTower.Gcoef (I := I) B m m * cutErrCoeff m * eps *
               t ^ m * q ^ m * B.w m t x -
             (3 / 2 : Real) * beta * towerFactCoeff m (m - 1) *
               t ^ (m - 1) * q ^ m * B.w m t x +
@@ -764,11 +1381,10 @@ omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
 private theorem cutWsum_nonpos
     {G : RealizedMetricFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
-    (cut : ShiCutoffData (I := I) G B.T)
-    {m n : Nat} (hm : 1 ≤ m) {t : Real}
+    {m : Nat} (hm : 1 ≤ m) {t q eps : Real}
     (ht : t ∈ Set.Icc 0 B.T) (x : M)
-    (hsmall : 2 * cut.err n * B.T * cutErrCoeff m ≤ 1) :
-    let q := cut.chi n t x
+    (hq0 : 0 ≤ q) (hq1 : q ≤ 1) (he0 : 0 ≤ eps)
+    (hsmall : 2 * eps * B.T * cutErrCoeff m ≤ 1) :
     let beta := towerBeta B.c B.α (towerConst B.c B.α) m
     let barTop := towerBarTop B.c (towerConst B.c B.α) m
     (∑ k ∈ Finset.range (m + 1),
@@ -779,23 +1395,22 @@ private theorem cutWsum_nonpos
           towerFactCoeff m k * t ^ k * q ^ (k + 1) * B.w (k + 1) t x) +
       barTop * B.K * (t ^ m * q ^ (m + 1) * B.w m t x) +
       (∑ k ∈ Finset.range (m + 1),
-        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+        BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
           t ^ k * q ^ k * B.w k t x) ≤
-        BernsteinTower.Gcoef (I := I) B m 0 * cutErrCoeff 0 * cut.err n *
+        BernsteinTower.Gcoef (I := I) B m 0 * cutErrCoeff 0 * eps *
           B.w 0 t x := by
   classical
   dsimp only
-  set q : Real := cut.chi n t x with hq
   set beta : Real := towerBeta B.c B.α (towerConst B.c B.α) m with hbeta
   set barTop : Real := towerBarTop B.c (towerConst B.c B.α) m with hbarTop
-  have hcore := cutWterms_nonpos (I := I) B cut hm ht x hsmall
+  have hcore := cutWterms_nonpos (I := I) B hm ht x hq0 hq1 he0 hsmall
   dsimp only at hcore
-  rw [← hq, ← hbeta, ← hbarTop] at hcore
+  rw [← hbeta, ← hbarTop] at hcore
   let timeTerm : Nat → Real := fun k =>
     BernsteinTower.Gcoef (I := I) B m k *
       ((k : Real) * t ^ (k - 1) * q ^ (k + 1) * B.w k t x)
   let errTerm : Nat → Real := fun k =>
-    BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * cut.err n *
+    BernsteinTower.Gcoef (I := I) B m k * cutErrCoeff k * eps *
       t ^ k * q ^ k * B.w k t x
   let negTerm : Nat → Real := fun k =>
     towerFactCoeff m (k - 1) * t ^ (k - 1) * q ^ k * B.w k t x
@@ -844,7 +1459,7 @@ private theorem cutWsum_nonpos
         (∑ k ∈ Finset.Ico 1 m, negTerm k) + negTerm m := by
     rw [hnegIcc, ← Finset.sum_erase_add _ _ hmIcc, herase]
   have herr0 : errTerm 0 =
-      BernsteinTower.Gcoef (I := I) B m 0 * cutErrCoeff 0 * cut.err n *
+      BernsteinTower.Gcoef (I := I) B m 0 * cutErrCoeff 0 * eps *
         B.w 0 t x := by
     simp [errTerm]
   rw [← herr0]
@@ -859,12 +1474,13 @@ private theorem cutWsum_nonpos
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-private theorem cutLevel_le
+private theorem supportLevel_le
     {G : RealizedMetricFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
-    (cut : ShiCutoffData (I := I) G B.T)
-    {m n i : Nat} (hgrad : TowerNormGradUpTo (I := I) B m) (hi : i ≤ m)
-    {t : Real} (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
+    {m i : Nat} (hgrad : TowerNormGradUpTo (I := I) B m) (hi : i ≤ m)
+    {eps t : Real} {chi : Real → M → Real} {x : M}
+    (support : ShiCutoffLowerSupportAt (I := I) G B.T eps chi t x)
+    (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (heps : 0 ≤ eps)
     (d : Real)
     (hd : HasDerivWithinAt (fun s : Real => B.w i s x) d (Set.Icc 0 B.T) t)
     (hheat : d - B.wLap i t x ≤
@@ -872,39 +1488,47 @@ private theorem cutLevel_le
     parabolicOperatorWithDrift (I := I) G B.T
         (fun _ y => (0 : TangentSpace I y))
         (fun s y => BernsteinTower.Gcoef (I := I) B m i *
-          (s ^ i * (cut.chi n s y) ^ (i + 1) * B.w i s y)) t x ≤
+          (s ^ i * (support.phi s y) ^ (i + 1) * B.w i s y)) t x ≤
       BernsteinTower.Gcoef (I := I) B m i *
-        ((cut.chi n t x) ^ (i + 1) *
+        ((support.phi t x) ^ (i + 1) *
             ((i : Real) * t ^ (i - 1) * B.w i t x +
               t ^ i * (-2 * B.w (i + 1) t x +
                 towerReactionSum (M := M) B.w B.c i t x)) +
-          (1 / 2 : Real) * t ^ i * (cut.chi n t x) ^ (i + 1) *
+          (1 / 2 : Real) * t ^ i * (support.phi t x) ^ (i + 1) *
             B.w (i + 1) t x +
-          cutErrCoeff i * cut.err n * t ^ i * (cut.chi n t x) ^ i *
+          cutErrCoeff i * eps * t ^ i * (support.phi t x) ^ i *
             B.w i t x) := by
-  let qpow : Real → M → Real := fun s y => (cut.chi n s y) ^ (i + 1)
+  let qpow : Real → M → Real := fun s y => (support.phi s y) ^ (i + 1)
   let v : Real → M → Real := fun s y => s ^ i * B.w i s y
   have hq_time : DifferentiableWithinAt Real
       (fun s : Real => qpow s x) (Set.Icc 0 B.T) t := by
-    simpa [qpow] using (cut.time_diff n t ht htpos x).pow (i + 1)
+    simpa [qpow] using support.time_diff.pow (i + 1)
   have hv_time : DifferentiableWithinAt Real
       (fun s : Real => v s x) (Set.Icc 0 B.T) t := by
     exact (((hasDerivWithinAt_id t (Set.Icc 0 B.T)).pow i).mul hd).differentiableWithinAt
-  have hq_space : ∀ y : M,
+  have hq_space : ∀ᶠ y in 𝓝 x,
       MDifferentiableAt I 𝓘(Real, Real) (qpow t) y := by
-    intro y
-    simpa [qpow] using (cut.space_diff ht y).pow (i + 1)
+    filter_upwards [support.space_diff_nhds] with y hy
+    simpa [qpow] using hy.pow (i + 1)
   have hv_space : ∀ y : M,
       MDifferentiableAt I 𝓘(Real, Real) (v t) y := by
     intro y
     have h := (B.hw_space i t ht htpos y).const_smul (t ^ i)
     simpa [v, smul_eq_mul] using h
-  have hq_grad : ∀ y : M,
+  have hq_grad :
       MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun z : M =>
-        gradientFun (I := I) (G.metric t) (qpow t) z) y := by
-    intro y
-    exact gradientFun_mdiffAt (I := I) (G.metric t)
-      ((cut.space_smooth n t ht).pow (i + 1)) y
+        gradientFun (I := I) (G.metric t) (qpow t) z) x := by
+    have hrhs :
+        MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+          (((i + 1 : Nat) : Real) * support.phi t y ^ i) •
+            gradientFun (I := I) (G.metric t) (support.phi t) y) x :=
+      (((support.space_diff_nhds.self_of_nhds.pow i).const_smul
+        (((i + 1 : Nat) : Real))).smul_section support.grad_diff)
+    refine hrhs.congr_of_eventuallyEq ?_
+    filter_upwards [support.space_diff_nhds] with y hy
+    exact congrArg (fun b =>
+      (⟨y, b⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+      (gradientFun_pow (I := I) (G.metric t) i hy)
   have hv_grad : ∀ y : M,
       MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun z : M =>
         gradientFun (I := I) (G.metric t) (v t) z) y := by
@@ -927,31 +1551,25 @@ private theorem cutLevel_le
       simpa using congrFun hplain z
     rw [hsection]
     exact (B.hw_grad i t ht htpos y).smul_const_section (a := t ^ i)
-  have hprod_grad : ∀ y : M,
+  have hprod_grad :
       MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun z : M =>
         gradientFun (I := I) (G.metric t)
-          (fun w : M => qpow t w * v t w) z) y := by
-    intro y
+          (fun w : M => qpow t w * v t w) z) x := by
     have hplain :
         (fun z : M => gradientFun (I := I) (G.metric t)
-          (fun w : M => qpow t w * v t w) z) =
+          (fun w : M => qpow t w * v t w) z) =ᶠ[𝓝 x]
         (fun z : M => qpow t z •
             gradientFun (I := I) (G.metric t) (v t) z +
           v t z • gradientFun (I := I) (G.metric t) (qpow t) z) := by
-      funext z
-      exact gradientFun_mul (I := I) (G.metric t) (hq_space z) (hv_space z)
-    have hsection :
-        (T% fun z : M => gradientFun (I := I) (G.metric t)
-          (fun w : M => qpow t w * v t w) z) =
-        (T% fun z : M => qpow t z •
-            gradientFun (I := I) (G.metric t) (v t) z +
-          v t z • gradientFun (I := I) (G.metric t) (qpow t) z) := by
-      funext z
-      simpa using congrFun hplain z
-    rw [hsection]
-    exact mdifferentiableAt_add_section
-      ((hq_space y).smul_section (hv_grad y))
-      ((hv_space y).smul_section (hq_grad y))
+      filter_upwards [hq_space] with z hqz
+      exact gradientFun_mul (I := I) (G.metric t) hqz (hv_space z)
+    have hrhs := mdifferentiableAt_add_section
+      (hq_space.self_of_nhds.smul_section (hv_grad x))
+      ((hv_space x).smul_section hq_grad)
+    exact hrhs.congr_of_eventuallyEq (by
+      filter_upwards [hplain] with z hz
+      exact congrArg (fun b =>
+        (⟨z, b⟩ : TotalSpace E (TangentSpace I : M → Type _))) hz)
   have hv_parabolic :
       parabolicOperatorWithDrift (I := I) G B.T
           (fun _ y => (0 : TangentSpace I y)) v t x =
@@ -983,18 +1601,24 @@ private theorem cutLevel_le
       simp [v, smul_eq_mul]]
     exact gradientFun_const_smul (I := I) (G.metric t) (t ^ i)
       (B.hw_space i t ht htpos x)
-  have hmul := parabolic_mul (I := I) G B.T
+  have huniq : UniqueDiffWithinAt Real (Set.Icc 0 B.T) t :=
+    (uniqueDiffOn_Icc B.hT).uniqueDiffWithinAt ht
+  have hmul := parabolic_mul_nhds (I := I) B.T
     (fun _ y => (0 : TangentSpace I y)) qpow v t x
-    hq_time hv_time hq_space hv_space hq_grad hv_grad
-  have hscale := parabolic_smul (I := I) G B.T
+    hq_time hv_time hq_space (Filter.Eventually.of_forall hv_space)
+    hq_grad (hv_grad x)
+  have hscale := parabolic_smul_nhds (I := I) B.T
     (fun _ y => (0 : TangentSpace I y))
     (BernsteinTower.Gcoef (I := I) B m i)
     (fun s y => qpow s y * v s y) t x
     (hq_time.mul hv_time)
-    (fun y => (hq_space y).mul (hv_space y)) (hprod_grad x)
-  have hq_bound := cut.pow_parabolic_le n i ht htpos x
-  have hcross := cut.pow_cross_le B (m := m) (n := n) (k := i) (p := i)
-    hgrad hi ht htpos x
+    (by
+      filter_upwards [hq_space] with y hy
+      exact hy.mul (hv_space y))
+    hprod_grad huniq
+  have hq_bound := support_pow_para (I := I) support ht i
+  have hcross := support_pow_cross (I := I) B (m := m) (k := i) (p := i)
+    hgrad hi support ht htpos heps
   have hcoef0 : 0 ≤ BernsteinTower.Gcoef (I := I) B m i :=
     BernsteinTower.Gcoef_nonneg (I := I) B m i
   have hti0 : 0 ≤ t ^ i := pow_nonneg ht.1 i
@@ -1002,8 +1626,8 @@ private theorem cutLevel_le
   have hq_term :
       v t x * parabolicOperatorWithDrift (I := I) G B.T
           (fun _ y => (0 : TangentSpace I y)) qpow t x ≤
-        (((i + 1 : Nat) : Real) * cut.err n) *
-          t ^ i * (cut.chi n t x) ^ i * B.w i t x := by
+        (((i + 1 : Nat) : Real) * eps) *
+          t ^ i * (support.phi t x) ^ i * B.w i t x := by
     have hmult := mul_le_mul_of_nonneg_left hq_bound
       (mul_nonneg hti0 hwi0)
     dsimp [qpow, v]
@@ -1013,10 +1637,10 @@ private theorem cutLevel_le
       -2 * (G.metric t).inner x
           (gradientAt (I := I) G t (qpow t) x)
           (gradientAt (I := I) G t (v t) x) ≤
-        (1 / 2 : Real) * t ^ i * (cut.chi n t x) ^ (i + 1) *
+        (1 / 2 : Real) * t ^ i * (support.phi t x) ^ (i + 1) *
             B.w (i + 1) t x +
-          8 * (((i + 1 : Nat) : Real) ^ 2) * cut.err n * t ^ i *
-            (cut.chi n t x) ^ i * B.w i t x := by
+          8 * (((i + 1 : Nat) : Real) ^ 2) * eps * t ^ i *
+            (support.phi t x) ^ i * B.w i t x := by
     rw [hv_gradient]
     simp only [map_smul, smul_eq_mul]
     have hmult := mul_le_mul_of_nonneg_left hcross hti0
@@ -1024,7 +1648,7 @@ private theorem cutLevel_le
     unfold gradientAt
     convert hmult using 1 <;> ring
   rw [show (fun s y => BernsteinTower.Gcoef (I := I) B m i *
-        (s ^ i * (cut.chi n s y) ^ (i + 1) * B.w i s y)) =
+        (s ^ i * (support.phi s y) ^ (i + 1) * B.w i s y)) =
       (fun s y => BernsteinTower.Gcoef (I := I) B m i *
         (qpow s y * v s y)) by
       funext s y
@@ -1032,15 +1656,18 @@ private theorem cutLevel_le
       ring]
   rw [hscale, hmul, hv_parabolic]
   have hheat_mul :
-      (cut.chi n t x) ^ (i + 1) *
+      (support.phi t x) ^ (i + 1) *
           ((i : Real) * t ^ (i - 1) * B.w i t x +
             t ^ i * (d - B.wLap i t x)) ≤
-        (cut.chi n t x) ^ (i + 1) *
+        (support.phi t x) ^ (i + 1) *
           ((i : Real) * t ^ (i - 1) * B.w i t x +
             t ^ i * (-2 * B.w (i + 1) t x +
               towerReactionSum (M := M) B.w B.c i t x)) := by
     apply mul_le_mul_of_nonneg_left _
-      (pow_nonneg (cut.range n t x ht).1 (i + 1))
+      (pow_nonneg
+        (support.lower_nhds.self_of_nhdsWithin
+          (show (t, x) ∈ spacetimeSlab (M := M) B.T from
+            ⟨ht, Set.mem_univ x⟩)).1 (i + 1))
     linarith [mul_le_mul_of_nonneg_left hheat hti0]
   apply mul_le_mul_of_nonneg_left _ hcoef0
   calc
@@ -1052,59 +1679,103 @@ private theorem cutLevel_le
         2 * (G.metric t).inner x
           (gradientAt (I := I) G t (qpow t) x)
           (gradientAt (I := I) G t (v t) x) ≤
-      (cut.chi n t x) ^ (i + 1) *
+      (support.phi t x) ^ (i + 1) *
           ((i : Real) * t ^ (i - 1) * B.w i t x +
             t ^ i * (d - B.wLap i t x)) +
-        (((i + 1 : Nat) : Real) * cut.err n) * t ^ i *
-          (cut.chi n t x) ^ i * B.w i t x +
-        ((1 / 2 : Real) * t ^ i * (cut.chi n t x) ^ (i + 1) *
+        (((i + 1 : Nat) : Real) * eps) * t ^ i *
+          (support.phi t x) ^ i * B.w i t x +
+        ((1 / 2 : Real) * t ^ i * (support.phi t x) ^ (i + 1) *
             B.w (i + 1) t x +
-          8 * (((i + 1 : Nat) : Real) ^ 2) * cut.err n * t ^ i *
-            (cut.chi n t x) ^ i * B.w i t x) := by
+          8 * (((i + 1 : Nat) : Real) ^ 2) * eps * t ^ i *
+            (support.phi t x) ^ i * B.w i t x) := by
       dsimp [qpow, v]
       linarith
-    _ ≤ (cut.chi n t x) ^ (i + 1) *
+    _ ≤ (support.phi t x) ^ (i + 1) *
           ((i : Real) * t ^ (i - 1) * B.w i t x +
             t ^ i * (-2 * B.w (i + 1) t x +
               towerReactionSum (M := M) B.w B.c i t x)) +
-        (1 / 2 : Real) * t ^ i * (cut.chi n t x) ^ (i + 1) *
+        (1 / 2 : Real) * t ^ i * (support.phi t x) ^ (i + 1) *
           B.w (i + 1) t x +
-        cutErrCoeff i * cut.err n * t ^ i * (cut.chi n t x) ^ i *
+        cutErrCoeff i * eps * t ^ i * (support.phi t x) ^ i *
           B.w i t x := by
       rw [cutErrCoeff]
       simp only [Nat.cast_add, Nat.cast_one]
       linarith [hheat_mul]
 
-omit [NeZero (Module.finrank Real E)] in
-/-- The graded localized Bernstein polynomial satisfies the closed pointwise
-parabolic recurrence.  All positive-level cutoff errors telescope into the
-retained next-level dissipation; only the base curvature error remains. -/
-theorem GfunCut_parabolic_le
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] in
+private theorem cutLevel_le
     {G : RealizedMetricFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
     (cut : ShiCutoffData (I := I) G B.T)
-    {m n : Nat} (hm : 1 ≤ m)
-    (hgrad : TowerNormGradUpTo (I := I) B m)
+    {m n i : Nat} (hgrad : TowerNormGradUpTo (I := I) B m) (hi : i ≤ m)
     {t : Real} (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
+    (d : Real)
+    (hd : HasDerivWithinAt (fun s : Real => B.w i s x) d (Set.Icc 0 B.T) t)
+    (hheat : d - B.wLap i t x ≤
+      -2 * B.w (i + 1) t x + towerReactionSum (M := M) B.w B.c i t x) :
+    parabolicOperatorWithDrift (I := I) G B.T
+        (fun _ y => (0 : TangentSpace I y))
+        (fun s y => BernsteinTower.Gcoef (I := I) B m i *
+          (s ^ i * cut.chi n s y ^ (i + 1) * B.w i s y)) t x ≤
+      BernsteinTower.Gcoef (I := I) B m i *
+        (cut.chi n t x ^ (i + 1) *
+            ((i : Real) * t ^ (i - 1) * B.w i t x +
+              t ^ i * (-2 * B.w (i + 1) t x +
+                towerReactionSum (M := M) B.w B.c i t x)) +
+          (1 / 2 : Real) * t ^ i * cut.chi n t x ^ (i + 1) *
+            B.w (i + 1) t x +
+          cutErrCoeff i * cut.err n * t ^ i * cut.chi n t x ^ i *
+            B.w i t x) := by
+  let support : ShiCutoffLowerSupportAt
+      (I := I) G B.T (cut.err n) (cut.chi n) t x :=
+    { phi := cut.chi n
+      eq_at := rfl
+      lower_nhds := by
+        filter_upwards [self_mem_nhdsWithin] with p hp
+        exact ⟨(cut.range n p.1 p.2 hp.1).1, le_rfl⟩
+      time_diff := cut.time_diff n t ht htpos x
+      space_diff_nhds := Filter.Eventually.of_forall fun y => cut.space_diff ht y
+      grad_diff := cut.grad_diff ht x
+      grad_sq_le := cut.grad_sq_le n t ht htpos x
+      parabolic_le := cut.parabolic_le n t ht htpos x }
+  exact supportLevel_le (I := I) B hgrad hi support ht htpos
+    (cut.err_nonneg n) d hd hheat
+
+omit [NeZero (Module.finrank Real E)] in
+private theorem GfunSupport_parabolic_le
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    {m : Nat} (hm : 1 ≤ m)
+    (hgrad : TowerNormGradUpTo (I := I) B m)
+    {eps t : Real} {chi : Real → M → Real} {x : M}
+    (support : ShiCutoffLowerSupportAt (I := I) G B.T eps chi t x)
+    (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t)
+    (hchi : chi t x ∈ Set.Icc (0 : Real) 1) (heps : 0 ≤ eps)
     (hIH : ∀ j, j < m →
       t ^ j * B.w j t x ≤ (towerConst B.c B.α j) ^ 2 * B.K ^ 2)
-    (hsmall : 2 * cut.err n * B.T * cutErrCoeff m ≤ 1) :
-    parabolicOperatorWithDrift (I := I) G B.T
-        (fun _ y ↦ (0 : TangentSpace I y))
-        (GfunCut (I := I) B cut m n) t x ≤
-      (towerBarTop B.c (towerConst B.c B.α) m +
+    (hsmall : 2 * eps * B.T * cutErrCoeff m ≤ 1) :
+    let F := GfunLocal (I := I) B support.phi m
+    DifferentiableWithinAt Real (fun s => F s x) (Set.Icc 0 B.T) t ∧
+      (∀ᶠ y in 𝓝 x, MDifferentiableAt I 𝓘(Real, Real) (F t) y) ∧
+      MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (F t) y) x ∧
+      parabolicOperatorWithDrift (I := I) G B.T
+          (fun _ y ↦ (0 : TangentSpace I y)) F t x ≤
+        (towerBarTop B.c (towerConst B.c B.α) m +
           towerBeta B.c B.α (towerConst B.c B.α) m *
             ∑ i ∈ Finset.range m,
               towerFactCoeff m i *
                 towerBarGood B.c (towerConst B.c B.α) i) * B.K ^ 3 +
-        9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := by
+        9 * eps * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := by
   classical
-  set q : Real := cut.chi n t x with hq
+  dsimp only
+  set q : Real := support.phi t x with hq
   set C : Nat → Real := towerConst B.c B.α with hC
   set beta : Real := towerBeta B.c B.α C m with hbeta
   set barTop : Real := towerBarTop B.c C m with hbarTop
-  have hq0 : 0 ≤ q := by simpa only [hq] using (cut.range n t x ht).1
-  have hq1 : q ≤ 1 := by simpa only [hq] using (cut.range n t x ht).2
+  have hq0 : 0 ≤ q := by simpa only [hq, support.eq_at] using hchi.1
+  have hq1 : q ≤ 1 := by simpa only [hq, support.eq_at] using hchi.2
   have hqpow_le : ∀ k : Nat, q ^ k ≤ 1 := by
     intro k
     induction k with
@@ -1134,111 +1805,111 @@ theorem GfunCut_parabolic_le
       HasDerivWithinAt (fun r : Real ↦ B.w i r x) (dvec i) (Set.Icc 0 B.T) t :=
     fun i ↦ (hspec i).1.mono B.hslab
   let term : Nat → Real → M → Real := fun i s y ↦
-    BernsteinTower.Gcoef (I := I) B m i *
-      (s ^ i * (cut.chi n s y) ^ (i + 1) * B.w i s y)
+    (BernsteinTower.Gcoef (I := I) B m i * s ^ i) *
+      (support.phi s y ^ (i + 1) * B.w i s y)
   have htime : ∀ i ∈ Finset.range (m + 1),
       DifferentiableWithinAt Real (fun s : Real ↦ term i s x) (Set.Icc 0 B.T) t := by
     intro i _
     have hprod :=
       ((((hasDerivWithinAt_id t (Set.Icc 0 B.T)).pow i).differentiableWithinAt.mul
-        ((cut.time_diff n t ht htpos x).pow (i + 1))).mul
+        (support.time_diff.pow (i + 1))).mul
           (hd i).differentiableWithinAt)
     simpa only [term, mul_assoc] using
       hprod.const_mul (BernsteinTower.Gcoef (I := I) B m i)
-  have hspace : ∀ i ∈ Finset.range (m + 1), ∀ y : M,
+  have hspace : ∀ i ∈ Finset.range (m + 1), ∀ᶠ y in 𝓝 x,
       MDifferentiableAt I 𝓘(Real, Real) (term i t) y := by
-    intro i _ y
-    have hprod := ((cut.space_diff (n := n) ht y).pow (i + 1)).mul
-      (B.hw_space i t ht htpos y)
-    have hscaled := hprod.const_smul
-      (BernsteinTower.Gcoef (I := I) B m i * t ^ i)
-    change MDifferentiableAt I 𝓘(Real, Real)
-      (fun z : M ↦ (BernsteinTower.Gcoef (I := I) B m i * t ^ i) *
-        ((cut.chi n t z) ^ (i + 1) * B.w i t z)) y at hscaled
-    simpa only [term, mul_assoc] using hscaled
-  have hgradTerm : ∀ i ∈ Finset.range (m + 1), ∀ y : M,
+    intro i _
+    filter_upwards [support.space_diff_nhds] with y hy
+    have hprod := (hy.pow (i + 1)).mul (B.hw_space i t ht htpos y)
+    rw [show term i t =
+        (BernsteinTower.Gcoef (I := I) B m i * t ^ i) •
+          (fun z : M => support.phi t z ^ (i + 1) * B.w i t z) by
+      funext z
+      simp only [term, Pi.smul_apply, smul_eq_mul]]
+    exact hprod.const_smul (BernsteinTower.Gcoef (I := I) B m i * t ^ i)
+  have hgradTerm : ∀ i ∈ Finset.range (m + 1),
       MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun z : M ↦
-        gradientFun (I := I) (G.metric t) (term i t) z) y := by
-    intro i _ y
-    let qpow : M → Real := fun z ↦ (cut.chi n t z) ^ (i + 1)
+        gradientFun (I := I) (G.metric t) (term i t) z) x := by
+    intro i _
+    let qpow : M → Real := fun z ↦ support.phi t z ^ (i + 1)
     let wi : M → Real := B.w i t
-    have hq_space : ∀ z : M, MDifferentiableAt I 𝓘(Real, Real) qpow z := by
-      intro z
-      simpa only [qpow] using (cut.space_diff (n := n) ht z).pow (i + 1)
+    have hq_space : ∀ᶠ z in 𝓝 x,
+        MDifferentiableAt I 𝓘(Real, Real) qpow z := by
+      filter_upwards [support.space_diff_nhds] with z hz
+      simpa only [qpow] using hz.pow (i + 1)
     have hw_space : ∀ z : M, MDifferentiableAt I 𝓘(Real, Real) wi z := by
       intro z
       simpa only [wi] using B.hw_space i t ht htpos z
-    have hq_grad : ∀ z : M,
+    have hq_grad :
         MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun w : M ↦
-        gradientFun (I := I) (G.metric t) qpow w) z := by
-      intro z
-      exact gradientFun_mdiffAt (I := I) (G.metric t)
-        ((cut.space_smooth n t ht).pow (i + 1)) z
-    have hw_grad : ∀ z : M,
+        gradientFun (I := I) (G.metric t) qpow w) x := by
+      have hrhs := (((support.space_diff_nhds.self_of_nhds.pow i).const_smul
+        (((i + 1 : Nat) : Real))).smul_section support.grad_diff)
+      refine hrhs.congr_of_eventuallyEq ?_
+      filter_upwards [support.space_diff_nhds] with z hz
+      exact congrArg (fun b =>
+        (⟨z, b⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+        (gradientFun_pow (I := I) (G.metric t) i hz)
+    have hw_grad :
         MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun w : M ↦
-        gradientFun (I := I) (G.metric t) wi w) z := by
-      intro z
-      simpa only [wi] using B.hw_grad i t ht htpos z
+        gradientFun (I := I) (G.metric t) wi w) x := by
+      simpa only [wi] using B.hw_grad i t ht htpos x
     have hprod_grad : MDifferentiableAt I (I.prod 𝓘(Real, E)) (T% fun z : M ↦
-        gradientFun (I := I) (G.metric t) (fun w ↦ qpow w * wi w) z) y := by
+        gradientFun (I := I) (G.metric t) (fun w ↦ qpow w * wi w) z) x := by
       have hplain :
           (fun z : M ↦ gradientFun (I := I) (G.metric t)
-            (fun w ↦ qpow w * wi w) z) =
+            (fun w ↦ qpow w * wi w) z) =ᶠ[𝓝 x]
             (fun z : M ↦ qpow z • gradientFun (I := I) (G.metric t) wi z +
               wi z • gradientFun (I := I) (G.metric t) qpow z) := by
-        funext z
-        exact gradientFun_mul (I := I) (G.metric t) (hq_space z) (hw_space z)
-      rw [show (T% fun z : M ↦ gradientFun (I := I) (G.metric t)
-          (fun w ↦ qpow w * wi w) z) =
-          (T% fun z : M ↦ qpow z • gradientFun (I := I) (G.metric t) wi z +
-            wi z • gradientFun (I := I) (G.metric t) qpow z) by
-        funext z
-        simpa using congrFun hplain z]
-      exact mdifferentiableAt_add_section
-        ((hq_space y).smul_section (hw_grad y))
-        ((hw_space y).smul_section (hq_grad y))
-    have hterm : term i t =
-        (BernsteinTower.Gcoef (I := I) B m i * t ^ i) •
-          (fun z : M ↦ qpow z * wi z) := by
+        filter_upwards [hq_space] with z hz
+        exact gradientFun_mul (I := I) (G.metric t) hz (hw_space z)
+      exact (mdifferentiableAt_add_section
+        (hq_space.self_of_nhds.smul_section hw_grad)
+        ((hw_space x).smul_section hq_grad)).congr_of_eventuallyEq (by
+          filter_upwards [hplain] with z hz
+          exact congrArg (fun b =>
+            (⟨z, b⟩ : TotalSpace E (TangentSpace I : M → Type _))) hz)
+    let hcoef : Real := BernsteinTower.Gcoef (I := I) B m i * t ^ i
+    have hscaled := hprod_grad.smul_const_section (a := hcoef)
+    rw [show term i t =
+        hcoef • (fun z : M => qpow z * wi z) by
       funext z
-      simp only [term, qpow, wi, Pi.smul_apply, smul_eq_mul]
-      ring
-    have hplain :
-        (fun z : M ↦ gradientFun (I := I) (G.metric t) (term i t) z) =
-          (BernsteinTower.Gcoef (I := I) B m i * t ^ i) •
-            (fun z : M ↦ gradientFun (I := I) (G.metric t)
-              (fun w ↦ qpow w * wi w) z) := by
-      funext z
-      rw [hterm]
-      exact gradientFun_const_smul (I := I) (G.metric t)
-        (BernsteinTower.Gcoef (I := I) B m i * t ^ i)
-        ((hq_space z).mul (hw_space z))
-    rw [show (T% fun z : M ↦
-        gradientFun (I := I) (G.metric t) (term i t) z) =
-        (T% ((BernsteinTower.Gcoef (I := I) B m i * t ^ i) •
-          fun z : M ↦ gradientFun (I := I) (G.metric t)
-            (fun w ↦ qpow w * wi w) z)) by
-      funext z
-      simpa using congrFun hplain z]
-    exact hprod_grad.smul_const_section
-      (a := BernsteinTower.Gcoef (I := I) B m i * t ^ i)
+      simp only [term, hcoef, qpow, wi, Pi.smul_apply, smul_eq_mul]]
+    refine hscaled.congr_of_eventuallyEq ?_
+    filter_upwards [hq_space] with z hz
+    exact congrArg (fun b =>
+      (⟨z, b⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+      (by
+        exact gradientFun_const_smul (I := I) (G.metric t) hcoef
+          (hz.mul (hw_space z)))
+  have hF :
+      GfunLocal (I := I) B support.phi m =
+        (fun s y ↦ ∑ i ∈ Finset.range (m + 1), term i s y) := by
+    funext s y
+    rw [GfunLocal]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [term]
+    ring
   have hsum :
       parabolicOperatorWithDrift (I := I) G B.T
           (fun _ y ↦ (0 : TangentSpace I y))
-          (GfunCut (I := I) B cut m n) t x =
+          (GfunLocal (I := I) B support.phi m) t x =
         ∑ i ∈ Finset.range (m + 1),
           parabolicOperatorWithDrift (I := I) G B.T
             (fun _ y ↦ (0 : TangentSpace I y)) (term i) t x := by
-    rw [show GfunCut (I := I) B cut m n =
-        (fun s y ↦ ∑ i ∈ Finset.range (m + 1), term i s y) by
-      funext s y
-      rw [GfunCut]
-      apply Finset.sum_congr rfl
-      intro i _
-      simp only [term]
-      ring]
-    exact parabolic_sum (I := I) (Finset.range (m + 1)) G B.T
+    rw [hF]
+    exact parabolic_sum_nhds (I := I) (Finset.range (m + 1)) B.T
       (fun _ y ↦ (0 : TangentSpace I y)) term t x htime hspace hgradTerm
+  have hreg := sum_reg_nhds (I := I) (G := G)
+    (Finset.range (m + 1)) term B.T t x htime hspace hgradTerm
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [hF]
+    exact hreg.1
+  · rw [hF]
+    exact hreg.2.1
+  · rw [hF]
+    exact hreg.2.2
   have hlevel : ∀ i ∈ Finset.range (m + 1),
       parabolicOperatorWithDrift (I := I) G B.T
           (fun _ y ↦ (0 : TangentSpace I y)) (term i) t x ≤
@@ -1248,15 +1919,21 @@ theorem GfunCut_parabolic_le
                 t ^ i * (-2 * B.w (i + 1) t x +
                   towerReactionSum (M := M) B.w B.c i t x)) +
             (1 / 2 : Real) * t ^ i * q ^ (i + 1) * B.w (i + 1) t x +
-            cutErrCoeff i * cut.err n * t ^ i * q ^ i * B.w i t x) := by
+            cutErrCoeff i * eps * t ^ i * q ^ i * B.w i t x) := by
     intro i hi
     have him : i ≤ m := by
       simpa only [Finset.mem_range, Nat.lt_add_one_iff] using hi
     have hheat : dvec i - B.wLap i t x ≤
         -2 * B.w (i + 1) t x + towerReactionSum (M := M) B.w B.c i t x := by
       linarith [(hspec i).2]
-    simpa only [term, hq] using
-      cutLevel_le (I := I) B cut hgrad him ht htpos x (dvec i) (hd i) hheat
+    rw [show term i =
+        (fun s y => BernsteinTower.Gcoef (I := I) B m i *
+          (s ^ i * support.phi s y ^ (i + 1) * B.w i s y)) by
+      funext s y
+      simp only [term]
+      ring]
+    simpa only [hq] using supportLevel_le (I := I) B hgrad him support
+      ht htpos heps (dvec i) (hd i) hheat
   let timeTerm : Nat → Real := fun i ↦
     BernsteinTower.Gcoef (I := I) B m i *
       ((i : Real) * t ^ (i - 1) * q ^ (i + 1) * B.w i t x)
@@ -1264,7 +1941,7 @@ theorem GfunCut_parabolic_le
     (3 / 2 : Real) * beta * towerFactCoeff m i * t ^ i * q ^ (i + 1) *
       B.w (i + 1) t x
   let errTerm : Nat → Real := fun i ↦
-    BernsteinTower.Gcoef (I := I) B m i * cutErrCoeff i * cut.err n *
+    BernsteinTower.Gcoef (I := I) B m i * cutErrCoeff i * eps *
       t ^ i * q ^ i * B.w i t x
   let forceTerm : Nat → Real := fun i ↦
     beta * towerFactCoeff m i * towerBarGood B.c C i * B.K ^ 3
@@ -1354,9 +2031,9 @@ theorem GfunCut_parabolic_le
         (∑ i ∈ Finset.range m, lowerBound i) + topBound := by
     rw [Finset.sum_range_succ]
     exact add_le_add (Finset.sum_le_sum hlower) htop
-  have hW := cutWsum_nonpos (I := I) B cut hm ht x hsmall
+  have hW := cutWsum_nonpos (I := I) B hm ht x hq0 hq1 heps hsmall
   dsimp only at hW
-  rw [← hq, ← hbeta, ← hbarTop] at hW
+  rw [← hbeta, ← hbarTop] at hW
   rw [Finset.mul_sum] at hW
   have hW' : (∑ i ∈ Finset.range (m + 1), timeTerm i) -
       (∑ i ∈ Finset.range m, negTerm i) + topSpace +
@@ -1394,22 +2071,61 @@ theorem GfunCut_parabolic_le
     dsimp only [topBound]
     nlinarith [hW', htopNeg0]
   have herr0 : errTerm 0 ≤
-      9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := by
+      9 * eps * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := by
     have hcoef0 : 0 ≤
-        9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 := by
+        9 * eps * BernsteinTower.Gcoef (I := I) B m 0 := by
       exact mul_nonneg
-        (mul_nonneg (by norm_num) (cut.err_nonneg n))
+        (mul_nonneg (by norm_num) heps)
         (BernsteinTower.Gcoef_nonneg (I := I) B m 0)
     calc
       errTerm 0 =
-          (9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0) * B.w 0 t x := by
+          (9 * eps * BernsteinTower.Gcoef (I := I) B m 0) * B.w 0 t x := by
         simp only [errTerm, cutErrCoeff, Nat.cast_zero, zero_add, pow_zero]
         ring
-      _ ≤ (9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0) * B.K ^ 2 :=
+      _ ≤ (9 * eps * BernsteinTower.Gcoef (I := I) B m 0) * B.K ^ 2 :=
         mul_le_mul_of_nonneg_left (B.hw0_bound t ht x) hcoef0
-      _ = 9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := rfl
+      _ = 9 * eps * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := rfl
   rw [hsum]
   linarith [hsumBound, hassembled, herr0]
+
+omit [NeZero (Module.finrank Real E)] in
+/-- The graded localized Bernstein polynomial satisfies the closed pointwise
+parabolic recurrence.  All positive-level cutoff errors telescope into the
+retained next-level dissipation; only the base curvature error remains. -/
+theorem GfunCut_parabolic_le
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    (cut : ShiCutoffData (I := I) G B.T)
+    {m n : Nat} (hm : 1 ≤ m)
+    (hgrad : TowerNormGradUpTo (I := I) B m)
+    {t : Real} (ht : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
+    (hIH : ∀ j, j < m →
+      t ^ j * B.w j t x ≤ (towerConst B.c B.α j) ^ 2 * B.K ^ 2)
+    (hsmall : 2 * cut.err n * B.T * cutErrCoeff m ≤ 1) :
+    parabolicOperatorWithDrift (I := I) G B.T
+        (fun _ y ↦ (0 : TangentSpace I y))
+        (GfunCut (I := I) B cut m n) t x ≤
+      (towerBarTop B.c (towerConst B.c B.α) m +
+          towerBeta B.c B.α (towerConst B.c B.α) m *
+            ∑ i ∈ Finset.range m,
+              towerFactCoeff m i *
+                towerBarGood B.c (towerConst B.c B.α) i) * B.K ^ 3 +
+        9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2 := by
+  let support : ShiCutoffLowerSupportAt
+      (I := I) G B.T (cut.err n) (cut.chi n) t x :=
+    { phi := cut.chi n
+      eq_at := rfl
+      lower_nhds := by
+        filter_upwards [self_mem_nhdsWithin] with p hp
+        exact ⟨(cut.range n p.1 p.2 hp.1).1, le_rfl⟩
+      time_diff := cut.time_diff n t ht htpos x
+      space_diff_nhds := Filter.Eventually.of_forall fun y => cut.space_diff ht y
+      grad_diff := cut.grad_diff ht x
+      grad_sq_le := cut.grad_sq_le n t ht htpos x
+      parabolic_le := cut.parabolic_le n t ht htpos x }
+  simpa only [GfunCut, GfunLocal] using
+    (GfunSupport_parabolic_le (I := I) B hm hgrad support ht htpos
+      (cut.range n t x ht) (cut.err_nonneg n) hIH hsmall).2.2.2
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in

@@ -1,5 +1,34 @@
 # P4 complete-Shi cutoff architecture consultation
 
+## 2026-07-23 ruling
+
+The selected architecture is **Route B-prime**: use a point-centered
+Calabi/barrier cutoff and a compact-support maximum principle which asks for a
+smooth upper support only at a selected negative minimizer.  A globally smooth
+solution-generated `ShiCutoffData` is no longer the mandatory producer.
+
+The first two implementation bricks are checked and exact-current:
+
+- `ParabolicUpperSupportAt` and
+  `strict_barrier_cpt_of_upperSupport` in `MaximumPrinciple/ScalarWeak.lean`;
+- the extracted smooth `ShiCutoffData`, the local
+  `ShiCutoffLowerSupportAt`, the point-centered `ShiBarrierCutoffData`, and
+  `ShiCutoffData.toBarrierAt` in `Evolution/ShiCutoffData.lean`.
+
+Both support structures are necessarily data structures in `Type`, rather
+than the `Prop` structures displayed below, because consumers project the
+selected support function.  The separate pointwise spatial differentiability
+fields were omitted as redundant consequences of the neighborhood fields.
+
+The basepoint-free completeness package, connectivity-free intrinsic-geodesic
+producer spine, point-pair Hopf--Rinow endpoint, and finite closed-eball
+compactness are now focused- and exact-current.  The next true producer
+frontier is therefore the evolving-distance Calabi upper support.  In
+particular, `scaledDist_calabiUpperSupport_of_sol` and
+`shiBarrierCutoff_of_sol` remain theorem-level 0%, while
+`BernsteinTower.estimate_barrier_at` is under source implementation.  The
+legacy `estimate_complete` is not to be filled.
+
 Repository: `https://github.com/liao9yuan/differential-geometry`
 
 Branch: `codex/short-time-existence-align`

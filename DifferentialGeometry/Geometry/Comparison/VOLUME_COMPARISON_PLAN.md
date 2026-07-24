@@ -2242,3 +2242,90 @@ frenzymath reference decomposition.  Brick list (our-stack names):
 R1a is infrastructure: `localPack_card` and all endpoint theorems remain 0%
 until stated and proved; Route B machinery estimate unchanged (~74--78%) since
 the new brick is upstream of the blocked consumer.
+
+## 2026-07-23 Route B N-c completion
+
+The previously open unrestricted initial-derivative identity is now proved:
+`intrinsic_jacobi_d0` in `Exponential/JacobiVariation.lean` gives
+`D_t J_w(0) = w` for the globally smooth intrinsic variation, with no
+smallness, curvature, or injectivity-radius hypothesis.  It uses
+`intrinsicVar_smooth`, `commute_ds_dt_intrinsic`,
+`intrinsicGeodesic_mfderiv_zero`, and the constant-curve covariant derivative
+formula.  Focused verification passed.
+
+Thus N-c is 100%.  N-d (minimizing implies no interior conjugate vector)
+remains theorem-level 0%.  Its next smallest producer is interior-point
+uniqueness for `Analysis.ODE.IsJacobiSolOn`, needed to show that a conjugate
+Jacobi field with nonzero initial derivative cannot also have zero derivative
+at the conjugate time.  After that remain the truncated-field cross term,
+smooth corner perturbation, and the bridge to
+`indexForm_nonneg_of_minimising_geodesic`.
+
+Honest accounting: the arbitrary strictly injective-ball comparison,
+`localPack_card`, and the Step-A direct discharge remain 0% as theorems.
+Dedicated Route B machinery is about 76--80%; full V1--V3
+volume-comparison/CGT machinery is about 46--50%.
+
+## 2026-07-23 Route B N-d interior uniqueness
+
+`Analysis/ODE/IndexFormUniqueness.lean` now proves
+`IsJacobiSolOn.eq_zero_of_interior`: a bounded-coefficient Jacobi ODE solution
+whose position and velocity vanish at one interior time vanishes on the whole
+closed interval.  Right propagation uses the zero-data second-order Gronwall
+estimate; left propagation uses the same theorem after time reversal.
+Focused verification passed.
+
+This completes the interior-uniqueness producer, not N-d itself.  The next
+smallest theorem is that a nontrivial Jacobi solution vanishing at an interior
+time has nonzero velocity there; continuity of the coefficient supplies the
+uniform bound required by the uniqueness theorem.  Then come the exact
+truncated/split-field cross term, the negative perturbation, smooth corner
+repair, and the bridge to
+`indexForm_nonneg_of_minimising_geodesic`.
+
+Honest accounting: N-d and all downstream endpoint theorems remain 0%.
+Dedicated Route B machinery is about 77--81%; full V1--V3
+volume-comparison/CGT machinery is about 46--50%.
+
+## 2026-07-23 Route B N-d abstract negative direction
+
+`Analysis/ODE/IndexFormNegative.lean` is now focused-green, warning-free, and
+targeted-build green.
+It proves:
+
+- `IsJacobiSolOn.snd_ne_zero`: a nontrivial Jacobi solution has nonzero
+  velocity at an interior zero;
+- `indexForm_test` / `indexForm_test_pos`: the exact positive cross term
+  `c(1-c)‖v(c)‖²`;
+- `exists_split_neg`: the sum of the index forms of the two matching
+  half-fields is strictly negative;
+- `contDiffOn_jacobi` / `jacobi_pair_contDiff`: smooth-coefficient,
+  two-sided Jacobi data are smooth on an open interval;
+- `exists_smooth_split`: the negative half-fields can be returned smooth on
+  their respective open domains, with their actual derivatives in the two
+  index forms.
+
+This completes the abstract ODE half of N-d.  It does not prove N-d: the
+in-tree theorem `indexForm_nonneg_of_minimising_geodesic` accepts one globally
+smooth field, while the correct negative witness consists of two smooth
+fields that agree in value but have a derivative jump at the conjugate time.
+The next architecture choice is either:
+
+1. a quantitative `Real.smoothTransition` gluing theorem, proving that global
+   smooth fields approximate the split witness in the index form while
+   preserving endpoint vanishing; or
+2. a broken-variation second-variation theorem that directly proves
+   nonnegativity for two matching smooth halves.
+
+The repository has mollifier and smooth-transition primitives but no
+ready-made endpoint-preserving interval `H¹` approximation theorem that
+closes option 1.  Option 2 is the route used by the surveyed primary
+reference and needs a genuine geometric extension of the current
+second-variation consumer.  This is a substantive design boundary; do not
+hide it behind a global-smoothness assumption on the cornered field.
+
+Honest accounting: N-d, arbitrary strictly injective-ball comparison,
+`localPack_card`, and the Step-A direct discharge remain 0% as endpoint
+theorems.  The abstract negative-direction producer is 100%; N-d dedicated
+machinery is about 55--60%; dedicated Route B machinery is about 79--83%;
+full V1--V3 volume-comparison/CGT machinery is about 47--51%.

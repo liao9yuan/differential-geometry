@@ -329,3 +329,19 @@ The focused check and exact module refresh both passed.
   `expMapIntrinsic` using `intrinsicFiber_smooth` and the chain rule.
 - The coordinated exact module refresh passed (`3799/3799`). No source proof
   frontier remains in this file.
+
+### 2026-07-23 intrinsic initial derivative
+
+Added `intrinsic_jacobi_d0`, the unrestricted endpoint identity
+`D_t J_w(0) = w` for the global intrinsic variation.  The proof applies mixed
+covariant commutation to
+`F(s,t) = intrinsicGeodesic p (x + s • w) t`; at `t = 0` the transverse curve
+is constant and the longitudinal velocity is exactly `x + s • w` by
+`intrinsicGeodesic_mfderiv_zero`.  The only dependent-fibre wrinkle is handled
+with `covDerivAlong_congr_curve`.
+
+Focused verification passed without warnings.  This completes Route B brick
+N-c.  The minimizing-implies-no-interior-conjugate theorem remains 0%; its
+dedicated N machinery is now roughly 42%, with the abstract index-form
+foundation present but the interior uniqueness, corner smoothing, and
+abstract-to-geometric collision still open.

@@ -1,9 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerSolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinComplete
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
-import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
@@ -220,69 +218,6 @@ private theorem metric_equiv_start
   exact exp_bounds_log (hpos alpha) (hpos s) hlog
 
 end AnchorComparison
-
-section RicciQuadraticBound
-
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
-
-private theorem ricci_quad_sol
-    {D : RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    {t C : Real} (ht : t ∈ D.carrier)
-    (hcurv : ∀ x : M,
-      normSq0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x) ≤ C)
-    (x : M) (v : TangentSpace I x) :
-    |ricciTensor (I := I) (S.base.metric t) x v v| ≤
-      (Module.finrank Real E : Real) ^ 2 * Real.sqrt C *
-        (S.base.metric t).inner x v v := by
-  have hunit : ∀ u : TangentSpace I x,
-      (S.base.metric t).inner x u u = 1 →
-        |S.ricciAt t x (vec2 (I := I) u u)| ≤
-          (Module.finrank Real E : Real) ^ 2 * Real.sqrt C := by
-    intro u hu
-    obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) (S.base.metric t) x
-    have hinv : MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
-        (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
-      have h := metricInverseInBasis_of_orthonormal (I := I) (S.base.metric t) basis hON
-      intro i j
-      simpa [identityInvMetric, diagonalInvMetric] using h i j
-    have hbridge : ∀ i j : Fin (Module.finrank Real (TangentSpace I x)),
-        (S.ricci t) x (vec2 (I := I) (basis i) (basis j)) =
-          S.ricciAt t x (vec2 (I := I) (basis i) (basis j)) := by
-      intro i j
-      simp
-    have htrace : ∀ i j : Fin (Module.finrank Real (TangentSpace I x)),
-        S.ricciAt t x (vec2 (I := I) (basis i) (basis j)) =
-          ∑ a, S.base.rm04 t x
-            (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)) := by
-      intro i j
-      have h := ricci_diag_eq_sum_rm04_diag_of_orthonormal
-        (I := I) (S.base.metric t) basis
-        (S.ricci t) (S.base.rm13 t) (S.base.rm04 t)
-        (ricciTraceOfSol (I := I) S t ht)
-        (solution_rm04LowersRm13At (I := I) S t x) hON i j
-      rw [hbridge i j] at h
-      exact h
-    have hraw := ricci_unitQuad_le_of_trace (I := I) (S.base.metric t)
-      basis hON hinv (S.ricciAt t x) (S.base.rm04 t x) htrace u hu
-    calc
-      |S.ricciAt t x (vec2 (I := I) u u)| ≤
-          (Module.finrank Real (TangentSpace I x) : Real) ^ 2 *
-            Real.sqrt (normSq0S (I := I) (S.base.metric t) x 4
-              (S.base.rm04 t x)) := hraw
-      _ ≤ (Module.finrank Real E : Real) ^ 2 * Real.sqrt C := by
-        change (Module.finrank Real E : Real) ^ 2 *
-            Real.sqrt (normSq0S (I := I) (S.base.metric t) x 4
-              (S.base.rm04 t x)) ≤
-          (Module.finrank Real E : Real) ^ 2 * Real.sqrt C
-        exact mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt (hcurv x)) (by positivity)
-  have hray := tensor02_quadForm_abs_le_of_unit_bound
-    (I := I) (S.base.metric t) (S.ricciAt t x) hunit v
-  simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
-    metricRicciAt_apply_eq_ricciTensor] using hray
-
-end RicciQuadraticBound
 
 section CompleteTruncation
 
@@ -819,8 +754,8 @@ theorem movingShi_of_bound
           A * (F.S.base.metric s).inner x v v := by
     intro s hs x v
     simpa only [A, d] using
-      (ricci_quad_sol (I := I) F.S (hslab hs)
-        (fun y ↦ by simpa only [PointedFlowData.rmNormSq] using hcurv s hs y) x v)
+      (ricci_quad_sol (I := I) F.S x v
+        (by simpa only [PointedFlowData.rmNormSq] using hcurv s hs x))
   have hpde := metric_pde_start (I := I) F.S F.isSolution
     halphaPsi hslab hreg
   have hmetric := metric_equiv_start (I := I)

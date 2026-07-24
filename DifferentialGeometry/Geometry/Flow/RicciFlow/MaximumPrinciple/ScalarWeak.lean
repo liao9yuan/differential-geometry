@@ -25,8 +25,8 @@ namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
 
-open Bundle Set
-open scoped Manifold ContDiff
+open Bundle Filter Set
+open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
@@ -518,6 +518,29 @@ theorem parabolic_exp_rescale_identity
 
 /-! ## Strict barrier maximum principle -/
 
+/-- A smooth local upper support for a spacetime scalar function at one point,
+with the parabolic inequality needed by the weak maximum principle. -/
+structure ParabolicUpperSupportAt
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (w : Real -> M -> Real)
+    (t : Real) (x : M) where
+  v : Real -> M -> Real
+  eq_at : v t x = w t x
+  upper_nhds :
+    ∀ᶠ p in 𝓝[spacetimeSlab (M := M) T] (t, x),
+      w p.1 p.2 <= v p.1 p.2
+  time_diff :
+    DifferentiableWithinAt Real (fun s : Real => v s x) (Set.Icc 0 T) t
+  space_diff_nhds :
+    ∀ᶠ y in 𝓝 x, MDifferentiableAt I 𝓘(Real, Real) (v t) y
+  grad_diff :
+    MDifferentiableAt I (I.prod 𝓘(Real, E))
+      (T% fun y : M => gradientFun (I := I) (G.metric t) (v t) y) x
+  operator_nonneg :
+    0 <= parabolicOperatorWithDrift (I := I) G T X v t x
+
 /-- Compactness of the realized spacetime slab. -/
 private theorem spacetimeSlab_isCompact
     [CompactSpace M] (T : Real) :
@@ -529,11 +552,10 @@ private theorem spacetimeSlab_isCompact
 `[0,T]` is nonpositive. -/
 private theorem derivWithin_nonpos_at_Icc_min_of_pos
     {φ : Real -> Real} {T t : Real}
-    (hmin : IsMinOn φ (Set.Icc 0 T) t)
+    (hmin : IsLocalMinOn φ (Set.Icc 0 T) t)
     (ht : t ∈ Set.Icc 0 T) (htpos : 0 < t)
     (_hφ : DifferentiableWithinAt Real φ (Set.Icc 0 T) t) :
     derivWithin φ (Set.Icc 0 T) t <= 0 := by
-  have hlocal : IsLocalMinOn φ (Set.Icc 0 T) t := hmin.localize
   have hdir : (0 : Real) - t ∈ posTangentConeAt (Set.Icc 0 T) t := by
     have hseg : segment Real t 0 ⊆ Set.Icc 0 T := by
       rw [segment_symm, segment_eq_Icc ht.1]
@@ -543,7 +565,7 @@ private theorem derivWithin_nonpos_at_Icc_min_of_pos
   have hnonneg :
       (0 : Real) <=
         (fderivWithin Real φ (Set.Icc 0 T) t : Real →L[Real] Real) (0 - t) :=
-    hlocal.fderivWithin_nonneg hdir
+    hmin.fderivWithin_nonneg hdir
   have hlin :
       (fderivWithin Real φ (Set.Icc 0 T) t : Real →L[Real] Real) (0 - t) =
         (0 - t) * derivWithin φ (Set.Icc 0 T) t := by
@@ -642,7 +664,7 @@ theorem strict_barrier_nonnegative_of_positive_time
         ((differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
     have hbarrier_deriv_nonpos :
         derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 <= 0 :=
-      derivWithin_nonpos_at_Icc_min_of_pos htime_min hp0_time ht0_pos htime_diff
+      derivWithin_nonpos_at_Icc_min_of_pos htime_min.localize hp0_time ht0_pos htime_diff
     have hderiv_eq :
       derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 =
         derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 + ε :=
@@ -760,7 +782,7 @@ theorem strict_barrier_posReg
         ((differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
     have hbarrier_deriv_nonpos :
         derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 <= 0 :=
-      derivWithin_nonpos_at_Icc_min_of_pos htime_min hp0_time ht0_pos htime_diff
+      derivWithin_nonpos_at_Icc_min_of_pos htime_min.localize hp0_time ht0_pos htime_diff
     have hderiv_eq :
       derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 =
         derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 + ε :=
@@ -883,7 +905,7 @@ theorem strict_barrier_cpt
         ((differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
     have hbarrier_deriv_nonpos :
         derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 <= 0 :=
-      derivWithin_nonpos_at_Icc_min_of_pos htime_min hp0_time ht0_pos htime_diff
+      derivWithin_nonpos_at_Icc_min_of_pos htime_min.localize hp0_time ht0_pos htime_diff
     have hderiv_eq :
         derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 =
           derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 + ε :=
@@ -913,6 +935,168 @@ theorem strict_barrier_cpt
       unfold parabolicOperatorWithDrift
       linarith
     exact not_lt_of_ge (hnegative t0 hp0_time ht0_pos x0 hw_t0_neg) hP_neg
+  intro t ht x
+  by_contra hnot
+  have hw_neg : w t x < 0 := lt_of_not_ge hnot
+  by_cases ht_zero : t = 0
+  · exact not_lt_of_ge (by simpa [ht_zero] using hw0 x) hw_neg
+  · have ht_pos : 0 < t := lt_of_le_of_ne ht.1 (Ne.symm ht_zero)
+    let ε : Real := -(w t x) / (2 * t)
+    have hε_pos : 0 < ε :=
+      div_pos (neg_pos.mpr hw_neg) (mul_pos two_pos ht_pos)
+    have hbarrier := hbarrier_nonneg ε hε_pos t ht x
+    have hε_mul : ε * t = -(w t x) / 2 := by
+      dsimp [ε]
+      field_simp [ht_zero]
+    have hbarrier_neg : w t x + ε * t < 0 := by
+      rw [hε_mul]
+      linarith
+    exact not_lt_of_ge hbarrier hbarrier_neg
+
+/-- Compact-support weak maximum principle from smooth local upper supports at
+the possible negative points. -/
+theorem strict_barrier_cpt_of_upperSupport
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (_hT : 0 <= T)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (w : Real -> M -> Real)
+    (K : Set M) (hK : IsCompact K)
+    (hw_out : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, x ∉ K -> 0 <= w t x)
+    (hw_cont : ContinuousOn
+      (fun p : Real × M => w p.1 p.2) (Set.Icc 0 T ×ˢ K))
+    (hw0 : forall x : M, 0 <= w 0 x)
+    (hsupport : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      forall x : M, w t x < 0 ->
+        ParabolicUpperSupportAt (I := I) G T X w t x) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x := by
+  classical
+  have hbarrier_nonneg :
+      forall ε : Real, 0 < ε ->
+        forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+          0 <= w t x + ε * t := by
+    intro ε hε
+    by_contra hnot
+    push Not at hnot
+    rcases hnot with ⟨tb, htb, xb, hbneg⟩
+    have hxbK : xb ∈ K := by
+      by_contra hxb
+      have hwb : 0 <= w tb xb := hw_out tb htb xb hxb
+      have hεtb : 0 <= ε * tb := mul_nonneg (le_of_lt hε) htb.1
+      linarith
+    let Φ : Real × M -> Real := fun p => w p.1 p.2 + ε * p.1
+    have hΦ_cont : ContinuousOn Φ (Set.Icc 0 T ×ˢ K) := by
+      have hlinear :
+          ContinuousOn (fun p : Real × M => ε * p.1) (Set.Icc 0 T ×ˢ K) :=
+        (continuous_const.mul continuous_fst).continuousOn
+      exact hw_cont.add hlinear
+    have hslab_compact : IsCompact (Set.Icc 0 T ×ˢ K) :=
+      isCompact_Icc.prod hK
+    have hslab_nonempty : (Set.Icc 0 T ×ˢ K).Nonempty :=
+      ⟨(tb, xb), ⟨htb, hxbK⟩⟩
+    obtain ⟨p0, hp0, hp0min⟩ :=
+      hslab_compact.exists_isMinOn hslab_nonempty hΦ_cont
+    rcases p0 with ⟨t0, x0⟩
+    have hp0_time : t0 ∈ Set.Icc 0 T := hp0.1
+    have hΦ_min_bad : Φ (t0, x0) <= Φ (tb, xb) :=
+      hp0min (show (tb, xb) ∈ Set.Icc 0 T ×ˢ K from ⟨htb, hxbK⟩)
+    have hΦ0_neg : Φ (t0, x0) < 0 := lt_of_le_of_lt hΦ_min_bad hbneg
+    have hΦ_min_slab :
+        IsMinOn Φ (spacetimeSlab (M := M) T) (t0, x0) := by
+      intro p hp
+      by_cases hpK : p.2 ∈ K
+      · exact hp0min ⟨hp.1, hpK⟩
+      · have hwp : 0 <= w p.1 p.2 := hw_out p.1 hp.1 p.2 hpK
+        have hεp : 0 <= ε * p.1 := mul_nonneg (le_of_lt hε) hp.1.1
+        have hΦp : 0 <= Φ p := by
+          dsimp [Φ]
+          linarith
+        exact (le_of_lt hΦ0_neg).trans hΦp
+    have ht0_ne_zero : t0 ≠ 0 := by
+      intro ht0
+      have hnonneg0 : 0 <= Φ (t0, x0) := by
+        simp [Φ, ht0, hw0 x0]
+      exact not_lt_of_ge hnonneg0 hΦ0_neg
+    have ht0_pos : 0 < t0 :=
+      lt_of_le_of_ne hp0_time.1 (Ne.symm ht0_ne_zero)
+    have hT_pos : 0 < T := lt_of_lt_of_le ht0_pos hp0_time.2
+    have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t0 :=
+      (uniqueDiffOn_Icc hT_pos).uniqueDiffWithinAt hp0_time
+    have hw_t0_neg : w t0 x0 < 0 := by
+      have hεt_nonneg : 0 <= ε * t0 :=
+        mul_nonneg (le_of_lt hε) hp0_time.1
+      nlinarith [hΦ0_neg, hεt_nonneg]
+    let support := hsupport t0 hp0_time ht0_pos x0 hw_t0_neg
+    let Ψ : Real × M -> Real :=
+      fun p => support.v p.1 p.2 + ε * p.1
+    have hΨ_local :
+        IsLocalMinOn Ψ (spacetimeSlab (M := M) T) (t0, x0) := by
+      unfold IsLocalMinOn IsMinFilter
+      filter_upwards [support.upper_nhds, self_mem_nhdsWithin] with p hp_upper hp_slab
+      have hmin := hΦ_min_slab hp_slab
+      dsimp [Ψ, Φ] at hmin ⊢
+      rw [support.eq_at]
+      linarith
+    have htime_min :
+        IsLocalMinOn (fun s : Real => support.v s x0 + ε * s)
+          (Set.Icc 0 T) t0 := by
+      have hcomp := hΨ_local.comp_continuousOn
+        (s := Set.Icc 0 T) (g := fun s : Real => (s, x0))
+        (by
+          intro s hs
+          exact ⟨hs, Set.mem_univ x0⟩)
+        (continuous_id.prodMk continuous_const).continuousOn hp0_time
+      simpa only [Function.comp_apply, Ψ] using hcomp
+    have htime_diff :
+        DifferentiableWithinAt Real
+          (fun s : Real => support.v s x0 + ε * s) (Set.Icc 0 T) t0 :=
+      support.time_diff.add
+        ((differentiableWithinAt_id'
+          (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
+    have hbarrier_deriv_nonpos :
+        derivWithin (fun s : Real => support.v s x0 + ε * s)
+          (Set.Icc 0 T) t0 <= 0 :=
+      derivWithin_nonpos_at_Icc_min_of_pos
+        htime_min hp0_time ht0_pos htime_diff
+    have hderiv_eq :
+        derivWithin (fun s : Real => support.v s x0 + ε * s)
+            (Set.Icc 0 T) t0 =
+          derivWithin (fun s : Real => support.v s x0)
+            (Set.Icc 0 T) t0 + ε :=
+      derivWithin_add_eps_mul_time (M := M) huniq support.time_diff
+    have hv_deriv_le :
+        derivWithin (fun s : Real => support.v s x0)
+          (Set.Icc 0 T) t0 <= -ε := by
+      linarith
+    have hspace_min_shift :
+        IsLocalMin (fun y : M => support.v t0 y + ε * t0) x0 := by
+      rw [← isLocalMinOn_univ_iff]
+      have hcomp := hΨ_local.comp_continuousOn
+        (s := Set.univ) (g := fun y : M => (t0, y))
+        (by
+          intro y _
+          exact ⟨hp0_time, Set.mem_univ y⟩)
+        (continuous_const.prodMk continuous_id).continuousOn (Set.mem_univ x0)
+      simpa only [Function.comp_apply, Ψ] using hcomp
+    have hspatial_min : IsLocalMin (support.v t0) x0 := by
+      unfold IsLocalMin IsMinFilter at hspace_min_shift ⊢
+      filter_upwards [hspace_min_shift] with y hy
+      linarith
+    have hheat_nonneg :
+        0 <= heatOperatorWithDrift
+          (I := I) G t0 (X t0) (support.v t0) x0 :=
+      heatOperatorWithDrift_at_spatial_min_nonneg (I := I) G t0 (X t0)
+        hspatial_min support.space_diff_nhds.self_of_nhds support.space_diff_nhds
+        support.grad_diff
+    have hP_neg :
+        parabolicOperatorWithDrift
+          (I := I) G T X support.v t0 x0 < 0 := by
+      unfold parabolicOperatorWithDrift
+      linarith
+    exact not_lt_of_ge support.operator_nonneg hP_neg
   intro t ht x
   by_contra hnot
   have hw_neg : w t x < 0 := lt_of_not_ge hnot

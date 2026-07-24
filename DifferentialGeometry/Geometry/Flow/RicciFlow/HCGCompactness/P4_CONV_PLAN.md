@@ -79,15 +79,15 @@ focused-green, and exact-current.  `rmResidual_cost`, `towerHeatSol_raw`, and
 `towerHeatSol_any` are theorem-level 100% checked, and their dedicated
 direct-tower machinery is 100%.
 
-The complete-noncompact Bernstein signature is also corrected.  Anchor
+The complete-noncompact Bernstein architecture is now Route B-prime.  Anchor
 completeness, metric equivalence, and a Ricci lower bound do not by themselves
-produce a parabolic cutoff or an unrestricted scalar maximum principle.  The
-internal route now requires an explicit quantitative cutoff/exhaustion package
-and the actual curvature-tower Kato estimate; both are solution-specific
-producers, not new HCG assumptions.  The canonical fixed-order abstract theorem
-is `BernsteinTower.estimate_cutoff_at`; `estimate_of_cutoff` remains its
-all-order compatibility wrapper.  The no-extra-input theorem must be proved in
-the Ricci-flow solution layer and is not yet part of the trusted route.
+produce a globally smooth parabolic exhaustion.  Instead, the selected route
+uses point-centered Calabi lower supports for the cutoff and asks for a smooth
+upper support only at a selected negative Bernstein minimizer.  The actual
+curvature-tower Kato estimate remains solution-generated, not a new HCG
+assumption.  The existing smooth fixed-order theorem
+`BernsteinTower.estimate_cutoff_at` stays exact-current, while the barrier
+sibling is a separate not-yet-stated theorem.
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -175,10 +175,21 @@ cut-locus/time-distance comparison stack.  A local-Shi detour does not avoid
 that same analysis.  The architecture choice is recorded in
 [`P4_CUTOFF_CONSULT.md`](P4_CUTOFF_CONSULT.md).
 
-Accordingly, the solution-generated `ShiCutoffData` theorem remains
-theorem-level 0% and is the single independent complete-Bernstein blocker.
-Green wrappers and route-neutral helpers are not counted as that analytic
-producer.
+Accordingly, a solution-generated globally smooth `ShiCutoffData` is no longer
+the mandatory blocker.  The Route B-prime maximum-principle and data boundaries
+are checked: `strict_barrier_cpt_of_upperSupport`,
+`ShiCutoffLowerSupportAt`, `ShiBarrierCutoffData`, and
+`ShiCutoffData.toBarrierAt` are focused- and exact-current.  The basepoint-free
+  completeness package, connectivity-free intrinsic-geodesic producer spine,
+  point-pair Hopf--Rinow endpoint, and finite closed-eball compactness are also
+  focused- and exact-current.  The first genuine geometric producer frontier is
+  now the spatial part of the evolving-distance Calabi upper support.  Its
+  fixed-path time variation is focused-green:
+  `pathLength_timeDeriv_of_ricciFlow` proves the exact Ricci-flow derivative,
+  and `pathLength_deriv_ge` gives `∂ₜ L ≥ -A L` from a quadratic Ricci bound.
+  `scaledDist_calabiUpperSupport_of_sol` and `shiBarrierCutoff_of_sol` remain
+  theorem-level 0%; `BernsteinTower.estimate_barrier_at` is being implemented as
+  the independent consumer-side sibling.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` records constants before `k`, and `srcCovLip_of_soln` is

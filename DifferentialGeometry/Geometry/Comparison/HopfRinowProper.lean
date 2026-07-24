@@ -1,6 +1,7 @@
 import Mathlib.Topology.Order.IntermediateValue
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Metric.Completeness
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -19,6 +20,96 @@ open Set Function Filter Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry
+
+namespace RiemannianMetricComplete
+
+open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Geometry.Riemannian.Exponential
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  [I.Boundaryless]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A finite-radius closed ball for the extended distance of a complete
+Riemannian metric is compact, without a connectedness assumption. -/
+theorem closedEBall_isCompact
+    {g : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g)
+    (O : M) (R : ℝ) :
+    IsCompact
+      {x : M |
+        riemannianEDistOf (I := I) g O x ≤ ENNReal.ofReal R} := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : CompleteSpace M := hg.complete
+  have hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)) :=
+    fun x v =>
+      tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) g x v
+  let ρ : ℝ := (ENNReal.ofReal R).toReal
+  haveI : FiniteDimensional ℝ (TangentSpace I O) :=
+    inferInstanceAs (FiniteDimensional ℝ E)
+  haveI : ProperSpace (TangentSpace I O) :=
+    FiniteDimensional.proper_real (TangentSpace I O)
+  have himg :
+      IsCompact
+        ((fun v => expMapIntrinsic (I := I) g hEnorm O v) ''
+          Metric.closedBall (0 : TangentSpace I O) ρ) :=
+    (isCompact_closedBall (0 : TangentSpace I O) ρ).image
+      (expMapIntrinsic_continuous (I := I) g hEnorm O)
+  have hclosed :
+      IsClosed
+        {x : M |
+          riemannianEDistOf (I := I) g O x ≤ ENNReal.ofReal R} := by
+    have hset :
+        {x : M |
+          riemannianEDistOf (I := I) g O x ≤ ENNReal.ofReal R} =
+          Metric.closedEBall O (ENNReal.ofReal R) := by
+      ext x
+      rw [Metric.mem_closedEBall',
+        IsRiemannianManifold.out (I := I) O x]
+      rfl
+    rw [hset]
+    exact Metric.isClosed_closedEBall
+  refine himg.of_isClosed_subset hclosed ?_
+  intro x hx
+  have hfin :
+      riemannianEDist I O x ≠ (⊤ : ℝ≥0∞) := by
+    apply ne_top_of_le_ne_top ENNReal.ofReal_ne_top
+    simpa only [riemannianEDistOf] using hx
+  obtain ⟨v, hv_exp, hv_len⟩ :=
+    hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
+      (I := I) g hEnorm O x hfin
+  refine ⟨v, ?_, hv_exp⟩
+  rw [Metric.mem_closedBall, dist_zero_right]
+  have hnorm : ‖v‖ = Real.sqrt (g.inner O v v) := by
+    have hv := hEnorm O v
+    rw [← ofReal_norm_eq_enorm] at hv
+    exact (ENNReal.ofReal_eq_ofReal_iff
+      (norm_nonneg v) (Real.sqrt_nonneg _)).mp hv
+  rw [hnorm, hv_len]
+  exact (ENNReal.toReal_le_toReal hfin ENNReal.ofReal_ne_top).2
+    (by simpa only [riemannianEDistOf] using hx)
+
+end RiemannianMetricComplete
+
 namespace Geometry
 namespace Riemannian
 namespace HopfRinow

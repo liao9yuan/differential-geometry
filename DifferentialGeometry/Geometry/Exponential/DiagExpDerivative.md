@@ -210,3 +210,12 @@ order-1 proof; the ONLY changes are the ContDiffAt order on the inner symm and t
   standard-branch instance is 100% complete; it is compatibility machinery and
   does not complete the still-unstated quantitative HCG branch/readout theorem
   or the `StepB1RawInput` producer.
+
+## 2026-07-23 - component-local standard branch
+
+- Removed the accidental file-wide `ConnectedSpace M` assumption.  The complete
+  source, including `exists_stdBranch`, `stdBranch`, and `std_inv_eq`, passes
+  focused verification without it.
+- This is an assumption cleanup only: the selected branch remains qualitative
+  and component-local.  It supplies no Calabi radius, no quantitative support
+  estimate, and no new HCG endpoint theorem.

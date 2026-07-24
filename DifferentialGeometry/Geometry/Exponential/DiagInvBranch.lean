@@ -28,7 +28,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
@@ -142,6 +142,20 @@ theorem inv_snd_inf
   intro y hy
   refine TotalSpace.ext (B.proj_eq (hdom y hy)).symm ?_
   exact heq_of_eq rfl
+
+/-- Fixing the first point of a selected inverse branch gives a smooth
+tangent-bundle map wherever the corresponding pairs stay in the branch
+domain. -/
+theorem inv_fst_inf
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p pt : M} (B : DiagInvBranch (I := I) g hEnorm p) {S : Set M}
+    (hdom : ∀ y ∈ S, (pt, y) ∈ B.dom) :
+    ContMDiffOn I I.tangent ∞ (fun y : M ↦ B.inv (pt, y)) S := by
+  have hpair : ContMDiffOn I (I.prod I) ∞ (fun y : M ↦ (pt, y)) S :=
+    (contMDiff_const.prodMk contMDiff_id).contMDiffOn
+  simpa only [inv, dom, Function.comp_apply] using B.inv_inf.comp hpair hdom
 
 /-- On the selected inverse domain, exponentiating its fiber component gives
 the second point of the pair. -/

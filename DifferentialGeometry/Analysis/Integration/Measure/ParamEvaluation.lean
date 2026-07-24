@@ -1440,6 +1440,31 @@ theorem riemannianVolumeMeasure_image_param_eq
     (chartAtlasPOU_isSubordinate I M) Ψ hB_meas hB_source
 
 set_option linter.unusedSectionVars false in
+/-- A pointwise lower bound for a parametrized Riemannian density gives the
+corresponding lower bound for the volume of the parametrized image. -/
+theorem param_vol_ge
+    [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
+    {B : Set E} (hB_meas : MeasurableSet B)
+    (hB_source : B ⊆ Ψ.source)
+    {c : ℝ}
+    (hdens : ∀ w ∈ B, c ≤ paramDensity (I := I) g Ψ w) :
+    ENNReal.ofReal c * (modelHaar (E := E)) B ≤
+      riemannianVolumeMeasure (I := I) (M := M) g (Ψ '' B) := by
+  rw [riemannianVolumeMeasure_image_param_eq
+    (I := I) g Ψ hB_meas hB_source]
+  calc
+    ENNReal.ofReal c * (modelHaar (E := E)) B =
+        ∫⁻ _ in B, ENNReal.ofReal c ∂(modelHaar (E := E)) := by
+      rw [MeasureTheory.setLIntegral_const]
+    _ ≤ ∫⁻ w in B, ENNReal.ofReal (paramDensity (I := I) g Ψ w)
+        ∂(modelHaar (E := E)) := by
+      refine MeasureTheory.setLIntegral_mono' hB_meas ?_
+      intro w hw
+      exact ENNReal.ofReal_le_ofReal (hdens w hw)
+
+set_option linter.unusedSectionVars false in
 /-- Set-form V0 evaluation formula on a measurable target subset.
 
 If `A` lies in the target of a `C¹` parametrizing partial diffeomorphism, then

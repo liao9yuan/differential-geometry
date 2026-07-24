@@ -180,3 +180,23 @@ Honest accounting after this brick:
   single independent analytic blocker for the complete Shi route;
 - end-to-end complete arbitrary-dimensional Shi: theorem-level 0%;
 - unconditional `compactnessSol`: theorem-level 0%.
+
+## 2026-07-23 Route B-prime data extraction
+
+The unchanged smooth `ShiCutoffData` definition and its three route-neutral
+helpers now live in `Evolution/ShiCutoffData.lean`.  `BernsteinComplete` imports
+that module; its existing smooth fixed-order theorem and compatibility wrapper
+continue to focused-check unchanged.  The extracted module and
+`BernsteinComplete` both passed exact targeted verification; the only warning
+remains the documented legacy `estimate_complete` `sorry`.
+
+The new data module also owns the local lower-support and point-centered
+barrier-cutoff interfaces.  No barrier recurrence is hidden here:
+`BernsteinTower.estimate_barrier_at` is not yet stated or proved and is
+therefore theorem-level 0%.  The exact-current smooth
+`BernsteinTower.estimate_cutoff_at` remains theorem-level 100%.
+
+This extraction advances the selected Route B-prime machinery to roughly
+15--20%, while the solution-generated barrier cutoff, complete Shi theorem,
+and unconditional `compactnessSol` remain theorem-level 0%.  Whole-project HCG
+supporting machinery remains about 60%.

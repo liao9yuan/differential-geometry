@@ -87,3 +87,28 @@ route-neutral composition calculus, but it does not construct a smooth
 parabolic exhaustion or a Calabi barrier.  Consequently the solution-generated
 `ShiCutoffData` and corrected complete-noncompact Shi theorem remain
 theorem-level 0%.
+
+## 2026-07-23: local upper-support compact maximum principle
+
+- Added `ParabolicUpperSupportAt`, carrying one smooth spacetime upper support
+  and the parabolic inequality only at the selected contact point.
+- Added `strict_barrier_cpt_of_upperSupport`.  Its compact-cylinder minimizer
+  is global because the function is nonnegative outside the supplied compact
+  set, but differentiability is requested only from the local upper support at
+  a possible negative minimizer.
+- The consultation displayed the support structure as `Prop`.  Lean correctly
+  rejects that form because the structure contains the data field `v`; the
+  checked interface is therefore a data structure in `Type`.  The redundant
+  pointwise spatial differentiability field was also omitted, since it follows
+  from the neighborhood field.
+- The private one-sided time derivative helper was weakened from a global
+  `IsMinOn` hypothesis to the exact `IsLocalMinOn` hypothesis used by both the
+  old smooth theorem and the new support theorem.
+- Focused and exact targeted verification passed with no local diagnostics.
+
+This theorem is complete (100%).  It closes only the maximum-principle brick of
+the selected Route B-prime complete-Bernstein architecture; the
+solution-generated barrier cutoff and the complete Shi theorem are still
+unstated/unproved (0%).  Dedicated Route B-prime machinery is about 10--15%,
+the unconditional HCG endpoint remains theorem-level 0%, and whole-project HCG
+supporting machinery remains about 60%.

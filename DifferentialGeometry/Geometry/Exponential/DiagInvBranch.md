@@ -41,3 +41,16 @@ section based at the moving first point.  The proof only composes the existing
 `inv_inf` producer and corrects the total-space base with `proj_eq`; it adds no
 branch field or quantitative assumption.  Focused verification passed, and the
 module object was refreshed successfully.
+
+## 2026-07-23 fixed-first inverse map
+
+Added `DiagInvBranch.inv_fst_inf`.  On a set whose pairs with fixed first point
+lie in the branch domain, the selected inverse is a smooth tangent-bundle map.
+The proof is the direct composition of the fixed-first pair map with `inv_inf`;
+it adds no chart choice, radius, or endpoint assumption.
+
+The accidental file-wide `ConnectedSpace M` assumption was also removed.
+Focused verification passed for the complete file.  This closes the small
+component-local branch API needed by the Calabi preparation, but the actual
+fixed-metric Calabi support theorem remains unstated and therefore 0%; its
+dedicated branch/Hopf infrastructure is still only supporting machinery.

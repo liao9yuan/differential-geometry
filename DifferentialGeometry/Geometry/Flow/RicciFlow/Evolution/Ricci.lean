@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateIdentities
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 
 /-!
 # Ricci Evolution by Tracing Riemann Evolution

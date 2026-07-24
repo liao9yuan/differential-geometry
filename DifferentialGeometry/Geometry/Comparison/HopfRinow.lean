@@ -114,7 +114,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section GeodesicCompleteness
@@ -777,7 +777,7 @@ over paths is attained). The proof builds a length-minimising sequence of
 `C¹` paths whose lengths converge to `riemannianEDist I p q` and extracts a
 continuous limit curve. -/
 theorem exists_continuous_path_realizing_riemannianEDist
-    (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
         pathELength I γ 0 1 = riemannianEDist I p q := by
@@ -938,7 +938,7 @@ distance, `riemannianEDist I p q = ENNReal.ofReal L`. Assembled from
 `exists_continuous_path_realizing_riemannianEDist`, `minimizing_path_is_smooth_geodesic`, and
 `unit_speed_rescale`. -/
 theorem exists_unit_speed_minimizing_geodesic_between_points
-    (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
       0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L) ∧

@@ -1,5 +1,14 @@
 # IntrinsicExp.lean notes
 
+## 2026-07-23 componentwise completeness audit
+
+Removed the ambient `ConnectedSpace M` assumption from the canonical intrinsic
+exponential and complete-geodesic API.  The construction stays in the component
+of its initial point and velocity.  Focused and exact verification passed.
+
+Accounting: this module's no-connected migration is complete (100%).  This is
+producer infrastructure and does not by itself complete an HCG endpoint.
+
 ## 2026-07-08 radial endpoint germ
 
 Added and verified the small-velocity bridge `exp_eq_intr_of_small`, which

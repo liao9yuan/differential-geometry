@@ -163,6 +163,154 @@ theorem chart_symm_edist_le
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
   [T2Space M] in
+/-- A fixed smooth parametrization is locally Lipschitz for Riemannian
+extended distance at every point of its source. -/
+theorem diffeo_edist_le
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsManifold I 1 M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
+    {x : E} (hx : x ∈ Ψ.source) :
+    ∃ C : ℝ≥0, 0 < C ∧ ∃ r : ℝ, 0 < r ∧
+      Metric.ball x r ⊆ Ψ.source ∧
+        ∀ y ∈ Metric.ball x r, ∀ z ∈ Metric.ball x r,
+          riemannianEDist I (Ψ y) (Ψ z) ≤ C * edist y z := by
+  let q := Ψ x
+  rcases chart_symm_edist_le (I := I) q with ⟨C, C_pos, R, R_pos, hq⟩
+  let F := extChartAt I q ∘ Ψ
+  have hΨ : ContMDiffAt 𝓘(ℝ, E) I 1 Ψ x :=
+    Ψ.contMDiffOn_toFun.contMDiffAt (Ψ.open_source.mem_nhds hx)
+  have hF : ContDiffAt ℝ 1 F x := by
+    apply contMDiffAt_iff_contDiffAt.mp
+    simpa only [F, q] using
+      (contMDiffAt_extChartAt (I := I) (x := q) (n := 1)).comp x hΨ
+  obtain ⟨K, t, ht, hKt⟩ := hF.exists_lipschitzOnWith
+  have hsrc :
+      Ψ ⁻¹' (extChartAt I q).source ∈ 𝓝 x := by
+    apply hΨ.continuousAt.preimage_mem_nhds
+    simpa only [q] using extChartAt_source_mem_nhds (I := I) q
+  have hF0 : F x = extChartAt I q q := by
+    simp only [F, Function.comp_apply, q]
+  have hball :
+      F ⁻¹' Metric.ball (extChartAt I q q) R ∈ 𝓝 x := by
+    apply hF.continuousAt.preimage_mem_nhds
+    simpa only [hF0] using Metric.ball_mem_nhds (extChartAt I q q) R_pos
+  let s := Ψ.source ∩ t ∩
+    (Ψ ⁻¹' (extChartAt I q).source) ∩
+      (F ⁻¹' Metric.ball (extChartAt I q q) R)
+  have hs : s ∈ 𝓝 x := by
+    exact inter_mem
+      (inter_mem
+        (inter_mem (Ψ.open_source.mem_nhds hx) ht)
+        hsrc)
+      hball
+  obtain ⟨r, r_pos, hr⟩ := Metric.mem_nhds_iff.mp hs
+  have hrSource : Metric.ball x r ⊆ Ψ.source :=
+    fun y hy ↦ (hr hy).1.1.1
+  refine ⟨C * K + 1, by positivity, r, r_pos, hrSource, ?_⟩
+  intro y hy z hz
+  rcases hr hy with ⟨⟨⟨hyΨ, hyt⟩, hySource⟩, hyBall⟩
+  rcases hr hz with ⟨⟨⟨hzΨ, hzt⟩, hzSource⟩, hzBall⟩
+  have hyRange : F y ∈ range I :=
+    extChartAt_target_subset_range q
+      ((extChartAt I q).map_source hySource)
+  have hzRange : F z ∈ range I :=
+    extChartAt_target_subset_range q
+      ((extChartAt I q).map_source hzSource)
+  have hyInv : (extChartAt I q).symm (F y) = Ψ y := by
+    simpa only [F, Function.comp_apply] using
+      (extChartAt I q).left_inv hySource
+  have hzInv : (extChartAt I q).symm (F z) = Ψ z := by
+    simpa only [F, Function.comp_apply] using
+      (extChartAt I q).left_inv hzSource
+  rw [← hyInv, ← hzInv]
+  refine (hq (F y) ⟨hyBall, hyRange⟩ (F z) ⟨hzBall, hzRange⟩).trans ?_
+  calc
+    (C : ℝ≥0∞) * edist (F y) (F z)
+        ≤ C * (K * edist y z) := mul_right_mono (hKt hyt hzt)
+    _ = (C * K) * edist y z := by simp only [mul_assoc]
+    _ ≤ (C * K + 1) * edist y z := by
+      gcongr
+      exact le_add_of_nonneg_right (by positivity)
+
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+  [T2Space M] in
+/-- A pointwise speed bound along a model segment controls the Riemannian
+extended distance between the corresponding parametrized endpoints. -/
+theorem param_edist_le
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsManifold I 1 M]
+    (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
+    {U : Set E} {L : ℝ}
+    (hU : U ⊆ Ψ.source)
+    (hspd : ∀ w ∈ U, ∀ ξ : E,
+      ‖mfderiv 𝓘(ℝ, E) I Ψ w ξ‖ₑ ≤ ENNReal.ofReal (L * ‖ξ‖))
+    {u v : E} (hseg : segment ℝ u v ⊆ U) :
+    riemannianEDist I (Ψ u) (Ψ v) ≤
+      ENNReal.ofReal (L * dist u v) := by
+  let η := ContinuousAffineMap.lineMap (R := ℝ) u v
+  let γ : ℝ → M := Ψ ∘ η
+  have hηU : MapsTo η (Set.Icc (0 : ℝ) 1) U := by
+    intro t ht
+    apply hseg
+    rw [segment_eq_image_lineMap]
+    exact ⟨t, ht, rfl⟩
+  have hηsrc : MapsTo η (Set.Icc (0 : ℝ) 1) Ψ.source :=
+    fun t ht ↦ hU (hηU ht)
+  have hηsmooth :
+      ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) 1 η (Set.Icc (0 : ℝ) 1) := by
+    rw [contMDiffOn_iff_contDiffOn]
+    exact η.contDiff.contDiffOn
+  have hγsmooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc (0 : ℝ) 1) :=
+    Ψ.contMDiffOn_toFun.comp hηsmooth hηsrc
+  have hγzero : γ 0 = Ψ u := by
+    simp only [γ, Function.comp_apply, η, ContinuousAffineMap.coe_lineMap_eq,
+      AffineMap.lineMap_apply_zero]
+  have hγone : γ 1 = Ψ v := by
+    simp only [γ, Function.comp_apply, η, ContinuousAffineMap.coe_lineMap_eq,
+      AffineMap.lineMap_apply_one]
+  have hpoint : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖mfderiv 𝓘(ℝ, ℝ) I γ t 1‖ₑ ≤
+        ENNReal.ofReal (L * dist u v) := by
+    intro t ht
+    have hΨdiff : MDifferentiableAt 𝓘(ℝ, E) I Ψ (η t) :=
+      Ψ.mdifferentiableAt one_ne_zero (hηsrc ht)
+    have hηdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) η t := by
+      rw [mdifferentiableAt_iff_differentiableAt]
+      exact η.differentiableAt
+    have hchain :
+        mfderiv 𝓘(ℝ, ℝ) I γ t 1 =
+          mfderiv 𝓘(ℝ, E) I Ψ (η t)
+            (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) η t 1) := by
+      rw [show γ = Ψ ∘ η from rfl, mfderiv_comp t hΨdiff hηdiff]
+      rfl
+    have hηderiv :
+        mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) η t 1 = v - u := by
+      rw [mfderiv_eq_fderiv, η.fderiv]
+      change ((AffineMap.lineMap u v).linear : ℝ →ₗ[ℝ] E) 1 = v - u
+      rw [AffineMap.lineMap_linear]
+      simp
+    rw [hchain, hηderiv]
+    simpa only [dist_eq_norm, norm_sub_rev] using
+      hspd (η t) (hηU ht) (v - u)
+  calc
+    riemannianEDist I (Ψ u) (Ψ v) ≤ pathELength I γ 0 1 :=
+      riemannianEDist_le_pathELength hγsmooth hγzero hγone zero_le_one
+    _ = ∫⁻ t in Set.Icc (0 : ℝ) 1,
+        ‖mfderiv 𝓘(ℝ, ℝ) I γ t 1‖ₑ := by
+      rw [pathELength_eq_lintegral_mfderiv_Icc]
+    _ ≤ ∫⁻ _ in Set.Icc (0 : ℝ) 1,
+        ENNReal.ofReal (L * dist u v) :=
+      MeasureTheory.setLIntegral_mono' measurableSet_Icc hpoint
+    _ = ENNReal.ofReal (L * dist u v) *
+        MeasureTheory.volume (Set.Icc (0 : ℝ) 1) := by
+      rw [MeasureTheory.setLIntegral_const]
+    _ = ENNReal.ofReal (L * dist u v) := by
+      rw [Real.volume_Icc]
+      norm_num
+
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M]
+  [T2Space M] in
 /-- The inverse of a fixed extended chart is locally Lipschitz for the
 Riemannian extended distance at every point of its target. -/
 theorem chart_inv_edist_le

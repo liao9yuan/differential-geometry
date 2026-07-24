@@ -13,7 +13,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjugateHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.WeylEigenvalueCountingBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 
 /-!
 # Classical scalar reconstruction inputs for the conjugate-heat limit
@@ -528,8 +528,7 @@ theorem galLim_jet_mass
     galLimExt_smooth (I := I) (M := M) hS hτ hlim
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   obtain ⟨p, _hp, hpsum⟩ := htail
   refine ⟨tau', htau', htau'_tau, ?_⟩
   intro a b ha hab hb
@@ -651,8 +650,7 @@ theorem galLim_mass0
   classical
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   obtain ⟨p, _hp, hpsum⟩ := htail
   intro m
   obtain ⟨k : Nat, hk⟩ := exists_nat_gt p
@@ -714,10 +712,7 @@ theorem galLim_slice_cc
       hc h0 (galLimExt hτ hlim 0 t)
   have htail : EigenvalueTailSummable (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M)
-      (S.family.metric (T : Real)) 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M)
-        (S.family.metric (T : Real)) 0 0)
+    scalar_eigen_tail (I := I) (M := M) (S.family.metric (T : Real))
   have hmem : ∀ σ : Real, ∀ hσ : 0 ≤ σ,
       ∃ v : tensorHs (I := I) (M := M)
           (S.family.metric (T : Real)) 0 0 σ,
@@ -1303,8 +1298,7 @@ theorem galLim_joint_cont
   classical
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   have hc : ∀ i : TensorEigenIdx (I := I) (M := M) q 0 0,
       ContDiffOn Real (0 : Nat) (fun t => ulim t i) Set.univ := by
     intro i
@@ -1354,8 +1348,7 @@ theorem galLim_joint_smooth
     galLim_jet_mass (I := I) (M := M) hS hτ hlim
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   refine ⟨tau', htau', htau'_tau, ?_⟩
   intro a b ha hab hb N
   let a₀ : Real := a / 2
@@ -1595,8 +1588,7 @@ theorem galLim_pde
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   let hc := tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   obtain ⟨tauJ, htauJ, htauJ_tau, hjet⟩ :=
     galLim_jet_mass (I := I) (M := M) hS hτ hlim
   obtain ⟨tauD, htauD, _htauD_one, _hreg, hcore⟩ :=

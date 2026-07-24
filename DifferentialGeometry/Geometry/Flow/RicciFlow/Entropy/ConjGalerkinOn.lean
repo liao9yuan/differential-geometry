@@ -691,8 +691,7 @@ theorem galJet_mass_on
     hS hτ hlim hreg hcore
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   obtain ⟨p, _hp, hpsum⟩ := htail
   intro a b ha hab hb
   have hKsub : Icc a b ⊆ Ioo (0 : Real) tau := by
@@ -820,8 +819,7 @@ theorem galJoint_fin_on
     hS hτ hlim hreg hcore
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   intro a b ha hab hb N
   let a₀ : Real := a / 2
   let b₀ : Real := (b + tau) / 2
@@ -947,8 +945,7 @@ theorem galPde_on
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   let hc := tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0
   have htail : EigenvalueTailSummable (I := I) (M := M) q 0 0 :=
-    eigenvalueTailSummable_of_countingBound (I := I) (M := M) q 0 0
-      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) q 0 0)
+    scalar_eigen_tail (I := I) (M := M) q
   have hjet := galJet_mass_on (I := I) (M := M)
     hS hτ hlim hreg hcore
   have hlift := galVel_lift_on (I := I) (M := M)

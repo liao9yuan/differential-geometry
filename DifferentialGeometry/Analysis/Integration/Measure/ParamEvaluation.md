@@ -92,3 +92,14 @@ current V0d completion section above.
 - Focused verification and the exported module refresh passed.
 - These are low-layer regularity facts used to make the normal polar integrand
   measurable; they do not supply any global injectivity or cut-locus result.
+
+## 2026-07-23 parametrized lower bound
+
+- Added `param_vol_ge`, the generic monotonicity corollary of
+  `riemannianVolumeMeasure_image_param_eq`.
+- A pointwise scalar lower bound for `paramDensity` now immediately yields the
+  corresponding lower bound for the Riemannian volume of the parametrized
+  image.
+- This is measure-transfer machinery only; it does not assert a density bound,
+  source radius, or geometric ball inclusion.
+- Focused verification passed without warnings.

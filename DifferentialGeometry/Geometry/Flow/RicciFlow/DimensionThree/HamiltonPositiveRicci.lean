@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.EarlyBall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.ScaleTransfer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergenceGlobal
@@ -2466,7 +2467,30 @@ theorem ham3_noncollapse
     (hsel : Ham3PointSel (I := I) P Q)
     (_hrm : Ham3RmControl (I := I) P Q hsel ham3_r0) :
     exists kappa : Real, Ham3Noncollapse (I := I) P Q hsel kappa ham3_r0 := by
-  sorry
+  classical
+  letI : CompactSpace M := hM.1
+  letI : ConnectedSpace M := hM.2.1
+  letI : I.Boundaryless := hM.2.2.1
+  have hsol :
+      DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) P.S :=
+    P.isSmooth.isSolution
+  have hnlc : Perelman.NoLocalCollapsing P.S ham3_r0 := by
+    have htransport :
+        ∀ (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+          (hD' : D =
+            DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+              0 omega h0omega)
+          (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn
+            (I := I) (M := M) D),
+          DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S →
+            Perelman.NoLocalCollapsing S ham3_r0 := by
+      intro D hD' S hS
+      subst D
+      exact Perelman.no_local_open (I := I) (M := M) h0omega
+        S hS hM.2.2.2 ham3_r0_pos
+    exact htransport P.D hD P.S hsol
+  exact ham3_noncollapse_of
+    (I := I) h0omega P hD Q hsel _hrm hnlc
 
 /-- Black box 11.12-style input: Hamilton compactness produces a pointed smooth
 Cheeger-Gromov-Hamilton limit from curvature control and noncollapsing. -/

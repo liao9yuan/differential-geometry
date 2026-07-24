@@ -306,6 +306,107 @@ theorem intrinsic_jacobi_one
     exact congrArg (fun L : E →L[ℝ] E => L w) hfootCLM
   exact hstep.trans hgoal
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The intrinsic Jacobi variation has initial covariant derivative `w`.
+
+For the globally smooth variation
+`F(s,t) = intrinsicGeodesic p (x + s • w) t`, mixed covariant derivatives
+commute at `(0,0)`. The transverse curve there is constant at `p`, while the
+longitudinal velocity is exactly `x + s • w`. -/
+theorem intrinsic_jacobi_d0
+    [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (x w : E) :
+    (covDerivAlong (I := I) g
+      (fun t : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+        (show TangentSpace I p from x) t)
+      (fun t : ℝ => show TangentSpace I
+          (intrinsicGeodesic (I := I) g hEnorm p
+            (show TangentSpace I p from x) t) from
+        mfderiv 𝓘(ℝ, ℝ) I
+          (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+            (show TangentSpace I p from x + s • w) t) 0 (1 : ℝ))
+      0 : E) = w := by
+  classical
+  let F : ℝ → ℝ → M := fun s t =>
+    intrinsicGeodesic (I := I) g hEnorm p
+      (show TangentSpace I p from x + s • w) t
+  have hFsmooth : IsSmoothVariation (I := I) F := by
+    change ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ)
+      (fun q : ℝ × ℝ => F q.1 q.2)
+    exact (intrinsicVar_smooth (I := I) g hEnorm p x w).of_le ENat.LEInfty.out
+  have hF0 : ∀ s : ℝ, F s 0 = p := by
+    intro s
+    exact intrinsicGeodesic_zero (I := I) g hEnorm p _
+  have hlaunch : ∀ s : ℝ,
+      (mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) 0 (1 : ℝ) : E) = x + s • w := by
+    intro s
+    exact intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p
+      (show TangentSpace I p from x + s • w)
+  have hF0_ev : (fun s : ℝ => F s 0) =ᶠ[𝓝 (0 : ℝ)] (fun _ : ℝ => p) :=
+    Filter.Eventually.of_forall hF0
+  have hlaunch_ev : ∀ᶠ s in 𝓝 (0 : ℝ),
+      (mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) 0 (1 : ℝ) : E)
+        = ((show TangentSpace I p from x + s • w : E)) :=
+    Filter.Eventually.of_forall hlaunch
+  have hHDA : HasDerivAt (fun s : ℝ => x + s • w) w 0 := by
+    have h : HasDerivAt (fun s : ℝ => x + s • w) ((1 : ℝ) • w) 0 :=
+      ((hasDerivAt_id (0 : ℝ)).smul_const w).const_add x
+    simpa using h
+  have hLHS := covDerivAlong_congr_curve (I := I) g
+    (fun s : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) 0 (1 : ℝ))
+    (fun s : ℝ => (show TangentSpace I p from x + s • w)) hF0_ev hlaunch_ev
+  have hdiff : DifferentiableAt ℝ
+      (fun s : ℝ => ((show TangentSpace I p from x + s • w) : E)) 0 :=
+    hHDA.differentiableAt
+  have hconst := covDerivAlong_const (I := I) g p
+    (fun s : ℝ => (show TangentSpace I p from x + s • w)) 0 hdiff
+  have hderiv :
+      deriv (fun s : ℝ => ((show TangentSpace I p from x + s • w) : E)) 0 = w :=
+    hHDA.deriv
+  have hcomm := commute_ds_dt_intrinsic (I := I) g F hFsmooth 0
+  have hcomm_E :
+      (covDerivAlong (I := I) g (fun s : ℝ => F s 0)
+          (fun s : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) 0 (1 : ℝ)) 0 : E)
+        = (covDerivAlong (I := I) g (fun t : ℝ => F 0 t)
+          (fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s t) 0 (1 : ℝ)) 0 : E) := by
+    rw [hcomm]
+  have hfinal :
+      (covDerivAlong (I := I) g (fun t : ℝ => F 0 t)
+          (fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s t) 0 (1 : ℝ)) 0 : E)
+        = w :=
+    hcomm_E.symm.trans (hLHS.trans (hconst.trans hderiv))
+  have hcentral_ev : (fun t : ℝ => F 0 t) =ᶠ[𝓝 (0 : ℝ)]
+      (fun t : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+        (show TangentSpace I p from x) t) := by
+    filter_upwards with t
+    simp only [F, zero_smul, add_zero]
+  have hfield_ev : ∀ᶠ t in 𝓝 (0 : ℝ),
+      (mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s t) 0 (1 : ℝ) : E)
+        = ((show TangentSpace I
+            (intrinsicGeodesic (I := I) g hEnorm p
+              (show TangentSpace I p from x) t) from
+          mfderiv 𝓘(ℝ, ℝ) I
+            (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+              (show TangentSpace I p from x + s • w) t) 0 (1 : ℝ)) : E) := by
+    filter_upwards with t
+    rfl
+  have hRHS := covDerivAlong_congr_curve (I := I) g
+    (fun t : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s t) 0 (1 : ℝ))
+    (fun t : ℝ => show TangentSpace I
+        (intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from x) t) from
+      mfderiv 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from x + s • w) t) 0 (1 : ℝ))
+    hcentral_ev hfield_ev
+  exact hRHS.symm.trans hfinal
+
 /-- **The clamped radial slice satisfies `∇_t ∂_t = 0` at interior parameters.**
 For `‖a‖ < expMapC2Radius g p` and a clamp `ψ` that is the identity on
 `[-1, 2]`, the curve `v ↦ expMap g p (ψ v • a)` satisfies the geodesic equation
