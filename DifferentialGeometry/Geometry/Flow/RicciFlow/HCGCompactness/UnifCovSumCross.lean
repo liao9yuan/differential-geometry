@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+import Mathlib.Analysis.Matrix.PosDef
 
 /-!
 # Covariant-sum cross-metric equivalence (item-6 statement S0) — fiber-level layer
@@ -44,6 +45,46 @@ open DifferentialGeometry.HCGCompactness
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
+
+/-! ### Matrix determinant building blocks for the volume (Loewner→det) brick
+
+These generic real-matrix lemmas are the pure linear-algebra core of the volume comparison
+`dV_{g₀} ≍_{Λ^{n/2}} dV_{gBase}` (recon §3 volume level): the chart densities are
+`√det(chartGram)`, so the comparison reduces to `det(chartGram g₀) ≤ Λ^n·det(chartGram gBase)`
+(Loewner→determinant monotonicity).  Mathlib has no matrix square root, Weyl monotonicity, or
+`det`-order lemma, so this is built from the spectral theorem; the reusable core is
+`det_le_one_of_rayleigh` (`A ≤ I ⟹ det A ≤ 1`).  Candidate canonical home:
+`Geometry/Comparison/Volume/JacobianBounds.lean` `MatrixBounds` (beside the existing
+`eigenvalues_ge_of_rayleigh`/`sqrt_pow_le_sqrt_det`); kept private here pending planner hoist. -/
+section MatrixDet
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+/-- Unit-vector Rayleigh **upper** bound ⟹ every eigenvalue is `≤ a` (the upper companion of
+`Geometry/Comparison/Volume/JacobianBounds.lean`'s `eigenvalues_ge_of_rayleigh`). -/
+private lemma eigenvalues_le_of_rayleigh
+    {A : Matrix ι ι ℝ} {a : ℝ} (hA : A.IsHermitian)
+    (hray : ∀ v : EuclideanSpace ℝ ι, ‖v‖ = 1 →
+      RCLike.re (dotProduct (star ⇑v) (Matrix.mulVec A ⇑v)) ≤ a) :
+    ∀ i, hA.eigenvalues i ≤ a := by
+  intro i
+  rw [hA.eigenvalues_eq i]
+  exact hray (hA.eigenvectorBasis i) (hA.eigenvectorBasis.norm_eq_one i)
+
+/-- A positive-semidefinite real matrix whose Rayleigh quotient is `≤ 1` on the unit sphere
+(i.e. `A ≤ I` in the Loewner order) has `det A ≤ 1`: its eigenvalues lie in `[0,1]` and the
+determinant is their product.  This is the `B = I` core of Loewner→determinant monotonicity. -/
+private lemma det_le_one_of_rayleigh
+    {A : Matrix ι ι ℝ} (hA : A.PosSemidef)
+    (hray : ∀ v : EuclideanSpace ℝ ι, ‖v‖ = 1 →
+      RCLike.re (dotProduct (star ⇑v) (Matrix.mulVec A ⇑v)) ≤ 1) :
+    A.det ≤ 1 := by
+  rw [hA.isHermitian.det_eq_prod_eigenvalues]
+  refine Finset.prod_le_one (fun i _ => ?_) (fun i _ => ?_)
+  · exact_mod_cast hA.eigenvalues_nonneg i
+  · exact_mod_cast eigenvalues_le_of_rayleigh hA.isHermitian hray i
+
+end MatrixDet
 
 -- The fibre-level comparison is purely pointwise: it needs only the fibre inner-product /
 -- finite-dimensionality on `E` and a charted smooth manifold structure.  The manifold

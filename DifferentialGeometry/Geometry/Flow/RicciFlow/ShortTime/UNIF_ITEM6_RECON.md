@@ -499,6 +499,19 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (S0 session 2, LANE C, Opus): **VOLUME brick (V) core LANDED + verified**
+  (`lake build` 3860 jobs EXIT=0; axioms standard triple).  Two reusable matrix lemmas in
+  `HCGCompactness/UnifCovSumCross.lean` §MatrixDet: `eigenvalues_le_of_rayleigh` (upper companion
+  of `JacobianBounds.eigenvalues_ge_of_rayleigh`) and `det_le_one_of_rayleigh` (`A≤I ⟹ det A≤1`,
+  the `B=I` core of Loewner→det).  **MATERIAL FINDING**: the full explicit-`Λ` volume comparison
+  needs a genuine Loewner→determinant estimate (Mathlib lacks matrix-sqrt-as-op / Weyl / Hadamard /
+  det-order; `CompactVolumeEquiv.lean:9` records the existing measure-equiv was built to AVOID it) —
+  NOT "generic matrix analysis available", but FEASIBLE via the CFC matrix sqrt
+  (`Analysis/Matrix/Order.lean`: `CFC.sqrt`, `sqrt_mul_sqrt_self`, `PosSemidef.det_sqrt`).  The
+  general `det_le_of_posSemidef_le` + chart-Gram comparability + `chartDensity`/measure lift are
+  FULLY WORKED (mechanical next session) in `UnifCovSumCross.md`.  T (connection-change) skeleton
+  recorded there too; its j=1-for-`(0,2)` needs the generic multi-slot connection difference
+  (beyond single-covector `connectionDifferenceOutput`).
 - 2026-07-24 (S0 session 1, LANE C, Opus): item-6 **S0** (`covsum_cross_unif`) build STARTED.
   HOME confirmed `HCGCompactness/UnifCovSumCross.lean` (NOT recon §5's `Analysis/Sobolev/
   CrossMetric/` — S0's `MetricCovDerivOrderBoundOn` hyps are downstream of `Analysis/`, same

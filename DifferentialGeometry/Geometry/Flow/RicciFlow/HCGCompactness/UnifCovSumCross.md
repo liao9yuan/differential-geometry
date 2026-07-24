@@ -100,7 +100,85 @@ sorry-free: general-order class-hypothesis fiber comparison `covSumCross_fiber0S
 is NOT stated sorry-free in Lean this session (blocked on the volume + currency-bridge +
 connection-change bricks above); its full statement + 3-brick decomposition live in this note.
 
+## Session 2 (2026-07-24) — VOLUME brick (V) core + routes
+
+Planner dispatch: (V) the volume brick (Loewner→det), then (T) start the connection-change
+telescoping (j=1 verified if the full induction is large, skeleton in `.md` either way).
+
+### V — MATERIAL FINDING: Loewner→det is a genuine matrix brick, not "generic matrix analysis"
+Mathlib has **no** matrix square root as a plain `Matrix` op, **no** Weyl/min-max eigenvalue
+monotonicity, **no** Loewner `≤`→`det` lemma, and **no** Hadamard determinant inequality.
+`Measure/CompactVolumeEquiv.lean:9` explicitly records the existing `volume_uniform_equiv` was
+built to AVOID this estimate.  So the explicit-`Λ` volume comparison genuinely requires building
+Loewner→det.  Located building material: `JacobianBounds.lean` `MatrixBounds`
+(`eigenvalues_ge_of_rayleigh`, `sqrt_pow_le_sqrt_det`) is single-matrix (eigenvalue→det), NOT the
+two-matrix Loewner→det; Mathlib `Analysis/Matrix/PosDef.lean` has `det_eq_prod_eigenvalues`,
+`PosSemidef.eigenvalues_nonneg`.  **BUT** `Analysis/Matrix/Order.lean` provides a CFC matrix sqrt
+(`CFC.sqrt`, `CFC.sqrt_mul_sqrt_self`, `PosSemidef.det_sqrt`, `nonneg_iff_posSemidef`) and
+`Analysis/CStarAlgebra/…` the factorization `CStarAlgebra.nonneg_iff_eq_star_mul_self` — so the
+brick is FEASIBLE (no missing math), just a ~50-line matrix proof.
+
+### V — LANDED (sorry-free, verified; axioms `[propext, Classical.choice, Quot.sound]`)
+The reusable Loewner→det core, in `UnifCovSumCross.lean` §MatrixDet (private; hoist candidate =
+`JacobianBounds.lean` `MatrixBounds`):
+- `eigenvalues_le_of_rayleigh` — Rayleigh **upper** bound ⟹ every eigenvalue `≤ a` (upper companion
+  of the existing `eigenvalues_ge_of_rayleigh`).
+- `det_le_one_of_rayleigh` — `A.PosSemidef` + Rayleigh `≤ 1` (i.e. `A ≤ I`) ⟹ `det A ≤ 1`
+  (eigenvalues `∈ [0,1]`, `det = ∏ ≤ 1` via `Finset.prod_le_one`).  This is the `B = I` core.
+
+### V — REMAINING (fully-worked route; next session is mechanical)
+1. **`det_le_of_posSemidef_le`** (general Loewner→det): `A.PosSemidef`, `B.PosDef`,
+   `∀ v:ι→ℝ, v ⬝ᵥ A*ᵥv ≤ v ⬝ᵥ B*ᵥv` ⟹ `A.det ≤ B.det`.  Proof (worked): `M := CFC.sqrt B`
+   (PosDef, symmetric `Mᴴ=M` via `IsSelfAdjoint.of_nonneg (CFC.sqrt_nonneg _)`, `M*M=B` via
+   `CFC.sqrt_mul_sqrt_self`, `det M = √(det B)` via `PosSemidef.det_sqrt`).  Set
+   `C := M⁻¹*A*M⁻¹`; `C.PosSemidef` (via `PosSemidef.conjTranspose_mul_mul_same` + `Mᴴ=M`).
+   Rayleigh: for `‖v‖=1`, put `u := M⁻¹*ᵥv`; then `v ⬝ᵥ C*ᵥv = u ⬝ᵥ A*ᵥu ≤ u ⬝ᵥ B*ᵥu = (M*ᵥu)⬝ᵥ(M*ᵥu)
+   = v⬝ᵥv = 1` (uses `M` symmetric + `M*ᵥu = v`), so `det_le_one_of_rayleigh` gives `det C ≤ 1`.
+   Finally `A = M*C*M` ⟹ `det A = (det M)²·det C = det B·det C ≤ det B` (`det B>0`).  Coercion
+   care: `EuclideanSpace ℝ ι ↔ ι→ℝ`, `star=id`/`RCLike.re=id` over ℝ, `dotProduct_mulVec` with
+   `M`/`M⁻¹` symmetric (`transpose_nonsing_inv`), `⇑v ⬝ᵥ ⇑v = ‖v‖²` via `EuclideanSpace` inner.
+2. **`chartGram_quad_le_of_equiv`** (gap-free): from `MetricUniformEquivalentOn univ gBase g₀ Λ`,
+   `∀ v:Fin n→ℝ, v ⬝ᵥ (chartGram g₀ x₀ x)*ᵥv ≤ Λ·(v ⬝ᵥ (chartGram gBase x₀ x)*ᵥv)`.  Route:
+   `chartGramMatrix_apply` (`= g.inner x (cbf i)(cbf j)`, `Geometry/Metric/ChartGram.lean:224`) +
+   bilinear expansion `v ⬝ᵥ Gram *ᵥ v = g.inner x V V`, `V=∑ vᵢ·cbf i` (tooling:
+   `chartBasisVecFiber_eq_sum_chartModelBasis`, `g_inner_bilinear_expand`) + comparability.
+3. **`chartDensity_cross_le`**: from (1)+(2) with `A=chartGram g₀`, `B=Λ•chartGram gBase`
+   (`det(Λ•G)=Λⁿ det G`), `√`: `chartDensity g₀ x₀ x ≤ Λ^{n/2}·chartDensity gBase x₀ x`.
+4. **`volumeMeasure_cross_le`**: lift (3) to `riemannianVolumeMeasure g₀ ≤ (Λ^{n/2})•riemannianVolumeMeasure
+   gBase` (both directions) via `chart_lintegral_le` (`CompactVolumeEquiv.lean:195`) + the POU-sum
+   pattern of `volume_uniform_equiv:342` (with explicit `C=Λ^{n/2}` instead of the existential).
+Constant: volume factor `Λ^{n/2}` (`n=finrank`), matching recon §3.
+
+### T — connection-change telescoping (skeleton, per planner "state the skeleton either way")
+Target (pointwise, gBase-fibre currency): `|∇^{g₀,j}T|_{gBase} ≤ D_j·∑_{k≤j}|∇^{gBase,k}T|_{gBase}`,
+`D_j=D_j(Λ,n)`.  **j=1 template** = the scalar-Hessian assembly in
+`Garding/CrossMetricEnergy.lean` `cross_point_le`: `∇^{cov}−∇^{cov'}` on a covector `α` is the
+connection-difference tensor `A=connectionDifferenceTensorAt (LeviCivita g₀)(LeviCivita gBase) x`
+contracted, i.e. `hess_sub_conn` (`HessianTraceRealization.lean:333`,
+`Hess_{cov}u−Hess_{cov'}u = −connectionDifferenceOutput(diff)(du)`) + `connOut_norm_le`
+(`ConnectionDifferenceNorm.lean:29`, `‖A⋆α‖_g ≤ ‖A‖_g·‖α‖_g`) + the g-norm triangle.  Class
+uniformity: bound `‖A‖_{gBase}=√normSqRS(connectionDifferenceTensorAt)` by the order-1 jet via
+`lcDiff_norm_le` (`MetricLapDiff.lean:164`, `‖ΔLC‖ ≤ Ce·metricDerivNorm 1 …`) then
+`metricDerivNorm ↔ MetricCovDerivOrderBoundOn`.  **GAP for the actual `(0,2)` base**:
+`connectionDifferenceOutput` is single-covector (`(0,1)→(0,2)`); the `(0,s)`-tensor difference is
+the multi-slot Leibniz sum `∑_{slot} A⋆(slot)` — the generic multi-slot connection difference is
+the real j=1-for-`(0,2)` content (not yet a committed lemma; `MetricDiffCovGradKoszul`/
+`RicciDeTurckSectionDifference` are metric-difference-specific).  **Induction j→j+1**: differentiate
+`∇^{g₀,j}T = ∇^{gBase,j}T + (Γ-diff insertions)` once more with `∇^{gBase}`, convert the extra
+`∇^{g₀}`→`∇^{gBase}` via the same connection-difference, and re-index — each step adds one
+`A`-insertion (cost one jet) and one fibre-slot (cost `√Λ`).  Then integrate with the volume
+comparison (V) and sum over `j≤n` (Cauchy–Schwarz over the `(j+1)`-term inner sum) → `C(Λ,n)`.
+
 ## Status
+- 2026-07-24 (session 2, V): LANDED the Loewner→det reusable CORE sorry-free + verified
+  (`eigenvalues_le_of_rayleigh`, `det_le_one_of_rayleigh`; `lake` EXIT=0; axioms standard triple).
+  MATERIAL FINDING: the full Loewner→det is a genuine ~50-line matrix brick (Mathlib lacks matrix
+  sqrt-as-`Matrix`-op / Weyl / Hadamard / det-order), NOT "generic matrix analysis available" — but
+  FEASIBLE (CFC sqrt in `Analysis/Matrix/Order.lean`).  General lemma + chart-Gram + density + measure
+  lift fully-worked above (mechanical next session).  T skeleton recorded; j=1 for the `(0,2)` base
+  needs the generic multi-slot connection difference (beyond single-covector `connectionDifferenceOutput`).
+  No general-lemma `.lean` written (coercion-heavy; banked the core rather than risk a long
+  unverified cycle).
 - 2026-07-24 (session 1): recon COMPLETE; comparability predicate + fiber atoms located and
   REUSED; three missing bricks isolated (Loewner→det volume, RS↔0S currency bridge [other
   lane], iterated connection change [main frontier]).  Green fiber engine (0S currency) is
