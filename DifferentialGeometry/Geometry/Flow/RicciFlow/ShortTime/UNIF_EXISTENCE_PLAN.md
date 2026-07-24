@@ -579,6 +579,35 @@ the Codex-blocked concrete instantiation, mirroring the
   then the downstream field wrapper.  DLb insert producer ~40%;
   deTurckLie constituent ~65%; (N) 0%.
 
+## Planner acceptance №17 (2026-07-24) — DLb HALF COMPLETE (all four endpoints)
+
+- DLb session 2 ACCEPTED.  Spot-checks pass: insert endpoints
+  `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  (`DeTurckVectorFieldL2JetBound.lean` :3956/:4123) and field wrappers
+  `deTurckLieDLbCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  (`DeTurckLieCoeffL2JetBound.lean` :432/:483); zero `sorry`, audit lines
+  stripped, diff scope exactly the permitted set.  Executor evidence:
+  whole-file checks clean; full closure `lake build
+  +…DeTurckLieCoeffL2JetBound` "Build completed successfully (9427
+  jobs)"; axiom audit exactly `[propext, Classical.choice, Quot.sound]`
+  on all four.
+- Discipline PASSED per RULING 2: insert `Ktop = 2·ΛClow 0·Ktop_xi`
+  (R-free, no `appCcGdiag` — the corner peel used the PUBLIC unconditional
+  `rfns_appCcRS_appCcLeibnizPsi_diag_le`, `OperatorFieldFibreNormJet.lean
+  :1728`); field `Ktop = 4·finrank·Ktop_insert`, R-free.  RECIPE
+  CORRECTION recorded: the argCorner lower sum is bounded by
+  `rfns_appCcRS_argLower_le` (:1426), NOT the coeff-corner engine
+  (:1372) named in the session-1 recipe; and the summed field wrapper
+  sums the per-order `×4·finrank` helper against the insert-summed bound
+  (no `jetL2_sum_lowShift` needed downstream — it is private upstream).
+- BOTH HALVES of `deTurckLieCoeffField` are now built and
+  shape-compatible.  Remaining for the constituent: the combined
+  assembly via `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`
+  (`2·DLa² + 2·DLb²`, per-order + summed) in
+  `DeTurckLieCoeffL2JetBound.lean` (the lowest file seeing both halves)
+  — dispatched to the warm session-2 executor.  Then `lieCorr0Field`
+  (2nd missing constituent), then the threeArm/C₀ assembly.  (N) 0%.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -1075,3 +1104,38 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
     wAlpha_L2 + wrapper + `jetL2_sum_lowShift a 2 3`, then the downstream field wrapper in
     `DeTurckLieCoeffL2JetBound.lean`.  ~300 lines, multi-session.
   My default absent a ruling: GENUINE (sibling of DLa); the 3 verified layers are that foundation.
+- 2026-07-24 (DLb session 2): **DLb HALF COMPLETE — all four top-separated endpoints built + verified
+  + axiom-audited (both RULINGS satisfied).**  Continued session-1's verified base (batches 1/2/2b).
+  - **Insert level** (`DeTurckVectorFieldL2JetBound.lean`, `section DLbTopSeparated`): batch 3
+    `wOmega_L2_topsep` (the crux corner peel), batch 4 `wAlpha_L2_topsep`, batch 5
+    `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated`, batch 6 `..._summed_topSeparated`.
+    Whole-file `lake env lean` EXIT=0, zero errors, zero NEW warnings (my code all > line 3500;
+    verified live, not cached).
+  - **RULING 2 satisfied — GENUINE positive R-free Ktop.**  The `Ktop = 0` shortcut was NOT used.
+    The wOmega corner peel is genuine: argCorner Leibniz (`iteratedCovGrad_appCcRS_eq_argCorner_add_
+    lower`) + the PUBLIC unconditional `rfns_appCcRS_appCcLeibnizPsi_diag_le`
+    (`OperatorFieldFibreNormJet.lean:1728`) — so the corner coefficient bound carries NO `appCcGdiag`,
+    just the R-free order-0 `cometricCastG0` fiber norm `ΛClow 0`; the top-free lower sum
+    (`rfns_appCcRS_argLower_le` :1426, antidiagonal ≤ two-arm triangular grid) integrates ball-uniformly.
+    Insert `Ktop = 2·ΛClow 0·Ktop_xi` (R-free, cleaner than the planned `appCcGdiag(a+1)` collapse).
+    (Note: the `.md` recipe's mention of `rfns_iteratedCovGrad_appCc_coeffLower_le` :1372 was for the
+    wrong engine; the correct lower-sum lemma is `rfns_appCcRS_argLower_le` :1426.)
+  - **RULING 1 satisfied — endpoint locations.**  Insert endpoints in `DeTurckVectorFieldL2JetBound.lean`;
+    THIN field wrappers `deTurckLieDLbCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated` in
+    `DeTurckLieCoeffL2JetBound.lean` via `normSq_iCG_dlbField_le` (generic-g₁ `×4·finrank` transport
+    through `deTurckLieDLbCoeffField_eq_slotInsert_sum`), `Ktop = 4·finrank·Ktop_insert` (R-free).  The
+    summed field wrapper avoids the private `jetL2_sum_lowShift` by summing the helper against the
+    insert-summed bound.  SHAPES match the DLa field siblings (:5680/5966); quantifier order s-before-i.
+  - **VERIFICATION:** full closure build `lake build +DeTurckLieCoeffL2JetBound` = 9427 jobs exit 0
+    (both modified modules Built clean, no warnings/errors in either).  **Axiom audit** via direct
+    `lean` (LEAN_PATH = `C:/dgb2/e87b/lib/lean` + the 9 package olean dirs): all four endpoints
+    (2 insert + 2 field) print exactly `[propext, Classical.choice, Quot.sound]`.  Audit lines stripped
+    after green.
+  - **Files touched:** `DeTurckVectorFieldL2JetBound.lean` (+.md), `DeTurckLieCoeffL2JetBound.lean`
+    (+.md new), `DeTurckLieJetL2Summed.md`.  Not committed (planner commits).
+  - **ASSEMBLY FRONTIER (NOT started, per dispatch scope):** the combined-coefficient assembly
+    `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via
+    `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`).  Both DLa and DLb top-separated summed
+    producers now exist and are shape-compatible.  `(N)` `ricci_flow_unif_existence` still **0%**
+    (`deTurckLieCoeffField` is the 1st of two genuinely-missing C₀ constituents; its DLa+DLb halves are
+    now both built, assembly pending; `lieCorr0Field` is a separate later dispatch).

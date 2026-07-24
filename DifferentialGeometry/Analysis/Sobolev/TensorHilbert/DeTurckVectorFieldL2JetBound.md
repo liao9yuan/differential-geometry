@@ -226,3 +226,31 @@ at the wrapper.
   perOrder endpoint `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated`, batch 6 summed
   `..._summed_topSeparated` (`jetL2_sum_lowShift a 2 3`), then the DOWNSTREAM field wrapper in
   `DeTurckLieCoeffL2JetBound.lean`.  `(N)` still 0%.
+- 2026-07-24 (session 2) **BATCHES 3–6 COMPLETE + VERIFIED GREEN** (whole-file `lake env lean`
+  EXIT=0, zero errors, zero NEW warnings; only pre-existing unusedSectionVars warnings, all at
+  lines < 3500).  All four insert-level lemmas landed in `section DLbTopSeparated`:
+  - batch 3 `wOmega_L2_topsep` — the crux corner peel.  Route CHANGED from the `.md` recipe: the
+    corner coefficient carries NO `appCcGdiag`.  Used PUBLIC unconditional
+    `rfns_appCcRS_appCcLeibnizPsi_diag_le` (`OperatorFieldFibreNormJet.lean:1728`) for the corner
+    `rfns(appCcRS ψ_{n,n}(∇ⁿwXi)) ≤ rfns(cometricCastG0)·rfns(∇ⁿwXi)`, with `rfns(cometricCastG0) ≤
+    ΛClow 0` (`cometricCastG0_rfns_lowOrder_le` at 0, `R`-free).  Lower sum via
+    `rfns_appCcRS_argLower_le` (:1426) → antidiagonal ≤ two-arm triangular grid (Finset
+    `sum_range_reflect`+`sum_range_succ'` reindex) → `exists_integrated_…_twoArm_rs_le` (S=cometricCastG0
+    3 1, T=wXi 0 3).  **`Ktop = 2·ΛClow 0·Ktop_xi`, `R`-free, NO `appCcGdiag`** (cleaner than the
+    planned `appCcGdiag(a+1)` collapse; RULING 2 satisfied — Ktop genuinely positive).  ~155 lines.
+  - batch 4 `wAlpha_L2_topsep` — wAlphaA arm = `‖∇^{i+1}wOmega‖²` top-sep at `n=i+1` (top
+    `‖∇^{i+2}P‖²`); wAlphaB arm reconstructs the `hBsum` two-arm block from
+    `wAlpha_order0_jetL2_generic` (top-free, ball-uniform).  `Ktop = 2·Ktop_om`.
+  - batch 5 `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated` — clones the ballUniform
+    insert plumbing (:3041; htie/hδP/hPball/empty-M) + `hwin` top-split (`‖∇^{i+2}Pc‖²≤‖∇T‖²+‖∇T'‖²`)
+    + `norm_iCG_wEndoInsert_eq_wAlpha`; absorbs C into `Kc i·1`.  `Ktop = Ktop_a`.
+  - batch 6 `..._summed_topSeparated` — `jetL2_sum_lowShift a 2 3`, both windows `a+3`.
+  SHAPES match the DLa siblings (`DeTurckLieKernelL2JetBound.lean:5680/5966`); quantifier order
+  s-before-i.  **Field wrapper** (`DeTurckLieCoeffL2JetBound.lean`): `normSq_iCG_dlbField_le`
+  (generic-g₁ `×4·finrank` per-order helper via `deTurckLieDLbCoeffField_eq_slotInsert_sum` +
+  `rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le` + `sq_le_two_add`) + the two field
+  endpoints; the summed field wrapper avoids the private `jetL2_sum_lowShift` by summing the helper
+  against the insert-summed bound.  Field `Ktop = 4·finrank·Ktop_insert`, `R`-free.  Wrapper-file
+  check + 4-endpoint axiom audit pending an olean refresh (the vector-field module is a heavy
+  build).  `(N)` still 0% (DLb half of one C₀ constituent now built; assembly not started per
+  session scope).

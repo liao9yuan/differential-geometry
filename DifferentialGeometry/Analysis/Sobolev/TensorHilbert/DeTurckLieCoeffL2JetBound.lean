@@ -350,6 +350,187 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B
 
+set_option linter.unusedSectionVars false in
+/-- Per-order `×4·finrank` transport of the `(2,2)` field jet to the `(1,1)` insert jet, via the
+slotInsert/reindex decomposition (`deTurckLieDLbCoeffField_eq_slotInsert_sum`); each summand is
+`≤ finrank·‖∇ⁱ wEndoInsert‖²` (`rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le`), and
+`sq_le_two_add` yields the factor `4·finrank`.  `R`-free bounded factor. -/
+private theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 ≤
+      4 * (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 := by
+  have hL2A : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (slotInsertEndoCc (I := I) (M := M) g₀ 1
+        (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 :=
+    normSq_iteratedCovGrad_le_scaled_of_pointwise (I := I) (M := M) g₀
+      (slotInsertEndoCc (I := I) (M := M) g₀ 1 (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
+      (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg) i (Module.finrank ℝ E : ℝ)
+      (fun x => rfns_iteratedCovGrad_dlbSlotZero_le (I := I) (M := M) g₀ g₁ g_bg i x)
+  have hL2B : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
+        (Equiv.swap (0 : Fin 2) 1))‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 :=
+    normSq_iteratedCovGrad_le_scaled_of_pointwise (I := I) (M := M) g₀
+      (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
+        (Equiv.swap (0 : Fin 2) 1))
+      (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg) i (Module.finrank ℝ E : ℝ)
+      (fun x => rfns_iteratedCovGrad_dlbSlotOne_le (I := I) (M := M) g₀ g₁ g_bg i x)
+  have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)
+      = iteratedCovGrad (I := I) g₀ 2 2 i
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
+        + iteratedCovGrad (I := I) g₀ 2 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                  (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
+              (Equiv.swap (0 : Fin 2) 1)) := by
+    rw [deTurckLieDLbCoeffField_eq_slotInsert_sum (I := I) (M := M) g₀ g₁ g_bg, iteratedCovGrad_add]
+  rw [hgrad]
+  refine le_trans (sq_le_two_add
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
+      + iteratedCovGrad (I := I) g₀ 2 2 i
+          (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
+            (Equiv.swap (0 : Fin 2) 1))‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+            (slotInsertEndoCc (I := I) (M := M) g₀ 1
+              (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
+          (Equiv.swap (0 : Fin 2) 1))‖
+    ((Module.finrank ℝ E : ℝ) *
+      ‖iteratedCovGrad (I := I) g₀ 1 1 i (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2)
+    ((Module.finrank ℝ E : ℝ) *
+      ‖iteratedCovGrad (I := I) g₀ 1 1 i (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2)
+    (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+    (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
+
+set_option linter.unusedVariables false in
+/-- **`realizedFam` per-order top-separated jet-L2 bound** for the DLb coefficient field.  Thin
+`×4·finrank` transport of `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated` through
+`normSq_iCG_dlbField_le`; `Ktop = 4·finrank·Ktop_insert` stays `R`-free. -/
+theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_topSeparated
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieDLbCoeffField (I := I) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
+            Ktop * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) +
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 3),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  obtain ⟨Ktop, hKtop_nn, Kc, hKc_nn, hins⟩ :=
+    deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated (I := I) (M := M) g₀ g_bg a
+      ha_super hR hδ₀
+  have hfr_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+  refine ⟨4 * (Module.finrank ℝ E : ℝ) * Ktop,
+      mul_nonneg (mul_nonneg (by norm_num) hfr_nn) hKtop_nn,
+    fun i => 4 * (Module.finrank ℝ E : ℝ) * Kc i,
+    fun i => mul_nonneg (mul_nonneg (by norm_num) hfr_nn) (hKc_nn i), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs i hi
+  have hins_i := hins T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs i hi
+  have hstep : 4 * (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
+      4 * (Module.finrank ℝ E : ℝ) *
+        (Ktop * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) +
+          Kc i * (1 + ∑ j ∈ Finset.range (i + 3),
+            (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2))) :=
+    mul_le_mul_of_nonneg_left hins_i (mul_nonneg (by norm_num) hfr_nn)
+  refine le_trans (normSq_iCG_dlbField_le (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i) ?_
+  refine le_trans hstep (le_of_eq ?_)
+  ring
+
+set_option linter.unusedVariables false in
+/-- **Summed** `realizedFam` top-separated jet-L2 bound for the DLb coefficient field.  Thin
+`×4·finrank` transport of the summed insert bound; both windows `a+3`, `Ktop` `R`-free. -/
+theorem deTurckLieDLbCoeffField_realizedFam_jetL2_summed_topSeparated
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℝ, 0 ≤ Kc ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 2 2 i
+                (deTurckLieDLbCoeffField (I := I) g₀
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
+            Ktop * (∑ j ∈ Finset.range (a + 3),
+                (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
+            Kc * (1 + ∑ j ∈ Finset.range (a + 3),
+                (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  obtain ⟨Ktop, hKtop_nn, Kc, hKc_nn, hins⟩ :=
+    deTurckLieWEndoInsert_realizedFam_jetL2_summed_topSeparated (I := I) (M := M) g₀ g_bg a
+      ha_super hR hδ₀
+  have hfr_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+  refine ⟨4 * (Module.finrank ℝ E : ℝ) * Ktop,
+      mul_nonneg (mul_nonneg (by norm_num) hfr_nn) hKtop_nn,
+    4 * (Module.finrank ℝ E : ℝ) * Kc,
+    mul_nonneg (mul_nonneg (by norm_num) hfr_nn) hKc_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs
+  have hsum_field : ∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (deTurckLieDLbCoeffField (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
+      4 * (Module.finrank ℝ E : ℝ) *
+        ∑ i ∈ Finset.range (a + 1),
+          ‖iteratedCovGrad (I := I) g₀ 1 1 i
+            (deTurckLieWEndoInsert (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_le_sum (fun i _ => ?_)
+    exact normSq_iCG_dlbField_le (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i
+  have hins_s := hins T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs
+  refine le_trans hsum_field ?_
+  refine le_trans (mul_le_mul_of_nonneg_left hins_s (mul_nonneg (by norm_num) hfr_nn))
+    (le_of_eq ?_)
+  ring
+
 set_option linter.unusedVariables false in
 theorem deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)

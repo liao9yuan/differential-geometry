@@ -171,3 +171,28 @@ Still open for `deTurckLieCoeffField` (= DLa + DLb): the **DLb** half
 (`DeTurckVectorFieldL2JetBound.lean` / `deTurckLieDLbCoeffField`) top-separated summed producer, then the
 **combined-coefficient assembly** `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via
 `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`).
+
+## 2026-07-24 — DLb field lift COMPLETE (session 2); DLb half of `deTurckLieCoeffField` DONE
+
+The **DLb** half is now built + verified (axiom-clean: all four endpoints depend only on
+`[propext, Classical.choice, Quot.sound]`, via direct `lean` with the project `LEAN_PATH`).  Layers:
+
+- **Insert level** (`DeTurckVectorFieldL2JetBound.lean`, `section DLbTopSeparated`), the analytic
+  heart — see `DeTurckVectorFieldL2JetBound.md` for the full tower.  The top order `∇^{i+2}T` enters
+  ONLY through `wAlphaA = ∇^{i+1}wOmega`, and `wOmega`'s corner peel uses the argCorner Leibniz
+  decomposition with the PUBLIC unconditional `rfns_appCcRS_appCcLeibnizPsi_diag_le` — so the corner
+  coefficient bound is the `R`-free order-0 `cometricCastG0` fiber norm (`ΛClow 0`, NO `appCcGdiag`),
+  and the top-free lower sum is bounded ball-uniformly by the two-arm grid integrator.  Endpoints:
+  `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`, `Ktop = 2·ΛClow 0·Ktop_xi`
+  (`R`-free), summed via `jetL2_sum_lowShift a 2 3` (both windows `a+3`).
+- **Field level** (`DeTurckLieCoeffL2JetBound.lean`), a THIN `×4·finrank` lift through
+  `deTurckLieDLbCoeffField_eq_slotInsert_sum`: `deTurckLieDLbCoeffField_realizedFam_jetL2_{perOrder,
+  summed}_topSeparated`, `Ktop = 4·finrank·Ktop_insert` (`R`-free).  Shapes match the DLa field
+  siblings `deTurckLieDLaCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  (`DeTurckLieKernelL2JetBound.lean:5680/5966`).
+
+Both DLa and DLb top-separated summed producers now exist and are shape-compatible.  **Remaining
+for `deTurckLieCoeffField`:** the combined-coefficient assembly `‖∇^i deTurckLieCoeffField‖² ≤
+2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`) — NOT
+started this session (per dispatch scope: stop at the four verified DLb endpoints).  `(N)`
+`ricci_flow_unif_existence` remains **0%**.
