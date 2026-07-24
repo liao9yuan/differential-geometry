@@ -200,12 +200,6 @@ theorem chartGramLim_contOn
   exact (hcOn.continuousWithinAt
     ⟨hp₀t, interior_subset hKint⟩).mono_of_mem_nhdsWithin hmem
 
-set_option maxHeartbeats 1000000 in
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricTensorContLim
     [LocallyCompactSpace M]
@@ -230,7 +224,8 @@ theorem metricTensorContLim
       {q : {t : ℝ // t ∈ Set.Icc β ψ} × M |
         q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
     ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
-  exact hlim.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+  have h := hlim.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+  exact h
 
 end HCGCompactness
 end DifferentialGeometry

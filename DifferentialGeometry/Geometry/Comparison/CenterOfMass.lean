@@ -108,18 +108,6 @@ theorem metricEnergy_half (μ : ι -> Real) (pts : ι -> X) (q : X) :
     metricEnergy μ pts q = ∑ i : ι, μ i * halfSqDist (pts i) q := by
   simp [metricEnergy, halfSqDist, Finset.mul_sum, mul_assoc, mul_comm]
 
-set_option maxHeartbeats 800000 in
-
-
-
-
-
-
-
-
-
-
-
 theorem metricEnergy_argmin_stable {P : Type*} [TopologicalSpace P] [FirstCountableTopology P]
     {K : Set X} (hK : IsCompact K)
     (μ : P -> ι -> Real) (pts : P -> ι -> X) (c : P -> X) (p₀ : P)
@@ -148,15 +136,22 @@ theorem metricEnergy_argmin_stable {P : Type*} [TopologicalSpace P] [FirstCounta
   have hcstar_min : ∀ y : X,
       metricEnergy (μ p₀) (pts p₀) cstar ≤ metricEnergy (μ p₀) (pts p₀) y := by
     intro y
+    have hpair : Filter.Tendsto
+        (fun n => ((seq (ns (φ n)), c (seq (ns (φ n)))) : P × X)) Filter.atTop
+        (nhds ((p₀, cstar) : P × X)) := hp_tend.prodMk_nhds hφ_tend
     have hLHS : Filter.Tendsto
         (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n))))
           (c (seq (ns (φ n))))) Filter.atTop
-        (nhds (metricEnergy (μ p₀) (pts p₀) cstar)) :=
-      (Econt.tendsto (p₀, cstar)).comp (hp_tend.prodMk_nhds hφ_tend)
+        (nhds (metricEnergy (μ p₀) (pts p₀) cstar)) := by
+      have h := (Econt.tendsto ((p₀, cstar) : P × X)).comp hpair
+      exact h
+    have hconst : Continuous (fun a : P => ((a, y) : P × X)) :=
+      continuous_id.prodMk continuous_const
     have hRHS : Filter.Tendsto
         (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n)))) y) Filter.atTop
-        (nhds (metricEnergy (μ p₀) (pts p₀) y)) :=
-      ((Econt.comp (continuous_id.prodMk continuous_const)).tendsto p₀).comp hp_tend
+        (nhds (metricEnergy (μ p₀) (pts p₀) y)) := by
+      have h := ((Econt.comp hconst).tendsto p₀).comp hp_tend
+      exact h
     exact le_of_tendsto_of_tendsto hLHS hRHS
       (Filter.Eventually.of_forall (fun n => hc_min (seq (ns (φ n))) y))
   refine ⟨φ, ?_⟩

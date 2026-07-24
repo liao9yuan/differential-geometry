@@ -223,7 +223,6 @@ private lemma partialDeriv_jointContDiffOn {G : ℝ × E → ℝ} {U : Set (ℝ 
 
 
 
-set_option synthInstance.maxHeartbeats 200000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma spatialJet_set
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -767,13 +766,6 @@ theorem metricVariationEquationOn_of_pde
     (hpde (t : ℝ) htmem x X Y).mono Set.Ico_subset_Ici_self
   simpa [SolutionFamily.ricciAt, metricRicciAt, metricRicciAt_apply_eq_ricciTensor] using h
 
-set_option maxHeartbeats 1000000 in
-
-
-
-
-
-
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [T2Space M] [SigmaCompactSpace M] in
@@ -804,7 +796,8 @@ theorem metricFamilySmoothOn_of_chartGram
         {q : {t : ℝ // t ∈ Set.Ico a b} × M |
           q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
       ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
-    exact (hcont x₀ i j).comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+    have h := (hcont x₀ i j).comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+    exact h
   refine ⟨?_, ?_, ?_, ?_⟩
   · intro x X Y
     have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞
@@ -892,7 +885,8 @@ theorem ricciCont_of_joint [I.Boundaryless]
       {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
       (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
     fun q hq => ⟨q.1.2, hq⟩
-  refine (hframe.comp hincl hmaps).congr ?_
+  have hcomp := hframe.comp hincl hmaps
+  refine hcomp.congr ?_
   intro q _
   have hvec : (fun k : Fin 2 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) q.2)
       = DifferentialGeometry.Integral.Connection.vec2
@@ -998,7 +992,8 @@ theorem rm04Cont_of_joint [I.Boundaryless]
       {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
       (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
     fun q hq => ⟨q.1.2, hq⟩
-  refine (hsum.comp hincl hmaps).congr ?_
+  have hcomp := hsum.comp hincl hmaps
+  refine hcomp.congr ?_
   intro q hq
   exact rm04_coord_eq (I := I) (g q.1.1) x₀ idx hq
 

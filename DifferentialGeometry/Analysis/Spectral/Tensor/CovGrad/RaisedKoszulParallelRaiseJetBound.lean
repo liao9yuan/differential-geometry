@@ -4,9 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometri
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
@@ -26,6 +23,17 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_quarter_scale_bound {S R : ℝ}
+    (hS : S ≤ 4 * R ^ 2 + 4 * R ^ 2 + 2 * R ^ 2) :
+    (1 / 2 : ℝ) ^ 2 * S ≤ 10 * R ^ 2 := by
+  nlinarith [hS]
+
+private lemma real_split_triple_bound {S AB A B C R : ℝ}
+    (h1 : S ≤ 2 * AB + 2 * C) (h2 : AB ≤ 2 * A + 2 * B)
+    (hA : A ≤ R ^ 2) (hB : B ≤ R ^ 2) (hC : C ≤ R ^ 2) :
+    S ≤ 4 * R ^ 2 + 4 * R ^ 2 + 2 * R ^ 2 := by
+  linarith
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -183,12 +191,8 @@ theorem rfns_iteratedCovGrad_koszulCovecCc_le
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB, hbC,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PA,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PC]
-  nlinarith [hsum, sq_nonneg R,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
+    exact real_split_triple_bound h1 h2 hbA hbB hbC
+  exact real_quarter_scale_bound hsum
 
 end TensorSpectral
 end Parabolic

@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
@@ -30,6 +27,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_le_of_sq_le_mul {c A : ℝ} (hA : 0 ≤ A) (h : c ^ 2 ≤ A * A) :
+    c ≤ A := by
+  nlinarith [h, hA, sq_nonneg (c - A), sq_nonneg (c + A)]
+
+private lemma real_half_average_le {c A B : ℝ} (hcA : c ≤ A) (hBA : B = A) :
+    1 / 2 * (1 / 2 * A + 1 / 2 * c) + 1 / 2 * (1 / 2 * c + 1 / 2 * B) ≤ A := by
+  rw [hBA]; linarith
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -378,11 +383,8 @@ theorem symmAbsorbedCoeff_riemannianFiberNormSq_le (g₀ : SmoothRiemannianMetri
     tensorInnerPointwise_sq_le_mul (I := I) (M := M) g₀ (2 + i) 2 x Rm Pm
   have hCA : tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Pm ≤
       tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Rm := by
-    nlinarith [hCS, hA_nn, hBA,
-      sq_nonneg (tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Pm -
-        tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Rm),
-      sq_nonneg (tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Pm +
-        tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x Rm Rm)]
+    rw [hBA] at hCS
+    exact real_le_of_sq_le_mul hA_nn hCS
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g₀ (2 + i) 2 x
       ((symmAbsorbedCoeff (I := I) (M := M) g₀ i R σ').toSection x),
     htoModel,
@@ -391,7 +393,7 @@ theorem symmAbsorbedCoeff_riemannianFiberNormSq_le (g₀ : SmoothRiemannianMetri
   simp only [tensorInnerPointwise_add_left, tensorInnerPointwise_add_right,
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   rw [tensorInnerPointwise_symm (I := I) (M := M) g₀ (2 + i) 2 x Pm Rm]
-  nlinarith [hCA, hBA]
+  exact real_half_average_le hCA hBA
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem symmAbsorbedCoeff_jet_le (g₀ : SmoothRiemannianMetric I M) (i n : ℕ)

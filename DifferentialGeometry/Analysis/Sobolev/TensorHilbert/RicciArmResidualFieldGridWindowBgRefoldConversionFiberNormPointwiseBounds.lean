@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -34,6 +32,15 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_ten_R2_bound {S AB A B C R2 : ℝ}
+    (h1 : S ≤ 2 * AB + 2 * C) (h2 : AB ≤ 2 * A + 2 * B)
+    (hA : A ≤ R2) (hB : B ≤ R2) (hC : C ≤ R2) : S ≤ 10 * R2 := by
+  linarith
+
+private lemma real_quarter_ten_bound {S R2 : ℝ} (hS : S ≤ 10 * R2) (hS0 : 0 ≤ S) :
+    (1 / 2 : ℝ) ^ 2 * S ≤ 10 * R2 := by
+  nlinarith [hS, hS0]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -308,12 +315,9 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB, hbC,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PA,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PC]
-  nlinarith [hsum, hR2_nn,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
+    exact real_ten_R2_bound h1 h2 hbA hbB hbC
+  exact real_quarter_ten_bound hsum
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC))
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)

@@ -155,10 +155,6 @@ theorem rmBounded_of_not_unbounded
   intro t x ht hT
   exact hK t x ht hT
 
-set_option maxHeartbeats 1000000 in
-
-
-
 theorem extends_of_rmBounded
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -215,7 +211,8 @@ theorem extends_of_rmBounded
         (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
         (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
-    exact (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
+    have h := (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
+    exact h
   have h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M =>
@@ -226,7 +223,8 @@ theorem extends_of_rmBounded
         (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
         (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
-    exact (hrr_cont x₀ i j).comp hshift.continuous.continuousOn hmaps
+    have h := (hrr_cont x₀ i j).comp hshift.continuous.continuousOn hmaps
+    exact h
   have h2pde : ∀ t ∈ Set.Ico t_star omega, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (rr (s - t_star)).inner x v w)
         ((-2 : ℝ) * ricciTensor (I := I) (rr (t - t_star)) x v w) (Set.Ici t_star) t := by

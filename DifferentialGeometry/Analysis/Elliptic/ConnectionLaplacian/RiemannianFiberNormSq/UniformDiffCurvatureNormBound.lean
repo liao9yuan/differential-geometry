@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -61,8 +59,8 @@ private lemma nablaBaseSlotCurv_eq_of_leftMidRight
     rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
     exact nablaCurvSec_swap23 (g := g) Y'.contMDiff W.contMDiff hext
   rw [hswap Z, hswap Z']
-  congr 1
-  exact nablaBaseSlotCurv_eq_of_leftMid (I := I) g X' X' Z Z' Y' x rfl hZZ' u
+  exact neg_inj.mpr
+    (nablaBaseSlotCurv_eq_of_leftMid (I := I) g X' X' Z Z' Y' x rfl hZZ' u)
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
