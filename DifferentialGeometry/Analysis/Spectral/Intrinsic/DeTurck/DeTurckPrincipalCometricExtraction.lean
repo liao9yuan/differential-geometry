@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -36,6 +34,16 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_le_sq_of_sqrt_le {y r : ℝ} (hy : 0 ≤ y) (hr : 0 ≤ r)
+    (h : Real.sqrt y ≤ r) : y ≤ r ^ 2 := by
+  nlinarith [Real.sqrt_nonneg y, Real.sq_sqrt hy, h, hr]
+
+private lemma real_split_pair_bound {S AB A B C : ℝ}
+    (h1 : S ≤ 2 * AB + 2 * C) (h2 : AB ≤ 2 * A + 2 * B)
+    (hA : A = C) (hB : B = C) : S ≤ 4 * C + 4 * C + 2 * C := by
+  rw [hA, hB] at h2
+  linarith
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -586,7 +594,7 @@ theorem riemannianFiberNormSq_deTurckPrincipalCometricCoeff_le
     have hLnn : 0 ≤ g₀.inner x (Λ (e b)) (Λ (e b)) :=
       DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x (Λ (e b))
     have hsq := Real.sq_sqrt hLnn
-    nlinarith [Real.sqrt_nonneg (g₀.inner x (Λ (e b)) (Λ (e b))), hsqrt, hsq, hr_nn]
+    exact real_le_sq_of_sqrt_le hLnn hr_nn hsqrt
   have hParseval : ∀ b : Fin n,
       (∑ a : Fin n, (g₀.inner x (e a) (Λ (e b))) ^ 2) = g₀.inner x (Λ (e b)) (Λ (e b)) := by
     intro b
@@ -784,10 +792,7 @@ private lemma riemannianFiberNormSq_iteratedCovGrad_ricciArmPrincipalCoeff_sub_l
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 4 (2 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (2 + i) x PA,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (2 + i) x PB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (2 + i) x PC]
+    exact real_split_pair_bound h1 h2 hbA hbB
   have hlhs4 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x (PA0 + PA0) =
       4 * riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x PA0 := by
     rw [show PA0 + PA0 = (2 : ℝ) • PA0 from (two_smul ℝ PA0).symm,

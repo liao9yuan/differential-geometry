@@ -43,7 +43,12 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-set_option maxHeartbeats 1600000 in
+
+private lemma real_two_mul_add_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    0 ≤ 2 * a + b := by linarith
+
+private lemma real_le_mul_add_one {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    a ≤ a * (b + 1) := by nlinarith
 
 theorem secondOrderInterp_lpFiberJet_fin_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
@@ -183,7 +188,8 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
     have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt (Module.finrank ℝ E : ℝ) := Real.sqrt_nonneg _
 
     have hIb_bound : Ib ≤ D * (Aw * (Ib ^ (1 / β) * C)) := by
-      have hcoef_nn : 0 ≤ D := by rw [hD_def]; nlinarith [hp1m, hsqrt_nn]
+      have hcoef_nn : 0 ≤ D := by
+        rw [hD_def]; exact real_two_mul_add_nonneg hp1m.le hsqrt_nn
       have hstep : Ib ≤ D * (∫ x, f₁ x * f₂ x * f₃ x ∂μ) := hIBP
       refine le_trans hstep ?_
       apply mul_le_mul_of_nonneg_left _ hcoef_nn
@@ -208,7 +214,7 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
     have hcoef_le : D ≤ K' := by
       have hp_le_k : p ≤ (k : ℝ) := by
         rw [hp_def, div_le_iff₀ hi1R]
-        nlinarith [hkR, hiR]
+        exact real_le_mul_add_one hkR.le hiR.le
       have hDk : D ≤ 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) := by
         rw [hD_def]; linarith
       exact le_trans hDk (le_trans (le_max_left _ _) (le_max_left _ _))
@@ -234,7 +240,6 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
         _ = K' * Aw * C := by ring
   · exfalso; omega
 
-set_option maxHeartbeats 1600000 in
 
 theorem secondOrderInterp_lpFiberJet_sup_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
@@ -298,7 +303,8 @@ theorem secondOrderInterp_lpFiberJet_sup_rs
   have hkm1_nn : (0 : ℝ) ≤ (k : ℝ) - 1 := by
     have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
     linarith
-  have hD_nn : 0 ≤ D := by rw [hD_def]; nlinarith [hkm1_nn, hsqrt_nn]
+  have hD_nn : 0 ≤ D := by
+    rw [hD_def]; exact real_two_mul_add_nonneg hkm1_nn hsqrt_nn
 
   have hIBP' : Ib ≤ D * A * J := by
     rw [hIb_def, hJ_def, hD_def]; exact hIBP

@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -115,7 +113,7 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
     rw [hSEΦ, Integral.Connection.slotExtend_toSection, Integral.Connection.slotExtendFib_apply,
       ContinuousLinearEquiv.apply_symm_apply, ContinuousLinearMap.comp_apply]
   rw [show (⇑wcurry) = (fun y : M => (Tensor0SNabla.curriedSection I M (fun z : M => w z) y) (Y y)) from rfl,
-    hCL_w, map_add]
+    hCL_w, ContinuousLinearMap.map_add]
   rw [hcurU_op, ContinuousLinearMap.comp_apply]
   abel
 
@@ -163,8 +161,8 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     intro y
     apply ContinuousLinearMap.ext
     intro D
-    rw [Integral.Connection.slotExtendFib_apply, ContinuousLinearMap.zero_comp, map_zero,
-      ContinuousLinearMap.zero_apply]
+    rw [Integral.Connection.slotExtendFib_apply, ContinuousLinearMap.zero_comp,
+      ContinuousLinearEquiv.map_zero, ContinuousLinearMap.zero_apply]
 
   have hdir : ∀ (x : M) (v : E),
       Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v = 0 := by

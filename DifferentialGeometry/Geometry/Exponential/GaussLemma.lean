@@ -36,6 +36,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+private lemma real_eq_zero_of_sqrt_eq_zero {y : ℝ} (hy : 0 ≤ y) (h : Real.sqrt y = 0) :
+    y = 0 := by
+  have hsq := Real.sq_sqrt hy
+  rw [h] at hsq
+  simpa using hsq.symm
+
 section RadialMinimizerConvention
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1209,7 +1215,6 @@ private theorem radial_minimizer_radiality
     exact hradial
 
 set_option linter.unusedVariables false in
-set_option maxHeartbeats 1600000 in
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1284,8 +1289,7 @@ theorem normalBall_radial_minimizer_equality
       intro t ht
       have : B (c t) (c t) = 0 := by
         have h := hρ0 t ht; rw [hρ_def] at h; simp only at h
-        nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h,
-          Real.sq_sqrt (hBnn (c t))]
+        exact real_eq_zero_of_sqrt_eq_zero (hBnn (c t)) h
       by_contra hc0
       exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
     refine ⟨fun t => (t - a) / (b - a), ?_, ?_, ?_, ?_⟩
@@ -1383,7 +1387,7 @@ theorem normalBall_radial_minimizer_equality
           have : B (c t) (c t) = 0 := by
             have h : ρ t = 0 := hρt0.symm
             rw [hρ_def] at h; simp only at h
-            nlinarith [Real.sq_sqrt (hBnn (c t)), Real.sqrt_nonneg (B (c t) (c t)), h]
+            exact real_eq_zero_of_sqrt_eq_zero (hBnn (c t)) h
           by_contra hc0
           exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
         rw [hct0, ← hρt0, zero_div, zero_smul]

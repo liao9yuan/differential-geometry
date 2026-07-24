@@ -9,8 +9,6 @@ import Mathlib.Topology.Order.Compact
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -579,11 +577,13 @@ private lemma riemannOp_normSq_le_chartConstants
         (riemannOp (cov := LeviCivita (I := I) g) x v w u)
       ≤ CG * ∑ l, coeff l ^ 2 := hgnorm_le_CGcoeff
     _ ≤ CG * (CR ^ 2 * (n : ℝ) ^ 4 *
-          ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2))) := by
-        gcongr
+          ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2))) :=
+        mul_le_mul_of_nonneg_left hsum_coeff_sq' hCG_nonneg
     _ ≤ CG * (CR ^ 2 * (n : ℝ) ^ 4 *
-          (cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w))) := by
-        gcongr
+          (cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w))) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left hQprod_le
+            (mul_nonneg hCR2_nonneg (pow_nonneg hn_nonneg 4))) hCG_nonneg
     _ = CG * CR ^ 2 * (n : ℝ) ^ 4 * cg⁻¹ ^ 3 *
           g.inner x v v * g.inner x w w * g.inner x u u := by ring
 

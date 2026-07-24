@@ -27,8 +27,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -54,6 +52,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_sq_add_three_le {a b c K0 K1 K2 W : ℝ}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c)
+    (h0 : a ^ 2 ≤ K0 * W) (h1 : b ^ 2 ≤ K1 * W) (h2 : c ^ 2 ≤ K2 * W)
+    (hK0 : 0 ≤ K0) (hK1 : 0 ≤ K1) (hK2 : 0 ≤ K2) (hW : 0 ≤ W) :
+    (a + b + c) ^ 2 ≤ 3 * (K0 + K1 + K2) * W := by
+  nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c),
+    h0, h1, h2, ha, hb, hc, mul_nonneg hK0 hW, mul_nonneg hK1 hW, mul_nonneg hK2 hW]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -1020,9 +1026,8 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
     refine le_trans hsq ?_
-    nlinarith [hG0, hG1, hG2, sq_nonneg (‖G0‖ - ‖G1‖), sq_nonneg (‖G1‖ - ‖G2‖),
-      sq_nonneg (‖G0‖ - ‖G2‖), norm_nonneg G0, norm_nonneg G1, norm_nonneg G2,
-      hK0_nn i, hK1_nn i, hK2_nn i, hwin_nn]
+    exact real_sq_add_three_le (norm_nonneg G0) (norm_nonneg G1) (norm_nonneg G2)
+      hG0 hG1 hG2 (hK0_nn i) (hK1_nn i) (hK2_nn i) hwin_nn
 
 
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
