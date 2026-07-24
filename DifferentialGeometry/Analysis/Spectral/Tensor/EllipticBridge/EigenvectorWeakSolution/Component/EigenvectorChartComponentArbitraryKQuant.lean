@@ -12,8 +12,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
 open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
@@ -998,7 +996,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
   classical
   induction m with
   | zero =>
-      simpa using
+      simpa only [Nat.zero_add, zero_add, pow_one] using
         eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
           (I := I) (M := M) g r s
   | succ m ih =>

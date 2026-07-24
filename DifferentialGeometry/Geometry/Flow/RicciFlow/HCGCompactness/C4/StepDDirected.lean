@@ -1038,6 +1038,18 @@ def sepNextC0 (c0 cov δ : ℝ) : ℝ :=
 def sepNextCov (c0 cov δ B : ℝ) : ℝ :=
   sepFeed c0 cov + δ * B
 
+private lemma sepNextC0_nonneg {c0 cov δ : ℝ} (hc0 : 0 ≤ c0) (hδ : 0 ≤ δ)
+    (hfeed : 0 ≤ sepFeed c0 cov) : 0 ≤ sepNextC0 c0 cov δ := by
+  unfold sepNextC0
+  have h : 0 ≤ δ * (1 + sepFeed c0 cov) := mul_nonneg hδ (by linarith)
+  linarith
+
+private lemma sepNextCov_nonneg {c0 cov δ B : ℝ} (hfeed : 0 ≤ sepFeed c0 cov)
+    (hδ : 0 ≤ δ) (hB : 0 ≤ B) : 0 ≤ sepNextCov c0 cov δ B := by
+  unfold sepNextCov
+  have h : 0 ≤ δ * B := mul_nonneg hδ hB
+  linarith
+
 theorem sepFeed_c0 (c0 cov : ℝ) :
     c0 / (1 - c0) ≤ sepFeed c0 cov :=
   le_max_left _ _
@@ -1210,7 +1222,6 @@ theorem exists_strictMono_ge (T : ℕ → ℕ) :
 
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1418,18 +1429,10 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
         sepFeed_nonneg hc0F0 (lt_of_le_of_lt hc0F2 (by norm_num))
       have hfeedR0 : 0 ≤ sepFeed c0R covR :=
         sepFeed_nonneg hc0R0 (lt_of_le_of_lt hc0R2 (by norm_num))
-      have hc0NF0 : 0 ≤ c0NF := by
-        dsimp [c0NF, sepNextC0]
-        nlinarith
-      have hcovNF0 : 0 ≤ covNF := by
-        dsimp [covNF, sepNextCov]
-        nlinarith [hBpos.le]
-      have hc0NR0 : 0 ≤ c0NR := by
-        dsimp [c0NR, sepNextC0]
-        nlinarith
-      have hcovNR0 : 0 ≤ covNR := by
-        dsimp [covNR, sepNextCov]
-        nlinarith [hBpos.le]
+      have hc0NF0 : 0 ≤ c0NF := sepNextC0_nonneg hc0F0 hδF0 hfeedF0
+      have hcovNF0 : 0 ≤ covNF := sepNextCov_nonneg hfeedF0 hδF0 hBpos.le
+      have hc0NR0 : 0 ≤ c0NR := sepNextC0_nonneg hc0R0 hδR0 hfeedR0
+      have hcovNR0 : 0 ≤ covNR := sepNextCov_nonneg hfeedR0 hδR0 hBpos.le
       have hc0Next0 : 0 ≤ c0Next := by
         dsimp [c0Next]
         exact le_max_of_le_left hc0NF0
