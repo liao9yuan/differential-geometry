@@ -668,6 +668,27 @@ the Codex-blocked concrete instantiation, mirroring the
   tame-window integrator; `Ktop = 5·Ktop_DLb` R-free, single Kc; summed
   windows `a+3`.  Shape = deTurckLie siblings verbatim.
 
+## Planner ruling №20 (2026-07-24) — upstream FALSE-GREEN repair authorized
+
+- The executor found `LieCorr0Split.lean` and `LieCorr0LowJet.lean` are
+  `lake env lean` FALSE-GREENs (committed Codex-lane drafts that never
+  passed a real `lake build`; their own `.md`s admit unverified status) —
+  this CORRECTS №19's "low machinery pre-built" premise, which rested on
+  source reads + note claims, not builds.  Known-lesson recurrence
+  (lake-env-lean false-green).
+- RULING: repair AUTHORIZED, scope-limited — Split: add the missing
+  `open DifferentialGeometry.Integral.L2` (all 8 build errors are
+  `Unknown identifier SmoothCcTensor` from it); LowJet: mechanical
+  hygiene only (opens, autoImplicit-false binders, implicit plumbing).
+  HARD GUARDRAIL: any repair needing a theorem-STATEMENT change, or a
+  genuine proof failure, must STOP for a planner decision (that would
+  mean the refolds are unsound drafts).  Verify Split then LowJet by
+  targeted `lake build` before resuming the leaf.
+- WIP already in the new leaf (unverifiable until deps build):
+  `endoArm_eq_dlb`, `lc0Insert_base_eq_neg_dlb`,
+  `lc0InsertBase_realizedFam_perOrder_topSeparated` (top piece,
+  `Ktop = Ktop_DLb`), `sq_le_five_add`.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -1259,3 +1280,24 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
     both pre-built; work = jetL2 lift + realizedFam thread + triangle + summed).
   - **Files touched:** `LieCorr0Core.md`, `DeTurckLieJetL2Summed.md`, this plan.  No `.lean`.  Not
     committed (planner commits).  `(N)` `ricci_flow_unif_existence` still **0%**.
+- 2026-07-24 (lieCorr0 build, session 1): **BLOCKED on broken upstream deps;
+  scope ruling requested.**  Rulings 1+2 (№19) consumed: new leaf
+  `TensorHilbert/LieCorr0CoeffL2JetBound.lean` created (namespace
+  `Integral.Connection`); the decisive R-free-Ktop brick is WRITTEN — top piece
+  `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`
+  (`lc0Insert_base_eq_neg_dlb` from `insert_base`@g_bg:=g₀ + `endoArm_eq_dlb`),
+  its per-order top-separated bound inherited from the DLb producer @g_bg:=g₀
+  (`Ktop = Ktop_DLb`), plus the `sq_le_five_add` five-summand triangle helper.
+  **BLOCKER:** the leaf cannot be `lake build`-checked — imported
+  `LieCorr0Split` and `LieCorr0LowJet` FAIL `lake build` under the lakefile's
+  `autoImplicit false`; they are `lake env lean` FALSE-GREENs (never truly
+  built).  This CORRECTS the recon/№19 premise that the low machinery was
+  "pre-built".  `LieCorr0Split` fix = ONE line (`open …Integral.L2`; all 8
+  errors are `SmoothCcTensor`/`.ext` at :36/:47/:58/:69/:108/:160 + 2 cascades).
+  `LieCorr0LowJet` has the open already but is unbuilt (unknown residual
+  autoImplicit-false depth, behind Split).  Both are OUTSIDE the authorized
+  editable set (new leaf + notes).  **RULING NEEDED:** authorize editing
+  `LieCorr0Split.lean` (+`LieCorr0LowJet.lean` as needed) to add the missing
+  open(s)/autoImplicit-false fixes so the ratified plan can proceed, OR repair +
+  rebuild them upstream first.  No `.lean` edits outside the new leaf were made.
+  `(N)` still **0%**.

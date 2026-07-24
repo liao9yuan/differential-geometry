@@ -165,3 +165,17 @@ the work is jetL2 lifting + realizedFam threading + the 5-way triangle + summed)
 None — no Lean written this session (stopped at recon for the two rulings).
 `(N)` `ricci_flow_unif_existence` still **0%**; this constituent's producer is
 0% built (recon + entry plan only).
+
+### CORRECTION (2026-07-24, build phase) — the "pre-built machinery" premise was FALSE-GREEN.
+
+After rulings 1+2 were accepted (№19) and the build started, the new leaf
+`TensorHilbert/LieCorr0CoeffL2JetBound.lean` could not be checked: the imported
+`LieCorr0Split` / `LieCorr0LowJet` **fail `lake build`** (lakefile
+`autoImplicit false`).  They are `lake env lean` FALSE-GREENs — the recon's
+claim that the low machinery "already exists / focused-checked per its `.md`"
+rested on the `.md`s' own autoImplicit-true focused checks, NOT a real build.
+`LieCorr0Split` fix is ONE line (`open DifferentialGeometry.Integral.L2`; all 8
+errors are `SmoothCcTensor`/`.ext`).  `LieCorr0LowJet` has the open but is
+unbuilt (unknown residual depth).  BLOCKS the ratified plan until repaired; both
+files are outside the authorized editable set -> planner scope ruling requested.
+Details in `TensorHilbert/LieCorr0CoeffL2JetBound.md`.

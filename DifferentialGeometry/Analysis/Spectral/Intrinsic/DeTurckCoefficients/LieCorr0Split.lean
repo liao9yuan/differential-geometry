@@ -13,13 +13,21 @@ DeTurck endomorphism arm, where its leading derivative cancels.
 
 noncomputable section
 
-open Bundle Manifold Tensor0SBundle
-open scoped Manifold Topology ContDiff
+open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
+open scoped ENNReal NNReal BigOperators Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open LieCorr0Core
 
 variable
@@ -177,7 +185,7 @@ theorem tail_base_split (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
         lc0AMix (I := I) (M := M) g₀ g₁ g_bg) +
       lc0Riem (I := I) (M := M) g₀ g₁ := by
   rw [lc0_decomp (I := I) (M := M) g₀ g₁ g_bg]
-  rw [insert_base (I := I) (M := M) g₀ g₁ g_bg]
+  rw [← insert_base (I := I) (M := M) g₀ g₁ g_bg]
   abel
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
