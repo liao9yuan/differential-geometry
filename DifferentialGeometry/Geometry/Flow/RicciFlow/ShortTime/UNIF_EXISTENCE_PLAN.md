@@ -470,6 +470,11 @@ the Codex-blocked concrete instantiation, mirroring the
   unchanged otherwise: (N) itself still 0% (its `sorry` untouched); next
   brick = DLa/DLb field-level assembly inside
   `DeTurckLieKernelL2JetBound.lean` (dispatched).
+- NOTE: the №12 item-4 (abstract tame Nemytskii) executor was STOPPED BY
+  THE USER before reporting; that dispatch is cancelled and ruling item 4
+  is back to OPEN (re-dispatch needs a user decision or the next planning
+  pass).  Ruling scoreboard: items 1 ✓, 3 ✓; item 2 in flight (DLa brick);
+  items 4, 5, 6 open.
 
 ## Executor constraints (multi-agent; STRICT)
 
