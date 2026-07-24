@@ -14,8 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -314,8 +312,7 @@ def frameSharpGradKoszulKernel (g₀ g₁ : SmoothRiemannianMetric I M)
       map_add' := fun p p' => by
         apply ContinuousLinearMap.ext
         intro q
-        rw [ContinuousLinearMap.add_apply, LinearMap.coe_toContinuousLinearMap',
-          LinearMap.coe_toContinuousLinearMap', LinearMap.coe_toContinuousLinearMap']
+        simp only [ContinuousLinearMap.add_apply, LinearMap.coe_toContinuousLinearMap']
         simp only [LinearMap.coe_mk, AddHom.coe_mk]
         rw [sharpGradKoszulKernelBilin_apply, sharpGradKoszulKernelBilin_apply,
           sharpGradKoszulKernelBilin_apply, sharpRaisedKoszulVec_add_snd,
@@ -329,8 +326,7 @@ def frameSharpGradKoszulKernel (g₀ g₁ : SmoothRiemannianMetric I M)
         rw [RingHom.id_apply]
         apply ContinuousLinearMap.ext
         intro q
-        rw [ContinuousLinearMap.smul_apply, LinearMap.coe_toContinuousLinearMap',
-          LinearMap.coe_toContinuousLinearMap']
+        simp only [ContinuousLinearMap.smul_apply, LinearMap.coe_toContinuousLinearMap']
         simp only [LinearMap.coe_mk, AddHom.coe_mk]
         rw [sharpGradKoszulKernelBilin_apply, sharpGradKoszulKernelBilin_apply,
           sharpRaisedKoszulVec_smul_snd,

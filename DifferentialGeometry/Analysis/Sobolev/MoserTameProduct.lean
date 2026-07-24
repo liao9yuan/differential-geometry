@@ -142,7 +142,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
           mul_nonneg (by positivity) (mul_nonneg hΛ₀ hSc_nn)
         rw [hexp]; linarith
 
-set_option maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
@@ -367,7 +366,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
         apply mul_le_mul_of_nonneg_left _ hC_nn
         linarith
 
-set_option maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
@@ -398,12 +396,14 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
                       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
   classical
   refine ⟨Real.sqrt (∑ k' ∈ Finset.range (k + 1),
-      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), by positivity, ?_⟩
+      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), Real.sqrt_nonneg _, ?_⟩
   intro c P Λ K hK hΛ hjet hP
   set i₀ : Fin n := ⟨0, hn⟩ with hi₀
   set Tcard : ℝ := ∑ k' ∈ Finset.range (k + 1),
       ((Finset.Nat.antidiagonalTuple n k').card : ℝ) with hTcard
-  have hTcard_nn : 0 ≤ Tcard := by rw [hTcard]; positivity
+  have hTcard_nn : 0 ≤ Tcard := by
+    rw [hTcard]
+    exact Finset.sum_nonneg (fun _ _ => Nat.cast_nonneg _)
   set C : ℝ := Real.sqrt Tcard with hC
   have hC_nn : 0 ≤ C := by rw [hC]; exact Real.sqrt_nonneg _
   set sK : ℝ := Real.sqrt K with hsK

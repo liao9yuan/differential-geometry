@@ -14,8 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRem
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
@@ -298,12 +296,16 @@ private theorem reconChartRepr_jointContMDiffOn
     · rw [DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr_apply,
         Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hbase]
-  set Lconst : Tensor0SBundle.Tensor0SModel 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+  let Lconst : Tensor0SBundle.Tensor0SModel 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
     ContinuousLinearMap.smulRightL ℝ
       (ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ)
       (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
       (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv.toContinuousLinearMap
-      with hLconst
+  have hLconst : Lconst = ContinuousLinearMap.smulRightL ℝ
+      (ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ)
+      (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+      (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv.toContinuousLinearMap :=
+    rfl
   have hLsmooth : ContMDiff 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)
       𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞ (fun v => Lconst v) :=
     Lconst.contMDiff
@@ -954,12 +956,17 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
           rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
             TangentBundle.trivializationAt_baseSet (I := I) α]
           exact hx
-    set Φ : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+    let Φ : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
       ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ x).comp
         ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 0 2 x).symm
           : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSSpace 0 2 I x)
-      with hΦ
+    have hΦ : Φ =
+        ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ x).comp
+          ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 0 2 x).symm
+            : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ]
+              Tensor0SBundle.TensorRSSpace 0 2 I x) := rfl
     have hΦeq : ∀ s : ℝ, Φ ((Rec s).toFun x) =
         DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
           (I := I) 0 2 α (fun z : M => (Rec s).toSection z) x := by
