@@ -137,7 +137,80 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 4 (2026-07-24, LANE C, Opus) — STEP 0 + composition core landed
+
+### STEP 0 — asset real-green PROBE (mandatory, per false-green lesson)
+`lake build` of the three consumed asset modules
+(`PerturbedRiemannOpDifferenceBound`, `CovDerivConnDiffQuadraticBound`,
+`ChristoffelDifferenceKoszul`): "Build completed successfully (9273 jobs)",
+EXIT=0, all REPLAYED real-green (warnings pre-existing in other files).  NOT
+`lake env lean` false-greens.  Safe to consume.
+
+### Ground-truth asset signatures (verified by direct read)
+- ORDER-0 DIFFERENCE (`PerturbedRiemannOpDifferenceBound.lean:88`)
+  `exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
+   (g₀) {δ₀} (hδ₀ : δ₀<1) (B) (hB : 0≤B) : ∃ C ≥ 0, ∀ (g₁) (P : SmoothCcTensor g₀ 0 2)
+   {δ} (hδ_le : δ ≤ max δ₀ 0) (hδ : gFibreOpBound g₀ (ccTensorBilinSymm g₀ P) δ)
+   (htie : ∀ x v w, g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm g₀ P x v w) (x),
+   (∑ j<3, ‖(iteratedCovGrad g₀ 0 2 j P).toSection x‖) ≤ B →
+   ∀ v w u, g₀(R(g₁)−R(g₀), R(g₁)−R(g₀)) ≤ C²·g₀(v,v)·g₀(w,w)·g₀(u,u)`.
+  KEY: the envelope uses the **asset-`g₀` connection**.  With role
+  base=gBase (asset-`g₀` := gBase), it is `∇^{gBase,j}P` — direct
+  `MetricCovDerivOrderBoundOn` content, so **Finding-D connection conversion is
+  NOT needed** for the base=gBase assignment (corrects Finding D's worry).
+- FIXED gBase CURVATURE (`UniformRiemannOperatorNormBound.lean:683`)
+  `exists_uniform_riemannOp_LeviCivita_gNorm_bound (g) : ∃ Kbase ≥ 0,
+   ∀ x v w u, g(R(g)vwu, R(g)vwu) ≤ Kbase·g(v,v)·g(w,w)·g(u,u)`.  (Squared-norm.)
+- CONVEX COMBO (`Geometry/Metric/ConvexCombination.lean:140`)
+  `SmoothRiemannianMetric.convexComb g₁ g₂ χ hχ hχ01`, `convexComb_inner :
+   (g₁.convexComb g₂ χ …).inner x v w = χ x • g₁.inner x v w + (1−χ x) • g₂.inner x v w`.
+  For telescoping take χ ≡ constant `t`.  NO comparability/jet lemmas yet.
+- (N) comparability (inline, `ExtendViaUniqueness.lean:78`): diagonal
+  `Λ⁻¹·gBase(v,v) ≤ g₀(v,v) ≤ Λ·gBase(v,v)` ∀ x v.  No named predicate.
+- `MetricCovDerivOrderBoundOn K a h gRef C := ∀ x∈K, √(normSq0S gRef x (a+2)
+   (metricCovDeriv h gRef a x)) ≤ C` (`AllTimesBounds.lean:661/691`)
+  = `‖∇^{gRef,a}h‖_{gRef} ≤ C`.
+
+### 2a-0 assembly SPINE (this session's math)
+Role base=gBase, `g₁ = g₀`, `P = g₀−gBase`.  Chain, in gBase then g₀ currency:
+1. difference asset ⟹ `gBase(R(g₀)−R(gBase),·) ≤ Cd²·gBase-quad`  (needs P/htie/fibre-op/envelope).
+2. fixed asset @ gBase ⟹ `gBase(R(gBase),·) ≤ Kb·gBase-quad`.
+3. g-norm triangle (`R(g₀) = (R(g₀)−R(gBase)) + R(gBase)`) + square ⟹
+   `gBase(R(g₀),·) ≤ (Cd+√Kb)²·gBase-quad`.
+4. comparability conversion ⟹ `g₀(R(g₀),·) ≤ Λ⁴(Cd+√Kb)²·g₀-quad`
+   (one Λ on the output vector `g₀ ≤ Λ·gBase`, three on the inputs `gBase ≤ Λ·g₀`).
+So **F = Λ²·(Cd + √Kb)** (norm form; squared bound uses F²).
+
+### LANDED this session — `UnifCurvatureJetBound.lean` (composition core)
+`unifCurvatureSup_singleLink_of_diff` (target-shaped, verified): takes the
+difference bound (step 1's CONCLUSION) as hypothesis `hdiff` + `Λ`-comparability,
+consumes the committed fixed-curvature asset (step 2), does steps 3–4, and
+produces `∃ F ≥ 0, ∀ x v w u, g₀(R(g₀),·) ≤ F²·g₀(v,v)g₀(w,w)g₀(u,u)` with
+`F = Λ²(Cd+√Kb)`.  Plus a private g-norm triangle helper `gAddNorm_le`.
+This is the item-4-style abstraction: the genuinely-missing infrastructure
+(discharging `hdiff`) is the named frontier; the composition + fixed asset +
+conversion is fully proved.
+
+### FRONTIER (remaining for full 2a-0, next sessions)
+- **Discharge `hdiff`** (the crux): construct `P = g₀−gBase : SmoothCcTensor
+  gBase 0 2` with `htie` (metric-difference-as-ccTensor — MISSING infra; `htie`
+  is always a hypothesis in the codebase, never constructed); derive
+  `gFibreOpBound gBase (ccTensorBilinSymm gBase P) (Λ−1)` from comparability
+  (needs Λ<2 for δ<1); derive the envelope `∑_{j<3}‖∇^{gBase,j}P‖ ≤ B` from
+  `MetricCovDerivOrderBoundOn ≤2 g₀ gBase Λ` (orders 1,2 direct; order 0 = ‖g₀−gBase‖
+  from comparability).  Then apply the order-0 difference asset.
+- **2a-tel** (Λ ≥ 2 full class): `g_t = convexComb g₀ gBase (const t)`; prove
+  each link's convexComb comparability + jet inheritance (NEW lemmas on
+  `convexComb`); compose ~2Λ(Λ+1) single-links by triangle.  Needs the
+  discharge above per link.
+- **2a-hi**: higher-order `∇^{g₀,a}R`, a ≤ b (order-generic; needs the
+  higher-order curvature-difference extension the current asset lacks).
+
 ## Status
+- 2026-07-24 (session 4, LANE C): STEP 0 asset probe PASSED (real-green);
+  composition core `unifCurvatureSup_singleLink_of_diff` landed + verified +
+  axiom-clean (see this file's session-4 block).  Frontier = discharge `hdiff`
+  (P-construction crux) then 2a-tel/2a-hi.
 - 2026-07-24 (session 3): (2a) recon COMPLETE, no Lean.  Finding A: (2a) is an
   assembly of existing jet-envelope curvature-difference machinery (de-risked).
   Finding B: that machinery is small-perturbation (`Λ<2`) only — full class needs
