@@ -12,7 +12,43 @@ that lets `UnifCurvatureJetBound.lean`'s order-`≤2` jet envelope consume
 `MetricCovDerivOrderBoundOn` (which is stated in `normSq0S`/`metricCovDeriv`
 currency).
 
-## HEADLINE (session 8 recon): `normBridge` is GATED on a missing upstream framework agreement
+## GATE RESOLVED (2026-07-24): the upstream agreement is now PROVED
+
+The missing `nabla0SFun ↔ tensor0SCovariantDerivative` `(0, s)` agreement (the framework
+gate below) is **landed, sorry-free, axiom-clean**:
+
+```
+DifferentialGeometry/Geometry/Connection/ChartTensorNabla/Agreement/Nabla0SFunAgreement.lean
+  nabla0SFun_eq_tensor0SCovariantDerivative (g s X α x) :
+    nabla0SFun s (LeviCivita g) X α x
+      = tensor0SCovariantDerivative I M s (LeviCivita g) (fun y => α y) x (X x)
+```
+
+Axiom audit: `[propext, Classical.choice, Quot.sound]` (no `sorryAx`).  It was proved by a
+cleaner route than either sketched below: both sides have a closed intrinsic smooth-slot
+form (`nabla0SFun_eval_smooth_slots` and the new abstract Leibniz rule
+`abstractDerivEval_aux`), which match verbatim — no `chartTensor0S`, no chart/Christoffel
+bookkeeping.  See `Nabla0SFunAgreement.md`.
+
+**`normBridge` is therefore no longer gated on a missing agreement.**  What remains to
+discharge `normBridge`'s sorry is the *tower + norm assembly* (still a real, separate,
+multi-step effort — NOT attempted this session, so the honest documented `sorry` at
+`MetricCovDerivBridge.lean` is left in place rather than relocated):
+
+- **(a-step) tower match** `iteratedCovGrad`/`covGrad` (abstract) ↔ `metricCovDeriv`/nabla.
+  My agreement bridges the *pointwise directional* step; the tower step additionally needs
+  `iteratedCovGrad_succ` + `covGrad` unit-eval (`curry_covGrad_unit_eval_genVal`,
+  `covDeriv_unit_eval_eq_genVal`) on one side and `metricCovDeriv_succ_apply_section`
+  (`HCGCompactness/MetricCovDerivCoordStep.lean:43`, already `nabla0SFun`-based) on the
+  other, glued by `nabla0SFun_eq_tensor0SCovariantDerivative`, plus the `2+j = j+2` HEq
+  cast.
+- **(a-base) `j = 0`** derivative-free (as mapped below).
+- **(b) norm reconciliation** chain (as mapped below), independent of the gate.
+
+Wiring: `import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Nabla0SFunAgreement`
+into `MetricCovDerivBridge.lean` (no cycle; the agreement is upstream of HCG).
+
+## HEADLINE (session 8 recon, now SUPERSEDED by the gate resolution above): the original gate analysis
 
 The two sides of `normBridge` live in **two different covariant-derivative
 formalisms**, and the crossing between them is a repeatedly-flagged MISSING bridge:
