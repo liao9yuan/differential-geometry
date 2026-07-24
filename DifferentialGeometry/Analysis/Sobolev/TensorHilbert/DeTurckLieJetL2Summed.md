@@ -1,0 +1,137 @@
+# DeTurckLieJetL2Summed.lean — Phase-A reconnaissance (NOT built; the covering engine EXISTS but its field-level bridge is a large missing reduction, not a small engine-swap)
+
+## 2026-07-23 — dispatch = `deTurckLieCoeffField` top-separated producer; verdict: ENGINE FOUND, BRIDGE MISSING/LARGE
+
+Dispatched (plan §"Planner acceptance №8") as the first of the two genuinely-missing C₀
+constituents (`deTurckLieCoeffField`, then `lieCorr0Field`) of the threeArm precursor. Two phases:
+(A) trace the field's committed structure and find which committed `_topSeparated_le` engine covers
+its top-window gain; (B) build the summed producer IF covered, else report the exact missing engine.
+
+**Outcome: the covering engine EXISTS — `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`
+(`CurvatureCoefficientDifferenceJetTower.lean:1823`, committed-clean) — and every committed identity
+routing `deTurckLieCoeffField` → `connDiffSection` is present. BUT the committed field-level
+reduction is fully GRID-COLLAPSED (dissolves the connDiffSection top-split into a raw ∇T-product grid
+before integrating), so there is NO committed top-separated field-level bridge. Building one is a
+LARGE multi-lemma re-derivation through the g₁-dependent bicontraction (`dLaBiContrFib`) and the
+DeTurck-VF insertion (`deTurckLieWEndoInsert`) — NOT the ~40-line engine-swap the plan §№4/§№5
+roadmap assumed for connDiff/Lie. No Lean written (a grid-collapsed R-dependent producer would
+violate the ruling stop-signal; an orphan intermediate would be mislabelled machinery).**
+
+---
+
+## The field's committed structure (verified at HEAD `922dbc4ac`)
+
+`deTurckLieCoeffField g₀ g₁ g_bg : SmoothCcTensor g₀ 2 2` (`RicciDeTurckSectionDifference.lean:7716`),
+fibre `deTurckLieFib g₁ g_bg x = dLaBiContrFib g₁ g_bg x + deTurckLieDLbFib g₁ g_bg x` (`:7690`),
+`g_bg`-dependent (three metrics). Committed additive split (`DeTurckLieKernelL2JetBound.lean:77`):
+
+    deTurckLieCoeffField = deTurckLieDLaCoeffField + deTurckLieDLbCoeffField           (both (2,2))
+
+- **DLa** (`deTurckLieDLaCoeffField`, `DeTurckLieKernelL2JetBound.lean:44`), fibre `dLaBiContrFib`:
+  its lowered covector is a DIFFERENCE of covariant derivatives of `connDiffSection`
+  (`dLaLoweredCovec`, `:1591`):
+
+        dLaLoweredCovec g₀ g₁ g_bg = covGrad g₀ 1 2 (connDiffSection g₁ g₀)
+                                   − covGrad g₀ 1 2 (connDiffSection g_bg g₀)
+
+  committed background-splits: `deTurckLieCovDerivA_backgroundSplit` (:106),
+  `dLaCovKernel_backgroundSplit` (:248), `connDiff_cocycle` (:91), `dLaLoweredCc_raise_repr` (:1629).
+  The (2,2) field is the `dLaBiContrFib` bicontraction of this covector with the **g₁-orthonormal
+  frame / sharpFlatEndo(g₁)** factors (`dLaBiContrFibFixedFrame`), i.e. a **g₁-dependent (nonlinear)
+  product** of `covGrad(connDiffSection g₁ g₀)` with g₁-frame factors.
+
+- **DLb** (`deTurckLieDLbCoeffField`, `:60`), fibre `deTurckLieDLbFib`: routes through the DeTurck
+  vector field `deTurckLieWEndoInsert` (`DeTurckVectorFieldL2JetBound.lean:47`). The DeTurck VF is
+  built from `connDiff`/`connDiffLoweredCc`: `wXi = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀
+  g_bg` (`:57`, the cocycle split), `wEndo_eq_covDeriv_add_connDiff` (`:424`).
+
+**Derivative order.** DLa's top factor is `covGrad(connDiffSection g₁ g₀)` = ∇(connDiffSection), one
+covariant derivative MORE than the connDiff field. So `∇^i deTurckLieCoeffField` reaches `∇^{i+2}T`
+(the committed grid runs `k ∈ range (i+3)`, top cell `∇^{i+2}T`;
+`rfns_..._diagonalProductGrid_le:4409`; ball-uniform T-bound hyp is `j ≤ a+2`,
+`DeTurckLieCoeffL2JetBound.lean:439`). Contrast: connDiff `∇^i` reaches `∇^{i+1}T`.
+**So the deTurckLie top window is `a+2` (max derivative `∇^{a+2}T`), matching arm0Base
+(the OTHER genuine C₀ constituent, top `a+2`), NOT connDiff (`a+1`).** The C₀ assembly top window is
+therefore set at `a+2` by arm0 and deTurckLie together. Planner note: the "sibling-compatible (both
+windows a+2)" target in the dispatch is compatible with **arm0** (top `a+2`), and the deTurckLie top
+sum must be `∑_{j<a+3}‖∇^jT‖²` = `∑_{j≤a+2}`, one order above the connDiff/Lie `∑_{j<a+2}`.
+
+## The covering engine (Phase-A answer)
+
+**`rfns_iteratedCovGrad_connDiffSection_topSeparated_le` (`CurvatureCoefficientDifferenceJetTower
+.lean:1823`)** — the `(1,2)` connection-difference engine, committed-clean (the 64 dirty lines of
+that file are the unrelated `pureTrace`/`koszul_l2_succ` hunks; this engine is untouched and used
+committed by `ConnDiffJetL2Summed.lean:178` and `DeTurckRemainderTameLipschitz.lean:41940`). Head
+`10·S 0 · rfns(∇^{j+1}T)` (`S` from `sharpFlatEndoCc`, `(g₀,hδ₀)`-only ⇒ **R-independent Ktop**),
+remainder in `boundedFactorGridWindow`. Applied at order `j = i+1`, it gives the deTurckLie top
+window `∇^{i+2}T`. The three `(0,4)` curvature engines (`riemannLoweredBackgroundDifference:10570`,
+`ricEndoBackgroundDifferenceField:11141`, `riemannG1LoweringDifference:11695`) are NOT a better fit:
+deTurckLie's top factor is literally `covGrad(connDiffSection)`, not a curvature `(0,4)` difference.
+
+Committed identities routing deTurckLie → connDiffSection (all present, all ball-uniform-only):
+- DLa: `dLaLoweredCovec = covGrad(connDiffSection g₁ g₀) − covGrad(connDiffSection g_bg g₀)`
+  (`:1591`); reduction `exists_rfns_iteratedCovGrad_connDiffSection_tgrid_dla` (`:2599`).
+- DLb: `rfns_iCG_connDiffLoweredCc_eq_connDiffSection` / `norm_iCG_connDiffLoweredCc_eq_connDiffSection`
+  (`DeTurckVectorFieldL2JetBound.lean:2192/2211`), `rfns_iCG_wCA_eq_connDiffSection` (`:2624`),
+  `norm_iCG_wCA_eq_connDiffSection` (`:2648`), and the ball-uniform
+  `connDiffSection_lowOrder_jetL2_succ_generic` (`:1954`) they feed.
+- The `g_bg` parts (`connDiffSection g_bg g₀`, `connDiffLoweredCc g₀ g_bg`) are T-INDEPENDENT ⇒
+  constant jets ⇒ absorbed into `Kc` (do NOT carry the top window); only the `g₁` part carries it.
+
+## Why Phase B is NOT the small engine-swap the roadmap assumed (the blocker)
+
+The committed field-level reductions are **fully grid-collapsed**, discarding the connDiffSection
+top-split:
+
+- `rfns_iteratedCovGrad_deTurckLieDLaCoeffField_diagonalProductGrid_le`
+  (`DeTurckLieKernelL2JetBound.lean:4397`):
+
+        rfns(∇^i deTurckLieDLa) ≤ C i · ∑_{k∈range(i+3)} ∑_{n∈range(k+1)}
+                                        ∑_{e∈antidiagonalTuple n k} ∏_m rfns(∇^{e m} T)
+
+  — a raw `∇T`-product grid; the `10·S 0·rfns(∇^{i+2}T)` head is dissolved into the grid via
+  `dLaGridWin`/`dLaPairCount`/`exists_rfns_pairTraceOpDla_tgrid`/`exists_rfns_dLaSym_tgrid`. The
+  per-order ball-uniform proof (`:4606`) then integrates it with
+  `antidiagonalTupleGrid_integral_ballUniform_tameWindow` into an R-opaque constant.
+- DLb is analogous: `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform`
+  (`DeTurckVectorFieldL2JetBound.lean:3041`) consumes the ball-uniform
+  `connDiffSection_lowOrder_jetL2_succ_generic`, not the topSeparated engine.
+
+There is **no committed head/topSeparated variant** for any `deTurckLie*`/`wEndo*`/`dLaBiContr*`
+field (grep of `Analysis/Sobolev/TensorHilbert/` returns nothing). So the plan §№4/§№5 model
+("swap the ball-uniform bound for the topSeparated engine, ~40-line reuse of `jetL2_sum_lowShift`")
+does NOT apply: connDiff/Lie reused a single clean field↔section reindex
+(`connDiffContrInsertionField_eq_reindex_slotExtend_two`); **deTurckLie has no such clean
+field↔connDiffSection identity** — the bridge is the entire `dLaBiContrFib` bicontraction (DLa) and
+`deTurckLieWEndoInsert` insertion (DLb), both g₁-dependent nonlinear products whose committed
+pointwise reductions collapse the head.
+
+## The exact missing bridge (smallest next brick)
+
+A **top-separated pointwise reduction** replacing the grid-collapse — for DLa (and a DLb twin):
+
+    ∃ Ktop ≥ 0 (from `10·S 0`, (g₀,hδ₀)[,g_bg]-only), ∃ Kc : ℕ→ℝ≥0,
+      ∀ g₁ P htie hδ (hPball : ∀ j≤a+3, ‖∇^j P‖ ≤ R), ∀ i ≤ a, ∀ x,
+        rfns(∇^i deTurckLieDLaCoeffField g₀ g₁ g_bg) x
+          ≤ Ktop · rfns(∇^{i+2} P) x   +   Kc i · (grid remainder over ∇^{≤i+1} P)
+
+built by re-running the `dLaBiContrFib` reduction with
+`rfns_iteratedCovGrad_connDiffSection_topSeparated_le` at order `i+1` in place of
+`rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le` (used at `:2667`), keeping the head
+cell (top factor `rfns(∇^{i+2}P)`) separate through the bicontraction Leibniz, and the `g_bg`-part
+absorbed as a fixed field. Then integrate with `boundedFactorGridWindow_integral_ballUniform_
+tameWindow` (top → `‖∇^{i+2}P‖²`, remainder → `Kc·(1+low)`), realizedFam wrapper (clone arm/connDiff),
+and `jetL2_sum_lowShift` (top offset `p=2`, low offset `q=2`) to sum over `i≤a`. This is a
+~300–500-line intricate tensor re-derivation PER HALF (DLa + DLb) with ~3-min focused-check cycles —
+a multi-session brick, NOT one careful-iteration session. Recommended: DLa first (cleaner —
+`dLaLoweredCovec` has the explicit covGrad identity), then DLb (via the DeTurck-VF ↔ connDiffSection
+identities), then assemble `deTurckLieCoeffField = DLa + DLb` by triangle. The `lieCorr0Field`
+constituent (LieCorr0Core.lean:583) is a separate later dispatch.
+
+## Guardrails / verification status
+
+No Lean written. Nothing committed; no dirty tracked file edited (elaboration never entered
+`CurvatureCoefficientDifferenceJetTower.lean`; all claims are grep/Read forensics against HEAD
+`922dbc4ac`). Only new untracked files touched (this note + the plan status log). (N)
+`ricci_flow_unif_existence` remains **0%**; `deTurckLieCoeffField` is the 1st of the two genuinely-
+missing C₀ constituents of the threeArm precursor (ruling item 2) and sits far below (N).

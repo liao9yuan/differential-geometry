@@ -248,6 +248,45 @@ private lemma connDiffSection_eq_cometricRaiseSlot0Field (g₀ g₁ : SmoothRiem
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
+/-!
+The lowered connection-difference tensor is the covariant realization of the
+usual `(1,2)` connection-difference section.  Exporting the pointwise norm
+identity here avoids rebuilding this realization inside every low-regularity
+coefficient estimate.
+-/
+theorem connLow_rfns
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+        ((iteratedCovGrad (I := I) g₀ 0 3 n
+          (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 n
+          (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+        ((iteratedCovGrad (I := I) g₀ 0 3 n
+          (connDiffLoweredCc (I := I) g₀ g₁)).toSection x)
+        = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+            ((iteratedCovGrad (I := I) g₀ 0 3 n
+              (domDomCongrSection (I := I) g₀ (finRotate 3)
+                (connDiffLoweredCc (I := I) g₀ g₁))).toSection x) :=
+          (riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+            (I := I) (M := M) g₀ (finRotate 3)
+            (connDiffLoweredCc (I := I) g₀ g₁) n x).symm
+    _ = riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
+              (domDomCongrSection (I := I) g₀ (finRotate 3)
+                (connDiffLoweredCc (I := I) g₀ g₁)))).toSection x) :=
+        (rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
+          (I := I) (M := M) g₀ 1
+          (domDomCongrSection (I := I) g₀ (finRotate 3)
+            (connDiffLoweredCc (I := I) g₀ g₁)) n x).symm
+    _ = riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+        rw [connDiffSection_eq_cometricRaiseSlot0Field]
+
 set_option linter.unusedSectionVars false in
 private lemma flatArmCoeffCc_true_eq_cometricRaiseSlot0Field
     (g₀ g₁ : SmoothRiemannianMetric I M) :

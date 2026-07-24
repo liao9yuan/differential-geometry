@@ -9,11 +9,14 @@
 - absolute shell bounds sum to full-slab Bochner integrability and identify the
   shell series with the full terminal potential;
 - the full terminal potential is bounded by the finite dimension-dependent
-  Gaussian series constant times the scale-free source size.
+  Gaussian series constant times the scale-free source size;
+- `klLateFull_canon` discharges the formerly parameterized cover family by
+  choosing the canonical quantitative Euclidean shell covers.
 
-The cover data remain parameterized until the canonical quantitative-cover
-producer is exported. The exact theorem `ricci_flow_forward_unique` remains
-**0%**.
+The ordinary late potential now has no external covering input. The exact
+theorem `ricci_flow_forward_unique` remains **0%**.
 
-The focused Lean check passes without local warnings. The file contains no
-proof placeholders or new foundational assumptions.
+The previously exported late-potential chain passed focused verification.  The
+new `klLateFull_canon` source contains no proof placeholder or new foundational
+assumption; its focused verification is pending the coordinated export of
+`QuantCover`.

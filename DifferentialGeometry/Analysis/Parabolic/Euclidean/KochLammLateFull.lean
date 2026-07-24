@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammLateAbs
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammLateSeries
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.QuantCover
 import Mathlib.Order.SuccPred.IntervalSucc
 
 /-!
@@ -312,6 +313,20 @@ theorem klLateFull_norm {T R : ℝ} {A₁ A_q : ℝ≥0}
       rfl
     _ = klLateSeries (Module.finrank ℝ V) *
         (klLateTailC V * (A_q : ℝ)) := rfl
+
+omit [CompleteSpace F] in
+/-- The full terminal-slab estimate with its Euclidean covering family chosen
+canonically from the finite-dimensional quantitative-cover theorem. -/
+theorem klLateFull_canon {T R : ℝ} {A₁ A_q : ℝ≥0}
+    {f : ℝ × V → F} (h : KLSource0 T A₁ A_q f) (x : V)
+    (hR : 0 < R) (hRT : R ^ 2 ≤ T) :
+    ‖klLateFull0 R f x‖ ≤
+      klLateSeries (Module.finrank ℝ V) *
+        (klLateTailC V * (A_q : ℝ)) := by
+  classical
+  choose s hcard hcover using
+    fun k : ℕ ↦ exists_shell_cover (V := V) x hR k
+  exact klLateFull_norm (V := V) h x hR hRT s hcard hcover
 
 end Euclidean
 end Parabolic
