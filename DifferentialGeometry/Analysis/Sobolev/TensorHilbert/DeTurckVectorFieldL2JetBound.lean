@@ -3138,6 +3138,368 @@ theorem deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform
     have := hF_nn i
     nlinarith [hF_nn i]
 
+/-! ### DLb top-separated tower (insert-level producer)
+
+Top-separated `realizedFam` jetL2 producer for `deTurckLieWEndoInsert`, the DLb sibling of the DLa
+kernel top separation.  The top order `∇^{i+2}T` enters only through `wAlphaA = ∇^{i+1}wOmega`; the
+remainder currency is `antidiagonalTupleGridWindow` (integrated by the tame-window integrator).  See
+`DeTurckVectorFieldL2JetBound.md`. -/
+section DLbTopSeparated
+
+/-- Pure `Finset` window-shift helper (copied verbatim from the sibling top-separated files). -/
+private lemma sum_shift_le (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : ℕ) :
+    ∑ i ∈ Finset.range m, g (i + c) ≤ ∑ j ∈ Finset.range (m + c), g j := by
+  classical
+  have hsub :
+      (Finset.range m).map ⟨fun i => i + c, fun a b h => by simpa using h⟩ ⊆
+        Finset.range (m + c) := by
+    intro j hj
+    rw [Finset.mem_map] at hj
+    obtain ⟨i, hi, rfl⟩ := hj
+    rw [Finset.mem_range] at hi ⊢
+    simp only [Function.Embedding.coeFn_mk]
+    omega
+  calc ∑ i ∈ Finset.range m, g (i + c)
+      = ∑ j ∈ (Finset.range m).map ⟨fun i => i + c, fun a b h => by simpa using h⟩, g j := by
+        rw [Finset.sum_map]; rfl
+    _ ≤ ∑ j ∈ Finset.range (m + c), g j :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hg j)
+
+/-- Summation of a per-order top-separated jet bound with independent top offset `p` and low-window
+offset `q` (copied from the sibling top-separated files). -/
+private lemma jetL2_sum_lowShift
+    (a p q : ℕ) (Ktop : ℝ) (hKtop : 0 ≤ Ktop) (Kc : ℕ → ℝ) (hKc : ∀ i, 0 ≤ Kc i)
+    (f w : ℕ → ℝ) (hw : ∀ j, 0 ≤ w j)
+    (hper : ∀ i, i ≤ a →
+        f i ≤ Ktop * w (i + p) + Kc i * (1 + ∑ j ∈ Finset.range (i + q), w j)) :
+    ∑ i ∈ Finset.range (a + 1), f i ≤
+      Ktop * (∑ j ∈ Finset.range (a + 1 + p), w j) +
+      (∑ i ∈ Finset.range (a + 1), Kc i) * (1 + ∑ j ∈ Finset.range (a + q), w j) := by
+  refine le_trans (Finset.sum_le_sum (fun i hi =>
+    hper i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)))) ?_
+  rw [Finset.sum_add_distrib]
+  have hB : (∑ i ∈ Finset.range (a + 1), Ktop * w (i + p)) ≤
+      Ktop * ∑ j ∈ Finset.range (a + 1 + p), w j := by
+    rw [← Finset.mul_sum]
+    exact mul_le_mul_of_nonneg_left (sum_shift_le w hw (a + 1) p) hKtop
+  have hA : (∑ i ∈ Finset.range (a + 1), Kc i * (1 + ∑ j ∈ Finset.range (i + q), w j)) ≤
+      (∑ i ∈ Finset.range (a + 1), Kc i) * (1 + ∑ j ∈ Finset.range (a + q), w j) := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hi' : i ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    refine mul_le_mul_of_nonneg_left ?_ (hKc i)
+    have hsub : Finset.range (i + q) ⊆ Finset.range (a + q) := by
+      intro y hy; rw [Finset.mem_range] at hy ⊢; omega
+    have hss : ∑ j ∈ Finset.range (i + q), w j ≤ ∑ j ∈ Finset.range (a + q), w j :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hw j)
+    linarith
+  linarith [hA, hB]
+
+/-- Reshape the connDiffSection top-separated engine remainder
+`∑_{k<j} b(j-k)·antidiagonalTupleGrid b (k+1)` into `Cj·antidiagonalTupleGridWindow b (j+2)`
+(public-grid analogue of the DLa `engineRem_le_dLaGridWin`). -/
+private lemma engineRem_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : ℕ) :
+    ∑ k ∈ Finset.range j,
+        b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
+      (∑ k ∈ Finset.range j,
+          Combinatorics.antidiagonalTupleGridCount (j - k) *
+            Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+        Combinatorics.antidiagonalTupleGridWindow b (j + 2) := by
+  rw [Finset.sum_mul]
+  refine Finset.sum_le_sum (fun k hk => ?_)
+  rw [Finset.mem_range] at hk
+  have hg_nn : 0 ≤ Combinatorics.antidiagonalTupleGrid b (k + 1) :=
+    Combinatorics.antidiagonalTupleGrid_nonneg b hb (k + 1)
+  have h1 : b (j - k) ≤ Combinatorics.antidiagonalTupleGrid b (j - k) := by
+    have hsf := Combinatorics.single_factor_mul_antidiagonalTupleGrid_le b hb 0 (j - k) (by omega)
+    rwa [Combinatorics.antidiagonalTupleGrid_zero, mul_one, Nat.zero_add] at hsf
+  have h2 : Combinatorics.antidiagonalTupleGrid b (j - k) *
+      Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
+      (Combinatorics.antidiagonalTupleGridCount (j - k) *
+        Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+        Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) :=
+    Combinatorics.antidiagonalTupleGrid_mul_le b hb (j - k) (k + 1)
+  have h3 : Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) ≤
+      Combinatorics.antidiagonalTupleGridWindow b (j + 2) := by
+    rw [show (j - k) + (k + 1) = j + 1 from by omega]
+    exact Combinatorics.antidiagonalTupleGrid_le_window b hb (by omega)
+  calc b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1)
+      ≤ Combinatorics.antidiagonalTupleGrid b (j - k) *
+          Combinatorics.antidiagonalTupleGrid b (k + 1) :=
+        mul_le_mul_of_nonneg_right h1 hg_nn
+    _ ≤ (Combinatorics.antidiagonalTupleGridCount (j - k) *
+          Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+          Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) := h2
+    _ ≤ (Combinatorics.antidiagonalTupleGridCount (j - k) *
+          Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+          Combinatorics.antidiagonalTupleGridWindow b (j + 2) :=
+        mul_le_mul_of_nonneg_left h3
+          (mul_nonneg (Combinatorics.antidiagonalTupleGridCount_nonneg _)
+            (Combinatorics.antidiagonalTupleGridCount_nonneg _))
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **connDiffSection top-separated jet bound in `antidiagonalTupleGridWindow` currency.**  Top
+coefficient `Ktop = 2·Kt0` (`R`-independent engine head); remainder is a single grid window (house
+`R`-pattern).  Public-grid re-derivation of the DLa `exists_rfns_connDiffSection_topsep_dla`. -/
+private theorem exists_rfns_connDiff_topsep
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ j, 0 ≤ Kc j) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (j : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+          Ktop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) P).toSection x) +
+          Kc j * Combinatorics.antidiagonalTupleGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (j + 2) := by
+  classical
+  obtain ⟨Kt0, hKt0_nn, Kc0, hKc0_nn, hbot⟩ :=
+    rfns_iteratedCovGrad_connDiffSection_topSeparated_le (I := I) (M := M) g₀ hδ₀
+  refine ⟨2 * Kt0, mul_nonneg (by norm_num) hKt0_nn,
+    fun j => 2 * Kc0 j * (∑ k ∈ Finset.range j,
+      Combinatorics.antidiagonalTupleGridCount (j - k) *
+        Combinatorics.antidiagonalTupleGridCount (k + 1)),
+    fun j => mul_nonneg (mul_nonneg (by norm_num) (hKc0_nn j))
+      (Finset.sum_nonneg fun k _ =>
+        mul_nonneg (Combinatorics.antidiagonalTupleGridCount_nonneg _)
+          (Combinatorics.antidiagonalTupleGridCount_nonneg _)), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hbound j x
+  set b : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) with hb_def
+  have hb : ∀ l, 0 ≤ b l :=
+    fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+  have heng := hbot g₁ P htie hδ_le hδ0 hbound j x
+  set Hd : SmoothCcTensor g₀ 1 (2 + j) :=
+    appCcRS (I := I) (M := M) g₀ 1 1 (2 + j)
+      (iteratedCovGrad (I := I) g₀ 1 2 j (raisedKoszul (I := I) g₀ g₁))
+      (sharpFlatEndoCc (I := I) g₀ g₁) with hHd_def
+  have hhead : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) ≤
+      Kt0 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) P).toSection x) := heng.1
+  have hrem := heng.2
+  have hsplit : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) +
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+          Hd).toSection x) := by
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 1 (2 + j) x
+      (Hd.toSection x)
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) - Hd).toSection x)
+    have key :
+        (iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x =
+          Hd.toSection x +
+            (iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+              Hd).toSection x := by
+      simp only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+      abel
+    rw [key]
+    exact hadd
+  have hrem2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) - Hd).toSection x) ≤
+      Kc0 j * ((∑ k ∈ Finset.range j,
+        Combinatorics.antidiagonalTupleGridCount (j - k) *
+          Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+        Combinatorics.antidiagonalTupleGridWindow b (j + 2)) :=
+    le_trans hrem (mul_le_mul_of_nonneg_left (engineRem_le_grid b hb j) (hKc0_nn j))
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) +
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+            Hd).toSection x) := hsplit
+    _ ≤ 2 * (Kt0 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) P).toSection x)) +
+        2 * (Kc0 j * ((∑ k ∈ Finset.range j,
+          Combinatorics.antidiagonalTupleGridCount (j - k) *
+            Combinatorics.antidiagonalTupleGridCount (k + 1)) *
+          Combinatorics.antidiagonalTupleGridWindow b (j + 2))) := by
+          linarith [hhead, hrem2]
+    _ = (2 * Kt0) * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) P).toSection x) +
+        (2 * Kc0 j * (∑ k ∈ Finset.range j,
+          Combinatorics.antidiagonalTupleGridCount (j - k) *
+            Combinatorics.antidiagonalTupleGridCount (k + 1))) *
+          Combinatorics.antidiagonalTupleGridWindow b (j + 2) := by ring
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **connDiffSection L2 top-separated bound.**  Integrates `exists_rfns_connDiff_topsep`: the top
+`‖∇^{n+1}P‖²` stays separated with the `R`-free coefficient `Ktop = 2·Kt0`; the grid-window remainder
+integrates to a ball-uniform per-order constant `C n` (absorbed into `Kc·1` downstream via the
+tame-window integrator + the `hPball` conversion `∑_{j≤k}‖∇^jP‖² ≤ (k+1)R²`). -/
+private theorem connDiff_L2_topsep
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ n : ℕ, n ≤ a + 1 →
+          ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
+            Ktop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2 + C n := by
+  classical
+  obtain ⟨Ktop_pt, hKtop_pt_nn, Kc_pt, hKc_pt_nn, hpt⟩ :=
+    exists_rfns_connDiff_topsep (I := I) (M := M) g₀ hδ₀
+  obtain ⟨K, hK_nn, hKint⟩ :=
+    antidiagonalTupleGrid_integral_ballUniform_tameWindow (I := I) (M := M) g₀ a ha_super hR
+  refine ⟨Ktop_pt, hKtop_pt_nn,
+    fun n => Kc_pt n * ∑ k ∈ Finset.range (n + 2), K k * (1 + ((k : ℝ) + 1) * R ^ 2),
+    fun n => mul_nonneg (hKc_pt_nn n)
+      (Finset.sum_nonneg fun k _ => mul_nonneg (hK_nn k) (by positivity)), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hPball n hn
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
+  -- per-index grid integrability + ball-uniform integral bound (via tame-window integrator)
+  have hAG : ∀ k : ℕ, k ≤ a + 2 →
+      MeasureTheory.Integrable (fun x => Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+        (∫ x, Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+          K k * (1 + ((k : ℝ) + 1) * R ^ 2) := by
+    intro k hk
+    have hExpand : (fun x => Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+        = (fun x => ∑ m ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple m k,
+            ∏ i : Fin m, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e i) P).toSection x)) := by
+      funext x; rw [Combinatorics.antidiagonalTupleGrid]
+    rw [hExpand]
+    obtain ⟨hint, hbd⟩ := hKint P hPball k
+    refine ⟨hint, le_trans hbd ?_⟩
+    have hsum : (∑ j ∈ Finset.range (k + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) ≤ ((k : ℝ) + 1) * R ^ 2 := by
+      calc ∑ j ∈ Finset.range (k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2
+          ≤ ∑ j ∈ Finset.range (k + 1), R ^ 2 := by
+            refine Finset.sum_le_sum (fun j hj => ?_)
+            have hjk : j ≤ a + 2 :=
+              le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) hk
+            have hb := hPball j hjk
+            nlinarith [norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j P), hb, hR]
+        _ = ((k : ℝ) + 1) * R ^ 2 := by
+            rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
+    exact mul_le_mul_of_nonneg_left (by linarith [hsum]) (hK_nn k)
+  -- window integrability + integral bound
+  have hwin_int : MeasureTheory.Integrable (fun x => Combinatorics.antidiagonalTupleGridWindow
+      (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    simp only [Combinatorics.antidiagonalTupleGridWindow]
+    refine MeasureTheory.integrable_finset_sum _ (fun k hk => (hAG k ?_).1)
+    have := Finset.mem_range.mp hk; omega
+  have hwin_bd : (∫ x, Combinatorics.antidiagonalTupleGridWindow
+      (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2)
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      ∑ k ∈ Finset.range (n + 2), K k * (1 + ((k : ℝ) + 1) * R ^ 2) := by
+    simp only [Combinatorics.antidiagonalTupleGridWindow]
+    rw [MeasureTheory.integral_finset_sum _ (fun k hk => (hAG k (by
+      have := Finset.mem_range.mp hk; omega)).1)]
+    refine Finset.sum_le_sum (fun k hk => (hAG k ?_).2)
+    have := Finset.mem_range.mp hk; omega
+  -- top integrability
+  have htop_int : MeasureTheory.Integrable (fun x =>
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + (n + 1))
+      (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P)
+  -- pointwise top-separated bound, integrated
+  have hbridge := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 1 (2 + n)
+    (iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀))
+    (fun x => Ktop_pt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P).toSection x)
+      + Kc_pt n * Combinatorics.antidiagonalTupleGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2))
+    ((htop_int.const_mul Ktop_pt).add (hwin_int.const_mul (Kc_pt n)))
+    (fun x => hpt g₁ P htie hδ_le hδ0 hδ n x)
+  rw [MeasureTheory.integral_add (htop_int.const_mul Ktop_pt) (hwin_int.const_mul (Kc_pt n)),
+    MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul] at hbridge
+  have hnormsq : ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    rw [SmoothCcTensor.norm_def, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+  calc ‖iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)‖ ^ 2
+      ≤ Ktop_pt * (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P).toSection x)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+        + Kc_pt n * (∫ x, Combinatorics.antidiagonalTupleGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) := hbridge
+    _ = Ktop_pt * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2
+        + Kc_pt n * (∫ x, Combinatorics.antidiagonalTupleGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) := by rw [hnormsq]
+    _ ≤ Ktop_pt * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2
+        + Kc_pt n * ∑ k ∈ Finset.range (n + 2), K k * (1 + ((k : ℝ) + 1) * R ^ 2) := by
+        have hmul := mul_le_mul_of_nonneg_left hwin_bd (hKc_pt_nn n)
+        linarith [hmul]
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **wXi L2 top-separated bound.**  `wXi = connDiffLoweredCc g₁ − connDiffLoweredCc g_bg`; the
+`g₁` part carries the top `‖∇^{n+1}P‖²` (via `connDiff_L2_topsep`), the `g_bg` part is a `T`-free
+constant folded into `C n`.  `Ktop = 2·(connDiff Ktop)`, `R`-free. -/
+private theorem wXi_L2_topsep
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ n : ℕ, n ≤ a + 1 →
+          ‖iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
+            Ktop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2 + C n := by
+  classical
+  obtain ⟨Ktop_cd, hKtop_cd_nn, C_cd, hC_cd_nn, hcd⟩ :=
+    connDiff_L2_topsep (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨2 * Ktop_cd, mul_nonneg (by norm_num) hKtop_cd_nn,
+    fun n => 2 * C_cd n +
+      2 * ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2,
+    fun n => add_nonneg (mul_nonneg (by norm_num) (hC_cd_nn n))
+      (mul_nonneg (by norm_num) (sq_nonneg _)), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hPball n hn
+  have hA : ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 ≤
+      Ktop_cd * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P‖ ^ 2 + C_cd n := by
+    rw [norm_iCG_connDiffLoweredCc_eq_connDiffSection (I := I) (M := M) g₀ g₁ n]
+    exact hcd g₁ P htie hδ_le hδ0 hδ hPball n hn
+  have htri : ‖iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ +
+        ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g_bg)‖ := by
+    rw [wXi, iteratedCovGrad_sub]
+    exact norm_sub_le _ _
+  nlinarith [htri, hA,
+    norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)),
+    norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)),
+    norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g_bg)),
+    sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ -
+      ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g_bg)‖)]
+
+end DLbTopSeparated
+
 end DifferentialGeometry.Integral.Connection
 
 end

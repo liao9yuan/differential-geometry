@@ -542,6 +542,43 @@ the Codex-blocked concrete instantiation, mirroring the
   boundary AFTER the deTurckLie constituent closes; do not churn now.
 - (N) still 0%.  DLb session dispatched next.
 
+## Planner acceptance №16 (2026-07-24) — DLb session 1 accepted; TWO RULINGS
+
+- DLb session 1 ACCEPTED: three verified layers in
+  `DeTurckVectorFieldL2JetBound.lean` `section DLbTopSeparated` (:3147) —
+  `exists_rfns_connDiff_topsep` (:3245, public-grid-currency mirror of the
+  DLa pointwise top-sep), `connDiff_L2_topsep` (:3337, retires the
+  L2-integration route risk), `wXi_L2_topsep` (:3462).  Whole-file focused
+  check EXIT=0 live (pre-existing warnings still emitted ⟹ not
+  cached-stale); zero `sorry`; diff scope = the three permitted files.
+  Intermediate helpers — axiom audit deferred to the endpoints.
+- RULING 1 (structural, accepted): the named field endpoints CANNOT live
+  in `DeTurckVectorFieldL2JetBound.lean` (`deTurckLieDLbCoeffField` is
+  defined in `DeTurckLieKernelL2JetBound.lean:60`; the slotInsert bridge
+  in `DeTurckLieCoeffL2JetBound.lean:47`).  Split per the canonical-home
+  rule: insert-level endpoints
+  `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  in the vector-field file (the analytic heart), plus a THIN `×4·finrank`
+  R-free field wrapper `deTurckLieDLbCoeffField_realizedFam_jetL2_*` in
+  `DeTurckLieCoeffL2JetBound.lean` mirroring its ballUniform wrapper
+  (:244).  Session 2's editable set extends to that file.
+- RULING 2 (mathematical): GENUINE positive Ktop; the `Ktop = 0`
+  shortcut is REJECTED for DLb.  DLb's top content is real
+  (`wAlphaA = ∇^{i+1}wOmega` reaches `∇^{i+2}T`); lumping it under the
+  R-carrying `Kc` loses the R-freeness of the top coefficient
+  irrecoverably at this layer and would poison the combined
+  `2·DLa² + 2·DLb²` assembly (DLa's R-free `256·Kt0` wasted).  `Ktop = 0`
+  remains legitimate ONLY for constituents with no genuine top content
+  (the traceHess pattern).
+- Remaining insert tower (session 2, recipe in
+  `DeTurckVectorFieldL2JetBound.md`): wOmega corner peel via
+  `iteratedCovGrad_appCcRS_eq_argCorner_add_lower`
+  (`OperatorFieldFibreNormJet.lean:1410`) + lower sum ball-uniform
+  (:1372); wAlpha triangle; realizedFam wrapper with
+  `appCcGdiag n ≤ appCcGdiag (a+1)`; summed via `jetL2_sum_lowShift a 2 3`;
+  then the downstream field wrapper.  DLb insert producer ~40%;
+  deTurckLie constituent ~65%; (N) 0%.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -986,3 +1023,55 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`.  Then `deTurckLieCoeffField` (ruling item 2's
   1st constituent) is DONE.  (N) `ricci_flow_unif_existence` still **0%** — this is a C₀-constituent
   producer far below (N).
+- 2026-07-24: **DLb session — recon + head; two findings for planner ruling.**  Recon of the DLb
+  top-separation in `DeTurckVectorFieldL2JetBound.lean` (notes in `DeTurckVectorFieldL2JetBound.md`).
+  (1) **STRUCTURAL — endpoint location.**  `deTurckLieDLbCoeffField_realizedFam_jetL2_*_topSeparated`
+  CANNOT be stated in this file: `deTurckLieDLbCoeffField` is defined in the SIBLING
+  `DeTurckLieKernelL2JetBound.lean:60`, and the (2,2)↔(1,1) slotInsert bridge
+  `deTurckLieDLbCoeffField_eq_slotInsert_sum` lives further downstream in
+  `DeTurckLieCoeffL2JetBound.lean:47` (imports both).  So the DLb split is asymmetric to DLa: the
+  editable file hosts the INSERT-level producer `deTurckLieWEndoInsert_realizedFam_jetL2_*_
+  topSeparated` (upgrading the ball-uniform :3041); the FIELD endpoints are a THIN downstream wrapper
+  (× `4·finrank`, R-free), mirroring the ball-uniform field wrapper
+  `deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform` (`DeTurckLieCoeffL2JetBound.lean:244`).
+  №15 located the producer "near :3041" (insert level) but named it `deTurckLieDLbCoeffField_…`;
+  resolution = build insert-level here, dispatch the field wrapper against `DeTurckLieCoeffL2JetBound.lean`.
+  (2) **ROUTE SIMPLIFIED — no private arm1 machinery.**  The wOmega layer's appCc two-arm grid has a
+  metric-coefficient arm (cometricCastG0) that carries P-content; naively its remainder needs the
+  `boundedFactorGridWindow` currency + cometricCastG0 grid bound (`rfns_iteratedCovGrad_cometricCastG0_
+  gridWindow_le`, PRIVATE in `CurvatureArm1KoszulTopSeparation.lean:35`).  AVOIDED: since
+  `jetL2_sum_lowShift`'s per-order remainder is `Kc i·(1+∑low)`, the `Kc i·1` slot absorbs ANY
+  ball-uniform (R-dependent) constant, so the ENTIRE sub-top remainder integrates BALL-UNIFORMLY
+  (existing two-arm integrator + F_B) and only the single top `∇^{i+2}P` needs R-free separation.
+  Stays fully in-file/in existing machinery.  Route ≈300–500 lines (5 L2-chaining lemmas + wrapper +
+  summed), turnkey recipe in the `.md`.
+  Progress: BATCH 1 (`exists_rfns_connDiff_topsep` = connDiffSection pointwise top-sep in public
+  `antidiagonalTupleGridWindow` currency, + `engineRem_le_grid` reshape + `sum_shift_le` +
+  `jetL2_sum_lowShift`) WRITTEN in `section DLbTopSeparated`, desk-checked (mirrors the verified DLa
+  `exists_rfns_connDiffSection_topsep_dla`).  **Focused check + axiom audit PENDING** — foreign lean
+  lanes were near-continuous during the session (heavy builds contending; verify window not secured).
+  Kept the file at batch-1-only so the first window confirms the head clean.  Ktop plan R-free:
+  `2·appCcGdiag(a+1)·cΦ0·2·2Kt0`.  (N) still **0%**.
+- 2026-07-24 (cont.): **3 of ~6 DLb tower layers VERIFIED GREEN.**  Secured verify windows (foreign
+  lanes intermittent).  `section DLbTopSeparated` now has (all whole-file `lake env lean` EXIT=0,
+  zero errors, zero new warnings, live/not-cached): `exists_rfns_connDiff_topsep` (connDiffSection
+  pointwise top-sep, public grid currency), **`connDiff_L2_topsep`** (connDiffSection L2 top-sep —
+  the crux L2-integration idiom PROVEN: `normSq_le_integral_of_pointwise_fiberNormSq_le_rs` + the
+  tame-window integrator `antidiagonalTupleGrid_integral_ballUniform_tameWindow` + `hPball` (k+1)R²
+  conversion; the biggest route uncertainty is now retired), `wXi_L2_topsep`.  No axiom audit yet
+  (these are intermediate helpers, not endpoints; EXIT=0 confirms sorry-free).
+- **DECISION POINT for the planner (changes remaining effort a lot).**  Does the DLb endpoint need a
+  GENUINE positive `Ktop` on `‖∇^{i+2}T‖²` (like DLa, whose leading `wAlphaA = ∇^{i+1}wOmega ~
+  ∇^{i+2}T`), or may it use **`Ktop = 0`** — reusing the existing ball-uniform
+  `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform` (:3041) via `P i ≤ 0·top + P i·(1+
+  low)` (`low ≥ 0`), exactly the **traceHessian** constituent's accepted route
+  (`TraceHessJetL2Summed.md`)?  The endpoint SHAPE and the R-free-`Ktop` discipline are satisfied by
+  BOTH; the combined `deTurckLie` top is then `2·Ktop_DLa` (R-free) with DLb folded into `Kc`.
+  - If `Ktop = 0` acceptable: the insert endpoint + field wrapper are ~40+40 lines reusing :3041 —
+    near-immediate.  The 3 genuine layers already built stay reusable if you later want it tight.
+  - If GENUINE required (DLa-sibling reading): remaining = wOmega_L2 corner peel (the crux; recipe in
+    `DeTurckVectorFieldL2JetBound.md` — `iteratedCovGrad_appCcRS_eq_argCorner_add_lower`
+    `OperatorFieldFibreNormJet.lean:1410` + `rfns_iteratedCovGrad_appCc_coeffLower_le` :1372), then
+    wAlpha_L2 + wrapper + `jetL2_sum_lowShift a 2 3`, then the downstream field wrapper in
+    `DeTurckLieCoeffL2JetBound.lean`.  ~300 lines, multi-session.
+  My default absent a ruling: GENUINE (sibling of DLa); the 3 verified layers are that foundation.
