@@ -42,35 +42,54 @@ elaboration, not cached-stale): **EXIT 0, zero errors/warnings.**  Axiom audit
 `[propext, Classical.choice, Quot.sound]`.  Verified in a quiet Lean window
 (lanes A/B active; wait-poll protocol).
 
-## Stage β — what remains for the coefficient-one Gårding pair
+## Stage β step 1 (session 5) — commutator LANDED; `:1085` BLOCKED on covDivergence tower
 
-Goal: `hs_covsum_unif` / `covsum_hs_unif` (recon §S1) — the two-sided
-spectral↔covariant equivalence with `Λ`-uniform constant, at a generic order.
-The chain mirrors `DirichletSpectralBochnerGap.lean`:
+**`roughLapComm_unif` — GREEN, axiom-clean.**  The class-uniform `m`-fold
+rough-Laplacian/covGrad commutator, uniform sibling of the `private`
+`iteratedRoughLapGrad_commutator_l2Norm_le_local` (`DirichletSpectralBochnerGap.lean:616`).
+Structural mirror of the original induction on `m`, with `hcurv` (the same stage-α
+hypothesis) in place of its `Classical.choose` witness `K`; constant family built by the
+recursion `Cfun p = Fc p + Cfun_{m-1}(p+1)` — EXPRESSED THROUGH `Fc`, no choose.  The one
+private dep, the reindex `norm_iteratedCovGrad_comp_local` (`:443`, ~25 lines), was inlined
+verbatim as `private norm_iterCovGrad_comp` (pointwise input `rfns_iteratedCovGrad_comp`,
+public).
 
-1. **Discharge `hbase` (express `Cbase` through `Fc`).**  Re-derive the `m`-fold
-   commutator `iteratedRoughLapGrad_commutator_l2Norm_le_local` (`:616`, private) with
-   `hcurv` in place of its `K`, then `rawConnLap_iteratedCovGrad_…_base_add_lower`
-   (`:1085`, private).  BLOCKER: both use the private reindex helper
-   `norm_iteratedCovGrad_comp_local` (`:443`) and the private
-   `covDivergence_l2Norm_le_covGrad_local` (`:599`) — need public equivalents or a
-   short inline re-derivation.  The commutator constant is then explicit in `Fc`
-   (`Cfun p = ∑_{i} Fc(p+i)`-shape).  `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
-   (`RoughLaplacianSecondCovGradL2Bound.lean:537`, PUBLIC, dimension-only) and the
-   Weitzenböck IBP are consumable directly.
-2. **Uniform strong induction** (mirror `exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_lower`,
-   `:1439`): iterate `bochner_step_unif`, folding in the uniform Sobolev-jet constant
-   from `hsJet_le` (`IteratedCovGradHsJetBound.lean:834` — audit whether its constant
-   is curvature/dimension = uniformizable; expected yes, §7.3).
-3. **Coefficient-one gap** (mirror `cc_dirichlet_gap`, `:1539`) ⟹ `covsum_hs_unif`;
-   the easy direction (`hs_covsum_unif`) mirrors `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general`.
+**`:1085` (base+lower) is BLOCKED — STOP-and-request per the session-5 mandate.**  Turning
+`roughLapComm_unif` into `bochner_step_unif`'s `hbase` requires the uniform sibling of
+`rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower` (`:1085`),
+whose IBP cross-term uses `covDivergence_l2Norm_le_covGrad_local` (`:599`).  Unlike the
+reindex helper, this is NOT a ≤40-line inline: it sits atop a **~130-line `private` tower**
+(`:479–597`: `contract_eq_covGradBundleEquiv_symm_local`,
+`riemannianFiberNormSq_eq_sum_contract_orthoFrame_local`,
+`riemannianFiberNormSq_contract_le_succ_local`,
+`covDivergenceRaw_eq_sum_contract_covDeriv_local`,
+`riemannianFiberNormSq_covGrad_eq_sum_frame_local`,
+`riemannianFiberNormSq_covDivergence_le_local`).  No PUBLIC `covDivergence ≤ covGrad` bound
+exists anywhere in the tree.  The IBP identity itself
+(`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence`, `TensorCovDivergence.lean:1095`)
+and `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen` (`:537`) ARE public.
 
-Effort: step 1 is the immediate next brick (~150–250 lines incl. the two reindex/divergence
-helpers); steps 2–3 are the induction assembly.  No new mathematical frontier —
-structural mirroring with `hcurv` threaded.
+**Requested ruling:** publicize `covDivergence_l2Norm_le_covGrad_local` and its `:479–597`
+support tower in `DirichletSpectralBochnerGap.lean` (drop `private`; a benign,
+`covDivergence`-standard, foundational-file change), OR authorize a >130-line inline copy
+in this leaf (forbidden-parallel-API territory — not recommended).  With the publicize,
+`:1085` → `hbase` is a short assembly (commutator `roughLapComm_unif` + `:759`-analog +
+public IBP + public rawConnLap≤2ndCovGrad + the now-public covDivergence bound).
+
+## Stage β steps 2–3 (unchanged, after `hbase`)
+2. **Uniform strong induction** (mirror `:1439`): iterate `bochner_step_unif`, folding in
+   the uniform Sobolev-jet constant from `hsJet_le` (`IteratedCovGradHsJetBound.lean:834`
+   — audit its constant is curvature/dimension = uniformizable; expected yes, §7.3).
+3. **Coefficient-one gap** (mirror `cc_dirichlet_gap`, `:1539`) ⟹ `covsum_hs_unif`; the
+   easy direction (`hs_covsum_unif`) mirrors `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general`.
 
 ## Status
+- 2026-07-24 (session 5): STEP 0 authoritative build of `UnifBochnerGap` GREEN ("Build
+  completed successfully (9342 jobs)").  STEP 1: `roughLapComm_unif` + inlined
+  `norm_iterCovGrad_comp` LANDED, both public theorems (`bochner_step_unif`,
+  `roughLapComm_unif`) axiom-clean `[propext, Classical.choice, Quot.sound]`; full-file
+  authoritative rebuild GREEN.  `:1085`→`hbase` BLOCKED on the ~130-line private
+  covDivergence tower — STOP-and-request the publicize ruling (above).  STEP 2 (induction)
+  awaits `hbase`.  No plan edits; no commit.
 - 2026-07-24 (session 4): stage α `bochner_step_unif` GREEN + axiom-clean.  Curvature
   abstracted as `hcurv` (consumable currency); commutator base abstracted as `hbase`.
-  Stage β = discharge `hbase` (commutator re-derivation, blocked on 2 private helpers)
-  then the induction to `hs_covsum_unif`/`covsum_hs_unif`.  No plan edits; no commit.
