@@ -57,6 +57,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integrable_mul_triple_of_tsupport {Ω K : Set EuclN}
     (hΩ_open : IsOpen Ω) (hK_in : K ⊆ Ω) (hK_compact : IsCompact K)
     (hK_closed : IsClosed K) (hK_meas : MeasurableSet K)
@@ -111,6 +112,7 @@ private lemma integrable_mul_triple_of_tsupport {Ω K : Set EuclN}
   rw [h_reassoc] at full_int
   exact full_int.restrict
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_apply_continuousOn_of_contDiffOn {Ω : Set EuclN}
     (hΩ : IsOpen Ω) {a : EuclN → ℝ} (ha : ContDiffOn ℝ ∞ a Ω) (v : EuclN) :
     ContinuousOn (fun y => (fderiv ℝ a y) v) Ω := by
@@ -178,7 +180,469 @@ private lemma integral_add_thirteen {α : Type*} [MeasurableSpace α]
 -- (`integrable_mul_triple_of_tsupport`), fderiv-apply (`fderiv_apply_continuousOn_of_contDiffOn`)
 -- and sum-distribution steps into the lemmas above cut the needed budget from 4000000 to ~230000
 -- (default 200000); the remainder is spread across the 295-line numerator-decomposition block.
-set_option maxHeartbeats 250000 in
+private lemma numerator_secondOrder_decomp
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {u_h : H1Compl (I := I) (M := M) g}
+    (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
+    (l₁ l₂ : Fin (Module.finrank ℝ E))
+    {ψ : EuclN → ℝ}
+    (Ω K : Set EuclN)
+    (integrable_triple_psi : ∀ {a : EuclN → ℝ}, ContinuousOn a Ω →
+        ∀ {u : EuclN → ℝ}, IntegrableOn u K (volume : Measure EuclN) →
+        Integrable (fun y => a y * u y * ψ y)
+          ((volume : Measure EuclN).restrict Ω))
+    (hΩ_open : IsOpen Ω)
+    (h_base_wp_int : ∀ i : Fin (Module.finrank ℝ E),
+      IntegrableOn ((chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i) K (volume : Measure EuclN))
+    (h_base_uc_int : IntegrableOn (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart K (volume : Measure EuclN))
+    (h_base_fc_int : IntegrableOn (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart K (volume : Measure EuclN))
+    (h_chosenFChartDeriv_int : ∀ l : Fin (Module.finrank ℝ E),
+      IntegrableOn (chosenFChartDeriv (I := I) (M := M) g α hu_h l)
+        K (volume : Measure EuclN))
+    (h_fChartDeriv2_int :
+      IntegrableOn (fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂)
+        K (volume : Measure EuclN))
+    (h_c_cont_on : ContinuousOn (densityOnEuclid (I := I) g α) Ω)
+    (h_d2c_cont_on : ContinuousOn
+      (densitySecondDerivOnEuclid (I := I) g α l₁ l₂) Ω)
+    (h_dc_l₁_cont_on : ContinuousOn (densityDerivOnEuclid (I := I) g α l₁) Ω)
+    (h_dc_l₂_cont_on : ContinuousOn (densityDerivOnEuclid (I := I) g α l₂) Ω)
+    (h_int_C1_pair : ∀ i j,
+      Integrable (fun y => (fderiv ℝ (weightedInvGramSecondDerivOnEuclid
+            (I := I) g α i j l₁ l₂) y) (EuclideanSpace.single j 1) *
+          (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i y * ψ y)
+        ((volume : Measure EuclN).restrict Ω))
+    (h_int_C2_pair : ∀ i j,
+      Integrable (fun y => weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y * ψ y)
+        ((volume : Measure EuclN).restrict Ω))
+    (h_int_C3_pair : ∀ i j,
+      Integrable (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid
+            (I := I) g α i j l₁) y) (EuclideanSpace.single j 1) *
+          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y * ψ y)
+        ((volume : Measure EuclN).restrict Ω))
+    (h_int_C4_pair : ∀ i j,
+      Integrable (fun y => weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+          chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y * ψ y)
+        ((volume : Measure EuclN).restrict Ω))
+    (h_int_X1_named : ∀ i j,
+      Integrable (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid
+            (I := I) g α i j l₂) y) (EuclideanSpace.single j 1) *
+          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y * ψ y)
+        ((volume : Measure EuclN).restrict Ω))
+    (h_int_X2_named : ∀ i j,
+      Integrable (fun y => weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+          chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y * ψ y)
+        ((volume : Measure EuclN).restrict Ω)) :
+    (∫ y in Ω,
+      effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+      ∂(volume : Measure EuclN)) =
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω,
+              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
+                (EuclideanSpace.single j 1) *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
+              ψ y
+              ∂(volume : Measure EuclN)) +
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+              chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
+              ψ y
+              ∂(volume : Measure EuclN)) +
+      (-
+         ∫ y in Ω,
+            (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
+            (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial l₁ y * ψ y ∂(volume : Measure EuclN)) +
+     ∫ y in Ω,
+     (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
+     chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
+     ∂(volume : Measure EuclN) +
+     ∫ y in Ω, densityOnEuclid (I := I) g α y *
+     fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
+     ∂(volume : Measure EuclN) +
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω,
+              (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
+                (EuclideanSpace.single j 1) *
+              (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i y * ψ y
+              ∂(volume : Measure EuclN)) +
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω, weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y * ψ y
+              ∂(volume : Measure EuclN)) +
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω,
+              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
+                (EuclideanSpace.single j 1) *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y * ψ y
+              ∂(volume : Measure EuclN)) +
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+              chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y * ψ y
+              ∂(volume : Measure EuclN)) +
+      (-
+         ∫ y in Ω,
+            (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
+            (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart y * ψ y ∂(volume : Measure EuclN)) +
+      (-
+         ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+            (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial l₂ y * ψ y ∂(volume : Measure EuclN)) +
+     ∫ y in Ω,
+     (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
+     (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+       (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart y * ψ y ∂(volume : Measure EuclN) +
+     ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+     chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
+     ∂(volume : Measure EuclN) := by
+  let D_base : ChartBilinearH1ComplData (I := I) (M := M) g α :=
+    chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
+  let I_num : ℝ := ∫ y in Ω,
+    effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+    ∂(volume : Measure EuclN)
+  let X1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω,
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
+        (EuclideanSpace.single j 1) *
+      chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
+      ψ y
+      ∂(volume : Measure EuclN)
+  let X2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+      chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
+      ψ y
+      ∂(volume : Measure EuclN)
+  let N_A3 : ℝ := ∫ y in Ω,
+    (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
+    D_base.weak_partial l₁ y * ψ y ∂(volume : Measure EuclN)
+  let N_B1 : ℝ := ∫ y in Ω,
+    (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
+    chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
+    ∂(volume : Measure EuclN)
+  let N_B2 : ℝ := ∫ y in Ω, densityOnEuclid (I := I) g α y *
+    fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
+    ∂(volume : Measure EuclN)
+  let C1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω,
+      (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
+        (EuclideanSpace.single j 1) *
+      D_base.weak_partial i y * ψ y
+      ∂(volume : Measure EuclN)
+  let C2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω, weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+      chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y * ψ y
+      ∂(volume : Measure EuclN)
+  let C3 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω,
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
+        (EuclideanSpace.single j 1) *
+      chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y * ψ y
+      ∂(volume : Measure EuclN)
+  let C4 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+      chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y * ψ y
+      ∂(volume : Measure EuclN)
+  let N_D1 : ℝ := ∫ y in Ω,
+    (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
+    D_base.u_chart y * ψ y ∂(volume : Measure EuclN)
+  let N_D2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+    D_base.weak_partial l₂ y * ψ y ∂(volume : Measure EuclN)
+  let N_E1 : ℝ := ∫ y in Ω,
+    (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
+    D_base.f_chart y * ψ y ∂(volume : Measure EuclN)
+  let N_E2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+    chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
+    ∂(volume : Measure EuclN)
+  classical
+  change (∫ y in Ω,
+      effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+      ∂(volume : Measure EuclN)) = _
+  have h_integrand_eq : ∀ y : EuclN,
+      effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
+              (EuclideanSpace.single j 1) *
+            chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
+            ψ y) +
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+            chosenThirdMixedPartialChartPushedU
+              (I := I) (M := M) g α u_h i l₁ j y *
+            ψ y) +
+      (- (densityDerivOnEuclid (I := I) g α l₂ y *
+            D_base.weak_partial l₁ y * ψ y)) +
+      densityDerivOnEuclid (I := I) g α l₂ y *
+        chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y +
+      densityOnEuclid (I := I) g α y *
+        fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y +
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
+              (EuclideanSpace.single j 1) *
+            D_base.weak_partial i y * ψ y) +
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+            chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
+            ψ y) +
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
+              (EuclideanSpace.single j 1) *
+            chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
+            ψ y) +
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+            chosenThirdMixedPartialChartPushedU
+              (I := I) (M := M) g α u_h i l₂ j y *
+            ψ y) +
+      (- (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
+            D_base.u_chart y * ψ y)) +
+      (- (densityDerivOnEuclid (I := I) g α l₁ y *
+            D_base.weak_partial l₂ y * ψ y)) +
+      densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y * D_base.f_chart y * ψ y +
+      densityDerivOnEuclid (I := I) g α l₁ y *
+        chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y := by
+    intro y
+    unfold effectiveSourceChartSecondOrderNumerator
+    simp only [add_mul, sub_mul, Finset.sum_mul]
+    ring
+  rw [setIntegral_congr_fun hΩ_open.measurableSet (fun y _ => h_integrand_eq y)]
+  let int_A1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
+          (EuclideanSpace.single j 1) *
+        chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
+        ψ y
+  let int_A2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+        chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
+        ψ y
+  let int_A3 : EuclN → ℝ := fun y =>
+    - (densityDerivOnEuclid (I := I) g α l₂ y *
+        D_base.weak_partial l₁ y * ψ y)
+  let int_B1 : EuclN → ℝ := fun y =>
+    densityDerivOnEuclid (I := I) g α l₂ y *
+      chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
+  let int_B2 : EuclN → ℝ := fun y =>
+    densityOnEuclid (I := I) g α y *
+      fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
+  let int_C1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
+          (EuclideanSpace.single j 1) *
+        D_base.weak_partial i y * ψ y
+  let int_C2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+        chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
+        ψ y
+  let int_C3 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
+          (EuclideanSpace.single j 1) *
+        chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
+        ψ y
+  let int_C4 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+        chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y *
+        ψ y
+  let int_D1 : EuclN → ℝ := fun y =>
+    - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
+        D_base.u_chart y * ψ y)
+  let int_D2 : EuclN → ℝ := fun y =>
+    - (densityDerivOnEuclid (I := I) g α l₁ y *
+        D_base.weak_partial l₂ y * ψ y)
+  let int_E1 : EuclN → ℝ := fun y =>
+    densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
+      D_base.f_chart y * ψ y
+  let int_E2 : EuclN → ℝ := fun y =>
+    densityDerivOnEuclid (I := I) g α l₁ y *
+      chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
+  have hint_A1 : Integrable int_A1 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_X1_named i j))
+  have hint_A2 : Integrable int_A2 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_X2_named i j))
+  have hint_A3 : Integrable int_A3 ((volume : Measure EuclN).restrict Ω) :=
+    (integrable_triple_psi h_dc_l₂_cont_on (h_base_wp_int l₁)).neg
+  have hint_B1 : Integrable int_B1 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_triple_psi h_dc_l₂_cont_on (h_chosenFChartDeriv_int l₁)
+  have hint_B2 : Integrable int_B2 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_triple_psi h_c_cont_on h_fChartDeriv2_int
+  have hint_C1 : Integrable int_C1 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_C1_pair i j))
+  have hint_C2 : Integrable int_C2 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_C2_pair i j))
+  have hint_C3 : Integrable int_C3 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_C3_pair i j))
+  have hint_C4 : Integrable int_C4 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_finset_sum _ (fun i _ =>
+      integrable_finset_sum _ (fun j _ => h_int_C4_pair i j))
+  have hint_D1 : Integrable int_D1 ((volume : Measure EuclN).restrict Ω) :=
+    (integrable_triple_psi h_d2c_cont_on h_base_uc_int).neg
+  have hint_D2 : Integrable int_D2 ((volume : Measure EuclN).restrict Ω) :=
+    (integrable_triple_psi h_dc_l₁_cont_on (h_base_wp_int l₂)).neg
+  have hint_E1 : Integrable int_E1 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_triple_psi h_d2c_cont_on h_base_fc_int
+  have hint_E2 : Integrable int_E2 ((volume : Measure EuclN).restrict Ω) :=
+    integrable_triple_psi h_dc_l₁_cont_on (h_chosenFChartDeriv_int l₂)
+  have h_int_split := integral_add_thirteen hint_A1 hint_A2 hint_A3 hint_B1
+    hint_B2 hint_C1 hint_C2 hint_C3 hint_C4 hint_D1 hint_D2 hint_E1 hint_E2
+  have eq_intA1 : (∫ y in Ω, int_A1 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), X1 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
+                (EuclideanSpace.single j 1) *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
+              ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), X1 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_X1_named i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_X1_named i j)]
+
+  have eq_intA2 : (∫ y in Ω, int_A2 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), X2 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
+              chosenThirdMixedPartialChartPushedU
+                (I := I) (M := M) g α u_h i l₁ j y *
+              ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), X2 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_X2_named i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_X2_named i j)]
+
+  have eq_intA3 : (∫ y in Ω, int_A3 y ∂(volume : Measure EuclN)) = - N_A3 := by
+    change (∫ y in Ω,
+        - (densityDerivOnEuclid (I := I) g α l₂ y *
+          D_base.weak_partial l₁ y * ψ y)
+        ∂(volume : Measure EuclN)) = - N_A3
+    rw [MeasureTheory.integral_neg]
+    rfl
+
+  have eq_intB1 : (∫ y in Ω, int_B1 y ∂(volume : Measure EuclN)) = N_B1 := rfl
+  have eq_intB2 : (∫ y in Ω, int_B2 y ∂(volume : Measure EuclN)) = N_B2 := rfl
+  have eq_intC1 : (∫ y in Ω, int_C1 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C1 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            (fderiv ℝ (weightedInvGramSecondDerivOnEuclid
+              (I := I) g α i j l₁ l₂) y)
+              (EuclideanSpace.single j 1) *
+              D_base.weak_partial i y * ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C1 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_C1_pair i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_C1_pair i j)]
+
+  have eq_intC2 : (∫ y in Ω, int_C2 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C2 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
+              ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C2 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_C2_pair i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_C2_pair i j)]
+
+  have eq_intC3 : (∫ y in Ω, int_C3 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C3 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
+                (EuclideanSpace.single j 1) *
+              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
+              ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C3 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_C3_pair i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_C3_pair i j)]
+
+  have eq_intC4 : (∫ y in Ω, int_C4 y ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C4 i j := by
+    change (∫ y in Ω,
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
+              chosenThirdMixedPartialChartPushedU
+                (I := I) (M := M) g α u_h i l₂ j y * ψ y
+        ∂(volume : Measure EuclN)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E), C4 i j
+    rw [integral_finset_sum _ (fun i _ =>
+      (integrable_finset_sum _ (fun j _ => h_int_C4_pair i j)))]
+    refine Finset.sum_congr rfl ?_; intro i _
+    rw [integral_finset_sum _ (fun j _ => h_int_C4_pair i j)]
+
+  have eq_intD1 : (∫ y in Ω, int_D1 y ∂(volume : Measure EuclN)) = - N_D1 := by
+    change (∫ y in Ω,
+        - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
+          D_base.u_chart y * ψ y)
+        ∂(volume : Measure EuclN)) = - N_D1
+    rw [MeasureTheory.integral_neg]
+    rfl
+
+  have eq_intD2 : (∫ y in Ω, int_D2 y ∂(volume : Measure EuclN)) = - N_D2 := by
+    change (∫ y in Ω,
+        - (densityDerivOnEuclid (I := I) g α l₁ y *
+          D_base.weak_partial l₂ y * ψ y)
+        ∂(volume : Measure EuclN)) = - N_D2
+    rw [MeasureTheory.integral_neg]
+
+  have eq_intE1 : (∫ y in Ω, int_E1 y ∂(volume : Measure EuclN)) = N_E1 := rfl
+  have eq_intE2 : (∫ y in Ω, int_E2 y ∂(volume : Measure EuclN)) = N_E2 := rfl
+  rw [h_int_split, eq_intA1, eq_intA2, eq_intA3, eq_intB1, eq_intB2,
+    eq_intC1, eq_intC2, eq_intC3, eq_intC4, eq_intD1, eq_intD2, eq_intE1, eq_intE2]
+
+
 theorem twice_differentiated_variational_identity_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1358,287 +1822,12 @@ theorem twice_differentiated_variational_identity_holds
         ∑ j : Fin (Module.finrank ℝ E), C3 i j) +
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), C4 i j) +
-      (- N_D1) + (- N_D2) + N_E1 + N_E2 := by
-    classical
-    change (∫ y in Ω,
-        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
-        ∂(volume : Measure EuclN)) = _
-    have h_integrand_eq : ∀ y : EuclN,
-        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
-                (EuclideanSpace.single j 1) *
-              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
-              ψ y) +
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
-              chosenThirdMixedPartialChartPushedU
-                (I := I) (M := M) g α u_h i l₁ j y *
-              ψ y) +
-        (- (densityDerivOnEuclid (I := I) g α l₂ y *
-              D_base.weak_partial l₁ y * ψ y)) +
-        densityDerivOnEuclid (I := I) g α l₂ y *
-          chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y +
-        densityOnEuclid (I := I) g α y *
-          fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y +
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
-                (EuclideanSpace.single j 1) *
-              D_base.weak_partial i y * ψ y) +
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
-              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
-              ψ y) +
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
-                (EuclideanSpace.single j 1) *
-              chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
-              ψ y) +
-        (∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E),
-            weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
-              chosenThirdMixedPartialChartPushedU
-                (I := I) (M := M) g α u_h i l₂ j y *
-              ψ y) +
-        (- (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-              D_base.u_chart y * ψ y)) +
-        (- (densityDerivOnEuclid (I := I) g α l₁ y *
-              D_base.weak_partial l₂ y * ψ y)) +
-        densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y * D_base.f_chart y * ψ y +
-        densityDerivOnEuclid (I := I) g α l₁ y *
-          chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y := by
-      intro y
-      unfold effectiveSourceChartSecondOrderNumerator
-      simp only [add_mul, sub_mul, Finset.sum_mul]
-      ring
-    rw [setIntegral_congr_fun hΩ_open.measurableSet (fun y _ => h_integrand_eq y)]
-    let int_A1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
-            (EuclideanSpace.single j 1) *
-          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
-          ψ y
-    let int_A2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
-          chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
-          ψ y
-    let int_A3 : EuclN → ℝ := fun y =>
-      - (densityDerivOnEuclid (I := I) g α l₂ y *
-          D_base.weak_partial l₁ y * ψ y)
-    let int_B1 : EuclN → ℝ := fun y =>
-      densityDerivOnEuclid (I := I) g α l₂ y *
-        chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
-    let int_B2 : EuclN → ℝ := fun y =>
-      densityOnEuclid (I := I) g α y *
-        fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
-    let int_C1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
-            (EuclideanSpace.single j 1) *
-          D_base.weak_partial i y * ψ y
-    let int_C2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
-          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
-          ψ y
-    let int_C3 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
-            (EuclideanSpace.single j 1) *
-          chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
-          ψ y
-    let int_C4 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
-      ∑ j : Fin (Module.finrank ℝ E),
-        weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
-          chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y *
-          ψ y
-    let int_D1 : EuclN → ℝ := fun y =>
-      - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-          D_base.u_chart y * ψ y)
-    let int_D2 : EuclN → ℝ := fun y =>
-      - (densityDerivOnEuclid (I := I) g α l₁ y *
-          D_base.weak_partial l₂ y * ψ y)
-    let int_E1 : EuclN → ℝ := fun y =>
-      densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-        D_base.f_chart y * ψ y
-    let int_E2 : EuclN → ℝ := fun y =>
-      densityDerivOnEuclid (I := I) g α l₁ y *
-        chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
-    have hint_A1 : Integrable int_A1 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_X1_named i j))
-    have hint_A2 : Integrable int_A2 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_X2_named i j))
-    have hint_A3 : Integrable int_A3 ((volume : Measure EuclN).restrict Ω) :=
-      (integrable_triple_psi h_dc_l₂_cont_on (h_base_wp_int l₁)).neg
-    have hint_B1 : Integrable int_B1 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_triple_psi h_dc_l₂_cont_on (h_chosenFChartDeriv_int l₁)
-    have hint_B2 : Integrable int_B2 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_triple_psi h_c_cont_on h_fChartDeriv2_int
-    have hint_C1 : Integrable int_C1 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_C1_pair i j))
-    have hint_C2 : Integrable int_C2 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_C2_pair i j))
-    have hint_C3 : Integrable int_C3 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_C3_pair i j))
-    have hint_C4 : Integrable int_C4 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_finset_sum _ (fun i _ =>
-        integrable_finset_sum _ (fun j _ => h_int_C4_pair i j))
-    have hint_D1 : Integrable int_D1 ((volume : Measure EuclN).restrict Ω) :=
-      (integrable_triple_psi h_d2c_cont_on h_base_uc_int).neg
-    have hint_D2 : Integrable int_D2 ((volume : Measure EuclN).restrict Ω) :=
-      (integrable_triple_psi h_dc_l₁_cont_on (h_base_wp_int l₂)).neg
-    have hint_E1 : Integrable int_E1 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_triple_psi h_d2c_cont_on h_base_fc_int
-    have hint_E2 : Integrable int_E2 ((volume : Measure EuclN).restrict Ω) :=
-      integrable_triple_psi h_dc_l₁_cont_on (h_chosenFChartDeriv_int l₂)
-    have h_int_split := integral_add_thirteen hint_A1 hint_A2 hint_A3 hint_B1
-      hint_B2 hint_C1 hint_C2 hint_C3 hint_C4 hint_D1 hint_D2 hint_E1 hint_E2
-    have eq_intA1 : (∫ y in Ω, int_A1 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), X1 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
-                  (EuclideanSpace.single j 1) *
-                chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
-                ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), X1 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_X1_named i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_X1_named i j)]
-
-    have eq_intA2 : (∫ y in Ω, int_A2 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), X2 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
-                chosenThirdMixedPartialChartPushedU
-                  (I := I) (M := M) g α u_h i l₁ j y *
-                ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), X2 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_X2_named i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_X2_named i j)]
-
-    have eq_intA3 : (∫ y in Ω, int_A3 y ∂(volume : Measure EuclN)) = - N_A3 := by
-      change (∫ y in Ω,
-          - (densityDerivOnEuclid (I := I) g α l₂ y *
-            D_base.weak_partial l₁ y * ψ y)
-          ∂(volume : Measure EuclN)) = - N_A3
-      rw [MeasureTheory.integral_neg]
-      rfl
-
-    have eq_intB1 : (∫ y in Ω, int_B1 y ∂(volume : Measure EuclN)) = N_B1 := rfl
-    have eq_intB2 : (∫ y in Ω, int_B2 y ∂(volume : Measure EuclN)) = N_B2 := rfl
-    have eq_intC1 : (∫ y in Ω, int_C1 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C1 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              (fderiv ℝ (weightedInvGramSecondDerivOnEuclid
-                (I := I) g α i j l₁ l₂) y)
-                (EuclideanSpace.single j 1) *
-                D_base.weak_partial i y * ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C1 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_C1_pair i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_C1_pair i j)]
-
-    have eq_intC2 : (∫ y in Ω, int_C2 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C2 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
-                chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
-                ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C2 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_C2_pair i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_C2_pair i j)]
-
-    have eq_intC3 : (∫ y in Ω, int_C3 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C3 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
-                  (EuclideanSpace.single j 1) *
-                chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
-                ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C3 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_C3_pair i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_C3_pair i j)]
-
-    have eq_intC4 : (∫ y in Ω, int_C4 y ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C4 i j := by
-      change (∫ y in Ω,
-          ∑ i : Fin (Module.finrank ℝ E),
-            ∑ j : Fin (Module.finrank ℝ E),
-              weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
-                chosenThirdMixedPartialChartPushedU
-                  (I := I) (M := M) g α u_h i l₂ j y * ψ y
-          ∂(volume : Measure EuclN)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          ∑ j : Fin (Module.finrank ℝ E), C4 i j
-      rw [integral_finset_sum _ (fun i _ =>
-        (integrable_finset_sum _ (fun j _ => h_int_C4_pair i j)))]
-      refine Finset.sum_congr rfl ?_; intro i _
-      rw [integral_finset_sum _ (fun j _ => h_int_C4_pair i j)]
-
-    have eq_intD1 : (∫ y in Ω, int_D1 y ∂(volume : Measure EuclN)) = - N_D1 := by
-      change (∫ y in Ω,
-          - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-            D_base.u_chart y * ψ y)
-          ∂(volume : Measure EuclN)) = - N_D1
-      rw [MeasureTheory.integral_neg]
-      rfl
-
-    have eq_intD2 : (∫ y in Ω, int_D2 y ∂(volume : Measure EuclN)) = - N_D2 := by
-      change (∫ y in Ω,
-          - (densityDerivOnEuclid (I := I) g α l₁ y *
-            D_base.weak_partial l₂ y * ψ y)
-          ∂(volume : Measure EuclN)) = - N_D2
-      rw [MeasureTheory.integral_neg]
-
-    have eq_intE1 : (∫ y in Ω, int_E1 y ∂(volume : Measure EuclN)) = N_E1 := rfl
-    have eq_intE2 : (∫ y in Ω, int_E2 y ∂(volume : Measure EuclN)) = N_E2 := rfl
-    rw [h_int_split, eq_intA1, eq_intA2, eq_intA3, eq_intB1, eq_intB2,
-      eq_intC1, eq_intC2, eq_intC3, eq_intC4, eq_intD1, eq_intD2, eq_intE1, eq_intE2]
+      (- N_D1) + (- N_D2) + N_E1 + N_E2 :=
+    numerator_secondOrder_decomp g α hu_h l₁ l₂ Ω K
+      integrable_triple_psi hΩ_open h_base_wp_int h_base_uc_int h_base_fc_int
+      h_chosenFChartDeriv_int h_fChartDeriv2_int h_c_cont_on h_d2c_cont_on
+      h_dc_l₁_cont_on h_dc_l₂_cont_on h_int_C1_pair h_int_C2_pair h_int_C3_pair
+      h_int_C4_pair h_int_X1_named h_int_X2_named
   have h_I_num_eq_rhs :=
     integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
       (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p ψ
