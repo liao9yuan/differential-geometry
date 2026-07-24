@@ -608,6 +608,28 @@ the Codex-blocked concrete instantiation, mirroring the
   — dispatched to the warm session-2 executor.  Then `lieCorr0Field`
   (2nd missing constituent), then the threeArm/C₀ assembly.  (N) 0%.
 
+## Planner acceptance №18 (2026-07-24) — deTurckLieCoeffField CLOSED
+
+- Session 3 (combined assembly) ACCEPTED.  Endpoints
+  `deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated` (:739)
+  and `..._summed_topSeparated` (:799) in
+  `DeTurckLieCoeffL2JetBound.lean` (858 lines), via the pointwise
+  triangle helper `normSq_iCG_deTurckLieCoeff_le` and the committed split
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`.  Spot-checks:
+  zero `sorry`, audit lines stripped, diff scope exactly the four
+  permitted files.  Executor evidence: whole-file check clean; direct-lean
+  full re-elaboration with axiom audit exactly
+  `[propext, Classical.choice, Quot.sound]` on both endpoints.
+- Combined constants: `Ktop = 2·(Ktop_DLa + Ktop_DLb)` R-free;
+  `Kc = 2·(Kc_DLa + Kc_DLb)`, R only there.  Discipline PASSED.
+- THE FIRST genuinely-missing C₀ constituent (`deTurckLieCoeffField`) is
+  now fully produced at the top-separated realizedFam jetL2 layer
+  (perOrder + summed).  Post-commit `lake build` olean refresh recorded
+  below.  Remaining on the №8 constituent map: `lieCorr0Field`
+  (`LieCorr0Core.lean:583`, 2nd missing constituent — dispatched next),
+  then the Ψ₀/threeArm C₀ assembly, then the smooth-core tame lemma
+  (ruling item 2 proper).  (N) still 0%.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -1139,3 +1161,20 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
     producers now exist and are shape-compatible.  `(N)` `ricci_flow_unif_existence` still **0%**
     (`deTurckLieCoeffField` is the 1st of two genuinely-missing C₀ constituents; its DLa+DLb halves are
     now both built, assembly pending; `lieCorr0Field` is a separate later dispatch).
+- 2026-07-24 (session 3, combined assembly): **`deTurckLieCoeffField` CONSTITUENT CLOSED.**  Built +
+  verified + axiom-audited in `DeTurckLieCoeffL2JetBound.lean` (lowest file seeing both halves):
+  `deTurckLieCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`.  Route: private pointwise
+  triangle `normSq_iCG_deTurckLieCoeff_le` (`‖∇ⁱ coeff‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²` via the committed
+  split `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` :77 + `sq_le_two_add`), consuming the DLa
+  field endpoints (`DeTurckLieKernelL2JetBound.lean:5680/5966` — confirmed imported/visible, no import
+  hacking) and the DLb field endpoints; perOrder via `add_le_add (2·ha)(2·hb)` + `ring`, summed via
+  `Finset.sum_le_sum` + `sum_add_distrib` + `← mul_sum` (avoids the private `jetL2_sum_lowShift`).
+  Combined `Ktop = 2·(Ktop_DLa + Ktop_DLb)` **R-free**, single combined `Kc = 2·(Kc_DLa + Kc_DLb)`.
+  SHAPES match the DLa/DLb field siblings (s-before-i, windows `a+3`).  **Verification:** whole-file
+  `lake env lean` clean (zero errors, zero new warnings, my code all > line 708); direct-`lean` axiom
+  audit (LEAN_PATH = `C:/dgb2/e87b/lib/lean` + 9 package olean dirs) — both endpoints print exactly
+  `[propext, Classical.choice, Quot.sound]`; audit lines stripped.  Olean refresh NOT needed (audit is
+  direct-lean on source; deps current at f32558d03; no downstream consumer this session).  Files:
+  `DeTurckLieCoeffL2JetBound.lean` (+.md), `DeTurckLieJetL2Summed.md`, plan.  Not committed (planner
+  commits).  **Next (planner's):** `lieCorr0Field` (`LieCorr0Core.lean:583`, the 2nd genuinely-missing
+  C₀ constituent) and the threeArm precursor assembly.  `(N)` still **0%**.

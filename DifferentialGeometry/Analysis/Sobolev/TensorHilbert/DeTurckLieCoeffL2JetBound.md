@@ -33,8 +33,28 @@ Kc i·(1+∑_{j<i+3}(…))`; summed both windows `a+3`, single `Kc`.  Quantifier
 Field `Ktop = 4·finrank·Ktop_insert` is `R`-free (finrank is g₀-level; `Ktop_insert` is the
 insert-level `2·ΛClow 0·Ktop_xi`, `R`-free).  `R` only in `Kc`.
 
-## Status
+## Combined assembly (session 3, 2026-07-24) — deTurckLie constituent CLOSED
 
-Code written; whole-file check + axiom audit of the two field endpoints pending the vector-field
-module olean refresh (heavy build).  Insert-level producers verified green (see
-`DeTurckVectorFieldL2JetBound.md`).
+Added after the DLb field wrappers, closing `deTurckLieCoeffField = deTurckLieDLaCoeffField +
+deTurckLieDLbCoeffField`:
+
+- `normSq_iCG_deTurckLieCoeff_le` (private, generic `g₁`): the pointwise combined triangle
+  `‖∇ⁱ deTurckLieCoeffField‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²`, via the committed additive split
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` (`DeTurckLieKernelL2JetBound.lean:77`,
+  public, imported) + `sq_le_two_add`.  Reused by both combined endpoints.
+- `deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated` — consumes the DLa perOrder endpoint
+  (`DeTurckLieKernelL2JetBound.lean:5680`) + the DLb perOrder field endpoint; `le_trans` the triangle
+  helper, then `add_le_add (2·ha) (2·hb)` + `ring`.
+- `deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated` — consumes the DLa/DLb SUMMED
+  endpoints; `htri_sum` = summed triangle (`Finset.sum_le_sum` helper + `Finset.sum_add_distrib` +
+  `← Finset.mul_sum`), then `add_le_add (2·ha_s) (2·hb_s)` + `ring`.
+
+Combined `Ktop = 2·(Ktop_DLa + Ktop_DLb)` (R-free), single combined `Kc i = 2·(Kc_a i + Kc_b i)`
+(perOrder) / `Kc = 2·(Kc_a + Kc_b)` (summed).  SHAPES match the DLa/DLb field siblings; s-before-i.
+
+## Status — GREEN + AUDITED
+
+All field-level endpoints (2 DLb + 2 combined) verified: whole-file `lake env lean` clean (zero
+errors, zero new warnings), and direct-`lean` axiom audit (project `LEAN_PATH`) — every endpoint
+depends only on `[propext, Classical.choice, Quot.sound]`.  The DLb insert-level producers are green
+(see `DeTurckVectorFieldL2JetBound.md`).  The `deTurckLieCoeffField` constituent is CLOSED.

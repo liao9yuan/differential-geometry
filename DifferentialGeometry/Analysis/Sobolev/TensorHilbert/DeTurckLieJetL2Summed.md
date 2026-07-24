@@ -196,3 +196,22 @@ for `deTurckLieCoeffField`:** the combined-coefficient assembly `‖∇^i deTurc
 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`) — NOT
 started this session (per dispatch scope: stop at the four verified DLb endpoints).  `(N)`
 `ricci_flow_unif_existence` remains **0%**.
+
+## 2026-07-24 — COMBINED assembly DONE (session 3); `deTurckLieCoeffField` constituent CLOSED
+
+The combined-coefficient endpoints are built + verified + axiom-clean in
+`DeTurckLieCoeffL2JetBound.lean` (the lowest file seeing both halves):
+`deTurckLieCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`.  Route: the pointwise
+triangle `‖∇ⁱ deTurckLieCoeffField‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²` (private
+`normSq_iCG_deTurckLieCoeff_le`, via the committed split `deTurckLieDLaCoeffField_add_
+deTurckLieDLbCoeffField` :77 + `sq_le_two_add`), consuming the DLa field endpoints
+(`DeTurckLieKernelL2JetBound.lean:5680/5966`, imported+visible) and the DLb field endpoints; summed
+via `Finset.sum_le_sum` + `sum_add_distrib` + `← mul_sum` (no private `jetL2_sum_lowShift` needed).
+Combined `Ktop = 2·(Ktop_DLa + Ktop_DLb)` R-FREE, single combined `Kc`.  SHAPES match the DLa/DLb
+field siblings (s-before-i, windows `a+3`).  Whole-file `lake env lean` clean (zero errors, zero new
+warnings); direct-`lean` axiom audit = `[propext, Classical.choice, Quot.sound]` for both.
+
+**`deTurckLieCoeffField` (ruling item 2's 1st genuinely-missing C₀ constituent) is now CLOSED** — DLa
+half + DLb half + combined assembly all built.  Next dispatches (planner's): `lieCorr0Field`
+(`LieCorr0Core.lean:583`, the 2nd C₀ constituent) and the threeArm precursor assembly.  `(N)`
+`ricci_flow_unif_existence` still **0%** (this constituent sits far below (N)).
