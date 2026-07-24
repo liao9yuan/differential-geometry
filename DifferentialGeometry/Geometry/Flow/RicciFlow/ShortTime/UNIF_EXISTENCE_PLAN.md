@@ -737,6 +737,46 @@ C ratified), final (N) assembly last.
 - Lane A's leaf (top piece via DLb@`g_bg:=g₀`) stays written and parked
   until the deps build.
 
+## Planner consolidation №22 (2026-07-24) — parallel-lane outcomes
+
+- LANE A (lieCorr0 / item 2): band-aid disproved (T1) — the winning
+  TotalSpace topology has no paired FiberBundle instance and the topology
+  is baked at the `SmoothCcTensor` definition sites, so per-site pins are
+  impossible.  Only fix = bundle-definition-layer instance dedup.  CONSULT
+  READY: `ShortTime/UNIF_DIAMOND_PRO_PROMPT.md` (+ evidence in
+  `TensorHilbert/LieCorr0CoeffL2JetBound.md`); branch pushed to origin.
+  BLOCKED on browser access for the GPT Pro submission (Chrome extension
+  not connected) — user action needed, or manual paste.  lieCorr0 parked.
+- LANE B (item 5 → item 6/2a): item 5's fixed-horizon layer DELIVERED
+  (`maxreg_solution_jointly_smooth_representative_of_tame_nemytskii`,
+  `d95dc134b`).  2a chain: composition core (`447463644`) + tie API
+  (`75673d4f1`) + discharger D1 (`7a79aea50`) + D2 linearity reduction
+  (`a77c7ffdc`) all green; D2's crux `normBridge` statement pinned with
+  ONE documented frontier `sorry` (`5edeae3a7`, sorryAx marker
+  intentional) — gated on the missing formalism agreement
+  `nabla0SFun ↔ tensor0SCovariantDerivative` (flagged-missing ×5 in the
+  tree).  Agreement-bridge executor dispatched
+  (`Agreement/Nabla0SFunAgreement.lean`, sibling-induction template).
+  `B(Λ) = n·(Λ−1) + 2Λ` pinned.
+- LANE C (item 6/S1): **S1-ABSTRACT COMPLETE.**  Chain: `bochner_step_unif`
+  (`3d0d6847c`) → `roughLapComm_unif` (`515cba063`) → hbase discharge
+  (`f5812c014`, + the one-token covDivergence publicize, no downstream
+  breakage) → `elliptic_lapSum_unif` (`d2854d87c`, tight ⌈a/2⌉ budget) →
+  both endpoints `covsum_hs_unif`/`hsCovsum_unif` (`4458fb6f1`, + the
+  four-token spectral-bridge publicize) → consumer verdict `49fe8ae04`:
+  STEP 2.2/2.3 UNNECESSARY (route-2 internals).  All constants
+  Fc-explicit; only dimension chooses remain.  Two downstream deltas
+  recorded in `UnifBochnerGap.md`: the thin rank-2 face wrapper and a
+  possible expose-aggregate-constant refinement when 2a/2c compose.
+- Scoreboard: ruling items 1 ✓, 3 ✓, 4 ✓, 5 ✓ (fixed-horizon layer;
+  deepest cutoff rework deferred, post-item-2); item 6: S1-abstract ✓,
+  2a ~45% (gated on the agreement bridge), S0/S1b/S2–S4 unstarted;
+  item 2: 6/7 constituents + lieCorr0 parked on the diamond consult +
+  threeArm assembly unstarted.  (N) `ricci_flow_unif_existence`: **0%**
+  (its `sorry` untouched).  Known intentional machinery `sorry`: exactly
+  one (`normBridge`), documented, expected to clear with the agreement
+  bridge.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
