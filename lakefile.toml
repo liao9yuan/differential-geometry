@@ -2,6 +2,12 @@ name = "DifferentialGeometry"
 version = "1.2.1"
 keywords = ["math"]
 defaultTargets = ["DifferentialGeometry", "DeclIndex"]
+# Branch-local (codex/analytic-producers-e87b): short absolute build dir.
+# The default .lake/build under this worktree's 63-char prefix pushes two deep
+# spectral modules' artifact paths past Windows MAX_PATH (~260), which Lake's
+# C-runtime cannot open (deterministic ENOENT on .olean.hash / .trace).
+# Revert to the default before merging to a normally-located checkout.
+buildDir = "C:/dgb2/e87b"
 
 [leanOptions]
 pp.unicode.fun = true

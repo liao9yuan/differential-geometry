@@ -420,16 +420,61 @@ parallel to `nemytskiiMixedForcingMap_dist_le`.  This decouples item 4 from
 the Codex-blocked concrete instantiation, mirroring the
 `forward_ode2_of_bound` abstraction pattern.
 
+## Planner acceptance №13 (2026-07-23) — tree COMMITTED CLEAN; authoritative build 7/8 pending one upstream rebuild
+
+- User clarified nobody owns this branch; the orphaned Codex leftovers were
+  committed by the user: `f55a993d6` (JetTower pureTrace/koszul lines +
+  DeTurckLie `symmC0_rfns_le` wrapper) and `126aaebda` "update" (sweeps in
+  the eight new modules and notes).  `git status --short` is now EMPTY.
+- User ran the authoritative 8-target `lake build`: 9432/9433 jobs; single
+  failure = `...EllipticBridge...EigenvectorChartRHSDiffNumeratorWkpNormSharp`
+  (the previously hash-split heavy spectral module; its `.lake` artifacts
+  are stale at 07-20 00:49 and its cached `.trace` log holds no error, so
+  the job genuinely re-ran and failed — exact error text not yet captured).
+  `LowScaleCutoff` IS lake-green (artifacts 07-23 21:14).  The six
+  TensorHilbert engines + `TimeH1Modulus` sit downstream of the failed
+  module and were skipped — still pending authoritative verification.
+- ROOT CAUSE FOUND (deterministic, not a race / not thread exhaustion):
+  Windows MAX_PATH.  With the 63-char worktree prefix, exactly two modules
+  have build artifacts over the ~260-char C-runtime limit:
+  `EigenvectorChartRHSDiffNumeratorWkpNormSharp` (`.olean.hash` = 261;
+  its `.trace` = 256 is readable, so Lake starts the replay and then dies
+  ENOENT on the hash — the exact observed error) and
+  `EigenvectorChartRHSDiffWkpNormSharpBoundedExplicit` (`.olean.hash` =
+  267, `.trace` = 262; not in today's closure, latent).  The 07-20 sidecar
+  files were written by long-path-capable `cp` mirroring, which is why
+  they exist yet Lake cannot open them.  This also retro-explains the
+  original "missing hash" split that first broke `lake build`.
+- Diagnosis nailed by minimal repro: Lean's own runtime on the 261-char
+  path gives `pathExists: false` + `IO.FS.readFile` ENOENT, while bash and
+  .NET read the same file fine.  A `C:\w87` junction did NOT help — Lake
+  canonicalizes the workspace root back to the real long prefix.
+- FIX (zero recompile, adopted): `lakefile.toml` on this branch sets
+  `buildDir = "C:/dgb2/e87b"` (short absolute path; comment in the file
+  explains why; REVERT before merging to a normally-located checkout).
+  The old `.lake/build` (9.4 GB) was preseeded into `C:/dgb2/e87b` via
+  hardlinks (`cp -al`, ~2 min, zero extra disk).  Trace keys survive:
+  probes report "All targets up-to-date" for LowScaleCutoff (1902 jobs)
+  AND for the previously-fatal Numerator module (8954 jobs) — the killer
+  replay now passes.  No special cwd is needed anymore; plain `lake build`
+  / `lake env lean` in the worktree just work.  The old
+  `.lake/build` tree is abandoned (do not delete yet; it backs the
+  hardlinks' provenance history).  The 8-target authoritative build was
+  relaunched under the new buildDir; result recorded below.
+
 ## Executor constraints (multi-agent; STRICT)
 
-- Work ONLY in this worktree/branch.  It has UNCOMMITTED Codex work — do
-  not commit, do not touch any file in `git status --short`, especially
-  `Analysis/Parabolic/Euclidean/KochLammLateFull.*` and the modified
-  Spectral/Sobolev files.  New leaf files + this plan's named files only;
-  the Stage-3 statement edit only after acceptance.
+- Work ONLY in this worktree/branch.  The tree is committed clean as of
+  №13 (`126aaebda`); the old "uncommitted Codex work — do not commit" rule
+  is obsolete.  Keep commits surgical, never sweep unrelated files.  New
+  leaf files + this plan's named files only; the Stage-3 statement edit
+  only after acceptance.
 - Verification: focused `lake env lean <file>` per edit; `lake build
-  +<Module>` only for final verification of NEW modules.  Never run two
-  Lean processes at once.  Put `set_option autoImplicit false` at the top
+  +<Module>` only for final verification of NEW modules.  Build artifacts
+  live in `C:/dgb2/e87b` (branch-local `buildDir` in `lakefile.toml`; see
+  №13 — MAX_PATH.  Do NOT change `buildDir` back or build with a stripped
+  lakefile: the default `.lake/build` prefix deterministically fails on
+  two deep spectral modules).  Never run two Lean processes at once.  Put `set_option autoImplicit false` at the top
   of every new file (`lake env lean` does NOT apply lakefile leanOptions —
   a focused check does not verify binder hygiene).
 - Honest accounting: (N) remains 0% until its exact `sorry` is gone;
