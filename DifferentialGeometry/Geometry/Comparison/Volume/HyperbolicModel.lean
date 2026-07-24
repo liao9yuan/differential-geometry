@@ -119,6 +119,55 @@ theorem hypDen_continuous (q : ℝ) (d : ℕ) : Continuous (hypDensity q d) :=
 def hypMeanCurv (q : ℝ) (d : ℕ) (r : ℝ) : ℝ :=
   (d : ℝ) * hypSnDeriv q r / hypSn q r
 
+/-- The hyperbolic model mean curvature is bounded by its Euclidean pole term
+plus the curvature scale. -/
+theorem hypMeanCurv_le
+    {q r : ℝ} (d : ℕ) (hq : 0 ≤ q) (hr : 0 < r) :
+    hypMeanCurv q d r ≤ (d : ℝ) / r + (d : ℝ) * q := by
+  by_cases hq0 : q = 0
+  · subst q
+    simp [hypMeanCurv, hypSnDeriv, hypSn]
+  · have hqpos : 0 < q := lt_of_le_of_ne hq (Ne.symm hq0)
+    have hqr : 0 < q * r := mul_pos hqpos hr
+    have hsinh : 0 < Real.sinh (q * r) :=
+      Real.sinh_pos_iff.mpr hqr
+    have hcosh :
+        Real.cosh (q * r) ≤ Real.sinh (q * r) + 1 := by
+      have hexp : Real.exp (-(q * r)) ≤ 1 :=
+        Real.exp_le_one_iff.mpr (neg_nonpos.mpr hqr.le)
+      calc
+        Real.cosh (q * r) =
+            Real.sinh (q * r) + Real.exp (-(q * r)) := by
+          linarith [Real.cosh_sub_sinh (q * r)]
+        _ ≤ Real.sinh (q * r) + 1 := add_le_add le_rfl hexp
+    have hsinh_ge : q * r ≤ Real.sinh (q * r) :=
+      Real.self_le_sinh_iff.mpr hqr.le
+    have hmain :
+        q * r * Real.cosh (q * r) ≤
+          (1 + q * r) * Real.sinh (q * r) := by
+      calc
+        q * r * Real.cosh (q * r) ≤
+            q * r * (Real.sinh (q * r) + 1) :=
+          mul_le_mul_of_nonneg_left hcosh hqr.le
+        _ ≤ (1 + q * r) * Real.sinh (q * r) := by
+          nlinarith
+    have hmodel :
+        Real.cosh (q * r) ≤
+          (1 / r + q) * (Real.sinh (q * r) / q) := by
+      have hdiv := (div_le_div_iff_of_pos_right hqr).mpr hmain
+      convert hdiv using 1 <;> field_simp
+    have hratio :
+        Real.cosh (q * r) / (Real.sinh (q * r) / q) ≤ 1 / r + q :=
+      (div_le_iff₀ (div_pos hsinh hqpos)).mpr hmodel
+    rw [hypMeanCurv, hypSnDeriv, if_neg hq0, hypSn, if_neg hq0]
+    calc
+      (d : ℝ) * Real.cosh (q * r) / (Real.sinh (q * r) / q) =
+          (d : ℝ) * (Real.cosh (q * r) /
+            (Real.sinh (q * r) / q)) := by ring
+      _ ≤ (d : ℝ) * (1 / r + q) :=
+        mul_le_mul_of_nonneg_left hratio (Nat.cast_nonneg d)
+      _ = (d : ℝ) / r + (d : ℝ) * q := by ring
+
 /-- The hyperbolic model mean curvature satisfies its scalar Riccati equation. -/
 theorem hasDerivAt_hypMean
     {q r : ℝ} {d : ℕ} (hq : 0 ≤ q) (hr : 0 < r) (hd : 0 < d) :

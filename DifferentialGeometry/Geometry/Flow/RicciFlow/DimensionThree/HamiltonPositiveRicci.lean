@@ -3,11 +3,11 @@ import Mathlib.Topology.Algebra.ProperAction.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureProducers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.LocalPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
-import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.EarlyBall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.ScaleTransfer
@@ -35,8 +35,7 @@ evolution equations, maximum-principle cores, and dimension-three algebra stay
 in their native project files.  The theorem-shaped `sorry`s below are only
 for the remaining global analytic or topological inputs in Hamilton's Section
 12 completion: maximal-flow existence, point selection and rescaling,
-noncollapsing, compactness, limit extraction, and spherical space-form
-classification.
+compactness, limit extraction, and spherical space-form classification.
 -/
 
 noncomputable section
@@ -2453,8 +2452,8 @@ theorem ham3_noncollapse_of
       (hscale i hiScale) hRm_i
   exact ⟨hRm_i, hkappa_i⟩
 
-/-- Black box 11.8-style input: Perelman's no-local-collapsing theorem gives a
-uniform volume lower bound at the fixed radius `r0`. -/
+/-- Perelman's no-local-collapsing theorem gives the uniform volume lower bound
+at the fixed radius `r0` required by the Hamilton blow-up sequence. -/
 theorem ham3_noncollapse
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))

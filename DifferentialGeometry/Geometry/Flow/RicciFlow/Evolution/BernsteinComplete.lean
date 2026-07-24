@@ -2568,6 +2568,336 @@ theorem estimate_cutoff_at
       exact hlimit.trans hfinal
 
 omit [NeZero (Module.finrank Real E)] in
+/-- **Point-centered complete Bernstein estimate from barrier cutoffs.**
+
+The cutoff family may depend on the point being estimated.  The family
+hypothesis is essential: the strong induction needs lower-order estimates at
+the a priori unrelated point selected by the compact-support maximum
+principle. -/
+theorem estimate_barrier_at
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    (B : BernsteinTower (I := I) G)
+    (hcut : ∀ O : M,
+      Nonempty (ShiBarrierCutoffData (I := I) G B.T O))
+    (m : Nat)
+    (hgrad : TowerNormGradUpTo (I := I) B m) :
+    ∀ t : Real, t ∈ Set.Icc 0 B.T → 0 < t → ∀ x : M,
+      t ^ m * B.w m t x ≤ (towerConst B.c B.α m) ^ 2 * B.K ^ 2 := by
+  revert hgrad
+  induction m using Nat.strong_induction_on with
+  | h m IH =>
+    intro hgrad
+    rcases Nat.eq_zero_or_pos m with hm0 | hmpos
+    · subst hm0
+      intro t ht _ x
+      simpa only [pow_zero, one_mul, towerConst_zero, one_pow] using
+        B.hw0_bound t ht x
+    · classical
+      set C : Nat → Real := towerConst B.c B.α with hC
+      set beta : Real := towerBeta B.c B.α C m with hbeta
+      set barTop : Real := towerBarTop B.c C m with hbarTop
+      set aBar : Real := beta * (Nat.factorial (m - 1) : Real) * B.K ^ 2
+        with haBar
+      set bCore : Real :=
+        (barTop + beta * ∑ i ∈ Finset.range m,
+          towerFactCoeff m i * towerBarGood B.c C i) * B.K ^ 3
+        with hbCore
+      have hbeta0 : 0 ≤ beta := by
+        simpa only [hbeta, hC] using towerBeta_nonneg B.hc B.hα m
+      have hbarTop0 : 0 ≤ barTop := by
+        simpa only [hbarTop, hC] using towerBarTop_nonneg B.hc B.α m
+      have haBar0 : 0 ≤ aBar := by
+        rw [haBar]
+        exact mul_nonneg
+          (mul_nonneg hbeta0 (Nat.cast_nonneg (Nat.factorial (m - 1))))
+          (pow_nonneg (le_of_lt B.hK) 2)
+      have hsum0 : 0 ≤ ∑ i ∈ Finset.range m,
+          towerFactCoeff m i * towerBarGood B.c C i := by
+        apply Finset.sum_nonneg
+        intro i _
+        exact mul_nonneg (towerFactCoeff_nonneg _ _)
+          (by simpa only [hC] using towerBarGood_nonneg B.hc B.α i)
+      have hbCore0 : 0 ≤ bCore := by
+        rw [hbCore]
+        exact mul_nonneg
+          (add_nonneg hbarTop0 (mul_nonneg hbeta0 hsum0))
+          (pow_nonneg (le_of_lt B.hK) 3)
+      have htK_slab : ∀ s : Real, s ∈ Set.Icc 0 B.T → s * B.K ≤ B.α := by
+        intro s hs
+        calc
+          s * B.K ≤ (B.α / B.K) * B.K :=
+            mul_le_mul_of_nonneg_right (hs.2.trans B.hTK) (le_of_lt B.hK)
+          _ = B.α := div_mul_cancel₀ B.α (ne_of_gt B.hK)
+      have hbound_cut : ∀ {O : M}
+          (cut : ShiBarrierCutoffData (I := I) G B.T O) (n : Nat),
+          2 * cut.err n * B.T * cutErrCoeff m ≤ 1 →
+          ∀ s : Real, s ∈ Set.Icc 0 B.T → ∀ y : M,
+            GfunLocal (I := I) B (cut.chi n) m s y ≤
+              aBar + (bCore +
+                9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 *
+                  B.K ^ 2) * s := by
+        intro O cut n hsmall
+        let bErr : Real :=
+          9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2
+        let bBar : Real := bCore + bErr
+        let F : Real → M → Real := GfunLocal (I := I) B (cut.chi n) m
+        let w : Real → M → Real := fun s y ↦ (aBar + bBar * s) - F s y
+        have hbErr0 : 0 ≤ bErr := by
+          dsimp only [bErr]
+          exact mul_nonneg
+            (mul_nonneg
+              (mul_nonneg (by norm_num) (cut.err_nonneg n))
+              (BernsteinTower.Gcoef_nonneg (I := I) B m 0))
+            (pow_nonneg (le_of_lt B.hK) 2)
+        have hbBar0 : 0 ≤ bBar := add_nonneg hbCore0 hbErr0
+        have hFcont : ContinuousOn (fun p : Real × M ↦ F p.1 p.2)
+            (Set.Icc 0 B.T ×ˢ cut.support n) := by
+          rw [show (fun p : Real × M ↦ F p.1 p.2) =
+              (fun p : Real × M ↦ ∑ i ∈ Finset.range (m + 1),
+                BernsteinTower.Gcoef (I := I) B m i * p.1 ^ i *
+                  (cut.chi n p.1 p.2) ^ (i + 1) * B.w i p.1 p.2) by
+            funext p
+            change GfunLocal (I := I) B (cut.chi n) m p.1 p.2 = _
+            rw [GfunLocal]]
+          apply continuousOn_finset_sum
+          intro i _
+          exact (((continuous_const.mul (continuous_fst.pow i)).continuousOn.mul
+            ((cut.joint_cont n).pow (i + 1))).mul
+              ((B.hw_cont i).mono fun p hp ↦ ⟨hp.1, Set.mem_univ _⟩))
+        have hinit : ∀ y : M, F 0 y ≤ aBar := by
+          intro y
+          have h0mem : (0 : Real) ∈ Set.Icc 0 B.T :=
+            ⟨le_rfl, le_of_lt B.hT⟩
+          have hF0 : F 0 y =
+              BernsteinTower.Gcoef (I := I) B m 0 *
+                cut.chi n 0 y * B.w 0 0 y := by
+            change GfunLocal (I := I) B (cut.chi n) m 0 y = _
+            rw [GfunLocal, Finset.sum_eq_single 0]
+            · simp
+            · intro i _ hi0
+              rcases Nat.eq_zero_or_pos i with rfl | hi
+              · exact absurd rfl hi0
+              · simp [zero_pow (by omega : i ≠ 0)]
+            · simp
+          have hGc0 : BernsteinTower.Gcoef (I := I) B m 0 =
+              beta * (Nat.factorial (m - 1) : Real) := by
+            rw [BernsteinTower.Gcoef, if_neg (by omega : ¬ (0 : Nat) = m),
+              towerFactCoeff, Nat.factorial_zero, Nat.cast_one, div_one,
+              ← hC, ← hbeta]
+          have hchi := cut.range n 0 y h0mem
+          have hchi_w : cut.chi n 0 y * B.w 0 0 y ≤ B.K ^ 2 := by
+            calc
+              cut.chi n 0 y * B.w 0 0 y ≤ 1 * B.w 0 0 y :=
+                mul_le_mul_of_nonneg_right hchi.2 (B.hw_nonneg 0 0 h0mem y)
+              _ = B.w 0 0 y := one_mul _
+              _ ≤ B.K ^ 2 := B.hw0_bound 0 h0mem y
+          rw [hF0, hGc0, haBar]
+          calc
+            beta * (Nat.factorial (m - 1) : Real) *
+                  cut.chi n 0 y * B.w 0 0 y =
+                (beta * (Nat.factorial (m - 1) : Real)) *
+                  (cut.chi n 0 y * B.w 0 0 y) := by ring
+            _ ≤ (beta * (Nat.factorial (m - 1) : Real)) * B.K ^ 2 :=
+              mul_le_mul_of_nonneg_left hchi_w
+                (mul_nonneg hbeta0 (Nat.cast_nonneg (Nat.factorial (m - 1))))
+        have hw_out : ∀ s : Real, s ∈ Set.Icc 0 B.T →
+            ∀ y : M, y ∉ cut.support n → 0 ≤ w s y := by
+          intro s hs y hy
+          have hchi0 := cut.support_zero n s hs y hy
+          have hF0 : F s y = 0 := by simp [F, GfunLocal, hchi0]
+          dsimp only [w]
+          rw [hF0, sub_zero]
+          exact add_nonneg haBar0 (mul_nonneg hbBar0 hs.1)
+        have hw_cont : ContinuousOn (fun p : Real × M ↦ w p.1 p.2)
+            (Set.Icc 0 B.T ×ˢ cut.support n) := by
+          have haffine : ContinuousOn
+              (fun p : Real × M ↦ aBar + bBar * p.1)
+              (Set.Icc 0 B.T ×ˢ cut.support n) :=
+            (continuous_const.add (continuous_const.mul continuous_fst)).continuousOn
+          exact haffine.sub hFcont
+        have hw0 : ∀ y : M, 0 ≤ w 0 y := by
+          intro y
+          dsimp only [w]
+          simpa only [mul_zero, add_zero] using sub_nonneg.mpr (hinit y)
+        have hsupport : ∀ s : Real, s ∈ Set.Icc 0 B.T → 0 < s →
+            ∀ y : M, w s y < 0 →
+              ParabolicUpperSupportAt (I := I) G B.T
+                (fun _ z ↦ (0 : TangentSpace I z)) w s y := by
+          intro s hs hspos y hneg
+          have haff0 : 0 ≤ aBar + bBar * s :=
+            add_nonneg haBar0 (mul_nonneg hbBar0 hs.1)
+          have hFpos : 0 < F s y := by
+            dsimp only [w] at hneg
+            linarith
+          have hchiPos : 0 < cut.chi n s y := by
+            by_contra hnot
+            have hchi0 : cut.chi n s y = 0 :=
+              le_antisymm (le_of_not_gt hnot) (cut.range n s y hs).1
+            have : F s y = 0 := by simp [F, GfunLocal, hchi0]
+            linarith
+          let support := cut.lower_support n s hs hspos y hchiPos
+          let Fs : Real → M → Real :=
+            GfunLocal (I := I) B support.phi m
+          let v : Real → M → Real := fun r z ↦ (aBar + bBar * r) - Fs r z
+          have hrec := GfunSupport_parabolic_le (I := I) B hmpos hgrad support
+            hs hspos (cut.range n s y hs) (cut.err_nonneg n)
+            (fun j hj ↦ by
+              have hgrad_j : TowerNormGradUpTo (I := I) B j := by
+                intro k hk
+                exact hgrad k (hk.trans (Nat.le_of_lt hj))
+              exact IH j hj hgrad_j s hs hspos y)
+            hsmall
+          have hFs_eq : Fs s y = F s y := by
+            simp only [Fs, F, GfunLocal, support.eq_at]
+          refine
+            { v := v
+              eq_at := by simp only [v, w, hFs_eq]
+              upper_nhds := ?_
+              time_diff := ?_
+              space_diff_nhds := ?_
+              grad_diff := ?_
+              operator_nonneg := ?_ }
+          · filter_upwards [support.lower_nhds, self_mem_nhdsWithin] with p hp hpslab
+            have hmono : Fs p.1 p.2 ≤ F p.1 p.2 := by
+              change GfunLocal (I := I) B support.phi m p.1 p.2 ≤
+                GfunLocal (I := I) B (cut.chi n) m p.1 p.2
+              rw [GfunLocal, GfunLocal]
+              apply Finset.sum_le_sum
+              intro i _
+              calc
+                BernsteinTower.Gcoef (I := I) B m i * p.1 ^ i *
+                      support.phi p.1 p.2 ^ (i + 1) * B.w i p.1 p.2 =
+                    (BernsteinTower.Gcoef (I := I) B m i * p.1 ^ i) *
+                      (support.phi p.1 p.2 ^ (i + 1) * B.w i p.1 p.2) := by ring
+                _ ≤ (BernsteinTower.Gcoef (I := I) B m i * p.1 ^ i) *
+                      (cut.chi n p.1 p.2 ^ (i + 1) * B.w i p.1 p.2) :=
+                  mul_le_mul_of_nonneg_left
+                    (mul_le_mul_of_nonneg_right
+                      (pow_le_pow_left₀ hp.1 hp.2 (i + 1))
+                      (B.hw_nonneg i p.1 hpslab.1 p.2))
+                    (mul_nonneg
+                      (BernsteinTower.Gcoef_nonneg (I := I) B m i)
+                      (pow_nonneg hpslab.1.1 i))
+                _ = BernsteinTower.Gcoef (I := I) B m i * p.1 ^ i *
+                      cut.chi n p.1 p.2 ^ (i + 1) * B.w i p.1 p.2 := by ring
+            dsimp only [v, w]
+            linarith
+          · exact ((differentiableWithinAt_const aBar).add
+              ((differentiableWithinAt_id'
+                (𝕜 := Real) (s := Set.Icc 0 B.T) (x := s)).const_mul bBar)).sub
+              hrec.1
+          · filter_upwards [hrec.2.1] with z hz
+            simpa only [v, Fs] using mdifferentiableAt_const.sub hz
+          · refine (hrec.2.2.1.smul_const_section
+                (a := (-1 : Real))).congr_of_eventuallyEq ?_
+            filter_upwards [hrec.2.1] with z hz
+            exact congrArg (fun b ↦
+              (⟨z, b⟩ : TotalSpace E (TangentSpace I : M → Type _))) (by
+                calc
+                  gradientFun (I := I) (G.metric s) (v s) z =
+                      gradientFun (I := I) (G.metric s)
+                          (fun _ : M ↦ aBar + bBar * s) z -
+                        gradientFun (I := I) (G.metric s) (Fs s) z := by
+                    simpa only [v] using
+                      gradientFun_sub (I := I) (G.metric s)
+                        mdifferentiableAt_const hz
+                  _ = -gradientFun (I := I) (G.metric s) (Fs s) z := by
+                    rw [gradientFun_const]
+                    simp
+                  _ = (-1 : Real) •
+                      gradientFun (I := I) (G.metric s) (Fs s) z := by simp)
+          · have huniq : UniqueDiffWithinAt Real (Set.Icc 0 B.T) s :=
+              (uniqueDiffOn_Icc B.hT).uniqueDiffWithinAt hs
+            have hop := parabolic_aff_nhds (I := I) B.T
+              (fun _ z ↦ (0 : TangentSpace I z)) Fs aBar bBar s y
+              huniq hrec.1 hrec.2.1 hrec.2.2.1
+            rw [show v = (fun r z ↦ (aBar + bBar * r) - Fs r z) from rfl,
+              hop]
+            dsimp only [bBar, bErr]
+            linarith [hrec.2.2.2]
+        have hw_nonneg := strict_barrier_cpt_of_upperSupport
+          (I := I) G B.T (le_of_lt B.hT)
+          (fun _ z ↦ (0 : TangentSpace I z)) w (cut.support n)
+          (cut.support_compact n) hw_out hw_cont hw0 hsupport
+        intro s hs y
+        have hw := hw_nonneg s hs y
+        dsimp only [w, bBar, bErr] at hw
+        linarith
+      intro t ht htpos x
+      let cut : ShiBarrierCutoffData (I := I) G B.T x :=
+        Classical.choice (hcut x)
+      have hwm_le_G :
+          t ^ m * B.w m t x ≤ BernsteinTower.Gfun (I := I) B m t x := by
+        rw [BernsteinTower.Gfun, ← Finset.sum_erase_add _ _ (by simp :
+          m ∈ Finset.range (m + 1))]
+        have hrest : 0 ≤ ∑ i ∈ (Finset.range (m + 1)).erase m,
+            BernsteinTower.Gcoef (I := I) B m i * t ^ i * B.w i t x := by
+          apply Finset.sum_nonneg
+          intro i _
+          exact mul_nonneg
+            (mul_nonneg (BernsteinTower.Gcoef_nonneg (I := I) B m i)
+              (pow_nonneg ht.1 i))
+            (B.hw_nonneg i t ht x)
+        have htop : BernsteinTower.Gcoef (I := I) B m m *
+            t ^ m * B.w m t x = t ^ m * B.w m t x := by
+          rw [BernsteinTower.Gcoef]
+          simp
+        rw [htop]
+        linarith
+      have hsmall_eventually : ∀ᶠ n in Filter.atTop,
+          2 * cut.err n * B.T * cutErrCoeff m ≤ 1 := by
+        have hlim : Filter.Tendsto
+            (fun n ↦ 2 * cut.err n * B.T * cutErrCoeff m)
+            Filter.atTop (nhds 0) := by
+          simpa only [mul_zero, zero_mul] using
+            (((cut.err_tendsto.const_mul 2).mul_const B.T).mul_const
+              (cutErrCoeff m))
+        filter_upwards [hlim.eventually_lt_const zero_lt_one] with n hn
+        exact hn.le
+      have hbound_eventually : ∀ᶠ n in Filter.atTop,
+          t ^ m * B.w m t x ≤
+            aBar + (bCore +
+              9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 *
+                B.K ^ 2) * t := by
+        filter_upwards [hsmall_eventually, cut.center_exhausts t ht] with n hsmall hchi
+        have hn := hbound_cut cut n hsmall t ht x
+        have hone : GfunLocal (I := I) B (cut.chi n) m t x =
+            BernsteinTower.Gfun (I := I) B m t x := by
+          simp [GfunLocal, BernsteinTower.Gfun, hchi]
+        rw [hone] at hn
+        exact hwm_le_G.trans hn
+      have herr_tendsto : Filter.Tendsto
+          (fun n ↦ 9 * cut.err n *
+            BernsteinTower.Gcoef (I := I) B m 0 * B.K ^ 2)
+          Filter.atTop (nhds 0) := by
+        simpa only [zero_mul, mul_zero] using
+          (((cut.err_tendsto.const_mul 9).mul_const
+            (BernsteinTower.Gcoef (I := I) B m 0)).mul_const (B.K ^ 2))
+      have hrhs_tendsto : Filter.Tendsto
+          (fun n ↦ aBar + (bCore +
+            9 * cut.err n * BernsteinTower.Gcoef (I := I) B m 0 *
+              B.K ^ 2) * t)
+          Filter.atTop (nhds (aBar + bCore * t)) := by
+        have hconst : Filter.Tendsto (fun _ : Nat ↦ aBar + bCore * t)
+            Filter.atTop (nhds (aBar + bCore * t)) := tendsto_const_nhds
+        simpa only [add_mul, add_assoc, zero_mul, add_zero] using
+          (hconst.add (herr_tendsto.mul_const t))
+      have hlimit : t ^ m * B.w m t x ≤ aBar + bCore * t :=
+        ge_of_tendsto hrhs_tendsto hbound_eventually
+      have hfinal : aBar + bCore * t ≤
+          towerConstSq B.c B.α m * B.K ^ 2 := by
+        rw [towerConstSq_pos B.c B.α hmpos, haBar, hbCore, ← hbeta, ← hC,
+          ← hbarTop]
+        have htK : t * B.K ≤ B.α := htK_slab t ht
+        have hcoeff0 : 0 ≤ barTop + beta * ∑ i ∈ Finset.range m,
+            towerFactCoeff m i * towerBarGood B.c C i :=
+          add_nonneg hbarTop0 (mul_nonneg hbeta0 hsum0)
+        have hKsq0 : 0 ≤ B.K ^ 2 := pow_nonneg (le_of_lt B.hK) 2
+        nlinarith [htK, mul_nonneg hcoeff0 hKsq0]
+      rw [towerConst_sq B.hc B.hα]
+      exact hlimit.trans hfinal
+
+omit [NeZero (Module.finrank Real E)] in
 /-- All-order compatibility wrapper for `estimate_cutoff_at`. -/
 theorem estimate_of_cutoff
     {G : RealizedMetricFamily (I := I) (M := M) Real}

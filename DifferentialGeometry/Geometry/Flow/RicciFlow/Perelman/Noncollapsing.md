@@ -1445,3 +1445,33 @@ their module artifact refreshes pass.  The umbrella focused check currently
 stops before these files on a missing unrelated spectral artifact
 `SpectralPointwiseFlowDeriv.olean`; this is a stale-artifact/import-chain issue,
 not a local Perelman proof error.
+
+## 2026-07-23 scalar tail and endpoint closure
+
+The two earlier blockers are both closed.
+
+First, `VolumeComparison.family_vol_low` is proved by the fixed-parametrization
+finite-cover route, and `early_vol_low`, `early_ball_low`, and
+`no_local_open` are all checked. Second, the actual entropy chain did not need
+the deferred arbitrary-valence Weyl theorem: its nine uses were all rank zero.
+`ScalarWeyl.scalar_eigen_tail` now proves exactly that input from scalar
+point-evaluation Sobolev control and a finite Bessel/reproducing-kernel
+combination. Six consumers in `ConjGalerkinClassical` and three in
+`ConjGalerkinOn` have been rewired, with no new assumptions.
+
+The complete `EarlyBall` dependency refresh passed. Axiom audits for both
+`scalar_eigen_tail` and `no_local_open` contain only `propext`,
+`Classical.choice`, and `Quot.sound`, with no `sorryAx`. Therefore the
+original-flow `NoLocalCollapsing` theorem is theorem-level **100%** and its
+dedicated machinery is **100%**. This is one completed producer inside the
+larger Hamilton/HCG program; the unconditional HCG compactness endpoint remains
+theorem-level **0%**, and whole-project HCG machinery remains conservatively
+about **60%**.
+
+The Hamilton consumer is now closed as well: `ham3_noncollapse` applies
+`no_local_open` to the actual maximal-flow package and then uses the existing
+rescaling adapter `ham3_noncollapse_of`.  Its focused check passes, and its
+axiom replay likewise reports only `propext`, `Classical.choice`, and
+`Quot.sound`.  Thus `ham3_noncollapse` is theorem-level **100%** with
+dedicated machinery **100%**; this does not change the still-open
+`ham3_cgh_limit` or the unconditional HCG endpoint from **0%**.

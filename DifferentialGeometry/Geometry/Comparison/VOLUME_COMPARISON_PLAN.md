@@ -2329,3 +2329,39 @@ Honest accounting: N-d, arbitrary strictly injective-ball comparison,
 theorems.  The abstract negative-direction producer is 100%; N-d dedicated
 machinery is about 55--60%; dedicated Route B machinery is about 79--83%;
 full V1--V3 volume-comparison/CGT machinery is about 47--51%.
+
+## 2026-07-23 Route B N-d smooth split bridge
+
+Architecture choice A-prime is now implemented in
+`Analysis/ODE/IndexFormNegativeSmooth.lean`.  The checked public theorem
+`exists_smooth_indexForm_neg_of_split` turns two locally smooth half-fields
+that agree in value, vanish at the outer endpoints, and have negative split
+index into one globally smooth endpoint-vanishing field with negative index.
+
+The proof is quantitative in the fixed Hilbert space:
+
+- compact plateaux extend the two local half-fields globally while preserving
+  both values and derivatives on `[0, 1]`;
+- the exact splice derivative contains the transition term
+  `η' * (W₀ - W₁)`;
+- value matching and the vector mean-value estimate make that transition term
+  uniformly bounded independently of `δ`;
+- splitting at `c - δ`, `c`, and `c + δ` gives an explicit `C * δ`
+  index-form error, with exact almost-everywhere cancellation on both tails.
+
+Focused verification and the targeted module build passed, with no `sorry`.
+No derivative matching, `CompleteSpace`, self-adjointness, Jacobi, or global
+smoothness assumption was added.  This resolves the previous option-1 versus
+option-2 architecture boundary in favor of A-prime and completes the abstract
+ODE negative-direction plus smoothing package.
+
+It does not prove N-d itself.  The next smallest real frontier is geometric:
+lift the smooth coefficient field through a parallel orthonormal frame along
+the minimizing geodesic, prove the lifted field is smooth, perpendicular, and
+endpoint-vanishing, identify its geometric index form with the abstract one,
+and contradict `indexForm_nonneg_of_minimising_geodesic`.
+
+Honest accounting: N-d and all downstream endpoint theorems remain 0%.
+The abstract negative-direction and smoothing package is 100%; N-d dedicated
+machinery is about 70--75%; dedicated Route B machinery is about 81--85%;
+full V1--V3 volume-comparison/CGT machinery is about 48--52%.

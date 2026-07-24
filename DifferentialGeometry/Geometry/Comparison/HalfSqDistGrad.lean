@@ -69,6 +69,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Arc length of the intrinsic radial geodesic.**  The intrinsic radial

@@ -584,6 +584,77 @@ private theorem complete_of_cutoff
   rw [hwB m (by omega) t x] at hdiv
   simpa only [hBc, hBK, hBα] using hdiv
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Fixed-order complete Bernstein adapter from a point-centered barrier-cutoff
+family and Kato control through the requested order. -/
+private theorem complete_of_barrier
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {w wLap : Nat → Real → M → Real}
+    (levelC : Nat → Real)
+    (K aScale T : Real)
+    (hT : 0 < T) (hK : 0 < K) (haScale : 0 ≤ aScale)
+    (hslab : Set.Icc 0 T ⊆ D.carrier)
+    (hregular : ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → t ∈ D.regular)
+    (hw_nonneg : ∀ k : Nat, ∀ t : Real, ∀ x : M, 0 ≤ w k t x)
+    (hw0_bound : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      w 0 t x ≤ K ^ 2)
+    (hTK : T ≤ aScale / K)
+    (hheat : ∀ k : Nat, TowerHeatBoundOn (D := D) w wLap (levelC k) k)
+    (hLap : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      heatOperatorWithDrift (I := I) G t
+        (fun _y : M ↦ (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
+    (hw_cont : ∀ k : Nat, ContinuousOn (fun p : Real × M ↦ w k p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hw_space : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ y : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
+    (hw_grad : ∀ k : Nat, ∀ t : Real, t ∈ Set.Icc 0 T → 0 < t → ∀ x : M,
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M ↦ gradientFun (I := I) (G.metric t) (w k t) y) x)
+    (hcut : ∀ O : M,
+      Nonempty (ShiBarrierCutoffData (I := I) G T O))
+    (m : Nat) (c : Real) (hc : 0 ≤ c)
+    (hlevelC : ∀ k : Nat, k ≤ m + 1 → levelC k ≤ c)
+    (hKato : ∀ k : Nat, k ≤ m → ∀ s : Real, s ∈ Set.Icc 0 T → 0 < s → ∀ y : M,
+      (G.metric s).inner y
+          (gradientFun (I := I) (G.metric s) (w k s) y)
+          (gradientFun (I := I) (G.metric s) (w k s) y) ≤
+        4 * w k s y * w (k + 1) s y)
+    {t : Real} (htmem : t ∈ Set.Icc 0 T) (htpos : 0 < t) (x : M) :
+    w m t x ≤ (towerConst c aScale m) ^ 2 * K ^ 2 / t ^ m := by
+  obtain ⟨B, hBc, hBK, hBα, hBT, hwB⟩ :=
+    exists_trunc_tower (I := I) G levelC K aScale T hT hK haScale hslab
+      hregular hw_nonneg hw0_bound hTK hheat hLap hw_cont hw_space hw_grad
+      (m + 1) c hc hlevelC
+  have cutB : ∀ O : M,
+      Nonempty (ShiBarrierCutoffData (I := I) G B.T O) := by
+    intro O
+    simpa only [hBT] using hcut O
+  have hgradB : TowerNormGradUpTo (I := I) B m := by
+    intro k hk s hs hspos y
+    have hsT : s ∈ Set.Icc 0 T := by
+      simpa only [hBT] using hs
+    have hkTop : k ≤ m + 1 := by omega
+    have hk1Top : k + 1 ≤ m + 1 := by omega
+    have hwk : B.w k s = w k s := by
+      funext z
+      exact hwB k hkTop s z
+    have hwk1 : B.w (k + 1) s = w (k + 1) s := by
+      funext z
+      exact hwB (k + 1) hk1Top s z
+    simpa only [hwk, hwk1] using hKato k hk s hsT hspos y
+  have htmemB : t ∈ Set.Icc 0 B.T := by
+    simpa only [hBT] using htmem
+  have hkey := BernsteinTower.estimate_barrier_at B cutB m hgradB
+    t htmemB htpos x
+  have hdiv : B.w m t x ≤
+      (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by
+    rw [le_div_iff₀ (pow_pos htpos m)]
+    simpa only [mul_comm] using hkey
+  rw [hwB m (by omega) t x] at hdiv
+  simpa only [hBc, hBK, hBα] using hdiv
+
 end CompleteTruncation
 
 /-- An explicit constants-first envelope for the complete Shi estimate.

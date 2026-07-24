@@ -187,9 +187,21 @@ are checked: `strict_barrier_cpt_of_upperSupport`,
   fixed-path time variation is focused-green:
   `pathLength_timeDeriv_of_ricciFlow` proves the exact Ricci-flow derivative,
   and `pathLength_deriv_ge` gives `∂ₜ L ≥ -A L` from a quadratic Ricci bound.
+  The pure model estimate `hypMeanCurv_le` is focused- and exact-green and supplies
+  the explicit `d / r + d * q` bound once the radial Laplacian/Jacobi trace
+  bridge is available.
+  The comparison-layer `calabi_tail_of` and `exists_calabi_tail` are
+  focused-green and provide the finite-distance minimizing vector, terminal
+  inverse branch, and target-domain membership needed by the local support.
   `scaledDist_calabiUpperSupport_of_sol` and `shiBarrierCutoff_of_sol` remain
-  theorem-level 0%; `BernsteinTower.estimate_barrier_at` is being implemented as
-  the independent consumer-side sibling.
+  theorem-level 0%.  The independent consumer-side sibling
+  `BernsteinTower.estimate_barrier_at` is focused- and exact-green and sorry-free.
+  Its corrected signature consumes a point-centered family
+  `∀ O, Nonempty (ShiBarrierCutoffData G B.T O)` and proves the fixed-order
+  estimate globally; a single fixed-center cutoff was insufficient for the
+  strong-induction hypothesis at the arbitrary compact-support minimum.
+  The private `MovingShiOpen.complete_of_barrier` adapter is focused-green and
+  transports the same finite truncation and Kato prefix to that consumer.
 
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` records constants before `k`, and `srcCovLip_of_soln` is

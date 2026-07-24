@@ -21,3 +21,11 @@ initial-boundary producer without a local `sorry`. Consequently
 axiom-cleanliness issue is upstream in the positive-time entropy route: its
 Galerkin classical-slice construction still inherits the Weyl
 diagonal-kernel counting `sorry`.
+
+## 2026-07-23 axiom-clean closure
+
+The preceding caveat is now obsolete. The exact scalar Galerkin consumers use
+`scalar_eigen_tail`, whose axiom audit is clean, and the strong generic Weyl
+theorem has no Entropy/Perelman consumer. The refreshed endpoint artifact
+shows `no_local_open` depends only on the standard foundational axioms and not
+on `sorryAx`.

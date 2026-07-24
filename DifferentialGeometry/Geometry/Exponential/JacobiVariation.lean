@@ -151,7 +151,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 velocity satisfies the Jacobi equation on all of `ℝ`. -/
 theorem intrinsic_jacobi
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -256,7 +256,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 of the intrinsic exponential map. -/
 theorem intrinsic_jacobi_one
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

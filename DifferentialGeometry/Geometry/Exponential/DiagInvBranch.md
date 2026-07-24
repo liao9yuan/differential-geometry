@@ -54,3 +54,20 @@ Focused verification passed for the complete file.  This closes the small
 component-local branch API needed by the Calabi preparation, but the actual
 fixed-metric Calabi support theorem remains unstated and therefore 0%; its
 dedicated branch/Hopf infrastructure is still only supporting machinery.
+
+## 2026-07-23 fresh-import proof repair
+
+A targeted refresh exposed that the older proofs of `inv_eq_of_exp` and
+`exp_eq` depended on stale simplifier shapes for `diagExp`.  Both proofs now
+change directly to the defining intrinsic-exponential equality before applying
+the branch inverse laws.  In particular, they no longer invoke the exported
+`diagExp_apply` theorem, whose surrounding module still carries an unrelated
+connectedness seam.
+
+Focused verification against the refreshed intrinsic-exponential artifacts
+passed, and the exact targeted refresh is GREEN (`3780/3780`).  The component-
+local `diagExp` projection seam is now repaired in `ExpVariationSmooth`, so the
+branch proof no longer depends on either stale simplifier state or an accidental
+connectedness hypothesis.  This is a proof-stability repair only: the generic
+branch API remains complete, while the Route B' Calabi distance-support theorem
+remains 0%.

@@ -300,3 +300,18 @@ For each tangent direction `w` at `q`:
 - Honest accounting: `exists_halfSqDist_md` itself is complete; the concrete
   finite-hat differentiability instantiation remains unstated and therefore
   0% complete.
+
+## 2026-07-24 component-local radial length
+
+The public `arcLength_radial` theorem now omits the section-wide
+`ConnectedSpace M` assumption.  Its proof only uses the constant-speed theorem
+for one complete intrinsic geodesic, which is component-local.  This
+strengthening is needed by the no-connectedness Route B-prime broken-path
+Calabi support.
+
+The source change is complete and focused verification is GREEN against the
+repaired, exact-current inverse-branch chain.  After restoring the
+connectivity-free `DiagExpDerivative` artifact, the exact targeted refresh is
+also GREEN (`3792/3792`).  This API cleanup does not prove the radial
+Laplacian/Jacobi-trace bridge or the final distance barrier, both of which
+remain open.

@@ -70,3 +70,12 @@ Progress accounting after this proof:
   Weyl diagonal-kernel counting `sorry`.
 - Hamilton's `ham3_noncollapse` is a separate downstream theorem; its direct
   source wiring and axiom status are recorded in `HamiltonPositiveRicci.md`.
+
+## 2026-07-23 downstream axiom closure
+
+The separate scalar Weyl frontier mentioned above is now closed for the
+rank-zero entropy consumers. The complete downstream `EarlyBall` artifact
+refresh passed, and `no_local_open` has no `sorryAx` in its axiom set.
+Consequently the original-flow `NoLocalCollapsing` producer and its dedicated
+small-ball/entropy assembly are both 100%; the stronger arbitrary-valence Weyl
+theorem remains a separate short-time realization frontier.

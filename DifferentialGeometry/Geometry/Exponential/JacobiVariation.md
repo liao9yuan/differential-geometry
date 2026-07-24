@@ -345,3 +345,17 @@ N-c.  The minimizing-implies-no-interior-conjugate theorem remains 0%; its
 dedicated N machinery is now roughly 42%, with the abstract index-form
 foundation present but the interior uniqueness, corner smoothing, and
 abstract-to-geometric collision still open.
+
+### 2026-07-24 component-local intrinsic Jacobi API
+
+Removed the accidental `ConnectedSpace M` assumptions from
+`intrinsic_jacobi` and `intrinsic_jacobi_one`.  Their proofs use only the
+complete intrinsic-geodesic and smooth-variation APIs; the consumed
+`intrinsicVar_smooth`, `intrinsicFiber_smooth`, and `intrinsicExp_smooth`
+declarations are already component-local.  The theorem statements and proof
+routes are otherwise unchanged.
+
+Focused verification passed without diagnostics, and the coordinated exact
+targeted refresh is GREEN (`3799/3799`).  These two theorems remain fully
+proved (100%); this is an API-hypothesis cleanup and does not by itself advance
+the still-open Route B′ cutoff producer or its endpoint theorem.

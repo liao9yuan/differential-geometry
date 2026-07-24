@@ -1,5 +1,17 @@
 # IntrinsicVelocity status
 
+## 2026-07-23 component-local API
+
+- Removed the accidental file-wide `ConnectedSpace M` assumption.  The file
+  contains no connectedness argument: each construction follows one complete
+  intrinsic geodesic inside the component of its initial point.
+- The complete source file remains focused GREEN, and its exact artifact is
+  current (`3796/3796`).
+- This makes `intrinsicVelocityLift`, `intrinsicExp_smooth`,
+  `intrinsicFiber_smooth`, and `intrinsicVar_smooth` usable by the pointwise
+  Route B-prime Calabi construction without adding connectedness to the
+  complete-Shi theorem.
+
 ## 2026-07-18
 
 - `intrinsicVelocityLift` is the true tangent-bundle velocity lift of the

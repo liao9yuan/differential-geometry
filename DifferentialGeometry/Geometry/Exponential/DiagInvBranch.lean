@@ -110,7 +110,12 @@ theorem inv_eq_of_exp
     (hvsrc : (⟨y, v⟩ : TangentBundle I M) ∈ B.hom.source)
     (hexp : expMapIntrinsic (I := I) g hEnorm y v = pt) :
     B.inv (y, pt) = (⟨y, v⟩ : TangentBundle I M) := by
-  simpa only [diagExp_apply, hexp] using B.left_inv hvsrc
+  have hdiag :
+      diagExp (I := I) g hEnorm (⟨y, v⟩ : TangentBundle I M) = (y, pt) := by
+    change (y, expMapIntrinsic (I := I) g hEnorm y v) = (y, pt)
+    rw [hexp]
+  rw [← hdiag]
+  exact B.left_inv hvsrc
 
 /-- On the selected inverse domain, the inverse tangent vector is based at the
 first point of the pair. -/
@@ -166,8 +171,12 @@ theorem exp_eq
     {p : M} (B : DiagInvBranch (I := I) g hEnorm p)
     {y : M × M} (hy : y ∈ B.dom) :
     expMapIntrinsic (I := I) g hEnorm y.1 (B.inv y).snd = y.2 := by
-  have h := congrArg Prod.snd (B.right_inv hy)
-  simp only [diagExp_snd] at h
+  have h :
+      expMapIntrinsic (I := I) g hEnorm (B.inv y).proj (B.inv y).snd = y.2 := by
+    have hright := congrArg Prod.snd (B.right_inv hy)
+    change
+      expMapIntrinsic (I := I) g hEnorm (B.inv y).proj (B.inv y).snd = y.2 at hright
+    exact hright
   rwa [B.proj_eq hy] at h
 
 /-- Inside the named realized-exponential radius, a selected branch inverse is

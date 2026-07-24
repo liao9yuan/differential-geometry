@@ -87,6 +87,23 @@ Bernstein algebra or adding a second public API.  Thus the exact-green
 HCG-facing assembly does not yet make the complete-Shi route trusted end to
 end.
 
+## 2026-07-24 point-centered barrier adapter
+
+Added the private fixed-order `complete_of_barrier`.  It uses the same
+`exists_trunc_tower` constructor as the smooth-cutoff adapter, retains the
+tower through `m + 1`, transports Kato control through `m`, and consumes the
+quantifier-correct point-centered family
+
+```text
+∀ O, Nonempty (ShiBarrierCutoffData G T O).
+```
+
+After rewriting the truncated time horizon, it calls the exact-current
+`BernsteinTower.estimate_barrier_at`.  Focused verification of the complete
+file is GREEN.  This adapter adds no new public assumption and does not yet
+replace the public legacy call: that switch remains blocked on the actual
+solution-generated barrier-cutoff family.
+
 The single-flow and sequence/open-window theorems contain no further `sorry`.
 In particular, the sequence theorem must never be reproved by calling
 `movingShi_complete` separately for each member and then trying to extract a
@@ -103,8 +120,8 @@ uniform constant.
 - dedicated HCG-facing complete-Shi assembly machinery: 100%.
 - arbitrary-dimensional curvature-tower producer and dedicated machinery:
   100% checked.
-- generic fixed-order cutoff Bernstein consumer and HCG conditional adapter:
-  100% checked; the concrete solution-produced `ShiCutoffData` theorem remains
-  0%.
+- generic fixed-order cutoff/barrier Bernstein consumers and their HCG
+  conditional adapters: 100% checked; the concrete solution-produced
+  `ShiBarrierCutoffData` theorem remains 0%.
 - unconditional `compactnessSol`: theorem 0%.
 - whole-HCG support machinery: about 60%.

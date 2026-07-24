@@ -28,3 +28,23 @@ scalar Riccati equation `hasDerivAt_hypMean`, and
 `hypDenDeriv_eq_mean`.  These identify the exact scalar comparison term that
 the manifold trace-Riccati theorem must dominate.  Focused verification and the
 explicitly named module build passed.
+
+## 2026-07-23 mean-curvature growth bound
+
+Added the public scalar estimate `hypMeanCurv_le`:
+
+```text
+hypMeanCurv q d r <= (d : Real) / r + (d : Real) * q
+```
+
+for `0 <= q` and `0 < r`.  The proof handles the Euclidean `q = 0` case
+directly.  For positive `q`, it combines `x <= sinh x` with
+`cosh x - sinh x = exp (-x) <= 1`, then divides only by explicitly positive
+quantities.  This is the quantitative model term needed by the Route B-prime
+distance-barrier estimate; it does not prove the geometric Laplacian comparison
+or the complete Bernstein endpoint.
+
+Focused verification passed without diagnostics, and the exact targeted
+refresh is GREEN (`2615/2615`).  The theorem itself is complete; the larger
+Route B-prime cutoff producer and unconditional complete-Shi theorem remain
+open.

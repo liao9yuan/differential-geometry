@@ -29,3 +29,24 @@ Accounting: the theorem is 0%; the selected Route B-prime producer machinery
 is about 30%; the fixed-path time-variation subtheorem is 100%; the dedicated
 P4 consumer machinery remains about 98%;
 unconditional `compactnessSol` remains 0%; whole HCG support remains about 60%.
+
+## 2026-07-23 — fixed-metric frontier audit
+
+The Calabi branch-selection route is now precise.  Along a point-pair
+Hopf--Rinow minimizer from `O` to `x`, choose a point `q` sufficiently close to
+`x`.  Openness of the selected diagonal branch near `(x,x)`, together with
+`DiagInvBranch.inv_fst_inf` and `inv_eq_of_exp`, supplies the smooth fixed-first
+endpoint family from `q` to nearby endpoints.  Thus no global no-cut-locus
+theorem and no pointwise chart selector is needed.
+
+The remaining fixed-metric obstruction is narrower: the repository has no
+checked theorem identifying the Laplacian of this selected radial length with
+the trace `curveMean` of its transverse Jacobi family.  Existing
+`curveMean_le_hyp` gives the Riccati comparison after that identification, and
+the new focused-green `hypMeanCurv_le` gives the explicit
+`d / r + d * q` scalar bound.  This radial Laplacian/Jacobi-trace identity must
+be proved as geometry; it must not be accepted as a new input.
+
+The local support/branch assembly and the scalar model bound are routine
+supporting bricks.  They do not change the endpoint accounting:
+`scaledDist_calabiUpperSupport_of_sol` remains theorem-level 0%.

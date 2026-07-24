@@ -184,3 +184,20 @@ as the zero slice.  It does not choose a smaller lifespan.
 Both changes are source-complete and contain no local `sorry`; they remain
 theorem-level **0%** until the pending upstream refresh permits a focused file
 check.  Their dedicated source is approximately **95%**.
+
+## 2026-07-23 scalar spectral cutover
+
+All six rank-zero `EigenvalueTailSummable` consumers now use the proved
+`IntrinsicSpectral.scalar_eigen_tail`.  The direct import of
+`ShortTime.WeylEigenvalueCountingBound` has been removed, so this module no
+longer consumes the deferred generic tensor local-Weyl theorem.
+
+Focused verification passes without warnings after also dropping the unused
+positive-dimension instance from the three mass-conservation theorem
+signatures.  No consumer assumption was added.  The scalar producer's axiom
+audit contains only the standard foundational axioms and no `sorryAx`.
+This section supersedes the earlier generic-Weyl dependency accounting:
+`galLim_jet_mass` and its scalar spectral dependency chain are theorem-level
+**100%** with dedicated machinery **100%**.  The downstream
+`NoLocalCollapsing` and `ham3_noncollapse` producers are now also closed; their
+status is tracked in the Perelman and Hamilton notes.

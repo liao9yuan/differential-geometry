@@ -80,6 +80,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section DiagExp
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The diagonal intrinsic exponential map, sending a tangent vector `u` to its
@@ -96,6 +97,7 @@ def diagExp
     TangentBundle I M → M × M :=
   fun u => (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd)
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 @[simp] theorem diagExp_apply
@@ -108,6 +110,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
     diagExp (I := I) g hEnorm u =
       (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd) := rfl
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 @[simp] theorem diagExp_fst
@@ -119,6 +122,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
     (u : TangentBundle I M) :
     (diagExp (I := I) g hEnorm u).1 = u.proj := rfl
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 @[simp] theorem diagExp_snd
@@ -146,6 +150,7 @@ private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle 
   fun s => (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
     (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Chart-`α` velocity lift is an integral curve.**  If `Γ` is a moving-foot
@@ -264,6 +269,7 @@ private theorem chartVelocityLift_isMIntegralCurveOn
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The projection of the chart-`α` velocity lift recovers `Γ` where the foot is
@@ -289,6 +295,7 @@ private theorem chartVelocityLift_proj
   change (extChartAt I α).symm (chartCurve (I := I) α Γ s) = Γ s
   rw [chartCurve_def, (extChartAt I α).left_inv hext_src]
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Chart-independence bridge.**  For a chart center `α`, a finite order
@@ -1133,6 +1140,7 @@ theorem diagExp_variation_contMDiffAt_of_smallField
     hfst.prodMk hsnd
   simpa [diagExp, TotalSpace.mk'] using hpair
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Total-space charted smoothness of the diagonal exponential at the zero

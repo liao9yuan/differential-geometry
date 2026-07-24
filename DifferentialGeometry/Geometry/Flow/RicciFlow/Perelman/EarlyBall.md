@@ -30,3 +30,17 @@ radius depending on the centre `p` and require scalar launch/model inputs at
 that centre.  They do not by themselves give the all-centre uniform radius
 needed by `early_vol_low`. The implemented fixed-parametrization finite-cover
 route avoids that detour.
+
+## 2026-07-23 axiom-clean closure
+
+The earlier Weyl caveat is superseded. All nine rank-zero Galerkin tail
+consumers now use the proved scalar producer `scalar_eigen_tail`; the deferred
+generic tensor local-Weyl theorem is no longer in the Entropy/Perelman source
+dependency graph.
+
+The full `EarlyBall` dependency artifact refresh passed, and the axiom audit of
+`no_local_open` reports only `propext`, `Classical.choice`, and `Quot.sound`.
+Thus `NoLocalCollapsing` on the original half-open flow interval is
+theorem-level **100%**, and its dedicated early/positive-time machinery is
+**100%**. This does not complete the separate HCG compactness or
+limit-classification endpoints.

@@ -163,7 +163,7 @@ private theorem rev_trace_eq
   dsimp only [scalar]
   ring
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- A genuine reversed heat potential preserves its moving Riemannian mass at interior times. -/
 theorem heatpot_mass_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -243,7 +243,7 @@ theorem heatpot_mass_deriv
     (fun r : Real => ∫ x, u r x ∂(volumeMeasureFamily (I := I) (M := M) G r)) 0 s
   exact hvariation.congr_deriv hmass
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- On a shorter interval, a genuine reversed heat potential has constant moving mass. -/
 theorem heatpot_mass_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -334,7 +334,7 @@ theorem heatpot_mass_eq
   change mass s = mass 0
   exact (hclosed hs).trans (hclosed ⟨le_rfl, htau'.le⟩).symm
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- On a prescribed reflected regular interval, a genuine heat potential has
 constant moving mass on the entire closed interval. -/
 theorem heatpot_mass_on

@@ -191,12 +191,60 @@ continue to focused-check unchanged.  The extracted module and
 remains the documented legacy `estimate_complete` `sorry`.
 
 The new data module also owns the local lower-support and point-centered
-barrier-cutoff interfaces.  No barrier recurrence is hidden here:
-`BernsteinTower.estimate_barrier_at` is not yet stated or proved and is
-therefore theorem-level 0%.  The exact-current smooth
-`BernsteinTower.estimate_cutoff_at` remains theorem-level 100%.
+barrier-cutoff interfaces.  At the time of extraction no barrier recurrence
+was hidden there; the later quantifier-corrected consumer is recorded below.
+The exact-current smooth `BernsteinTower.estimate_cutoff_at` remains
+theorem-level 100%.
 
-This extraction advances the selected Route B-prime machinery to roughly
-15--20%, while the solution-generated barrier cutoff, complete Shi theorem,
-and unconditional `compactnessSol` remain theorem-level 0%.  Whole-project HCG
-supporting machinery remains about 60%.
+The extraction itself advanced the selected Route B-prime machinery to roughly
+15--20%; see the later section for the current consumer status.
+
+## 2026-07-23 barrier-consumer quantifier correction
+
+The first attempt to implement the consultation's displayed
+`estimate_barrier_at` signature exposed a genuine quantifier defect.  At a
+negative minimum the compact-support maximum principle selects an arbitrary
+point `y`.  The graded reaction estimate there needs every strict lower-order
+bound at `y`.  A single
+`ShiBarrierCutoffData G T O` only exhausts its fixed center `O`, so strong
+induction from that input supplies lower-order estimates at `O`, not at the
+selected `y`.  This is exactly where the smooth proof used its global
+`exhausts` field.
+
+The canonical repair is to consume a point-centered cutoff family
+
+```lean
+hcut : ∀ y, Nonempty (ShiBarrierCutoffData (I := I) G B.T y)
+```
+
+and conclude the estimate at every point.  This is the data already produced
+by the intended solution-level caller, which constructs a distance cutoff
+after the requested point is known.  It adds no geometric hypothesis and does
+not restore global exhaustion.
+
+The local analytic refactor is complete in source:
+
+- `supportLevel_le` consumes one `ShiCutoffLowerSupportAt`;
+- `GfunSupport_parabolic_le` supplies the local regularity and unchanged
+  graded recurrence for its lower support;
+- the old smooth `cutLevel_le`, `GfunCut_parabolic_le`, and
+  `estimate_cutoff_at` remain compatibility consumers;
+- the revised `estimate_barrier_at` selects the cutoff centered at the final
+  point, builds an affine-minus-local-polynomial upper support at every
+  possible negative minimum, applies
+  `strict_barrier_cpt_of_upperSupport`, and then uses `center_exhausts` and
+  `err_tendsto`.
+
+The source proof contains no new placeholder; focused verification is GREEN,
+and the exact targeted refresh is GREEN (`3749/3749`).  The only warning is the
+pre-existing legacy `estimate_complete` `sorry`.
+
+Honest accounting at this checkpoint:
+
+- revised `estimate_barrier_at`: theorem-level 100%, focused- and exact-green;
+- its lower-support recurrence: theorem-level 100%, focused- and exact-green;
+- dedicated barrier-consumer machinery: 100%;
+- solution-generated `ShiBarrierCutoffData`: theorem-level 0%;
+- end-to-end complete arbitrary-dimensional Shi: theorem-level 0%;
+- unconditional `compactnessSol`: theorem-level 0%;
+- whole-project HCG supporting machinery remains roughly 60%.

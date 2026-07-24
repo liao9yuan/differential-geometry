@@ -26,3 +26,15 @@ frontiers at **0%**.
 The file now opens the exact namespaces needed for quasi-linear, metric
 realization, divergence, and tensor scalar notation.  Focused verification and
 the module artifact refresh both passed.
+
+## 2026-07-23 scalar spectral cutover
+
+The three exact-interval rank-zero tail inputs now use
+`IntrinsicSpectral.scalar_eigen_tail`.  `ScalarWeyl` is imported directly
+rather than relying on a transitive import through `ConjGalerkinClassical`.
+Focused verification passes, and the file has no remaining reference to the
+deferred generic Weyl theorem.
+This supersedes the older pending-refresh and downstream-frontier paragraph:
+the exact-interval scalar tail consumers are theorem-level **100%** with
+dedicated machinery **100%**, and the later Perelman/Hamilton notes record
+`NoLocalCollapsing` and `ham3_noncollapse` as closed.

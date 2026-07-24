@@ -1,5 +1,37 @@
 # HamiltonPositiveRicci live frontier audit
 
+## Current state — 2026-07-23
+
+`ham3_noncollapse` is now proved.  It installs the compact, connected, and
+boundaryless instances carried by `Closed3Manifold`, obtains the actual
+`IsSolutionOn P.S`, applies the axiom-clean Perelman producer
+`no_local_open`, and feeds that result to the already checked
+`ham3_noncollapse_of` adapter.  Its focused source check passes.  Thus
+`ham3_noncollapse` is theorem-level **100%**, and its dedicated noncollapsing
+machinery is **100%**; this is no longer one of the Hamilton `sorry`
+frontiers.
+
+The exact Hamilton target rebuilt the full Noncollapsing chain successfully
+(`ConjGalerkinClassical`, `ConjGalerkinOn`, `WSpan`, `NoncollapseSpan`,
+`NoncollapseOpen`, and `EarlyBall`) but stopped at **10128/10129** on the
+unrelated shared module `Evolution/BBSLimitProducer.lean`: lines 104 and 142
+try to eliminate an `Exists` proof into `CinftyLimitData`, which Lean rejects
+because `Exists.casesOn` can eliminate only into `Prop`.  `MovingShiOpen` did
+not fail and was not edited by this lane.
+
+That failure was imported only through the unused `MaximalTime` umbrella.
+Hamilton now imports the one declaration it actually needs directly from
+`Evolution.ExtendedSolutionRegularity`; no `MaximalTime` declaration is used.
+The narrowed Hamilton source check passes, and an exact source replay reports
+that `ham3_noncollapse` depends only on `propext`, `Classical.choice`, and
+`Quot.sound`, with no `sorryAx`.
+
+The remaining theorem-shaped `sorry`s in this file are
+`ham3_flow_exists_normalized`, `ham3_cgh_limit`, and `ham3_space_box`; each
+remains theorem-level **0%**.  The unconditional HCG compactness endpoint is
+therefore still **0%**, while whole-project HCG machinery is conservatively
+about **60%**.
+
 ## Current state — 2026-07-09
 
 The current Hamilton file has five theorem-shaped `sorry`s:

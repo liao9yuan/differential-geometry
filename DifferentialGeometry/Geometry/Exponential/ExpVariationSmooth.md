@@ -1,5 +1,35 @@
 # ExpVariationSmooth.lean
 
+## Component-local diagonal exponential API
+
+The foundational total-space map `diagExp` and its defining projection
+identities `diagExp_apply`, `diagExp_fst`, and `diagExp_snd` are component-local.
+Their declarations now explicitly omit the file-wide `ConnectedSpace M`
+assumption.  The later variation theorems retain their existing connectedness
+hypotheses; this cleanup does not change their route or statements.
+
+Focused verification passed, and the exact targeted refresh is GREEN
+(`3777/3777`).
+
+The fresh exact compilation also exposed two private chart-velocity helpers
+whose inherited `ConnectedSpace M` assumptions had been hidden by the older
+artifact.  `chartVelocityLift_isMIntegralCurveOn` and
+`chartVelocityLift_proj` now explicitly omit that unused section instance.
+The complete file again passes focused verification and the exact targeted
+refresh (`3777/3777`); no proof body or geometric hypothesis changed.
+
+## 2026-07-23 — component-local zero-section producers
+
+The chart-independence bridge
+`expMapIntrinsic_eq_chartFlow_proj_residual` and the zero-section regularity
+theorem `diagExp_contMDiffAt_zero` now explicitly omit the file-wide
+`ConnectedSpace M` assumption. Both existing proof bodies pass focused
+verification unchanged, so the connectedness requirement was only inherited
+section context, not part of the geodesic-flow argument.
+
+The artifact for these newly weakened signatures still needs its coordinated
+narrow refresh before downstream files can observe them.
+
 ## Step C moving-base audit
 
 This file proves smoothness for intrinsic exponential variations of the form
