@@ -137,6 +137,69 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 7 (2026-07-24, LANE C, Opus) — D2 recon COMPLETE: decisive risk RESOLVED; single-frontier decomposition
+
+### VERDICT — the coordinator's decisive risk (convention / slot-order / connection mismatch) is RESOLVED (no mismatch)
+Deep recon of both covariant-derivative iterations settles the session-6 worry:
+- **Connection: identical, definitionally.** `covGrad` differentiates against
+  `LeviCivita g` (`CovGrad/Defs.lean` → `covGradGradSection` uses
+  `tensorRSCovariantDerivative … (LeviCivita g)`), and
+  `LeviCivita g = leviCivitaConnectionOfMetric g` by **`rfl`**
+  (`Connection/LeviCivita/Defs.lean:262 LeviCivita_eq_leviCivitaConnectionOfMetric`;
+  the project's LeviCivita→metricCov collapse).  `metricCovDerivStep` uses
+  `leviCivitaConnectionOfMetric gRef`.  Same connection — NO mismatch.
+- **Slot order: identical (derivative-slot-first, both towers).**
+  `metricCovDeriv` places derivative slots first (Defs docstring).  `covGrad` also
+  prepends the new slot: `curry_covGrad_unit_eval_genVal`
+  (`Curvature/CovGradRoughLap/GradientField.lean:183`) reads slot `0` as the
+  derivative direction.  NO slot-order mismatch.
+- **The `r ≥ 1` "no bridge to totalNabla0S" frontier** flagged in
+  `Evolution/IteratedNablaRmTower.md:571,590` **does NOT apply here** — our tensor is
+  `(0, 2)` (`r = 0`), and the `r = 0` RS↔0S bridges EXIST:
+  `covDeriv_unit_eval_eq_genVal` (`GradientField.lean:257`:
+  `tensorRSCovariantDerivative 0 s (LeviCivita g) σ · (unit) = tensor0SCovariantDerivative s (LeviCivita g) (σ·(unit))`).
+
+So D2 is mathematically SOUND and reduces to **ONE reusable frontier lemma**; everything
+else composes from existing API.
+
+### The SINGLE genuine frontier lemma (reusable; belongs upstream, NOT in this leaf)
+```
+normBridge (h gBase : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+  ‖(iteratedCovGrad gBase 0 2 j (metricCcTensor gBase h)).toSection x‖_{tensorRS_riemannianBundle gBase 0 (2+j)}
+    = Real.sqrt (normSq0S gBase x (j+2) (metricCovDeriv h gBase j x))
+```
+Two halves, both multi-lemma, HEq-heavy (index cast `2+j` vs `j+2`; cf.
+`CovGrad/CovariantBilinearLeibniz.lean:100 norm_toSection_heq_congr` already needed for
+`(s+1)+m = s+(m+1)`):
+- **(a) tower match**: `iteratedCovGrad gBase 0 2 j (metricCcTensor gBase h) .toSection x (unit) = metricCovDeriv h gBase j x`, by induction on `j`.  Base: `metricCovDeriv h gBase 0 = metricTensorField h` (`PointedConvergence.lean:184`) and `metricCcTensor gBase h .toSection x (unit) = metricTensorField h x` (`metricCcTensorFib_apply` = `metricTensorField_apply`, both `= h.inner x (v0) (v1)`).  Step: `curry_covGrad_unit_eval_genVal` + `covDeriv_unit_eval_eq_genVal` + `totalNabla0SFun_apply_section` (the `metricCovDerivStep` operator) + `nabla0SFun ↔ tensor0SCovariantDerivative` identification.
+- **(b) norm reconciliation**: `riemannianFiberNormSq gBase 0 s x (T.toSection x) = normSq0S gBase x s (T.toSection x (unit))`, via `norm_toSection_eq_sqrt_riemannianFiberNormSq` (`Sobolev/TensorHilbert/MetricArmCoeffJetTower.lean:904`, clean) + `_eq_coord` on both sides (Hom-from-`Tensor0SSpace 0 = ℝ` isometry).
+Proposed home: `Analysis/Spectral/Tensor/CovGrad/` or `HCGCompactness/` beside the
+`metricCovDeriv*` bridges (reusable — connects the two derivative APIs).  Per mission
+protocol (upstream bridge ⟹ stop-and-propose), NOT placed in this leaf.
+
+### Composition around the frontier (all from EXISTING API — no new frontiers)
+- **Envelope shape is a named def**: `iteratedCovGradJetSum gBase S x = ∑_{j<3} ‖(iteratedCovGrad gBase 0 2 j S).toSection x‖` (`MetricRealization/RealizedJet2CovGradBound.lean:262`).  Consumer = `MetricArmCoeffJetTower`'s `(1+R)^j` tower `R`-input currency (my `S = metricDifferenceCcTensor gBase g₀`).
+- **RS linearity**: `iteratedCovGrad_sub` (`CovGrad/IteratedCovGradLinear.lean:91`), `covGrad_sub`, `covGrad_zero` all exist.
+- **j≥1 self-zero (0S-world, AFTER the bridge)**: `metricCovDeriv gBase gBase j = 0` from `nabla_metric_zero` (`Tensor/RSTensor/MetricCompatibility.lean:117`, `∇g = 0`) iterated + `metricCovDeriv gBase gBase 0 = metricTensorField gBase`.  So the `metricCcTensor gBase gBase` tower vanishes for `j ≥ 1`; the difference-envelope's `j≥1` terms reduce to `√normSq0S(metricCovDeriv g₀ gBase j) ≤ Λ` directly from `MetricCovDerivOrderBoundOn`.
+- **j=0 term (order-0 HS)**: `‖metricDifferenceCcTensor gBase g₀ .toSection x‖ = √(riemannianFiberNormSq gBase 0 2 x (…))`; bound `riemannianFiberNormSq ≤ finrank²·(Λ−1)²` via `_eq_coord`/Parseval (`normSq0S_eq_coord`; ON frame) + my Discharger-1 op bound `Λ−1` per component ⟹ `≤ finrank·(Λ−1)`.  **Pins `c₀(n) = finrank ℝ E = n`.**
+
+### Pinned constants
+`B(Λ) = c₀(n)·(Λ−1) + 2Λ` with **`c₀(n) = n = Module.finrank ℝ E`** (order-0 HS = `n·(Λ−1)`;
+orders 1,2 each `≤ Λ` from `MetricCovDerivOrderBoundOn (≤2) g₀ gBase Λ`, summed `= 2Λ`).
+
+### LANDED this session (sorry-free, axiom-clean)
+`metricDiff_iterCovGrad_sub` (public): RS linearity split of the envelope summand,
+`iteratedCovGrad gBase 0 2 j (metricDifferenceCcTensor gBase g₀) = iteratedCovGrad … (metricCcTensor gBase g₀) − iteratedCovGrad … (metricCcTensor gBase gBase)` (via `iteratedCovGrad_sub`; the `metricDifferenceCcTensor = metricCcTensor g₀ − metricCcTensor gBase` reduction is `rfl`).  Design-independent first assembly step (needed whether the planner builds `normBridge` upstream or restates the S1 hypothesis in RS currency).  Import added: `…CovGrad.IteratedCovGradLinear`.
+
+### STOP condition (this brick) — reached
+Frontier `normBridge` is a genuine multi-session upstream structural tower (two
+HEq-heavy halves).  Mission protocol: upstream bridge ⟹ stop-and-propose.  Assembly
+`unifCurvatureSup_singleLink` and `2a-tel` remain blocked on `normBridge` + the j=0
+Parseval HS bound (both upstream/reusable).  DECISION for planner: (i) build `normBridge`
+upstream (est. 1–2 sessions), or (ii) restate S1's curvature-jet hypothesis directly in
+the RS `iteratedCovGradJetSum` currency (avoids the bridge; `MetricArmCoeffJetTower`
+already consumes that currency).
+
 ## Session 6 (2026-07-24, LANE C, Opus) — Discharger 1 LANDED; D2 frontier sharpened
 
 ### LANDED — Discharger 1 (`gFibreOpBound` from comparability), verified + axiom-clean

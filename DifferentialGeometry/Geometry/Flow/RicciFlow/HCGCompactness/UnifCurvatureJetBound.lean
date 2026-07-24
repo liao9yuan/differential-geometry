@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.PerturbedRiemannOpDifferenceBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 
 /-!
 # Uniform curvature-jet bound (item-6 brick 2a)
@@ -397,6 +398,43 @@ theorem metricDiff_gFibreOpBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ :
     (ccTensorBilinSymm (I := I) gBase
       (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x)
     hsymm (by linarith : (0 : ℝ) ≤ Λ - 1) hdiag v w
+
+/-! ### Discharger 2 — jet envelope: RS linearity reduction (session 7)
+
+Recon verdict (see `UnifCurvatureJetBound.md`, session 7): the covariant-derivative
+convention/slot-order/connection mismatch feared in session 6 is **resolved** —
+`covGrad` and `metricCovDeriv` differentiate against the *same* connection
+(`LeviCivita g = leviCivitaConnectionOfMetric g` by `rfl`) with the *same*
+derivative-slot-first order, and the `r = 0` RS↔0S unit-evaluation bridges exist
+(`covDeriv_unit_eval_eq_genVal`, `curry_covGrad_unit_eval_genVal`).  The whole
+order-`≤2` envelope then reduces to a **single reusable frontier lemma**, the norm
+bridge `‖(iteratedCovGrad gBase 0 2 j (metricCcTensor gBase h)).toSection x‖ =
+√(normSq0S gBase x (j+2) (metricCovDeriv h gBase j x))`, which belongs upstream
+(`CovGrad`/`Geometry`) and is proposed there rather than placed in this leaf.
+
+Everything around the frontier composes from existing API: RS linearity (below),
+`j ≥ 1` self-zero of the `metricCcTensor gBase gBase` tower (from `nabla_metric_zero`,
+applied after the bridge), and the order-0 HS bound `≤ finrank·(Λ−1)` (Discharger 1's
+operator bound plus the `normSq0S` Parseval expansion), pinning
+`B(Λ) = finrank·(Λ−1) + 2Λ`. -/
+
+/-- **Envelope-summand linearity split (Discharger 2 reduction).**  At every order
+`j`, the iterated covariant gradient of the metric difference splits into the
+difference of the two metric-realizing towers, because
+`metricDifferenceCcTensor gBase g₀ = metricCcTensor gBase g₀ − metricCcTensor gBase gBase`.
+This is the design-independent first assembly step of the brick-2a jet envelope: it
+is needed whether the class-uniform curvature-jet hypothesis is discharged through the
+upstream `metricCovDeriv` norm bridge or restated directly in the RS
+`iteratedCovGrad` currency. -/
+theorem metricDiff_iterCovGrad_sub (gBase g₀ : SmoothRiemannianMetric I M) (j : ℕ) :
+    iteratedCovGrad gBase 0 2 j
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) =
+      iteratedCovGrad gBase 0 2 j (metricCcTensor (I := I) (M := M) gBase g₀) -
+        iteratedCovGrad gBase 0 2 j (metricCcTensor (I := I) (M := M) gBase gBase) := by
+  have h : metricDifferenceCcTensor (I := I) (M := M) gBase g₀ =
+      metricCcTensor (I := I) (M := M) gBase g₀ -
+        metricCcTensor (I := I) (M := M) gBase gBase := rfl
+  rw [h, iteratedCovGrad_sub]
 
 end RicciFlow
 end PDE
