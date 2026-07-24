@@ -108,14 +108,54 @@ injectivity radius, or `λ₁`.  Λ-controllable via the same `hcurv`/`Fc` mecha
 UNIFORM version is not free — it requires re-deriving `exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter`
 through `bochner_step_hcurv`, which is step-2 work — but the audit finds no blocker.)
 
-## Stage β steps 2–3 (after `hbase` — now unblocked)
-2. **Uniform strong induction** (mirror `:1439`): iterate `bochner_step_hcurv`, folding in the
-   uniform Sobolev-jet constant (uniform `hsJet_le`, built from the audited chain via
-   `bochner_step_hcurv`/`roughLapComm_unif`).
-3. **Coefficient-one gap** (mirror `cc_dirichlet_gap`, `:1539`) ⟹ `covsum_hs_unif`; the easy
-   direction (`hs_covsum_unif`) mirrors `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general`.
+## STEP-2 route MAPPED (session 7) — fully specified for a mechanical write
+
+**KEY finding:** the endpoints `covsum_hs_unif`/`hs_covsum_unif` ARE uniform
+`hsJet_le`/`hs_le_jet` (`IteratedCovGradHsJetBound.lean:834/855`).  The hard one routes
+through the elliptic `exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter`
+(`AllOrderGardingConstant.lean:918`, `∑‖∇^j‖ ≤ C·∑‖Δ^i‖`).  Its ORIGINAL proof peels a
+DEEPER curvature atom `exists_integrated_curvatureCrossBound` (via the order-2 step
+`exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen:122`, constant `2+2·Ccross`) that my
+`hcurv` (the `pointwiseTensorCurv` defect) does NOT capture.  **The planner's route sidesteps
+it:** re-derive `:918`'s CONTENT via `bochner_step_hcurv` (whose curvature is already
+`hcurv`-packaged), NOT by uniformizing `:918`'s subs.  All pieces are now identified.
+
+### STEP 2.1 — uniform elliptic `elliptic_lapSum_unif` (`∀ j, ‖∇^j S‖ ≤ C_j·∑_{i≤j}‖Δ^i S‖`)
+STRONG induction on the jet order `j` (rank `s` fixed; `hcurv` rank-generic ⇒ reusable):
+- **`j=0`:** `‖S‖ = ‖Δ^0 S‖`, `C_0 = 1`.
+- **`j=1` (base, curvature-FREE):** `‖∇S‖² ≤ ‖ΔS‖·‖S‖` — the Dirichlet-energy IBP
+  `covGrad_norm_sq_le_rawConnLap_mul_self` (`AllOrderGardingConstant.lean:843`, private,
+  ~9 lines — INLINE; atom `covGrad_l2NormSq_le_rawConnLap_mul_self_gen`).  ⇒ `‖∇S‖ ≤
+  ‖S‖+‖ΔS‖ = ∑_{i≤1}‖Δ^i S‖`, `C_1 = 1`.  No `Fc` (curvature-free, Λ-independent).
+- **`j≥2` (either parity):** `bochner_step_hcurv` at `k=j-2`:
+  `‖∇^j S‖² ≤ ‖∇^{j-2}(ΔS)‖² + C·(∑_{a≤j-1}‖∇^a S‖)²`.  Bound `‖∇^{j-2}(ΔS)‖` by strong-IH
+  at `j-2` applied to `ΔS`, reindex `Δ^i(ΔS)=Δ^{i+1}S` (inline the private
+  `rawTensorConnLapIter_rawTensorConnLapSmooth:520`, ~6 lines; `Δ^i,Δ^{i+1}` public
+  `rawTensorConnLapIter_zero/_succ`); bound each `‖∇^a S‖` (`a≤j-1`) by strong-IH.  Take
+  `√`: `C_j = C_{j-2} + √C·∑_{a≤j-1}C_a`, `Fc`-explicit.
+- Then wrap to `hsJet_le` shape: even orders `jet_even`-style
+  (`∑_{j≤2k}‖∇^j‖ ≤ C·‖Hs^{2k}‖`) via `elliptic_lapSum_unif` + the curvature-FREE
+  `rawIter_even`(`‖Δ^i S‖ ≤ ‖Hs^{2i}‖`)/`ccToHs_norm_mono` (both consumable); odd via `jet_odd`.
+  ⟹ `covsum_hs_unif`.  Easy direction `hs_covsum_unif` mirrors `hs_le_jet:855`/`mode_le_jet:438`
+  (curvature via `exists_iteratedCovGrad_rawConnLapIter_l2Norm_le` — iterate `roughLapComm_unif`).
+- Effort: `elliptic_lapSum_unif` ~100–130 lines (+ 2 inlined helpers ~15); wrappers ~120.
+  Genuinely a multi-lemma brick; NOT one clean landing under the wait cadence.
+
+### STEP 2.2 — uniform strong induction (mirror `:1439`)
+Once uniform `hsJet_le` (2.1) exists: iterate `bochner_step_hcurv`, fold the uniform
+Sobolev-jet constant (as `:1439` does at `:1465`).  Prereq = 2.1.
+
+### STEP 2.3 — coefficient-one gap + endpoints
+Mirror `cc_dirichlet_gap:1539` (uses 2.2) → `covsum_hs_unif`; easy → `hs_covsum_unif`.
 
 ## Status
+- 2026-07-24 (session 7): STEP-2 route fully MAPPED (no Lean landed — a deep mapping of the
+  elliptic chain).  KEY: `bochner_step_hcurv` route sidesteps the deeper
+  `curvatureCrossBound` atom `:918` uses; the `j=1` base is curvature-FREE
+  (`covGrad_norm_sq_le_rawConnLap_mul_self:843`); every sub-lemma + inline identified above.
+  STEP 2.1 (uniform elliptic `elliptic_lapSum_unif` → uniform `hsJet_le`) is a specified
+  ~250-line multi-lemma write; recommended as the next focused dispatch.  No plan edits; no
+  commit.
 - 2026-07-24 (session 6): publicize GRANTED + applied (one token: `private` dropped from
   `covDivergence_l2Norm_le_covGrad_local:599`; DirichletSpectralBochnerGap rebuilt GREEN,
   63s — NO downstream breakage).  `hbase` ASSEMBLED + DISCHARGED: `rawConnLapIter_unif`,
