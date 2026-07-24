@@ -461,6 +461,15 @@ the Codex-blocked concrete instantiation, mirroring the
   `.lake/build` tree is abandoned (do not delete yet; it backs the
   hardlinks' provenance history).  The 8-target authoritative build was
   relaunched under the new buildDir; result recorded below.
+- RESULT (2026-07-23 ~23:20): `lake build` of all eight targets GREEN —
+  "Build completed successfully (9433 jobs)", EXIT=0.  The six
+  TensorHilbert engines compiled fresh (23:19–23:20); `TimeH1Modulus` and
+  `LowScaleCutoff` had already built in the user's run (21:14) and
+  replayed.  ALL Stage/ruling machinery modules of this plan are now
+  authoritatively lake-verified (not just focused-check green).  Scoreboard
+  unchanged otherwise: (N) itself still 0% (its `sorry` untouched); next
+  brick = DLa/DLb field-level assembly inside
+  `DeTurckLieKernelL2JetBound.lean` (dispatched).
 
 ## Executor constraints (multi-agent; STRICT)
 
