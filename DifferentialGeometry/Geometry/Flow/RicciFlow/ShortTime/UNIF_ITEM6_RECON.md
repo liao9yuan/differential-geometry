@@ -373,7 +373,118 @@ need a quantity `Λ` cannot control.
 
 ---
 
+## 7. S1 CONSTANT AUDIT (session 2, STAGE 1 — the §6/§4-risk-2 audit executed)
+
+**VERDICT: CLEAN. No type-(iii) constant anywhere in the Bochner recursion.**
+Every constant in the single Bochner step, and in the full induction chain, is
+either (i) a curvature-jet contraction (pointwise sup of the Riemann tensor `R`
+and its covariant derivatives `∇^a R`) or (ii) a dimension/metric-contraction
+constant.  Both are controlled by `Λ`-comparability + `MetricCovDerivOrderBoundOn`
+jets.  The §0 stop-condition ("spectral scale with no min-max transfer") remains
+the strategic risk, but the specific fear that the per-metric proof hides an
+uncontrollable `λ₁`/injectivity/spectral-gap quantity is **REFUTED by inspection**.
+
+### 7.1 `cc_dirichlet_gap` is a red herring (NOT a spectral gap)
+
+`cc_dirichlet_gap` (`DirichletSpectralBochnerGap.lean:1539`) reads
+`‖∇^{n+1}u‖²_{L²} ≤ ‖u‖²_{H^{n+1}} + Cgap·‖u‖²_{H^n}` — a **coefficient-one
+Gårding inequality** (the `H^{n+1}` term has coefficient exactly 1; the "gap" is
+the ORDER gap between consecutive Sobolev norms, controlled by lower orders).  Its
+`Cgap` is the accumulated `Cstep·Csob² + Cih` from
+`exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_lower:1439/1466` —
+a product of the single-step constants (§7.2) and the Sobolev-jet constant
+(§7.3).  There is NO eigenvalue-gap `λ₁`, NO injectivity radius, NO Poincaré
+constant.  The name misleads; the content is elliptic regularity.
+
+### 7.2 Single Bochner step — per-constant provenance
+`iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower g₀ s k`
+(`DirichletSpectralBochnerGap.lean:1220`), producing order `k+2` from order `k`,
+constant `C = Cgap_comm + K 0`:
+
+| # | constant | source (file:line) | what it is | TYPE |
+|---|---|---|---|---|
+| 1 | `K 0` (Weitzenböck curvature) | `exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le` (`AllOrderGardingConstant.lean:193`), `= √(2·ccR 0 + 2·ccdR 0)` | `ccR/ccdR` = appFullSec window sup of the Riemann hom-field `H_R` (`= R`) and `H_dR` (`= ∇R`) via `exists_pointwiseTensorCurv_firstOrder_homField_section` + `exists_appFullSec_on_jet_iteratedCovGrad_window_bound` (`HomFieldActionIteratedCovGradWindow.lean:342`) | **(i)** curvature-jet |
+| 2 | `Cfun 0`, `Cfun 1` (commutator `[Δ_∇,∇^k]`) | `iteratedRoughLapGrad_commutator_l2Norm_le_local` (`…:616`), recursion `Cfun p = K p + Cm(p+1)`, base `0`; every `K` from row 1 | finite sum of `∇^a R` sups (docstring `:307–312`: "contractions of `∇^a R`, `a ≤ m`") | **(i)** curvature-jet |
+| 3 | `Crc` | `exists_iteratedCovGrad_rawConnLap_l2Norm_le_local` (`…:759`), `= K_lap + Cfun 0` | metric/curvature (row 4) + commutator (row 2) | **(i)/(ii)** |
+| 4 | `K_lap` | `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen` (`RoughLaplacianSecondCovGradL2Bound.lean:537`) | `Δ_∇ = −trace_g ∇²`: metric-contraction / dimension | **(ii)** |
+| 5 | `dimR` | `Real.sqrt (finrank E)` (`:1109`) | pure dimension | **(ii)** |
+| — | Weitzenböck IBP | `weitzenbock_integrated_covGrad_l2_normSq` (`IntegratedOrder2Weitzenbock.lean:196`) | an EQUATION — no free constant | — |
+| — | `covDiv ≤ covGrad` | `covDivergence_l2Norm_le_covGrad_local` (`:1179`) | one-slot trace | **(ii)** |
+
+The Weitzenböck defect `pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇S)`
+(`PointwiseTensorBochner.lean:95`) is, by `pointwiseTensorCurv_toSection_eq_frame_sum
+:208`, the frame-trace gradient-slot reordering = "the genuine off-diagonal
+Riemann curvature" — a purely algebraic contraction of `R` with `S`.  Confirmed
+type (i).
+
+### 7.3 Assembly-level (full induction; not in the single step, audited for completeness)
+- `Csob` = `hsJet_le` (`IteratedCovGradHsJetBound.lean:834`) → `jet_even`/`jet_odd`
+  (`:842/:847`): the covariant-sum ↔ spectral Sobolev-jet bridge, same
+  rawConnLap/curvature family (sibling `hs_le_jet:855` gives the reverse).
+  Expected type (i)/(ii); not separately unrolled (out of single-step scope) —
+  it must be re-audited when the full induction is uniformized, but it shares the
+  curvature/dimension backbone and shows no spectral-gap surface.
+- `cc_dirichlet_gap`'s `Cgap` (§7.1): product of §7.2 + `Csob`.
+
+### 7.4 ORDER-BUDGET finding (sharpens Stage-0 `A(n)`)
+The commutator `[Δ_∇, ∇^m]` needs curvature jets `∇^a R` up to `a ≈ m`
+(`AllOrderGardingConstant.lean:307–312`).  In the single step at inner order `k`
+the commutator is at level `m = k`, so the step needs `∇^a R` up to `a ≈ k`.  The
+FULL induction to order `a+2` therefore needs `∇^a R` up to `a ≈ a+2`, i.e.
+**metric jets up to ≈ `A(n)+2 = 4·finrank+14`** (Riemann `= 2` metric
+derivatives).  This is `+2` beyond the Stage-0 data order `A(n)=4n+12` — the
+standard Gårding phenomenon (the coefficients' jets sit two orders above the
+data order).  **ACTION for the (N) statement:** the class hypothesis
+`MetricCovDerivOrderBoundOn … Λ` for S1 should be at order `≈ A(n)+2`, not `A(n)`;
+confirm the exact reach (`k−1` vs `k` vs `k+1`) when building §7.5(2a).  This does
+not endanger R1τ — the Lemma-3.11 producers are order-generic (`AllTimesBounds`),
+so raising the order is free on the input side.
+
+### 7.5 STAGE-2 decomposition — why the single step is NOT a clean one-session landing
+The planner's STAGE-2 target (single step with an explicit `F(Λ,n)` constant
+under hypotheses `Λ`-comparability + `MetricCovDerivOrderBoundOn`) does not land
+directly: its constant (§7.2) is built from `Classical.choose` curvature-jet
+SUPS (`ccR, ccdR, K_lap`) that are NOT yet bounded by `Λ`.  The missing bridge is
+the genuine first Lean brick, in three sub-bricks:
+
+- **(2a) [MISSING — the real gate]** `MetricCovDerivOrderBoundOn Set.univ N g₀ gBase Λ ⟹
+  sup_x ‖∇^a Riemann(g₀)‖ ≤ Fᵣ(Λ,n)` for `a ≤ N−2`.  Bridges metric jets to the
+  Riemann-curvature jet sup (`Riemann = 2` metric derivatives).  A
+  `MetricCovDerivOrderBoundOn → curvature-jet-sup` lemma was searched for and NOT
+  found (`MetricCovDerivArityBridge.lean`/`MetricCovDerivContinuity.lean` cover the
+  `metricCovDerivNorm` mechanics, not a curvature-sup bound).  This is itself a
+  small multi-lemma sub-brick.
+- **(2b)** `ccR p, ccdR p, K_lap ≤ G(Λ,n)`: feed (2a) through
+  `exists_appFullSec_on_jet_iteratedCovGrad_window_bound` (already the pointwise
+  sup of the Riemann hom-field) — mechanical once (2a) lands.
+- **(2c)** assemble `C = (Cfun 0)² + 2·Crc·dimR·Cfun 1 + K 0 ≤ F(Λ,n)` — the
+  single-step lemma the planner named; consumes (2a)+(2b)+dimension.
+
+**Recommended first Lean brick: (2a)** — the `Λ`-uniform pointwise
+Riemann-curvature-jet sup bound from `MetricCovDerivOrderBoundOn`.  It is the
+narrowest genuinely-missing input, it is the gate for the whole S1, and building
+(2c) before it would either reduce S1 to multiple open frontiers or leave an
+unverifiable half-build (CLAUDE.md: at most one visible frontier; no
+sorry-masking).  Home: a new leaf under
+`Geometry/Flow/RicciFlow/HCGCompactness/` (next to the `MetricCovDeriv*` bridges)
+or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lean`
+(S1) can consume it.
+
+---
+
 ## Status
+- 2026-07-24 (session 2, STAGE 1): audit COMPLETE, verdict CLEAN — no
+  type-(iii); all Bochner-recursion constants are curvature-jet (i) or
+  dimension (ii); `cc_dirichlet_gap` is a coefficient-one Gårding inequality, not
+  a spectral gap (§7.1).  Order-budget sharpened: S1 needs metric jets `≈ A(n)+2`
+  (§7.4).  STAGE 2 NOT run as the single step: it reduces to the MISSING
+  curvature-jet-sup-≤-`Λ` bridge (2a), which is the recommended first Lean brick
+  (§7.5).  Stopped cleanly at the audit boundary per the planner's stop
+  condition.  No `.lean` written this session.
+- 2026-07-24 (session 1): item-6 recon COMPLETE (LANE C, no Lean).  `tensorHs`
+  confirmed a spectral scale ⟹ the §0 min-max-failure risk is real and leads the
+  report.  Packet = S1 (hard gate) + S0/S1b/S2/S3/S4 (routine-medium, inherit
+  S1).  Reported to planner.
 - 2026-07-24: item-6 recon COMPLETE (LANE C, no Lean).  `tensorHs` confirmed a
   spectral scale ⟹ the §0 min-max-failure risk is real and leads the report.
   Packet = S1 (hard gate) + S0/S1b/S2/S3/S4 (routine-medium, inherit S1).  First
